@@ -135,7 +135,15 @@ DEFAULT_PT_TRANSLATIONS: dict[str, str] = {
     "dogbar": "Dogbar",
     "estima lock": "Estima Lock",
     "headlock": "Gravata",
-    "cross face": "Cross Face",
+    "cross face": "Pressão Facial",
+    "guillotine": "Guilhotina",
+    "triangle": "Triângulo",
+    "ezekiel": "Ezequiel",
+    "shoulder lock": "Chave de Ombro",
+    "wristlock": "Chave de Pulso",
+    "leg lock": "Chave de Perna",
+    "twister": "Twister",
+    "z lock": "Z Lock",
 }
 
 # App type → color/icon mapping (for metadata)
@@ -281,19 +289,6 @@ def build_technique_library(
 ) -> list[dict[str, Any]]:
     """Build enriched NodeLibraryItem[] from all sources."""
 
-    existing_names_lower = {
-        _normalize_name(n.get("name", "") + " " + n.get("translations", {}).get("en", ""))
-        for n in existing_nodes
-    }
-    existing_names_lower.update(
-        _normalize_name(n.get("translations", {}).get("en", ""))
-        for n in existing_nodes
-    )
-    existing_names_lower.update(
-        _normalize_name(n.get("translations", {}).get("pt", ""))
-        for n in existing_nodes
-    )
-
     library: list[dict[str, Any]] = []
     seen_normalized: set[str] = set()
     index = 0
@@ -345,36 +340,16 @@ def build_technique_library(
         index += 1
 
     # ── 2. Add ADCC-only submissions not in technique dataset ──
-    tech_names = {_normalize_name(str(r.get("technique_name", r.get("Name", ""))))
-                  for _, r in tech_df.iterrows()}
-    tech_names.update(
-        _normalize_name(str(r.get("translations", {}).get("en", "")))
-        for r in library
-    )
-    tech_names.update(
-        _normalize_name(str(r.get("translations", {}).get("pt", "")))
-        for r in library
-    )
-
     for sub_name, eff in effectiveness.items():
         if sub_name in seen_normalized:
             continue
         # Skip generic entries
         if sub_name in ("submission", "verbal tap", "short choke", "choke"):
             continue
-        # Map to app type
-        if "choke" in sub_name or "rnc" in sub_name \
-                or sub_name in ("guillotine", "triangle"):
-            app_type = "submission"
-        elif "lock" in sub_name or "bar" in sub_name \
-                or sub_name in ("kimura", "americana", "omoplata"):
-            app_type = "submission"
-        elif "hold" in sub_name:
-            app_type = "submission"
-        else:
-            app_type = "submission"
+        # All ADCC win-method entries are submissions
+        app_type = "submission"
 
-        name_en = sub_name.title().replace("Slicer", "Slicer").replace("Katagatame", "Katagatame")
+        name_en = sub_name.title()
         pt_name = DEFAULT_PT_TRANSLATIONS.get(sub_name, name_en)
         norm = _normalize_name(name_en)
         if norm in seen_normalized:
@@ -397,8 +372,9 @@ def build_technique_library(
         index += 1
 
     # ── 3. Sort by effectiveness descending (submissions first), then alpha ──
+    # Scored entries first (descending score), unscored last, alpha tiebreak
     library.sort(key=lambda x: (
-        -(x.get("effectiveness", {})).get("effectiveness_score", 0) if "effectiveness" in x else -1,
+        -x["effectiveness"]["effectiveness_score"] if "effectiveness" in x else 1,
         x["name"],
     ))
 
@@ -424,7 +400,6 @@ def _generate_variations(en: str, pt: str) -> list[str]:
             "kimura": ["double wrist lock", "chave de ombro"],
             "americana": ["paintbrush", "chave de braco inversa"],
             "omoplata": ["shoulder lock", "chave de ombro"],
-            "triangle": ["sankaku jime"],
             "kneebar": ["leg lock", "joelho"],
             "toe hold": ["foot lock", "pe"],
             "ankle lock": ["tornozelo", "foot lock"],
@@ -433,6 +408,18 @@ def _generate_variations(en: str, pt: str) -> list[str]:
             "north south choke": ["north-south", "norte sul", "kuzure kami shiho gatame"],
             "calf slicer": ["musculo", "calf crusher"],
             "footlock": ["chave de pe", "foot lock"],
+            "guillotine": ["guilhotina", "guillotine choke"],
+            "triangle": ["sankaku jime", "triangulo", "triangle choke"],
+            "ezekiel": ["ezekiel choke", "ezequiel"],
+            "katagatame": ["kata gatame", "shoulder choke"],
+            "headlock": ["gravata", "head lock"],
+            "leg lock": ["chave de perna", "leglock"],
+            "cross face": ["pressao facial", "crossface"],
+            "dogbar": ["dog bar"],
+            "shoulder lock": ["chave de ombro", "shoulder crank"],
+            "twister": ["spinal lock", "body twister"],
+            "wristlock": ["chave de pulso", "wrist lock"],
+            "z lock": ["z-lock"],
         }
         for alt in alts.get(n, []):
             if alt not in seen:

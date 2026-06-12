@@ -11,7 +11,7 @@ ultra-caveman default. No filler. Fragments. Technical terms exact. Stop only on
 1. **Read CLAUDE.md first** — contains project memory, stack, dataset registry, doc map
 2. **Read AGENTS.md second** — you're reading it
 3. **Pipelines in `pipelines/`** — one file per dataset. Inherit `Pipeline` base class
-4. **Schemas in `schemas/`** — `unified.py` for dataset schemas, `app_types.py` for app TS mirror
+4. **Schemas in `schemas/`** — `__init__.py` for dataset schemas, `app_types.py` for app TS mirror
 5. **Analysis in `analysis/`** — pure functions, no side effects, inputs are DataFrames
 6. **CV in `cv/`** — ViCoS dataset investigation only. No raw image model training yet
 7. **Export in `export/`** — produces JSON matching GrapplingArc AsyncStorage format
@@ -41,7 +41,7 @@ No ticket. No worktree. No git ops. Edit, ruff check, pytest, done.
 | adcc_historical | bjagrelli/adcc-historical-dataset | 1028 |
 | adcc_fighters | albucathecoder/adcc-fighter-stats | ~600 |
 
-Schema for each: `schemas/unified.py`.
+Schema for each: `schemas/__init__.py`.
 
 ## Pipeline Template
 

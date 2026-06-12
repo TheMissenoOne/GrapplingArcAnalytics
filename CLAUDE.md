@@ -53,17 +53,18 @@
 │   └── baseline_classifier.py       # [TODO] RF/XGBoost on pose features
 ├── export/
 │   ├── __init__.py                  # module exports
-│   ├── tech_library.py              # [TODO] → app technique library JSON
+│   ├── tech_library.py              # ✅ → app technique library JSON + effectiveness scores
 │   ├── adcc_elo_table.py            # [TODO] → app ELO benchmark
 │   └── benchmark_results.py         # [TODO] → user benchmark JSON
+├── docs/                            # design docs, audit reports
 ├── notebooks/                       # Jupyter notebooks (exploratory)
-├── tests/                           # pytest
+├── tests/                           # pytest (pipelines, tech_library)
 └── .claude/skills/                  # agent skills
 ```
 
 ## Dataset Registry
 
-| key | Kaggle slug | rows | delimeter | columns |
+| key | Kaggle slug | rows | delimiter | columns |
 |---|---|---|---|---|
 | grappling_techniques | liiucbs/grappling-techniques | 76 | `,` | Name, Position, Origin, Type, … |
 | adcc_historical | bjagrelli/adcc-historical-dataset | 1028 | `;` | match_id, year, winner_name, loser_name, win_type, stage, submission, weight_class, sex |
