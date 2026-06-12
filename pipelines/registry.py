@@ -26,7 +26,7 @@ DATASETS: dict[str, DatasetSpec] = {
     "grappling_techniques": DatasetSpec(
         key="grappling_techniques",
         slug="liiucbs/grappling-techniques",
-        files=["dataset.csv"],
+        files=["grappling  techniques.csv", "dataset.csv"],
         description="76 grappling techniques from BJJ, Judo, and Wrestling",
         rows_approx=76,
     ),
@@ -41,8 +41,8 @@ DATASETS: dict[str, DatasetSpec] = {
     "adcc_fighters": DatasetSpec(
         key="adcc_fighters",
         slug="albucathecoder/adcc-fighter-stats",
-        files=["adcc_fighter_stats.csv"],  # verify after download
+        files=["fighters_dataset.csv", "adcc_fighter_stats.csv"],
         description="ADCC fighter career stats (wins, titles, submission ratios)",
-        rows_approx=600,
+        rows_approx=614,
     ),
 }

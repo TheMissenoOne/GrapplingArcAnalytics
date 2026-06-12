@@ -63,17 +63,31 @@ class Pipeline(ABC):
         cache = RAW_DIR / self.spec.key
         if cache.exists() and not force:
             logger.info("%s: cached at %s", self.spec.key, cache)
-            return cache / self.spec.files[0]
+            return self._find_raw_file(cache)
 
         logger.info("%s: downloading from Kaggle…", self.spec.key)
         path = Path(kagglehub.dataset_download(self.spec.slug))
-        raw_file = path / self.spec.files[0]
-        if not raw_file.exists():
-            raise DatasetNotFoundError(
-                f"Expected {raw_file} not found in Kaggle download for {self.spec.slug}"
-            )
+        raw_file = self._find_raw_file(path)
         self._symlink_cache(path, cache)
         return raw_file
+
+    def _find_raw_file(self, directory: Path) -> Path:
+        """Find the first CSV in a directory (auto-discover, handles spaces)."""
+        for fname in self.spec.files:
+            candidate = directory / fname
+            if candidate.exists():
+                return candidate
+        # fallback: glob for any CSV
+        csvs = list(directory.glob("*.csv"))
+        if csvs:
+            logger.warning(
+                "%s: no exact file match, using first CSV: %s", self.spec.key, csvs[0].name
+            )
+            return csvs[0]
+        raise DatasetNotFoundError(
+            f"No CSV found in {directory} for dataset {self.spec.slug}. "
+            f"Looked for: {self.spec.files}"
+        )
 
     def _load_raw(self, path: Path) -> pd.DataFrame:
         kwargs: dict[str, Any] = {"low_memory": False}

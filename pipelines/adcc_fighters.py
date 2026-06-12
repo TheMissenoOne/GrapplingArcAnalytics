@@ -1,7 +1,7 @@
 """
 ADCC Fighter Stats pipeline (Kaggle: albucathecoder/adcc-fighter-stats).
 
-Career stats per ADCC fighter: wins, losses, titles, submission ratios, favorite targets.
+614 fighters, 25 columns: career stats, win ratios, submission preferences, titles.
 """
 
 from __future__ import annotations
@@ -18,57 +18,53 @@ class ADCCFightersPipeline(Pipeline):
     def clean(self, df: pd.DataFrame) -> pd.DataFrame:
         cols = {c.lower().strip().replace(" ", "_"): c for c in df.columns}
         df = df.rename(columns={v: k for k, v in cols.items()})
-
-        num_cols = ["wins", "losses", "titles"]
-        for c in num_cols:
-            if c in df.columns:
-                df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0).astype(int)
-
-        if "sub_ratio" in df.columns:
-            df["sub_ratio"] = pd.to_numeric(df["sub_ratio"], errors="coerce").fillna(0.0)
-
-        if "debut_year" in df.columns:
-            df["debut_year"] = (
-                pd.to_numeric(df["debut_year"], errors="coerce").fillna(0).astype(int)
-            )
-
         return df
 
     def normalize(self, df: pd.DataFrame) -> pd.DataFrame:
-        name_col = next((c for c in df.columns if "fighter" in c or "name" in c), "name")
-        target_col = next(
-            (c for c in df.columns if "target" in c or "submission_target" in c),
-            "favorite_target",
-        )
-        belt_col = next((c for c in df.columns if "belt" in c), "")
-        team_col = next((c for c in df.columns if "team" in c or "association" in c), "")
-        weight_col = next((c for c in df.columns if "weight" in c or "division" in c), "")
-        win_ratio_col = next((c for c in df.columns if "win_ratio" in c or "win_rate" in c), "")
+        col = df.columns.tolist()
 
-        result = pd.DataFrame({
-            "fighter_name": df[name_col].str.strip(),
-            "wins": df.get("wins", 0),
-            "losses": df.get("losses", 0),
-            "titles": df.get("titles", 0),
-            "sub_ratio": df.get("sub_ratio", 0.0),
-        })
+        result = pd.DataFrame({"fighter_name": df["name"]})
 
-        if win_ratio_col and win_ratio_col in df.columns:
-            result["win_ratio"] = pd.to_numeric(df[win_ratio_col], errors="coerce")
+        # wins → total_wins or total_fights
+        if "total_wins" in col:
+            result["wins"] = df["total_wins"].fillna(0).astype(int)
+        elif "total_fights" in col:
+            result["wins"] = (df["total_fights"] * df.get("win_ratio", 0)).fillna(0).astype(int)
         else:
-            total = result["wins"] + result["losses"]
-            result["win_ratio"] = (result["wins"] / total.replace(0, 1)).round(3)
+            result["wins"] = 0
 
-        if target_col:
-            result["favorite_target"] = df[target_col].str.strip()
-        if belt_col:
-            result["belt"] = df[belt_col].str.strip()
-        if team_col:
-            result["team"] = df[team_col].str.strip()
-        if weight_col:
-            result["weight_class"] = df[weight_col].str.strip()
+        result["losses"] = 0  # derived later if total_fights present
+        if "total_fights" in col:
+            result["losses"] = (df["total_fights"] - result["wins"]).clip(lower=0).astype(int)
 
-        debut = df.get("debut_year", 0)
-        result["debut_year"] = debut
+        result["titles"] = df.get("n_titles", 0).fillna(0).astype(int)
+        result["sub_ratio"] = df.get("sub_win_ratio", df.get("sub_ratio", 0.0)).fillna(0.0)
+        result["debut_year"] = df.get("debut_year", 0).fillna(0).astype(int)
+
+        if "win_ratio" in col:
+            result["win_ratio"] = df["win_ratio"].fillna(0.0)
+        elif "total_fights" in col:
+            result["win_ratio"] = (result["wins"] / df["total_fights"].replace(0, 1)).round(3)
+        else:
+            result["win_ratio"] = 0.0
+
+        if "favorite_target" in col:
+            result["favorite_target"] = df["favorite_target"].fillna("").astype(str)
+
+        if "main_weight_class" in col:
+            result["weight_class"] = df["main_weight_class"].fillna(0).astype(int).astype(str)
+            result["weight_class"] = result["weight_class"].replace("0", "")
+
+        # extra rich fields kept for advanced analysis
+        for extra in [
+            "n_editions_competed", "scored_points_per_fight",
+            "suffered_points_per_fight", "fights_per_edition",
+            "avg_match_importance", "highest_match_importance",
+            "open_weight_ratio", "custom_score", "n_different_subs",
+            "fought_superfight", "champion", "female", "point_win_ratio",
+            "decision_win_ratio", "most_vulnerable",
+        ]:
+            if extra in col:
+                result[extra] = df[extra]
 
         return result
