@@ -182,7 +182,8 @@ def create_app(
         return app.state.estimator
 
     def get_classifier() -> ClassifierBundle:
-        if app.state.classifier is None:
+        bundle = app.state.classifier
+        if bundle is None:
             try:
                 bundle = load_classifier("rf")
             except (FileNotFoundError, ValueError) as exc:
@@ -190,7 +191,6 @@ def create_app(
                     status_code=503, detail=f"Classifier unavailable: {exc}"
                 ) from exc
             app.state.classifier = bundle
-        bundle = app.state.classifier
         assert isinstance(bundle, ClassifierBundle)
         return bundle
 

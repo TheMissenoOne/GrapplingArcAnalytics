@@ -1,12 +1,9 @@
 import type { ExportRequest, NodeOption, Role, TimelineEvent } from "../types";
 
-let _seq = 0;
-
 /** Create a TimelineEvent with a unique id and sensible defaults. */
 export function newEvent(partial: Partial<TimelineEvent> = {}): TimelineEvent {
-  _seq += 1;
   return {
-    id: `e${Date.now()}_${_seq}`,
+    id: crypto.randomUUID(),
     label: "",
     type: "control",
     role: "",
