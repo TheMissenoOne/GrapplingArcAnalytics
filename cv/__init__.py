@@ -1,7 +1,13 @@
 """Computer vision investigation — ViCoS dataset, pose features, baseline classifiers."""
 
 from .baseline_classifier import evaluate_baseline, train_baseline, write_classifier_meta
-from .inference import ClassifierBundle, classify_frame, classify_pose_pair, load_classifier
+from .inference import (
+    ClassifierBundle,
+    classify_frame,
+    classify_pose_pair,
+    classify_pose_pair_probs,
+    load_classifier,
+)
 from .pose_estimate import PoseEstimator
 from .pose_features import (
     FEATURE_NAMES,
@@ -43,6 +49,7 @@ __all__ = [
     "write_classifier_meta",
     "load_classifier",
     "classify_pose_pair",
+    "classify_pose_pair_probs",
     "classify_frame",
     "ClassifierBundle",
     "PoseEstimator",

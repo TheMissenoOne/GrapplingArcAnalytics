@@ -12,7 +12,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 
 from cv import baseline_classifier, inference
-from cv.inference import ClassifierBundle, classify_pose_pair, load_classifier
+from cv.inference import (
+    ClassifierBundle,
+    classify_pose_pair,
+    classify_pose_pair_probs,
+    load_classifier,
+)
 from cv.pose_features import (
     L_ANKLE,
     L_HIP,
@@ -87,6 +92,16 @@ def test_classify_pose_pair_roundtrip() -> None:
     label, conf = classify_pose_pair(kp0, kp1, bundle)
     assert label == expected
     assert 0.0 <= conf <= 1.0
+
+
+def test_classify_pose_pair_probs() -> None:
+    bundle, kp0, kp1, expected = _toy_bundle()
+    probs = classify_pose_pair_probs(kp0, kp1, bundle)
+    # one entry per class, keyed by label, summing to ~1, and consistent with the
+    # hard prediction.
+    assert set(probs) == set(bundle.classes)
+    assert sum(probs.values()) == pytest.approx(1.0)
+    assert max(probs, key=lambda k: probs[k]) == expected
 
 
 def test_load_classifier_roundtrip(tmp_path, monkeypatch) -> None:

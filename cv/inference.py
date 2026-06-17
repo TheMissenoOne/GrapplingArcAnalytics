@@ -111,20 +111,46 @@ def classify_pose_pair(
         ``(label, confidence)`` where confidence is the model's probability for the
         predicted class (``1.0`` if the model exposes no ``predict_proba``).
     """
-    features = pair_to_features(kp0, kp1).reshape(1, -1)
-    pred_idx = int(bundle.model.predict(features)[0])
+    probs = classify_pose_pair_probs(kp0, kp1, bundle)
+    label = max(probs, key=lambda k: probs[k])
+    return label, probs[label]
 
+
+def classify_pose_pair_probs(
+    kp0: np.ndarray,
+    kp1: np.ndarray,
+    bundle: ClassifierBundle,
+) -> dict[str, float]:
+    """Full per-class probability map for a pair of athletes.
+
+    Used by the prediction loop (``analysis.priors``) to re-rank against athlete
+    priors. Keyed by the human-readable class label (``bundle.classes``).
+
+    Parameters
+    ----------
+    kp0, kp1 : np.ndarray
+        ``(17, 3)`` COCO keypoints (pixel coords); ordering must match training's
+        ``athlete_idx``.
+    bundle : ClassifierBundle
+
+    Returns
+    -------
+    dict[str, float]
+        ``{class_label: probability}``. If the model exposes no ``predict_proba``,
+        returns ``{predicted_label: 1.0}``.
+    """
+    features = pair_to_features(kp0, kp1).reshape(1, -1)
     proba = getattr(bundle.model, "predict_proba", None)
     if callable(proba):
         probs = proba(features)[0]
-        confidence = float(np.max(probs))
-        # predict and argmax(proba) agree for sklearn/xgboost; trust predict for the
-        # label and report the matching probability.
-        pred_idx = int(np.argmax(probs))
-    else:
-        confidence = 1.0
-
-    return bundle.decode(pred_idx), confidence
+        # predict_proba columns are ordered by model.classes_ (encoded ints);
+        # map each back to its label via bundle.classes.
+        return {
+            bundle.decode(int(cls)): float(p)
+            for cls, p in zip(bundle.model.classes_, probs)
+        }
+    pred_idx = int(bundle.model.predict(features)[0])
+    return {bundle.decode(pred_idx): 1.0}
 
 
 def classify_frame(
