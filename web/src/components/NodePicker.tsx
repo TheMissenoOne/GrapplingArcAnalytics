@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { NodeOption } from "../types";
-import { filterNodes } from "../lib/events";
+import { rankNodes } from "../lib/rank";
 
 interface Props {
   nodes: NodeOption[];
@@ -13,7 +13,7 @@ interface Props {
 export function NodePicker({ nodes, value, onPick, placeholder }: Props) {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
-  const results = useMemo(() => filterNodes(nodes, query).slice(0, 12), [nodes, query]);
+  const results = useMemo(() => rankNodes(nodes, query, 12), [nodes, query]);
 
   return (
     <div className="node-picker">

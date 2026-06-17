@@ -4,12 +4,13 @@ import { exportSession, getNodes } from "./api";
 import { buildExportRequest } from "./lib/events";
 import { VideoPanel } from "./components/VideoPanel";
 import { LivePanel } from "./components/LivePanel";
+import { AnnotatePanel } from "./components/AnnotatePanel";
 import { ReviewTable } from "./components/ReviewTable";
 
-type Tab = "video" | "live";
+type Tab = "annotate" | "video" | "live";
 
 export default function App() {
-  const [tab, setTab] = useState<Tab>("video");
+  const [tab, setTab] = useState<Tab>("annotate");
   const [nodes, setNodes] = useState<NodeOption[]>([]);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
   const [youRole, setYouRole] = useState<Role>("top");
@@ -54,6 +55,9 @@ export default function App() {
       {banner && <div className="banner">{banner}</div>}
 
       <nav className="tabs">
+        <button className={tab === "annotate" ? "active" : ""} onClick={() => setTab("annotate")}>
+          Annotate (keyboard)
+        </button>
         <button className={tab === "video" ? "active" : ""} onClick={() => setTab("video")}>
           Video (post-hoc)
         </button>
@@ -62,8 +66,12 @@ export default function App() {
         </button>
       </nav>
 
-      {tab === "video" ? <VideoPanel onAdd={addEvent} /> : <LivePanel onAdd={addEvent} />}
+      {tab === "annotate" && <AnnotatePanel nodes={nodes} />}
+      {tab === "video" && <VideoPanel onAdd={addEvent} />}
+      {tab === "live" && <LivePanel onAdd={addEvent} />}
 
+      {tab !== "annotate" && (
+        <>
       <section className="session-meta">
         <label>
           You are
@@ -97,6 +105,8 @@ export default function App() {
           Clear
         </button>
       </div>
+        </>
+      )}
     </div>
   );
 }

@@ -14,7 +14,9 @@ created lazily on first use, so tests can inject fakes via :func:`create_app` an
 
 from __future__ import annotations
 
+import json
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -33,6 +35,7 @@ from analysis.priors import (
 from cv.inference import ClassifierBundle, classify_pose_pair_probs, load_classifier
 from cv.segmenter import segment
 from cv.vocab_map import NodeRef, build_vocab_index, load_app_nodes, map_vicos_class
+from realtime.capture import build_capture_record, save_capture
 from realtime.export import TimelineEvent, build_session_payload
 
 if TYPE_CHECKING:
@@ -87,6 +90,22 @@ class NodeOption(BaseModel):
     name: str
     type: str
     en: str | None = None
+
+
+class DetectionOut(BaseModel):
+    raw_class: str
+    vicos_class: str
+    confidence: float
+    x: float
+    y: float
+    width: float
+    height: float
+
+
+class DetectResponse(BaseModel):
+    detections: list[DetectionOut]
+    image_w: int
+    image_h: int
 
 
 class ExportEventIn(BaseModel):
@@ -171,6 +190,7 @@ def create_app(
     cors_origins: list[str] | None = None,
     store: AthleteVectorStore | None = None,
     roboflow: RoboflowClassifier | None = None,
+    capture_dir: Path | None = None,
 ) -> FastAPI:
     """Build the FastAPI app.
 
@@ -202,6 +222,7 @@ def create_app(
     app.state.classifier = classifier
     app.state.store = store
     app.state.roboflow = roboflow
+    app.state.capture_dir = capture_dir or (Path("data") / "captures")
     app.state.node_options = _node_options(raw_nodes)
     app.state.vocab_index = (
         vocab_index if vocab_index is not None else build_vocab_index(raw_nodes)
@@ -318,6 +339,40 @@ def create_app(
             node_type=match.node_type,
             ok=match.ok,
         )
+
+    @app.post("/detect", response_model=DetectResponse)
+    def detect(file: UploadFile) -> DetectResponse:
+        """Detect athlete positions (with boxes) in a frame — drives the overlay."""
+        if app.state.roboflow is None:
+            raise HTTPException(status_code=503, detail="Detection backend not configured")
+        frame = _decode_image(file.file.read())
+        result = app.state.roboflow.detect(frame)
+        return DetectResponse(
+            detections=[DetectionOut(**d) for d in result["detections"]],
+            image_w=result["image_w"],
+            image_h=result["image_h"],
+        )
+
+    @app.post("/capture")
+    def capture(
+        file: UploadFile,
+        detections: str = Form("[]"),
+        you_side: str = Form("left"),
+        image_w: int = Form(...),
+        image_h: int = Form(...),
+        manual_position: str | None = Form(None),
+    ) -> dict[str, Any]:
+        """Persist a hand-labeled frame (bjj3 class + bbox + actor) to the dataset."""
+        image_bytes = file.file.read()
+        record = build_capture_record(
+            json.loads(detections),
+            you_side=you_side,
+            image_w=image_w,
+            image_h=image_h,
+            manual_position=manual_position or None,
+        )
+        path = save_capture(app.state.capture_dir, image_bytes, record)
+        return {"path": str(path), "record": record}
 
     @app.post("/export")
     def export(req: ExportRequest) -> dict[str, Any]:

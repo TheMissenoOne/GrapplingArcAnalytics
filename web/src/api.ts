@@ -1,4 +1,11 @@
-import type { ClassifyResponse, ExportRequest, NodeOption } from "./types";
+import type {
+  ClassifyResponse,
+  DetectResponse,
+  Detection,
+  ExportRequest,
+  NodeOption,
+  YouSide,
+} from "./types";
 
 const BASE =
   (import.meta.env.VITE_API_BASE as string | undefined) ?? "http://localhost:8000";
@@ -22,6 +29,36 @@ export async function classifyFrame(blob: Blob): Promise<ClassifyResponse> {
   return jsonOrThrow<ClassifyResponse>(
     await fetch(`${BASE}/classify`, { method: "POST", body: form }),
   );
+}
+
+/** Detect athlete positions (with boxes) in a frame — drives the overlay. */
+export async function detectFrame(blob: Blob): Promise<DetectResponse> {
+  const form = new FormData();
+  form.append("file", blob, "frame.jpg");
+  return jsonOrThrow<DetectResponse>(
+    await fetch(`${BASE}/detect`, { method: "POST", body: form }),
+  );
+}
+
+/** Persist a hand-labeled frame (bjj3 class + bbox + actor) to the dataset. */
+export async function captureFrame(
+  blob: Blob,
+  opts: {
+    detections: Detection[];
+    you_side: YouSide;
+    image_w: number;
+    image_h: number;
+    manual_position?: string | null;
+  },
+): Promise<{ path: string; record: unknown }> {
+  const form = new FormData();
+  form.append("file", blob, "frame.jpg");
+  form.append("detections", JSON.stringify(opts.detections));
+  form.append("you_side", opts.you_side);
+  form.append("image_w", String(opts.image_w));
+  form.append("image_h", String(opts.image_h));
+  if (opts.manual_position) form.append("manual_position", opts.manual_position);
+  return jsonOrThrow(await fetch(`${BASE}/capture`, { method: "POST", body: form }));
 }
 
 /** Build a GrapplingArc SessionPayload from the reviewed timeline. */

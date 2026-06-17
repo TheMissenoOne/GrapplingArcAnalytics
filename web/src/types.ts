@@ -7,6 +7,24 @@ export interface NodeOption {
   en?: string | null;
 }
 
+export interface Detection {
+  raw_class: string;
+  vicos_class: string;
+  confidence: number;
+  x: number; // bbox centre
+  y: number;
+  width: number;
+  height: number;
+}
+
+export interface DetectResponse {
+  detections: Detection[];
+  image_w: number;
+  image_h: number;
+}
+
+export type YouSide = "left" | "right";
+
 export interface ClassifyResponse {
   vicos_class: string;
   confidence: number;

@@ -31,28 +31,55 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_API_URL = "https://serverless.roboflow.com"
 
-# A predictor turns one frame into a list of (class_name, confidence) detections.
-Predictor = Callable[[np.ndarray], list[tuple[str, float]]]
+# A detector turns one frame into a list of raw detection dicts
+# ``{class/raw_class, confidence, x, y, width, height}`` (x,y = bbox centre).
+DetectFn = Callable[[np.ndarray], list[dict[str, Any]]]
 
 
-def _extract(resp: Any) -> list[tuple[str, float]]:
-    """Adapt an ``inference`` result (object or dict) to (class_name, confidence)."""
+def _get(obj: Any, *keys: str) -> Any:
+    """Read the first present key from a dict or attribute from an object."""
+    for k in keys:
+        if isinstance(obj, dict):
+            if k in obj:
+                return obj[k]
+        elif hasattr(obj, k):
+            return getattr(obj, k)
+    return None
+
+
+def _extract_detections(resp: Any) -> list[dict[str, Any]]:
+    """Adapt an inference result (object or dict) to raw detection dicts with boxes."""
     if isinstance(resp, list):
         resp = resp[0] if resp else {}
-    preds = getattr(resp, "predictions", None)
-    if preds is None and isinstance(resp, dict):
-        preds = resp.get("predictions", [])
-    out: list[tuple[str, float]] = []
-    for p in preds or []:
-        if isinstance(p, dict):
-            name = p.get("class") or p.get("class_name")
-            conf = p.get("confidence")
-        else:
-            name = getattr(p, "class_name", None) or getattr(p, "class_", None)
-            conf = getattr(p, "confidence", None)
-        if name is not None and conf is not None:
-            out.append((str(name), float(conf)))
+    preds = _get(resp, "predictions") or []
+    out: list[dict[str, Any]] = []
+    for p in preds:
+        name = _get(p, "class", "class_name", "class_")
+        conf = _get(p, "confidence")
+        if name is None or conf is None:
+            continue
+        out.append(
+            {
+                "raw_class": str(name),
+                "confidence": float(conf),
+                "x": float(_get(p, "x") or 0.0),
+                "y": float(_get(p, "y") or 0.0),
+                "width": float(_get(p, "width") or 0.0),
+                "height": float(_get(p, "height") or 0.0),
+            }
+        )
     return out
+
+
+def _image_dims(resp: Any) -> tuple[int, int] | None:
+    """Read (width, height) of the inferred image from the response, if present."""
+    if isinstance(resp, list):
+        resp = resp[0] if resp else {}
+    img = _get(resp, "image")
+    if img is None:
+        return None
+    w, h = _get(img, "width"), _get(img, "height")
+    return (int(w), int(h)) if w and h else None
 
 
 class RoboflowClassifier:
@@ -65,7 +92,7 @@ class RoboflowClassifier:
         conf: float = 0.4,
         api_url: str = DEFAULT_API_URL,
         timeout: float = 30.0,
-        predict_fn: Predictor | None = None,
+        detect_fn: DetectFn | None = None,
     ) -> None:
         """
         Parameters
@@ -81,19 +108,21 @@ class RoboflowClassifier:
             ``inference`` server for offline use (same JSON contract).
         timeout : float
             HTTP timeout (seconds).
-        predict_fn : callable or None
-            ``frame -> [(class_name, confidence)]`` override for tests / alt backends.
+        detect_fn : callable or None
+            ``frame -> [{raw_class, confidence, x, y, width, height}]`` override for
+            tests / alt backends (skips the HTTP call).
         """
         self.model_id = model_id
         self.api_key = api_key
         self.conf = conf
         self.api_url = api_url.rstrip("/")
         self.timeout = timeout
-        self._predict_fn = predict_fn
+        self._detect_fn = detect_fn
 
-    def _predict(self, frame: np.ndarray) -> list[tuple[str, float]]:
-        if self._predict_fn is not None:
-            return self._predict_fn(frame)
+    def _raw(self, frame: np.ndarray) -> tuple[list[dict[str, Any]], tuple[int, int] | None]:
+        """Return (raw detections, image dims or None) for a frame."""
+        if self._detect_fn is not None:
+            return self._detect_fn(frame), None
 
         import cv2
         import requests
@@ -113,22 +142,47 @@ class RoboflowClassifier:
             timeout=self.timeout,
         )
         resp.raise_for_status()
-        return _extract(resp.json())
+        body = resp.json()
+        return _extract_detections(body), _image_dims(body)
+
+    def detect(
+        self, frame: np.ndarray, role_map: dict[int, str] | None = None
+    ) -> dict[str, Any]:
+        """Frame → ``{detections: [...], image_w, image_h}`` with boxes (for the overlay).
+
+        Each detection: ``{raw_class, vicos_class, confidence, x, y, width, height}``
+        (``x``/``y`` = bbox centre). Image dims come from the model response, falling back
+        to the frame shape (for injected ``detect_fn``).
+        """
+        raw, dims = self._raw(frame)
+        image_w = dims[0] if dims else int(frame.shape[1])
+        image_h = dims[1] if dims else int(frame.shape[0])
+        detections = [
+            {
+                "raw_class": d["raw_class"],
+                "vicos_class": roboflow_to_vicos(d["raw_class"], role_map),
+                "confidence": float(d["confidence"]),
+                "x": float(d["x"]),
+                "y": float(d["y"]),
+                "width": float(d["width"]),
+                "height": float(d["height"]),
+            }
+            for d in raw
+            if float(d.get("confidence", 0.0)) >= self.conf
+        ]
+        return {"detections": detections, "image_w": image_w, "image_h": image_h}
 
     def classify_frame_probs(
         self, frame: np.ndarray, role_map: dict[int, str] | None = None
     ) -> dict[str, float]:
         """Frame → ``{vicos_class: probability}`` (L1-normalized).
 
-        Detections below ``conf`` are dropped; the rest are converted to ViCoS classes
-        and their confidences summed per class (so both athletes' boxes count), then
-        L1-normalized. Empty when nothing is detected.
+        Aggregates ``detect()`` confidences per ViCoS class (so both athletes' boxes
+        count), then L1-normalizes. Empty when nothing is detected.
         """
         agg: dict[str, float] = {}
-        for class_name, confidence in self._predict(frame):
-            if confidence < self.conf:
-                continue
-            label = roboflow_to_vicos(class_name, role_map)
-            agg[label] = agg.get(label, 0.0) + confidence
+        for det in self.detect(frame, role_map)["detections"]:
+            label = det["vicos_class"]
+            agg[label] = agg.get(label, 0.0) + det["confidence"]
         total = sum(agg.values())
         return {k: v / total for k, v in agg.items()} if total > 0 else {}

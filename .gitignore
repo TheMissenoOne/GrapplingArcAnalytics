@@ -14,6 +14,7 @@ build/
 # Data (downloaded datasets — large, not committed)
 data/raw/*
 data/processed/*
+data/captures/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 

@@ -6,6 +6,8 @@ no model download or sibling repo is needed.
 
 from __future__ import annotations
 
+import json
+
 import cv2
 import numpy as np
 import pytest
@@ -28,6 +30,7 @@ from cv.pose_features import (
     R_SHOULDER,
     pair_to_features,
 )
+from cv.roboflow_classifier import RoboflowClassifier
 from cv.vocab_map import build_vocab_index
 from realtime.app import create_app
 
@@ -180,9 +183,11 @@ def test_priors_unknown_athlete_empty(index: dict) -> None:
 
 
 def test_classify_roboflow_backend(index: dict) -> None:
-    from cv.roboflow_classifier import RoboflowClassifier
-
-    rf = RoboflowClassifier("bjj3/1", predict_fn=lambda _f: [("mount1", 0.9), ("mount2", 0.8)])
+    dets = [
+        {"raw_class": "mount1", "confidence": 0.9, "x": 30, "y": 50, "width": 20, "height": 20},
+        {"raw_class": "mount2", "confidence": 0.8, "x": 70, "y": 50, "width": 20, "height": 20},
+    ]
+    rf = RoboflowClassifier("bjj3/1", detect_fn=lambda _f: dets)
     client = TestClient(create_app(vocab_index=index, nodes=NODES, roboflow=rf))
     r = client.post("/classify", files={"file": ("f.png", _png_bytes(), "image/png")})
     assert r.status_code == 200
@@ -192,10 +197,41 @@ def test_classify_roboflow_backend(index: dict) -> None:
     assert body["ok"] is True
 
 
+def test_detect_returns_boxes(index: dict) -> None:
+    dets = [{"raw_class": "mount1", "confidence": 0.9, "x": 30, "y": 50, "width": 20, "height": 20}]
+    rf = RoboflowClassifier("bjj3/1", detect_fn=lambda _f: dets)
+    client = TestClient(create_app(vocab_index=index, nodes=NODES, roboflow=rf))
+    r = client.post("/detect", files={"file": ("f.png", _png_bytes(), "image/png")})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["detections"][0]["vicos_class"] == "mount_top"
+    assert body["image_w"] == 8 and body["image_h"] == 8  # from the 8x8 png
+
+
+def test_detect_503_without_roboflow(index: dict) -> None:
+    client = TestClient(create_app(vocab_index=index, nodes=NODES))
+    r = client.post("/detect", files={"file": ("f.png", _png_bytes(), "image/png")})
+    assert r.status_code == 503
+
+
+def test_capture_writes_dataset(index: dict, tmp_path) -> None:
+    client = TestClient(create_app(vocab_index=index, nodes=NODES, capture_dir=tmp_path))
+    dets = [{"raw_class": "mount1", "confidence": 0.9, "x": 2, "y": 4, "width": 2, "height": 2}]
+    r = client.post(
+        "/capture",
+        files={"file": ("f.png", _png_bytes(), "image/png")},
+        data={"detections": json.dumps(dets), "you_side": "left", "image_w": 8, "image_h": 8},
+    )
+    assert r.status_code == 200
+    rec = r.json()["record"]
+    assert rec["annotations"][0]["actor"] == "you"  # x=2 < 4 → left → you
+    assert (tmp_path / "annotations.jsonl").exists()
+
+
 def test_classify_roboflow_422_when_empty(index: dict) -> None:
     from cv.roboflow_classifier import RoboflowClassifier
 
-    rf = RoboflowClassifier("bjj3/1", predict_fn=lambda _f: [])
+    rf = RoboflowClassifier("bjj3/1", detect_fn=lambda _f: [])
     client = TestClient(create_app(vocab_index=index, nodes=NODES, roboflow=rf))
     r = client.post("/classify", files={"file": ("f.png", _png_bytes(), "image/png")})
     assert r.status_code == 422
