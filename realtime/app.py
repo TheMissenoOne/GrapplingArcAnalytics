@@ -416,12 +416,7 @@ def create_app(
             if app.state.store is not None:
                 app.state.store.upsert_athlete(graph)
 
-        return {
-            "path": str(path),
-            "record": record,
-            "graph_node": you_entry["label"] if you_entry else None,
-            "you_entry": you_entry,
-        }
+        return {"path": str(path), "record": record, "you_entry": you_entry}
 
     @app.post("/export")
     def export(req: ExportRequest) -> dict[str, Any]:

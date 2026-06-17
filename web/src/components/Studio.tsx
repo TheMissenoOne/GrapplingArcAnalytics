@@ -172,7 +172,7 @@ export function Studio({ nodes, athlete, onAdd }: Props) {
         }
         setManualQuery("");
         setManual(false);
-        setFlash(res.graph_node ? `✓ ${res.graph_node}` : "✓ captured");
+        setFlash(res.you_entry ? `✓ ${res.you_entry.label}` : "✓ captured");
       } catch (err) {
         setFlash(`capture error: ${(err as Error).message}`);
       }

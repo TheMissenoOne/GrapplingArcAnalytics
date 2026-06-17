@@ -261,7 +261,7 @@ def test_capture_manual_position_builds_graph(index: dict, tmp_path) -> None:
               "manual_position": "Berimbolo", "athlete": "me"},
     )
     assert r.status_code == 200
-    assert r.json()["graph_node"] == "Berimbolo"  # free-text position accepted
+    assert r.json()["you_entry"]["label"] == "Berimbolo"  # free-text position accepted
 
 
 def test_classify_roboflow_422_when_empty(index: dict) -> None:

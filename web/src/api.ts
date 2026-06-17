@@ -54,7 +54,6 @@ export async function captureFrame(
 ): Promise<{
   path: string;
   record: unknown;
-  graph_node: string | null;
   you_entry: { label: string; type: string; role: string; actor: string } | null;
 }> {
   const form = new FormData();
