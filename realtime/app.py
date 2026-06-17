@@ -33,6 +33,7 @@ from analysis.priors import (
     suggest_next,
 )
 from cv.inference import ClassifierBundle, classify_pose_pair_probs, load_classifier
+from cv.roboflow_labels import roboflow_to_vicos
 from cv.segmenter import segment
 from cv.vocab_map import NodeRef, build_vocab_index, load_app_nodes, map_vicos_class
 from realtime.capture import build_capture_record, save_capture
@@ -232,6 +233,8 @@ def create_app(
     # In-memory per-athlete state: accumulated sessions + the derived graph.
     app.state.athlete_sessions = {}
     app.state.athlete_graphs = {}
+    # Annotate mode accumulates your-position entries per athlete (one growing round).
+    app.state.athlete_capture_entries = {}
 
     def get_estimator() -> Any:
         if app.state.estimator is None:
@@ -353,6 +356,20 @@ def create_app(
             image_h=result["image_h"],
         )
 
+    def _you_position(
+        dets: list[dict[str, Any]], you_side: str, image_w: int
+    ) -> tuple[str, str] | None:
+        """The (node_label, node_type) of the detection on the you-side, if any."""
+        for d in dets:
+            side = "left" if float(d["x"]) < image_w / 2 else "right"
+            if side != you_side:
+                continue
+            vc = d.get("vicos_class") or roboflow_to_vicos(str(d["raw_class"]))
+            match = map_vicos_class(vc, app.state.vocab_index)
+            label = match.node_name if match.node_name else match.position
+            return label, (match.node_type or "transition")
+        return None
+
     @app.post("/capture")
     def capture(
         file: UploadFile,
@@ -361,18 +378,44 @@ def create_app(
         image_w: int = Form(...),
         image_h: int = Form(...),
         manual_position: str | None = Form(None),
+        athlete: str | None = Form(None),
     ) -> dict[str, Any]:
-        """Persist a hand-labeled frame (bjj3 class + bbox + actor) to the dataset."""
+        """Persist a hand-labeled frame (bjj3 class + bbox + actor) to the dataset.
+
+        When ``athlete`` is given, the your-side position is also appended to that
+        athlete's graph (annotate mode builds the prediction-loop graph incrementally).
+        """
+        dets = json.loads(detections)
         image_bytes = file.file.read()
         record = build_capture_record(
-            json.loads(detections),
+            dets,
             you_side=you_side,
             image_w=image_w,
             image_h=image_h,
             manual_position=manual_position or None,
         )
         path = save_capture(app.state.capture_dir, image_bytes, record)
-        return {"path": str(path), "record": record}
+
+        graph_node: str | None = None
+        if athlete:
+            if manual_position:
+                graph_node = manual_position
+                node_type = app.state.node_types.get(manual_position, "transition")
+            else:
+                you = _you_position(dets, you_side, image_w)
+                graph_node, node_type = you if you else (None, "")
+            if graph_node:
+                entries = app.state.athlete_capture_entries.setdefault(athlete, [])
+                entries.append(
+                    {"label": graph_node, "type": node_type, "actor": "you", "successful": True}
+                )
+                session = {"topics": [], "rounds": [{"entries": entries}]}
+                graph = build_athlete_graph(athlete, [session])
+                app.state.athlete_graphs[athlete] = graph
+                if app.state.store is not None:
+                    app.state.store.upsert_athlete(graph)
+
+        return {"path": str(path), "record": record, "graph_node": graph_node}
 
     @app.post("/export")
     def export(req: ExportRequest) -> dict[str, Any]:

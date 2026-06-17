@@ -228,6 +228,37 @@ def test_capture_writes_dataset(index: dict, tmp_path) -> None:
     assert (tmp_path / "annotations.jsonl").exists()
 
 
+def test_capture_with_athlete_builds_graph(index: dict, tmp_path) -> None:
+    client = TestClient(create_app(vocab_index=index, nodes=NODES, capture_dir=tmp_path))
+    # Capture two your-side positions for an athlete → graph + a transition.
+    for vc, raw in [("mount_top", "mount1"), ("guard_bottom", "guard2")]:
+        det = {"raw_class": raw, "vicos_class": vc, "confidence": 0.9,
+               "x": 2, "y": 4, "width": 2, "height": 2}
+        r = client.post(
+            "/capture",
+            files={"file": ("f.png", _png_bytes(), "image/png")},
+            data={"detections": json.dumps([det]), "you_side": "left",
+                  "image_w": 8, "image_h": 8, "athlete": "me"},
+        )
+        assert r.status_code == 200
+    # mount → Montada was ingested; prior from Montada should now exist.
+    pr = client.post("/priors", json={"athlete": "me", "prev_label": "Montada"})
+    assert pr.status_code == 200
+    assert pr.json()  # non-empty: a transition out of Montada was recorded
+
+
+def test_capture_manual_position_builds_graph(index: dict, tmp_path) -> None:
+    client = TestClient(create_app(vocab_index=index, nodes=NODES, capture_dir=tmp_path))
+    r = client.post(
+        "/capture",
+        files={"file": ("f.png", _png_bytes(), "image/png")},
+        data={"detections": "[]", "you_side": "left", "image_w": 8, "image_h": 8,
+              "manual_position": "Berimbolo", "athlete": "me"},
+    )
+    assert r.status_code == 200
+    assert r.json()["graph_node"] == "Berimbolo"  # free-text position accepted
+
+
 def test_classify_roboflow_422_when_empty(index: dict) -> None:
     from cv.roboflow_classifier import RoboflowClassifier
 

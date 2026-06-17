@@ -39,7 +39,7 @@ export function AnnotatePanel({ nodes }: Props) {
   const [youSide, setYouSide] = useState<YouSide>("left");
   const [manual, setManual] = useState(false);
   const [manualQuery, setManualQuery] = useState("");
-  const [manualPosition, setManualPosition] = useState<string | null>(null);
+  const [athlete, setAthlete] = useState("");
   const [captured, setCaptured] = useState<Captured[]>([]);
   const [flash, setFlash] = useState("");
 
@@ -52,7 +52,7 @@ export function AnnotatePanel({ nodes }: Props) {
     setSrc(URL.createObjectURL(file));
     setDetections([]);
     setManual(false);
-    setManualPosition(null);
+    setManualQuery("");
   };
 
   // ── Draw the detection overlay (boxes + YOU/OPP labels) ──
@@ -109,41 +109,50 @@ export function AnnotatePanel({ nodes }: Props) {
         setFlash(`${res.detections.length} detection(s)`);
       }
     } catch (err) {
-      setFlash(`detect error: ${(err as Error).message}`);
+      // Any failure (404/offline/no model) → fall back to manual entry, don't dead-end.
+      setDetections([]);
+      setManual(true);
+      setFlash(`detect failed (${(err as Error).message}) — type the position`);
+      setTimeout(() => manualInputRef.current?.focus(), 0);
     }
   }, []);
 
-  const commit = useCallback(async () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (detections.length === 0 && !manualPosition) {
-      setFlash("Nothing to capture — classify or pick a position first");
-      return;
-    }
-    try {
-      const blob = await captureVideoFrame(video);
-      const image_w = dims.w || video.videoWidth;
-      const image_h = dims.h || video.videoHeight;
-      await captureFrame(blob, {
-        detections,
-        you_side: youSide,
-        image_w,
-        image_h,
-        manual_position: manualPosition,
-      });
-      const summary = manualPosition
-        ? `${manualPosition} (manual)`
-        : detections
-            .map((d) => `${d.vicos_class}/${sideOf(d, dims.w) === youSide ? "YOU" : "OPP"}`)
-            .join(" + ");
-      setCaptured((prev) => [{ id: `${Date.now()}`, summary }, ...prev]);
-      setManualPosition(null);
-      setManual(false);
-      setFlash("✓ captured");
-    } catch (err) {
-      setFlash(`capture error: ${(err as Error).message}`);
-    }
-  }, [detections, dims, youSide, manualPosition]);
+  const commit = useCallback(
+    async (positionOverride?: string) => {
+      const video = videoRef.current;
+      if (!video) return;
+      const pos = positionOverride ?? null;
+      if (detections.length === 0 && !pos) {
+        setFlash("Nothing to capture — classify or type a position first");
+        return;
+      }
+      try {
+        const blob = await captureVideoFrame(video);
+        const image_w = dims.w || video.videoWidth;
+        const image_h = dims.h || video.videoHeight;
+        const res = await captureFrame(blob, {
+          detections,
+          you_side: youSide,
+          image_w,
+          image_h,
+          manual_position: pos,
+          athlete: athlete.trim() || undefined,
+        });
+        const summary = pos
+          ? `${pos} (manual)`
+          : detections
+              .map((d) => `${d.vicos_class}/${sideOf(d, dims.w) === youSide ? "YOU" : "OPP"}`)
+              .join(" + ");
+        setCaptured((prev) => [{ id: `${Date.now()}`, summary }, ...prev]);
+        setManualQuery("");
+        setManual(false);
+        setFlash(res.graph_node ? `✓ captured → graph: ${res.graph_node}` : "✓ captured");
+      } catch (err) {
+        setFlash(`capture error: ${(err as Error).message}`);
+      }
+    },
+    [detections, dims, youSide, athlete],
+  );
 
   const togglePlay = useCallback(() => {
     const video = videoRef.current;
@@ -183,11 +192,21 @@ export function AnnotatePanel({ nodes }: Props) {
 
   return (
     <div className="panel">
-      <input
-        type="file"
-        accept="video/*"
-        onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])}
-      />
+      <div className="row">
+        <input
+          type="file"
+          accept="video/*"
+          onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])}
+        />
+        <label className="muted">
+          Athlete{" "}
+          <input
+            value={athlete}
+            placeholder="name (builds graph)"
+            onChange={(e) => setAthlete(e.target.value)}
+          />
+        </label>
+      </div>
       <p className="muted">
         <b>Space</b> classify · <b>←</b> you=left · <b>→</b> you=right · <b>Enter</b> capture ·
         you-side: <b style={{ color: YOU }}>{youSide}</b>
@@ -211,22 +230,18 @@ export function AnnotatePanel({ nodes }: Props) {
               placeholder="search position…"
               onChange={(e) => setManualQuery(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && manualResults[0]) {
-                  setManualPosition(manualResults[0].name);
-                  setManualQuery(manualResults[0].name);
+                // Enter inserts directly: top suggestion, or the typed text (free-form).
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const chosen = manualResults[0]?.name ?? manualQuery.trim();
+                  if (chosen) void commit(chosen);
                 }
               }}
             />
-            {manualQuery && !manualPosition && manualResults.length > 0 && (
+            {manualQuery && manualResults.length > 0 && (
               <ul className="node-picker-list">
                 {manualResults.map((n) => (
-                  <li
-                    key={n.name}
-                    onMouseDown={() => {
-                      setManualPosition(n.name);
-                      setManualQuery(n.name);
-                    }}
-                  >
+                  <li key={n.name} onMouseDown={() => void commit(n.name)}>
                     <span>{n.name}</span>
                     <small>{n.en ?? n.type}</small>
                   </li>
@@ -234,7 +249,7 @@ export function AnnotatePanel({ nodes }: Props) {
               </ul>
             )}
           </div>
-          {manualPosition && <span className="tag tag-cv">{manualPosition} — Enter to capture</span>}
+          <span className="muted">type + Enter to capture (free text ok)</span>
         </div>
       )}
 

@@ -49,8 +49,9 @@ export async function captureFrame(
     image_w: number;
     image_h: number;
     manual_position?: string | null;
+    athlete?: string | null;
   },
-): Promise<{ path: string; record: unknown }> {
+): Promise<{ path: string; record: unknown; graph_node: string | null }> {
   const form = new FormData();
   form.append("file", blob, "frame.jpg");
   form.append("detections", JSON.stringify(opts.detections));
@@ -58,6 +59,7 @@ export async function captureFrame(
   form.append("image_w", String(opts.image_w));
   form.append("image_h", String(opts.image_h));
   if (opts.manual_position) form.append("manual_position", opts.manual_position);
+  if (opts.athlete) form.append("athlete", opts.athlete);
   return jsonOrThrow(await fetch(`${BASE}/capture`, { method: "POST", body: form }));
 }
 
