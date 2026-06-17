@@ -19,6 +19,7 @@ from typing import Any
 
 import numpy as np
 from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from cv.inference import ClassifierBundle, classify_pose_pair, load_classifier
@@ -69,6 +70,12 @@ class ClassifyResponse(BaseModel):
     ok: bool
 
 
+class NodeOption(BaseModel):
+    name: str
+    type: str
+    en: str | None = None
+
+
 class ExportEventIn(BaseModel):
     label: str
     type: str
@@ -116,10 +123,26 @@ def _decode_image(raw: bytes) -> np.ndarray:
 
 
 # ─── App factory ─────────────────────────────────────────────────────────--
+def _node_options(nodes: list[dict[str, Any]]) -> list[NodeOption]:
+    """Distinct {name, type, en} for the manual annotation picker."""
+    seen: set[str] = set()
+    out: list[NodeOption] = []
+    for n in nodes:
+        name = str(n.get("name", "")).strip()
+        if not name or name in seen:
+            continue
+        seen.add(name)
+        translations = n.get("translations", {}) or {}
+        out.append(NodeOption(name=name, type=str(n.get("type", "")), en=translations.get("en")))
+    return out
+
+
 def create_app(
     estimator: Any | None = None,
     classifier: ClassifierBundle | None = None,
     vocab_index: dict[str, NodeRef] | None = None,
+    nodes: list[dict[str, Any]] | None = None,
+    cors_origins: list[str] | None = None,
 ) -> FastAPI:
     """Build the FastAPI app.
 
@@ -131,12 +154,24 @@ def create_app(
         Injected for tests; lazily loaded via ``load_classifier`` when None.
     vocab_index : dict or None
         Injected for tests; built from ``load_app_nodes`` at startup when None.
+    nodes : list[dict] or None
+        Raw app nodes for the ``/nodes`` picker. Defaults to ``load_app_nodes()``.
+    cors_origins : list[str] or None
+        Allowed CORS origins. Defaults to ``["*"]`` (dev).
     """
+    raw_nodes = nodes if nodes is not None else load_app_nodes()
     app = FastAPI(title="GrapplingArc Realtime CV", version="0.1.0")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins or ["*"],
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     app.state.estimator = estimator
     app.state.classifier = classifier
+    app.state.node_options = _node_options(raw_nodes)
     app.state.vocab_index = (
-        vocab_index if vocab_index is not None else build_vocab_index(load_app_nodes())
+        vocab_index if vocab_index is not None else build_vocab_index(raw_nodes)
     )
 
     def get_estimator() -> Any:
@@ -162,6 +197,11 @@ def create_app(
     @app.get("/health")
     def health() -> dict[str, Any]:
         return {"status": "ok", "vocab_index_size": len(app.state.vocab_index)}
+
+    @app.get("/nodes", response_model=list[NodeOption])
+    def nodes_route() -> list[NodeOption]:
+        options: list[NodeOption] = app.state.node_options
+        return options
 
     @app.post("/segment", response_model=SegmentResponse)
     def segment_stream(req: SegmentRequest) -> SegmentResponse:

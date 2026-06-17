@@ -99,6 +99,22 @@ def test_health(index: dict) -> None:
     assert r.json()["status"] == "ok"
 
 
+def test_nodes_route(index: dict) -> None:
+    client = TestClient(create_app(vocab_index=index, nodes=NODES))
+    r = client.get("/nodes")
+    assert r.status_code == 200
+    body = r.json()
+    names = {n["name"] for n in body}
+    assert {"Montada", "Guarda Fechada"} <= names
+    assert all("type" in n for n in body)
+
+
+def test_cors_header(index: dict) -> None:
+    client = TestClient(create_app(vocab_index=index, nodes=NODES))
+    r = client.get("/health", headers={"Origin": "http://localhost:5173"})
+    assert r.headers.get("access-control-allow-origin") == "*"
+
+
 def test_segment_maps_to_nodes(index: dict) -> None:
     client = TestClient(create_app(vocab_index=index))
     frames = [{"frame_index": i, "label": "mount_top", "confidence": 0.9} for i in range(5)]
