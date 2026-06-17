@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 3,
+  "sessions": [
+    {
+      "id": "session_1",
+      "createdAt": "2026-06-01T10:00:00Z",
+      "duration": 30,
+      "rounds": [
+        {
+          "entries": [
+            {"label": "Rear Naked Choke", "actor": "you", "successful": true, "assoc": null, "type": "submission"},
+            {"label": "Armbar", "actor": "you", "successful": false, "assoc": null, "type": "submission"},
+            {"label": "Triangle Choke", "actor": "partner", "successful": true, "assoc": null, "type": "submission"}
+          ]
+        },
+        {
+          "entries": [
+            {"label": "Armbar", "actor": "you", "successful": true, "assoc": null, "type": "submission"},
+            {"label": "Heel Hook", "actor": "you", "successful": true, "assoc": null, "type": "submission"},
+            {"label": "Kimura", "actor": "you", "successful": false, "assoc": null, "type": "submission"}
+          ]
+        }
+      ]
+    },
+    {
+      "id": "session_2",
+      "createdAt": "2026-06-02T10:00:00Z",
+      "duration": 45,
+      "rounds": [
+        {
+          "entries": [
+            {"label": "Rear Naked Choke", "actor": "you", "successful": true, "assoc": null, "type": "submission"},
+            {"label": "Unknown Technique", "actor": "you", "successful": true, "assoc": null, "type": "submission"}
+          ]
+        }
+      ]
+    }
+  ]
+}

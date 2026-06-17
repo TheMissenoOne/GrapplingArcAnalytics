@@ -10,12 +10,17 @@ from pipelines.registry import DATASETS
 
 
 def test_registry_specs_complete() -> None:
-    assert set(DATASETS) == {"grappling_techniques", "adcc_historical", "adcc_fighters"}
+    expected = {"grappling_techniques", "adcc_historical", "adcc_fighters", "bjjheroes"}
+    assert set(DATASETS) == expected
     for key, spec in DATASETS.items():
         assert spec.key == key
-        assert "/" in spec.slug
-        assert spec.files
-        assert spec.delimiter in (",", ";")
+        if spec.source == "kaggle":
+            assert "/" in spec.slug
+            assert spec.files
+            assert spec.delimiter in (",", ";")
+        else:
+            assert spec.source == "scrape"
+            assert spec.url
 
 
 def test_adcc_historical_delimiter_is_semicolon() -> None:

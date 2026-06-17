@@ -41,3 +41,12 @@ Thumbs.db
 # ViCoS dataset
 cv/vicos_data/
 cv/images/
+
+# Obsidian vault (kanban/) — track only stable config
+kanban/.obsidian/*
+!kanban/.obsidian/app.json
+!kanban/.obsidian/graph.json
+!kanban/.obsidian/core-plugins.json
+!kanban/.obsidian/community-plugins.json
+!kanban/.obsidian/types.json
+!kanban/.obsidian/templates.json

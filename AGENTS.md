@@ -23,7 +23,7 @@ ultra-caveman default. No filler. Fragments. Technical terms exact. Stop only on
 
 ticket → worktree → analyze → implement → test → pr
 
-1. **Ticket:** Create/update kanban card in `kanban/TODO/`
+1. **Ticket:** Pick/create kanban card in `kanban/TODO/`, move to `kanban/DOING/`. Board rules + card template: `kanban/README.md`, `kanban/_template.md`
 2. **Worktree:** `git worktree add ../.worktrees/<id>-<slug> -b feature/<id>-<slug> origin/main`
 3. **Analyze:** Read CLAUDE.md + relevant doc. Search patterns.
 4. **Implement:** pipeline/schema → analysis/cv → tests → notebook. One layer at a time.
@@ -40,6 +40,7 @@ No ticket. No worktree. No git ops. Edit, ruff check, pytest, done.
 | grappling_techniques | liiucbs/grappling-techniques | 76 |
 | adcc_historical | bjagrelli/adcc-historical-dataset | 1028 |
 | adcc_fighters | albucathecoder/adcc-fighter-stats | ~600 |
+| bjjheroes | (scrape) bjjheroes.com | ~400 |
 
 Schema for each: `schemas/__init__.py`.
 

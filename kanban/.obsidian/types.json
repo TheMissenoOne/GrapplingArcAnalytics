@@ -1,0 +1,14 @@
+{
+  "types": {
+    "id": "text",
+    "slug": "text",
+    "phase": "number",
+    "lane": "text",
+    "priority": "text",
+    "status": "text",
+    "depends": "multitext",
+    "branch": "text",
+    "created": "date",
+    "tags": "tags"
+  }
+}

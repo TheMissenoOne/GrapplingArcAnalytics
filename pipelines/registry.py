@@ -7,6 +7,7 @@ Each entry describes how to download, load, and parse the dataset.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Literal
 
 
 @dataclass(frozen=True)
@@ -20,6 +21,8 @@ class DatasetSpec:
     delimiter: str = ","
     encoding: str = "utf-8"
     rows_approx: int = 0
+    source: Literal["kaggle", "scrape"] = "kaggle"
+    url: str = ""
 
 
 DATASETS: dict[str, DatasetSpec] = {
@@ -44,5 +47,14 @@ DATASETS: dict[str, DatasetSpec] = {
         files=["fighters_dataset.csv", "adcc_fighter_stats.csv"],
         description="ADCC fighter career stats (wins, titles, submission ratios)",
         rows_approx=614,
+    ),
+    "bjjheroes": DatasetSpec(
+        key="bjjheroes",
+        slug="bjjheroes",
+        files=[],
+        description="~400 BJJ Heroes athlete profiles with belt, team, lineage",
+        source="scrape",
+        url="https://www.bjjheroes.com/a-z-bjj-fighters-list",
+        rows_approx=400,
     ),
 }
