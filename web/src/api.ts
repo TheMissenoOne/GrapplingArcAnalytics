@@ -51,7 +51,12 @@ export async function captureFrame(
     manual_position?: string | null;
     athlete?: string | null;
   },
-): Promise<{ path: string; record: unknown; graph_node: string | null }> {
+): Promise<{
+  path: string;
+  record: unknown;
+  graph_node: string | null;
+  you_entry: { label: string; type: string; role: string; actor: string } | null;
+}> {
   const form = new FormData();
   form.append("file", blob, "frame.jpg");
   form.append("detections", JSON.stringify(opts.detections));

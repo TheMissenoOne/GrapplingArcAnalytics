@@ -223,9 +223,14 @@ def test_capture_writes_dataset(index: dict, tmp_path) -> None:
         data={"detections": json.dumps(dets), "you_side": "left", "image_w": 8, "image_h": 8},
     )
     assert r.status_code == 200
-    rec = r.json()["record"]
+    body = r.json()
+    rec = body["record"]
     assert rec["annotations"][0]["actor"] == "you"  # x=2 < 4 → left → you
     assert (tmp_path / "annotations.jsonl").exists()
+    # you_entry drives the web timeline row (mapped node + role + actor)
+    assert body["you_entry"]["actor"] == "you"
+    assert body["you_entry"]["label"] == "Montada"  # mount1 → Montada
+    assert body["you_entry"]["role"] == "top"
 
 
 def test_capture_with_athlete_builds_graph(index: dict, tmp_path) -> None:

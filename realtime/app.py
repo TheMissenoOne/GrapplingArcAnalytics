@@ -356,10 +356,13 @@ def create_app(
             image_h=result["image_h"],
         )
 
-    def _you_position(
-        dets: list[dict[str, Any]], you_side: str, image_w: int
-    ) -> tuple[str, str] | None:
-        """The (node_label, node_type) of the detection on the you-side, if any."""
+    def _you_entry(
+        dets: list[dict[str, Any]], you_side: str, image_w: int, manual_position: str | None
+    ) -> dict[str, str] | None:
+        """The your-side position as a timeline entry {label, type, role, actor}, or None."""
+        if manual_position:
+            node_type = app.state.node_types.get(manual_position, "transition")
+            return {"label": manual_position, "type": node_type, "role": "", "actor": "you"}
         for d in dets:
             side = "left" if float(d["x"]) < image_w / 2 else "right"
             if side != you_side:
@@ -367,7 +370,12 @@ def create_app(
             vc = d.get("vicos_class") or roboflow_to_vicos(str(d["raw_class"]))
             match = map_vicos_class(vc, app.state.vocab_index)
             label = match.node_name if match.node_name else match.position
-            return label, (match.node_type or "transition")
+            return {
+                "label": label,
+                "type": match.node_type or "transition",
+                "role": match.role,
+                "actor": "you",
+            }
         return None
 
     @app.post("/capture")
@@ -396,26 +404,24 @@ def create_app(
         )
         path = save_capture(app.state.capture_dir, image_bytes, record)
 
-        graph_node: str | None = None
-        if athlete:
-            if manual_position:
-                graph_node = manual_position
-                node_type = app.state.node_types.get(manual_position, "transition")
-            else:
-                you = _you_position(dets, you_side, image_w)
-                graph_node, node_type = you if you else (None, "")
-            if graph_node:
-                entries = app.state.athlete_capture_entries.setdefault(athlete, [])
-                entries.append(
-                    {"label": graph_node, "type": node_type, "actor": "you", "successful": True}
-                )
-                session = {"topics": [], "rounds": [{"entries": entries}]}
-                graph = build_athlete_graph(athlete, [session])
-                app.state.athlete_graphs[athlete] = graph
-                if app.state.store is not None:
-                    app.state.store.upsert_athlete(graph)
+        you_entry = _you_entry(dets, you_side, image_w, manual_position or None)
 
-        return {"path": str(path), "record": record, "graph_node": graph_node}
+        # Build the athlete graph incrementally when an athlete is named.
+        if athlete and you_entry:
+            entries = app.state.athlete_capture_entries.setdefault(athlete, [])
+            entries.append({**you_entry, "successful": True})
+            session = {"topics": [], "rounds": [{"entries": entries}]}
+            graph = build_athlete_graph(athlete, [session])
+            app.state.athlete_graphs[athlete] = graph
+            if app.state.store is not None:
+                app.state.store.upsert_athlete(graph)
+
+        return {
+            "path": str(path),
+            "record": record,
+            "graph_node": you_entry["label"] if you_entry else None,
+            "you_entry": you_entry,
+        }
 
     @app.post("/export")
     def export(req: ExportRequest) -> dict[str, Any]:

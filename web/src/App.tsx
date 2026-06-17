@@ -2,17 +2,13 @@ import { useEffect, useState } from "react";
 import type { NodeOption, Role, TimelineEvent } from "./types";
 import { exportSession, getNodes } from "./api";
 import { buildExportRequest } from "./lib/events";
-import { VideoPanel } from "./components/VideoPanel";
-import { LivePanel } from "./components/LivePanel";
-import { AnnotatePanel } from "./components/AnnotatePanel";
+import { Studio } from "./components/Studio";
 import { ReviewTable } from "./components/ReviewTable";
 
-type Tab = "annotate" | "video" | "live";
-
 export default function App() {
-  const [tab, setTab] = useState<Tab>("annotate");
   const [nodes, setNodes] = useState<NodeOption[]>([]);
   const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [athlete, setAthlete] = useState("");
   const [youRole, setYouRole] = useState<Role>("top");
   const [difficulty, setDifficulty] = useState(3);
   const [intensity, setIntensity] = useState(3);
@@ -22,7 +18,9 @@ export default function App() {
   useEffect(() => {
     getNodes()
       .then(setNodes)
-      .catch((err) => setBanner(`Backend unreachable (${(err as Error).message}). Manual picker disabled.`));
+      .catch((err) =>
+        setBanner(`Backend unreachable (${(err as Error).message}). Manual picker disabled.`),
+      );
   }, []);
 
   const addEvent = (e: TimelineEvent) => setEvents((prev) => [...prev, e]);
@@ -54,25 +52,17 @@ export default function App() {
 
       {banner && <div className="banner">{banner}</div>}
 
-      <nav className="tabs">
-        <button className={tab === "annotate" ? "active" : ""} onClick={() => setTab("annotate")}>
-          Annotate (keyboard)
-        </button>
-        <button className={tab === "video" ? "active" : ""} onClick={() => setTab("video")}>
-          Video (post-hoc)
-        </button>
-        <button className={tab === "live" ? "active" : ""} onClick={() => setTab("live")}>
-          Live (screen)
-        </button>
-      </nav>
+      <Studio nodes={nodes} athlete={athlete} onAdd={addEvent} />
 
-      {tab === "annotate" && <AnnotatePanel nodes={nodes} />}
-      {tab === "video" && <VideoPanel onAdd={addEvent} />}
-      {tab === "live" && <LivePanel onAdd={addEvent} />}
-
-      {tab !== "annotate" && (
-        <>
       <section className="session-meta">
+        <label className="grow">
+          Athlete
+          <input
+            value={athlete}
+            placeholder="name (builds graph)"
+            onChange={(e) => setAthlete(e.target.value)}
+          />
+        </label>
         <label>
           You are
           <select value={youRole} onChange={(e) => setYouRole(e.target.value as Role)}>
@@ -82,11 +72,23 @@ export default function App() {
         </label>
         <label>
           Difficulty
-          <input type="number" min={1} max={5} value={difficulty} onChange={(e) => setDifficulty(Number(e.target.value))} />
+          <input
+            type="number"
+            min={1}
+            max={5}
+            value={difficulty}
+            onChange={(e) => setDifficulty(Number(e.target.value))}
+          />
         </label>
         <label>
           Intensity
-          <input type="number" min={1} max={5} value={intensity} onChange={(e) => setIntensity(Number(e.target.value))} />
+          <input
+            type="number"
+            min={1}
+            max={5}
+            value={intensity}
+            onChange={(e) => setIntensity(Number(e.target.value))}
+          />
         </label>
         <label className="grow">
           Notes
@@ -105,8 +107,6 @@ export default function App() {
           Clear
         </button>
       </div>
-        </>
-      )}
     </div>
   );
 }

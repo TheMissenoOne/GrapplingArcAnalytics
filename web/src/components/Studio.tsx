@@ -1,61 +1,89 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Detection, NodeOption, YouSide } from "../types";
+import type { Detection, NodeOption, TimelineEvent, YouSide } from "../types";
 import { captureFrame, detectFrame } from "../api";
 import { captureVideoFrame } from "../lib/capture";
+import { newEvent } from "../lib/events";
+import { isYou, scaleBox } from "../lib/overlay";
 import { rankNodes } from "../lib/rank";
 
 interface Props {
   nodes: NodeOption[];
+  athlete: string;
+  onAdd: (event: TimelineEvent) => void;
 }
 
-interface Captured {
-  id: string;
-  summary: string;
-}
+type Source = "video" | "screen";
 
 const YOU = "#3b82f6"; // blue
 const OPP = "#ef4444"; // red
 
-/** Which side of the frame a detection's centre falls on. */
-function sideOf(det: Detection, imageW: number): "left" | "right" {
-  return det.x < imageW / 2 ? "left" : "right";
-}
-
 /**
- * Keyboard-driven manual annotation studio.
+ * Unified annotation studio: upload a video OR share the screen, then annotate by keyboard.
  *   Space — play/pause; on pause, classify the current frame (draw boxes)
  *   ← / →  — which side is You (left / right); overlay recolors
- *   Enter  — commit the labeled frame to the dataset
- * On a no-detection frame, a manual position input activates.
+ *   Enter  — commit: save a dataset frame AND add an editable timeline row
+ * No-detection / detect failure → type the position (free text), Enter captures.
  */
-export function AnnotatePanel({ nodes }: Props) {
+export function Studio({ nodes, athlete, onAdd }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const manualInputRef = useRef<HTMLInputElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
 
+  const [source, setSource] = useState<Source>("video");
   const [src, setSrc] = useState<string | null>(null);
+  const [hasScreen, setHasScreen] = useState(false);
   const [detections, setDetections] = useState<Detection[]>([]);
   const [dims, setDims] = useState<{ w: number; h: number }>({ w: 0, h: 0 });
   const [youSide, setYouSide] = useState<YouSide>("left");
   const [manual, setManual] = useState(false);
   const [manualQuery, setManualQuery] = useState("");
-  const [athlete, setAthlete] = useState("");
-  const [captured, setCaptured] = useState<Captured[]>([]);
   const [flash, setFlash] = useState("");
 
+  const stopStream = useCallback(() => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setHasScreen(false);
+  }, []);
+
+  useEffect(() => () => stopStream(), [stopStream]);
   useEffect(() => {
     if (!src) return;
     return () => URL.revokeObjectURL(src);
   }, [src]);
 
-  const loadFile = (file: File) => {
-    setSrc(URL.createObjectURL(file));
+  const reset = () => {
     setDetections([]);
     setManual(false);
     setManualQuery("");
   };
 
-  // ── Draw the detection overlay (boxes + YOU/OPP labels) ──
+  const loadFile = (file: File) => {
+    stopStream();
+    setSource("video");
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setSrc(URL.createObjectURL(file));
+    reset();
+  };
+
+  const shareScreen = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      streamRef.current = stream;
+      setSource("screen");
+      setSrc(null);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        await videoRef.current.play();
+      }
+      setHasScreen(true);
+      reset();
+    } catch (err) {
+      setFlash(`screen share cancelled: ${(err as Error).message}`);
+    }
+  };
+
+  // ── Overlay ──
   const draw = useCallback(() => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -66,24 +94,19 @@ export function AnnotatePanel({ nodes }: Props) {
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (!dims.w || !dims.h) return;
-    const sx = canvas.width / dims.w;
-    const sy = canvas.height / dims.h;
     ctx.lineWidth = 3;
     ctx.font = "bold 14px system-ui";
     for (const det of detections) {
-      const isYou = sideOf(det, dims.w) === youSide;
-      const color = isYou ? YOU : OPP;
-      const x = (det.x - det.width / 2) * sx;
-      const y = (det.y - det.height / 2) * sy;
-      const w = det.width * sx;
-      const h = det.height * sy;
+      const mine = isYou(det.x, dims.w, youSide);
+      const color = mine ? YOU : OPP;
+      const b = scaleBox(det, dims.w, dims.h, canvas.width, canvas.height);
       ctx.strokeStyle = color;
-      ctx.strokeRect(x, y, w, h);
-      const label = `${isYou ? "YOU" : "OPP"} · ${det.vicos_class}`;
+      ctx.strokeRect(b.x, b.y, b.w, b.h);
+      const label = `${mine ? "YOU" : "OPP"} · ${det.vicos_class}`;
       ctx.fillStyle = color;
-      ctx.fillRect(x, y - 18, ctx.measureText(label).width + 10, 18);
+      ctx.fillRect(b.x, b.y - 18, ctx.measureText(label).width + 10, 18);
       ctx.fillStyle = "#fff";
-      ctx.fillText(label, x + 5, y - 5);
+      ctx.fillText(label, b.x + 5, b.y - 5);
     }
   }, [detections, dims, youSide]);
 
@@ -96,8 +119,7 @@ export function AnnotatePanel({ nodes }: Props) {
     const video = videoRef.current;
     if (!video) return;
     try {
-      const blob = await captureVideoFrame(video);
-      const res = await detectFrame(blob);
+      const res = await detectFrame(await captureVideoFrame(video));
       setDetections(res.detections);
       setDims({ w: res.image_w, h: res.image_h });
       if (res.detections.length === 0) {
@@ -109,7 +131,6 @@ export function AnnotatePanel({ nodes }: Props) {
         setFlash(`${res.detections.length} detection(s)`);
       }
     } catch (err) {
-      // Any failure (404/offline/no model) → fall back to manual entry, don't dead-end.
       setDetections([]);
       setManual(true);
       setFlash(`detect failed (${(err as Error).message}) — type the position`);
@@ -138,20 +159,25 @@ export function AnnotatePanel({ nodes }: Props) {
           manual_position: pos,
           athlete: athlete.trim() || undefined,
         });
-        const summary = pos
-          ? `${pos} (manual)`
-          : detections
-              .map((d) => `${d.vicos_class}/${sideOf(d, dims.w) === youSide ? "YOU" : "OPP"}`)
-              .join(" + ");
-        setCaptured((prev) => [{ id: `${Date.now()}`, summary }, ...prev]);
+        if (res.you_entry) {
+          onAdd(
+            newEvent({
+              source: "cv",
+              label: res.you_entry.label,
+              type: res.you_entry.type,
+              role: (res.you_entry.role as TimelineEvent["role"]) || "",
+              start: video.currentTime || 0,
+            }),
+          );
+        }
         setManualQuery("");
         setManual(false);
-        setFlash(res.graph_node ? `✓ captured → graph: ${res.graph_node}` : "✓ captured");
+        setFlash(res.graph_node ? `✓ ${res.graph_node}` : "✓ captured");
       } catch (err) {
         setFlash(`capture error: ${(err as Error).message}`);
       }
     },
-    [detections, dims, youSide, athlete],
+    [detections, dims, youSide, athlete, onAdd],
   );
 
   const togglePlay = useCallback(() => {
@@ -168,7 +194,6 @@ export function AnnotatePanel({ nodes }: Props) {
   // ── Keyboard ──
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      // Don't hijack typing in the manual input.
       if ((e.target as HTMLElement)?.tagName === "INPUT") return;
       if (e.key === " ") {
         e.preventDefault();
@@ -189,33 +214,40 @@ export function AnnotatePanel({ nodes }: Props) {
   }, [togglePlay, commit]);
 
   const manualResults = useMemo(() => rankNodes(nodes, manualQuery, 8), [nodes, manualQuery]);
+  const ready = source === "video" ? !!src : hasScreen;
 
   return (
     <div className="panel">
       <div className="row">
-        <input
-          type="file"
-          accept="video/*"
-          onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])}
-        />
-        <label className="muted">
-          Athlete{" "}
+        <button className={source === "video" ? "active" : ""} onClick={() => setSource("video")}>
+          Upload video
+        </button>
+        <button onClick={() => void shareScreen()}>Share screen</button>
+        {source === "video" && (
           <input
-            value={athlete}
-            placeholder="name (builds graph)"
-            onChange={(e) => setAthlete(e.target.value)}
+            type="file"
+            accept="video/*"
+            onChange={(e) => e.target.files?.[0] && loadFile(e.target.files[0])}
           />
-        </label>
+        )}
       </div>
+
       <p className="muted">
         <b>Space</b> classify · <b>←</b> you=left · <b>→</b> you=right · <b>Enter</b> capture ·
         you-side: <b style={{ color: YOU }}>{youSide}</b>
         {flash && ` · ${flash}`}
       </p>
 
-      {src && (
+      {ready && (
         <div className="live-stage">
-          <video ref={videoRef} src={src} controls className="video" onLoadedData={draw} />
+          <video
+            ref={videoRef}
+            src={src ?? undefined}
+            controls={source === "video"}
+            muted
+            className="video"
+            onLoadedData={draw}
+          />
           <canvas ref={canvasRef} className="overlay-canvas" />
         </div>
       )}
@@ -230,7 +262,6 @@ export function AnnotatePanel({ nodes }: Props) {
               placeholder="search position…"
               onChange={(e) => setManualQuery(e.target.value)}
               onKeyDown={(e) => {
-                // Enter inserts directly: top suggestion, or the typed text (free-form).
                 if (e.key === "Enter") {
                   e.preventDefault();
                   const chosen = manualResults[0]?.name ?? manualQuery.trim();
@@ -251,20 +282,6 @@ export function AnnotatePanel({ nodes }: Props) {
           </div>
           <span className="muted">type + Enter to capture (free text ok)</span>
         </div>
-      )}
-
-      <h2>Captured ({captured.length})</h2>
-      {captured.length === 0 ? (
-        <p className="muted">Nothing captured yet.</p>
-      ) : (
-        <ul className="capture-list">
-          {captured.map((c, i) => (
-            <li key={c.id}>
-              <span className="idx">{captured.length - i}</span>
-              {c.summary}
-            </li>
-          ))}
-        </ul>
       )}
     </div>
   );
