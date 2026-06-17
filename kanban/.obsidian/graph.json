@@ -1,0 +1,12 @@
+{
+  "collapse-filter": false,
+  "search": "tag:#kanban",
+  "showTags": true,
+  "showAttachments": false,
+  "hideUnresolved": false,
+  "colorGroups": [
+    { "query": "path:TODO", "color": { "a": 1, "rgb": 14701138 } },
+    { "query": "path:DOING", "color": { "a": 1, "rgb": 16753920 } },
+    { "query": "path:DONE", "color": { "a": 1, "rgb": 5025616 } }
+  ]
+}

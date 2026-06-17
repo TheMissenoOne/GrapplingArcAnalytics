@@ -4,11 +4,10 @@ from __future__ import annotations
 
 import pandas as pd
 
+from analysis.names import _normalize_name, _resolve_aliases
 from export.tech_library import (
     DEFAULT_PT_TRANSLATIONS,
     _generate_variations,
-    _normalize_name,
-    _resolve_aliases,
     build_effectiveness,
     build_technique_library,
 )

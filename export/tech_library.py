@@ -17,38 +17,18 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
+from analysis.names import _normalize_adcc_sub, _normalize_name, _resolve_aliases
 from pipelines.adcc_historical import ADCCHistoricalPipeline
 from pipelines.etl import PROCESSED_DIR
 from pipelines.grappling_techniques import GrapplingTechniquesPipeline
 
 logger = logging.getLogger(__name__)
-
-# Known name aliases for cross-referencing (norm → canonical)
-NAME_ALIASES: dict[str, str] = {
-    "rnc": "rear naked choke",
-    "d'arce choke": "darce choke",
-    "d'arce": "darce choke",
-    "inside heel hook": "heel hook",
-    "outside heel hook": "heel hook",
-    "mata leao": "rear naked choke",
-    "hadaka jime": "rear naked choke",
-    "guillotine": "guillotine choke",
-    "chave de braco": "armbar",
-    "chave de calcanhar": "heel hook",
-    "triangulo": "triangle choke",
-}
-
-
-def _resolve_aliases(name: str) -> str:
-    """Resolve a name to its canonical form via alias map."""
-    return NAME_ALIASES.get(name, name)
 
 
 def _name_in_nodes(name: str, nodes: list[dict[str, Any]]) -> bool:
@@ -163,14 +143,6 @@ TYPE_DISPLAY: dict[str, str] = {
 
 # ── Helpers ──────────────────────────────────────────────────
 
-def _normalize_name(name: str) -> str:
-    """Normalize technique name for cross-referencing."""
-    n = name.lower().strip()
-    n = re.sub(r"[^a-z0-9 ]", "", n)
-    n = re.sub(r"\s+", " ", n)
-    return n
-
-
 def _slugify(name: str) -> str:
     return name.lower().strip().replace(" ", "-").replace("/", "-") \
         .replace("(", "").replace(")", "")
@@ -217,15 +189,7 @@ def build_effectiveness(adcc_df: pd.DataFrame) -> dict[str, dict[str, Any]]:
     subs = adcc_df.dropna(subset=["submission"]).copy()
 
     # Normalize submission names (merge heel hook variants + common aliases)
-    subs["sub_clean"] = subs["submission"].apply(_normalize_name)
-    subs["sub_clean"] = subs["sub_clean"].replace({
-        "inside heel hook": "heel hook",
-        "outside heel hook": "heel hook",
-        "rnc": "rear naked choke",
-        "d'arce choke": "darce choke",
-        "d'arce": "darce choke",
-        "kneebar": "kneebar",
-    })
+    subs["sub_clean"] = subs["submission"].apply(_normalize_adcc_sub)
 
     # Stage numeric depth
     stage_depth_map = {

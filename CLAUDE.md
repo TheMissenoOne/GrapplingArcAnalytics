@@ -57,6 +57,7 @@
 │   ├── adcc_elo_table.py            # [TODO] → app ELO benchmark
 │   └── benchmark_results.py         # [TODO] → user benchmark JSON
 ├── docs/                            # design docs, audit reports
+├── kanban/                          # agent task board + Obsidian vault: TODO/ DOING/ DONE/, lanes A–E for parallel agents (kanban/README.md)
 ├── notebooks/                       # Jupyter notebooks (exploratory)
 ├── tests/                           # pytest (pipelines, tech_library)
 └── .claude/skills/                  # agent skills
@@ -64,11 +65,12 @@
 
 ## Dataset Registry
 
-| key | Kaggle slug | rows | delimiter | columns |
+| key | source / slug | rows | delimiter | columns |
 |---|---|---|---|---|
 | grappling_techniques | liiucbs/grappling-techniques | 76 | `,` | Name, Position, Origin, Type, … |
 | adcc_historical | bjagrelli/adcc-historical-dataset | 1028 | `;` | match_id, year, winner_name, loser_name, win_type, stage, submission, weight_class, sex |
 | adcc_fighters | albucathecoder/adcc-fighter-stats | ~600 | `,` | fighter_name, wins, losses, titles, sub_ratio, win_ratio, debut_year, favorite_target |
+| bjjheroes | (scrape) bjjheroes.com | ~400 | N/A | fighter_name, nickname, belt, team, weight_class, achievements_raw |
 
 ## Data Flow
 
