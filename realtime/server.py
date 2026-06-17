@@ -2,14 +2,14 @@
 
 Run::
 
-    uv pip install inference            # heavy; kept out of the project lock
     # put ROBOFLOW_API_KEY in .env (gitignored)
     uv run --extra realtime uvicorn realtime.server:app --port 8000
 
-When ``ROBOFLOW_API_KEY`` is set, ``/classify`` uses the Roboflow detection model
-(``$BJJ_MODEL_ID``, default ``bjj3/1``). Without a key it falls back to the
-pose+sklearn backend. An optional Qdrant store is attached when reachable, enabling
-the similar-athlete prior blend; if it can't be built, priors degrade to own-history.
+When ``ROBOFLOW_API_KEY`` is set, ``/classify`` calls the Roboflow detection model
+(``$BJJ_MODEL_ID``, default ``bjj3/1``) over the hosted serverless HTTP API (no heavy
+SDK). Without a key it falls back to the pose+sklearn backend. An optional Qdrant store
+is attached when reachable, enabling the similar-athlete prior blend; if it can't be
+built, priors degrade to own-history.
 """
 
 from __future__ import annotations

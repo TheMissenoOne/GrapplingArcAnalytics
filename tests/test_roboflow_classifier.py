@@ -38,6 +38,30 @@ def test_variant_role_map() -> None:
     assert probs == {"mount": pytest.approx(1.0)}
 
 
+def test_http_predict_path(monkeypatch) -> None:
+    import requests
+
+    class _FakeResp:
+        def raise_for_status(self) -> None: ...
+
+        def json(self) -> dict:
+            return {"predictions": [{"class": "mount1", "confidence": 0.9}]}
+
+    captured: dict = {}
+
+    def _fake_post(url, **kwargs):  # type: ignore[no-untyped-def]
+        captured["url"] = url
+        captured["params"] = kwargs.get("params")
+        return _FakeResp()
+
+    monkeypatch.setattr(requests, "post", _fake_post)
+    clf = RoboflowClassifier("bjj3/1", api_key="k")
+    probs = clf.classify_frame_probs(np.zeros((8, 8, 3), dtype=np.uint8))
+    assert probs == {"mount_top": pytest.approx(1.0)}
+    assert captured["url"].endswith("/bjj3/1")
+    assert captured["params"]["api_key"] == "k"
+
+
 def test_extract_handles_dict_and_object_results() -> None:
     dict_resp = {"predictions": [{"class": "mount1", "confidence": 0.9}]}
     assert _extract(dict_resp) == [("mount1", 0.9)]
