@@ -15,17 +15,28 @@ created lazily on first use, so tests can inject fakes via :func:`create_app` an
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
-from fastapi import FastAPI, HTTPException, UploadFile
+from fastapi import FastAPI, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from cv.inference import ClassifierBundle, classify_pose_pair, load_classifier
+from analysis.athlete_graph import AthleteGraph, build_athlete_graph
+from analysis.priors import (
+    DEFAULT_ALPHA,
+    label_map_from_index,
+    next_move_prior,
+    rerank_classification,
+    suggest_next,
+)
+from cv.inference import ClassifierBundle, classify_pose_pair_probs, load_classifier
 from cv.segmenter import segment
 from cv.vocab_map import NodeRef, build_vocab_index, load_app_nodes, map_vicos_class
 from realtime.export import TimelineEvent, build_session_payload
+
+if TYPE_CHECKING:
+    from analysis.vector_store import AthleteVectorStore
 
 logger = logging.getLogger(__name__)
 
@@ -68,6 +79,7 @@ class ClassifyResponse(BaseModel):
     node_name: str | None
     node_type: str | None
     ok: bool
+    reranked: bool = False
 
 
 class NodeOption(BaseModel):
@@ -92,6 +104,19 @@ class ExportRequest(BaseModel):
     notes: str = ""
     timestamp: int | None = None
     outcome: str | None = None
+    # When set, the produced session is ingested into this athlete's graph (+ store).
+    athlete: str | None = None
+
+
+class PriorsRequest(BaseModel):
+    athlete: str
+    prev_label: str
+    k: int = Field(default=5, ge=1)
+
+
+class RankedItem(BaseModel):
+    label: str
+    score: float
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────--
@@ -143,6 +168,7 @@ def create_app(
     vocab_index: dict[str, NodeRef] | None = None,
     nodes: list[dict[str, Any]] | None = None,
     cors_origins: list[str] | None = None,
+    store: AthleteVectorStore | None = None,
 ) -> FastAPI:
     """Build the FastAPI app.
 
@@ -158,6 +184,9 @@ def create_app(
         Raw app nodes for the ``/nodes`` picker. Defaults to ``load_app_nodes()``.
     cors_origins : list[str] or None
         Allowed CORS origins. Defaults to ``["*"]`` (dev).
+    store : AthleteVectorStore or None
+        Optional Qdrant store for the similar-athlete prior blend. ``None`` ⇒ priors
+        use own-history only (graceful).
     """
     raw_nodes = nodes if nodes is not None else load_app_nodes()
     app = FastAPI(title="GrapplingArc Realtime CV", version="0.1.0")
@@ -169,10 +198,16 @@ def create_app(
     )
     app.state.estimator = estimator
     app.state.classifier = classifier
+    app.state.store = store
     app.state.node_options = _node_options(raw_nodes)
     app.state.vocab_index = (
         vocab_index if vocab_index is not None else build_vocab_index(raw_nodes)
     )
+    app.state.label_map = label_map_from_index(app.state.vocab_index)
+    app.state.node_types = {ref.name: ref.type for ref in app.state.vocab_index.values()}
+    # In-memory per-athlete state: accumulated sessions + the derived graph.
+    app.state.athlete_sessions = {}
+    app.state.athlete_graphs = {}
 
     def get_estimator() -> Any:
         if app.state.estimator is None:
@@ -209,8 +244,17 @@ def create_app(
         events = segment(frames, window=req.window, min_frames=req.min_frames)
         return SegmentResponse(events=[_event_to_out(e, app.state.vocab_index) for e in events])
 
+    def _graph_for(athlete: str) -> AthleteGraph:
+        graph = app.state.athlete_graphs.get(athlete)
+        return graph if graph is not None else AthleteGraph(athlete=athlete)
+
     @app.post("/classify", response_model=ClassifyResponse)
-    def classify(file: UploadFile) -> ClassifyResponse:
+    def classify(
+        file: UploadFile,
+        athlete: str | None = Form(None),
+        prev_label: str | None = Form(None),
+        alpha: float = Form(DEFAULT_ALPHA),
+    ) -> ClassifyResponse:
         # Sync route (reads the underlying file directly) so the endpoint needs no
         # async portal — TestClient's portal task-naming breaks once a sibling test
         # has applied nest_asyncio to the loop.
@@ -224,11 +268,41 @@ def create_app(
             raise HTTPException(status_code=422, detail="Fewer than two athletes detected")
 
         kp0, kp1 = pair
-        vicos_label, conf = classify_pose_pair(kp0, kp1, bundle)
+        probs = classify_pose_pair_probs(kp0, kp1, bundle)
+        vicos_label = max(probs, key=lambda k: probs[k])
         match = map_vicos_class(vicos_label, app.state.vocab_index)
+        raw_name = match.node_name if match.ok else match.position
+
+        # Prior-aware re-rank when an athlete context is supplied and known.
+        if athlete and prev_label and athlete in app.state.athlete_graphs:
+            top, score, _ = rerank_classification(
+                probs,
+                prev_label,
+                _graph_for(athlete),
+                app.state.vocab_index,
+                alpha=alpha,
+                store=app.state.store,
+                athlete=athlete,
+            )
+            if top:
+                if top != raw_name:
+                    logger.info(
+                        "prior flipped argmax: %s -> %s (athlete=%s, prev=%s)",
+                        raw_name, top, athlete, prev_label,
+                    )
+                return ClassifyResponse(
+                    vicos_class=vicos_label,
+                    confidence=score,
+                    role=match.role,
+                    node_name=top,
+                    node_type=app.state.node_types.get(top),
+                    ok=True,
+                    reranked=True,
+                )
+
         return ClassifyResponse(
             vicos_class=vicos_label,
-            confidence=conf,
+            confidence=probs[vicos_label],
             role=match.role,
             node_name=match.node_name,
             node_type=match.node_type,
@@ -243,7 +317,7 @@ def create_app(
             )
             for e in req.events
         ]
-        return build_session_payload(
+        payload = build_session_payload(
             events,
             you_role=req.you_role,
             difficulty=req.difficulty,
@@ -252,5 +326,39 @@ def create_app(
             timestamp=req.timestamp,
             outcome=req.outcome,
         )
+        # Close the loop: ingest the session into the athlete's graph (+ store).
+        if req.athlete:
+            sessions = app.state.athlete_sessions.setdefault(req.athlete, [])
+            sessions.append(payload)
+            graph = build_athlete_graph(req.athlete, sessions)
+            app.state.athlete_graphs[req.athlete] = graph
+            if app.state.store is not None:
+                app.state.store.upsert_athlete(graph)
+        return payload
+
+    @app.post("/priors", response_model=list[RankedItem])
+    def priors_route(req: PriorsRequest) -> list[RankedItem]:
+        prior = next_move_prior(
+            _graph_for(req.athlete),
+            req.prev_label,
+            store=app.state.store,
+            athlete=req.athlete,
+            k=req.k,
+            label_map=app.state.label_map,
+        )
+        ranked = sorted(prior.items(), key=lambda kv: kv[1], reverse=True)
+        return [RankedItem(label=label, score=score) for label, score in ranked]
+
+    @app.post("/suggest", response_model=list[RankedItem])
+    def suggest_route(req: PriorsRequest) -> list[RankedItem]:
+        ranked = suggest_next(
+            _graph_for(req.athlete),
+            req.prev_label,
+            k=req.k,
+            store=app.state.store,
+            athlete=req.athlete,
+            label_map=app.state.label_map,
+        )
+        return [RankedItem(label=label, score=score) for label, score in ranked]
 
     return app

@@ -149,6 +149,36 @@ def test_classify_422_when_one_pose(index: dict) -> None:
     assert r.status_code == 422
 
 
+def test_priors_and_suggest_after_export_ingest(index: dict) -> None:
+    client = TestClient(create_app(vocab_index=index, nodes=NODES))
+    # Ingest a session for an athlete who goes mount → (off-vocab) finish.
+    export_body = {
+        "events": [
+            {"label": "Montada", "type": "control", "role": "top"},
+            {"label": "Armlock", "type": "submission", "role": "top"},
+        ],
+        "athlete": "me",
+        "you_role": "top",
+    }
+    assert client.post("/export", json=export_body).status_code == 200
+
+    pr = client.post("/priors", json={"athlete": "me", "prev_label": "Montada"})
+    assert pr.status_code == 200
+    body = pr.json()
+    assert body and body[0]["label"] == "Armlock"
+
+    sg = client.post("/suggest", json={"athlete": "me", "prev_label": "Montada", "k": 3})
+    assert sg.status_code == 200
+    assert sg.json()[0]["label"] == "Armlock"
+
+
+def test_priors_unknown_athlete_empty(index: dict) -> None:
+    client = TestClient(create_app(vocab_index=index, nodes=NODES))
+    r = client.post("/priors", json={"athlete": "ghost", "prev_label": "Montada"})
+    assert r.status_code == 200
+    assert r.json() == []
+
+
 def test_classify_503_when_classifier_unavailable(index: dict, monkeypatch) -> None:
     def _boom(_model_type: str):
         raise FileNotFoundError("no meta")
