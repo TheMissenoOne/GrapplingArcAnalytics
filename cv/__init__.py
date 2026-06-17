@@ -13,6 +13,15 @@ from .pose_features import (
 )
 from .vicos_download import VicosSample, download_annotations, download_images, verify
 from .vicos_explore import explore_vicos, plot_class_distribution, plot_pose_skeleton
+from .vocab_map import (
+    VICOS_POSITION_ALIASES,
+    NodeRef,
+    VocabMatch,
+    build_vocab_index,
+    load_app_nodes,
+    map_all,
+    map_vicos_class,
+)
 
 __all__ = [
     "download_annotations",
@@ -36,4 +45,11 @@ __all__ = [
     "classify_frame",
     "ClassifierBundle",
     "PoseEstimator",
+    "load_app_nodes",
+    "build_vocab_index",
+    "map_vicos_class",
+    "map_all",
+    "VocabMatch",
+    "NodeRef",
+    "VICOS_POSITION_ALIASES",
 ]
