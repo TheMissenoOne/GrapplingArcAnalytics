@@ -59,6 +59,9 @@ cv = [
     "torchvision>=0.18",
     "ultralytics>=8.2",
     "onnxruntime>=1.18",
+    # NOTE: the Roboflow backend needs `inference` (heavy, opinionated pins). It is
+    # imported lazily in cv/roboflow_classifier.py and installed separately
+    # (`uv pip install inference`) so its deps don't constrain the project lock.
 ]
 realtime = [
     "fastapi>=0.115",

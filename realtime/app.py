@@ -37,6 +37,7 @@ from realtime.export import TimelineEvent, build_session_payload
 
 if TYPE_CHECKING:
     from analysis.vector_store import AthleteVectorStore
+    from cv.roboflow_classifier import RoboflowClassifier
 
 logger = logging.getLogger(__name__)
 
@@ -169,6 +170,7 @@ def create_app(
     nodes: list[dict[str, Any]] | None = None,
     cors_origins: list[str] | None = None,
     store: AthleteVectorStore | None = None,
+    roboflow: RoboflowClassifier | None = None,
 ) -> FastAPI:
     """Build the FastAPI app.
 
@@ -199,6 +201,7 @@ def create_app(
     app.state.estimator = estimator
     app.state.classifier = classifier
     app.state.store = store
+    app.state.roboflow = roboflow
     app.state.node_options = _node_options(raw_nodes)
     app.state.vocab_index = (
         vocab_index if vocab_index is not None else build_vocab_index(raw_nodes)
@@ -259,16 +262,23 @@ def create_app(
         # async portal — TestClient's portal task-naming breaks once a sibling test
         # has applied nest_asyncio to the loop.
         frame = _decode_image(file.file.read())
-        est = get_estimator()
-        bundle = get_classifier()
 
-        poses = est.estimate(frame)
-        pair = est.select_grappler_pair(poses)
-        if pair is None:
-            raise HTTPException(status_code=422, detail="Fewer than two athletes detected")
+        if app.state.roboflow is not None:
+            # Roboflow object-detection backend: frame → position classes directly.
+            probs = app.state.roboflow.classify_frame_probs(frame)
+            if not probs:
+                raise HTTPException(status_code=422, detail="No position detected")
+        else:
+            # Pose-estimation + sklearn fallback backend.
+            est = get_estimator()
+            bundle = get_classifier()
+            poses = est.estimate(frame)
+            pair = est.select_grappler_pair(poses)
+            if pair is None:
+                raise HTTPException(status_code=422, detail="Fewer than two athletes detected")
+            kp0, kp1 = pair
+            probs = classify_pose_pair_probs(kp0, kp1, bundle)
 
-        kp0, kp1 = pair
-        probs = classify_pose_pair_probs(kp0, kp1, bundle)
         vicos_label = max(probs, key=lambda k: probs[k])
         match = map_vicos_class(vicos_label, app.state.vocab_index)
         raw_name = match.node_name if match.ok else match.position

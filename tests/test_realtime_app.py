@@ -179,6 +179,28 @@ def test_priors_unknown_athlete_empty(index: dict) -> None:
     assert r.json() == []
 
 
+def test_classify_roboflow_backend(index: dict) -> None:
+    from cv.roboflow_classifier import RoboflowClassifier
+
+    rf = RoboflowClassifier("bjj3/1", predict_fn=lambda _f: [("mount1", 0.9), ("mount2", 0.8)])
+    client = TestClient(create_app(vocab_index=index, nodes=NODES, roboflow=rf))
+    r = client.post("/classify", files={"file": ("f.png", _png_bytes(), "image/png")})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["node_name"] == "Montada"  # mount → Montada
+    assert body["role"] == "top"  # top class won the argmax (0.9 > 0.8)
+    assert body["ok"] is True
+
+
+def test_classify_roboflow_422_when_empty(index: dict) -> None:
+    from cv.roboflow_classifier import RoboflowClassifier
+
+    rf = RoboflowClassifier("bjj3/1", predict_fn=lambda _f: [])
+    client = TestClient(create_app(vocab_index=index, nodes=NODES, roboflow=rf))
+    r = client.post("/classify", files={"file": ("f.png", _png_bytes(), "image/png")})
+    assert r.status_code == 422
+
+
 def test_classify_503_when_classifier_unavailable(index: dict, monkeypatch) -> None:
     def _boom(_model_type: str):
         raise FileNotFoundError("no meta")

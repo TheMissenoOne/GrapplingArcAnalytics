@@ -17,6 +17,8 @@ from .pose_features import (
     pair_to_features,
     single_pose_features,
 )
+from .roboflow_classifier import RoboflowClassifier
+from .roboflow_labels import roboflow_to_vicos
 from .segmenter import PositionEvent, segment, smooth_labels
 from .vicos_download import VicosSample, download_annotations, download_images, verify
 from .vicos_explore import explore_vicos, plot_class_distribution, plot_pose_skeleton
@@ -63,4 +65,6 @@ __all__ = [
     "segment",
     "smooth_labels",
     "PositionEvent",
+    "RoboflowClassifier",
+    "roboflow_to_vicos",
 ]
