@@ -1,7 +1,16 @@
 """Computer vision investigation — ViCoS dataset, pose features, baseline classifiers."""
 
-from .baseline_classifier import evaluate_baseline, train_baseline
-from .pose_features import build_feature_matrix, normalize_pose, pair_features, single_pose_features
+from .baseline_classifier import evaluate_baseline, train_baseline, write_classifier_meta
+from .inference import ClassifierBundle, classify_frame, classify_pose_pair, load_classifier
+from .pose_estimate import PoseEstimator
+from .pose_features import (
+    FEATURE_NAMES,
+    build_feature_matrix,
+    normalize_pose,
+    pair_features,
+    pair_to_features,
+    single_pose_features,
+)
 from .vicos_download import VicosSample, download_annotations, download_images, verify
 from .vicos_explore import explore_vicos, plot_class_distribution, plot_pose_skeleton
 
@@ -16,7 +25,15 @@ __all__ = [
     "normalize_pose",
     "single_pose_features",
     "pair_features",
+    "pair_to_features",
+    "FEATURE_NAMES",
     "build_feature_matrix",
     "train_baseline",
     "evaluate_baseline",
+    "write_classifier_meta",
+    "load_classifier",
+    "classify_pose_pair",
+    "classify_frame",
+    "ClassifierBundle",
+    "PoseEstimator",
 ]

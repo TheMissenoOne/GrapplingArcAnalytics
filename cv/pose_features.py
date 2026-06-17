@@ -27,6 +27,14 @@ L_HIP, R_HIP = 11, 12
 L_KNEE, R_KNEE = 13, 14
 L_ANKLE, R_ANKLE = 15, 16
 
+# Names of the 68-dim pair feature vector produced by ``pair_to_features``:
+# athlete-0 single features (28) + athlete-1 single features (28) + pairwise (12).
+FEATURE_NAMES: list[str] = (
+    [f"ath0_{i}" for i in range(28)]
+    + [f"ath1_{i}" for i in range(28)]
+    + [f"pair_{i}" for i in range(12)]
+)
+
 
 def _hip_midpoint(kp: np.ndarray) -> np.ndarray:
     """Compute hip midpoint from left/right hip keypoints."""
@@ -228,6 +236,34 @@ def pair_features(kp_a: np.ndarray, kp_b: np.ndarray) -> np.ndarray:
     return np.array(features, dtype=np.float64)
 
 
+def pair_to_features(kp0: np.ndarray, kp1: np.ndarray) -> np.ndarray:
+    """Assemble the full 68-dim feature vector for a pair of athletes.
+
+    Single source of truth shared by training (``build_feature_matrix``) and
+    runtime inference (``cv.inference``), so the served vector is byte-identical
+    to the trained one.
+
+    Note the deliberate asymmetry: single-pose features run on the **normalized**
+    pose (hip-centered, torso-scaled), while pairwise features run on the **raw**
+    pixel-space keypoints (they encode inter-athlete distances/ordering).
+
+    Parameters
+    ----------
+    kp0, kp1 : np.ndarray
+        ``(17, 3)`` COCO keypoint arrays ``[x, y, confidence]`` in pixel coords
+        for athlete 0 and athlete 1 respectively.
+
+    Returns
+    -------
+    np.ndarray
+        ``(68,)`` float64 vector: ``[ath0 (28), ath1 (28), pair (12)]``.
+    """
+    f0 = single_pose_features(normalize_pose(kp0))
+    f1 = single_pose_features(normalize_pose(kp1))
+    pf = pair_features(kp0, kp1)
+    return np.concatenate([f0, f1, pf])
+
+
 def build_feature_matrix(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray, list[str]]:
     """Build X, y, feature_names from ViCoS annotation DataFrame.
 
@@ -255,13 +291,7 @@ def build_feature_matrix(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray, list
 
     for img_id, athletes in groups.items():
         if 0 in athletes and 1 in athletes:
-            kp0 = normalize_pose(athletes[0])
-            kp1 = normalize_pose(athletes[1])
-            f0 = single_pose_features(kp0)
-            f1 = single_pose_features(kp1)
-            pf = pair_features(athletes[0], athletes[1])
-            combined = np.concatenate([f0, f1, pf])
-            x_list.append(combined)
+            x_list.append(pair_to_features(athletes[0], athletes[1]))
             y_list.append(labels.get(img_id, "unknown"))
 
     if not x_list:
@@ -271,9 +301,4 @@ def build_feature_matrix(df: pd.DataFrame) -> tuple[np.ndarray, np.ndarray, list
     X = np.stack(x_list)  # noqa: N806
     y = np.array(y_list)
 
-    f0_names = [f"ath0_{i}" for i in range(28)]
-    f1_names = [f"ath1_{i}" for i in range(28)]
-    pf_names = [f"pair_{i}" for i in range(12)]
-    feature_names = f0_names + f1_names + pf_names
-
-    return X, y, feature_names
+    return X, y, list(FEATURE_NAMES)

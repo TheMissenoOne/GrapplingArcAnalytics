@@ -6,6 +6,7 @@ Phase 2: ViTPose embeddings for 90%+ (future).
 
 from __future__ import annotations
 
+import json
 import logging
 from pathlib import Path
 from typing import Any, Literal
@@ -17,7 +18,55 @@ from sklearn.metrics import accuracy_score, confusion_matrix, f1_score
 from sklearn.model_selection import GroupKFold, StratifiedShuffleSplit
 from sklearn.preprocessing import LabelEncoder
 
+from .pose_features import FEATURE_NAMES
+
 logger = logging.getLogger(__name__)
+
+MODEL_DIR = Path(__file__).resolve().parent.parent / "data" / "processed"
+
+
+def _meta_path(model_type: str) -> Path:
+    """Sidecar metadata path for a given model artifact."""
+    return MODEL_DIR / f"position_clf_{model_type}.meta.json"
+
+
+def write_classifier_meta(
+    model_type: str,
+    classes: list[str],
+    feature_names: list[str] | None = None,
+) -> Path:
+    """Write the sidecar meta JSON that lets inference decode predictions.
+
+    The trained model is fit on ``LabelEncoder``-encoded integers, so
+    ``model.predict`` returns class indices. This sidecar persists the
+    index→label map (``classes``) plus the expected ``feature_names`` so
+    ``cv.inference`` can decode without re-deriving anything.
+
+    Parameters
+    ----------
+    model_type : str
+        ``"rf"`` or ``"xgb"`` — selects the artifact name.
+    classes : list[str]
+        Class labels in ``LabelEncoder`` order (alphabetical), i.e. ``classes[i]``
+        is the label for predicted index ``i``.
+    feature_names : list[str] or None
+        Defaults to :data:`cv.pose_features.FEATURE_NAMES`.
+
+    Returns
+    -------
+    Path
+        The written meta path.
+    """
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    path = _meta_path(model_type)
+    payload = {
+        "model_type": model_type,
+        "classes": list(classes),
+        "feature_names": list(feature_names if feature_names is not None else FEATURE_NAMES),
+    }
+    path.write_text(json.dumps(payload, indent=2))
+    logger.info("Classifier meta written to %s (%d classes)", path, len(classes))
+    return path
 
 
 def train_baseline(
@@ -87,13 +136,15 @@ def train_baseline(
         n_classes,
     )
 
-    model_dir = Path(__file__).resolve().parent.parent / "data" / "processed"
-    model_dir.mkdir(parents=True, exist_ok=True)
-    path = model_dir / f"position_clf_{model_type}.joblib"
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    path = MODEL_DIR / f"position_clf_{model_type}.joblib"
     from joblib import dump
 
     dump(model, path)
     logger.info("Model saved to %s", path)
+
+    # Persist the index→label map + feature names so inference can decode.
+    write_classifier_meta(model_type, le.classes_.tolist())
 
     metrics: dict[str, Any] = {
         "accuracy": round(float(acc), 4),
