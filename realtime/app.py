@@ -24,6 +24,7 @@ from pydantic import BaseModel, Field
 from cv.inference import ClassifierBundle, classify_pose_pair, load_classifier
 from cv.segmenter import segment
 from cv.vocab_map import NodeRef, build_vocab_index, load_app_nodes, map_vicos_class
+from realtime.export import TimelineEvent, build_session_payload
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,24 @@ class ClassifyResponse(BaseModel):
     node_name: str | None
     node_type: str | None
     ok: bool
+
+
+class ExportEventIn(BaseModel):
+    label: str
+    type: str
+    role: str = ""
+    successful: bool = True
+    setup: str | None = None
+
+
+class ExportRequest(BaseModel):
+    events: list[ExportEventIn]
+    you_role: str = "top"
+    difficulty: int = Field(default=3, ge=1, le=5)
+    intensity: int = Field(default=3, ge=1, le=5)
+    notes: str = ""
+    timestamp: int | None = None
+    outcome: str | None = None
 
 
 # ─── Helpers ──────────────────────────────────────────────────────────────--
@@ -174,6 +193,24 @@ def create_app(
             node_name=match.node_name,
             node_type=match.node_type,
             ok=match.ok,
+        )
+
+    @app.post("/export")
+    def export(req: ExportRequest) -> dict[str, Any]:
+        events = [
+            TimelineEvent(
+                label=e.label, type=e.type, role=e.role, successful=e.successful, setup=e.setup
+            )
+            for e in req.events
+        ]
+        return build_session_payload(
+            events,
+            you_role=req.you_role,
+            difficulty=req.difficulty,
+            intensity=req.intensity,
+            notes=req.notes,
+            timestamp=req.timestamp,
+            outcome=req.outcome,
         )
 
     return app
