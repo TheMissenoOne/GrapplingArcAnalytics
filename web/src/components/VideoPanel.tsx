@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Role, TimelineEvent } from "../types";
 import { classifyFrame } from "../api";
 import { captureVideoFrame } from "../lib/capture";
@@ -14,6 +14,13 @@ export function VideoPanel({ onAdd }: Props) {
   const [src, setSrc] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [last, setLast] = useState<string>("");
+
+  // Revoke the object URL when it's replaced or the panel unmounts, so loading
+  // multiple videos doesn't leak blobs.
+  useEffect(() => {
+    if (!src) return;
+    return () => URL.revokeObjectURL(src);
+  }, [src]);
 
   const loadFile = (file: File) => {
     setSrc(URL.createObjectURL(file));

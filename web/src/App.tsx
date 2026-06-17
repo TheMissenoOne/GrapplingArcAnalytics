@@ -36,7 +36,9 @@ export default function App() {
       a.href = url;
       a.download = "session.json";
       a.click();
-      URL.revokeObjectURL(url);
+      // Defer revoke: revoking synchronously after click can abort the download
+      // before the browser fetches the blob: URL (Firefox/Safari, intermittent Chrome).
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
     } catch (err) {
       setBanner(`Export failed: ${(err as Error).message}`);
     }

@@ -96,3 +96,7 @@ class TestStackVectors:
         g = _make_graph("a", {"mount": 1})
         stacked = stack_vectors([g], vocab=["mount"])
         assert stacked.shape == (1, 1)
+
+    def test_empty_graphs_keeps_2d_shape(self) -> None:
+        stacked = stack_vectors([], vocab=["mount", "guard", "back"])
+        assert stacked.shape == (0, 3)

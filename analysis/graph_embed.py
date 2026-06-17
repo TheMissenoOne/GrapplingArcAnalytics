@@ -72,6 +72,9 @@ def stack_vectors(graphs: list[AthleteGraph], vocab: list[str]) -> np.ndarray:
     Returns
     -------
     np.ndarray
-        Shape ``(len(graphs), len(vocab))``.
+        Shape ``(len(graphs), len(vocab))`` — including ``(0, len(vocab))`` for an
+        empty ``graphs`` list, so downstream 2-D consumers don't break on cold start.
     """
+    if not graphs:
+        return np.zeros((0, len(vocab)), dtype=np.float64)
     return np.array([graph_vector(g, vocab) for g in graphs], dtype=np.float64)
