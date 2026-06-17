@@ -22,8 +22,6 @@ from pipelines.registry import DATASETS
 
 logger = logging.getLogger(__name__)
 
-nest_asyncio.apply()
-
 USER_AGENT = "GrapplingArcAnalytics/1.0 (research; dev@grapplingarc.app)"
 CONCURRENCY = 4
 BATCH_DELAY = 1.0
@@ -59,6 +57,9 @@ class BJJHeroesPipeline(Pipeline):
             logger.info("%s: scraping BJJ Heroes…", self.spec.key)
             fighter_urls = self._fetch_fighter_urls()
 
+            # Applied lazily (not at import) so importing this module never patches the
+            # global event loop — that breaks Starlette TestClient in unrelated tests.
+            nest_asyncio.apply()
             pages = asyncio.run(self._fetch_pages(fighter_urls))
 
             rows = []
