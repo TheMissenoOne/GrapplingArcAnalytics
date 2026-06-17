@@ -33,6 +33,29 @@ ticket → worktree → analyze → implement → test → pr
 ## Quick Fix (1 file)
 No ticket. No worktree. No git ops. Edit, ruff check, pytest, done.
 
+## Plan Mode → Parallel Work Packet
+
+Every plan mode run MUST also emit a **parallel work packet** for a weaker opencode agent
+to run alongside the main task. Goal: offload self-contained chunks while you do the hard part.
+
+Rules:
+- **Non-overlapping.** Packet files ≠ files you edit on the main thread. No shared edits → no conflicts.
+- **Self-contained.** Pure functions, tests, fixtures, docs, data exploration — work needing no design judgment.
+- **Efficient prompt.** Weaker model: short, literal, no ambiguity. State exact file path, function signature,
+  input/output types, and the test command. No prose, no options. One task per packet item.
+- **Verifiable.** Each item ends in a check the agent runs itself: `uv run pytest tests/<x>.py`, `ruff check <f>`.
+
+Format (append to plan, one block per item):
+
+```
+### parallel: <slug>
+file: <path>
+do: <one-line imperative>
+sig: <function signature(s) + types>
+done when: <exact command that must pass>
+```
+
+
 ## Dataset Registry
 
 | key | slug | rows |

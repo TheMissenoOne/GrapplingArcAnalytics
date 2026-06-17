@@ -11,6 +11,7 @@ from .pose_features import (
     pair_to_features,
     single_pose_features,
 )
+from .segmenter import PositionEvent, segment, smooth_labels
 from .vicos_download import VicosSample, download_annotations, download_images, verify
 from .vicos_explore import explore_vicos, plot_class_distribution, plot_pose_skeleton
 from .vocab_map import (
@@ -52,4 +53,7 @@ __all__ = [
     "VocabMatch",
     "NodeRef",
     "VICOS_POSITION_ALIASES",
+    "segment",
+    "smooth_labels",
+    "PositionEvent",
 ]
