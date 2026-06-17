@@ -1,1 +1,0 @@
-{"root":["./src/App.tsx","./src/api.ts","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/components/LivePanel.tsx","./src/components/NodePicker.tsx","./src/components/ReviewTable.tsx","./src/components/VideoPanel.tsx","./src/lib/capture.ts","./src/lib/events.test.ts","./src/lib/events.ts"],"version":"5.9.3"}
