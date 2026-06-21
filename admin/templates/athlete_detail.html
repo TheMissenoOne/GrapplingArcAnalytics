@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}{{ athlete.name }} — Admin{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+  <h1 style="margin:0">{{ athlete.name }}</h1>
+  {% if athlete.is_published %}
+    <span class="badge badge-green">published</span>
+  {% else %}
+    <form method="post" action="/admin/athletes/{{ athlete.id }}/publish" style="display:inline">
+      <button type="submit" class="btn btn-success">Publish Graph</button>
+    </form>
+  {% endif %}
+  <a href="/admin/athletes" style="margin-left:auto;color:#777;font-size:0.9rem">← Athletes</a>
+</div>
+
+<div class="grid2" style="margin-bottom:24px">
+  <div class="card">
+    <h2>Details</h2>
+    <table>
+      <tr><th>Nickname</th><td>{{ athlete.nickname or '—' }}</td></tr>
+      <tr><th>Team</th><td>{{ athlete.team or '—' }}</td></tr>
+      <tr><th>Weight Class</th><td>{{ athlete.weight_class or '—' }}</td></tr>
+      <tr><th>Belt</th><td>{{ athlete.belt or '—' }}</td></tr>
+      <tr><th>ELO</th><td>{{ "%.0f"|format(athlete.elo) }}</td></tr>
+      <tr><th>Source</th><td>{{ athlete.source }}</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>Graph Summary</h2>
+    {% if graph %}
+      <p>Nodes: <strong>{{ graph.nodes|length }}</strong> &nbsp; Edges: <strong>{{ graph.edges|length }}</strong></p>
+      <h2 style="margin-top:16px">Top Nodes</h2>
+      <table>
+        <tr><th>Label</th><th>Type</th><th>Usage</th></tr>
+        {% for n in graph.nodes|sort(attribute='data.usageCount', reverse=True) %}
+          {% if loop.index <= 8 %}
+          <tr>
+            <td>{{ n.label }}</td>
+            <td><span class="badge badge-gray">{{ n.data.type or '—' }}</span></td>
+            <td>{{ n.data.usageCount or 0 }}</td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+      </table>
+    {% else %}
+      <p style="color:#555">No graph yet — register matches to build one.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <h2>Register Match</h2>
+  <form method="post" action="/admin/athletes/{{ athlete.id }}/matches">
+    <div class="grid2">
+      <div>
+        <label>Opponent</label>
+        <input name="opponent_name" placeholder="B.J. Penn">
+      </div>
+      <div>
+        <label>Event</label>
+        <input name="event" placeholder="ADCC 2024">
+      </div>
+      <div>
+        <label>Year</label>
+        <input name="year" type="number" placeholder="2024">
+      </div>
+      <div>
+        <label>Weight Class</label>
+        <input name="weight_class" placeholder="-99kg">
+      </div>
+      <div>
+        <label>Win Type</label>
+        <select name="win_type">
+          <option value="SUBMISSION">SUBMISSION</option>
+          <option value="DECISION">DECISION</option>
+          <option value="POINTS">POINTS</option>
+          <option value="DQ">DQ</option>
+        </select>
+      </div>
+      <div>
+        <label>Stage</label>
+        <select name="stage">
+          <option value="R1">R1</option>
+          <option value="R2">R2</option>
+          <option value="8F">8F</option>
+          <option value="4F">4F</option>
+          <option value="SF">SF</option>
+          <option value="3RD">3RD</option>
+          <option value="F">F</option>
+          <option value="SPF">SPF</option>
+        </select>
+      </div>
+      <div>
+        <label>Submission</label>
+        <input name="submission" placeholder="Rear Naked Choke" list="node-list">
+        <datalist id="node-list">
+          {% for n in node_options %}
+          <option value="{{ n.name }}">
+          {% endfor %}
+        </datalist>
+      </div>
+      <div>
+        <label>Result</label>
+        <select name="won">
+          <option value="true">Win</option>
+          <option value="false">Loss</option>
+        </select>
+      </div>
+    </div>
+    <label>Sequence (JSON array of {label, type, actor})</label>
+    <textarea name="sequence_json" rows="4" placeholder='[{"label":"Back Take","type":"position","actor":"you"},{"label":"Rear Naked Choke","type":"submission","actor":"you"}]'></textarea>
+    <button type="submit" class="btn btn-primary">Save Match</button>
+  </form>
+</div>
+
+<h2>Match History ({{ matches|length }})</h2>
+<table>
+  <thead>
+    <tr><th>Year</th><th>Event</th><th>Opponent</th><th>Win Type</th><th>Stage</th><th>Submission</th><th>Result</th></tr>
+  </thead>
+  <tbody>
+    {% for m in matches|sort(attribute='year', reverse=True) %}
+    <tr>
+      <td>{{ m.year or '—' }}</td>
+      <td>{{ m.event or '—' }}</td>
+      <td>{{ m.opponent_name or '—' }}</td>
+      <td>{{ m.win_type or '—' }}</td>
+      <td>{{ m.stage or '—' }}</td>
+      <td>{{ m.submission or '—' }}</td>
+      <td>{% if m.won %}<span class="badge badge-green">W</span>{% else %}<span class="badge badge-gray">L</span>{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7" style="color:#555;text-align:center;padding:20px">No matches</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

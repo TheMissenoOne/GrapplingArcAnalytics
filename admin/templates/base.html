@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}GrapplingArc Admin{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e0e0e0; }
+    nav { background: #1a1a2e; padding: 12px 24px; display: flex; gap: 20px; align-items: center; border-bottom: 1px solid #333; }
+    nav a { color: #7c9ef5; text-decoration: none; font-weight: 500; }
+    nav a:hover { color: #fff; }
+    nav .brand { font-weight: 700; color: #fff; font-size: 1.1rem; margin-right: auto; }
+    main { max-width: 1100px; margin: 32px auto; padding: 0 24px; }
+    h1 { font-size: 1.6rem; margin-bottom: 20px; color: #fff; }
+    h2 { font-size: 1.2rem; margin: 24px 0 12px; color: #ccc; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 8px 12px; text-align: left; border-bottom: 1px solid #2a2a2a; }
+    th { background: #1a1a2e; color: #aaa; font-size: 0.85rem; text-transform: uppercase; }
+    tr:hover td { background: #1a1a1a; }
+    .btn { display: inline-block; padding: 7px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; text-decoration: none; }
+    .btn-primary { background: #4c72d5; color: #fff; }
+    .btn-success { background: #2e7d32; color: #fff; }
+    .btn-danger { background: #c62828; color: #fff; }
+    .btn:hover { opacity: 0.85; }
+    form input, form select, form textarea { width: 100%; padding: 8px 10px; border: 1px solid #333; border-radius: 5px; background: #1a1a1a; color: #e0e0e0; font-size: 0.95rem; margin-bottom: 12px; }
+    form label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 4px; }
+    .card { background: #141414; border: 1px solid #222; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.78rem; }
+    .badge-green { background: #1b5e20; color: #81c784; }
+    .badge-gray { background: #2a2a2a; color: #888; }
+    .error { color: #ef5350; margin-bottom: 12px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  </style>
+</head>
+<body>
+  <nav>
+    <span class="brand">GrapplingArc Admin</span>
+    <a href="/admin/athletes">Athletes</a>
+    <a href="/admin/analytics">Analytics</a>
+    <a href="/admin/logout">Logout</a>
+  </nav>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>
