@@ -257,6 +257,8 @@ def _recompute_athlete_elo(athlete_id: str, session: Any) -> None:
         return
     rows = [
         {
+            "match_id": m.id,
+            "year": m.year or 0,
             "winner": "athlete" if m.won else "opponent",
             "loser": "opponent" if m.won else "athlete",
             "win_type": m.win_type or "POINTS",
