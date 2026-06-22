@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Login</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e0e0e0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .box { background: #141414; border: 1px solid #222; border-radius: 10px; padding: 40px; width: 320px; }
+    h1 { font-size: 1.3rem; margin-bottom: 24px; color: #fff; text-align: center; }
+    label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 4px; }
+    input { width: 100%; padding: 9px 12px; border: 1px solid #333; border-radius: 5px; background: #1a1a1a; color: #e0e0e0; font-size: 0.95rem; margin-bottom: 16px; }
+    button { width: 100%; padding: 10px; background: #4c72d5; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    button:hover { background: #3a5bc7; }
+    .error { color: #ef5350; margin-bottom: 12px; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>GrapplingArc Admin</h1>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+    <form method="post" action="/admin/login">
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" autofocus required>
+      <button type="submit">Sign in</button>
+    </form>
+  </div>
+</body>
+</html>

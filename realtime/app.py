@@ -443,6 +443,18 @@ def create_app(
             app.state.athlete_graphs[req.athlete] = graph
             if app.state.store is not None:
                 app.state.store.upsert_athlete(graph)
+            # Optional: persist to Postgres when DATABASE_URL is configured.
+            import os
+            if os.getenv("DATABASE_URL") and hasattr(app.state, "_athlete_ids"):
+                athlete_id = app.state._athlete_ids.get(req.athlete)
+                if athlete_id:
+                    try:
+                        from db.base import db_session
+                        from db.repository import upsert_graph_from_athlete_graph
+                        with db_session() as db:
+                            upsert_graph_from_athlete_graph(graph, athlete_id, db)
+                    except Exception as _exc:
+                        logger.warning("DB persist failed: %s", _exc)
         return payload
 
     @app.post("/priors", response_model=list[RankedItem])

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Analytics — Admin{% endblock %}
+{% block content %}
+<h1>Analytics</h1>
+
+<div class="card">
+  <h2>Node Type Distribution ({{ total_nodes }} total nodes)</h2>
+  {% if type_counts %}
+  <table>
+    <thead><tr><th>Type</th><th>Count</th><th>Share</th></tr></thead>
+    <tbody>
+      {% set sorted = type_counts.items()|sort(attribute='1', reverse=True) %}
+      {% for t, c in sorted %}
+      <tr>
+        <td><span class="badge badge-gray">{{ t }}</span></td>
+        <td>{{ c }}</td>
+        <td>
+          {% if total_nodes > 0 %}
+          <div style="background:#4c72d5;height:8px;border-radius:4px;width:{{ (c / total_nodes * 300)|int }}px;display:inline-block"></div>
+          {{ "%.1f"|format(c / total_nodes * 100) }}%
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p style="color:#555">No data yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
