@@ -13,6 +13,7 @@ dependencies = [
     "pandas>=2.2",
     "numpy>=2.0",
     "pyarrow>=17",
+    "networkx>=3.3",
 
     # Kaggle integration
     "kagglehub[pandas-datasets]>=1.0",
