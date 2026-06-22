@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
+from analysis.names import _normalize_name
 from grapplemap.parser import JOINTS, GMapGraph, GMapPosition
 
 # ─── skeleton connectivity (joint index pairs to draw lines between) ─────────
@@ -111,12 +112,8 @@ def render_position_icon(pos: GMapPosition, size: int = 128) -> Image.Image:
 
 
 def _safe_filename(name: str) -> str:
-    """Convert position name to safe filename (mirrors normalizeLabel)."""
-    import re
-    n = name.lower().strip()
-    n = re.sub(r"[^a-z0-9 ]", "", n)
-    n = re.sub(r"\s+", "_", n.strip())
-    return n
+    """Convert position name to safe filename — _normalize_name + underscores."""
+    return _normalize_name(name).replace(" ", "_")
 
 
 def export_all_icons(
