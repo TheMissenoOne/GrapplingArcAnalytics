@@ -31,7 +31,18 @@
     .badge-gray { background: #2a2a2a; color: #888; }
     .error { color: #ef5350; margin-bottom: 12px; }
     .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* Phone-friendly live logging: single column + big tap targets under 640px. */
+    @media (max-width: 640px) {
+      main { margin: 16px auto; padding: 0 12px; }
+      nav { padding: 10px 14px; gap: 14px; flex-wrap: wrap; }
+      .grid2 { grid-template-columns: 1fr; }
+      form input, form select, form textarea { padding: 12px; font-size: 1rem; min-height: 44px; }
+      .btn { padding: 12px 18px; font-size: 1rem; min-height: 44px; }
+      table { display: block; overflow-x: auto; }
+    }
   </style>
+  <link rel="stylesheet" href="/admin/static/admin.css">
 </head>
 <body>
   <nav>

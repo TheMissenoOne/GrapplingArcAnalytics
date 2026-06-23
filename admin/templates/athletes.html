@@ -1,7 +1,12 @@
 {% extends "base.html" %}
 {% block title %}Athletes — Admin{% endblock %}
 {% block content %}
-<h1>Athletes</h1>
+<div style="display:flex;align-items:center;gap:16px">
+  <h1 style="margin:0">Athletes</h1>
+  <form method="post" action="/admin/athletes/seed" style="margin-left:auto">
+    <button type="submit" class="btn btn-primary">Seed from leaderboard</button>
+  </form>
+</div>
 
 <div class="card">
   <h2>Add Athlete</h2>
@@ -35,7 +40,7 @@
 <table>
   <thead>
     <tr>
-      <th>Name</th><th>Team</th><th>Belt</th><th>ELO</th><th>Published</th><th></th>
+      <th>Name</th><th>Team</th><th>Belt</th><th>Graph ELO</th><th>Rank ELO</th><th>Published</th><th></th>
     </tr>
   </thead>
   <tbody>
@@ -45,11 +50,12 @@
       <td>{{ a.team or '—' }}</td>
       <td>{{ a.belt or '—' }}</td>
       <td>{{ "%.0f"|format(a.elo) }}</td>
+      <td>{% if a.rank_elo is not none %}{{ "%.0f"|format(a.rank_elo) }}{% else %}—{% endif %}</td>
       <td>{% if a.is_published %}<span class="badge badge-green">live</span>{% else %}<span class="badge badge-gray">draft</span>{% endif %}</td>
       <td><a href="/admin/athletes/{{ a.id }}" class="btn btn-primary" style="font-size:0.8rem;padding:4px 10px">View</a></td>
     </tr>
     {% else %}
-    <tr><td colspan="6" style="color:#555;text-align:center;padding:24px">No athletes yet</td></tr>
+    <tr><td colspan="7" style="color:#555;text-align:center;padding:24px">No athletes yet</td></tr>
     {% endfor %}
   </tbody>
 </table>

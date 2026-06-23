@@ -21,7 +21,8 @@
       <tr><th>Team</th><td>{{ athlete.team or '—' }}</td></tr>
       <tr><th>Weight Class</th><td>{{ athlete.weight_class or '—' }}</td></tr>
       <tr><th>Belt</th><td>{{ athlete.belt or '—' }}</td></tr>
-      <tr><th>ELO</th><td>{{ "%.0f"|format(athlete.elo) }}</td></tr>
+      <tr><th>Graph ELO</th><td>{{ "%.0f"|format(athlete.elo) }}</td></tr>
+      <tr><th>Rank ELO</th><td>{% if athlete.rank_elo is not none %}{{ "%.0f"|format(athlete.rank_elo) }}{% else %}—{% endif %}</td></tr>
       <tr><th>Source</th><td>{{ athlete.source }}</td></tr>
     </table>
   </div>
@@ -49,12 +50,41 @@
 </div>
 
 <div class="card">
+  <h2>ELO Convergence</h2>
+  {% set gap = (athlete.rank_elo - athlete.elo) if athlete.rank_elo is not none else none %}
+  <div class="converge">
+    <div class="stat"><span class="label">Graph ELO</span><span class="value">{{ "%.0f"|format(athlete.elo) }}</span></div>
+    <div class="stat"><span class="label">Rank ELO (target)</span><span class="value">{% if athlete.rank_elo is not none %}{{ "%.0f"|format(athlete.rank_elo) }}{% else %}—{% endif %}</span></div>
+    {% if gap is not none %}
+    <div class="stat"><span class="label">Gap</span><span class="value gap {{ 'pos' if gap >= 0 else 'neg' }}">{{ "%+.0f"|format(gap) }}</span></div>
+    {% endif %}
+    <svg class="spark" id="converge-spark" width="320" height="60"
+         data-series="{{ graph_elo_series|tojson }}"
+         {% if athlete.rank_elo is not none %}data-target="{{ athlete.rank_elo }}"{% endif %}></svg>
+  </div>
+  <p style="color:#666;font-size:0.85rem;margin-top:8px">Graph ELO climbs from the belt floor toward the rank target as matches are registered.</p>
+</div>
+
+<div class="card">
   <h2>Register Match</h2>
-  <form method="post" action="/admin/athletes/{{ athlete.id }}/matches">
+  <form method="post" action="/admin/athletes/{{ athlete.id }}/matches" id="match-form">
     <div class="grid2">
       <div>
-        <label>Opponent</label>
+        <label>Opponent (ranked)</label>
+        <select name="opponent_athlete_id" id="opponent-select">
+          <option value="">— manual / unranked —</option>
+          {% for o in opponent_options %}
+          <option value="{{ o.id }}" data-name="{{ o.name }}">{{ o.name }} ({{ "%.0f"|format(o.rank_elo) }})</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Opponent (manual)</label>
         <input name="opponent_name" placeholder="B.J. Penn">
+      </div>
+      <div>
+        <label>Opponent ELO (manual)</label>
+        <input name="opponent_elo" type="number" placeholder="1100">
       </div>
       <div>
         <label>Event</label>
@@ -107,11 +137,28 @@
         </select>
       </div>
     </div>
-    <label>Sequence (JSON array of {label, type, actor})</label>
-    <textarea name="sequence_json" rows="4" placeholder='[{"label":"Back Take","type":"position","actor":"you"},{"label":"Rear Naked Choke","type":"submission","actor":"you"}]'></textarea>
+    <label>Live Match — tap to build the sequence</label>
+    <div class="actor-toggle" role="group" aria-label="Who scored">
+      <button type="button" id="actor-you" class="active-you">You</button>
+      <button type="button" id="actor-opp">Opponent</button>
+    </div>
+    <div class="chip-grid" id="chip-grid">
+      {% for n in node_options %}
+      <button type="button" class="chip" data-label="{{ n.name }}" data-type="{{ n.type }}">{{ n.name }}</button>
+      {% endfor %}
+    </div>
+    <div class="pill-list" id="pill-list" aria-live="polite"></div>
+
+    <details class="advanced">
+      <summary>Advanced: edit raw JSON</summary>
+      <textarea name="sequence_json" id="sequence-json" rows="4" placeholder='[{"label":"Back Take","type":"position","actor":"you"},{"label":"Rear Naked Choke","type":"submission","actor":"you"}]'>[]</textarea>
+    </details>
+
     <button type="submit" class="btn btn-primary">Save Match</button>
   </form>
 </div>
+
+<script src="/admin/static/livematch.js"></script>
 
 <h2>Match History ({{ matches|length }})</h2>
 <table>

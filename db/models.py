@@ -63,7 +63,8 @@ class Athlete(Base):
     weight_class: Mapped[str | None] = mapped_column(String(40))
     belt: Mapped[str | None] = mapped_column(String(40))
     source: Mapped[str] = mapped_column(String(20), default="manual")
-    elo: Mapped[float] = mapped_column(Float, default=1000.0)
+    elo: Mapped[float] = mapped_column(Float, default=1000.0)  # grown graph ELO
+    rank_elo: Mapped[float | None] = mapped_column(Float)  # ADCC leaderboard target
     archetype_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("archetypes.id"))
     is_published: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -71,7 +72,11 @@ class Athlete(Base):
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
-    matches: Mapped[list[AthleteMatch]] = relationship("AthleteMatch", back_populates="athlete")
+    matches: Mapped[list[AthleteMatch]] = relationship(
+        "AthleteMatch",
+        back_populates="athlete",
+        foreign_keys="AthleteMatch.athlete_id",
+    )
 
 
 class Graph(Base):
@@ -141,6 +146,11 @@ class AthleteMatch(Base):
         UUID(as_uuid=False), ForeignKey("athletes.id"), nullable=False
     )
     opponent_name: Mapped[str | None] = mapped_column(Text)
+    opponent_athlete_id: Mapped[str | None] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("athletes.id")
+    )
+    opponent_elo: Mapped[float | None] = mapped_column(Float)
+    graph_elo_after: Mapped[float | None] = mapped_column(Float)
     event: Mapped[str | None] = mapped_column(Text)
     year: Mapped[int | None] = mapped_column(Integer)
     weight_class: Mapped[str | None] = mapped_column(String(40))
@@ -152,7 +162,9 @@ class AthleteMatch(Base):
     created_by: Mapped[str | None] = mapped_column(UUID(as_uuid=False))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    athlete: Mapped[Athlete] = relationship("Athlete", back_populates="matches")
+    athlete: Mapped[Athlete] = relationship(
+        "Athlete", back_populates="matches", foreign_keys=[athlete_id]
+    )
 
 
 class BundleImport(Base):

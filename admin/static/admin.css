@@ -1,0 +1,50 @@
+/* Admin extras: convergence panel + live-match builder.
+   Base layout/theme lives inline in templates/base.html; this file adds the
+   impersonation-flow widgets and is loaded after it. */
+
+/* ── Convergence panel ─────────────────────────────────────────────── */
+.converge {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.converge .stat { display: flex; flex-direction: column; }
+.converge .stat .label { font-size: 0.75rem; color: #888; text-transform: uppercase; }
+.converge .stat .value { font-size: 1.5rem; font-weight: 700; color: #fff; }
+.converge .gap.pos { color: #81c784; }
+.converge .gap.neg { color: #ef5350; }
+.spark { background: #0d0d0d; border: 1px solid #222; border-radius: 6px; }
+
+/* ── Live-match builder ────────────────────────────────────────────── */
+.actor-toggle { display: inline-flex; border: 1px solid #333; border-radius: 6px; overflow: hidden; }
+.actor-toggle button {
+  background: #1a1a1a; color: #aaa; border: none; padding: 10px 18px;
+  cursor: pointer; min-height: 44px; font-size: 0.95rem;
+}
+.actor-toggle button.active-you { background: #2e7d32; color: #fff; }
+.actor-toggle button.active-opp { background: #c62828; color: #fff; }
+
+.chip-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px; margin: 12px 0;
+}
+.chip {
+  background: #1a1a2e; color: #cdd; border: 1px solid #333; border-radius: 8px;
+  padding: 12px 10px; cursor: pointer; font-size: 0.9rem; text-align: center;
+  min-height: 44px;
+}
+.chip:hover { background: #24243e; }
+
+.pill-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; padding: 6px 0; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #24243e; border: 1px solid #3a3a5a; border-radius: 999px;
+  padding: 6px 12px; font-size: 0.85rem;
+}
+.pill.you { border-color: #2e7d32; }
+.pill.opp { border-color: #c62828; }
+.pill .x { cursor: pointer; color: #999; font-weight: 700; }
+.pill .x:hover { color: #fff; }
+
+details.advanced summary { cursor: pointer; color: #888; margin: 12px 0; }

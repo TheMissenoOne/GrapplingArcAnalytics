@@ -145,16 +145,18 @@ def upsert_graph_from_athlete_graph(
     athlete_graph: Any, athlete_id: str, session: Session
 ) -> str:
     """Persist an AthleteGraph (from analysis/athlete_graph.py) into the DB."""
+    user_elo = getattr(athlete_graph, "user_elo", None)
     stmt = (
         pg_insert(Graph)
         .values(
             owner_kind="athlete",
             owner_id=athlete_id,
+            user_elo=user_elo,
             synced_at=datetime.now(UTC),
         )
         .on_conflict_do_update(
             index_elements=["owner_kind", "owner_id"],
-            set_={"synced_at": datetime.now(UTC)},
+            set_={"user_elo": user_elo, "synced_at": datetime.now(UTC)},
         )
         .returning(Graph.id)
     )
@@ -169,17 +171,24 @@ def upsert_graph_from_athlete_graph(
                 label=node.label,
                 type="technique",
                 node_type=node.type,
+                computed_elo=node.computed_elo,
                 usage_count=node.count,
             )
             .on_conflict_do_update(
                 index_elements=["graph_id", "node_key"],
-                set_={"label": node.label, "usage_count": node.count},
+                set_={
+                    "label": node.label,
+                    "computed_elo": node.computed_elo,
+                    "usage_count": node.count,
+                },
             )
         )
         session.execute(node_stmt)
 
     for (src, tgt), edge in athlete_graph.edges.items():
         edge_key = f"{src}→{tgt}"
+        # Prefer the grown edge ELO; fall back to the raw count for count-only callers.
+        edge_elo = edge.elo if edge.elo is not None else float(edge.count)
         edge_stmt = (
             pg_insert(GraphEdge)
             .values(
@@ -187,11 +196,11 @@ def upsert_graph_from_athlete_graph(
                 edge_key=edge_key,
                 source_key=src,
                 target_key=tgt,
-                elo=float(edge.count),
+                elo=edge_elo,
             )
             .on_conflict_do_update(
                 index_elements=["graph_id", "edge_key"],
-                set_={"elo": float(edge.count)},
+                set_={"elo": edge_elo},
             )
         )
         session.execute(edge_stmt)
@@ -212,10 +221,14 @@ def register_match(
     sequence: list[dict[str, Any]],
     created_by: str | None,
     session: Session,
+    opponent_athlete_id: str | None = None,
+    opponent_elo: float | None = None,
 ) -> str:
     match = AthleteMatch(
         athlete_id=athlete_id,
         opponent_name=opponent_name,
+        opponent_athlete_id=opponent_athlete_id,
+        opponent_elo=opponent_elo,
         event=event,
         year=year,
         weight_class=weight_class,
@@ -296,3 +309,56 @@ def publish_athlete(athlete_id: str, session: Session) -> None:
     athlete = session.get(Athlete, athlete_id)
     if athlete:
         athlete.is_published = True
+
+
+def _load_leaderboard() -> list[dict[str, Any]]:
+    """Load the ADCC ELO leaderboard, regenerating the JSON if it's missing."""
+    import json
+
+    from pipelines.etl import PROCESSED_DIR
+
+    path = PROCESSED_DIR / "adcc_elo_table.json"
+    if not path.exists():
+        from export.adcc_elo_table import export_adcc_elo_table
+
+        export_adcc_elo_table()
+    with open(path) as f:
+        data: list[dict[str, Any]] = json.load(f)
+    return data
+
+
+def rank_elo_for_athlete(name: str) -> float | None:
+    """Look up an athlete's ADCC rank ELO by normalized name, or None."""
+    target = _normalize_name(name)
+    for rec in _load_leaderboard():
+        if _normalize_name(str(rec.get("fighter", ""))) == target:
+            return float(rec["elo"])
+    return None
+
+
+def seed_athletes_from_leaderboard(session: Session) -> int:
+    """Create Athlete rows from the leaderboard with ``rank_elo`` set.
+
+    Skips fighters whose (normalized) name already exists. Returns count created.
+    """
+    existing = {
+        _normalize_name(a.name)
+        for a in session.execute(select(Athlete)).scalars()
+    }
+    created = 0
+    for rec in _load_leaderboard():
+        name = str(rec.get("fighter", "")).strip()
+        if not name or _normalize_name(name) in existing:
+            continue
+        session.add(
+            Athlete(
+                name=name,
+                belt="black",
+                weight_class=str(rec.get("weight_class") or "") or None,
+                source="leaderboard",
+                rank_elo=float(rec["elo"]),
+            )
+        )
+        existing.add(_normalize_name(name))
+        created += 1
+    return created

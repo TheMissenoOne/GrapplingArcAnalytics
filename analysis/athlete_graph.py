@@ -16,6 +16,7 @@ class AthleteNode:
     label: str
     type: str
     count: int
+    computed_elo: float | None = None
 
 
 @dataclass
@@ -23,6 +24,7 @@ class AthleteEdge:
     source: str
     target: str
     count: int
+    elo: float | None = None
 
 
 @dataclass
@@ -30,6 +32,7 @@ class AthleteGraph:
     athlete: str
     nodes: dict[str, AthleteNode] = field(default_factory=dict)
     edges: dict[tuple[str, str], AthleteEdge] = field(default_factory=dict)
+    user_elo: float | None = None
 
 
 def build_athlete_graph(athlete: str, sessions: list[dict[str, Any]]) -> AthleteGraph:
