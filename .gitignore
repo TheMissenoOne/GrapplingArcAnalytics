@@ -51,3 +51,6 @@ kanban/.obsidian/*
 !kanban/.obsidian/community-plugins.json
 !kanban/.obsidian/types.json
 !kanban/.obsidian/templates.json
+
+# GrappleMap full icon render (CV-derived bulk; regenerate via export/grapplemap_icons_export.py)
+data/grapplemap_icons/

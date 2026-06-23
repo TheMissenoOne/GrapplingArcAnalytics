@@ -180,3 +180,45 @@ def test_render_position_icon(gmap):
     # Should contain non-background pixels (the stick figures)
     pixels = np.array(img)
     assert pixels.std() > 0
+
+
+# ─── exporter: app vocab subset + require-index code-gen ─────────────────────
+
+def test_export_icons_writes_subset_and_index(gmap, tmp_path):
+    from export.grapplemap_icons_export import export_icons
+
+    full_dir   = tmp_path / "full"
+    app_assets = tmp_path / "app" / "grapplemap_icons"
+    index_ts   = tmp_path / "app" / "grapplemapIconIndex.ts"
+
+    matched = export_icons(
+        full_icons_dir=full_dir,
+        app_assets_dir=app_assets,
+        app_index_ts=index_ts,
+        size=64,
+        verbose=False,
+    )
+
+    # Full CV set rendered for every position.
+    full_pngs = list(full_dir.glob("*.png"))
+    assert len(full_pngs) == len(gmap.positions)
+
+    # Tag + exact matching covers a solid chunk of the app position vocab.
+    assert len(matched) >= 15
+    subset_pngs = list(app_assets.glob("*.png"))
+    assert len(subset_pngs) == len(matched)
+    assert len(matched) <= len(gmap.positions)
+
+    # Common positions resolve to the app's canonical (Portuguese) node keys.
+    assert "guarda_fechada" in matched   # Closed Guard
+    assert "montada" in matched          # Mount
+    assert (app_assets / "guarda_fechada.png").exists()
+
+    # Index TS is valid: every matched file has a static require, and node aliases
+    # (e.g. English "closed guard") resolve to the same canonical icon.
+    text = index_ts.read_text()
+    assert "GRAPPLEMAP_ICONS" in text
+    for key in matched:
+        assert f'"{key}": require("./grapplemap_icons/{key}.png")' in text
+    # English alias maps onto the canonical Portuguese icon.
+    assert '"closed_guard": require("./grapplemap_icons/guarda_fechada.png")' in text
