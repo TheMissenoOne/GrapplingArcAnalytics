@@ -133,3 +133,10 @@ drop trigger if exists on_auth_user_deleted on auth.users;
 create trigger on_auth_user_deleted
   before delete on auth.users
   for each row execute function public.handle_user_delete();
+
+-- ── 7. Lock SECURITY DEFINER trigger fns off the REST RPC surface ───────────
+-- Postgres grants EXECUTE to PUBLIC by default, so anon/authenticated could call
+-- these as /rest/v1/rpc/<fn> (Supabase lint 0028/0029). They only ever run as
+-- triggers (owner privileges), so revoke the public grant. Triggers still fire.
+revoke execute on function public.handle_new_user()    from public;
+revoke execute on function public.handle_user_delete() from public;
