@@ -88,15 +88,15 @@ def test_upsert_graph_from_bundle_creates_rows(session):
     graph_id = upsert_graph_from_bundle(bundle, session)
     session.commit()
 
-    from db.models import Graph, GraphEdge, GraphNode
+    from db.models import Graph, GraphEdge, TechniqueNode
 
     graph = session.get(Graph, graph_id)
     assert graph is not None
     assert graph.owner_kind == "user"
     assert graph.user_elo == 850.0
 
-    nodes = list(session.execute(select(GraphNode).where(GraphNode.graph_id == graph_id)).scalars())
-    assert len(nodes) == 2
+    # Node identity lives in the shared technique library now (not per-graph rows).
+    nodes = list(session.execute(select(TechniqueNode)).scalars())
     node_keys = {n.node_key for n in nodes}
     assert "closed guard" in node_keys
     assert "armbar" in node_keys
@@ -137,9 +137,9 @@ def test_node_key_is_normalized(session):
     upsert_graph_from_bundle(bundle, session)
     session.commit()
 
-    from db.models import GraphNode
+    from db.models import TechniqueNode
 
-    nodes = list(session.execute(select(GraphNode)).scalars())
+    nodes = list(session.execute(select(TechniqueNode)).scalars())
     keys = {n.node_key for n in nodes}
     assert "closed guard" in keys
 
@@ -163,12 +163,12 @@ def test_athlete_graph_upsert(session):
     ]
     athlete_id = str(uuid.uuid4())
     graph = build_athlete_graph("Gordon Ryan", sessions_payload)
-    graph_id = upsert_graph_from_athlete_graph(graph, athlete_id, session)
+    upsert_graph_from_athlete_graph(graph, athlete_id, session)
     session.commit()
 
-    from db.models import GraphNode
+    from db.models import TechniqueNode
 
-    nodes = list(session.execute(select(GraphNode).where(GraphNode.graph_id == graph_id)).scalars())
+    nodes = list(session.execute(select(TechniqueNode)).scalars())
     keys = {n.node_key for n in nodes}
     assert "back take" in keys
     assert "rear naked choke" in keys

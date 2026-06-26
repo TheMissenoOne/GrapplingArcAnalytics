@@ -33,8 +33,10 @@ class Archetype(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
-    centroid: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    centroid: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # legacy feature centroid
     feature_version: Mapped[str | None] = mapped_column(String(40))
+    # NB: `embedding vector(768)` in DB (alembic 0006) — centroid in the graphs
+    # embedding space for nearest-centroid archetype id. Unmapped (SQL backfill).
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -94,18 +96,19 @@ class Graph(Base):
     )
     synced_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
-    nodes: Mapped[list[GraphNode]] = relationship(
-        "GraphNode", back_populates="graph", cascade="all, delete-orphan"
-    )
     edges: Mapped[list[GraphEdge]] = relationship(
         "GraphEdge", back_populates="graph", cascade="all, delete-orphan"
     )
+    # NB: `embedding vector(768)` exists in the DB (alembic 0006) — one vector per
+    # owner for archetype id + similarity. Intentionally unmapped here (managed by
+    # the SQL embedding backfill job; avoids a pgvector ORM dependency).
 
 
 class TechniqueNode(Base):
     """Shared canonical technique library — one row per distinct node_key, reused
-    across all user/athlete graphs. Replaces the per-user GraphNode identity rows.
-    Holds the (future) pgvector technique embedding. See alembic 0004."""
+    across all user/athlete graphs. Replaces the per-user node identity rows.
+    A pgvector ``embedding vector(768)`` (alembic 0006) lives in the DB but is
+    intentionally unmapped here (SQL backfill job)."""
 
     __tablename__ = "technique_nodes"
 
@@ -119,29 +122,6 @@ class TechniqueNode(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
-
-
-class GraphNode(Base):
-    """DEPRECATED per-user node rows — superseded by TechniqueNode (shared) + edges.
-    Kept for dual-read during rollout; dropped in a later migration once the app
-    writes edges + shared nodes only."""
-
-    __tablename__ = "graph_nodes"
-    __table_args__ = (UniqueConstraint("graph_id", "node_key"),)
-
-    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
-    graph_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("graphs.id"), nullable=False
-    )
-    node_key: Mapped[str] = mapped_column(Text, nullable=False)  # _normalize_name(label)
-    label: Mapped[str] = mapped_column(Text, nullable=False)
-    type: Mapped[str] = mapped_column(String(20), default="technique")
-    node_type: Mapped[str] = mapped_column(String(40), default="")
-    computed_elo: Mapped[float | None] = mapped_column(Float)
-    usage_count: Mapped[int] = mapped_column(Integer, default=0)
-    trend: Mapped[str] = mapped_column(String(20), default="")
-
-    graph: Mapped[Graph] = relationship("Graph", back_populates="nodes")
 
 
 class GraphEdge(Base):
@@ -160,6 +140,8 @@ class GraphEdge(Base):
     owner_kind: Mapped[str | None] = mapped_column(String(10))
     elo: Mapped[float] = mapped_column(Float, default=0.0)
     setup: Mapped[str] = mapped_column(Text, default="")
+    # NB: `embedding vector(768)` in DB (alembic 0006) — transition/structure vector,
+    # athlete vs user spaces split by partial index on owner_kind. Unmapped (SQL backfill).
 
     graph: Mapped[Graph] = relationship("Graph", back_populates="edges")
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
@@ -17,10 +18,36 @@ from db.models import (
     BundleImport,
     Graph,
     GraphEdge,
-    GraphNode,
     Profile,
+    TechniqueNode,
 )
 from schemas.app_types import UserBundle
+
+
+@dataclass
+class DerivedNode:
+    """A graph node reconstructed from edges + the shared technique library.
+
+    Per-user node stats are no longer persisted (graph_nodes is dropped), so
+    ``computed_elo`` is derived as the strongest incident edge ELO. Exposes the
+    attributes ``analysis.archetype.graph_feature_vector`` reads."""
+
+    node_key: str
+    node_type: str
+    computed_elo: float | None
+
+
+def _ensure_technique(
+    node_key: str, label: str, type_: str, node_type: str, session: Session
+) -> None:
+    """Ensure a row exists in the shared technique library for *node_key*.
+
+    Insert-if-absent (source='user'); never clobbers a curated 'library' row."""
+    session.execute(
+        pg_insert(TechniqueNode)
+        .values(node_key=node_key, label=label, type=type_, node_type=node_type, source="user")
+        .on_conflict_do_nothing(index_elements=["node_key"])
+    )
 
 
 def upsert_graph_from_bundle(bundle: UserBundle, session: Session) -> str:
@@ -70,43 +97,22 @@ def upsert_graph_from_bundle(bundle: UserBundle, session: Session) -> str:
     if bundle.graph is None:
         return graph_id
 
-    # Upsert nodes
+    # Register techniques in the shared library (identity only; per-user stats are
+    # derived from edges, not persisted).
     for node in bundle.graph.nodes:
-        node_key = _normalize_name(node.label)
-        node_stmt = (
-            pg_insert(GraphNode)
-            .values(
-                graph_id=graph_id,
-                node_key=node_key,
-                label=node.label,
-                type=node.type,
-                node_type=node.node_type,
-                computed_elo=node.computed_elo,
-                usage_count=node.usage_count,
-                trend=node.trend,
-            )
-            .on_conflict_do_update(
-                index_elements=["graph_id", "node_key"],
-                set_={
-                    "label": node.label,
-                    "type": node.type,
-                    "node_type": node.node_type,
-                    "computed_elo": node.computed_elo,
-                    "usage_count": node.usage_count,
-                    "trend": node.trend,
-                },
-            )
+        _ensure_technique(
+            _normalize_name(node.label), node.label, node.type, node.node_type, session
         )
-        session.execute(node_stmt)
 
     # Upsert edges
     for edge in bundle.graph.edges:
-        source_key = _normalize_name(
-            _label_for_id(edge.source, bundle) or edge.source
-        )
-        target_key = _normalize_name(
-            _label_for_id(edge.target, bundle) or edge.target
-        )
+        source_label = _label_for_id(edge.source, bundle) or edge.source
+        target_label = _label_for_id(edge.target, bundle) or edge.target
+        source_key = _normalize_name(source_label)
+        target_key = _normalize_name(target_label)
+        # Endpoints must exist in the shared library to satisfy the edge FK.
+        _ensure_technique(source_key, source_label, "technique", "", session)
+        _ensure_technique(target_key, target_label, "technique", "", session)
         edge_key = f"{source_key}→{target_key}"
         edge_stmt = (
             pg_insert(GraphEdge)
@@ -162,30 +168,14 @@ def upsert_graph_from_athlete_graph(
     )
     graph_id: str = session.execute(stmt).scalar_one()
 
+    # Register techniques in the shared library (identity only).
     for node_key, node in athlete_graph.nodes.items():
-        node_stmt = (
-            pg_insert(GraphNode)
-            .values(
-                graph_id=graph_id,
-                node_key=node_key,
-                label=node.label,
-                type="technique",
-                node_type=node.type,
-                computed_elo=node.computed_elo,
-                usage_count=node.count,
-            )
-            .on_conflict_do_update(
-                index_elements=["graph_id", "node_key"],
-                set_={
-                    "label": node.label,
-                    "computed_elo": node.computed_elo,
-                    "usage_count": node.count,
-                },
-            )
-        )
-        session.execute(node_stmt)
+        _ensure_technique(node_key, node.label, "technique", node.type, session)
 
     for (src, tgt), edge in athlete_graph.edges.items():
+        # Endpoints must exist in the shared library to satisfy the edge FK.
+        _ensure_technique(src, src, "technique", "", session)
+        _ensure_technique(tgt, tgt, "technique", "", session)
         edge_key = f"{src}→{tgt}"
         # Prefer the grown edge ELO; fall back to the raw count for count-only callers.
         edge_elo = edge.elo if edge.elo is not None else float(edge.count)
@@ -274,12 +264,32 @@ def get_athlete_matches(athlete_id: str, session: Session) -> list[AthleteMatch]
     )
 
 
-def graphs_for_clustering(session: Session) -> list[tuple[str, list[GraphNode]]]:
-    """Return [(graph_id, [GraphNode, ...])] for all graphs."""
+def graphs_for_clustering(session: Session) -> list[tuple[str, list[DerivedNode]]]:
+    """Return [(graph_id, [DerivedNode, ...])] for all graphs.
+
+    Nodes are reconstructed from each graph's edges joined to the shared
+    ``technique_nodes`` library (graph_nodes is dropped): the node set is the
+    edge endpoints, ``node_type`` comes from the library, and ``computed_elo``
+    is derived as the strongest incident edge ELO."""
+    node_types = dict(
+        session.execute(select(TechniqueNode.node_key, TechniqueNode.node_type)).all()
+    )
     graphs = list(session.execute(select(Graph)).scalars())
     result = []
     for g in graphs:
-        nodes = list(session.execute(select(GraphNode).where(GraphNode.graph_id == g.id)).scalars())
+        edges = list(session.execute(select(GraphEdge).where(GraphEdge.graph_id == g.id)).scalars())
+        incident: dict[str, list[float]] = {}
+        for e in edges:
+            incident.setdefault(e.source_key, []).append(e.elo)
+            incident.setdefault(e.target_key, []).append(e.elo)
+        nodes = [
+            DerivedNode(
+                node_key=key,
+                node_type=node_types.get(key, ""),
+                computed_elo=max(elos) if elos else None,
+            )
+            for key, elos in incident.items()
+        ]
         result.append((g.id, nodes))
     return result
 

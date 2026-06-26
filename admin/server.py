@@ -21,7 +21,7 @@ from admin.auth import (
 from analysis.athlete_elo import replay_matches
 from cv.vocab_map import load_app_nodes
 from db.base import db_session
-from db.models import Athlete, Graph, GraphNode
+from db.models import Athlete, Graph, TechniqueNode
 from db.repository import (
     get_athlete_matches,
     publish_athlete,
@@ -276,7 +276,8 @@ def create_admin_app() -> FastAPI:
         if not is_authenticated(request):
             return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
-            node_rows = list(session.execute(select(GraphNode)).scalars())
+            node_rows = list(session.execute(select(TechniqueNode)).scalars())
+        # Type distribution over the shared technique library (one row per technique).
         type_counts: dict[str, int] = {}
         for n in node_rows:
             t = n.node_type or "unknown"

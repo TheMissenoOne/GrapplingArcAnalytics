@@ -4,13 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from typing import TYPE_CHECKING
+from typing import Protocol
 
 import numpy as np
 from sklearn.cluster import KMeans
-
-if TYPE_CHECKING:
-    from db.models import GraphNode
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +17,15 @@ FEATURE_VERSION = "v1"
 _TYPES = ["guard", "pass", "sweep", "submission", "takedown", "control", "escape", "transition"]
 
 
-def graph_feature_vector(nodes: list[GraphNode], edges: list[object] | None = None) -> np.ndarray:
+class _NodeLike(Protocol):
+    """Structural type for a graph node — satisfied by db.repository.DerivedNode
+    (nodes are reconstructed from edges + the shared library; graph_nodes is gone)."""
+
+    node_type: str
+    computed_elo: float | None
+
+
+def graph_feature_vector(nodes: list[_NodeLike], edges: list[object] | None = None) -> np.ndarray:
     """Build an L2-normalized feature vector for one graph.
 
     Dimensions (len = len(_TYPES) + 3):

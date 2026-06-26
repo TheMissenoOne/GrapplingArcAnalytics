@@ -17,20 +17,17 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from db.models import Graph, GraphEdge, GraphNode, TechniqueNode
+from db.models import Graph, GraphEdge, TechniqueNode
 
 
 def athlete_graph_to_app_json(graph_id: str, session: Session) -> dict[str, Any]:
     """Reconstruct app-shaped graph JSON from DB rows for a given graph_id.
 
-    Node identity/label/type comes from the shared ``technique_nodes`` library
-    (one canonical row per ``node_key``); the node set is the union of every
-    endpoint referenced by this graph's edges plus any legacy per-user
-    ``graph_nodes`` rows (dual-read during the migration — once ``graph_nodes``
-    is dropped, the node set is the edge endpoints alone). Per-user stats
-    (``computedElo``/``usageCount``/``trend``) are no longer persisted shared,
-    so they are read from the legacy ``graph_nodes`` row when present, else
-    derived from incident edges.
+    The node set is the graph's edge endpoints (graph_nodes is dropped); node
+    identity/label/type comes from the shared ``technique_nodes`` library (one
+    canonical row per ``node_key``). Per-user stats are no longer persisted, so
+    ``computedElo``/``usageCount`` are derived from incident edges (strongest
+    incident ELO / incident-edge count); ``trend`` is left empty.
     """
     graph = session.get(Graph, graph_id)
     if graph is None:
@@ -39,19 +36,13 @@ def athlete_graph_to_app_json(graph_id: str, session: Session) -> dict[str, Any]
     edges_rows = list(
         session.execute(select(GraphEdge).where(GraphEdge.graph_id == graph_id)).scalars()
     )
-    # Legacy per-user node rows (kept for stats during dual-read; may be empty).
-    legacy_nodes = {
-        n.node_key: n
-        for n in session.execute(
-            select(GraphNode).where(GraphNode.graph_id == graph_id)
-        ).scalars()
-    }
 
-    # Node set = every edge endpoint ∪ legacy node rows.
-    node_keys: set[str] = set(legacy_nodes)
+    # Node set + incident-edge stats from the edges.
+    incident: dict[str, list[float]] = {}
     for e in edges_rows:
-        node_keys.add(e.source_key)
-        node_keys.add(e.target_key)
+        incident.setdefault(e.source_key, []).append(e.elo)
+        incident.setdefault(e.target_key, []).append(e.elo)
+    node_keys = set(incident)
 
     library = {
         t.node_key: t
@@ -60,41 +51,22 @@ def athlete_graph_to_app_json(graph_id: str, session: Session) -> dict[str, Any]
         ).scalars()
     } if node_keys else {}
 
-    # Incident-edge stats for keys without a legacy node row.
-    incident: dict[str, list[float]] = {}
-    for e in edges_rows:
-        incident.setdefault(e.source_key, []).append(e.elo)
-        incident.setdefault(e.target_key, []).append(e.elo)
-
     nodes = []
     for key in sorted(node_keys):
-        legacy = legacy_nodes.get(key)
         lib = library.get(key)
-        label = (lib.label if lib else None) or (legacy.label if legacy else key)
-        node_type = (lib.node_type if lib else None) or (legacy.node_type if legacy else "")
-        ntype = (lib.type if lib else None) or (legacy.type if legacy else "technique")
-        if legacy is not None:
-            computed_elo, usage_count, trend = (
-                legacy.computed_elo,
-                legacy.usage_count,
-                legacy.trend,
-            )
-        else:
-            elos = incident.get(key, [])
-            computed_elo = max(elos) if elos else None
-            usage_count = len(elos)
-            trend = ""
+        label = (lib.label if lib else None) or key
+        elos = incident.get(key, [])
         nodes.append(
             {
                 "id": key,
                 "label": label,
-                "type": ntype,
+                "type": lib.type if lib else "technique",
                 "data": {
                     "label": label,
-                    "type": node_type,
-                    "computedElo": computed_elo,
-                    "usageCount": usage_count,
-                    "trend": trend,
+                    "type": lib.node_type if lib else "",
+                    "computedElo": max(elos) if elos else None,
+                    "usageCount": len(elos),
+                    "trend": "",
                 },
             }
         )
