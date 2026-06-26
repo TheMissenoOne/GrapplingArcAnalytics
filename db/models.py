@@ -102,7 +102,30 @@ class Graph(Base):
     )
 
 
+class TechniqueNode(Base):
+    """Shared canonical technique library — one row per distinct node_key, reused
+    across all user/athlete graphs. Replaces the per-user GraphNode identity rows.
+    Holds the (future) pgvector technique embedding. See alembic 0004."""
+
+    __tablename__ = "technique_nodes"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    node_key: Mapped[str] = mapped_column(Text, nullable=False, unique=True)  # == _normalize_name
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    type: Mapped[str] = mapped_column(String(20), default="technique")
+    node_type: Mapped[str] = mapped_column(String(40), default="")
+    source: Mapped[str] = mapped_column(String(10), default="user")  # 'library' | 'user'
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
 class GraphNode(Base):
+    """DEPRECATED per-user node rows — superseded by TechniqueNode (shared) + edges.
+    Kept for dual-read during rollout; dropped in a later migration once the app
+    writes edges + shared nodes only."""
+
     __tablename__ = "graph_nodes"
     __table_args__ = (UniqueConstraint("graph_id", "node_key"),)
 
@@ -130,8 +153,11 @@ class GraphEdge(Base):
         UUID(as_uuid=False), ForeignKey("graphs.id"), nullable=False
     )
     edge_key: Mapped[str] = mapped_column(Text, nullable=False)  # "{source_key}→{target_key}"
-    source_key: Mapped[str] = mapped_column(Text, nullable=False)
-    target_key: Mapped[str] = mapped_column(Text, nullable=False)
+    source_key: Mapped[str] = mapped_column(Text, nullable=False)  # FK → technique_nodes.node_key
+    target_key: Mapped[str] = mapped_column(Text, nullable=False)  # FK → technique_nodes.node_key
+    # Denormalized from the owning graph so athlete vs user edge vector spaces can
+    # be split by a partial index (see alembic 0005). 'user' | 'athlete'.
+    owner_kind: Mapped[str | None] = mapped_column(String(10))
     elo: Mapped[float] = mapped_column(Float, default=0.0)
     setup: Mapped[str] = mapped_column(Text, default="")
 
