@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+from collections.abc import Sequence
 from typing import Protocol
 
 import numpy as np
@@ -11,7 +12,10 @@ from sklearn.cluster import KMeans
 
 logger = logging.getLogger(__name__)
 
-FEATURE_VERSION = "v1"
+# v2: node identity/stats are reconstructed from edges (graph_nodes dropped) —
+# node set = edge endpoints, computed_elo = strongest incident edge ELO. This
+# shifts every feature vector, so old (v1) centroids must not be reused.
+FEATURE_VERSION = "v2"
 
 # Ordered node_type buckets that define the feature vector dimensions.
 _TYPES = ["guard", "pass", "sweep", "submission", "takedown", "control", "escape", "transition"]
@@ -25,7 +29,9 @@ class _NodeLike(Protocol):
     computed_elo: float | None
 
 
-def graph_feature_vector(nodes: list[_NodeLike], edges: list[object] | None = None) -> np.ndarray:
+def graph_feature_vector(
+    nodes: Sequence[_NodeLike], edges: list[object] | None = None
+) -> np.ndarray:
     """Build an L2-normalized feature vector for one graph.
 
     Dimensions (len = len(_TYPES) + 3):

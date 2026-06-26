@@ -30,14 +30,10 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute(
-        """
-        -- Policy + grants go away with the table, but drop explicitly so a
-        -- re-run after a manual table drop stays clean.
-        drop policy if exists nodes_athlete_read on public.graph_nodes;
-        drop table if exists public.graph_nodes cascade;
-        """
-    )
+    # `drop table ... cascade` removes the nodes_athlete_read policy + grants with
+    # the table, and is fully idempotent (unlike `drop policy ... on graph_nodes`,
+    # which raises if the table is already gone).
+    op.execute("drop table if exists public.graph_nodes cascade;")
 
 
 def downgrade() -> None:

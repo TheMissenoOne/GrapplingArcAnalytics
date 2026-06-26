@@ -42,24 +42,28 @@ def upgrade() -> None:
         alter table public.graphs          add column if not exists embedding vector(768);
         alter table public.archetypes      add column if not exists embedding vector(768);
 
-        -- ANN indexes (HNSW, cosine). Empty columns build instantly.
+        -- ANN indexes (HNSW, cosine). Partial on `embedding is not null` so a
+        -- partially-backfilled table only indexes embedded rows (and an empty
+        -- column indexes nothing) — avoids indexing NULLs and keeps the index
+        -- minimal until the embedding job runs. (owner_kind also splits the user
+        -- vs athlete edge/graph vector spaces.)
         create index if not exists idx_technique_nodes_embedding
-          on public.technique_nodes using hnsw (embedding vector_cosine_ops);
+          on public.technique_nodes using hnsw (embedding vector_cosine_ops)
+          where embedding is not null;
 
-        -- user vs athlete edge/graph spaces split by partial index on owner_kind.
         create index if not exists idx_graph_edges_embedding_user
           on public.graph_edges using hnsw (embedding vector_cosine_ops)
-          where owner_kind = 'user';
+          where owner_kind = 'user' and embedding is not null;
         create index if not exists idx_graph_edges_embedding_athlete
           on public.graph_edges using hnsw (embedding vector_cosine_ops)
-          where owner_kind = 'athlete';
+          where owner_kind = 'athlete' and embedding is not null;
 
         create index if not exists idx_graphs_embedding_user
           on public.graphs using hnsw (embedding vector_cosine_ops)
-          where owner_kind = 'user';
+          where owner_kind = 'user' and embedding is not null;
         create index if not exists idx_graphs_embedding_athlete
           on public.graphs using hnsw (embedding vector_cosine_ops)
-          where owner_kind = 'athlete';
+          where owner_kind = 'athlete' and embedding is not null;
         """
     )
 

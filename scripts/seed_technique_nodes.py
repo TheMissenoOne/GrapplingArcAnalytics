@@ -27,6 +27,7 @@ import json
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -63,7 +64,7 @@ _TYPE_TO_NODE_TYPE = {
     "concept": "concept",
 }
 
-def _canonical_label(item: dict) -> str:
+def _canonical_label(item: dict[str, Any]) -> str:
     """Prefer the English translation as the canonical, locale-independent label."""
     tr = item.get("translations") or {}
     return str(tr.get("en") or item.get("name") or "").strip()
@@ -71,7 +72,7 @@ def _canonical_label(item: dict) -> str:
 
 def seed(path: Path, dry_run: bool = False) -> int:
     items = json.loads(path.read_text(encoding="utf-8"))
-    rows: dict[str, dict] = {}
+    rows: dict[str, dict[str, Any]] = {}
     for item in items:
         label = _canonical_label(item)
         if not label:

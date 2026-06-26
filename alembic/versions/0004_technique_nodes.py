@@ -42,19 +42,27 @@ def upgrade() -> None:
 
         -- Seed from the distinct node_keys already present in per-user graph_nodes.
         -- Representative label/type/node_type = the most common value per node_key.
-        insert into public.technique_nodes (node_key, label, type, node_type, source)
-        select g.node_key,
-               (array_agg(g.label     order by g.cnt desc))[1],
-               (array_agg(g.type      order by g.cnt desc))[1],
-               (array_agg(g.node_type order by g.cnt desc))[1],
-               'user'
-        from (
-          select node_key, label, type, node_type, count(*) as cnt
-          from public.graph_nodes
-          group by node_key, label, type, node_type
-        ) g
-        group by g.node_key
-        on conflict (node_key) do nothing;
+        -- Guarded by to_regclass so this stays runnable even if graph_nodes was
+        -- already dropped (0007) — keeps the ordered chain + any re-run consistent.
+        do $seed$
+        begin
+          if to_regclass('public.graph_nodes') is not null then
+            insert into public.technique_nodes (node_key, label, type, node_type, source)
+            select g.node_key,
+                   (array_agg(g.label     order by g.cnt desc))[1],
+                   (array_agg(g.type      order by g.cnt desc))[1],
+                   (array_agg(g.node_type order by g.cnt desc))[1],
+                   'user'
+            from (
+              select node_key, label, type, node_type, count(*) as cnt
+              from public.graph_nodes
+              group by node_key, label, type, node_type
+            ) g
+            group by g.node_key
+            on conflict (node_key) do nothing;
+          end if;
+        end
+        $seed$;
 
         -- ── RLS: the library is a public, world-readable vocabulary ─────────
         alter table public.technique_nodes enable row level security;

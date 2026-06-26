@@ -18,6 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from db.models import Graph, GraphEdge, TechniqueNode
+from db.repository import incident_edge_elos
 
 
 def athlete_graph_to_app_json(graph_id: str, session: Session) -> dict[str, Any]:
@@ -37,11 +38,8 @@ def athlete_graph_to_app_json(graph_id: str, session: Session) -> dict[str, Any]
         session.execute(select(GraphEdge).where(GraphEdge.graph_id == graph_id)).scalars()
     )
 
-    # Node set + incident-edge stats from the edges.
-    incident: dict[str, list[float]] = {}
-    for e in edges_rows:
-        incident.setdefault(e.source_key, []).append(e.elo)
-        incident.setdefault(e.target_key, []).append(e.elo)
+    # Node set + incident-edge stats from the edges (shared derivation with clustering).
+    incident = incident_edge_elos(edges_rows)
     node_keys = set(incident)
 
     library = {
@@ -49,7 +47,7 @@ def athlete_graph_to_app_json(graph_id: str, session: Session) -> dict[str, Any]
         for t in session.execute(
             select(TechniqueNode).where(TechniqueNode.node_key.in_(node_keys))
         ).scalars()
-    } if node_keys else {}
+    }
 
     nodes = []
     for key in sorted(node_keys):

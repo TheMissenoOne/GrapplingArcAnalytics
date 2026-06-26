@@ -5,14 +5,14 @@
 --
 -- Model: every signed-in app user (email OR Google-bridged) has a Supabase
 -- session whose auth.uid() is the owner_id for their personal graph. The app
--- writes graphs/graph_nodes/graph_edges with owner_kind='user', owner_id=uid.
+-- writes graphs/graph_edges (+ the shared technique_nodes library) with
+-- owner_kind='user', owner_id=uid. (graph_nodes was dropped in alembic 0007.)
 -- ============================================================================
 
 -- ── 0. DB-level id defaults (PK default was Python/SQLAlchemy-only) ──────────
 -- The app inserts via PostgREST, which never supplies id, so the column needs a
 -- server-side default or every client insert fails NOT-NULL on id.
 alter table public.graphs       alter column id set default gen_random_uuid();
-alter table public.graph_nodes  alter column id set default gen_random_uuid();
 alter table public.graph_edges  alter column id set default gen_random_uuid();
 alter table public.profiles     alter column id set default gen_random_uuid();
 
@@ -70,21 +70,8 @@ create policy graphs_user_update on public.graphs
   for update using (owner_kind = 'user' and owner_id = auth.uid())
   with check (owner_kind = 'user' and owner_id = auth.uid());
 
--- ── 4. graph_nodes / graph_edges — gated through the owning graph ───────────
-alter table public.graph_nodes enable row level security;
+-- ── 4. graph_edges — gated through the owning graph ─────────────────────────
 alter table public.graph_edges enable row level security;
-
-drop policy if exists graph_nodes_user_all on public.graph_nodes;
-create policy graph_nodes_user_all on public.graph_nodes
-  for all
-  using (exists (
-    select 1 from public.graphs g
-    where g.id = graph_nodes.graph_id and g.owner_kind = 'user' and g.owner_id = auth.uid()
-  ))
-  with check (exists (
-    select 1 from public.graphs g
-    where g.id = graph_nodes.graph_id and g.owner_kind = 'user' and g.owner_id = auth.uid()
-  ));
 
 drop policy if exists graph_edges_user_all on public.graph_edges;
 create policy graph_edges_user_all on public.graph_edges
@@ -100,15 +87,11 @@ create policy graph_edges_user_all on public.graph_edges
 
 -- ── 5. Grants (RLS still applies; anon/authenticated need table privileges) ──
 grant usage on schema public to anon, authenticated;
-grant select, insert, update, delete on public.graphs, public.graph_nodes, public.graph_edges to authenticated;
+grant select, insert, update, delete on public.graphs, public.graph_edges to authenticated;
 grant select, insert, update on public.profiles to authenticated;
 
 -- ── 6. Cascade deletes ──────────────────────────────────────────────────────
--- nodes/edges follow their graph.
-alter table public.graph_nodes drop constraint if exists graph_nodes_graph_id_fkey;
-alter table public.graph_nodes add constraint graph_nodes_graph_id_fkey
-  foreign key (graph_id) references public.graphs(id) on delete cascade;
-
+-- edges follow their graph.
 alter table public.graph_edges drop constraint if exists graph_edges_graph_id_fkey;
 alter table public.graph_edges add constraint graph_edges_graph_id_fkey
   foreign key (graph_id) references public.graphs(id) on delete cascade;

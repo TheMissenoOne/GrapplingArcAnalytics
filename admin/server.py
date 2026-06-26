@@ -9,7 +9,7 @@ from fastapi import FastAPI, Form, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from admin.auth import (
     _COOKIE_NAME,
@@ -275,17 +275,19 @@ def create_admin_app() -> FastAPI:
     def analytics(request: Request) -> Any:
         if not is_authenticated(request):
             return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
+        # Type distribution over the shared technique library, aggregated in SQL
+        # (the library grows with every synced technique — don't materialize it all).
         with db_session() as session:
-            node_rows = list(session.execute(select(TechniqueNode)).scalars())
-        # Type distribution over the shared technique library (one row per technique).
-        type_counts: dict[str, int] = {}
-        for n in node_rows:
-            t = n.node_type or "unknown"
-            type_counts[t] = type_counts.get(t, 0) + 1
+            rows = session.execute(
+                select(TechniqueNode.node_type, func.count())
+                .group_by(TechniqueNode.node_type)
+            ).all()
+        type_counts = {(nt or "unknown"): int(cnt) for nt, cnt in rows}
+        total_nodes = sum(type_counts.values())
         return templates.TemplateResponse(
             request,
             "analytics.html",
-            context={"type_counts": type_counts, "total_nodes": len(node_rows)},
+            context={"type_counts": type_counts, "total_nodes": total_nodes},
         )
 
     return app

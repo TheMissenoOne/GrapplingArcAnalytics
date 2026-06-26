@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
@@ -37,17 +38,29 @@ class DerivedNode:
     computed_elo: float | None
 
 
-def _ensure_technique(
-    node_key: str, label: str, type_: str, node_type: str, session: Session
-) -> None:
-    """Ensure a row exists in the shared technique library for *node_key*.
+def _register_techniques(techs: dict[str, dict[str, str]], session: Session) -> None:
+    """Batch insert-if-absent into the shared technique library (one statement).
 
-    Insert-if-absent (source='user'); never clobbers a curated 'library' row."""
+    Empty node_keys are skipped (a punctuation/whitespace-only label normalizes to
+    '' and must not become a junk library row / FK target). ``source='user'``;
+    never clobbers a curated 'library' row (do-nothing on conflict)."""
+    rows = [t for key, t in techs.items() if key]
+    if not rows:
+        return
     session.execute(
-        pg_insert(TechniqueNode)
-        .values(node_key=node_key, label=label, type=type_, node_type=node_type, source="user")
-        .on_conflict_do_nothing(index_elements=["node_key"])
+        pg_insert(TechniqueNode).values(rows).on_conflict_do_nothing(index_elements=["node_key"])
     )
+
+
+def incident_edge_elos(edges: Iterable[GraphEdge]) -> dict[str, list[float]]:
+    """Map each node_key to the ELOs of its incident edges (graph_nodes is gone, so
+    the node set + per-node stats are reconstructed from edges). Shared by clustering
+    and the athlete export so the derivation has a single definition."""
+    incident: dict[str, list[float]] = {}
+    for e in edges:
+        incident.setdefault(e.source_key, []).append(e.elo)
+        incident.setdefault(e.target_key, []).append(e.elo)
+    return incident
 
 
 def upsert_graph_from_bundle(bundle: UserBundle, session: Session) -> str:
@@ -97,22 +110,39 @@ def upsert_graph_from_bundle(bundle: UserBundle, session: Session) -> str:
     if bundle.graph is None:
         return graph_id
 
-    # Register techniques in the shared library (identity only; per-user stats are
-    # derived from edges, not persisted).
+    # Collect techniques (nodes + edge endpoints) and register them in one batch
+    # BEFORE edges — the edge FK requires the endpoints to already exist. Per-user
+    # stats are not persisted (identity only; derived from edges at read time).
+    techs: dict[str, dict[str, str]] = {}
     for node in bundle.graph.nodes:
-        _ensure_technique(
-            _normalize_name(node.label), node.label, node.type, node.node_type, session
-        )
-
-    # Upsert edges
+        key = _normalize_name(node.label)
+        if key:
+            techs.setdefault(
+                key,
+                {"node_key": key, "label": node.label, "type": node.type,
+                 "node_type": node.node_type, "source": "user"},
+            )
+    resolved_edges = []
     for edge in bundle.graph.edges:
         source_label = _label_for_id(edge.source, bundle) or edge.source
         target_label = _label_for_id(edge.target, bundle) or edge.target
         source_key = _normalize_name(source_label)
         target_key = _normalize_name(target_label)
-        # Endpoints must exist in the shared library to satisfy the edge FK.
-        _ensure_technique(source_key, source_label, "technique", "", session)
-        _ensure_technique(target_key, target_label, "technique", "", session)
+        for key, label in ((source_key, source_label), (target_key, target_label)):
+            if key:
+                techs.setdefault(
+                    key,
+                    {"node_key": key, "label": label, "type": "technique",
+                     "node_type": "", "source": "user"},
+                )
+        resolved_edges.append((edge, source_key, target_key))
+
+    _register_techniques(techs, session)
+
+    # Upsert edges (skip any with an empty endpoint — no valid FK target).
+    for edge, source_key, target_key in resolved_edges:
+        if not source_key or not target_key:
+            continue
         edge_key = f"{source_key}→{target_key}"
         edge_stmt = (
             pg_insert(GraphEdge)
@@ -168,14 +198,28 @@ def upsert_graph_from_athlete_graph(
     )
     graph_id: str = session.execute(stmt).scalar_one()
 
-    # Register techniques in the shared library (identity only).
+    # Register techniques (nodes + edge endpoints) in one batch before edges (FK).
+    techs: dict[str, dict[str, str]] = {}
     for node_key, node in athlete_graph.nodes.items():
-        _ensure_technique(node_key, node.label, "technique", node.type, session)
+        if node_key:
+            techs.setdefault(
+                node_key,
+                {"node_key": node_key, "label": node.label, "type": "technique",
+                 "node_type": node.type, "source": "user"},
+            )
+    for (src, tgt), _edge in athlete_graph.edges.items():
+        for key in (src, tgt):
+            if key:
+                techs.setdefault(
+                    key,
+                    {"node_key": key, "label": key, "type": "technique",
+                     "node_type": "", "source": "user"},
+                )
+    _register_techniques(techs, session)
 
     for (src, tgt), edge in athlete_graph.edges.items():
-        # Endpoints must exist in the shared library to satisfy the edge FK.
-        _ensure_technique(src, src, "technique", "", session)
-        _ensure_technique(tgt, tgt, "technique", "", session)
+        if not src or not tgt:
+            continue
         edge_key = f"{src}→{tgt}"
         # Prefer the grown edge ELO; fall back to the raw count for count-only callers.
         edge_elo = edge.elo if edge.elo is not None else float(edge.count)
@@ -271,17 +315,17 @@ def graphs_for_clustering(session: Session) -> list[tuple[str, list[DerivedNode]
     ``technique_nodes`` library (graph_nodes is dropped): the node set is the
     edge endpoints, ``node_type`` comes from the library, and ``computed_elo``
     is derived as the strongest incident edge ELO."""
-    node_types = dict(
-        session.execute(select(TechniqueNode.node_key, TechniqueNode.node_type)).all()
-    )
+    node_types: dict[str, str] = {
+        row[0]: row[1]
+        for row in session.execute(
+            select(TechniqueNode.node_key, TechniqueNode.node_type)
+        ).all()
+    }
     graphs = list(session.execute(select(Graph)).scalars())
     result = []
     for g in graphs:
-        edges = list(session.execute(select(GraphEdge).where(GraphEdge.graph_id == g.id)).scalars())
-        incident: dict[str, list[float]] = {}
-        for e in edges:
-            incident.setdefault(e.source_key, []).append(e.elo)
-            incident.setdefault(e.target_key, []).append(e.elo)
+        edges = session.execute(select(GraphEdge).where(GraphEdge.graph_id == g.id)).scalars()
+        incident = incident_edge_elos(edges)
         nodes = [
             DerivedNode(
                 node_key=key,
