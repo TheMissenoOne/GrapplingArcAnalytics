@@ -19,6 +19,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from analysis.names import _normalize_name
+from analysis.technique_match import clean_label
 from db.models import Athlete, Match
 from db.repository import register_match, upsert_athlete
 
@@ -65,7 +66,7 @@ def analyzer_to_match_kwargs(
             continue
         by_fighter = _normalize_name(str(e.get("actor", ""))) == fnorm
         item: dict[str, Any] = {
-            "label": e.get("label", ""),
+            "label": clean_label(str(e.get("label", "")), str(e.get("type", ""))),
             "type": e.get("type", ""),
             "actor_id": fighter.id if by_fighter else opponent.id,
         }

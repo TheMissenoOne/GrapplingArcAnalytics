@@ -65,13 +65,14 @@ def test_new_node_seeds_at_belt_floor() -> None:
 
 # ── k_factor behavior ─────────────────────────────────────────────────────────
 def test_k_factor_shrinks_as_gap_closes_and_floors() -> None:
+    # base(n=1)=40 × gap_factor × COMPETITIVE_K_MULT(1.5).
     far = k_factor(1, 800.0, 1400.0)   # gap 600 ⇒ gap_factor clamped to 1.0
     near = k_factor(1, 1399.0, 1400.0)  # gap ~0 ⇒ gap_factor floored at 0.1
-    assert far == pytest.approx(40.0)
-    assert near == pytest.approx(4.0)
+    assert far == pytest.approx(60.0)
+    assert near == pytest.approx(6.0)
     assert near < far
     # At the target the floor still applies (never zero).
-    assert k_factor(1, 1400.0, 1400.0) == pytest.approx(4.0)
+    assert k_factor(1, 1400.0, 1400.0) == pytest.approx(6.0)
 
 
 # ── convergence ────────────────────────────────────────────────────────────────

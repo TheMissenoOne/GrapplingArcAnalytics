@@ -499,9 +499,21 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     rank = f.get("elo_rank")
     icons = {"taken down": "T", "guard passed": "P", "back taken": "B", "swept": "S"}
     mix = profile["style_mix"]
+    # Radar values per axis = the move-mix share, but an axis with NO node populated is
+    # assumed by the fighter's Grappling ELO (their overall level) rather than plotted as
+    # zero — so unmeasured categories sit at their standing, not as a false weakness.
+    pctile = profile["fighter"].get("elo_percentile")
+    elo_strength = max(0.1, 1 - (pctile - 1) / 99) if pctile else 0.5  # top% → 0..1
+    populated = [mix.get(k, 0.0) for k in _RADAR_AXES if mix.get(k, 0.0) > 0]
+    mean_pop = (sum(populated) / len(populated)) if populated else 0.1
+    radar_values = []
+    for k in _RADAR_AXES:
+        v = mix.get(k, 0.0)
+        if v <= 0:
+            v = round(mean_pop * elo_strength, 3)  # assume by grappler ELO
+        radar_values.append(round(v, 3))
     payload = {
-        "radar": {"labels": _RADAR_LABELS,
-                  "values": [round(mix.get(k, 0.0), 3) for k in _RADAR_AXES]},
+        "radar": {"labels": _RADAR_LABELS, "values": radar_values},
         "graph": profile["_career_gv"],
         "signature": profile["signature_techniques"],
         "responses": [

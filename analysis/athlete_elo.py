@@ -63,6 +63,10 @@ K_BASE_FLOOR: float = 10.0  # log-decay asymptote
 GAP_DIVISOR: float = 400.0
 GAP_FACTOR_MIN: float = 0.1
 GAP_FACTOR_MAX: float = 1.0
+# Replay only ever consumes registered COMPETITIVE bouts (status == 'final'; drafts
+# are held out), and real competition results should move Grappling ELO harder than
+# the base ladder. This multiplier scales every replayed match's K. Tunable.
+COMPETITIVE_K_MULT: float = 1.5
 
 
 def base_elo_for_belt(belt: str | None) -> float:
@@ -143,7 +147,7 @@ def k_factor(n_matches: int, graph_elo: float, rank_target: float) -> float:
     base = _base_k(n_matches)
     gap = abs(rank_target - graph_elo) / GAP_DIVISOR
     gap_factor = max(GAP_FACTOR_MIN, min(GAP_FACTOR_MAX, gap))
-    return base * gap_factor
+    return base * gap_factor * COMPETITIVE_K_MULT
 
 
 def _your_entries(match: Any) -> list[dict[str, Any]]:
