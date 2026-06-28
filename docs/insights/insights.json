@@ -1,0 +1,307 @@
+{
+  "network": {
+    "nodes": 201,
+    "edges": 401,
+    "transitions": 523,
+    "athletes_profiled": 12
+  },
+  "pagerank": [
+    [
+      "Back Control",
+      0.08657
+    ],
+    [
+      "Mount",
+      0.04898
+    ],
+    [
+      "Takedown",
+      0.04648
+    ],
+    [
+      "Side Control",
+      0.02801
+    ],
+    [
+      "Sweep",
+      0.0263
+    ],
+    [
+      "Double Leg Takedown",
+      0.02375
+    ],
+    [
+      "Escape to Standing",
+      0.02289
+    ],
+    [
+      "Body Triangle",
+      0.01797
+    ],
+    [
+      "Rear Naked Choke",
+      0.01727
+    ],
+    [
+      "Half Guard Pass",
+      0.01624
+    ],
+    [
+      "Heel Hook Attempt",
+      0.01502
+    ],
+    [
+      "Heel Hook",
+      0.01378
+    ],
+    [
+      "North South Control",
+      0.01358
+    ],
+    [
+      "Closed Guard",
+      0.01193
+    ],
+    [
+      "Triangle Attempt",
+      0.01151
+    ]
+  ],
+  "reward_risk": [
+    [
+      "Body Triangle",
+      0.417,
+      14
+    ],
+    [
+      "Arm Triangle Attempt",
+      0.25,
+      5
+    ],
+    [
+      "Sweep",
+      0.214,
+      15
+    ],
+    [
+      "Rear Naked Choke Attempt",
+      0.167,
+      7
+    ],
+    [
+      "Heel Hook Attempt",
+      0.143,
+      9
+    ],
+    [
+      "Triangle Attempt",
+      0.143,
+      9
+    ],
+    [
+      "Back Control",
+      0.133,
+      64
+    ],
+    [
+      "Side Control",
+      0.056,
+      20
+    ],
+    [
+      "Mount",
+      0.033,
+      33
+    ],
+    [
+      "Pull Guard",
+      0.0,
+      15
+    ],
+    [
+      "Kimura Attempt",
+      0.0,
+      6
+    ],
+    [
+      "Half Guard Pass",
+      0.0,
+      8
+    ],
+    [
+      "Rear Naked Choke",
+      0.0,
+      12
+    ],
+    [
+      "Heel Hook",
+      0.0,
+      9
+    ],
+    [
+      "Single Leg Takedown",
+      0.0,
+      10
+    ]
+  ],
+  "routes": {
+    "Body Triangle": [
+      "Body Triangle",
+      "Rear Naked Choke"
+    ],
+    "Arm Triangle Attempt": [
+      "Arm Triangle Attempt",
+      "Neck Crank / Rear Naked Choke"
+    ],
+    "Sweep": [
+      "Sweep",
+      "Bear Trap",
+      "Calf Slicer"
+    ],
+    "Rear Naked Choke Attempt": [
+      "Rear Naked Choke Attempt",
+      "Double Leg Takedown",
+      "Back Control",
+      "Body Triangle",
+      "Rear Naked Choke"
+    ],
+    "Heel Hook Attempt": [
+      "Heel Hook Attempt",
+      "Takedown",
+      "Mount",
+      "Back Control",
+      "Body Triangle",
+      "Rear Naked Choke"
+    ],
+    "Triangle Attempt": [
+      "Triangle Attempt",
+      "Armbar Attempt"
+    ]
+  },
+  "communities": [
+    {
+      "size": 16,
+      "type_lead": "control",
+      "members": [
+        "Takedown",
+        "Mount",
+        "Side Control",
+        "Heel Hook Attempt",
+        "North South Control",
+        "Heel Hook",
+        "Half Guard Pass",
+        "Guard Pass",
+        "Back Take Attempt",
+        "Guard Pull",
+        "Darce Choke Attempt",
+        "Triangle Choke"
+      ]
+    },
+    {
+      "size": 12,
+      "type_lead": "transition",
+      "members": [
+        "Takedown Attempt",
+        "Pull Guard",
+        "Closed Guard",
+        "Guillotine Attempt",
+        "Single Leg Takedown",
+        "Triangle Attempt",
+        "Straight Foot Lock Attempt",
+        "Arm Drag to Back Take",
+        "Clinch Takedown",
+        "Single Leg Takedown Attempt",
+        "Crucifix",
+        "Sweep / Top Position"
+      ]
+    },
+    {
+      "size": 12,
+      "type_lead": "escape",
+      "members": [
+        "Escape to Standing",
+        "Half Guard",
+        "Sweep",
+        "Kimura Attempt",
+        "Armbar Attempt",
+        "Leg Lock Attempt",
+        "Guard",
+        "Bear Trap",
+        "Deep Half Guard",
+        "Knee Cut Pass",
+        "Escape",
+        "Guard Recovery"
+      ]
+    },
+    {
+      "size": 11,
+      "type_lead": "control",
+      "members": [
+        "Back Control",
+        "Double Leg Takedown",
+        "Body Triangle",
+        "Rear Naked Choke",
+        "Rear Naked Choke Attempt",
+        "Arm Triangle Attempt",
+        "Arm Drag",
+        "Kimura",
+        "Mount Attempt",
+        "Body Lock Takedown",
+        "Mounted Crucifix"
+      ]
+    },
+    {
+      "size": 1,
+      "type_lead": "takedown",
+      "members": [
+        "Double Leg Takedown Attempt"
+      ]
+    }
+  ],
+  "similarity": {
+    "Gordon Ryan": [
+      [
+        "Gabby Pagana",
+        0.93
+      ],
+      [
+        "Kade Ruotolo",
+        0.85
+      ],
+      [
+        "Andrew Tackett",
+        0.843
+      ],
+      [
+        "Felipe Andrew",
+        0.802
+      ],
+      [
+        "Levi Jones-Leary",
+        0.768
+      ]
+    ],
+    "Kade Ruotolo": [
+      [
+        "Felipe Andrew",
+        0.893
+      ],
+      [
+        "Gordon Ryan",
+        0.85
+      ],
+      [
+        "Gabby Pagana",
+        0.848
+      ],
+      [
+        "Khamzat Chimaev",
+        0.807
+      ],
+      [
+        "Andrew Tackett",
+        0.731
+      ]
+    ]
+  }
+}
