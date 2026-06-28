@@ -117,16 +117,16 @@ def match_narrative(bd: dict[str, Any]) -> list[Section]:
             f"{who}'s closing chain ran " + " → ".join(chain) + "."
         ]))
 
-    # ELO context.
-    da, db = a.get("elo_delta"), b.get("elo_delta")
+    # Grappling-ELO context — relative % move, never the raw rating.
+    da, db = a.get("elo_delta_pct"), b.get("elo_delta_pct")
     if da is not None or db is not None:
         bits = []
         if da is not None:
-            bits.append(f"{_name(a)} {da:+.1f} ({a['graph_elo']})")
+            bits.append(f"{_name(a)} {da:+.1f}%")
         if db is not None:
-            bits.append(f"{_name(b)} {db:+.1f} ({b['graph_elo']})")
-        sections.append(("Rating impact", [
-            "Graph-ELO moved: " + "; ".join(bits) + "."
+            bits.append(f"{_name(b)} {db:+.1f}%")
+        sections.append(("Grappling ELO", [
+            "This bout moved each fighter's Grappling ELO: " + "; ".join(bits) + "."
         ]))
 
     return sections
@@ -149,9 +149,10 @@ def profile_narrative(p: dict[str, Any]) -> list[Section]:
     opener = f"{name} grapples as a {arche.lower()}." if arche else f"{name}'s game, mapped."
     if bucket_str:
         opener += f" His mat time skews {bucket_str}."
-    rank = f.get("elo_rank")
+    rank, pctile = f.get("elo_rank"), f.get("elo_percentile")
     if rank:
-        opener += f" He sits #{rank} on the leaderboard for his division."
+        opener += f" He sits #{rank} by Grappling ELO in his division"
+        opener += f" (top {pctile}% overall)." if pctile else "."
     sections.append(("The system", [opener]))
 
     # Signature game.

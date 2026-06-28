@@ -111,6 +111,10 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
     elo_rank = next(
         (i + 1 for i, row in enumerate(same_class) if row[0] == athlete.id), None
     )
+    # Relative standing (top X%) across the whole leaderboard — shown instead of the
+    # raw rating, which is never surfaced. See [[grappling-elo-presentation]].
+    overall = next((i + 1 for i, row in enumerate(ranked) if row[0] == athlete.id), None)
+    elo_percentile = max(1, round(overall / len(ranked) * 100)) if overall and ranked else None
 
     type_counts: Counter[str] = Counter()
     label_counts: Counter[str] = Counter()
@@ -258,6 +262,7 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
             "graph_elo": round(athlete.elo, 1),
             "elo_series": [round(float(x), 1) for x in (athlete.elo_series or [])],
             "elo_rank": elo_rank,
+            "elo_percentile": elo_percentile,
             "finish_rate": finish_rate,
             "record": {"wins": wins, "losses": losses, "draws": draws},
         },

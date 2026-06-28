@@ -212,7 +212,12 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
 def _fighter_block(athlete: Athlete) -> dict[str, Any]:
     series = [round(float(x), 1) for x in (athlete.elo_series or [])]
     # ELO swing this bout = last snapshot minus the one before it (None if too short).
-    elo_delta = round(series[-1] - series[-2], 1) if len(series) >= 2 else None
+    # Presented as a RELATIVE % move (the raw rating is never shown user-facing).
+    elo_delta = elo_delta_pct = None
+    if len(series) >= 2:
+        elo_delta = round(series[-1] - series[-2], 1)
+        prev = series[-2]
+        elo_delta_pct = round((series[-1] - prev) / prev * 100, 1) if prev else None
     return {
         "name": athlete.name,
         "slug": slugify(athlete.name),
@@ -222,6 +227,7 @@ def _fighter_block(athlete: Athlete) -> dict[str, Any]:
         "graph_elo": round(athlete.elo, 1),
         "elo_series": series,
         "elo_delta": elo_delta,
+        "elo_delta_pct": elo_delta_pct,
         "career_graph_ref": f"fighters/{slugify(athlete.name)}.json",
     }
 

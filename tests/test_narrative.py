@@ -38,15 +38,18 @@ def _breakdown() -> dict[str, Any]:
             "momentum_series": [1.0, 1.0, 1.0, 0.75],
         },
         "fighters": {
-            "a": {"name": "Khamzat Chimaev", "graph_elo": 1884.0, "elo_delta": 46.0},
-            "b": {"name": "Gilbert Burns", "graph_elo": 1791.0, "elo_delta": -31.0},
+            "a": {"name": "Khamzat Chimaev", "graph_elo": 1884.0,
+                  "elo_delta": 46.0, "elo_delta_pct": 2.5, "elo_pct": 1},
+            "b": {"name": "Gilbert Burns", "graph_elo": 1791.0,
+                  "elo_delta": -31.0, "elo_delta_pct": -1.7, "elo_pct": 4},
         },
     }
 
 
 def _profile() -> dict[str, Any]:
     return {
-        "fighter": {"name": "Gordon Ryan", "elo_rank": 1, "finish_rate": 0.6},
+        "fighter": {"name": "Gordon Ryan", "elo_rank": 1, "elo_percentile": 1,
+                    "finish_rate": 0.6},
         "archetype": "Submission Hunter",
         "style_mix": {"control": 0.32, "guard": 0.05, "pass": 0.20, "submission": 0.18,
                       "takedown": 0.05, "sweep": 0.10, "escape": 0.05, "transition": 0.05,
@@ -87,6 +90,12 @@ class TestMatchNarrative:
         body = _flat(match_narrative(_breakdown()))
         assert "Double Leg Takedown → Mount → Back Control" in body
 
+    def test_grappling_elo_relative(self) -> None:
+        body = _flat(match_narrative(_breakdown()))
+        assert "Grappling ELO" in body
+        assert "+2.5%" in body and "-1.7%" in body
+        assert "1884" not in body  # raw rating never shown
+
     def test_no_template_leftovers(self) -> None:
         body = _flat(match_narrative(_breakdown()))
         assert "{" not in body and "}" not in body
@@ -108,7 +117,7 @@ class TestProfileNarrative:
     def test_archetype_and_rank(self) -> None:
         body = _flat(profile_narrative(_profile()))
         assert "submission hunter" in body
-        assert "#1 on the leaderboard" in body
+        assert "#1 by Grappling ELO" in body
 
     def test_response_and_finishing(self) -> None:
         body = _flat(profile_narrative(_profile()))
