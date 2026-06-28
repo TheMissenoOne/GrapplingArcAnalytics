@@ -25,6 +25,10 @@ from db.repository import _perspective_view, get_matches_for_athlete
 # A fighter needs at least this many sequence-bearing bouts to be worth profiling.
 MIN_SEQUENCE_BOUTS = 3
 
+# …and at least this many of their OWN grappling events across those bouts, or the
+# dossier is noise (a striker with a couple of scrambles isn't a grappling profile).
+MIN_DOSSIER_EVENTS = 15
+
 # The offensive buckets (share of these = ``offense_ratio``, mirrors analysis.archetype).
 _OFFENSE = ("submission", "takedown", "sweep")
 
@@ -284,5 +288,6 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
             ],
         },
         "bouts": bouts,
+        "grappling_events": own_events,  # relevance signal — see MIN_DOSSIER_EVENTS
         "career_graph_ref": f"fighters/{_slug(athlete.name)}.json",
     }

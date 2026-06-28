@@ -32,7 +32,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from analysis.names import _normalize_name
-from analysis.style_profile import build_style_profile, qualifies
+from analysis.style_profile import MIN_DOSSIER_EVENTS, build_style_profile, qualifies
 from db.models import Archetype, Athlete
 from export.match_breakdown import (
     _final_matches,
@@ -48,6 +48,11 @@ logger = logging.getLogger(__name__)
 
 _DEFAULT_OUT = Path(__file__).resolve().parents[2] / "GrapplingArc" / "site"
 _CATS = {"guard", "pass", "sweep", "takedown", "control", "submission", "escape", "transition"}
+
+# Grapple-Like radar = the App analytics tab's axes (SpiderChart categoryOrder,
+# clockwise from the top), so the site and the app read the same fingerprint.
+_RADAR_AXES = ["pass", "control", "submission", "escape", "guard", "sweep", "takedown"]
+_RADAR_LABELS = ["Pass", "Control", "Submission", "Escape", "Guard", "Sweep", "Takedown"]
 
 
 # ── small helpers ────────────────────────────────────────────────────────────
@@ -219,6 +224,9 @@ def build_fighters(
             if athlete is None or not qualifies(aid, session):
                 continue
             profile = build_style_profile(athlete, session)
+            # Hide irrelevant dossiers: a striker with a couple of scrambles is noise.
+            if profile["grappling_events"] < MIN_DOSSIER_EVENTS:
+                continue
             career = _career_graphview(athlete, profile, session, 12)
             card = _truncate_graph(career, 8)
             slug = slugify(athlete.name)
@@ -291,6 +299,7 @@ _HEAD = """<!DOCTYPE html><html lang="en"><head>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="icon" type="image/svg+xml" href="logo.svg"/>
 <link rel="stylesheet" href="site.css"/></head><body>"""
 
 
@@ -424,20 +433,22 @@ def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
 
 # ── dossier detail page ──────────────────────────────────────────────────────
 _PROFILE_JS = """
-// radar fingerprint
+// radar fingerprint — same axes as the App analytics tab (pass/control/submission/
+// escape/guard/sweep/takedown), auto-scaled so the strongest category fills the web.
 (function(){
   const c=document.getElementById('radar'); if(!c) return; const x=c.getContext('2d');
-  const F=P.fingerprint, axes=[['top','Top'],['back','Back'],['legs','Legs'],['guard','Guard'],['pace','Pace'],['scramble','Scramble']];
-  const vals=axes.map(([k])=>Math.max(0.04,F[k]||0)), cx=160,cy=150,R=98;
-  function poly(s,fill,stroke,lw){x.beginPath();axes.forEach((_,i)=>{const ang=-Math.PI/2+i/axes.length*Math.PI*2,r=R*s[i],
+  const labels=P.radar.labels, raw=P.radar.values, N=labels.length;
+  const mx=Math.max(0.0001,...raw), vals=raw.map(v=>Math.max(0.03,v/mx));
+  const cx=160,cy=150,R=98;
+  function poly(s,fill,stroke,lw){x.beginPath();labels.forEach((_,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2,r=R*s[i],
     px=cx+Math.cos(ang)*r,py=cy+Math.sin(ang)*r;i?x.lineTo(px,py):x.moveTo(px,py);});x.closePath();
     if(fill){x.fillStyle=fill;x.fill();}x.strokeStyle=stroke;x.lineWidth=lw;x.stroke();}
-  [0.25,0.5,0.75,1].forEach(g=>poly(axes.map(()=>g),null,'#23232a',1));
-  axes.forEach((_,i)=>{const ang=-Math.PI/2+i/axes.length*Math.PI*2;x.strokeStyle='#23232a';
+  [0.25,0.5,0.75,1].forEach(g=>poly(labels.map(()=>g),null,'rgba(255,255,255,.10)',1));
+  labels.forEach((_,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2;x.strokeStyle='rgba(255,255,255,.10)';
     x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(ang)*R,cy+Math.sin(ang)*R);x.stroke();});
-  poly(vals,'rgba(77,134,255,.22)','#4d86ff',2);
-  x.fillStyle='#a2a2ad';x.font="600 11px 'Spline Sans Mono',monospace";x.textAlign='center';x.textBaseline='middle';
-  axes.forEach(([_,l],i)=>{const ang=-Math.PI/2+i/axes.length*Math.PI*2;x.fillText(l,cx+Math.cos(ang)*(R+18),cy+Math.sin(ang)*(R+14));});
+  poly(vals,'rgba(126,168,255,.20)','#7ea8ff',2);
+  x.fillStyle='#cdd2e0';x.font="600 10.5px 'Spline Sans Mono',monospace";x.textAlign='center';x.textBaseline='middle';
+  labels.forEach((l,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2;x.fillText(l,cx+Math.cos(ang)*(R+20),cy+Math.sin(ang)*(R+15));});
 })();
 // career graph
 GAGraph.mount(document.getElementById('careerGraph'),{mode:'map',nodes:P.graph.nodes,links:P.graph.links});
@@ -467,8 +478,10 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     rec = f["record"]
     rank = f.get("elo_rank")
     icons = {"taken down": "T", "guard passed": "P", "back taken": "B", "swept": "S"}
+    mix = profile["style_mix"]
     payload = {
-        "fingerprint": profile["fingerprint"],
+        "radar": {"labels": _RADAR_LABELS,
+                  "values": [round(mix.get(k, 0.0), 3) for k in _RADAR_AXES]},
         "graph": profile["_career_gv"],
         "signature": profile["signature_techniques"],
         "responses": [
@@ -492,8 +505,17 @@ def render_profile_page(profile: dict[str, Any]) -> str:
         sub_meta += f"<span><b>#{rank}</b> ELO · {html.escape(f.get('weight_class') or '')}</span>"
     arche = profile.get("archetype") or "Grappler"
     bio = sections[0][1][0] if sections else ""
+    # Per-athlete lead background: their photo (assets/fighters/<slug>.jpg) over a
+    # name-seeded gradient fallback, desaturated to B&W by the .hero-bg CSS filter.
+    slug = f["slug"]
+    h1 = sum(ord(c) for c in slug) % 360  # deterministic (hash() is per-process salted)
+    h2 = (h1 + 40) % 360
+    hero_bg = (f"background-image:url('assets/fighters/{slug}.jpg'),"
+               f"linear-gradient(135deg,hsl({h1},38%,16%),hsl({h2},32%,7%))")
     body = f"""{_nav('grapple')}
-<section class="dossier"><div class="wrap">
+<section class="dossier">
+  <div class="hero-bg" style="{hero_bg}"></div>
+  <div class="wrap">
   <div class="flex ac g12" style="margin-bottom:22px">
     <a href="grapple-like.html" class="tag" style="text-decoration:none">← Grapple Like</a>
     <span class="kicker">Athlete dossier</span>
@@ -554,6 +576,11 @@ def _js_file(var: str, data: Any) -> str:
 
 def export_site(session: Session, out: Path) -> dict[str, int]:
     out.mkdir(parents=True, exist_ok=True)
+    # Prune stale generated detail pages so hidden fighters / dropped bouts don't orphan
+    # (keep the hand-written static grapple-like.html index).
+    for old in (*out.glob("breakdown-*.html"), *out.glob("grapple-*.html")):
+        if old.name != "grapple-like.html":
+            old.unlink()
     rows, full, featured = build_breakdowns(session)
     fighters, details = build_fighters(session)
     elo = build_elo(session)
