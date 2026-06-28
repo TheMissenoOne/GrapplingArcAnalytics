@@ -165,6 +165,7 @@ def build_breakdowns(
     The featured bout = the decided match with the highest combined opponent rank_elo, so the
     homepage spotlight is real (names, method, mini-stats) and auto-updates with the data.
     """
+    standings = _elo_standings(session)
     rows: list[dict[str, Any]] = []
     full: list[tuple[str, dict[str, Any]]] = []
     featured: dict[str, Any] | None = None
@@ -176,6 +177,8 @@ def build_breakdowns(
             continue
         slug = match_slug(a, b, match.year)
         bd = build_match_breakdown(match, a, b)
+        bd["fighters"]["a"]["elo_pct"] = standings.get(a.id)
+        bd["fighters"]["b"]["elo_pct"] = standings.get(b.id)
         gv = _to_graphview(bd["transition_graph"])
         rows.append({
             "id": slug, "href": f"breakdown-{slug}.html",
@@ -252,7 +255,18 @@ def build_fighters(
     return cards, details
 
 
+def _elo_standings(session: Session) -> dict[str, int]:
+    """athlete_id → Grappling-ELO percentile (top X%) across the whole leaderboard."""
+    rows = list(session.execute(
+        select(Athlete.id, Athlete.rank_elo)
+        .where(Athlete.rank_elo.isnot(None)).order_by(Athlete.rank_elo.desc())
+    ))
+    n = len(rows)
+    return {rid: max(1, round((i + 1) / n * 100)) for i, (rid, _) in enumerate(rows)} if n else {}
+
+
 def build_elo(session: Session, limit: int = 8) -> list[list[Any]]:
+    """Leaderboard rows as RELATIVE values (% of the #1 rating) — never the raw number."""
     rows = list(session.execute(
         select(Athlete.name, Athlete.rank_elo)
         .where(Athlete.rank_elo.isnot(None)).order_by(Athlete.rank_elo.desc()).limit(limit)
@@ -260,8 +274,11 @@ def build_elo(session: Session, limit: int = 8) -> list[list[Any]]:
     if not rows:
         return []
     top = float(rows[0][1])
-    return [[str(i + 1), name, round(float(score)),
-             round(float(score) / top * 100)] for i, (name, score) in enumerate(rows)]
+    out = []
+    for i, (name, score) in enumerate(rows):
+        rel = round(float(score) / top * 100)
+        out.append([str(i + 1), name, f"{rel}%", rel])
+    return out
 
 
 # ── HTML chrome ──────────────────────────────────────────────────────────────
@@ -369,15 +386,18 @@ def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
         _stat_row("Control positions", sa["controls"], sb["controls"]),
     ])
 
-    def sig_card(f: dict[str, Any], label: str) -> str:
-        d = f.get("elo_delta")
+    def sig_card(f: dict[str, Any], name: str) -> str:
+        # Relative standing (top X%) + a % move — never the raw rating.
+        pct = f.get("elo_pct")
+        value = f"Top {pct}%" if pct else "Unranked"
+        d = f.get("elo_delta_pct")
         delta = ""
         if d is not None:
             cls = "up" if d >= 0 else "down"
             arrow = "▲" if d >= 0 else "▼"
-            delta = f'<div class="delta {cls}">{arrow} {d:+.1f} post-bout</div>'
-        return (f'<div class="sig-card"><div class="k">{label}</div>'
-                f'<div class="v">{f["graph_elo"]}</div>{delta}</div>')
+            delta = f'<div class="delta {cls}">{arrow} {d:+.1f}% this bout</div>'
+        return (f'<div class="sig-card"><div class="k">{html.escape(name)} · Grappling ELO</div>'
+                f'<div class="v">{value}</div>{delta}</div>')
 
     payload = {
         "a": a["name"], "b": b["name"],
@@ -420,7 +440,7 @@ def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
   <div class="divider"></div>
   <section class="block"><div class="wrap prose"><div class="sec-label">Rating &amp; significance</div></div>
     <div class="wrap viz"><div class="sig-cards">
-      {sig_card(a, a['name'] + ' ELO')}{sig_card(b, b['name'] + ' ELO')}
+      {sig_card(a, a['name'])}{sig_card(b, b['name'])}
       <div class="sig-card"><div class="k">Method</div><div class="v">{html.escape(meta['method'])}</div></div>
     </div></div></section>
 </article>
@@ -497,12 +517,15 @@ def render_profile_page(profile: dict[str, Any]) -> str:
         f'<div class="fincard"><div class="k">Finish rate</div><div class="v sub">{round(fin["finish_rate"] * 100)}%</div><div class="cap">of wins by submission</div></div>',
         f'<div class="fincard"><div class="k">Submission family</div><div class="v">{html.escape(fam.get("dominant") or "—")}</div><div class="cap">{html.escape(", ".join(sub_lines))}</div></div>',
         f'<div class="fincard"><div class="k">Decision rate</div><div class="v">{round(fin["decision_rate"] * 100)}%</div><div class="cap">of decided bouts</div></div>',
-        f'<div class="fincard"><div class="k">vs Top-10 ELO</div><div class="v" style="color:var(--good)">{fin["record_vs_elite"]["wins"]}–{fin["record_vs_elite"]["losses"]}</div><div class="cap">elite opposition</div></div>',
+        f'<div class="fincard"><div class="k">vs Top-10 Grappling ELO</div><div class="v" style="color:var(--good)">{fin["record_vs_elite"]["wins"]}–{fin["record_vs_elite"]["losses"]}</div><div class="cap">elite opposition</div></div>',
     ])
     sub_meta = f"<span><b>{rec['wins']}–{rec['losses']}</b> record</span>"
     sub_meta += f"<span><b>{round(f['finish_rate'] * 100)}%</b> finish rate</span>"
     if rank:
-        sub_meta += f"<span><b>#{rank}</b> ELO · {html.escape(f.get('weight_class') or '')}</span>"
+        sub_meta += f"<span><b>#{rank}</b> Grappling ELO</span>"
+    pctile = f.get("elo_percentile")
+    if pctile:
+        sub_meta += f"<span><b>Top {pctile}%</b> overall</span>"
     arche = profile.get("archetype") or "Grappler"
     bio = sections[0][1][0] if sections else ""
     # Per-athlete lead background: their photo (assets/fighters/<slug>.jpg) over a
@@ -561,6 +584,7 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     <h2 class="h-lg mt16">See the system in action</h2></div>
     <a class="btn" href="breakdowns.html">All breakdowns →</a></div>
   <div class="mgrid" id="linked"></div>
+  <p class="graph-hint" style="margin-top:30px">Lead photo via <a href="https://commons.wikimedia.org/" style="color:var(--ink-3);text-decoration:underline">Wikimedia Commons</a> (CC BY) — see <a href="assets/fighters/LICENSES.md" style="color:var(--ink-3);text-decoration:underline">credits</a>.</p>
 </div></section>
 {_FOOTER}
 <script src="graph.js"></script><script src="i18n.js"></script>
