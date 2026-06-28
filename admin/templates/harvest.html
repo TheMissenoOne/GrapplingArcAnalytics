@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Harvest — Admin{% endblock %}
+{% block content %}
+<h1>Harvest fight transcripts</h1>
+
+{% if msg %}<p class="badge badge-green" style="display:inline-block;margin-bottom:14px">{{ msg }}</p>{% endif %}
+
+<div class="card">
+  <h2 style="margin-top:0">1 · Harvest transcripts → prompt files</h2>
+  <p style="color:#888;font-size:0.88rem;margin-bottom:12px">
+    Fetches each video's transcript and writes a file (transcript + processing prompt) to
+    <code>data/harvest/inbox/</code>. No AI runs here — you process the files yourself.
+  </p>
+  <form method="post" action="/admin/harvest/run">
+    <label>Video URLs, search URLs, or "Name vs Name" queries (one per line)</label>
+    <textarea name="urls" rows="5" placeholder="https://youtu.be/XXXXXXXXXXX&#10;Gordon Ryan vs Felipe Pena ADCC 2022&#10;https://www.youtube.com/results?search_query=Tye+Ruotolo+vs+Levi+Jones-Leary"></textarea>
+    <p style="color:#888;font-size:0.82rem;margin:-6px 0 12px">A search URL or plain query harvests the <strong>top</strong> result. Note: YouTube may rate-limit transcript fetches — if a video shows "no_transcript", retry later or pick another upload.</p>
+    <label>…or a public playlist URL (harvests every video)</label>
+    <input name="playlist" placeholder="https://www.youtube.com/playlist?list=PL...">
+    <div class="grid2">
+      <div><label>Fighter A (optional — single URL)</label><input name="fighter" placeholder="Gordon Ryan"></div>
+      <div><label>Fighter B (optional — single URL)</label><input name="opponent" placeholder="Felipe Pena"></div>
+      <div><label>Year (optional)</label><input name="year" type="number" placeholder="2022"></div>
+      <div><label>Transcript language</label><input name="lang" value="en"></div>
+    </div>
+    <button type="submit" class="btn btn-primary">Harvest</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">2 · Inbox — paste each into ChatGPT / Copilot / Deepseek ({{ inbox|length }})</h2>
+  {% for f in inbox %}
+  <details style="margin-bottom:10px">
+    <summary style="cursor:pointer;color:#7c9ef5">{{ f.name }}</summary>
+    <textarea readonly rows="10" onclick="this.select()" style="margin-top:8px;font-family:monospace;font-size:0.8rem">{{ f.content }}</textarea>
+    <form method="post" action="/admin/harvest/delete" style="display:inline">
+      <input type="hidden" name="name" value="{{ f.name }}"><input type="hidden" name="kind" value="inbox">
+      <button class="btn btn-danger" style="padding:4px 10px">Delete</button>
+    </form>
+  </details>
+  {% else %}
+  <p style="color:#555">No harvested files yet — run step 1.</p>
+  {% endfor %}
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">3 · Paste the processed JSON back</h2>
+  <p style="color:#888;font-size:0.88rem;margin-bottom:12px">
+    Paste the JSON object the model returned. Saved to <code>data/harvest/processed/</code>.
+  </p>
+  <form method="post" action="/admin/harvest/processed">
+    <label>Filename (optional)</label>
+    <input name="filename" placeholder="gordon_vs_pena_2022">
+    <label>Processed match JSON</label>
+    <textarea name="processed_json" rows="8" placeholder='{"fighter":"...","opponent":"...","year":2022,"winner":"...","win_type":"SUBMISSION","events":[...]}'></textarea>
+    <button type="submit" class="btn btn-primary">Save processed JSON</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0">4 · Import processed → draft queue</h2>
+  <p style="color:#888;font-size:0.88rem;margin-bottom:12px">
+    Imports every file in <code>data/harvest/processed/</code> as a <strong>draft</strong> match
+    (excluded from graphs until approved on the athlete's page).
+    Current drafts: <strong>{{ draft_count }}</strong> · <a href="/admin/athletes" style="color:#7c9ef5">review on athlete pages →</a>
+  </p>
+  <table style="margin-bottom:14px">
+    <thead><tr><th>Processed file</th><th></th></tr></thead>
+    <tbody>
+      {% for name in processed %}
+      <tr>
+        <td>{{ name }}</td>
+        <td>
+          <form method="post" action="/admin/harvest/delete" style="display:inline">
+            <input type="hidden" name="name" value="{{ name }}"><input type="hidden" name="kind" value="processed">
+            <button class="btn btn-danger" style="padding:2px 10px">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="2" style="color:#555">No processed files yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <form method="post" action="/admin/harvest/import">
+    <button type="submit" class="btn btn-success">Import processed → drafts</button>
+  </form>
+</div>
+{% endblock %}

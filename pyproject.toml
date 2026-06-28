@@ -23,6 +23,10 @@ dependencies = [
     "beautifulsoup4>=4.12",
     "nest-asyncio>=1.6",
 
+    # YouTube fight-transcript harvesting (harvest/)
+    "youtube-transcript-api>=0.6,<1",
+    "feedparser>=6.0",
+
     # ML
     "scikit-learn>=1.5",
     "xgboost>=2.1",

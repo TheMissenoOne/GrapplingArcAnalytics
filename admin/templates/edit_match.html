@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Edit match — {{ athlete.name }}{% endblock %}
+{% block content %}
+<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+  <h1 style="margin:0">Edit Match</h1>
+  <a href="/admin/athletes/{{ athlete.id }}" style="margin-left:auto;color:#777;font-size:0.9rem">← {{ athlete.name }}</a>
+</div>
+
+<div class="card">
+  <p style="color:#666;font-size:0.9rem;margin-top:0">
+    Editing this match re-runs the chronological replay, so the whole graph + ELO update on save.
+  </p>
+  <details class="advanced" style="margin-bottom:14px">
+    <summary>Paste full match JSON to refill the form</summary>
+    <textarea id="paste-json" rows="5" placeholder='{"opponent":"...","event":"...","year":2024,"win_type":"POINTS","stage":"SPF","won":true,"sequence":[...]}'></textarea>
+    <button type="button" id="paste-fill" class="btn">Fill form ↓</button>
+  </details>
+
+  <form method="post" action="/admin/athletes/{{ athlete.id }}/matches/{{ match.id }}" id="match-form">
+    <div class="grid2">
+      <div>
+        <label>Opponent (athlete)</label>
+        <select name="opponent_athlete_id" id="opponent-select">
+          <option value="">— or type a new name →</option>
+          {% for o in opponent_options %}
+          <option value="{{ o.id }}" data-name="{{ o.name }}" {% if o.id == match.opponent_id %}selected{% endif %}>{{ o.name }}{% if o.rank_elo is not none %} ({{ "%.0f"|format(o.rank_elo) }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>New opponent (creates athlete)</label>
+        <input name="opponent_name" placeholder="{{ match.opponent_name or 'B.J. Penn' }}">
+      </div>
+      <div>
+        <label>Event</label>
+        <input name="event" value="{{ match.event or '' }}">
+      </div>
+      <div>
+        <label>Year</label>
+        <input name="year" type="number" value="{{ match.year if match.year is not none else '' }}">
+      </div>
+      <div>
+        <label>Weight Class</label>
+        <input name="weight_class" value="{{ match.weight_class or '' }}">
+      </div>
+      <div>
+        <label>Win Type</label>
+        <select name="win_type">
+          {% for wt in ['SUBMISSION', 'DECISION', 'POINTS', 'DRAW', 'DQ'] %}
+          <option value="{{ wt }}" {% if match.win_type == wt %}selected{% endif %}>{{ wt }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Stage</label>
+        <select name="stage">
+          {% for st in ['R1', 'R2', '8F', '4F', 'SF', '3RD', 'F', 'SPF', 'E1'] %}
+          <option value="{{ st }}" {% if match.stage == st %}selected{% endif %}>{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Submission</label>
+        <input name="submission" value="{{ match.submission or '' }}" list="node-list">
+        <datalist id="node-list">
+          {% for n in node_options %}
+          <option value="{{ n.name }}">
+          {% endfor %}
+        </datalist>
+      </div>
+      <div>
+        <label>Result</label>
+        <select name="won">
+          <option value="true" {% if match.won %}selected{% endif %}>Win</option>
+          <option value="false" {% if not match.won %}selected{% endif %}>Loss / Draw</option>
+        </select>
+      </div>
+    </div>
+    <label>Sequence — search, ↑↓ to pick, Enter to add (` flips side)</label>
+    <div class="actor-toggle" role="group" aria-label="Who scored">
+      <button type="button" id="actor-you" class="active-you">You</button>
+      <button type="button" id="actor-opp">Opponent</button>
+    </div>
+    <input type="search" id="chip-search" class="chip-search" autocomplete="off"
+           placeholder="Search techniques…">
+    <div class="chip-results" id="chip-results" aria-label="Technique results"></div>
+    <script id="node-vocab" type="application/json">{{ node_options|tojson }}</script>
+    <p style="color:#666;font-size:0.8rem;margin:-4px 0 8px">Click a pill to flip you/opponent · × to remove · Backspace (empty search) removes last.</p>
+    <div class="pill-list" id="pill-list" aria-live="polite"></div>
+
+    <details class="advanced">
+      <summary>Advanced: edit raw JSON</summary>
+      <textarea name="sequence_json" id="sequence-json" rows="6">{{ match.sequence|tojson }}</textarea>
+    </details>
+
+    <button type="submit" class="btn btn-primary">Save &amp; Re-replay</button>
+  </form>
+</div>
+
+<script src="/admin/static/livematch.js"></script>
+{% endblock %}

@@ -25,16 +25,27 @@
 .actor-toggle button.active-you { background: #2e7d32; color: #fff; }
 .actor-toggle button.active-opp { background: #c62828; color: #fff; }
 
-.chip-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 8px; margin: 12px 0;
+.chip-search {
+  width: 100%; box-sizing: border-box; margin: 12px 0 6px;
+  background: #11151c; color: #cdd; border: 1px solid #333; border-radius: 8px;
+  padding: 10px 12px; font-size: 0.95rem;
 }
-.chip {
-  background: #1a1a2e; color: #cdd; border: 1px solid #333; border-radius: 8px;
-  padding: 12px 10px; cursor: pointer; font-size: 0.9rem; text-align: center;
-  min-height: 44px;
+.chip-results {
+  max-height: 260px; overflow-y: auto; border: 1px solid #2a2a3e; border-radius: 8px;
+  margin-bottom: 12px;
 }
-.chip:hover { background: #24243e; }
+.result-row {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: pointer;
+  border-bottom: 1px solid #20202e; font-size: 0.9rem;
+}
+.result-row:last-child { border-bottom: none; }
+.result-row:hover { background: #1d1d30; }
+.result-row.is-active { background: #28304a; }
+.result-row .dot {
+  width: 10px; height: 10px; border-radius: 50%; flex: 0 0 auto;
+}
+.result-row .r-label { color: #cdd; flex: 1; }
+.result-row .r-type { color: #777; font-size: 0.78rem; text-transform: capitalize; }
 
 .pill-list { display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; padding: 6px 0; }
 .pill {

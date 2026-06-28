@@ -49,6 +49,28 @@
   </div>
 </div>
 
+{% if graph and graph.edges|length > 0 %}
+<div class="card">
+  <h2>Graph</h2>
+  <div style="overflow:auto">
+    <svg id="athlete-graph" width="640" height="460"
+         data-graph='{{ graph|tojson }}'
+         style="min-width:640px;background:#11151c;border-radius:8px"></svg>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-size:0.78rem;color:#aab">
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#7c9ef5"></span> guard</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f5a25d"></span> pass</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#5dd0c3"></span> sweep</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#e2615f"></span> submission</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#b98cf0"></span> takedown</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#9aa7b5"></span> control</span>
+    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6fbf73"></span> escape</span>
+    <span style="color:#778">circle size = usage</span>
+  </div>
+</div>
+<script src="/admin/static/graphview.js"></script>
+{% endif %}
+
 <div class="card">
   <h2>ELO Convergence</h2>
   {% set gap = (athlete.rank_elo - athlete.elo) if athlete.rank_elo is not none else none %}
@@ -59,7 +81,7 @@
     <div class="stat"><span class="label">Gap</span><span class="value gap {{ 'pos' if gap >= 0 else 'neg' }}">{{ "%+.0f"|format(gap) }}</span></div>
     {% endif %}
     <svg class="spark" id="converge-spark" width="320" height="60"
-         data-series="{{ graph_elo_series|tojson }}"
+         data-series='{{ graph_elo_series|tojson }}'
          {% if athlete.rank_elo is not none %}data-target="{{ athlete.rank_elo }}"{% endif %}></svg>
   </div>
   <p style="color:#666;font-size:0.85rem;margin-top:8px">Graph ELO climbs from the belt floor toward the rank target as matches are registered.</p>
@@ -67,24 +89,25 @@
 
 <div class="card">
   <h2>Register Match</h2>
+  <details class="advanced" style="margin-bottom:14px">
+    <summary>Paste full match JSON to fill the form</summary>
+    <textarea id="paste-json" rows="5" placeholder='{"opponent":"Felipe Pena","event":"ADCC 2024","year":2024,"weight_class":"ABS","win_type":"POINTS","stage":"SPF","submission":null,"won":true,"sequence":[{"label":"Takedown","type":"takedown","actor":"you"}]}'></textarea>
+    <button type="button" id="paste-fill" class="btn">Fill form ↓</button>
+  </details>
   <form method="post" action="/admin/athletes/{{ athlete.id }}/matches" id="match-form">
     <div class="grid2">
       <div>
-        <label>Opponent (ranked)</label>
+        <label>Opponent (athlete)</label>
         <select name="opponent_athlete_id" id="opponent-select">
-          <option value="">— manual / unranked —</option>
+          <option value="">— or type a new name →</option>
           {% for o in opponent_options %}
-          <option value="{{ o.id }}" data-name="{{ o.name }}">{{ o.name }} ({{ "%.0f"|format(o.rank_elo) }})</option>
+          <option value="{{ o.id }}" data-name="{{ o.name }}">{{ o.name }}{% if o.rank_elo is not none %} ({{ "%.0f"|format(o.rank_elo) }}){% endif %}</option>
           {% endfor %}
         </select>
       </div>
       <div>
-        <label>Opponent (manual)</label>
+        <label>New opponent (creates athlete)</label>
         <input name="opponent_name" placeholder="B.J. Penn">
-      </div>
-      <div>
-        <label>Opponent ELO (manual)</label>
-        <input name="opponent_elo" type="number" placeholder="1100">
       </div>
       <div>
         <label>Event</label>
@@ -104,6 +127,7 @@
           <option value="SUBMISSION">SUBMISSION</option>
           <option value="DECISION">DECISION</option>
           <option value="POINTS">POINTS</option>
+          <option value="DRAW">DRAW</option>
           <option value="DQ">DQ</option>
         </select>
       </div>
@@ -137,16 +161,16 @@
         </select>
       </div>
     </div>
-    <label>Live Match — tap to build the sequence</label>
+    <label>Live Match — search a technique, ↑↓ to pick, Enter to add (` flips side)</label>
     <div class="actor-toggle" role="group" aria-label="Who scored">
       <button type="button" id="actor-you" class="active-you">You</button>
       <button type="button" id="actor-opp">Opponent</button>
     </div>
-    <div class="chip-grid" id="chip-grid">
-      {% for n in node_options %}
-      <button type="button" class="chip" data-label="{{ n.name }}" data-type="{{ n.type }}">{{ n.name }}</button>
-      {% endfor %}
-    </div>
+    <input type="search" id="chip-search" class="chip-search" autocomplete="off"
+           placeholder="Search techniques…">
+    <div class="chip-results" id="chip-results" aria-label="Technique results"></div>
+    <script id="node-vocab" type="application/json">{{ node_options|tojson }}</script>
+    <p style="color:#666;font-size:0.8rem;margin:-4px 0 8px">Click a pill to flip you/opponent · × to remove · Backspace (empty search) removes last.</p>
     <div class="pill-list" id="pill-list" aria-live="polite"></div>
 
     <details class="advanced">
@@ -163,10 +187,10 @@
 <h2>Match History ({{ matches|length }})</h2>
 <table>
   <thead>
-    <tr><th>Year</th><th>Event</th><th>Opponent</th><th>Win Type</th><th>Stage</th><th>Submission</th><th>Result</th></tr>
+    <tr><th>Year</th><th>Event</th><th>Opponent</th><th>Win Type</th><th>Stage</th><th>Submission</th><th>Seq</th><th>Result</th><th></th></tr>
   </thead>
   <tbody>
-    {% for m in matches|sort(attribute='year', reverse=True) %}
+    {% for m in matches %}
     <tr>
       <td>{{ m.year or '—' }}</td>
       <td>{{ m.event or '—' }}</td>
@@ -174,10 +198,58 @@
       <td>{{ m.win_type or '—' }}</td>
       <td>{{ m.stage or '—' }}</td>
       <td>{{ m.submission or '—' }}</td>
-      <td>{% if m.won %}<span class="badge badge-green">W</span>{% else %}<span class="badge badge-gray">L</span>{% endif %}</td>
+      <td>{{ m.seq_len }}</td>
+      <td>
+        {% if m.result == 'D' %}<span class="badge badge-gray">D</span>
+        {% elif m.result == 'W' %}<span class="badge badge-green">W</span>
+        {% else %}<span class="badge badge-gray">L</span>{% endif %}
+      </td>
+      <td><a href="/admin/athletes/{{ athlete.id }}/matches/{{ m.id }}/edit" style="color:#7c9ef5">edit</a></td>
     </tr>
     {% else %}
-    <tr><td colspan="7" style="color:#555;text-align:center;padding:20px">No matches</td></tr>
+    <tr><td colspan="9" style="color:#555;text-align:center;padding:20px">No matches</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div style="display:flex;align-items:center;gap:14px;margin-top:28px">
+  <h2 style="margin:0">Draft Queue ({{ drafts|length }})</h2>
+  <form method="post" action="/admin/scraped/import" style="margin:0">
+    <button type="submit" class="btn">Import scraped drafts</button>
+  </form>
+  <span style="color:#666;font-size:0.82rem">Scraped matches stay out of the graph until approved.</span>
+</div>
+<table>
+  <thead>
+    <tr><th>Year</th><th>Event</th><th>Opponent</th><th>Win Type</th><th>Submission</th><th>Seq</th><th>Result</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for m in drafts %}
+    <tr>
+      <td>{{ m.year or '—' }}</td>
+      <td>{{ m.event or '—' }}</td>
+      <td>{{ m.opponent_name or '—' }}</td>
+      <td>{{ m.win_type or '—' }}</td>
+      <td>{{ m.submission or '—' }}</td>
+      <td>{{ m.seq_len }}</td>
+      <td>
+        {% if m.result == 'D' %}<span class="badge badge-gray">D</span>
+        {% elif m.result == 'W' %}<span class="badge badge-green">W</span>
+        {% else %}<span class="badge badge-gray">L</span>{% endif %}
+      </td>
+      <td style="white-space:nowrap">
+        <a href="/admin/athletes/{{ athlete.id }}/matches/{{ m.id }}/edit" style="color:#7c9ef5">edit</a>
+        <form method="post" action="/admin/athletes/{{ athlete.id }}/matches/{{ m.id }}/approve" style="display:inline;margin-left:8px">
+          <button type="submit" class="btn btn-success" style="padding:2px 10px">Approve</button>
+        </form>
+        <form method="post" action="/admin/athletes/{{ athlete.id }}/matches/{{ m.id }}/delete" style="display:inline;margin-left:4px"
+              onsubmit="return confirm('Delete this draft?')">
+          <button type="submit" class="btn" style="padding:2px 10px">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" style="color:#555;text-align:center;padding:20px">No drafts — click “Import scraped drafts”.</td></tr>
     {% endfor %}
   </tbody>
 </table>

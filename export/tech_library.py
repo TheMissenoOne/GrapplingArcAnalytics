@@ -246,10 +246,34 @@ def build_effectiveness(adcc_df: pd.DataFrame) -> dict[str, dict[str, Any]]:
     return effectiveness
 
 
+def _load_match_techniques() -> list[dict[str, str]]:
+    """Distinct techniques recorded from entered athlete matches.
+
+    Reads ``technique_nodes`` (``source='user'``) — every technique register_match
+    has seen. Returns ``[{label, node_type}]``. DB-optional: if DATABASE_URL is
+    unset or the read fails, returns ``[]`` so the export still runs offline."""
+    try:
+        from sqlalchemy import select
+
+        from db.base import db_session
+        from db.models import TechniqueNode
+
+        with db_session() as session:
+            rows = session.execute(
+                select(TechniqueNode.label, TechniqueNode.node_type)
+                .where(TechniqueNode.source == "user")
+            ).all()
+        return [{"label": str(lbl or ""), "node_type": str(nt or "")} for lbl, nt in rows]
+    except Exception as exc:  # no DB / not configured — skip the match-technique pass
+        logger.info("Skipping match-technique merge (no DB): %s", exc)
+        return []
+
+
 def build_technique_library(
     tech_df: pd.DataFrame,
     effectiveness: dict[str, dict[str, Any]],
     existing_nodes: list[dict[str, Any]],
+    match_techs: list[dict[str, str]] | None = None,
 ) -> list[dict[str, Any]]:
     """Build enriched NodeLibraryItem[] from all sources."""
 
@@ -333,6 +357,32 @@ def build_technique_library(
             "effectiveness": eff,
         }
         library.append(entry)
+        index += 1
+
+    # ── 2c. Add techniques seen in entered athlete matches (novel only) ──
+    # Every technique in a registered match must enter the app's offline catalog
+    # too (not just the shared technique_nodes table). app_type comes from the
+    # sequence's node_type bucket; novel-by-normalized-key and not already in app.
+    for mt in match_techs or []:
+        name_en = str(mt.get("label", "")).strip()
+        if not name_en:
+            continue
+        norm = _normalize_name(name_en)
+        if not norm or norm in seen_normalized or _name_in_nodes(norm, existing_nodes):
+            continue
+        seen_normalized.add(norm)
+        node_type = str(mt.get("node_type", "")).lower().strip()
+        app_type = node_type if node_type in TYPE_DISPLAY else "concept"
+        pt_name = DEFAULT_PT_TRANSLATIONS.get(norm, name_en)
+        library.append({
+            "_id": _make_oid(index),
+            "name": pt_name,
+            "type": app_type,
+            "translations": {"en": name_en, "pt": pt_name},
+            "variations": _generate_variations(name_en, pt_name),
+            "source": "athlete_match",
+            "already_in_app": False,
+        })
         index += 1
 
     # ── 3. Sort by effectiveness descending (submissions first), then alpha ──
@@ -514,7 +564,10 @@ def export_tech_library() -> dict[str, Any]:
     effectiveness = build_effectiveness(adcc_df)
     logger.info("Built effectiveness scores for %d submission techniques", len(effectiveness))
 
-    library = build_technique_library(tech_df, effectiveness, existing_nodes)
+    match_techs = _load_match_techniques()
+    if match_techs:
+        logger.info("Merging %d match-derived techniques from technique_nodes", len(match_techs))
+    library = build_technique_library(tech_df, effectiveness, existing_nodes, match_techs)
 
     lib_path, eff_path = export_library(library)
 

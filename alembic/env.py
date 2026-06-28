@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 
-import os
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, pool
-
 from alembic import context
+
+try:  # make `alembic` CLI work standalone (the app loads .env elsewhere)
+    from dotenv import load_dotenv
+
+    load_dotenv()
+except ImportError:
+    pass
 
 config = context.config
 if config.config_file_name:
@@ -15,30 +19,21 @@ if config.config_file_name:
 
 # Import all models so Alembic detects them
 import db.models  # noqa: E402, F401
-from db.base import Base  # noqa: E402
+from db.base import Base, get_engine  # noqa: E402
 
 target_metadata = Base.metadata
 
-# Override sqlalchemy.url from env
-db_url = os.environ.get("DATABASE_URL", "")
-if db_url:
-    config.set_main_option("sqlalchemy.url", db_url)
-
-
+# Both modes reuse db.base.get_engine so the DSN normalization (psycopg v3 driver +
+# component parsing for special chars in the password) lives in exactly one place.
 def run_migrations_offline() -> None:
-    url = config.get_main_option("sqlalchemy.url")
+    url = get_engine().url.render_as_string(hide_password=False)
     context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
     with context.begin_transaction():
         context.run_migrations()
 
 
 def run_migrations_online() -> None:
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section) or {},
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-    with connectable.connect() as connection:
+    with get_engine().connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():
             context.run_migrations()
