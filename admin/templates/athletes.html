@@ -37,7 +37,11 @@
   </form>
 </div>
 
-<table>
+<input id="athlete-filter" type="search" placeholder="Filter athletes by name…"
+       autocomplete="off"
+       style="width:100%;margin:8px 0 4px;padding:8px 10px;background:#11151c;border:1px solid #2a313c;border-radius:6px;color:#c8d0db">
+<p id="athlete-count" style="color:#666;font-size:0.8rem;margin:0 0 8px"></p>
+<table id="athlete-table">
   <thead>
     <tr>
       <th>Name</th><th>Team</th><th>Belt</th><th>Graph ELO</th><th>Rank ELO</th><th>Published</th><th></th>
@@ -45,7 +49,7 @@
   </thead>
   <tbody>
     {% for a in athletes %}
-    <tr>
+    <tr data-name="{{ a.name|lower }} {{ (a.nickname or '')|lower }}">
       <td><a href="/admin/athletes/{{ a.id }}" style="color:#7c9ef5">{{ a.name }}</a>{% if a.nickname %} <span style="color:#666">({{ a.nickname }})</span>{% endif %}</td>
       <td>{{ a.team or '—' }}</td>
       <td>{{ a.belt or '—' }}</td>
@@ -68,4 +72,25 @@
     <button type="submit" class="btn btn-primary">Run</button>
   </form>
 </div>
+
+<script>
+(function () {
+  var input = document.getElementById("athlete-filter");
+  var rows = Array.prototype.slice.call(
+    document.querySelectorAll("#athlete-table tbody tr[data-name]")
+  );
+  var count = document.getElementById("athlete-count");
+  function apply() {
+    var q = input.value.trim().toLowerCase();
+    var shown = 0;
+    rows.forEach(function (tr) {
+      var hit = !q || tr.getAttribute("data-name").indexOf(q) !== -1;
+      tr.style.display = hit ? "" : "none";
+      if (hit) shown++;
+    });
+    count.textContent = shown + " / " + rows.length + " athletes";
+  }
+  if (input && rows.length) { input.addEventListener("input", apply); apply(); }
+})();
+</script>
 {% endblock %}

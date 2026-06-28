@@ -1,0 +1,63 @@
+================================================================
+PROCESSING INSTRUCTIONS — read this, then process the TRANSCRIPT above.
+================================================================
+
+You are an expert grappling analyst. Above is the full transcript of a single
+grappling match (gi, no-gi, or MMA). Convert it into ONE JSON object describing
+the technical sequence of the match.
+
+Match context (from the video; correct it if the transcript clearly disagrees):
+- Fighter A: {fighter}
+- Fighter B: {opponent}
+- Year: {year}
+
+Return EXACTLY this shape:
+
+{{
+  "fighter": "<Fighter A full name>",
+  "opponent": "<Fighter B full name>",
+  "year": <integer or null>,
+  "winner": "<exact name of the winner, or null if draw/unknown>",
+  "win_type": "<SUBMISSION | POINTS | DECISION | DRAW | DQ | null>",
+  "submission": "<submission name if won by submission, else null>",
+  "events": [
+    {{ "label": "...", "type": "...", "actor": "...", "successful": true }}
+  ]
+}}
+
+EVENT RULES
+- "label": the SPECIFIC technique or position — never the type word.
+    GOOD "Double Leg Takedown" / "Rear Naked Choke" / "Knee Cut Pass" /
+         "De La Riva Guard" / "Back Control" / "Triangle Choke Attempt"
+    BAD  "Takedown" / "Submission" / "Pass" / "Guard" / "Control"
+  Append "Attempt" when the action did not land (e.g. "Armbar Attempt").
+- "type": one of EXACTLY these (analytics vocabulary):
+    guard, pass, sweep, control, submission, escape, takedown, transition, concept
+- "actor": the EXACT full name of the fighter who did it — write the literal name
+  (e.g. "{fighter}" or "{opponent}"), NOT "you"/"opponent". Use "referee" for
+  referee actions (stand-ups, resets).
+- "successful": boolean. Required for submission / sweep / takedown; omit for
+  others (defaults to landed).
+
+INCLUDE (grappling only): guard pulls, takedowns, throws, sweeps, passes, mount /
+back takes, submission attempts, escapes; clinch positions that lead to a takedown
+(Body Lock, Double Unders, Collar Tie).
+
+EXCLUDE: pure striking, stalling, grip fighting, commentary, ground-and-pound
+unless it forces a positional change.
+
+FORMAT-SPECIFIC
+- Fighter stands up off the ground -> label "Escape to Standing", type "escape",
+  actor = that fighter.
+- Referee stand-up (inactivity) -> label "Referee Stand Up", type "transition",
+  actor "referee".
+
+OUTPUT
+- Chronological order, one event per meaningful grappling action.
+- Output ONLY the JSON object — no markdown, no backticks, no commentary.
+- Start with '{{' and end with '}}'.
+
+When done, save the JSON the model returns into
+GrapplingArcAnalytics/data/harvest/processed/ (one .json per match) and run the
+admin "Import scraped drafts" (or `import_scraped_dir`) — it lands in the draft
+queue as one global match, replayed from both athletes' sides after you approve.

@@ -52,6 +52,9 @@ POINT_MAP: dict[str, int] = {
 # sequence.
 WIN_FALLBACK_SCORE: float = 0.75
 LOSS_FALLBACK_SCORE: float = 0.25
+# A draw is a neutral result: S = 0.5 moves ELO toward (not away from) the
+# opponent's rating, so a draw with a strong opponent still nudges ELO up.
+DRAW_SCORE: float = 0.5
 
 # ── K-factor ────────────────────────────────────────────────────────────────
 K_BASE_EARLY: float = 40.0  # n_matches <= 10
@@ -89,6 +92,7 @@ def score_from_match(match: Any) -> float:
     """Per-match score S in [0, 1] driving the ELO update.
 
     Priority:
+      0. Draw — neutral S = 0.5 (no winner; techniques still register).
       1. Submission outcome dominates — SUBMISSION win → 1.0, SUBMISSION loss → 0.0.
       2. Sequence point-map — your_points / (your_points + opp_points) when a
          scoring sequence is present (0.5 if neither side scored).
@@ -96,6 +100,8 @@ def score_from_match(match: Any) -> float:
     """
     won = bool(getattr(match, "won", True))
     win_type = (getattr(match, "win_type", None) or "").upper()
+    if win_type == "DRAW":
+        return DRAW_SCORE
     if win_type == "SUBMISSION":
         return 1.0 if won else 0.0
 

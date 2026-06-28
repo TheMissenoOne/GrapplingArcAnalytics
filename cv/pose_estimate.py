@@ -77,7 +77,7 @@ class PoseEstimator:
     def _ultralytics_runtime(self) -> PoseRuntime:
         """Lazily build a runtime backed by an Ultralytics YOLO model."""
         if self._model is None:
-            from ultralytics import YOLO  # heavy import, deferred
+            from ultralytics import YOLO  # type: ignore[attr-defined]  # heavy, deferred
 
             if not self.model_path.exists():
                 # Ultralytics auto-downloads known names (e.g. "yolov8n-pose.pt").

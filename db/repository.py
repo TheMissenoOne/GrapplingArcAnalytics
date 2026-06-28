@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
@@ -15,10 +15,10 @@ from analysis.names import _normalize_name
 from db.models import (
     Archetype,
     Athlete,
-    AthleteMatch,
     BundleImport,
     Graph,
     GraphEdge,
+    Match,
     Profile,
     TechniqueNode,
 )
@@ -242,40 +242,110 @@ def upsert_graph_from_athlete_graph(
     return graph_id
 
 
+def _techniques_from_sequence(
+    sequence: list[dict[str, Any]],
+) -> dict[str, dict[str, str]]:
+    """Every technique in a match sequence → a shared-library row (both actors).
+
+    The athlete *graph* only holds the athlete's own moves, but the technique
+    *library* should record every technique seen in any entered match. Keyed by
+    the normalized label (skips empty keys); ``source='user'``."""
+    techs: dict[str, dict[str, str]] = {}
+    for entry in sequence:
+        if not isinstance(entry, dict):
+            continue
+        label = str(entry.get("label", "")).strip()
+        key = _normalize_name(label)
+        if not key:
+            continue
+        techs.setdefault(
+            key,
+            {"node_key": key, "label": label, "type": "technique",
+             "node_type": str(entry.get("type", "")), "source": "user"},
+        )
+    return techs
+
+
 def register_match(
-    athlete_id: str,
-    opponent_name: str | None,
+    athlete_a_id: str,
+    athlete_b_id: str,
+    *,
+    winner_id: str | None,
+    win_type: str | None,
+    submission: str | None,
     event: str | None,
     year: int | None,
     weight_class: str | None,
-    win_type: str | None,
     stage: str | None,
-    submission: str | None,
-    won: bool,
     sequence: list[dict[str, Any]],
     created_by: str | None,
     session: Session,
-    opponent_athlete_id: str | None = None,
-    opponent_elo: float | None = None,
+    status: str = "final",
 ) -> str:
-    match = AthleteMatch(
-        athlete_id=athlete_id,
-        opponent_name=opponent_name,
-        opponent_athlete_id=opponent_athlete_id,
-        opponent_elo=opponent_elo,
+    """Store one GLOBAL match between two athletes. ``sequence`` events carry
+    ``actor_id`` (one of the two athlete ids). ``winner_id`` is None for a draw."""
+    match = Match(
+        athlete_a_id=athlete_a_id,
+        athlete_b_id=athlete_b_id,
+        winner_id=winner_id,
+        win_type=win_type,
+        submission=submission,
         event=event,
         year=year,
         weight_class=weight_class,
-        win_type=win_type,
         stage=stage,
-        submission=submission,
-        won=won,
         sequence=sequence,
         created_by=created_by,
+        status=status,
     )
     session.add(match)
     session.flush()
+    # Every technique in a FINAL match enters the shared library (app + analytics).
+    # Draft (scraped, unreviewed) matches hold coarse labels, so they don't register
+    # until approved — keeps the library clean.
+    if status == "final":
+        _register_techniques(_techniques_from_sequence(sequence), session)
     return match.id
+
+
+def get_match(match_id: str, session: Session) -> Match | None:
+    return session.get(Match, match_id)
+
+
+def update_match(
+    match_id: str,
+    *,
+    athlete_a_id: str,
+    athlete_b_id: str,
+    winner_id: str | None,
+    win_type: str | None,
+    submission: str | None,
+    event: str | None,
+    year: int | None,
+    weight_class: str | None,
+    stage: str | None,
+    sequence: list[dict[str, Any]],
+    session: Session,
+) -> None:
+    """Edit a stored global match in place (a/b are symmetric, so the caller may pass
+    them in the page-athlete's perspective). The caller re-runs ``replay_participants``
+    to rebuild both graphs. Techniques re-register only when the match is final."""
+    match = session.get(Match, match_id)
+    if match is None:
+        raise ValueError(f"Match {match_id} not found")
+    match.athlete_a_id = athlete_a_id
+    match.athlete_b_id = athlete_b_id
+    match.winner_id = winner_id
+    match.win_type = win_type
+    match.submission = submission
+    match.event = event
+    match.year = year
+    match.weight_class = weight_class
+    match.stage = stage
+    match.sequence = sequence
+    session.flush()
+    if match.status == "final":
+        _register_techniques(_techniques_from_sequence(sequence), session)
 
 
 def upsert_athlete(
@@ -300,12 +370,127 @@ def upsert_athlete(
     return athlete.id
 
 
-def get_athlete_matches(athlete_id: str, session: Session) -> list[AthleteMatch]:
+def get_matches_for_athlete(athlete_id: str, session: Session) -> list[Match]:
+    """Every global match the athlete participates in (either side), in a deterministic
+    order (year, created_at, id). Without the explicit ORDER BY the DB return order is
+    arbitrary, so same-year matches would replay in a nondeterministic order."""
     return list(
         session.execute(
-            select(AthleteMatch).where(AthleteMatch.athlete_id == athlete_id)
+            select(Match)
+            .where(
+                or_(Match.athlete_a_id == athlete_id, Match.athlete_b_id == athlete_id)
+            )
+            .order_by(Match.year, Match.created_at, Match.id)
         ).scalars()
     )
+
+
+def opponent_input_elo(match: Match, athlete_id: str, session: Session) -> float:
+    """Input rating for the OTHER athlete when replaying ``athlete_id``'s side: the
+    other athlete's ADCC rank_elo, else the black-belt floor (unranked → 800)."""
+    from analysis.athlete_elo import base_elo_for_belt
+
+    other_id = match.athlete_b_id if match.athlete_a_id == athlete_id else match.athlete_a_id
+    other = session.get(Athlete, other_id)
+    if other is not None and other.rank_elo is not None:
+        return float(other.rank_elo)
+    return base_elo_for_belt("black")
+
+
+@dataclass
+class _PerspectiveMatch:
+    """A global ``Match`` viewed from one athlete's side — the duck-typed shape
+    ``analysis.athlete_elo.replay_matches`` consumes (``.sequence`` with actor
+    'you'/'opponent', ``.won``, ``.win_type``, ``.year``, ``.created_at``)."""
+
+    sequence: list[dict[str, Any]]
+    won: bool
+    win_type: str | None
+    year: int | None
+    created_at: Any
+
+
+def _perspective_view(match: Match, athlete_id: str) -> _PerspectiveMatch:
+    """Remap a global match's actor_id sequence to 'you'/'opponent' for ``athlete_id``."""
+    seq: list[dict[str, Any]] = []
+    for e in match.sequence or []:
+        if not isinstance(e, dict):
+            continue
+        item: dict[str, Any] = {
+            "label": e.get("label", ""),
+            "type": e.get("type", ""),
+            "actor": "you" if e.get("actor_id") == athlete_id else "opponent",
+        }
+        if "successful" in e:
+            item["successful"] = e["successful"]
+        seq.append(item)
+    # No winner (draw OR un-inferred winner, e.g. unreviewed scraped match) → neutral
+    # score for BOTH sides, not a loss for both. Force the view's win_type to DRAW so
+    # score_from_match returns 0.5 instead of the loss fallback.
+    win_type = match.win_type
+    if match.winner_id is None and (win_type or "").upper() != "DRAW":
+        win_type = "DRAW"
+    return _PerspectiveMatch(
+        sequence=seq,
+        won=match.winner_id == athlete_id,
+        win_type=win_type,
+        year=match.year,
+        created_at=match.created_at,
+    )
+
+
+def replay_and_persist_athlete(athlete: Athlete, session: Session) -> list[float]:
+    """Replay every FINAL match this athlete participates in, FROM THEIR SIDE; persist
+    the grown graph + ``athlete.elo`` + ``athlete.elo_series``. Returns the snapshots.
+    Draft matches are held out until approved."""
+    from analysis.athlete_elo import replay_matches  # local: avoid import cycle
+
+    target = rank_elo_for_athlete(athlete.name)
+    if target is None:
+        target = athlete.rank_elo if athlete.rank_elo is not None else 1000.0
+    # get_matches_for_athlete already orders by (year, created_at, id); re-sort only to
+    # coalesce NULL years to the front and keep that deterministic id tiebreak.
+    final = sorted(
+        (m for m in get_matches_for_athlete(athlete.id, session) if m.status == "final"),
+        key=lambda m: (m.year or 0, m.created_at, m.id),
+    )
+    views = [_perspective_view(m, athlete.id) for m in final]
+    opp_elos = [opponent_input_elo(m, athlete.id, session) for m in final]
+    graph, snapshots = replay_matches(
+        athlete.name, views, target, opp_elos, belt=athlete.belt or "black"
+    )
+    upsert_graph_from_athlete_graph(graph, athlete.id, session)
+    if graph.user_elo is not None:
+        athlete.elo = graph.user_elo
+    athlete.elo_series = snapshots
+    return snapshots
+
+
+def replay_participants(match: Match, session: Session) -> None:
+    """Rebuild BOTH athletes' graphs after a match changes — the double pass."""
+    for aid in (match.athlete_a_id, match.athlete_b_id):
+        athlete = session.get(Athlete, aid)
+        if athlete is not None:
+            replay_and_persist_athlete(athlete, session)
+
+
+def approve_match(match_id: str, session: Session) -> Match:
+    """Promote a draft match to 'final' and register its (now-reviewed) techniques.
+    The caller runs ``replay_participants`` to fold it into both graphs."""
+    match = session.get(Match, match_id)
+    if match is None:
+        raise ValueError(f"Match {match_id} not found")
+    match.status = "final"
+    session.flush()
+    _register_techniques(_techniques_from_sequence(match.sequence or []), session)
+    return match
+
+
+def delete_match(match_id: str, session: Session) -> None:
+    match = session.get(Match, match_id)
+    if match is not None:
+        session.delete(match)
+        session.flush()
 
 
 def graphs_for_clustering(session: Session) -> list[tuple[str, list[DerivedNode]]]:
