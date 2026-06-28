@@ -91,23 +91,38 @@ def _sequence_view(match: Match, a: Athlete, b: Athlete) -> list[dict[str, Any]]
     return rows
 
 
+# Offensive entries (a fighter advancing) vs the dominant outcomes they convert into.
+_ENTRY_TYPES = ("takedown", "pass", "sweep")
+_DOMINANT_TYPES = ("control", "submission")
+
+
 def _blank_side_stats() -> dict[str, Any]:
     return {
         "takedowns_landed": 0, "takedowns_attempted": 0,
         "submission_attempts": 0, "submissions_finished": 0,
         "sweeps": 0, "passes": 0, "escapes": 0, "controls": 0,
-        "points": 0,
+        "transitions": 0, "points": 0,
+        # positional conversion = entries that reached a dominant position / entries
+        "positional_entries": 0, "positional_conversions": 0,
     }
 
 
 def _compute_stats(sequence: list[dict[str, Any]]) -> dict[str, Any]:
-    """Per-side tallies + a momentum split (share of scoring points, using the same
-    keyword point-map the ELO engine scores with, so the numbers agree)."""
+    """Per-side tallies, a momentum split + running series, and positional-conversion
+    rate. Uses the same keyword point-map the ELO engine scores with, so numbers agree.
+
+    NOTE: control *time* (seconds) can't be derived — stored events carry no timestamps.
+    """
     sides = {"a": _blank_side_stats(), "b": _blank_side_stats()}
+    pending_entry = {"a": False, "b": False}  # an unconverted offensive entry is open
+    cum = {"a": 0, "b": 0}
+    momentum_series: list[float] = []
     for e in sequence:
-        s = sides[e["side"]]
+        side = e["side"]
+        s = sides[side]
         typ = e["type"]
         ok = bool(e.get("successful"))
+        s["transitions"] += 1
         if typ == "takedown":
             s["takedowns_attempted"] += 1
             if ok:
@@ -124,21 +139,36 @@ def _compute_stats(sequence: list[dict[str, Any]]) -> dict[str, Any]:
             s["escapes"] += 1
         elif typ == "control":
             s["controls"] += 1
+        # positional conversion: an entry that later reaches a dominant position.
+        if typ in _ENTRY_TYPES:
+            s["positional_entries"] += 1
+            pending_entry[side] = True
+        elif typ in _DOMINANT_TYPES and pending_entry[side]:
+            s["positional_conversions"] += 1
+            pending_entry[side] = False
         s["points"] += _points_for_entry(e)
+        cum[side] = s["points"]
+        ctot = cum["a"] + cum["b"]
+        momentum_series.append(round(cum["a"] / ctot, 3) if ctot else 0.5)
+    for s in sides.values():
+        ent = s["positional_entries"]
+        s["positional_conversion"] = round(s["positional_conversions"] / ent, 3) if ent else 0.0
     total = sides["a"]["points"] + sides["b"]["points"]
     momentum = {
         "a": sides["a"]["points"] / total if total else 0.5,
         "b": sides["b"]["points"] / total if total else 0.5,
     }
-    return {"a": sides["a"], "b": sides["b"], "momentum": momentum}
+    return {"a": sides["a"], "b": sides["b"], "momentum": momentum,
+            "momentum_series": momentum_series}
 
 
 def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
     """Per-bout grappling map: node = normalized technique label, edge = each consecutive
     same-fighter transition. App-shaped ``{nodes, edges}`` (graphview.js contract)."""
     nodes: dict[str, dict[str, Any]] = {}
+    side_use: dict[str, dict[str, int]] = {}  # node key → per-side usage, for fighter tint
 
-    def touch(label: str, typ: str) -> str:
+    def touch(label: str, typ: str, side: str) -> str:
         key = _normalize_name(label)
         if not key:
             return ""
@@ -146,17 +176,22 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
         if node is None:
             nodes[key] = {
                 "id": key, "label": label,
-                "data": {"type": typ, "usageCount": 1},
+                "data": {"type": typ, "usageCount": 1, "side": side},
             }
+            side_use[key] = {"a": 0, "b": 0}
         else:
             node["data"]["usageCount"] += 1
+        side_use[key][side] += 1
+        # The fighter who used the node most "owns" it (drives the a/b colouring).
+        node = nodes[key]
+        node["data"]["side"] = "a" if side_use[key]["a"] >= side_use[key]["b"] else "b"
         return key
 
     edges: dict[tuple[str, str, str], dict[str, Any]] = {}
     prev_key: dict[str, str] = {"a": "", "b": ""}
     for e in sequence:
         side = e["side"]
-        key = touch(e["label"], e["type"])
+        key = touch(e["label"], e["type"], side)
         if not key:
             continue
         src = prev_key[side]
@@ -175,6 +210,9 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _fighter_block(athlete: Athlete) -> dict[str, Any]:
+    series = [round(float(x), 1) for x in (athlete.elo_series or [])]
+    # ELO swing this bout = last snapshot minus the one before it (None if too short).
+    elo_delta = round(series[-1] - series[-2], 1) if len(series) >= 2 else None
     return {
         "name": athlete.name,
         "slug": slugify(athlete.name),
@@ -182,7 +220,8 @@ def _fighter_block(athlete: Athlete) -> dict[str, Any]:
         "team": athlete.team,
         "weight_class": athlete.weight_class,
         "graph_elo": round(athlete.elo, 1),
-        "elo_series": [round(float(x), 1) for x in (athlete.elo_series or [])],
+        "elo_series": series,
+        "elo_delta": elo_delta,
         "career_graph_ref": f"fighters/{slugify(athlete.name)}.json",
     }
 

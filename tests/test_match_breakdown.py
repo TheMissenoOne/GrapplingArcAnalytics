@@ -93,6 +93,21 @@ class TestStats:
         assert s["momentum"]["b"] > s["momentum"]["a"]
         assert abs(s["momentum"]["a"] + s["momentum"]["b"] - 1.0) < 1e-9
 
+    def test_transitions_and_conversion(self) -> None:
+        s = _build()["stats"]
+        # Khamzat: 2 takedowns + a mount = 3 events; Dricus: lone sweep.
+        assert s["b"]["transitions"] == 3
+        assert s["a"]["transitions"] == 1
+        # Khamzat's first takedown converts to mount (1 of 2 entries); Dricus' sweep never.
+        assert s["b"]["positional_conversion"] == 0.5
+        assert s["a"]["positional_conversion"] == 0.0
+
+    def test_momentum_series_tracks_each_event(self) -> None:
+        s = _build()["stats"]
+        series = s["momentum_series"]
+        assert len(series) == 4  # one running point per event
+        assert all(0.0 <= v <= 1.0 for v in series)
+
 
 class TestTransitionGraph:
     def test_node_usage_and_edges(self) -> None:
@@ -117,3 +132,14 @@ class TestMeta:
         assert bd["fighters"]["a"]["graph_elo"] == 794.6
         assert bd["fighters"]["b"]["elo_series"] == [800.0, 811.0, 811.0]
         assert bd["fighters"]["b"]["career_graph_ref"] == "fighters/khamzat-chimaev.json"
+
+    def test_elo_delta(self) -> None:
+        bd = _build()
+        # last two snapshots: Dricus 794.6−800.0 = −5.4; Khamzat 811.0−811.0 = 0.0.
+        assert bd["fighters"]["a"]["elo_delta"] == -5.4
+        assert bd["fighters"]["b"]["elo_delta"] == 0.0
+
+    def test_graph_nodes_tagged_by_owning_side(self) -> None:
+        nodes = {n["id"]: n for n in _build()["transition_graph"]["nodes"]}
+        assert nodes["double leg takedown"]["data"]["side"] == "b"
+        assert nodes["sweep reversal"]["data"]["side"] == "a"
