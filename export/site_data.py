@@ -31,6 +31,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from analysis.event_profile import build_event_profile, event_names
 from analysis.names import _normalize_name
 from analysis.style_profile import MIN_DOSSIER_EVENTS, build_style_profile, qualifies
 from db.models import Archetype, Athlete
@@ -42,7 +43,7 @@ from export.match_breakdown import (
     match_slug,
     slugify,
 )
-from export.narrative import match_narrative, profile_narrative
+from export.narrative import event_narrative, match_narrative, profile_narrative
 
 logger = logging.getLogger(__name__)
 
@@ -291,6 +292,7 @@ def _nav(active: str) -> str:
   <nav class="site-nav">
     <a href="index.html"{cls('home')}>Home</a>
     <a href="breakdowns.html"{cls('breakdowns')}>Breakdowns</a>
+    <a href="events.html"{cls('events')}>Events</a>
     <a href="grapple-like.html"{cls('grapple')}>Grapple Like</a>
     <a href="the-data.html"{cls('data')}>The Data</a>
   </nav>
@@ -304,7 +306,7 @@ def _nav(active: str) -> str:
 _FOOTER = """<footer class="site-foot"><div class="wrap">
   <a class="brand" href="index.html"><span class="mark">GA</span>Grappling<span class="o">Arc</span></a>
   <nav class="links">
-    <a href="breakdowns.html">Breakdowns</a><a href="grapple-like.html">Grapple Like</a>
+    <a href="breakdowns.html">Breakdowns</a><a href="events.html">Events</a><a href="grapple-like.html">Grapple Like</a>
     <a href="the-data.html">The Data</a>
   </nav>
   <p class="copy">© 2026 GrapplingArc · generated from match data</p>
@@ -605,6 +607,72 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     return _HEAD.format(title=html.escape("Grapple Like " + f["name"])) + body
 
 
+# ── event (card) pages ───────────────────────────────────────────────────────
+def build_events(
+    session: Session,
+) -> tuple[list[dict[str, Any]], list[tuple[str, dict[str, Any]]]]:
+    """Returns (GA_EVENTS card rows, [(slug, event profile)]) for cards with ≥3 bouts."""
+    rows: list[dict[str, Any]] = []
+    details: list[tuple[str, dict[str, Any]]] = []
+    for name in event_names(session):
+        ep = build_event_profile(name, session)
+        slug = slugify(name)
+        hb = ep.get("headline_bout")
+        rows.append({
+            "slug": slug, "href": f"event-{slug}.html", "name": name,
+            "year": str(ep["year"] or ""), "bouts": ep["bout_count"],
+            "finishes": _pct(ep["finish_rate"]),
+            "headline": f"{hb['a']} vs {hb['b']}" if hb else "",
+            "names": ep["headliners"][:3],
+        })
+        details.append((slug, ep))
+    rows.sort(key=lambda r: (r["year"], r["bouts"]), reverse=True)
+    return rows, details
+
+
+def render_event_page(slug: str, ep: dict[str, Any]) -> str:
+    sections = event_narrative(ep)
+    name = ep["event"]
+    tags = ([str(ep["year"])] if ep["year"] else []) + [f"{ep['bout_count']} bouts"]
+    if ep["decided"]:
+        tags.append(f"{_pct(ep['finish_rate'])} finishes")
+    tagrow = "".join(f'<span class="tag">{html.escape(t)}</span>' for t in tags)
+    sub_finishes = sum(c for _, c in ep["submissions"])
+    stat_cards = "".join(
+        f'<div class="sig-card"><div class="k">{html.escape(k)}</div>'
+        f'<div class="v">{html.escape(str(v))}</div></div>'
+        for k, v in [("Bouts", ep["bout_count"]),
+                     ("Finishes", f"{ep['finishes']}/{ep['decided']}"),
+                     ("Submissions", sub_finishes),
+                     ("Athletes", ep["participant_count"])]
+    )
+    bout_cards = "".join(
+        f'<a class="mcard" href="breakdown-{b["slug"]}.html">'
+        f'<div class="ev">{html.escape(str(b["year"] or ""))}</div>'
+        f'<div class="op">{html.escape(b["a"] + " vs " + b["b"])}</div>'
+        f'<div class="rs">{html.escape((b["winner"] or "—") + " · " + b["method"])}</div></a>'
+        for b in ep["bouts"]
+    )
+    body = f"""{_nav('events')}
+<section class="art-hero"><div class="wrap">
+  <div class="center"><a href="events.html" class="tag" style="text-decoration:none">← Events</a></div>
+  <h1 class="art-title">{html.escape(name)}</h1>
+  <div class="result-bar">{tagrow}</div>
+  <div class="prose"><p class="lead art-sum">{html.escape(sections[0][1][0])}</p></div>
+</div></section>
+<article class="art">
+  <section class="block"><div class="wrap viz"><div class="sig-cards">{stat_cards}</div></div></section>
+  <div class="divider"></div>
+  <section class="block"><div class="wrap prose">{_prose_html(sections[1:])}</div></section>
+  <div class="divider"></div>
+  <section class="block"><div class="wrap prose"><div class="sec-label">Every bout</div></div>
+    <div class="wrap viz"><div class="mgrid">{bout_cards}</div></div></section>
+</article>
+{_FOOTER}
+<script src="i18n.js"></script></body></html>"""
+    return _HEAD.format(title=html.escape(name)) + body
+
+
 # ── orchestration ────────────────────────────────────────────────────────────
 def _js_file(var: str, data: Any) -> str:
     return f"/* generated by export.site_data — do not edit */\nwindow.{var} = {json.dumps(data, ensure_ascii=False)};\n"
@@ -614,17 +682,20 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     out.mkdir(parents=True, exist_ok=True)
     # Prune stale generated detail pages so hidden fighters / dropped bouts don't orphan
     # (keep the hand-written static grapple-like.html index).
-    for old in (*out.glob("breakdown-*.html"), *out.glob("grapple-*.html")):
+    for old in (*out.glob("breakdown-*.html"), *out.glob("grapple-*.html"),
+                *out.glob("event-*.html")):
         if old.name != "grapple-like.html":
             old.unlink()
     rows, full, featured = build_breakdowns(session)
     fighters, details = build_fighters(session)
+    events, event_details = build_events(session)
     elo = build_elo(session)
 
     bd_js = _js_file("GA_BREAKDOWNS", rows)
     bd_js += f"window.GA_FEATURED = {json.dumps(featured, ensure_ascii=False)};\n"
     (out / "breakdowns-data.js").write_text(bd_js, encoding="utf-8")
     (out / "fighters-data.js").write_text(_js_file("GA_FIGHTERS", fighters), encoding="utf-8")
+    (out / "events-data.js").write_text(_js_file("GA_EVENTS", events), encoding="utf-8")
     (out / "elo-data.js").write_text(_js_file("GA_ELO", elo), encoding="utf-8")
 
     # per-match detail pages (attach archetypes + adapted graph for the template)
@@ -642,15 +713,22 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
         (out / f"grapple-{slug}.html").write_text(
             render_profile_page(profile), encoding="utf-8")
 
-    return {"breakdowns": len(full), "fighters": len(details), "elo": len(elo)}
+    # per-event card pages
+    for slug, ep in event_details:
+        (out / f"event-{slug}.html").write_text(
+            render_event_page(slug, ep), encoding="utf-8")
+
+    return {"breakdowns": len(full), "fighters": len(details),
+            "events": len(event_details), "elo": len(elo)}
 
 
 def run(out: Path) -> int:
     from db.base import db_session
     with db_session() as session:
         counts = export_site(session, out)
-    logger.info("Generated %d breakdowns, %d dossiers, %d ELO rows → %s",
-                counts["breakdowns"], counts["fighters"], counts["elo"], out)
+    logger.info("Generated %d breakdowns, %d dossiers, %d events, %d ELO rows → %s",
+                counts["breakdowns"], counts["fighters"], counts["events"],
+                counts["elo"], out)
     return 0
 
 

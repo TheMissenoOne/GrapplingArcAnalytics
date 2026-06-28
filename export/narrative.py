@@ -202,6 +202,61 @@ def profile_narrative(p: dict[str, Any]) -> list[Section]:
     return sections
 
 
+# ── event (card) article ─────────────────────────────────────────────────────
+def event_narrative(ep: dict[str, Any]) -> list[Section]:
+    """Prose for a whole card from ``build_event_profile`` — the event read as one story."""
+    name = ep["event"]
+    sections: list[Section] = []
+
+    # Lede — the card at a glance.
+    lede = f"{name} ran {ep['bout_count']} bouts"
+    if ep.get("year"):
+        lede += f" in {ep['year']}"
+    lede += "."
+    if ep["decided"]:
+        lede += f" {_pct(ep['finish_rate'])} of the decided bouts ended in a finish."
+    sections.append(("The card", [lede]))
+
+    # Headline bout.
+    hb = ep.get("headline_bout")
+    if hb:
+        sections.append(("Headline bout", [
+            f"The marquee matchup pitted {hb['a']} against {hb['b']}, "
+            f"taken by {hb['winner']} ({hb['method'].lower()})."
+        ]))
+
+    # How they finished.
+    subs = ep.get("submissions") or []
+    if ep["decided"]:
+        line = f"{ep['finishes']} of {ep['decided']} decided bouts were finishes"
+        if subs:
+            line += f"; the most-seen finish was the {subs[0][0].lower()} ({subs[0][1]}×)"
+        line += "."
+        sections.append(("How they finished", [line]))
+
+    # Stylistic trend across the whole card.
+    mix = ep.get("style_mix") or {}
+    if mix:
+        top = sorted(mix.items(), key=lambda kv: kv[1], reverse=True)[:3]
+        bstr = ", ".join(f"{k} {_pct(v)}" for k, v in top if v > 0)
+        line = f"Across the card the action skewed {bstr}."
+        tech = ep.get("top_techniques") or []
+        if tech:
+            line += " Most-logged techniques: " + ", ".join(
+                f"{t[0]} ({t[1]}×)" for t in tech[:4]
+            ) + "."
+        sections.append(("How the card was won", [line]))
+
+    # Headliners.
+    hl = ep.get("headliners") or []
+    if hl:
+        sections.append(("Who showed up", [
+            "Top names on the card by Grappling ELO: " + ", ".join(hl) + "."
+        ]))
+
+    return sections
+
+
 def render_markdown(sections: list[Section]) -> str:
     out: list[str] = []
     for heading, paras in sections:
