@@ -287,6 +287,7 @@ def create_admin_app() -> FastAPI:
         win_type: str = Form(""),
         stage: str = Form(""),
         submission: str = Form(""),
+        video_url: str = Form(""),
         won: str = Form("true"),
         sequence_json: str = Form("[]"),
     ) -> Any:
@@ -320,6 +321,7 @@ def create_admin_app() -> FastAPI:
                 year=int(year) if year.isdigit() else None,
                 weight_class=weight_class or None,
                 stage=stage or None,
+                video_url=video_url or None,
                 sequence=_seq_with_actor_ids(sequence, athlete_id, opp.id),
                 created_by=None,
                 session=session,
@@ -354,6 +356,7 @@ def create_admin_app() -> FastAPI:
                 "win_type": match.win_type,
                 "stage": match.stage,
                 "submission": match.submission,
+                "video_url": match.video_url,
                 "won": match.winner_id == athlete_id,
                 "opponent_id": opp.id if opp else "",
                 "opponent_name": opp.name if opp else "",
@@ -385,6 +388,7 @@ def create_admin_app() -> FastAPI:
         win_type: str = Form(""),
         stage: str = Form(""),
         submission: str = Form(""),
+        video_url: str = Form(""),
         won: str = Form("true"),
         sequence_json: str = Form("[]"),
     ) -> Any:
@@ -423,6 +427,7 @@ def create_admin_app() -> FastAPI:
                 year=int(year) if year.isdigit() else None,
                 weight_class=weight_class or None,
                 stage=stage or None,
+                video_url=video_url or None,
                 sequence=_seq_with_actor_ids(sequence, athlete_id, opp.id),
                 session=session,
             )

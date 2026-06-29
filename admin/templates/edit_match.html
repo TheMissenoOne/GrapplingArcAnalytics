@@ -75,6 +75,11 @@
           <option value="false" {% if not match.won %}selected{% endif %}>Loss / Draw</option>
         </select>
       </div>
+      <div>
+        <label>YouTube link (optional)</label>
+        <input name="video_url" type="url" value="{{ match.video_url or '' }}"
+               placeholder="https://youtu.be/…">
+      </div>
     </div>
     <label>Sequence — search, ↑↓ to pick, Enter to add (` flips side)</label>
     <div class="actor-toggle" role="group" aria-label="Who scored">

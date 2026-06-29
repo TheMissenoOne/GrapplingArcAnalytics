@@ -24,7 +24,7 @@ def _athlete(aid: str, name: str, elo: float = 800.0,
 def _match(seq: list[dict[str, Any]], winner_id: str | None) -> Any:
     return SimpleNamespace(
         sequence=seq, winner_id=winner_id, year=2025, event="UFC 319",
-        weight_class="185", win_type="DECISION", submission=None,
+        weight_class="185", win_type="DECISION", submission=None, video_url=None,
     )
 
 
@@ -115,13 +115,17 @@ class TestTransitionGraph:
         nodes = {n["id"]: n for n in g["nodes"]}
         assert set(nodes) == {"double leg takedown", "mount", "sweep reversal"}
         assert nodes["double leg takedown"]["data"]["usageCount"] == 2
-        # Khamzat's chain: takedown→mount, mount→takedown. Dricus' lone sweep makes no edge.
-        pairs = {(e["source"], e["target"]) for e in g["edges"]}
-        assert pairs == {
-            ("double leg takedown", "mount"),
-            ("mount", "double leg takedown"),
+        # Khamzat's own chain (side b): takedown→mount, mount→takedown.
+        own = {(e["source"], e["target"]) for e in g["edges"] if e["data"]["side"] == "b"}
+        assert own == {("double leg takedown", "mount"), ("mount", "double leg takedown")}
+        # Handover (side x) edges bridge the fighters at the contested switches: B→A (Dricus'
+        # sweep off the mount) and A→B (Khamzat re-takedown). The graph is interconnected.
+        handover = {(e["source"], e["target"]) for e in g["edges"] if e["data"]["side"] == "x"}
+        assert handover == {
+            ("mount", "sweep reversal"),
+            ("sweep reversal", "double leg takedown"),
         }
-        assert all(e["data"]["side"] == "b" for e in g["edges"])
+        assert all(e["data"]["contested"] for e in g["edges"] if e["data"]["side"] == "x")
 
 
 class TestMeta:

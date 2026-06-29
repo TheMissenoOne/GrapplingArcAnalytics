@@ -14,37 +14,31 @@ dependencies = [
     "numpy>=2.0",
     "pyarrow>=17",
     "networkx>=3.3",
-
     # Kaggle integration
     "kagglehub[pandas-datasets]>=1.0",
-
     # Web scraping (BJJ Heroes)
     "aiohttp>=3.9",
     "beautifulsoup4>=4.12",
     "nest-asyncio>=1.6",
-
     # YouTube fight-transcript harvesting (harvest/)
     "youtube-transcript-api>=0.6,<1",
     "feedparser>=6.0",
-
     # ML
     "scikit-learn>=1.5",
     "xgboost>=2.1",
-
     # Viz
     "matplotlib>=3.9",
     "seaborn>=0.13",
-
     # Notebooks
     "jupyter>=1.0",
-
     # CV (pose → position)
     "opencv-python>=4.10",
     "pillow>=10.4",
-
     # Utils
     "python-dotenv>=1.0",
     "requests>=2.32",
+    "sentence-transformers>=5.6.0",
+    "pgvector>=0.4.2",
 ]
 
 [project.optional-dependencies]

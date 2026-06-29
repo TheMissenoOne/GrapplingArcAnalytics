@@ -43,7 +43,7 @@ from pathlib import Path
 
 from analysis.names import _normalize_name
 from cv.vocab_map import POSITION_TYPES, NodeRef, build_vocab_index, load_app_nodes
-from grapplemap.icons import _safe_filename, export_all_icons
+from grapplemap.icons import export_all_icons
 from grapplemap.parser import GMapGraph, GMapPosition, parse_grapplemap
 
 # ─── paths ───────────────────────────────────────────────────────────────────

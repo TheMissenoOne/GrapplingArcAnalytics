@@ -281,6 +281,7 @@ def register_match(
     created_by: str | None,
     session: Session,
     status: str = "final",
+    video_url: str | None = None,
 ) -> str:
     """Store one GLOBAL match between two athletes. ``sequence`` events carry
     ``actor_id`` (one of the two athlete ids). ``winner_id`` is None for a draw."""
@@ -297,6 +298,7 @@ def register_match(
         sequence=sequence,
         created_by=created_by,
         status=status,
+        video_url=video_url,
     )
     session.add(match)
     session.flush()
@@ -326,6 +328,7 @@ def update_match(
     stage: str | None,
     sequence: list[dict[str, Any]],
     session: Session,
+    video_url: str | None = None,
 ) -> None:
     """Edit a stored global match in place (a/b are symmetric, so the caller may pass
     them in the page-athlete's perspective). The caller re-runs ``replay_participants``
@@ -342,6 +345,7 @@ def update_match(
     match.year = year
     match.weight_class = weight_class
     match.stage = stage
+    match.video_url = video_url
     match.sequence = sequence
     session.flush()
     if match.status == "final":

@@ -163,8 +163,11 @@ def _compute_stats(sequence: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
-    """Per-bout grappling map: node = normalized technique label, edge = each consecutive
-    same-fighter transition. App-shaped ``{nodes, edges}`` (graphview.js contract)."""
+    """Per-bout grappling map: node = normalized technique label, edges = each consecutive
+    same-fighter transition (``side`` a/b) PLUS cross-fighter *handover* edges (``side`` "x")
+    at the contested moments where initiative passes between fighters — so the two fighters'
+    flows read as one interconnected map, not two separate subgraphs. App-shaped
+    ``{nodes, edges}`` (graphview.js contract)."""
     nodes: dict[str, dict[str, Any]] = {}
     side_use: dict[str, dict[str, int]] = {}  # node key → per-side usage, for fighter tint
 
@@ -188,24 +191,34 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
         return key
 
     edges: dict[tuple[str, str, str], dict[str, Any]] = {}
+
+    def link(src: str, tgt: str, side: str) -> None:
+        if not src or src == tgt:
+            return
+        ek = (src, tgt, side)
+        edge = edges.get(ek)
+        if edge is None:
+            edges[ek] = {
+                "id": f"{src}→{tgt}:{side}", "source": src, "target": tgt,
+                "data": {"side": side, "count": 1, "elo": 1000,
+                         **({"contested": True} if side == "x" else {})},
+            }
+        else:
+            edge["data"]["count"] += 1
+
     prev_key: dict[str, str] = {"a": "", "b": ""}
+    prev_global: tuple[str, str] = ("", "")  # (key, side) of the previous timeline event
     for e in sequence:
         side = e["side"]
         key = touch(e["label"], e["type"], side)
         if not key:
             continue
-        src = prev_key[side]
-        if src and src != key:
-            ek = (src, key, side)
-            edge = edges.get(ek)
-            if edge is None:
-                edges[ek] = {
-                    "id": f"{src}→{key}:{side}", "source": src, "target": key,
-                    "data": {"side": side, "count": 1, "elo": 1000},
-                }
-            else:
-                edge["data"]["count"] += 1
+        link(prev_key[side], key, side)  # the fighter's own flow
+        pk, ps = prev_global
+        if ps and ps != side:  # initiative changed fighters → contested handover
+            link(pk, key, "x")
         prev_key[side] = key
+        prev_global = (key, side)
     return {"nodes": list(nodes.values()), "edges": list(edges.values())}
 
 
@@ -252,6 +265,7 @@ def build_match_breakdown(match: Match, a: Athlete, b: Athlete) -> dict[str, Any
             "submission": match.submission,
             "method": _method(match.win_type, match.submission),
             "winner": winner,
+            "video_url": match.video_url,
         },
         "sequence": sequence,
         "stats": _compute_stats(sequence),

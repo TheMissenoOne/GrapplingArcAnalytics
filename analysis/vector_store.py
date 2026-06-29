@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import logging
 import uuid
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -154,3 +155,57 @@ def ingest_athlete(
     graph = build_athlete_graph(athlete, sessions)
     store.upsert_athlete(graph)
     return graph
+
+
+# ── general-map structural vectors ───────────────────────────────────────────
+def _position_vectors(graph: Any) -> tuple[list[str], dict[str, np.ndarray]]:
+    """Per-position next-move distribution over the (normalized) node vocab — the structural
+    fingerprint of a position (what tends to come next). Keyed by ``_normalize_name`` so it
+    lines up with ``technique_nodes.node_key`` and the grappling-map keys."""
+    vocab = sorted({_normalize_name(n) for n in graph.nodes()})
+    idx = {k: i for i, k in enumerate(vocab)}
+    vecs: dict[str, np.ndarray] = {}
+    for n in graph.nodes():
+        v = np.zeros(len(vocab), dtype=np.float64)
+        outs = list(graph.out_edges(n, data=True))
+        total = sum(d["weight"] for _, _, d in outs)
+        if total:
+            for _, t, d in outs:
+                v[idx[_normalize_name(t)]] += d["weight"] / total
+        key = _normalize_name(n)
+        vecs[key] = vecs.get(key, np.zeros(len(vocab))) + v
+    return vocab, vecs
+
+
+def structural_neighbours_fn(
+    graph: Any,
+) -> Callable[[str, int], list[tuple[str, float]]]:
+    """Neighbour function: positions whose next-move distributions are most similar (cosine).
+
+    Backed by the transition network (could be persisted to a Qdrant ``map_positions``
+    collection like :class:`AthleteVectorStore`; in-memory cosine is used here as the corpus
+    is small and the map is rebuilt each run)."""
+    _, vecs = _position_vectors(graph)
+    keys = [k for k, v in vecs.items() if v.any()]
+    if not keys:
+        return lambda node_key, k: []
+    mat = np.vstack([vecs[k] for k in keys])
+    norms = np.linalg.norm(mat, axis=1, keepdims=True)
+    mat = mat / np.where(norms == 0, 1.0, norms)
+    index = {k: i for i, k in enumerate(keys)}
+
+    def fn(node_key: str, k: int) -> list[tuple[str, float]]:
+        i = index.get(node_key)
+        if i is None:
+            return []
+        sims = mat @ mat[i]
+        out: list[tuple[str, float]] = []
+        for j in np.argsort(-sims):
+            if j == i or sims[j] <= 0:
+                continue
+            out.append((keys[j], round(float(sims[j]), 3)))
+            if len(out) >= k:
+                break
+        return out
+
+    return fn

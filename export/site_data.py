@@ -25,6 +25,7 @@ import argparse
 import html
 import json
 import logging
+import re
 from pathlib import Path
 from typing import Any
 
@@ -359,13 +360,36 @@ const lc=[['takedown','Takedown'],['control','Control'],['guard','Guard'],['pass
 const dot=c=>'<span class="dot" style="background:'+c+'"></span>';
 document.getElementById('seqLegend').innerHTML=
   lc.filter(([k])=>BD.graph.nodes.some(n=>n.cat===k)).map(([k,l])=>'<span>'+dot(GAGraph.CAT[k])+l+'</span>').join('')
-  +'<span style="margin-left:auto">'+dot('var(--blue)')+BD.a+'</span><span>'+dot('var(--pink)')+BD.b+'</span>';
+  +'<span style="margin-left:auto">'+dot('var(--blue)')+BD.a+'</span><span>'+dot('var(--orange)')+BD.b+'</span>';
 """
 
 
 def _stat_row(k: str, va: Any, vb: Any) -> str:
     return (f'<div class="stat"><div class="k">{k}</div>'
             f'<div class="vrow"><span class="v a">{va}</span><span class="v b">{vb}</span></div></div>')
+
+
+_YT_RE = re.compile(r"(?:youtu\.be/|youtube\.com/(?:watch\?v=|embed/|shorts/|v/))([\w-]{11})")
+
+
+def _youtube_embed(url: str | None) -> str:
+    """Responsive 16:9 YouTube embed block — empty string when there's no valid link, so the
+    section is fully hidden for matches without a video."""
+    if not url:
+        return ""
+    m = _YT_RE.search(url)
+    if not m:
+        return ""
+    vid = m.group(1)
+    return (
+        '<section class="block"><div class="wrap prose"><div class="sec-label">Watch</div></div>'
+        '<div class="wrap viz"><div style="position:relative;width:100%;aspect-ratio:16/9;'
+        'border:1px solid var(--line);border-radius:var(--radius);overflow:hidden">'
+        f'<iframe src="https://www.youtube-nocookie.com/embed/{vid}" title="Match video" '
+        'loading="lazy" frameborder="0" style="position:absolute;inset:0;width:100%;height:100%" '
+        'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; '
+        'picture-in-picture" allowfullscreen></iframe></div></div></section><div class="divider"></div>'
+    )
 
 
 def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
@@ -411,11 +435,11 @@ def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
   <div class="center"><a href="breakdowns.html" class="tag" style="text-decoration:none">← Breakdowns</a></div>
   <div class="bout">
     <div class="corner a"><span class="av">{_initials(a['name'])}</span>
-      <span class="nm">{html.escape(_name_break(a['name']))}</span>
+      <span class="nm">{html.escape(_name_break(a['name'])).replace('&lt;br/&gt;', '<br/>')}</span>
       <span class="rc">{html.escape(arche_a)}</span></div>
     <span class="vsbig">VS</span>
     <div class="corner b"><span class="av">{_initials(b['name'])}</span>
-      <span class="nm">{html.escape(_name_break(b['name']))}</span>
+      <span class="nm">{html.escape(_name_break(b['name'])).replace('&lt;br/&gt;', '<br/>')}</span>
       <span class="rc">{html.escape(arche_b)}</span></div>
   </div>
   <div class="result-bar">
@@ -426,6 +450,7 @@ def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
   <h1 class="art-title">{html.escape(_headline(bd))}</h1>
   <div class="prose"><p class="lead art-sum">{html.escape(sections[0][1][0])}</p></div>
 </div></section>
+{_youtube_embed(meta.get('video_url'))}
 <article class="art">
   <section class="block"><div class="wrap viz"><div class="statgrid">{stat_grid}</div></div></section>
   <div class="divider"></div>
@@ -583,7 +608,7 @@ def render_profile_page(profile: dict[str, Any]) -> str:
   <div class="freq" id="sigFreq"></div>
 </div></div></section>
 <section class="mod"><div class="wrap">
-  <div class="sec-head"><span class="eyebrow pink">Response patterns</span>
+  <div class="sec-head"><span class="eyebrow orange">Response patterns</span>
     <h2 class="h-lg mt16">How he reacts when the position changes</h2></div>
   <div class="tree" id="tree"></div>
 </div></section>

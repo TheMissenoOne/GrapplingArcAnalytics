@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     Boolean,
     DateTime,
@@ -104,8 +105,9 @@ class Graph(Base):
 class TechniqueNode(Base):
     """Shared canonical technique library — one row per distinct node_key, reused
     across all user/athlete graphs. Replaces the per-user node identity rows.
-    A pgvector ``embedding vector(768)`` (alembic 0006) lives in the DB but is
-    intentionally unmapped here (SQL backfill job)."""
+    The pgvector ``embedding vector(768)`` (alembic 0006) is the semantic position vector
+    (``analysis.embeddings``) — mapped here so the grappling-map backfill + cosine queries can
+    read/write it. Nullable; rows without a backfilled embedding stay NULL."""
 
     __tablename__ = "technique_nodes"
 
@@ -115,7 +117,26 @@ class TechniqueNode(Base):
     type: Mapped[str] = mapped_column(String(20), default="technique")
     node_type: Mapped[str] = mapped_column(String(40), default="")
     source: Mapped[str] = mapped_column(String(10), default="user")  # 'library' | 'user'
+    embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class MapEdge(Base):
+    """Global aggregate transition for the general grappling map — one row per
+    ``source_key → target_key`` over the whole corpus (``analysis.grappling_map``).
+    Distinct from per-graph ``graph_edges``; keyed on normalized technique node keys."""
+
+    __tablename__ = "map_edges"
+    __table_args__ = (UniqueConstraint("source_key", "target_key"),)
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    source_key: Mapped[str] = mapped_column(Text, nullable=False)  # == _normalize_name
+    target_key: Mapped[str] = mapped_column(Text, nullable=False)
+    count: Mapped[int] = mapped_column(Integer, default=0)
+    suggested: Mapped[bool] = mapped_column(Boolean, default=False)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
@@ -170,6 +191,7 @@ class Match(Base):
     win_type: Mapped[str | None] = mapped_column(String(20))
     stage: Mapped[str | None] = mapped_column(String(10))
     submission: Mapped[str | None] = mapped_column(Text)
+    video_url: Mapped[str | None] = mapped_column(Text)  # optional YouTube link (hidden if null)
     # Events: [{label, type, actor_id, successful?}], actor_id ∈ {athlete_a_id, athlete_b_id}.
     sequence: Mapped[list[Any] | None] = mapped_column(JSONB)
     # 'final' (counts toward both graphs) | 'draft' (scraped, awaiting review — excluded
