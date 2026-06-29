@@ -722,7 +722,7 @@ _OCEAN_STYLE = """<style>
 .op-tags{display:flex;flex-wrap:wrap;gap:6px}
 .muted{color:var(--ink-3);font-size:12px}
 @media(max-width:600px){
-  .ocean-panel{top:auto;bottom:0;height:auto;max-height:60vh;width:100%;border-left:none;border-top:1px solid var(--line);box-shadow:0 -22px 44px rgba(0,0,0,.4)}
+  .ocean-panel{top:auto;bottom:0;height:auto;max-height:52vh;width:100%;border-left:none;border-top:1px solid var(--line);box-shadow:0 -22px 44px rgba(0,0,0,.4)}
   .ocean-hud{max-width:none;right:18px}
 }
 </style>"""
