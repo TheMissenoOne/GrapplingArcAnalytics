@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from analysis.names import _normalize_name
+from analysis.names import athlete_key, clean_athlete_name
 from analysis.technique_match import clean_label
 from scripts.insert_ufc_matches import (
     CanonicalMatch,
@@ -40,7 +40,9 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
             if not b_name:
                 logger.warning("Skipping %s (%s): cannot determine opponent", a_name, year)
                 continue
-            key = (frozenset((_normalize_name(a_name), _normalize_name(b_name))), year)
+            # Dedup by cleaned identity key so dirty variants (timestamps/nicknames/accents)
+            # of the same human collapse to one bout instead of an "X vs X" self-match.
+            key = (frozenset((athlete_key(a_name), athlete_key(b_name))), year)
             if key in seen:
                 continue
             method = str(m.get("method") or "")
@@ -79,14 +81,16 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
 
     with db_session() as session:
         by_norm = {
-            _normalize_name(a.name): a for a in session.execute(select(Athlete)).scalars()
+            athlete_key(a.name): a for a in session.execute(select(Athlete)).scalars()
         }
 
         def resolve(name: str, source: str) -> Athlete:
-            key = _normalize_name(name)
+            key = athlete_key(name)
             ath = by_norm.get(key)
             if ath is None:
-                aid = upsert_athlete(name=name, belt="black", source=source, session=session)
+                aid = upsert_athlete(
+                    name=clean_athlete_name(name), belt="black", source=source, session=session
+                )
                 ath = session.get(Athlete, aid)
                 assert ath is not None
                 by_norm[key] = ath
@@ -109,7 +113,7 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
             session.flush()
             winner_id: str | None = None
             if cm.win_type is not None and cm.winner_name:
-                winner_id = (a.id if _normalize_name(cm.winner_name) == _normalize_name(cm.a_name)
+                winner_id = (a.id if athlete_key(cm.winner_name) == athlete_key(cm.a_name)
                              else b.id)
             seq = [
                 {**{k: v for k, v in e.items() if k != "actor"},

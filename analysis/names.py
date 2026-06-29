@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 
 # Known name aliases for cross-referencing (norm → canonical)
 # NOTE: "guillotine" intentionally omitted — would change existing ADCC behavior
@@ -32,6 +33,28 @@ def _normalize_name(name: str) -> str:
     n = re.sub(r"[^a-z0-9 ]", "", n)
     n = re.sub(r"\s+", " ", n)
     return n
+
+
+def _deaccent(s: str) -> str:
+    """Strip combining accents (ã→a) so 'Galvão' and 'Galvao' match. Display keeps accents."""
+    return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
+
+
+def clean_athlete_name(raw: str) -> str:
+    """Clean a scraped athlete display name (KEEP accents/case).
+
+    Strips transcript junk that split one human into many rows: ``[H:MM:SS]`` timestamps and
+    space-delimited ``'nicknames'`` (but not the apostrophe in ``Sean O'Malley``). Collapses
+    whitespace. Returns the display form; use ``athlete_key`` for merge/identity comparison.
+    """
+    n = re.sub(r"\[[0-9:]+\]", "", raw)               # [2:11:18] transcript timestamp
+    n = re.sub(r"(?<=\s)'[^']+'(?=\s|$)", "", n)      # spaced 'Hulk' / 'Cyborg' nickname
+    return re.sub(r"\s+", " ", n).strip()
+
+
+def athlete_key(name: str) -> str:
+    """Identity key for athlete dedup: cleaned, de-accented, normalized (ascii, lower)."""
+    return _normalize_name(_deaccent(clean_athlete_name(name)))
 
 
 def _normalize_adcc_sub(name: str) -> str:
