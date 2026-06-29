@@ -749,7 +749,9 @@ document.getElementById('oceanLegend').innerHTML = (O.regions||[]).map(function(
 var panel = document.getElementById('oceanPanel');
 var g = GAGraph.mount(document.getElementById('oceanGraph'), {mode:'map',
   nodes:O.nodes.map(function(n){return {id:n.id,label:n.label,cat:n.type,size:n.size,color:n.color};}),
-  links:O.links, onSelect:onSelect});
+  links:O.links, onSelect:onSelect,
+  pan:true, zoom:true, zoomOnSelect:true,        // drag to pan, wheel to zoom, click zooms in
+  charge:7000, linkDist:64, gravity:0.0009, bounded:false});  // spread out, no border tension
 function bar(title, m){
   if(!m) return '';
   var top = 100 - m.pct;
