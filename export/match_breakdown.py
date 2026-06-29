@@ -383,6 +383,19 @@ def export_site_assets(
     (matches_dir / "index.json").write_text(
         json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+
+    # Prune orphan files from prior exports (e.g. stale slugs after an athlete rename/dedupe) so
+    # the site never shows a deleted/duplicate bout. Only on a full export — a single-slug export
+    # must not wipe the rest.
+    if only_slug is None:
+        keep_matches = {f"{s}.json" for s in written} | {"index.json"}
+        for f in matches_dir.glob("*.json"):
+            if f.name not in keep_matches:
+                f.unlink()
+        keep_fighters = {f"{s}.json" for s in seen_fighters} | {"index.json"}
+        for f in fighters_dir.glob("*.json"):
+            if f.name not in keep_fighters:
+                f.unlink()
     return written
 
 
