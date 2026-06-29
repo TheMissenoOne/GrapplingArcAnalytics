@@ -253,6 +253,13 @@ def build_match_breakdown(
     existing site viz keeps rendering. ``curated_ds`` (node_key → ``technique_nodes``
     ``decision_space``) overrides the expert defaults when authored; ``systems`` /
     ``principles`` / ``decision_chains`` are populated once the ontology is curated.
+
+    Per-transition DS (DS-05/07) is carried in the ordered ``decision_space.timeline`` —
+    one entry per sequence event, with before/after + reductions. It is intentionally NOT
+    written onto ``transition_graph.edges[].data``: that graph dedups repeated transitions,
+    so a per-edge ``dsMeta`` would not map 1:1 to the timeline and would mislead (review fix
+    F2). The App's ``GraphEdge.data.dsMeta`` stays a forward-declared optional for future
+    per-edge DS on non-deduped graphs (e.g. user graphs).
     """
     sequence = _sequence_view(match, a, b)
     winner_side = _side_of(match.winner_id, a, b)

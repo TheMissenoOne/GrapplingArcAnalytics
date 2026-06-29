@@ -12,6 +12,14 @@ it. Per-transition this yields the reduction/recovery deltas (DS-05) and a match
 This module derives DS from event ``type`` so it works before any position has a curated
 ``technique_nodes.decision_space``; a curated per-position DS (DS-01/04) overrides the
 default when present.
+
+KNOWN SIMPLIFICATION (expert mode, review fix F3): each step *overwrites* both sides' space
+with the per-event-type default — it is memoryless, not cumulative. A submission always yields
+{0.85, 0.10} regardless of the path that reached it, so "progressive reduction" (DS-01) shows
+up only in the per-step variations, not as an accumulating floor. The cumulative model is the
+job of learned mode (DS-16) and/or a decay/min-tracking pass over the timeline; revisit in
+Phase 4. The reductions/recoveries/turning-points classification below is deliberately based on
+per-step deltas so it stays meaningful under this simplification.
 """
 
 from __future__ import annotations
