@@ -295,6 +295,7 @@ def _nav(active: str) -> str:
     <a href="breakdowns.html"{cls('breakdowns')}>Breakdowns</a>
     <a href="events.html"{cls('events')}>Events</a>
     <a href="grapple-like.html"{cls('grapple')}>Grapple Like</a>
+    <a href="the-ocean.html"{cls('ocean')}>The Ocean</a>
     <a href="the-data.html"{cls('data')}>The Data</a>
   </nav>
   <div class="head-right">
@@ -308,7 +309,7 @@ _FOOTER = """<footer class="site-foot"><div class="wrap">
   <a class="brand" href="index.html"><span class="mark">GA</span>Grappling<span class="o">Arc</span></a>
   <nav class="links">
     <a href="breakdowns.html">Breakdowns</a><a href="events.html">Events</a><a href="grapple-like.html">Grapple Like</a>
-    <a href="the-data.html">The Data</a>
+    <a href="the-ocean.html">The Ocean</a><a href="the-data.html">The Data</a>
   </nav>
   <p class="copy">© 2026 GrapplingArc · generated from match data</p>
 </div></footer>"""
@@ -698,6 +699,106 @@ def render_event_page(slug: str, ep: dict[str, Any]) -> str:
     return _HEAD.format(title=html.escape(name)) + body
 
 
+# ── The Ocean (full technique force graph) ───────────────────────────────────
+_OCEAN_STYLE = """<style>
+.ocean-stage{position:relative;height:calc(100vh - 58px);overflow:hidden;border-top:1px solid var(--line)}
+.ocean-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ocean-hud{position:absolute;top:18px;left:18px;z-index:2;max-width:340px;display:flex;flex-direction:column;gap:12px;pointer-events:none}
+.ocean-hud>*{pointer-events:auto}
+.ocean-h h1{font-size:30px;margin:0;letter-spacing:-.6px}
+.ocean-search{width:100%;padding:9px 12px;background:rgba(12,12,17,.85);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:13px;font-family:var(--mono)}
+.ocean-legend{display:flex;flex-wrap:wrap;gap:6px}
+.ocean-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--ink-2);background:rgba(12,12,17,.8);border:1px solid var(--line);border-radius:20px;padding:3px 9px}
+.ocean-chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.ocean-panel{position:absolute;top:0;right:0;height:100%;width:340px;background:var(--panel);border-left:1px solid var(--line);z-index:3;padding:24px 22px;overflow:auto;box-shadow:-22px 0 44px rgba(0,0,0,.32)}
+.ocean-panel[hidden]{display:none}
+.ocean-close{position:absolute;top:13px;right:16px;background:none;border:none;color:var(--ink-3);font-size:23px;cursor:pointer;line-height:1}
+.ocean-panel h2{font-size:21px;margin:0 30px 8px 0;letter-spacing:-.3px}
+.op-metrics{margin-top:18px;display:flex;flex-direction:column;gap:12px}
+.op-metric .op-mh{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
+.op-bar{height:7px;background:#1a1a22;border-radius:5px;overflow:hidden}
+.op-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--orange));border-radius:5px}
+.op-sec{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin:18px 0 8px}
+.op-tags{display:flex;flex-wrap:wrap;gap:6px}
+.muted{color:var(--ink-3);font-size:12px}
+@media(max-width:600px){.ocean-panel{width:100%}.ocean-hud{max-width:none;right:18px}}
+</style>"""
+
+_OCEAN_BODY = """<section class="ocean-stage">
+  <canvas id="oceanGraph" class="ocean-canvas"></canvas>
+  <div class="ocean-hud">
+    <div class="ocean-h"><h1>The Ocean</h1><p class="muted" id="oceanMeta"></p></div>
+    <input id="oceanSearch" class="ocean-search" placeholder="find a technique…" autocomplete="off"/>
+    <div id="oceanLegend" class="ocean-legend"></div>
+  </div>
+  <aside id="oceanPanel" class="ocean-panel" hidden>
+    <button id="oceanClose" class="ocean-close" aria-label="close">&times;</button>
+    <h2 id="opName"></h2><div id="opMeta"></div>
+    <div id="opMetrics" class="op-metrics"></div>
+    <div id="opNeighbours"></div><div id="opEdges"></div>
+  </aside>
+</section>"""
+
+_OCEAN_JS = """
+var O = window.GA_OCEAN || {nodes:[],links:[],regions:[],meta:{}};
+var byId = {}; O.nodes.forEach(function(n){ byId[n.id]=n; });
+document.getElementById('oceanMeta').textContent =
+  (O.meta.positions||0)+' techniques · '+(O.meta.transitions||0)+' transitions · '+(O.regions||[]).length+' regions';
+document.getElementById('oceanLegend').innerHTML = (O.regions||[]).map(function(r){
+  return '<span class="ocean-chip"><i style="background:'+r.color+'"></i>'+r.name+'</span>'; }).join('');
+var panel = document.getElementById('oceanPanel');
+var g = GAGraph.mount(document.getElementById('oceanGraph'), {mode:'map',
+  nodes:O.nodes.map(function(n){return {id:n.id,label:n.label,cat:n.type,size:n.size,color:n.color};}),
+  links:O.links, onSelect:onSelect});
+function bar(title, m){
+  if(!m) return '';
+  var top = 100 - m.pct;
+  var note = (m.ratio && m.ratio>0) ? (' · ×'+m.ratio+' avg') : '';
+  return '<div class="op-metric"><div class="op-mh"><span>'+title+'</span>'+
+    '<span class="muted">top '+top+'%'+note+'</span></div>'+
+    '<div class="op-bar"><div class="op-fill" style="width:'+Math.max(3,m.pct)+'%"></div></div></div>';
+}
+function onSelect(node){
+  if(!node || !byId[node.id]){ panel.hidden=true; return; }
+  var n = byId[node.id], mt = n.metrics||{};
+  var region = ((O.regions||[])[n.region]||{}).name || 'Unclustered';
+  var nb = (n.neighbours||[]).map(function(x){var t=byId[x.node_key];
+    return '<span class="tag">'+(t?t.label:x.node_key)+'</span>';}).join('');
+  var outs = O.links.filter(function(e){return e.from===n.id;}).map(function(e){
+    var t=byId[e.to];return t?t.label:e.to;}).slice(0,8).join(', ');
+  document.getElementById('opName').textContent = n.label;
+  document.getElementById('opMeta').innerHTML =
+    '<span class="tag" style="border-color:'+n.color+';color:'+n.color+'">'+region+'</span> '+
+    '<span class="muted">'+n.type+' · seen '+n.occ+'×</span>';
+  document.getElementById('opMetrics').innerHTML =
+    bar('Frequency',mt.frequency)+bar('Centrality',mt.centrality)+bar('Bridging',mt.bridging)+
+    bar('Favorability',mt.favorability)+bar('Effectiveness',mt.effectiveness);
+  document.getElementById('opNeighbours').innerHTML = nb ? '<div class="op-sec">Similar positions</div><div class="op-tags">'+nb+'</div>' : '';
+  document.getElementById('opEdges').innerHTML = outs ? '<div class="op-sec">Leads to</div><div class="muted">'+outs+'</div>' : '';
+  panel.hidden=false;
+}
+document.getElementById('oceanClose').addEventListener('click', function(){ panel.hidden=true; g.select(null); });
+function locate(){
+  var q=(document.getElementById('oceanSearch').value||'').toLowerCase().trim(); if(!q) return;
+  var hit = O.nodes.filter(function(n){return n.label.toLowerCase().indexOf(q)>=0;})
+    .sort(function(a,b){return (b.metrics.centrality.pct)-(a.metrics.centrality.pct);})[0];
+  if(hit) g.select(hit.id);
+}
+var os=document.getElementById('oceanSearch');
+os.addEventListener('change', locate);
+os.addEventListener('keydown', function(e){ if(e.key==='Enter') locate(); });
+"""
+
+
+def render_ocean_page() -> str:
+    """The Ocean — full-screen technique force graph, region legend, search, node dialog."""
+    return (
+        _HEAD.format(title="The Ocean") + _OCEAN_STYLE + _nav("ocean") + _OCEAN_BODY + _FOOTER +
+        '<script src="graph.js"></script><script src="i18n.js"></script>'
+        '<script src="ocean-data.js"></script><script>' + _OCEAN_JS + "</script></body></html>"
+    )
+
+
 # ── orchestration ────────────────────────────────────────────────────────────
 def _js_file(var: str, data: Any) -> str:
     return f"/* generated by export.site_data — do not edit */\nwindow.{var} = {json.dumps(data, ensure_ascii=False)};\n"
@@ -723,6 +824,11 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     (out / "events-data.js").write_text(_js_file("GA_EVENTS", events), encoding="utf-8")
     (out / "elo-data.js").write_text(_js_file("GA_ELO", elo), encoding="utf-8")
 
+    from analysis.ocean import build_ocean
+    ocean = build_ocean(session)
+    (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
+    (out / "the-ocean.html").write_text(render_ocean_page(), encoding="utf-8")
+
     # per-match detail pages (attach archetypes + adapted graph for the template)
     for slug, bd in full:
         bd["_arch_a"] = next((r["a"]["style"] for r in rows if r["id"] == slug), "")
@@ -744,16 +850,17 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
             render_event_page(slug, ep), encoding="utf-8")
 
     return {"breakdowns": len(full), "fighters": len(details),
-            "events": len(event_details), "elo": len(elo)}
+            "events": len(event_details), "elo": len(elo),
+            "ocean": len(ocean["nodes"])}
 
 
 def run(out: Path) -> int:
     from db.base import db_session
     with db_session() as session:
         counts = export_site(session, out)
-    logger.info("Generated %d breakdowns, %d dossiers, %d events, %d ELO rows → %s",
+    logger.info("Generated %d breakdowns, %d dossiers, %d events, %d ELO rows, %d ocean nodes → %s",
                 counts["breakdowns"], counts["fighters"], counts["events"],
-                counts["elo"], out)
+                counts["elo"], counts["ocean"], out)
     return 0
 
 
