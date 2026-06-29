@@ -7,6 +7,7 @@ import networkx as nx
 from analysis.systems import propose_from_network
 from db.models import Athlete, Match
 from export.match_breakdown import build_match_breakdown
+from export.ontology import validate_seed
 
 
 def test_propose_from_network_yields_systems():
@@ -70,6 +71,31 @@ def test_build_match_breakdown_is_additive():
     assert bd["systems"] == []
     assert bd["principles"] == []
     assert bd["decision_chains"] == []
+
+
+def test_validate_seed_catches_uuid_and_orphan_refs():
+    # A well-formed seed: milestone + implementation reference the system by stable key.
+    good = {
+        "systems": [{"key": "body-lock-passing-system"}],
+        "milestones": [{"name": "Concept", "system_key": "body-lock-passing-system"}],
+        "implementations": [
+            {
+                "name": "Gordon",
+                "system_key": "body-lock-passing-system",
+                "athlete_key": "gordon-ryan",
+            }
+        ],
+    }
+    assert validate_seed(good) == []
+
+    # Regressions F1 guards against: a DB-UUID-style ref, an orphan, and a missing athlete key.
+    bad = {
+        "systems": [{"key": "body-lock-passing-system"}],
+        "milestones": [{"name": "X", "system_key": "f47ac10b-58cc-4372-a567-0e02b2c3d479"}],
+        "implementations": [{"name": "Y", "system_key": "nope", "athlete_key": ""}],
+    }
+    problems = validate_seed(bad)
+    assert len(problems) == 3
 
 
 def test_curated_ds_overrides_in_breakdown():

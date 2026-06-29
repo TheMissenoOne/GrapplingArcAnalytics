@@ -51,6 +51,7 @@ def build_ontology_seed() -> dict[str, Any]:
 
         from db.base import db_session
         from db.models import (
+            Athlete,
             Dilemma,
             Intent,
             Milestone,
@@ -62,6 +63,7 @@ def build_ontology_seed() -> dict[str, Any]:
             SystemPrinciple,
             TechniqueNode,
         )
+        from export.match_breakdown import slugify
     except Exception as exc:  # import/config failure → offline-safe empty seed
         logger.info("Ontology seed: DB unavailable (%s) — emitting empty seed", exc)
         return _empty_seed()
@@ -109,7 +111,11 @@ def build_ontology_seed() -> dict[str, Any]:
             ).all():
                 sys_dilemma_keys.setdefault(sd[0], []).append(sd[1])
 
+            # id → stable key maps so milestones/implementations reference systems/athletes
+            # by slug (the cross-module contract), never by environment-specific DB UUIDs.
+            system_key_by_id: dict[str, str] = {}
             for s in session.execute(select(System)).scalars():
+                system_key_by_id[s.id] = s.key
                 seed["systems"].append(
                     {
                         "key": s.key,
@@ -129,7 +135,7 @@ def build_ontology_seed() -> dict[str, Any]:
 
             seed["milestones"] = [
                 {
-                    "system_id": m.system_id,
+                    "system_key": system_key_by_id.get(m.system_id, ""),
                     "ordinal": m.ordinal,
                     "kind": m.kind,
                     "name": m.name,
@@ -141,15 +147,24 @@ def build_ontology_seed() -> dict[str, Any]:
                 ).scalars()
             ]
 
+            impls = list(session.execute(select(SystemImplementation)).scalars())
+            # Resolve athlete UUIDs → stable name slugs (the app's athlete identity key).
+            athlete_keys: dict[str, str] = {}
+            impl_athlete_ids = {impl.athlete_id for impl in impls}
+            if impl_athlete_ids:
+                for ath in session.execute(
+                    select(Athlete).where(Athlete.id.in_(impl_athlete_ids))
+                ).scalars():
+                    athlete_keys[ath.id] = slugify(ath.name)
             seed["implementations"] = [
                 {
-                    "system_id": impl.system_id,
-                    "athlete_id": impl.athlete_id,
+                    "system_key": system_key_by_id.get(impl.system_id, ""),
+                    "athlete_key": athlete_keys.get(impl.athlete_id, ""),
                     "name": impl.name,
                     "overrides": impl.overrides or {},
                     "milestone_overrides": impl.milestone_overrides or [],
                 }
-                for impl in session.execute(select(SystemImplementation)).scalars()
+                for impl in impls
             ]
 
             # Per-position Decision Space (only positions that have a curated DS).
@@ -166,11 +181,36 @@ def build_ontology_seed() -> dict[str, Any]:
     return seed
 
 
+def validate_seed(seed: dict[str, Any]) -> list[str]:
+    """Referential-integrity check on a seed (cross-module contract guard, F1).
+
+    Every milestone/implementation must reference a System present in the same seed by its
+    stable ``system_key`` (never a DB UUID), and implementations must carry an ``athlete_key``.
+    Returns a list of human-readable problems; empty means the seed is internally consistent.
+    """
+    problems: list[str] = []
+    system_keys = {s.get("key") for s in seed.get("systems", [])}
+    for m in seed.get("milestones", []):
+        if m.get("system_key") not in system_keys:
+            problems.append(
+                f"milestone {m.get('name')!r} → unknown system_key {m.get('system_key')!r}"
+            )
+    for impl in seed.get("implementations", []):
+        name, skey = impl.get("name"), impl.get("system_key")
+        if skey not in system_keys:
+            problems.append(f"implementation {name!r} → unknown system_key {skey!r}")
+        if not impl.get("athlete_key"):
+            problems.append(f"implementation {name!r} → missing athlete_key")
+    return problems
+
+
 def export_ontology_seed(out_dir: Path | None = None) -> Path:
     """Build + write ``ontology_seed.json``. Returns the written path."""
     out_dir = out_dir or PROCESSED_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
     seed = build_ontology_seed()
+    for problem in validate_seed(seed):
+        logger.warning("Ontology seed integrity: %s", problem)
     path = out_dir / "ontology_seed.json"
     with open(path, "w") as f:
         json.dump(seed, f, indent=2, ensure_ascii=False)
@@ -188,4 +228,10 @@ def export_ontology_seed(out_dir: Path | None = None) -> Path:
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        pass
     export_ontology_seed()

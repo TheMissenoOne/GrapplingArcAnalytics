@@ -18,6 +18,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from analysis.names import _normalize_name
+
 # Expert-mode defaults: {event type → (attacker_ds, defender_ds)}.
 # attacker_ds = options for the acting side; defender_ds = options left to the opponent.
 # Deeper control → lower defender_ds (the point of the model). On a 0..1 scale.
@@ -136,7 +138,4 @@ def _sign(x: float) -> int:
 
 
 def _normalized_key(label: str) -> str:
-    # Local import to avoid a hard dependency when names isn't needed.
-    from analysis.names import _normalize_name
-
     return _normalize_name(label)
