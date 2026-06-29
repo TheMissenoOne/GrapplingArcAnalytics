@@ -17,7 +17,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from analysis.archetype import _TYPES
+from analysis.deviance import TYPES as _TYPES
 from analysis.names import _normalize_name
 from db.models import Archetype, Athlete
 from db.repository import _perspective_view, get_matches_for_athlete

@@ -36,8 +36,10 @@ class Archetype(Base):
     description: Mapped[str | None] = mapped_column(Text)
     centroid: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # legacy feature centroid
     feature_version: Mapped[str | None] = mapped_column(String(40))
-    # NB: `embedding vector(768)` in DB (alembic 0006) — centroid in the graphs
-    # embedding space for nearest-centroid archetype id. Unmapped (SQL backfill).
+    # Centroid in the graphs embedding space (alembic 0006) = mean of member graph embeddings,
+    # for nearest-centroid id + cross-corpus similarity. Backfilled by
+    # ``analysis.embeddings.backfill_archetype_embeddings``; NULL until then.
+    embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -97,9 +99,10 @@ class Graph(Base):
     edges: Mapped[list[GraphEdge]] = relationship(
         "GraphEdge", back_populates="graph", cascade="all, delete-orphan"
     )
-    # NB: `embedding vector(768)` exists in the DB (alembic 0006) — one vector per
-    # owner for archetype id + similarity. Intentionally unmapped here (managed by
-    # the SQL embedding backfill job; avoids a pgvector ORM dependency).
+    # One vector per owner (alembic 0006) — ELO-weighted mean of the graph's node embeddings,
+    # for athlete-graph similarity (RF11) + nearest-centroid archetype id. Backfilled by
+    # ``analysis.embeddings.backfill_graph_embeddings``; NULL until then.
+    embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
 
 
 class TechniqueNode(Base):
@@ -162,8 +165,10 @@ class GraphEdge(Base):
     owner_kind: Mapped[str | None] = mapped_column(String(10))
     elo: Mapped[float] = mapped_column(Float, default=0.0)
     setup: Mapped[str] = mapped_column(Text, default="")
-    # NB: `embedding vector(768)` in DB (alembic 0006) — transition/structure vector,
-    # athlete vs user spaces split by partial index on owner_kind. Unmapped (SQL backfill).
+    # Transition vector (alembic 0006): embedding of "{source} to {target}", athlete vs user
+    # spaces split by partial index on owner_kind. Backfilled by
+    # ``analysis.embeddings.backfill_graph_edge_embeddings``; NULL until then.
+    embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
 
     graph: Mapped[Graph] = relationship("Graph", back_populates="edges")
 

@@ -71,6 +71,124 @@ def backfill(session: Session, batch: int = 256) -> int:
     return len(nodes)
 
 
+def backfill_graph_edge_embeddings(session: Session, batch: int = 256) -> int:
+    """Embed each graph edge's ``"{source_label} to {target_label}"`` → ``graph_edges.embedding``.
+
+    Falls back to the raw node_key when a label is missing. Returns the edge count.
+    """
+    from db.models import GraphEdge
+
+    labels: dict[str, str] = {
+        k: lb
+        for k, lb in session.execute(
+            select(TechniqueNode.node_key, TechniqueNode.label)
+        ).all()
+    }
+    edges = list(session.execute(select(GraphEdge)).scalars())
+
+    def _text(e: Any) -> str:
+        s = labels.get(e.source_key, e.source_key)
+        t = labels.get(e.target_key, e.target_key)
+        return f"{s} to {t}"
+
+    for i in range(0, len(edges), batch):
+        chunk = edges[i : i + batch]
+        vecs = embed_texts([_text(e) for e in chunk])
+        for e, v in zip(chunk, vecs):
+            e.embedding = v
+    session.commit()
+    logger.info("Embedded %d graph edges → pgvector(768)", len(edges))
+    return len(edges)
+
+
+def backfill_graph_embeddings(session: Session) -> int:
+    """Set each graph's embedding = ELO-weighted mean of its nodes' technique embeddings.
+
+    Requires ``technique_nodes.embedding`` to be backfilled first. Graphs with no embedded
+    nodes are skipped (stay NULL). Returns the number of graphs updated.
+    """
+    from db.models import Graph, GraphEdge
+    from db.repository import incident_edge_elos
+
+    node_emb = {
+        k: np.asarray(v, dtype=np.float64)
+        for k, v in session.execute(
+            select(TechniqueNode.node_key, TechniqueNode.embedding).where(
+                TechniqueNode.embedding.isnot(None)
+            )
+        ).all()
+    }
+    n_set = 0
+    for g in session.execute(select(Graph)).scalars():
+        edges = list(session.execute(select(GraphEdge).where(GraphEdge.graph_id == g.id)).scalars())
+        vecs: list[np.ndarray] = []
+        weights: list[float] = []
+        for key, elos in incident_edge_elos(edges).items():
+            emb = node_emb.get(key)
+            if emb is None:
+                continue
+            vecs.append(emb)
+            weights.append(max(max(elos) if elos else 0.0, 1e-6))
+        if not vecs:
+            continue
+        arr = np.asarray(vecs)
+        w = np.asarray(weights)
+        mean = (arr * w[:, None]).sum(axis=0) / w.sum()
+        norm = np.linalg.norm(mean)
+        g.embedding = mean / norm if norm > 0 else mean
+        n_set += 1
+    session.commit()
+    logger.info("Embedded %d graphs → pgvector(768)", n_set)
+    return n_set
+
+
+def backfill_archetype_embeddings(session: Session) -> int:
+    """Set each archetype's embedding = normalized mean of its member graphs' embeddings.
+
+    Run after graph embeddings + archetype assignment. Returns archetypes updated.
+    """
+    from db.models import Archetype, Graph
+
+    groups: dict[int, list[np.ndarray]] = {}
+    for aid, emb in session.execute(
+        select(Graph.archetype_id, Graph.embedding).where(
+            Graph.archetype_id.isnot(None), Graph.embedding.isnot(None)
+        )
+    ).all():
+        groups.setdefault(int(aid), []).append(np.asarray(emb, dtype=np.float64))
+    n = 0
+    for aid, vs in groups.items():
+        arch = session.get(Archetype, aid)
+        if arch is None:
+            continue
+        mean = np.mean(vs, axis=0)
+        norm = np.linalg.norm(mean)
+        arch.embedding = mean / norm if norm > 0 else mean
+        n += 1
+    session.commit()
+    logger.info("Embedded %d archetype centroids → pgvector(768)", n)
+    return n
+
+
+def nearest_graphs(session: Session, graph_id: str, k: int = 6) -> list[tuple[str, float]]:
+    """DB-side: top-``k`` most stylistically similar graphs (cosine over graph embeddings)."""
+    from db.models import Graph
+
+    target = session.execute(
+        select(Graph.embedding).where(Graph.id == graph_id)
+    ).scalar_one_or_none()
+    if target is None:
+        return []
+    dist = Graph.embedding.cosine_distance(target)
+    rows = session.execute(
+        select(Graph.id, dist)
+        .where(Graph.embedding.isnot(None), Graph.id != graph_id)
+        .order_by(dist)
+        .limit(k)
+    )
+    return [(gid, round(1.0 - float(d), 3)) for gid, d in rows]
+
+
 def nearest_positions(session: Session, node_key: str, k: int = 6) -> list[tuple[str, float]]:
     """DB-side: top-``k`` semantically closest nodes to ``node_key`` via pgvector cosine."""
     target = session.execute(
@@ -132,12 +250,21 @@ def main() -> int:
     except ImportError:
         pass
     ap = argparse.ArgumentParser(description="Position embedding tooling")
-    ap.add_argument("cmd", choices=["backfill"], help="backfill = embed all nodes → pgvector")
-    ap.parse_args()
+    ap.add_argument(
+        "cmd",
+        choices=["backfill", "graphs", "all"],
+        help="backfill = nodes; graphs = edges+graphs+archetypes; all = nodes then graphs",
+    )
+    cmd = ap.parse_args().cmd
     from db.base import db_session
 
     with db_session() as session:
-        backfill(session)
+        if cmd in ("backfill", "all"):
+            backfill(session)
+        if cmd in ("graphs", "all"):
+            backfill_graph_edge_embeddings(session)
+            backfill_graph_embeddings(session)
+            backfill_archetype_embeddings(session)
     return 0
 
 

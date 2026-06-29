@@ -497,20 +497,26 @@ def delete_match(match_id: str, session: Session) -> None:
         session.flush()
 
 
-def graphs_for_clustering(session: Session) -> list[tuple[str, list[DerivedNode]]]:
-    """Return [(graph_id, [DerivedNode, ...])] for all graphs.
+def graphs_for_clustering(
+    session: Session, owner_kind: str | None = None
+) -> list[tuple[str, list[DerivedNode]]]:
+    """Return [(graph_id, [DerivedNode, ...])] for graphs (optionally one ``owner_kind``).
 
     Nodes are reconstructed from each graph's edges joined to the shared
     ``technique_nodes`` library (graph_nodes is dropped): the node set is the
     edge endpoints, ``node_type`` comes from the library, and ``computed_elo``
-    is derived as the strongest incident edge ELO."""
+    is derived as the strongest incident edge ELO. Pass ``owner_kind='athlete'`` to
+    restrict to pro-athlete graphs (the archetype population)."""
     node_types: dict[str, str] = {
         row[0]: row[1]
         for row in session.execute(
             select(TechniqueNode.node_key, TechniqueNode.node_type)
         ).all()
     }
-    graphs = list(session.execute(select(Graph)).scalars())
+    graph_q = select(Graph)
+    if owner_kind is not None:
+        graph_q = graph_q.where(Graph.owner_kind == owner_kind)
+    graphs = list(session.execute(graph_q).scalars())
     result = []
     for g in graphs:
         edges = session.execute(select(GraphEdge).where(GraphEdge.graph_id == g.id)).scalars()
