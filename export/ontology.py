@@ -41,6 +41,8 @@ def _empty_seed() -> dict[str, Any]:
         "milestones": [],
         "implementations": [],
         "position_decision_space": {},  # node_key → decision_space (DS-01/04)
+        "archetypes": [],               # RF01 target + emergent catalog
+        "athlete_profiles": [],         # per-athlete emergent archetype + signature deviance
     }
 
 
@@ -49,10 +51,18 @@ def build_ontology_seed() -> dict[str, Any]:
     try:
         from sqlalchemy import select
 
+        from analysis.deviance import (
+            TYPES,
+            node_population_stats,
+            signature_nodes,
+            type_deviance_vector,
+        )
         from db.base import db_session
         from db.models import (
+            Archetype,
             Athlete,
             Dilemma,
+            Graph,
             Intent,
             Milestone,
             Principle,
@@ -63,6 +73,7 @@ def build_ontology_seed() -> dict[str, Any]:
             SystemPrinciple,
             TechniqueNode,
         )
+        from db.repository import graphs_for_clustering
         from export.match_breakdown import slugify
     except Exception as exc:  # import/config failure → offline-safe empty seed
         logger.info("Ontology seed: DB unavailable (%s) — emitting empty seed", exc)
@@ -174,6 +185,65 @@ def build_ontology_seed() -> dict[str, Any]:
                 )
             ).all():
                 seed["position_decision_space"][n[0]] = n[1]
+
+            # ── Archetypes (RF01: target + emergent) ──────────────────────────
+            archetypes = list(session.execute(select(Archetype)).scalars())
+            arch_key_by_id = {a.id: a.key for a in archetypes}
+            seed["archetypes"] = [
+                {
+                    "key": a.key,
+                    "name": a.name,
+                    "kind": a.kind,
+                    "description": a.description,
+                    "signature_types": a.signature_types or [],
+                }
+                for a in archetypes
+                if a.key  # skip any legacy rows without a stable key
+            ]
+
+            # ── Per-athlete profiles: emergent archetype + proportional deviance ──
+            rows = [
+                (gid, nodes)
+                for gid, nodes in graphs_for_clustering(session, owner_kind="athlete")
+                if len(nodes) >= 3
+            ]
+            if rows:
+                by_key, by_type = node_population_stats(rows)
+                graph_owner = {
+                    g.id: (g.owner_id, g.archetype_id)
+                    for g in session.execute(
+                        select(Graph).where(Graph.owner_kind == "athlete")
+                    ).scalars()
+                }
+                owner_ids = {graph_owner[gid][0] for gid, _ in rows if gid in graph_owner}
+                ath_name = {
+                    a.id: a.name
+                    for a in session.execute(
+                        select(Athlete).where(Athlete.id.in_(owner_ids))
+                    ).scalars()
+                }
+                for gid, nodes in rows:
+                    owner_id, arch_id = graph_owner.get(gid, (None, None))
+                    name = ath_name.get(owner_id) if owner_id else None
+                    if not name:
+                        continue
+                    devs = type_deviance_vector(nodes, by_key, by_type)
+                    seed["athlete_profiles"].append(
+                        {
+                            "athlete_key": slugify(name),
+                            "name": name,
+                            "emergent_archetype_key": (
+                                arch_key_by_id.get(arch_id) if arch_id is not None else None
+                            ),
+                            "signature_nodes": [
+                                {"node_key": k, "z": round(z, 3)}
+                                for k, z in signature_nodes(nodes, by_key, by_type)
+                            ],
+                            "type_deviance": {
+                                t: round(float(z), 3) for t, z in zip(TYPES, devs)
+                            },
+                        }
+                    )
     except Exception as exc:
         logger.warning("Ontology seed: read failed (%s) — emitting empty seed", exc)
         return _empty_seed()
@@ -201,6 +271,13 @@ def validate_seed(seed: dict[str, Any]) -> list[str]:
             problems.append(f"implementation {name!r} → unknown system_key {skey!r}")
         if not impl.get("athlete_key"):
             problems.append(f"implementation {name!r} → missing athlete_key")
+    archetype_keys = {a.get("key") for a in seed.get("archetypes", [])}
+    for p in seed.get("athlete_profiles", []):
+        ak = p.get("emergent_archetype_key")
+        if ak is not None and ak not in archetype_keys:
+            problems.append(
+                f"athlete_profile {p.get('name')!r} → unknown archetype_key {ak!r}"
+            )
     return problems
 
 
@@ -215,13 +292,16 @@ def export_ontology_seed(out_dir: Path | None = None) -> Path:
     with open(path, "w") as f:
         json.dump(seed, f, indent=2, ensure_ascii=False)
     logger.info(
-        "Ontology seed → %s (%d systems, %d principles, %d dilemmas, %d milestones, %d impls)",
+        "Ontology seed → %s (%d systems, %d principles, %d dilemmas, %d milestones, %d impls, "
+        "%d archetypes, %d athlete profiles)",
         path,
         len(seed["systems"]),
         len(seed["principles"]),
         len(seed["dilemmas"]),
         len(seed["milestones"]),
         len(seed["implementations"]),
+        len(seed["archetypes"]),
+        len(seed["athlete_profiles"]),
     )
     return path
 

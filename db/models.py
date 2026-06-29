@@ -34,6 +34,12 @@ class Archetype(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False)
     description: Mapped[str | None] = mapped_column(Text)
+    # RF01: 'emergent' = computed cluster (rewritten on recompute) | 'target' = authored catalog.
+    kind: Mapped[str] = mapped_column(String(10), nullable=False, server_default="emergent")
+    # Emphasized node types, e.g. ["submission","control"] — dominant deviance dims (emergent)
+    # or author-picked (target).
+    signature_types: Mapped[list[str]] = mapped_column(JSONB, server_default="[]")
+    key: Mapped[str | None] = mapped_column(Text)  # stable slug for seed cross-reference
     centroid: Mapped[dict[str, Any] | None] = mapped_column(JSONB)  # legacy feature centroid
     feature_version: Mapped[str | None] = mapped_column(String(40))
     # Centroid in the graphs embedding space (alembic 0006) = mean of member graph embeddings,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 from collections.abc import Sequence
 from typing import Protocol
 
@@ -32,6 +33,20 @@ _TYPE_NOUN = {
     "guard": "Guard", "pass": "Passing", "sweep": "Sweep", "submission": "Submission",
     "takedown": "Takedown", "control": "Control", "escape": "Escape", "transition": "Scramble",
 }
+
+
+def _slug(name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def _dedupe_slugs(slugs: list[str]) -> list[str]:
+    """Make slugs unique (two clusters can share a name) by suffixing collisions -2, -3, ..."""
+    seen: dict[str, int] = {}
+    out: list[str] = []
+    for s in slugs:
+        seen[s] = seen.get(s, 0) + 1
+        out.append(s if seen[s] == 1 else f"{s}-{seen[s]}")
+    return out
 
 
 class _NodeLike(Protocol):
@@ -80,21 +95,28 @@ def graph_feature_vector(
     return vec / norm if norm > 0 else vec
 
 
-def name_archetype(centroid: np.ndarray, min_deviance: float = 1e-3) -> str:
-    """Name a cluster from its centroid's dominant per-type deviance dims (v3 layout).
+def signature_types(centroid: np.ndarray, min_deviance: float = 1e-3) -> list[str]:
+    """Top one or two positive per-type deviance dims of a centroid (v3 layout).
 
-    Deviance block = indices [len(_TYPES) : 2*len(_TYPES)). The top one or two positive
-    types name the archetype (e.g. "Submission / Control Specialist"); if no type stands
-    out, fall back to the dominant composition share ("Guard-Based"), else "Balanced"."""
+    Deviance block = indices [len(_TYPES) : 2*len(_TYPES)). Returns the emphasized node-type
+    slugs (e.g. ["submission","control"]) — empty when no type stands out."""
     nt = len(_TYPES)
     dev = centroid[nt : 2 * nt]
     ranked = sorted(
         ((_TYPES[i], float(dev[i])) for i in range(nt)), key=lambda kv: kv[1], reverse=True
     )
-    top = [t for t, v in ranked if v > min_deviance][:2]
+    return [t for t, v in ranked if v > min_deviance][:2]
+
+
+def name_archetype(centroid: np.ndarray, min_deviance: float = 1e-3) -> str:
+    """Name a cluster from its dominant deviance types (e.g. "Submission / Control Specialist").
+
+    If no type stands out, fall back to the dominant composition share ("Guard-Based"),
+    else "Balanced"."""
+    top = signature_types(centroid, min_deviance)
     if top:
-        nouns = " / ".join(_TYPE_NOUN[t] for t in top)
-        return f"{nouns} Specialist"
+        return f"{' / '.join(_TYPE_NOUN[t] for t in top)} Specialist"
+    nt = len(_TYPES)
     shares = centroid[:nt]
     j = int(np.argmax(shares))
     return f"{_TYPE_NOUN[_TYPES[j]]}-Based" if shares[j] > 0 else "Balanced"
@@ -153,11 +175,15 @@ def run_archetype_pipeline(session: object, k: int = 6) -> None:
     vectors = np.array([graph_feature_vector(r[1], by_key, by_type) for r in rows])
     km = fit_archetypes(vectors, k=k)
 
-    clear_archetypes(session)  # type: ignore[arg-type]  # drop prior-run (stale) archetypes
+    clear_archetypes(session)  # type: ignore[arg-type]  # drop prior emergent archetypes
     fv = archetype_feature_version(vectors)
     centroids = km.cluster_centers_.tolist()
     names = [name_archetype(c) for c in km.cluster_centers_]
-    archetype_ids = save_archetypes(centroids, names, fv, session)  # type: ignore[arg-type]
+    sig_types = [signature_types(c) for c in km.cluster_centers_]
+    keys = _dedupe_slugs([f"emergent-{_slug(n)}" for n in names])
+    archetype_ids = save_archetypes(
+        centroids, names, keys, sig_types, fv, session  # type: ignore[arg-type]
+    )
 
     for graph_id, label in zip(graph_ids, km.labels_):
         arch_id = archetype_ids[int(label)]

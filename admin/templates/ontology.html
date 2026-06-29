@@ -121,4 +121,32 @@
     <div style="grid-column:1/3;"><button class="btn btn-primary" type="submit">Save Decision Space</button></div>
   </form>
 </div>
+
+<div class="card">
+  <h2>Archetypes <span style="color:#666; font-size:.8rem;">(RF01: target = authored, emergent = computed)</span></h2>
+  <table>
+    <thead><tr><th>Name</th><th>Kind</th><th>Signature types</th><th></th></tr></thead>
+    <tbody>
+      {% for a in archetypes %}
+      <tr>
+        <td>{{ a.name }}{% if a.description %}<br><span style="color:#666; font-size:.8rem;">{{ a.description }}</span>{% endif %}</td>
+        <td><span class="badge {{ 'badge-gray' if a.kind == 'emergent' else 'badge-green' }}">{{ a.kind }}</span></td>
+        <td>{{ a.signature_types | join(", ") or "—" }}</td>
+        <td>{% if a.kind == 'target' %}<form method="post" action="/admin/ontology/archetypes/{{ a.id }}/delete">
+          <button class="btn btn-danger" type="submit">✕</button></form>{% endif %}</td>
+      </tr>
+      {% else %}<tr><td colspan="4" style="color:#666;">None yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <p style="color:#666; font-size:.8rem;">Emergent archetypes are rewritten by
+    <form method="post" action="/admin/archetypes/recompute" style="display:inline;">
+      <button class="btn" type="submit">recompute</button></form>; only target archetypes can be edited here.</p>
+  <h2>New target archetype</h2>
+  <form method="post" action="/admin/ontology/archetypes">
+    <label>Name</label><input name="name" required placeholder="Pressure Passer">
+    <label>Signature node types</label><input name="signature_types" placeholder="pass, control">
+    <label>Description</label><textarea name="description" rows="2"></textarea>
+    <button class="btn btn-primary" type="submit">Add target archetype</button>
+  </form>
+</div>
 {% endblock %}

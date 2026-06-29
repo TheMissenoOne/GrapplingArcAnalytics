@@ -98,6 +98,23 @@ def test_validate_seed_catches_uuid_and_orphan_refs():
     assert len(problems) == 3
 
 
+def test_validate_seed_catches_orphan_archetype_ref():
+    # athlete_profile.emergent_archetype_key must resolve to a seed archetype (RF01).
+    good = {
+        "archetypes": [{"key": "emergent-guard-sweep-specialist", "name": "X", "kind": "emergent"}],
+        "athlete_profiles": [
+            {"name": "Kade", "emergent_archetype_key": "emergent-guard-sweep-specialist"}
+        ],
+    }
+    assert validate_seed(good) == []
+    bad = {
+        "archetypes": [{"key": "emergent-guard-sweep-specialist"}],
+        "athlete_profiles": [{"name": "Ghost", "emergent_archetype_key": "does-not-exist"}],
+    }
+    problems = validate_seed(bad)
+    assert len(problems) == 1 and "does-not-exist" in problems[0]
+
+
 def test_curated_ds_overrides_in_breakdown():
     a = _athlete("a-id", "A")
     b = _athlete("b-id", "B")

@@ -536,12 +536,22 @@ def graphs_for_clustering(
 def save_archetypes(
     centroids: list[list[float]],
     names: list[str],
+    keys: list[str],
+    signature_types: list[list[str]],
     feature_version: str,
     session: Session,
 ) -> list[int]:
+    """Persist computed (emergent) archetypes. Returns the new row ids in input order."""
     ids = []
-    for name, centroid in zip(names, centroids):
-        a = Archetype(name=name, centroid={"vector": centroid}, feature_version=feature_version)
+    for name, key, sig, centroid in zip(names, keys, signature_types, centroids):
+        a = Archetype(
+            name=name,
+            key=key,
+            kind="emergent",
+            signature_types=sig,
+            centroid={"vector": centroid},
+            feature_version=feature_version,
+        )
         session.add(a)
         session.flush()
         ids.append(a.id)
@@ -555,13 +565,22 @@ def assign_archetype_to_graph(graph_id: str, archetype_id: int, session: Session
 
 
 def clear_archetypes(session: Session) -> int:
-    """Null graph→archetype refs and delete existing archetype rows before a recompute.
+    """Null graph refs to EMERGENT archetypes and delete those rows before a recompute.
 
-    Prevents stale (previous-run) archetypes from lingering and graphs pointing at them.
-    Returns rows deleted. (Once target archetypes exist, scope this to kind=='emergent'.)
+    Scoped to kind=='emergent' so author-defined TARGET archetypes (RF01) survive recompute.
+    Returns rows deleted.
     """
-    session.execute(update(Graph).values(archetype_id=None).where(Graph.archetype_id.isnot(None)))
-    res = session.execute(delete(Archetype))
+    emergent_ids = [
+        r[0] for r in session.execute(
+            select(Archetype.id).where(Archetype.kind == "emergent")
+        ).all()
+    ]
+    if not emergent_ids:
+        return 0
+    session.execute(
+        update(Graph).values(archetype_id=None).where(Graph.archetype_id.in_(emergent_ids))
+    )
+    res = session.execute(delete(Archetype).where(Archetype.id.in_(emergent_ids)))
     session.flush()
     return getattr(res, "rowcount", 0) or 0
 

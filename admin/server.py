@@ -21,6 +21,7 @@ from admin.auth import (
 from cv.vocab_map import load_app_nodes
 from db.base import db_session
 from db.models import (
+    Archetype,
     Athlete,
     Dilemma,
     Graph,
@@ -35,6 +36,7 @@ from db.models import (
 )
 from db.ontology_repository import (
     add_milestone,
+    delete_archetype,
     delete_dilemma,
     delete_implementation,
     delete_milestone,
@@ -48,6 +50,7 @@ from db.ontology_repository import (
     upsert_implementation,
     upsert_principle,
     upsert_system,
+    upsert_target_archetype,
 )
 from db.repository import (
     approve_match,
@@ -701,10 +704,37 @@ def create_admin_app() -> FastAPI:
                 select(TechniqueNode.node_key, TechniqueNode.decision_space)
                 .where(TechniqueNode.decision_space.isnot(None)).order_by(TechniqueNode.node_key)
             ).all())
+            archetypes = list(session.execute(
+                select(Archetype).order_by(Archetype.kind, Archetype.name)
+            ).scalars())
+            arch_rows = [{"id": a.id, "name": a.name, "kind": a.kind,
+                          "description": a.description,
+                          "signature_types": a.signature_types or []} for a in archetypes]
         return templates.TemplateResponse(request, "ontology.html", context={
             "systems": sys_rows, "principles": principles, "dilemmas": dilemmas,
             "ds_positions": [{"node_key": k, "ds": v} for k, v in ds_positions],
+            "archetypes": arch_rows,
         })
+
+    @app.post("/admin/ontology/archetypes")
+    def create_target_archetype(request: Request, name: str = Form(...),
+                                description: str = Form(""),
+                                signature_types: str = Form("")) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        sig = [t.strip() for t in signature_types.replace(",", " ").split() if t.strip()]
+        with db_session() as session:
+            upsert_target_archetype(name=name, description=description or None,
+                                    signature_types=sig, session=session)
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/archetypes/{archetype_id}/delete")
+    def remove_target_archetype(request: Request, archetype_id: str) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            delete_archetype(archetype_id, session)
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.post("/admin/ontology/principles")
     def create_principle(request: Request, name: str = Form(...), type: str = Form(""),

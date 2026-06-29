@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from analysis.names import _normalize_name
 from db.models import (
+    Archetype,
     Dilemma,
     Milestone,
     Principle,
@@ -186,3 +187,20 @@ def delete_principle(principle_id: str, session: Session) -> None:
 
 def delete_dilemma(dilemma_id: str, session: Session) -> None:
     session.execute(delete(Dilemma).where(Dilemma.id == dilemma_id))
+
+
+def upsert_target_archetype(
+    *, name: str, description: str | None, signature_types: list[str], session: Session
+) -> str:
+    """Author-defined (kind='target') archetype, keyed by slug. Survives recompute (RF01)."""
+    return _upsert_keyed(
+        session, Archetype, f"target-{slugify(name)}",
+        name=name, kind="target", description=description, signature_types=signature_types,
+    )
+
+
+def delete_archetype(archetype_id: str, session: Session) -> None:
+    """Delete a target archetype by id (emergent ones are managed by the recompute pipeline)."""
+    session.execute(
+        delete(Archetype).where(Archetype.id == int(archetype_id), Archetype.kind == "target")
+    )
