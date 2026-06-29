@@ -40,6 +40,11 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
             if not b_name:
                 logger.warning("Skipping %s (%s): cannot determine opponent", a_name, year)
                 continue
+            # Skip bogus "X vs X" bouts: both sides clean to the same human (dump error /
+            # accent+nickname variants of one person). Can't be a real match.
+            if athlete_key(a_name) == athlete_key(b_name):
+                logger.warning("Skipping self-match %s vs %s (%s)", a_name, b_name, year)
+                continue
             # Dedup by cleaned identity key so dirty variants (timestamps/nicknames/accents)
             # of the same human collapse to one bout instead of an "X vs X" self-match.
             key = (frozenset((athlete_key(a_name), athlete_key(b_name))), year)

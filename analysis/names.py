@@ -52,9 +52,23 @@ def clean_athlete_name(raw: str) -> str:
     return re.sub(r"\s+", " ", n).strip()
 
 
+# Athlete identity aliases (nickname-only / initial / misspelling forms that don't share a
+# cleaned key) → canonical key. Shared by the importer and the dedupe script so a re-import
+# can't re-split a merged human. NOT for distinct people (e.g. Andrew vs William Tackett).
+ATHLETE_ALIASES: dict[str, str] = {
+    "cyborg": "roberto abreu",          # Roberto 'Cyborg' Abreu
+    "m galvao": "mica galvao",          # M. Galvão → Mica/Micael Galvão
+    "micael galvao": "mica galvao",     # Micael "Mica" Galvão (same human)
+    "d reis": "diogo reis",             # D. Reis → Diogo Reis
+    "ffion davis": "ffion davies",      # "Davis" misspelling → Ffion Davies
+    "a tackett": "andrew tackett",      # A. Tackett → Andrew (NOT William Tackett)
+}
+
+
 def athlete_key(name: str) -> str:
-    """Identity key for athlete dedup: cleaned, de-accented, normalized (ascii, lower)."""
-    return _normalize_name(_deaccent(clean_athlete_name(name)))
+    """Identity key for athlete dedup: cleaned, de-accented, normalized + alias-resolved."""
+    k = _normalize_name(_deaccent(clean_athlete_name(name)))
+    return ATHLETE_ALIASES.get(k, k)
 
 
 def _normalize_adcc_sub(name: str) -> str:

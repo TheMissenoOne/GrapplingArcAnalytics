@@ -24,6 +24,9 @@ FEATURE_VERSION = "v3"
 # How much the relative-strength (deviance) block outweighs raw composition in clustering.
 DEVIANCE_WEIGHT = 1.5
 
+# Minimum nodes for a graph to be archetyped (skip empty leaderboard-seeded athletes).
+MIN_GRAPH_NODES = 3
+
 # node_type → human noun for naming archetypes from their dominant deviance dimensions.
 _TYPE_NOUN = {
     "guard": "Guard", "pass": "Passing", "sweep": "Sweep", "submission": "Submission",
@@ -132,13 +135,17 @@ def run_archetype_pipeline(session: object, k: int = 6) -> None:
     from analysis.deviance import node_population_stats
     from db.repository import (
         assign_archetype_to_graph,
+        clear_archetypes,
         graphs_for_clustering,
         save_archetypes,
     )
 
-    rows = graphs_for_clustering(session, owner_kind="athlete")  # type: ignore[arg-type]
+    all_rows = graphs_for_clustering(session, owner_kind="athlete")  # type: ignore[arg-type]
+    # Drop empty/near-empty graphs (leaderboard-seeded athletes with no matches) — their
+    # zero vectors would swamp one cluster and distort the population baseline.
+    rows = [(gid, nodes) for gid, nodes in all_rows if len(nodes) >= MIN_GRAPH_NODES]
     if not rows:
-        logger.warning("No athlete graphs found for clustering")
+        logger.warning("No non-empty athlete graphs found for clustering")
         return
 
     by_key, by_type = node_population_stats(rows)
@@ -146,6 +153,7 @@ def run_archetype_pipeline(session: object, k: int = 6) -> None:
     vectors = np.array([graph_feature_vector(r[1], by_key, by_type) for r in rows])
     km = fit_archetypes(vectors, k=k)
 
+    clear_archetypes(session)  # type: ignore[arg-type]  # drop prior-run (stale) archetypes
     fv = archetype_feature_version(vectors)
     centroids = km.cluster_centers_.tolist()
     names = [name_archetype(c) for c in km.cluster_centers_]

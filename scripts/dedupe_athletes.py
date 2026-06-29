@@ -23,22 +23,6 @@ from analysis.names import athlete_key, clean_athlete_name
 
 logger = logging.getLogger(__name__)
 
-# Manual aliases for variants that don't share an athlete_key (nickname-only / initial forms).
-# Maps an athlete_key → the canonical athlete_key it should merge into.
-ALIASES: dict[str, str] = {
-    "cyborg": "roberto abreu",          # Roberto 'Cyborg' Abreu
-    "m galvao": "mica galvao",          # M. Galvão → Mica/Micael Galvão
-    "micael galvao": "mica galvao",     # Micael "Mica" Galvão (same human)
-    "d reis": "diogo reis",             # D. Reis → Diogo Reis
-    "ffion davis": "ffion davies",      # "Davis" misspelling → Ffion Davies
-    "a tackett": "andrew tackett",      # A. Tackett → Andrew (NOT William Tackett)
-}
-
-
-def _canonical_key(name: str) -> str:
-    k = athlete_key(name)
-    return ALIASES.get(k, k)
-
 
 def _score(name: str, n_matches: int) -> tuple[int, int, int, int]:
     """Higher = better canonical. Prefer rows with matches, full (non-initial) accented names."""
@@ -67,7 +51,7 @@ def run(dry_run: bool) -> int:
 
         clusters: dict[str, list[Any]] = defaultdict(list)
         for a in athletes:
-            clusters[_canonical_key(a.name)].append(a)
+            clusters[athlete_key(a.name)].append(a)
 
         repoint = 0
         merged_rows = 0

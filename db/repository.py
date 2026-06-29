@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import or_, select
+from sqlalchemy import delete, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
@@ -552,6 +552,18 @@ def assign_archetype_to_graph(graph_id: str, archetype_id: int, session: Session
     graph = session.get(Graph, graph_id)
     if graph:
         graph.archetype_id = archetype_id
+
+
+def clear_archetypes(session: Session) -> int:
+    """Null graph→archetype refs and delete existing archetype rows before a recompute.
+
+    Prevents stale (previous-run) archetypes from lingering and graphs pointing at them.
+    Returns rows deleted. (Once target archetypes exist, scope this to kind=='emergent'.)
+    """
+    session.execute(update(Graph).values(archetype_id=None).where(Graph.archetype_id.isnot(None)))
+    res = session.execute(delete(Archetype))
+    session.flush()
+    return getattr(res, "rowcount", 0) or 0
 
 
 def publish_athlete(athlete_id: str, session: Session) -> None:
