@@ -20,7 +20,35 @@ from admin.auth import (
 )
 from cv.vocab_map import load_app_nodes
 from db.base import db_session
-from db.models import Athlete, Graph, Match, TechniqueNode
+from db.models import (
+    Athlete,
+    Dilemma,
+    Graph,
+    Match,
+    Milestone,
+    Principle,
+    System,
+    SystemDilemma,
+    SystemImplementation,
+    SystemPrinciple,
+    TechniqueNode,
+)
+from db.ontology_repository import (
+    add_milestone,
+    delete_dilemma,
+    delete_implementation,
+    delete_milestone,
+    delete_principle,
+    delete_system,
+    set_position_decision_space,
+    set_system_dilemmas,
+    set_system_principles,
+    slugify,
+    upsert_dilemma,
+    upsert_implementation,
+    upsert_principle,
+    upsert_system,
+)
 from db.repository import (
     approve_match,
     delete_match,
@@ -45,6 +73,12 @@ from harvest.harvester import (
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+
+def _lines(raw: str) -> list[str]:
+    """Split a textarea/comma field into a clean list (newlines or commas, trimmed)."""
+    parts = raw.replace(",", "\n").splitlines()
+    return [p.strip() for p in parts if p.strip()]
 
 
 # ── Global-match perspective helpers ────────────────────────────────────────
@@ -637,6 +671,235 @@ def create_admin_app() -> FastAPI:
             "analytics.html",
             context={"type_counts": type_counts, "total_nodes": total_nodes},
         )
+
+    # ── Ontology authoring (RF04-06, RF20, DS-01/04) ────────────────────────
+    def _guard(request: Request) -> RedirectResponse | None:
+        if not is_authenticated(request):
+            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
+        return None
+
+    @app.get("/admin/ontology", response_class=HTMLResponse)
+    def ontology_home(request: Request) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            systems = list(session.execute(select(System).order_by(System.name)).scalars())
+            sys_rows = []
+            for s in systems:
+                n_ms = session.execute(
+                    select(func.count()).select_from(Milestone).where(Milestone.system_id == s.id)
+                ).scalar_one()
+                n_impl = session.execute(
+                    select(func.count()).select_from(SystemImplementation)
+                    .where(SystemImplementation.system_id == s.id)
+                ).scalar_one()
+                sys_rows.append({"id": s.id, "key": s.key, "name": s.name,
+                                 "objective": s.objective, "milestones": n_ms, "impls": n_impl})
+            principles = list(session.execute(select(Principle).order_by(Principle.name)).scalars())
+            dilemmas = list(session.execute(select(Dilemma).order_by(Dilemma.name)).scalars())
+            ds_positions = list(session.execute(
+                select(TechniqueNode.node_key, TechniqueNode.decision_space)
+                .where(TechniqueNode.decision_space.isnot(None)).order_by(TechniqueNode.node_key)
+            ).all())
+        return templates.TemplateResponse(request, "ontology.html", context={
+            "systems": sys_rows, "principles": principles, "dilemmas": dilemmas,
+            "ds_positions": [{"node_key": k, "ds": v} for k, v in ds_positions],
+        })
+
+    @app.post("/admin/ontology/principles")
+    def create_principle(request: Request, name: str = Form(...), type: str = Form(""),
+                         description: str = Form("")) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            upsert_principle(key=slugify(name), name=name, type=type or None,
+                             description=description or None, session=session)
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/principles/{principle_id}/delete")
+    def remove_principle(request: Request, principle_id: str) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            delete_principle(principle_id, session)
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/dilemmas")
+    def create_dilemma(request: Request, name: str = Form(...), situation: str = Form(""),
+                      option_a: str = Form(""), option_b: str = Form(""),
+                      principle_keys: str = Form("")) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            upsert_dilemma(key=slugify(name), name=name, situation=situation or None,
+                           option_a=option_a or None, option_b=option_b or None,
+                           principle_keys=_lines(principle_keys), session=session)
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/dilemmas/{dilemma_id}/delete")
+    def remove_dilemma(request: Request, dilemma_id: str) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            delete_dilemma(dilemma_id, session)
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/systems")
+    def create_system(request: Request, name: str = Form(...), objective: str = Form("")) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            sid = upsert_system(
+                key=slugify(name), name=name, objective=objective or None,
+                entry_positions=[], activation_conditions=[], expected_opponent_responses=[],
+                alternative_paths=[], mastery_criteria=[], ds_mode="expert", session=session)
+        return RedirectResponse(f"/admin/ontology/systems/{sid}",
+                                status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.get("/admin/ontology/systems/{system_id}", response_class=HTMLResponse)
+    def edit_system(request: Request, system_id: str) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            system = session.get(System, system_id)
+            if system is None:
+                raise HTTPException(status_code=404, detail="System not found")
+            milestones = list(session.execute(
+                select(Milestone).where(Milestone.system_id == system_id)
+                .order_by(Milestone.ordinal)).scalars())
+            all_principles = list(
+                session.execute(select(Principle).order_by(Principle.name)).scalars())
+            all_dilemmas = list(
+                session.execute(select(Dilemma).order_by(Dilemma.name)).scalars())
+            attached_p = {row[0] for row in session.execute(
+                select(SystemPrinciple.principle_id)
+                .where(SystemPrinciple.system_id == system_id)).all()}
+            attached_d = {row[0] for row in session.execute(
+                select(SystemDilemma.dilemma_id)
+                .where(SystemDilemma.system_id == system_id)).all()}
+            impls = list(session.execute(
+                select(SystemImplementation, Athlete.name)
+                .join(Athlete, Athlete.id == SystemImplementation.athlete_id)
+                .where(SystemImplementation.system_id == system_id)).all())
+            impl_rows = [{"id": im.id, "name": im.name, "athlete": nm,
+                          "notes": (im.overrides or {}).get("notes", "")} for im, nm in impls]
+            athletes = list(session.execute(
+                select(Athlete).order_by(Athlete.name)).scalars())
+            ctx = {
+                "system": system,
+                "entry_positions": "\n".join(system.entry_positions or []),
+                "activation_conditions": "\n".join(system.activation_conditions or []),
+                "expected_opponent_responses": "\n".join(system.expected_opponent_responses or []),
+                "alternative_paths": "\n".join(system.alternative_paths or []),
+                "mastery_criteria": "\n".join(system.mastery_criteria or []),
+                "milestones": milestones,
+                "principles": [{"obj": p, "on": p.id in attached_p} for p in all_principles],
+                "dilemmas": [{"obj": d, "on": d.id in attached_d} for d in all_dilemmas],
+                "implementations": impl_rows,
+                "athletes": athletes,
+                "milestone_kinds": ["conceptual", "execution", "dilemma", "chaining",
+                                    "resistance", "recovery"],
+            }
+        return templates.TemplateResponse(request, "edit_system.html", context=ctx)
+
+    @app.post("/admin/ontology/systems/{system_id}")
+    def update_system(
+        request: Request, system_id: str, name: str = Form(...), objective: str = Form(""),
+        entry_positions: str = Form(""), activation_conditions: str = Form(""),
+        expected_opponent_responses: str = Form(""), alternative_paths: str = Form(""),
+        mastery_criteria: str = Form(""), ds_mode: str = Form("expert"),
+        principle_ids: list[str] = Form(default=[]),
+        dilemma_ids: list[str] = Form(default=[]),
+    ) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            system = session.get(System, system_id)
+            if system is None:
+                raise HTTPException(status_code=404, detail="System not found")
+            system.name = name
+            system.objective = objective or None
+            system.entry_positions = _lines(entry_positions)
+            system.activation_conditions = _lines(activation_conditions)
+            system.expected_opponent_responses = _lines(expected_opponent_responses)
+            system.alternative_paths = _lines(alternative_paths)
+            system.mastery_criteria = _lines(mastery_criteria)
+            system.ds_mode = ds_mode or "expert"
+            set_system_principles(system_id, principle_ids, session)
+            set_system_dilemmas(system_id, dilemma_ids, session)
+        return RedirectResponse(f"/admin/ontology/systems/{system_id}",
+                                status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/systems/{system_id}/delete")
+    def remove_system(request: Request, system_id: str) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            delete_system(system_id, session)
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/systems/{system_id}/milestones")
+    def create_milestone(request: Request, system_id: str, kind: str = Form(...),
+                        ordinal: int = Form(0), name: str = Form(...),
+                        description: str = Form("")) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            add_milestone(system_id=system_id, ordinal=ordinal, kind=kind, name=name,
+                          description=description or None, session=session)
+        return RedirectResponse(f"/admin/ontology/systems/{system_id}",
+                                status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/systems/{system_id}/milestones/{milestone_id}/delete")
+    def remove_milestone(request: Request, system_id: str, milestone_id: str) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            delete_milestone(milestone_id, session)
+        return RedirectResponse(f"/admin/ontology/systems/{system_id}",
+                                status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/systems/{system_id}/implementations")
+    def create_implementation(request: Request, system_id: str, athlete_id: str = Form(...),
+                            name: str = Form(""), notes: str = Form("")) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            upsert_implementation(system_id=system_id, athlete_id=athlete_id,
+                                  name=name or None, notes=notes, session=session)
+        return RedirectResponse(f"/admin/ontology/systems/{system_id}",
+                                status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/systems/{system_id}/implementations/{impl_id}/delete")
+    def remove_implementation(request: Request, system_id: str, impl_id: str) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            delete_implementation(impl_id, session)
+        return RedirectResponse(f"/admin/ontology/systems/{system_id}",
+                                status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/positions")
+    def set_position_ds(request: Request, node_key: str = Form(...),
+                      attacker_score: float = Form(...), defender_score: float = Form(...),
+                      expected_reactions: str = Form(""), constraints: str = Form("")) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        with db_session() as session:
+            set_position_decision_space(
+                node_key=node_key.strip().lower(), attacker_score=attacker_score,
+                defender_score=defender_score, expected_reactions=_lines(expected_reactions),
+                constraints=_lines(constraints), session=session)
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
+
+    @app.post("/admin/ontology/export")
+    def export_seed(request: Request) -> Any:
+        if (r := _guard(request)) is not None:
+            return r
+        from export.ontology import export_ontology_seed
+
+        export_ontology_seed()
+        return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
 
     return app
 

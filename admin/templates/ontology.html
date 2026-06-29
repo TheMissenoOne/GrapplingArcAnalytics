@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Ontology — GrapplingArc Admin{% endblock %}
+{% block content %}
+<div style="display:flex; align-items:center; gap:16px;">
+  <h1 style="margin-bottom:0;">Strategic Ontology</h1>
+  <form method="post" action="/admin/ontology/export" style="margin-left:auto;">
+    <button class="btn btn-success" type="submit">Export seed JSON</button>
+  </form>
+</div>
+<p style="color:#888; margin:8px 0 20px;">
+  Canonical knowledge (RF04-06, RF20) + per-position Decision Space (DS-01/04). Exported to
+  <code>data/processed/ontology_seed.json</code> and bundled into the app.
+</p>
+
+<div class="card">
+  <h2>Systems</h2>
+  <table>
+    <thead><tr><th>Name</th><th>Objective</th><th>Milestones</th><th>Impls</th><th></th></tr></thead>
+    <tbody>
+      {% for s in systems %}
+      <tr>
+        <td><a href="/admin/ontology/systems/{{ s.id }}" style="color:#7c9ef5;">{{ s.name }}</a><br>
+          <span style="color:#666; font-size:.8rem;">{{ s.key }}</span></td>
+        <td style="color:#aaa;">{{ s.objective or "—" }}</td>
+        <td>{{ s.milestones }}</td>
+        <td>{{ s.impls }}</td>
+        <td>
+          <form method="post" action="/admin/ontology/systems/{{ s.id }}/delete"
+                onsubmit="return confirm('Delete system {{ s.name }}?');">
+            <button class="btn btn-danger" type="submit">Delete</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5" style="color:#666;">No systems yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <h2>New system</h2>
+  <form method="post" action="/admin/ontology/systems" class="grid2">
+    <div><label>Name</label><input name="name" required placeholder="Back Attack System"></div>
+    <div><label>Objective</label><input name="objective" placeholder="Convert control into a strangle"></div>
+    <div style="grid-column:1/3;"><button class="btn btn-primary" type="submit">Create system</button></div>
+  </form>
+</div>
+
+<div class="grid2">
+  <div class="card">
+    <h2>Principles</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Type</th><th></th></tr></thead>
+      <tbody>
+        {% for p in principles %}
+        <tr>
+          <td>{{ p.name }}<br><span style="color:#666; font-size:.8rem;">{{ p.key }}</span></td>
+          <td><span class="badge badge-gray">{{ p.type or "—" }}</span></td>
+          <td><form method="post" action="/admin/ontology/principles/{{ p.id }}/delete">
+            <button class="btn btn-danger" type="submit">✕</button></form></td>
+        </tr>
+        {% else %}<tr><td colspan="3" style="color:#666;">None yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <h2>New principle</h2>
+    <form method="post" action="/admin/ontology/principles">
+      <label>Name</label><input name="name" required>
+      <label>Type</label><input name="type" placeholder="control | pressure | escape">
+      <label>Description</label><textarea name="description" rows="2"></textarea>
+      <button class="btn btn-primary" type="submit">Add principle</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Dilemmas</h2>
+    <table>
+      <thead><tr><th>Name</th><th>Fork</th><th></th></tr></thead>
+      <tbody>
+        {% for d in dilemmas %}
+        <tr>
+          <td>{{ d.name }}<br><span style="color:#666; font-size:.8rem;">{{ d.key }}</span></td>
+          <td style="color:#aaa; font-size:.85rem;">{{ d.option_a or "?" }} / {{ d.option_b or "?" }}</td>
+          <td><form method="post" action="/admin/ontology/dilemmas/{{ d.id }}/delete">
+            <button class="btn btn-danger" type="submit">✕</button></form></td>
+        </tr>
+        {% else %}<tr><td colspan="3" style="color:#666;">None yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <h2>New dilemma</h2>
+    <form method="post" action="/admin/ontology/dilemmas">
+      <label>Name</label><input name="name" required>
+      <label>Situation</label><input name="situation">
+      <label>Option A</label><input name="option_a">
+      <label>Option B</label><input name="option_b">
+      <label>Principle keys (one per line)</label><textarea name="principle_keys" rows="2"></textarea>
+      <button class="btn btn-primary" type="submit">Add dilemma</button>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Per-position Decision Space</h2>
+  <table>
+    <thead><tr><th>Position (node_key)</th><th>Attacker</th><th>Defender</th></tr></thead>
+    <tbody>
+      {% for pos in ds_positions %}
+      <tr>
+        <td>{{ pos.node_key }}</td>
+        <td>{{ pos.ds.attacker_score }}</td>
+        <td>{{ pos.ds.defender_score }}</td>
+      </tr>
+      {% else %}<tr><td colspan="3" style="color:#666;">No positions authored yet.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  <h2>Author / update a position</h2>
+  <form method="post" action="/admin/ontology/positions" class="grid2">
+    <div><label>node_key (existing library position)</label><input name="node_key" required placeholder="back control"></div>
+    <div></div>
+    <div><label>Attacker score (0–1)</label><input name="attacker_score" type="number" step="0.01" min="0" max="1" value="0.8"></div>
+    <div><label>Defender score (0–1)</label><input name="defender_score" type="number" step="0.01" min="0" max="1" value="0.25"></div>
+    <div><label>Expected reactions (one per line)</label><textarea name="expected_reactions" rows="2"></textarea></div>
+    <div><label>Constraints (one per line)</label><textarea name="constraints" rows="2"></textarea></div>
+    <div style="grid-column:1/3;"><button class="btn btn-primary" type="submit">Save Decision Space</button></div>
+  </form>
+</div>
+{% endblock %}
