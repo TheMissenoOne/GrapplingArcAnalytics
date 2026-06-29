@@ -163,11 +163,11 @@ def _compute_stats(sequence: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
-    """Per-bout grappling map: node = normalized technique label, edges = each consecutive
-    same-fighter transition (``side`` a/b) PLUS cross-fighter *handover* edges (``side`` "x")
-    at the contested moments where initiative passes between fighters — so the two fighters'
-    flows read as one interconnected map, not two separate subgraphs. App-shaped
-    ``{nodes, edges}`` (graphview.js contract)."""
+    """ONE unified per-bout grappling map: node = normalized technique label, edge = each
+    consecutive transition along the *match timeline* (regardless of fighter), coloured by the
+    ``side`` of the grappler who made the move. Shared positions are a single node, so the two
+    grapplers' games read as one connected graph, distinguished by colour — not two separate
+    subgraphs. App-shaped ``{nodes, edges}`` (graphview.js contract)."""
     nodes: dict[str, dict[str, Any]] = {}
     side_use: dict[str, dict[str, int]] = {}  # node key → per-side usage, for fighter tint
 
@@ -200,25 +200,19 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
         if edge is None:
             edges[ek] = {
                 "id": f"{src}→{tgt}:{side}", "source": src, "target": tgt,
-                "data": {"side": side, "count": 1, "elo": 1000,
-                         **({"contested": True} if side == "x" else {})},
+                "data": {"side": side, "count": 1, "elo": 1000},
             }
         else:
             edge["data"]["count"] += 1
 
-    prev_key: dict[str, str] = {"a": "", "b": ""}
-    prev_global: tuple[str, str] = ("", "")  # (key, side) of the previous timeline event
+    prev = ""  # previous position on the single match timeline
     for e in sequence:
         side = e["side"]
         key = touch(e["label"], e["type"], side)
         if not key:
             continue
-        link(prev_key[side], key, side)  # the fighter's own flow
-        pk, ps = prev_global
-        if ps and ps != side:  # initiative changed fighters → contested handover
-            link(pk, key, "x")
-        prev_key[side] = key
-        prev_global = (key, side)
+        link(prev, key, side)  # one flow; edge coloured by the grappler making this move
+        prev = key
     return {"nodes": list(nodes.values()), "edges": list(edges.values())}
 
 

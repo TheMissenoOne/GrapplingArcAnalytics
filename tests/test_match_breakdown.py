@@ -115,17 +115,14 @@ class TestTransitionGraph:
         nodes = {n["id"]: n for n in g["nodes"]}
         assert set(nodes) == {"double leg takedown", "mount", "sweep reversal"}
         assert nodes["double leg takedown"]["data"]["usageCount"] == 2
-        # Khamzat's own chain (side b): takedown→mount, mount→takedown.
-        own = {(e["source"], e["target"]) for e in g["edges"] if e["data"]["side"] == "b"}
-        assert own == {("double leg takedown", "mount"), ("mount", "double leg takedown")}
-        # Handover (side x) edges bridge the fighters at the contested switches: B→A (Dricus'
-        # sweep off the mount) and A→B (Khamzat re-takedown). The graph is interconnected.
-        handover = {(e["source"], e["target"]) for e in g["edges"] if e["data"]["side"] == "x"}
-        assert handover == {
-            ("mount", "sweep reversal"),
-            ("sweep reversal", "double leg takedown"),
+        # ONE unified timeline: takedown→mount (b), mount→sweep (a, Dricus takes over),
+        # sweep→takedown (b, Khamzat re-takes). Edge colour = the grappler who moved.
+        triples = {(e["source"], e["target"], e["data"]["side"]) for e in g["edges"]}
+        assert triples == {
+            ("double leg takedown", "mount", "b"),
+            ("mount", "sweep reversal", "a"),
+            ("sweep reversal", "double leg takedown", "b"),
         }
-        assert all(e["data"]["contested"] for e in g["edges"] if e["data"]["side"] == "x")
 
 
 class TestMeta:

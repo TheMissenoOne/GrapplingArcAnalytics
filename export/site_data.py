@@ -348,7 +348,7 @@ _BREAKDOWN_JS = """
     x.beginPath();pts.forEach((p,i)=>{const py=mid-(p>0?p:0)*(mid-12);i?x.lineTo(X(i),py):x.moveTo(X(i),py);});
     x.lineTo(W,mid);x.lineTo(0,mid);x.closePath();x.fillStyle='rgba(77,134,255,.28)';x.fill();
     x.beginPath();pts.forEach((p,i)=>{const py=mid+(p<0?-p:0)*(mid-12);i?x.lineTo(X(i),py):x.moveTo(X(i),py);});
-    x.lineTo(W,mid);x.lineTo(0,mid);x.closePath();x.fillStyle='rgba(255,95,162,.28)';x.fill();
+    x.lineTo(W,mid);x.lineTo(0,mid);x.closePath();x.fillStyle='rgba(252,76,2,.28)';x.fill();
     x.beginPath();pts.forEach((p,i)=>{const py=mid-p*(mid-12);i?x.lineTo(X(i),py):x.moveTo(X(i),py);});
     x.strokeStyle='#cfcfd6';x.lineWidth=2;x.stroke();
   }
