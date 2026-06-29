@@ -118,6 +118,10 @@ class TechniqueNode(Base):
     node_type: Mapped[str] = mapped_column(String(40), default="")
     source: Mapped[str] = mapped_column(String(10), default="user")  # 'library' | 'user'
     embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
+    # Decision Space (DS-01/04): {offensive[], defensive[], expected_reactions[],
+    # constraints[], attacker_score, defender_score}. ds_mode (DS-16) = 'expert' | 'learned'.
+    decision_space: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    ds_mode: Mapped[str] = mapped_column(String(10), nullable=False, server_default="expert")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -208,3 +212,168 @@ class BundleImport(Base):
     owner_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False))
     raw: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+# ── Strategic ontology (RF04-06, RF20) + Decision Space (DS-*) ──────────────────
+# Canonical knowledge entities authored in the admin, exported to the bundled app seed
+# (export/ontology.py) and synced to Supabase. Position/Transition are NOT re-modelled —
+# they stay as TechniqueNode / GraphEdge / MapEdge, soft-referenced here by ``node_key``.
+
+
+class Principle(Base):
+    """Invariant strategic constraint (e.g. 'control the opponent's hips'). Embeddable."""
+
+    __tablename__ = "principles"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    key: Mapped[str] = mapped_column(Text, nullable=False, unique=True)  # normalized slug
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    type: Mapped[str | None] = mapped_column(String(40))  # control | pressure | escape | ...
+    embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class Intent(Base):
+    """What a move aims to achieve."""
+
+    __tablename__ = "intents"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    key: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Reaction(Base):
+    """Expected opponent response (app-side proto: ``EdgeReaction``)."""
+
+    __tablename__ = "reactions"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    key: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Dilemma(Base):
+    """Decision fork (option_a vs option_b) referencing principles. Embeddable."""
+
+    __tablename__ = "dilemmas"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    key: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    situation: Mapped[str | None] = mapped_column(Text)
+    option_a: Mapped[str | None] = mapped_column(Text)
+    option_b: Mapped[str | None] = mapped_column(Text)
+    principle_keys: Mapped[list[Any]] = mapped_column(JSONB, server_default="[]")  # soft refs
+    embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class System(Base):
+    """RF04 strategic system — reusable across athletes; not owned by any one.
+
+    Position references (``entry_positions``) are ``node_key`` strings into the shared
+    ``technique_nodes`` library. ``ds_progression`` (DS-10) is the expected Decision-Space
+    arc per milestone stage; principles/dilemmas attach via the join tables.
+    """
+
+    __tablename__ = "systems"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    key: Mapped[str] = mapped_column(Text, nullable=False, unique=True)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    objective: Mapped[str | None] = mapped_column(Text)
+    entry_positions: Mapped[list[Any]] = mapped_column(JSONB, server_default="[]")  # node_keys
+    activation_conditions: Mapped[list[Any]] = mapped_column(JSONB, server_default="[]")
+    expected_opponent_responses: Mapped[list[Any]] = mapped_column(JSONB, server_default="[]")
+    alternative_paths: Mapped[list[Any]] = mapped_column(JSONB, server_default="[]")
+    mastery_criteria: Mapped[list[Any]] = mapped_column(JSONB, server_default="[]")
+    ds_progression: Mapped[list[Any]] = mapped_column(JSONB, server_default="[]")
+    ds_mode: Mapped[str] = mapped_column(String(10), nullable=False, server_default="expert")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    milestones: Mapped[list[Milestone]] = relationship(
+        "Milestone", back_populates="system", cascade="all, delete-orphan"
+    )
+
+
+class Milestone(Base):
+    """RF06 generic per-system mastery ladder; may carry a Decision-Space objective (DS-11)."""
+
+    __tablename__ = "milestones"
+    __table_args__ = (UniqueConstraint("system_id", "ordinal"),)
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    system_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("systems.id", ondelete="CASCADE"), nullable=False
+    )
+    ordinal: Mapped[int] = mapped_column(Integer, default=0)
+    # conceptual | execution | dilemma | chaining | resistance | recovery
+    kind: Mapped[str] = mapped_column(String(20), nullable=False)
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    ds_objective: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    system: Mapped[System] = relationship("System", back_populates="milestones")
+
+
+class SystemImplementation(Base):
+    """RF05 per-athlete overlay of a base system — deltas only, no knowledge duplication.
+
+    ``overrides`` = {node_priorities, preferred_sequences[node_key[]], edge_emphasis, notes}.
+    """
+
+    __tablename__ = "system_implementations"
+    __table_args__ = (UniqueConstraint("system_id", "athlete_id"),)
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    system_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("systems.id", ondelete="CASCADE"), nullable=False
+    )
+    athlete_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("athletes.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str | None] = mapped_column(Text)
+    overrides: Mapped[dict[str, Any]] = mapped_column(JSONB, server_default="{}")
+    milestone_overrides: Mapped[list[Any]] = mapped_column(JSONB, server_default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class SystemPrinciple(Base):
+    __tablename__ = "system_principles"
+
+    system_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("systems.id", ondelete="CASCADE"), primary_key=True
+    )
+    principle_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("principles.id", ondelete="CASCADE"), primary_key=True
+    )
+
+
+class SystemDilemma(Base):
+    __tablename__ = "system_dilemmas"
+
+    system_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("systems.id", ondelete="CASCADE"), primary_key=True
+    )
+    dilemma_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("dilemmas.id", ondelete="CASCADE"), primary_key=True
+    )

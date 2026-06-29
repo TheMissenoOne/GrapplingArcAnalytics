@@ -32,6 +32,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from analysis.athlete_elo import _points_for_entry
+from analysis.decision_space import sequence_decision_space
 from analysis.names import _normalize_name
 from db.models import Athlete, Graph, Match
 from export.athlete_graph_export import athlete_graph_to_app_json
@@ -239,8 +240,20 @@ def _fighter_block(athlete: Athlete) -> dict[str, Any]:
     }
 
 
-def build_match_breakdown(match: Match, a: Athlete, b: Athlete) -> dict[str, Any]:
-    """Assemble the self-contained breakdown bundle for one bout."""
+def build_match_breakdown(
+    match: Match,
+    a: Athlete,
+    b: Athlete,
+    curated_ds: dict[str, dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Assemble the self-contained breakdown bundle for one bout.
+
+    The ``decision_space`` block (RF14 / DS-12) is additive — the legacy keys (``meta``,
+    ``sequence``, ``stats``, ``transition_graph``, ``fighters``) are unchanged so the
+    existing site viz keeps rendering. ``curated_ds`` (node_key → ``technique_nodes``
+    ``decision_space``) overrides the expert defaults when authored; ``systems`` /
+    ``principles`` / ``decision_chains`` are populated once the ontology is curated.
+    """
     sequence = _sequence_view(match, a, b)
     winner_side = _side_of(match.winner_id, a, b)
     winner = None
@@ -265,6 +278,11 @@ def build_match_breakdown(match: Match, a: Athlete, b: Athlete) -> dict[str, Any
         "stats": _compute_stats(sequence),
         "transition_graph": _transition_graph(sequence),
         "fighters": {"a": _fighter_block(a), "b": _fighter_block(b)},
+        # ── Strategic layer (RF14 / DS-12) — additive, backward-compatible ──
+        "decision_space": sequence_decision_space(sequence, curated_ds),
+        "systems": [],
+        "principles": [],
+        "decision_chains": [],
     }
 
 
