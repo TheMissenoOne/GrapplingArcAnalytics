@@ -702,7 +702,7 @@ def render_event_page(slug: str, ep: dict[str, Any]) -> str:
 # ── The Ocean (full technique force graph) ───────────────────────────────────
 _OCEAN_STYLE = """<style>
 .ocean-stage{position:relative;height:calc(100vh - 58px);overflow:hidden;border-top:1px solid var(--line)}
-.ocean-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.ocean-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 .ocean-hud{position:absolute;top:18px;left:18px;z-index:2;max-width:340px;display:flex;flex-direction:column;gap:12px;pointer-events:none}
 .ocean-hud>*{pointer-events:auto}
 .ocean-h h1{font-size:30px;margin:0;letter-spacing:-.6px}
@@ -721,7 +721,10 @@ _OCEAN_STYLE = """<style>
 .op-sec{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin:18px 0 8px}
 .op-tags{display:flex;flex-wrap:wrap;gap:6px}
 .muted{color:var(--ink-3);font-size:12px}
-@media(max-width:600px){.ocean-panel{width:100%}.ocean-hud{max-width:none;right:18px}}
+@media(max-width:600px){
+  .ocean-panel{top:auto;bottom:0;height:auto;max-height:60vh;width:100%;border-left:none;border-top:1px solid var(--line);box-shadow:0 -22px 44px rgba(0,0,0,.4)}
+  .ocean-hud{max-width:none;right:18px}
+}
 </style>"""
 
 _OCEAN_BODY = """<section class="ocean-stage">
