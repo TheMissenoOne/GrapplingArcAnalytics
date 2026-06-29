@@ -318,6 +318,22 @@ def _final_matches(session: Session) -> list[Match]:
     return [m for m in rows if m.sequence]
 
 
+def _load_curated_ds(session: Session) -> dict[str, dict[str, Any]]:
+    """node_key → authored ``technique_nodes.decision_space`` (DS-01/04), if any (F4).
+
+    These override the expert event-type defaults in every breakdown's DS timeline, so a
+    curated position scores the same way wherever it appears in the corpus.
+    """
+    from db.models import TechniqueNode
+
+    rows = session.execute(
+        select(TechniqueNode.node_key, TechniqueNode.decision_space).where(
+            TechniqueNode.decision_space.isnot(None)
+        )
+    ).all()
+    return {node_key: ds for node_key, ds in rows if ds}
+
+
 def export_site_assets(
     session: Session, out: Path, only_slug: str | None = None
 ) -> list[str]:
@@ -327,6 +343,7 @@ def export_site_assets(
     matches_dir.mkdir(parents=True, exist_ok=True)
     fighters_dir.mkdir(parents=True, exist_ok=True)
 
+    curated_ds = _load_curated_ds(session)  # F4: authored per-position DS overrides defaults
     index: list[dict[str, Any]] = []
     written: list[str] = []
     seen_fighters: set[str] = set()
@@ -338,7 +355,7 @@ def export_site_assets(
         slug = match_slug(a, b, match.year)
         if only_slug and slug != only_slug:
             continue
-        bd = build_match_breakdown(match, a, b)
+        bd = build_match_breakdown(match, a, b, curated_ds=curated_ds)
         (matches_dir / f"{slug}.json").write_text(
             json.dumps(bd, ensure_ascii=False, indent=2), encoding="utf-8"
         )
