@@ -435,7 +435,31 @@ def _youtube_embed(url: str | None) -> str:
     )
 
 
-def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
+def _train_this_style(
+    a: dict[str, Any], b: dict[str, Any], dossier_slugs: frozenset[str]
+) -> str:
+    """Conversion CTA (RF02/RF15): link each fighter to their dossier (when it exists) and
+    nudge toward building the style in the app — the breakdown → Grapple Like → Project loop."""
+    btns = []
+    for f in (a, b):
+        fslug = slugify(f["name"])
+        if fslug in dossier_slugs:
+            btns.append(f'<a class="btn" href="grapple-{fslug}.html">'
+                        f'Grapple like {html.escape(f["name"])} →</a>')
+    btns.append('<a class="btn app" href="index.html#app">Start a Project in the app →</a>')
+    return (
+        '<section class="block"><div class="wrap prose">'
+        '<div class="sec-label">Train this style</div>'
+        '<div class="editorial"><p>Study the full game behind this performance, then build it '
+        'into your own — start a Project in the GrapplingArc app and track your reps.</p></div>'
+        f'<div class="flex g12 wrap-fx" style="margin-top:16px">{"".join(btns)}</div>'
+        '</div></section>'
+    )
+
+
+def render_breakdown_page(
+    slug: str, bd: dict[str, Any], dossier_slugs: frozenset[str] = frozenset()
+) -> str:
     meta, stats = bd["meta"], bd["stats"]
     a, b = bd["fighters"]["a"], bd["fighters"]["b"]
     sa, sb = stats["a"], stats["b"]
@@ -513,6 +537,8 @@ def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
       {sig_card(a, a['name'])}{sig_card(b, b['name'])}
       <div class="sig-card"><div class="k">Method</div><div class="v">{html.escape(meta['method'])}</div></div>
     </div></div></section>
+  <div class="divider"></div>
+  {_train_this_style(a, b, dossier_slugs)}
 </article>
 {_FOOTER}
 <script src="graph.js"></script><script src="i18n.js"></script>
@@ -671,6 +697,14 @@ def render_profile_page(profile: dict[str, Any]) -> str:
   <div class="mgrid" id="linked"></div>
   <p class="graph-hint" style="margin-top:30px">Lead photo via <a href="https://commons.wikimedia.org/" style="color:var(--ink-3);text-decoration:underline">Wikimedia Commons</a> (CC BY) — see <a href="assets/fighters/LICENSES.md" style="color:var(--ink-3);text-decoration:underline">credits</a>.</p>
 </div></section>
+<section class="sec-pad-sm"><div class="wrap"><div class="appstrip">
+  <div class="orb">GA</div>
+  <div style="flex:1;min-width:240px">
+    <h2 class="h-lg">Grapple like {html.escape(f['name'])}</h2>
+    <p class="muted mt8" style="max-width:48ch">Turn this game into a Project in the GrapplingArc app — it maps {html.escape(f['name'].split()[0])}'s signature entries against your own graph and shows exactly which positions to add.</p>
+  </div>
+  <a class="btn app lg" href="index.html#app">Start this Project →</a>
+</div></div></section>
 {_FOOTER}
 <script src="graph.js"></script><script src="i18n.js"></script>
 <script>const P = {json.dumps(payload, ensure_ascii=False)};
@@ -891,12 +925,13 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     (out / "the-ocean.html").write_text(render_ocean_page(), encoding="utf-8")
 
     # per-match detail pages (attach archetypes + adapted graph for the template)
+    dossier_slugs = frozenset(details)  # fighters that actually have a Grapple Like dossier
     for slug, bd in full:
         bd["_arch_a"] = next((r["a"]["style"] for r in rows if r["id"] == slug), "")
         bd["_arch_b"] = next((r["b"]["style"] for r in rows if r["id"] == slug), "")
         bd["transition_graph_gv"] = _to_graphview(bd["transition_graph"])
         (out / f"breakdown-{slug}.html").write_text(
-            render_breakdown_page(slug, bd), encoding="utf-8")
+            render_breakdown_page(slug, bd, dossier_slugs), encoding="utf-8")
 
     # per-fighter dossiers (reuse the profile + career graph computed above)
     for slug, d in details.items():
