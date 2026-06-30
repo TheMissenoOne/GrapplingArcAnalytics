@@ -62,6 +62,16 @@ ATHLETE_ALIASES: dict[str, str] = {
     "d reis": "diogo reis",             # D. Reis → Diogo Reis
     "ffion davis": "ffion davies",      # "Davis" misspelling → Ffion Davies
     "a tackett": "andrew tackett",      # A. Tackett → Andrew (NOT William Tackett)
+    "g ryan": "gordon ryan",            # G. Ryan → Gordon Ryan
+    "g sousa": "gabriel sousa",         # G. Sousa → Gabriel Sousa
+    "cyborg abreu": "roberto abreu",    # Cyborg Abreu → Roberto 'Cyborg' Abreu
+    "joseph chen": "jozef chen",        # "Joseph" misspelling → Jozef Chen
+    "jonathan alves": "johnatha alves", # "Jonathan" misspelling → Johnatha Alves
+    "adele fornino": "adele fornarino", # "Fornino" misspelling → Adele Fornarino
+    "gabby mccomb": "gabi mccomb",      # Gabby → Gabi McComb (same human)
+    "heam rida": "haisam rida",         # "Heam" misspelling → Haisam Rida
+    # NOTE: Junny vs Edwin Ocasio, Maia vs Mayssa Bastos, George vs Jorge Santos are
+    # DISTINCT people (real bouts) — do not alias.
 }
 
 

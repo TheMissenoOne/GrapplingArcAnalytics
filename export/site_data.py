@@ -92,9 +92,21 @@ def _result_short(meta: dict[str, Any]) -> str:
 
 
 def _archetype(athlete: Athlete | None, session: Session) -> str | None:
-    if athlete is None or athlete.archetype_id is None:
+    """Emergent archetype name for an athlete — stored on their Graph (deviance v3 pipeline
+    assigns Graph.archetype_id, not Athlete.archetype_id)."""
+    if athlete is None:
         return None
-    arch = session.get(Archetype, athlete.archetype_id)
+    from db.models import Graph
+
+    aid = session.execute(
+        select(Graph.archetype_id)
+        .where(Graph.owner_kind == "athlete", Graph.owner_id == athlete.id,
+               Graph.archetype_id.isnot(None))
+        .limit(1)
+    ).scalar_one_or_none()
+    if aid is None:
+        return None
+    arch = session.get(Archetype, aid)
     return arch.name if arch else None
 
 
@@ -229,6 +241,8 @@ def build_fighters(
             if athlete is None or not qualifies(aid, session):
                 continue
             profile = build_style_profile(athlete, session)
+            # Surface the real emergent archetype (RF01, deviance v3) instead of "Grappler".
+            profile["archetype"] = _archetype(athlete, session) or profile.get("archetype")
             # Hide irrelevant dossiers: a striker with a couple of scrambles is noise.
             if profile["grappling_events"] < MIN_DOSSIER_EVENTS:
                 continue
