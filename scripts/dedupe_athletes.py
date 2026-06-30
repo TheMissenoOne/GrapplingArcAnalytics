@@ -82,6 +82,17 @@ def run(dry_run: bool) -> int:
                 session.execute(delete(Athlete).where(Athlete.id == d.id))
             if not dry_run:
                 canon.name = canon_clean
+                # Preserve the ADCC leaderboard target: if the canonical row lost its rank_elo
+                # (the matches-row often won _score over the seeded row), re-sync it by name so
+                # the fighter doesn't fall off the leaderboard / show "Unranked".
+                from db.repository import rank_elo_for_athlete
+                lb = rank_elo_for_athlete(canon.name)
+                if lb is not None:
+                    canon.rank_elo = lb
+                elif canon.rank_elo is None:
+                    seeded = [d.rank_elo for d in dups if d.rank_elo is not None]
+                    if seeded:
+                        canon.rank_elo = max(seeded)
 
         # CRITICAL: repoint actor_ids INSIDE each match's sequence JSONB too — the FK update
         # above doesn't touch them, and stale ids break _perspective_view (empty graph, floored
