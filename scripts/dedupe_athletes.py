@@ -56,6 +56,7 @@ def run(dry_run: bool) -> int:
         repoint = 0
         merged_rows = 0
         touched: set[str] = set()
+        id_map: dict[str, str] = {}  # dup athlete id → canonical id (for sequence actor_id rewrite)
         for key, rows in clusters.items():
             if len(rows) < 2:
                 continue
@@ -67,6 +68,7 @@ def run(dry_run: bool) -> int:
             touched.add(canon.id)
             for d in dups:
                 merged_rows += 1
+                id_map[d.id] = canon.id
                 if dry_run:
                     repoint += n_matches(d.id)
                     continue
@@ -80,6 +82,25 @@ def run(dry_run: bool) -> int:
                 session.execute(delete(Athlete).where(Athlete.id == d.id))
             if not dry_run:
                 canon.name = canon_clean
+
+        # CRITICAL: repoint actor_ids INSIDE each match's sequence JSONB too — the FK update
+        # above doesn't touch them, and stale ids break _perspective_view (empty graph, floored
+        # ELO). Resolve dup → canonical via id_map.
+        seq_entries_fixed = 0
+        if not dry_run and id_map:
+            from sqlalchemy.orm.attributes import flag_modified
+            session.flush()
+            for m in list(session.execute(select(Match)).scalars()):
+                seq = m.sequence or []
+                changed = False
+                for e in seq:
+                    if isinstance(e, dict) and e.get("actor_id") in id_map:
+                        e["actor_id"] = id_map[e["actor_id"]]
+                        seq_entries_fixed += 1
+                        changed = True
+                if changed:
+                    flag_modified(m, "sequence")
+            session.flush()
 
         # Drop self-matches + duplicate pairings (frozenset(participants)+year) created by merge.
         self_deleted = 0
@@ -105,10 +126,12 @@ def run(dry_run: bool) -> int:
                     replay_and_persist_athlete(ath, session)
 
         logger.info("%s: %d clusters merged, %d dup rows, %d match refs repointed, "
-                    "%d self-matches + %d dup-pairings deleted, %d athletes replayed",
+                    "%d seq actor_ids re-tagged, %d self-matches + %d dup-pairings deleted, "
+                    "%d athletes replayed",
                     "DRY-RUN" if dry_run else "DONE",
                     sum(1 for r in clusters.values() if len(r) > 1),
-                    merged_rows, repoint, self_deleted, dup_deleted, len(touched))
+                    merged_rows, repoint, seq_entries_fixed, self_deleted, dup_deleted,
+                    len(touched))
     return 0
 
 

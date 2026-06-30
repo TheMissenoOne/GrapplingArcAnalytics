@@ -43,24 +43,41 @@ def test_belt_ladder_and_unknown_default() -> None:
 
 
 def test_new_node_seeds_at_belt_floor() -> None:
-    # Balanced points (3-3) ⇒ S == 0.5; opponent at the floor ⇒ expected == 0.5,
-    # so delta == 0 and the freshly-seeded node sits exactly on the floor.
+    # A DRAW is the truly neutral case: S == 0.5; opponent at the floor ⇒ expected == 0.5,
+    # so delta == 0 and the freshly-seeded node sits exactly on the floor. (A decided WIN is
+    # now result-anchored to S >= 0.5, so it would nudge above the floor — see the win test.)
     even = [
         {"label": "Guard Pass", "type": "position", "actor": "you"},       # 3
         {"label": "Guard Pass", "type": "position", "actor": "opponent"},  # 3
     ]
     graph, _ = replay_matches(
-        "X", [_match(won=True, win_type="POINTS", sequence=even)],
+        "X", [_match(won=True, win_type="DRAW", sequence=even)],
         rank_target=800.0, opp_elos=[800.0], belt="black",
     )
     assert next(iter(graph.nodes.values())).computed_elo == pytest.approx(800.0, abs=1e-6)
 
     # A purple belt seeds at 500 under the same neutral conditions.
     g_purple, _ = replay_matches(
-        "X", [_match(won=True, win_type="POINTS", sequence=even)],
+        "X", [_match(won=True, win_type="DRAW", sequence=even)],
         rank_target=500.0, opp_elos=[500.0], belt="purple",
     )
     assert next(iter(g_purple.nodes.values())).computed_elo == pytest.approx(500.0, abs=1e-6)
+
+
+def test_win_never_lowers_elo() -> None:
+    # Regression: a fighter who WON but was out-scored in logged grappling transitions must
+    # not lose ELO (the Khamzat / Gordon-vs-Galvão bug). Opponent logged more points, yet the
+    # node ELO must not drop below the seed floor.
+    opp_heavy = [
+        {"label": "Takedown", "type": "takedown", "actor": "opponent"},   # 2
+        {"label": "Guard Pass", "type": "position", "actor": "opponent"}, # 3
+        {"label": "Escape", "type": "escape", "actor": "you"},            # 0-ish
+    ]
+    graph, _ = replay_matches(
+        "W", [_match(won=True, win_type="POINTS", sequence=opp_heavy)],
+        rank_target=1500.0, opp_elos=[1500.0], belt="black",
+    )
+    assert all((n.computed_elo or 0) >= 800.0 - 1e-6 for n in graph.nodes.values())
 
 
 # ── k_factor behavior ─────────────────────────────────────────────────────────
@@ -123,7 +140,8 @@ def test_score_sequence_point_map() -> None:
         {"label": "Guard Pass", "type": "position", "actor": "you"},      # pass → 3
         {"label": "Single Leg Takedown", "type": "takedown", "actor": "opponent"},  # 2
     ])
-    assert score_from_match(m) == pytest.approx(3 / 5)
+    # Result-anchored: win → 0.5*0.75 + 0.5*(3/5) = 0.675 (>= 0.5 floor for a win).
+    assert score_from_match(m) == pytest.approx(0.675)
 
 
 def test_score_outcome_fallback() -> None:

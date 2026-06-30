@@ -120,10 +120,17 @@ def score_from_match(match: Any) -> float:
             your_pts += pts
         else:
             opp_pts += pts
-    if your_pts or opp_pts:
-        return your_pts / (your_pts + opp_pts)
 
-    return WIN_FALLBACK_SCORE if won else LOSS_FALLBACK_SCORE
+    outcome = WIN_FALLBACK_SCORE if won else LOSS_FALLBACK_SCORE
+    if not (your_pts or opp_pts):
+        return outcome
+    # Result-anchored: the outcome (0.75 win / 0.25 loss) sets the half the score lives in;
+    # the grappling point-share only modulates the magnitude WITHIN it. A decided win can no
+    # longer score below 0.5 just because the opponent logged more transitions (the bug that
+    # dropped Khamzat's / Gordon-vs-Galvão's ELO after a win). Draws/un-inferred → 0.5 above.
+    share = your_pts / (your_pts + opp_pts)
+    blended = 0.5 * outcome + 0.5 * share
+    return max(0.5, blended) if won else min(0.5, blended)
 
 
 def _base_k(n_matches: int) -> float:
@@ -204,6 +211,14 @@ def replay_matches(
         opp_elo = opp_elos[i] if i < len(opp_elos) else rank_target
         your = _your_entries(match)
 
+        # Seed NEW nodes at the athlete's CURRENT graph mean (not the belt floor) so that
+        # merely showing a new position is neutral to the headline rating. Floor-seeding made an
+        # elite climber's mean collapse every time they revealed a position — which read as
+        # "ELO dropped after a win" (Khamzat / Gordon). First-ever node falls back to the floor.
+        seed = _mean_elo(graph)
+        if seed is None:
+            seed = base
+
         # Seed / count participating nodes.
         participating: list[str] = []
         for entry in your:
@@ -212,7 +227,7 @@ def replay_matches(
             norm = _normalize_name(label)
             node = graph.nodes.get(norm)
             if node is None:
-                node = AthleteNode(label=label, type=typ, count=0, computed_elo=base)
+                node = AthleteNode(label=label, type=typ, count=0, computed_elo=seed)
                 graph.nodes[norm] = node
             node.count += 1
             participating.append(norm)
@@ -240,6 +255,11 @@ def replay_matches(
         s = score_from_match(match)
         k = k_factor(i + 1, graph_elo, rank_target)
         delta = k * (s - expected(graph_elo, opp_elo))
+        # Hard invariant: a recorded win never lowers Grappling ELO, a loss never raises it
+        # (regardless of how the grappling exchanges or rating gap shook out). Draws unclamped.
+        won = bool(getattr(match, "won", True))
+        if (getattr(match, "win_type", None) or "").upper() != "DRAW":
+            delta = max(delta, 0.0) if won else min(delta, 0.0)
 
         # Apply ``delta`` to each participating node, then converge-clamp so the
         # graph mean lands at most on the target when it would cross it.
