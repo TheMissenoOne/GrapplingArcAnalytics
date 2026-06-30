@@ -328,9 +328,37 @@ _FOOTER = """<footer class="site-foot"><div class="wrap">
   <p class="copy">© 2026 GrapplingArc · generated from match data</p>
 </div></footer>"""
 
-_HEAD = """<!DOCTYPE html><html lang="en"><head>
+# Canonical/OG base — keep in sync with _config.yml url + baseurl (+ /site).
+SITE_BASE = "https://themissenoone.github.io/GrapplingArc/site"
+_DEFAULT_DESC = (
+    "Interactive grappling & MMA match breakdowns — transition maps, momentum, "
+    "positional conversion and Grappling ELO."
+)
+
+
+def _head(title: str, description: str = "", path: str = "", image: str = "logo.svg") -> str:
+    """Full <head> with per-page SEO + Open Graph + Twitter card (acquisition baseline)."""
+    e = html.escape
+    full = f"{title} — GrapplingArc"
+    desc = (description or _DEFAULT_DESC).strip()
+    if len(desc) > 200:
+        desc = desc[:197].rstrip() + "…"
+    canonical = f"{SITE_BASE}/{path}" if path else f"{SITE_BASE}/"
+    img = image if image.startswith("http") else f"{SITE_BASE}/{image}"
+    return f"""<!DOCTYPE html><html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>{title} — GrapplingArc</title>
+<title>{e(full)}</title>
+<meta name="description" content="{e(desc)}"/>
+<link rel="canonical" href="{e(canonical)}"/>
+<meta property="og:type" content="website"/><meta property="og:site_name" content="GrapplingArc"/>
+<meta property="og:title" content="{e(full)}"/>
+<meta property="og:description" content="{e(desc)}"/>
+<meta property="og:url" content="{e(canonical)}"/>
+<meta property="og:image" content="{e(img)}"/>
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:title" content="{e(full)}"/>
+<meta name="twitter:description" content="{e(desc)}"/>
+<meta name="twitter:image" content="{e(img)}"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
@@ -490,7 +518,10 @@ def render_breakdown_page(slug: str, bd: dict[str, Any]) -> str:
 <script src="graph.js"></script><script src="i18n.js"></script>
 <script>const BD = {json.dumps(payload, ensure_ascii=False)};
 {_BREAKDOWN_JS}</script></body></html>"""
-    return _HEAD.format(title=html.escape(meta["title"])) + body
+    desc = (f"{win_line}. Interactive transition map, momentum and the decisive sequence — "
+            f"every claim traces to an edge you can hover.")
+    img = f"assets/fighters/{slugify(a['name'])}.jpg"
+    return _head(meta["title"], description=desc, path=f"breakdown-{slug}.html", image=img) + body
 
 
 # ── dossier detail page ──────────────────────────────────────────────────────
@@ -644,7 +675,12 @@ def render_profile_page(profile: dict[str, Any]) -> str:
 <script src="graph.js"></script><script src="i18n.js"></script>
 <script>const P = {json.dumps(payload, ensure_ascii=False)};
 {_PROFILE_JS}</script></body></html>"""
-    return _HEAD.format(title=html.escape("Grapple Like " + f["name"])) + body
+    pslug = slugify(f["name"])
+    arche = profile.get("archetype") or "grappler"
+    desc = (f"How {f['name']} wins, mapped from match data — a {arche} dossier: signature "
+            f"entries, response patterns and finishing profile. The system, not the match.")
+    return _head("Grapple Like " + f["name"], description=desc,
+                 path=f"grapple-{pslug}.html", image=f"assets/fighters/{pslug}.jpg") + body
 
 
 # ── event (card) pages ───────────────────────────────────────────────────────
@@ -710,7 +746,9 @@ def render_event_page(slug: str, ep: dict[str, Any]) -> str:
 </article>
 {_FOOTER}
 <script src="i18n.js"></script></body></html>"""
-    return _HEAD.format(title=html.escape(name)) + body
+    ev_desc = (ep.get("headline") or f"{name}: every bout mapped — transition graphs, "
+               f"finishes and Grappling-ELO swings.")
+    return _head(name, description=ev_desc, path=f"event-{slug}.html") + body
 
 
 # ── The Ocean (full technique force graph) ───────────────────────────────────
@@ -813,7 +851,10 @@ os.addEventListener('keydown', function(e){ if(e.key==='Enter') locate(); });
 def render_ocean_page() -> str:
     """The Ocean — full-screen technique force graph, region legend, search, node dialog."""
     return (
-        _HEAD.format(title="The Ocean") + _OCEAN_STYLE + _nav("ocean") + _OCEAN_BODY + _FOOTER +
+        _head("The Ocean", description="The global grappling position map — every technique as a "
+              "node, transitions as edges, clustered into regions with centrality, bridging and "
+              "effectiveness metrics.", path="the-ocean.html")
+        + _OCEAN_STYLE + _nav("ocean") + _OCEAN_BODY + _FOOTER +
         '<script src="graph.js"></script><script src="i18n.js"></script>'
         '<script src="ocean-data.js"></script><script>' + _OCEAN_JS + "</script></body></html>"
     )
@@ -868,6 +909,19 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     for slug, ep in event_details:
         (out / f"event-{slug}.html").write_text(
             render_event_page(slug, ep), encoding="utf-8")
+
+    # robots.txt + sitemap.xml (acquisition baseline — the site was invisible to crawlers).
+    static_pages = ["index.html", "breakdowns.html", "events.html", "grapple-like.html",
+                    "the-data.html", "the-ocean.html"]
+    urls = static_pages + [f"breakdown-{s}.html" for s, _ in full] \
+        + [f"grapple-{s}.html" for s in details] + [f"event-{s}.html" for s, _ in event_details]
+    locs = "\n".join(f"  <url><loc>{SITE_BASE}/{u}</loc></url>" for u in urls)
+    (out / "sitemap.xml").write_text(
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"{locs}\n</urlset>\n", encoding="utf-8")
+    (out / "robots.txt").write_text(
+        f"User-agent: *\nAllow: /\nSitemap: {SITE_BASE}/sitemap.xml\n", encoding="utf-8")
 
     return {"breakdowns": len(full), "fighters": len(details),
             "events": len(event_details), "elo": len(elo),
