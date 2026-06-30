@@ -851,9 +851,10 @@ function bar(title, m){
     '<div class="op-bar"><div class="op-fill" style="width:'+Math.max(3,m.pct)+'%"></div></div></div>';
 }
 function onSelect(node){
-  var s=document.getElementById('oceanSearch');
-  if(!node || !byId[node.id]){ panel.hidden=true; if(s) s.style.display=''; return; }
-  if(s){ s.style.display='none'; s.blur(); }   // hide search while a node is focused
+  var s=document.getElementById('oceanSearch'), lg=document.getElementById('oceanLegend');
+  if(!node || !byId[node.id]){ panel.hidden=true; if(s) s.style.display=''; if(lg) lg.style.display=''; return; }
+  if(s){ s.style.display='none'; s.blur(); }   // hide search + region legend while a node is focused
+  if(lg){ lg.style.display='none'; }
   var n = byId[node.id], mt = n.metrics||{};
   var region = ((O.regions||[])[n.region]||{}).name || 'Unclustered';
   var nb = (n.neighbours||[]).map(function(x){var t=byId[x.node_key];
