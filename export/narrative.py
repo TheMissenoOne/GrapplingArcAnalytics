@@ -40,6 +40,32 @@ def _chain(sequence: list[dict[str, Any]], side: str, limit: int = 5) -> list[st
 
 
 # ── match article ────────────────────────────────────────────────────────────
+def _decision_space_section(bd: dict[str, Any]) -> Section | None:
+    """Narrate the bout as decision-space reduction (the Danaher systems lens): control isn't
+    about activity, it's about removing the opponent's viable options. Uses the per-bout
+    ``decision_space.reductions`` (DS-05/07) already computed in build_match_breakdown."""
+    ds = bd.get("decision_space") or {}
+    reds = [r for r in (ds.get("reductions") or []) if r.get("reduction_pct", 0) > 0]
+    if not reds:
+        return None
+    a, b = bd["fighters"]["a"], bd["fighters"]["b"]
+    top = max(reds, key=lambda r: r.get("total_reduction", 0.0))
+    actor, foe = (a, b) if top["actor"] == "a" else (b, a)
+    foe_key = "b" if top["actor"] == "a" else "a"
+    before = top["ds_before"][foe_key]
+    after = top["ds_after"][foe_key]
+    pct = round(top.get("reduction_pct", 0.0) * 100)
+    para = (
+        f"The bout turned on decision space, not activity. {_name(actor)}'s {top['label']} was "
+        f"the decisive constraint — it collapsed {_name(foe)}'s viable options from "
+        f"{before:.2f} to {after:.2f} (a {pct}% reduction) while widening {_name(actor)}'s own "
+        f"attack. Whoever removes the other's choices fastest dictates the exchange."
+    )
+    if len(reds) > 1:
+        para += f" {_name(actor)} forced {len(reds)} such option-collapses across the match."
+    return ("Decision space", [para])
+
+
 def match_narrative(bd: dict[str, Any]) -> list[Section]:
     meta = bd["meta"]
     stats = bd["stats"]
@@ -67,8 +93,15 @@ def match_narrative(bd: dict[str, Any]) -> list[Section]:
     ]
     label, va, vb = max(disparities, key=lambda d: abs(d[1] - d[2]))
     if va != vb:
+        more_side = "a" if va > vb else "b"
         more, mv, lv = (_name(a), va, vb) if va > vb else (_name(b), vb, va)
-        lede += f" {more} led {mv}–{lv} in {label}."
+        # Don't contradict the result: if the busier side didn't win, frame it as activity that
+        # didn't convert to control (the decision-space section explains who actually dictated).
+        if winner and winner["side"] != more_side:
+            lede += (f" {more} logged more {label} ({mv}–{lv}), but volume didn't translate into "
+                     f"control.")
+        else:
+            lede += f" {more} led {mv}–{lv} in {label}."
     sections.append(("Overview", [lede]))
 
     # Takedown battle.
@@ -116,6 +149,11 @@ def match_narrative(bd: dict[str, Any]) -> list[Section]:
         sections.append(("The decisive sequence", [
             f"{who}'s closing chain ran " + " → ".join(chain) + "."
         ]))
+
+    # Decision space — the strategic "why" (option-collapse), the product's core lens.
+    ds_section = _decision_space_section(bd)
+    if ds_section is not None:
+        sections.append(ds_section)
 
     # Grappling-ELO context — relative % move, never the raw rating.
     da, db = a.get("elo_delta_pct"), b.get("elo_delta_pct")
