@@ -6,10 +6,11 @@ import hashlib
 import logging
 import re
 from collections.abc import Sequence
-from typing import Protocol
+from typing import Any, Protocol
 
 import numpy as np
 from sklearn.cluster import KMeans
+from sklearn.metrics import adjusted_rand_score
 
 from analysis.deviance import TYPES as _TYPES
 from analysis.deviance import Stats, type_deviance_vector
@@ -191,3 +192,107 @@ def run_archetype_pipeline(session: object, k: int = 6) -> None:
 
     logger.info("Archetypes fitted: k=%d, athlete graphs=%d, names=%s",
                 km.n_clusters, len(graph_ids), names)
+
+
+# ── Validation: alternative clustering + stability ────────────────────────────
+
+def fit_hdbscan(
+    vectors: np.ndarray,
+    min_cluster_size: int = 5,
+    min_samples: int | None = None,
+) -> tuple[np.ndarray | None, float]:
+    """HDBSCAN-based archetype detection (alternative to fixed-k KMeans).
+
+    Automatically determines the number of clusters from data density.
+    Returns ``(labels, n_clusters_float)`` where labels[i] = -1 means noise.
+    """
+    from sklearn.cluster import HDBSCAN
+    model = HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples)
+    labels = model.fit_predict(vectors)
+    n_clusters = len(set(labels) - {-1})
+    return labels, float(n_clusters)
+
+
+def jaccard_bootstrap_stability(
+    vectors: np.ndarray,
+    k: int = 6,
+    n_iter: int = 100,
+    sample_frac: float = 0.8,
+    random_state: int = 42,
+) -> dict[str, float]:
+    """Jaccard bootstrap stability analysis (Hennig 2007).
+
+    Repeatedly samples ``sample_frac`` of the data with replacement, re-runs
+    KMeans with fixed k, and measures cluster-wise Jaccard similarity of the
+    recovered partition against the original.
+
+    Returns
+    -------
+    dict with keys:
+      - ``mean_jaccard`` — mean pair-wise Jaccard across all bootstrap iterations
+      - ``std_jaccard`` — std of Jaccard
+      - ``ari_mean`` — mean Adjusted Rand Index
+      - ``cluster_jaccards`` — per-cluster mean Jaccard (length k)
+      - ``n_noise`` — how many iterations produced a different number of clusters
+    """
+    rng = np.random.RandomState(random_state)
+    n = len(vectors)
+    base_km = KMeans(n_clusters=k, random_state=random_state, n_init="auto")
+    base_labels = base_km.fit_predict(vectors)
+
+    cluster_jaccards: list[list[float]] = [[] for _ in range(k)]
+    aris: list[float] = []
+    noise_count = 0
+
+    for _ in range(n_iter):
+        idx = rng.choice(n, size=int(n * sample_frac), replace=True)
+        sample = vectors[idx]
+        if len(sample) < k:
+            noise_count += 1
+            continue
+        km = KMeans(n_clusters=k, random_state=rng.randint(0, 2**31), n_init="auto")
+        boot_labels = km.fit_predict(sample)
+
+        # Map boot labels to base labels via Hungarian / majority vote.
+        for c in range(k):
+            mask = base_labels == c
+            if mask.sum() == 0:
+                continue
+            boot_for_c = boot_labels[idx[mask]]
+            majority = np.bincount(boot_for_c).argmax()
+            intersection = (boot_labels[idx] == majority) & mask
+            union = (boot_labels[idx] == majority) | mask
+            j = intersection.sum() / max(union.sum(), 1)
+            cluster_jaccards[c].append(j)
+
+        ari = adjusted_rand_score(base_labels[idx], boot_labels)
+        aris.append(ari)
+
+    mean_cj = [np.mean(v) if v else 0.0 for v in cluster_jaccards]
+    return {
+        "mean_jaccard": float(np.mean(mean_cj)),
+        "std_jaccard": float(np.std(mean_cj)),
+        "ari_mean": float(np.mean(aris)) if aris else 0.0,
+        "cluster_jaccards": [round(x, 3) for x in mean_cj],
+        "n_noise": noise_count,
+    }
+
+
+def optimal_k_by_stability(
+    vectors: np.ndarray,
+    k_range: range = range(3, 11),
+    n_iter: int = 50,
+    random_state: int = 42,
+) -> list[dict[str, Any]]:
+    """Grid-search over k, returning stability diagnostics for each k.
+
+    Returns list of dicts sorted by ``mean_jaccard`` descending:
+      ``[{"k": 6, "mean_jaccard": 0.87, ...}, ...]``
+    """
+    results: list[dict[str, Any]] = []
+    for k in k_range:
+        if k >= len(vectors):
+            break
+        stab = jaccard_bootstrap_stability(vectors, k=k, n_iter=n_iter, random_state=random_state)
+        results.append({"k": k, **stab})
+    return sorted(results, key=lambda r: r["mean_jaccard"], reverse=True)

@@ -70,6 +70,9 @@ ATHLETE_ALIASES: dict[str, str] = {
     "adele fornino": "adele fornarino", # "Fornino" misspelling → Adele Fornarino
     "gabby mccomb": "gabi mccomb",      # Gabby → Gabi McComb (same human)
     "heam rida": "haisam rida",         # "Heam" misspelling → Haisam Rida
+    "heisen rita": "haisam rida",       # "Heisen Rita" misspelling → Haisam Rida
+    "miki galva": "mica galvao",        # "Miki Galva" misspelling → Mica Galvão
+    "daniel manosu": "dan manasoiu",    # "Manosu" misspelling → Dan Manasoiu
     # NOTE: Junny vs Edwin Ocasio, Maia vs Mayssa Bastos, George vs Jorge Santos are
     # DISTINCT people (real bouts) — do not alias.
 }

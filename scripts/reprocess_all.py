@@ -51,6 +51,19 @@ DATASETS: list[tuple[str, str | None, str]] = [
     ("scripts.wno24_data", "WNO 24", "WNO24"),
     ("scripts.wno31_data", "WNO 31", "WNO31"),
     ("scripts.cji_data", "CJI", "CJI"),
+    ("scripts.adcc2022_women_data", "ADCC 2022", "ADCC2022-Women"),
+    ("scripts.adcc2024_p99kg_data", "ADCC 2024", "ADCC2024+99kg"),
+    ("scripts.adcc_trials2022_sa_data", "ADCC Trials 2022 South America", "ADCCTrials2022SA"),
+    ("scripts.adcc_trials2023_ec_finals_data", "ADCC Trials 2023 East Coast",
+     "ADCCTrials2023EC-Finals"),
+    ("scripts.adcc_trials2023_ec_semis_data", "ADCC Trials 2023 East Coast",
+     "ADCCTrials2023EC-Semis"),
+    ("scripts.adcc_trials2024_wc_data", "ADCC Trials 2024 West Coast", "ADCCTrials2024WC"),
+    ("scripts.ibjjf2025_top10_data", "IBJJF 2025 Top 10", "IBJJF2025top10"),
+    ("scripts.ufc325_data", "UFC 325", "UFC325"),
+    ("scripts.ncaa2024_data", "NCAA 2024", "2024NCAA"),
+    ("scripts.ncaa2025_data", "NCAA 2025", "2025NCAA"),
+    ("scripts.ncaa2026_data", "NCAA 2026", "2026NCAA"),
 ]
 
 

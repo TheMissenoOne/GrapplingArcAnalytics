@@ -36,7 +36,18 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
         for (a_name, year), m in block.items():
             winner_name = str(m.get("winner") or "").strip()
             raw_events = m.get("events") or []
-            b_name = _derive_opponent(a_name, winner_name, raw_events)
+            if " vs " in a_name:
+                # Dump keyed by the full matchup: both participants come from the key.
+                a_name, b_name = (s.strip() for s in a_name.split(" vs ", 1))
+            else:
+                b_name = _derive_opponent(a_name, winner_name, raw_events)
+                # Derivation failed or self-collided (winner is a name-variant of side A):
+                # fall back to the explicit "opponent" field (the winner's opponent) —
+                # dirtier strings, but recovers bouts that were previously skipped.
+                opp = str(m.get("opponent") or "").strip()
+                if ((not b_name or athlete_key(b_name) == athlete_key(a_name))
+                        and opp and athlete_key(opp) != athlete_key(a_name)):
+                    b_name = opp
             if not b_name:
                 logger.warning("Skipping %s (%s): cannot determine opponent", a_name, year)
                 continue
