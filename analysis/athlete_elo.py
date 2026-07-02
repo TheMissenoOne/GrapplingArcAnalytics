@@ -16,6 +16,7 @@ per-match opponent ratings) is passed in, so it is unit-testable in isolation.
 from __future__ import annotations
 
 import math
+from datetime import date
 from typing import Any
 
 from analysis.athlete_graph import AthleteEdge, AthleteGraph, AthleteNode
@@ -63,10 +64,16 @@ K_BASE_FLOOR: float = 10.0  # log-decay asymptote
 GAP_DIVISOR: float = 400.0
 GAP_FACTOR_MIN: float = 0.1
 GAP_FACTOR_MAX: float = 1.0
-# Replay only ever consumes registered COMPETITIVE bouts (status == 'final'; drafts
-# are held out), and real competition results should move Grappling ELO harder than
-# the base ladder. This multiplier scales every replayed match's K. Tunable.
-COMPETITIVE_K_MULT: float = 1.5
+# Competitive multiplier: scales every replayed match's K for pro athletes.
+# Casual app users get 1.0 (base rate); leaderboard-seeded competitors get
+# a higher value (e.g. 2.5) to climb meaningfully above the belt floor.
+# Tunable per-athlete via the ``competitive_mult`` parameter on ``replay_matches``.
+COMPETITIVE_K_MULT: float = 2.5
+
+# ── Temporal decay (Aldous 2020 / MDPI 2024) ──────────────────────────────
+# Older matches contribute less to current rating. Half-life in months: a match
+# that old has its K-factor halved. 36 months ≈ 3 years = half-life.
+TEMPORAL_HALFLIFE_MONTHS: float = 36.0
 
 
 def base_elo_for_belt(belt: str | None) -> float:
@@ -144,17 +151,29 @@ def _base_k(n_matches: int) -> float:
     return max(K_BASE_FLOOR, decayed)
 
 
-def k_factor(n_matches: int, graph_elo: float, rank_target: float) -> float:
-    """K = base(n) × gap_factor.
+def k_factor(
+    n_matches: int, graph_elo: float, rank_target: float,
+    months_since: float = 0.0,
+    competitive_mult: float = COMPETITIVE_K_MULT,
+) -> float:
+    """K = base(n) × gap_factor × competitive_mult × temporal_decay.
 
     ``gap_factor`` scales K by how far the graph ELO sits from the rank target,
     clamped to [0.1, 1.0]: a big gap means near-full K (fast climb); near the
     target K is floored at 10% so growth slows and stabilizes.
+
+    ``competitive_mult`` — 2.5 for pro competitors (fast climb above belt floor),
+    1.0 for casual app users (base rate).
+
+    ``temporal_decay`` halves K every ``TEMPORAL_HALFLIFE_MONTHS`` months, so
+    older matches contribute less (per Aldous / MDPI 2024).  A match from today
+    gets decay = 1.0; a match 3 years old gets decay ~0.5.
     """
     base = _base_k(n_matches)
     gap = abs(rank_target - graph_elo) / GAP_DIVISOR
     gap_factor = max(GAP_FACTOR_MIN, min(GAP_FACTOR_MAX, gap))
-    return base * gap_factor * COMPETITIVE_K_MULT
+    temporal_decay = 2.0 ** (-months_since / TEMPORAL_HALFLIFE_MONTHS)
+    return base * gap_factor * competitive_mult * temporal_decay
 
 
 def _your_entries(match: Any) -> list[dict[str, Any]]:
@@ -175,12 +194,29 @@ def _mean_elo(graph: AthleteGraph) -> float | None:
     return sum(elos) / len(elos)
 
 
+def _months_between(match: Any, reference: date | None = None) -> float:
+    """Months elapsed between the match date and ``reference`` (default: today)."""
+    if reference is None:
+        reference = date.today()
+    match_date = getattr(match, "date", None)
+    if match_date is None:
+        return 0.0
+    if isinstance(match_date, str):
+        try:
+            match_date = date.fromisoformat(match_date)
+        except (ValueError, TypeError):
+            return 0.0
+    delta = reference - match_date
+    return max(0.0, delta.days / 30.44)
+
+
 def replay_matches(
     athlete_name: str,
     matches: list[Any],
     rank_target: float,
     opp_elos: list[float],
     belt: str | None = "black",
+    competitive_mult: float = COMPETITIVE_K_MULT,
 ) -> tuple[AthleteGraph, list[float]]:
     """Replay matches chronologically, growing per-node ELO toward ``rank_target``.
 
@@ -188,8 +224,8 @@ def replay_matches(
     ----------
     athlete_name : str
     matches : list
-        Match-like objects (duck-typed: ``.sequence``, ``.won``, ``.win_type``),
-        already sorted in chronological order.
+        Match-like objects (duck-typed: ``.sequence``, ``.won``, ``.win_type``,
+        ``.date``), already sorted in chronological order.
     rank_target : float
         The athlete's rank ELO — the convergence target.
     opp_elos : list[float]
@@ -253,7 +289,9 @@ def replay_matches(
 
         graph_elo = current_mean
         s = score_from_match(match)
-        k = k_factor(i + 1, graph_elo, rank_target)
+        months_since = _months_between(match)
+        k = k_factor(i + 1, graph_elo, rank_target, months_since=months_since,
+                      competitive_mult=competitive_mult)
         delta = k * (s - expected(graph_elo, opp_elo))
         # Hard invariant: a recorded win never lowers Grappling ELO, a loss never raises it
         # (regardless of how the grappling exchanges or rating gap shook out). Draws unclamped.
@@ -267,8 +305,8 @@ def replay_matches(
         unique = list(dict.fromkeys(participating))
         prospective_mean = graph_elo + delta * len(unique) / n_total
         scale = 1.0
-        if (graph_elo < rank_target <= prospective_mean) or (
-            graph_elo > rank_target >= prospective_mean
+        if (graph_elo <= rank_target <= prospective_mean) or (
+            graph_elo >= rank_target >= prospective_mean
         ):
             denom = prospective_mean - graph_elo
             if denom != 0:
