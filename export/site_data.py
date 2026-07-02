@@ -5,7 +5,7 @@ generated data files plus one detail page per match / qualifying fighter:
 
     site/breakdowns-data.js   window.GA_BREAKDOWNS  (all sequence bouts, graph.js-shaped)
     site/fighters-data.js     window.GA_FIGHTERS    (>=3-bout dossiers, card graphs)
-    site/elo-data.js          window.GA_ELO         (rank_elo leaderboard rows)
+    site/elo-data.js          window.GA_ELO         (per-discipline leaderboards: {grappling,mma,wrestling})
     site/breakdown-<slug>.html   per-bout article  (stats + momentum + graph + prose)
     site/grapple-<slug>.html     per-fighter dossier (career graph + signature + prose)
 
@@ -271,30 +271,41 @@ def build_fighters(
     return cards, details
 
 
+# A percentile pool smaller than this can't say "Top X%" honestly — leave its athletes
+# unranked (renderers already show "Unranked" / omit the chip for missing ids).
+_MIN_POOL = 5
+
+
 def _elo_standings(session: Session) -> dict[str, int]:
-    """athlete_id → Grappling-ELO percentile (top X%) across the whole leaderboard."""
-    rows = list(session.execute(
-        select(Athlete.id, Athlete.rank_elo)
-        .where(Athlete.rank_elo.isnot(None)).order_by(Athlete.rank_elo.desc())
-    ))
-    n = len(rows)
-    return {rid: max(1, round((i + 1) / n * 100)) for i, (rid, _) in enumerate(rows)} if n else {}
+    """athlete_id → Grappling-ELO percentile (top X%) within the athlete's own
+    discipline pool (mma / grappling / wrestling). Tiny pools stay unranked."""
+    from analysis.discipline import ranked_pools
 
-
-def build_elo(session: Session, limit: int = 8) -> list[list[Any]]:
-    """Leaderboard rows as RELATIVE values (% of the #1 rating) — never the raw number."""
-    rows = list(session.execute(
-        select(Athlete.name, Athlete.rank_elo)
-        .where(Athlete.rank_elo.isnot(None)).order_by(Athlete.rank_elo.desc()).limit(limit)
-    ))
-    if not rows:
-        return []
-    top = float(rows[0][1])
-    out = []
-    for i, (name, score) in enumerate(rows):
-        rel = round(float(score) / top * 100)
-        out.append([str(i + 1), name, f"{rel}%", rel])
+    out: dict[str, int] = {}
+    for rows in ranked_pools(session).values():
+        n = len(rows)
+        if n < _MIN_POOL:
+            continue
+        out.update({aid: max(1, round((i + 1) / n * 100)) for i, (aid, _, _) in enumerate(rows)})
     return out
+
+
+def build_elo(session: Session, limit: int = 8) -> dict[str, list[list[Any]]]:
+    """Per-discipline leaderboards, rows as RELATIVE values (% of that board's #1
+    rating) — never the raw number. Shape: {discipline: [[rank, name, "NN%", NN], …]}."""
+    from analysis.discipline import ranked_pools
+
+    boards: dict[str, list[list[Any]]] = {}
+    for d, rows in ranked_pools(session).items():
+        rows = rows[:limit]
+        out: list[list[Any]] = []
+        if rows:
+            top = rows[0][2]
+            for i, (_, name, score) in enumerate(rows):
+                rel = round(score / top * 100)
+                out.append([str(i + 1), name, f"{rel}%", rel])
+        boards[d] = out
+    return boards
 
 
 # ── HTML chrome ──────────────────────────────────────────────────────────────
@@ -962,7 +973,7 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
         f"User-agent: *\nAllow: /\nSitemap: {SITE_BASE}/sitemap.xml\n", encoding="utf-8")
 
     return {"breakdowns": len(full), "fighters": len(details),
-            "events": len(event_details), "elo": len(elo),
+            "events": len(event_details), "elo": sum(len(rows) for rows in elo.values()),
             "ocean": len(ocean["nodes"])}
 
 

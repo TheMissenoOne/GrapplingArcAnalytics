@@ -1,3 +1,4 @@
+# ruff: noqa: E501  (long recommendation f-strings are content)
 """Generate combined user insights from user data + competition data.
 
 Loads user JSON via ``UserBundle.from_json()`` and competition data from

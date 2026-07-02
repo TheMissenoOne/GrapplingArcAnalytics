@@ -157,11 +157,14 @@ def weighted_pagerank(
     idx = {v: i for i, v in enumerate(nodes)}
 
     # Precompute out-strength and out-degree.
-    out_str = np.array([sum(d.get("weight", 1.0) for _, _, d in g.out_edges(v, data=True)) for v in nodes], dtype=np.float64)
+    out_str = np.array(
+        [sum(d.get("weight", 1.0) for _, _, d in g.out_edges(v, data=True)) for v in nodes],
+        dtype=np.float64,
+    )
     out_deg = np.array([g.out_degree(v) for v in nodes], dtype=np.float64)
 
     # Build the combined transition matrix.
-    M = np.zeros((n, n), dtype=np.float64)
+    M = np.zeros((n, n), dtype=np.float64)  # noqa: N806 (literature notation)
     for v in nodes:
         i = idx[v]
         s = out_str[i]

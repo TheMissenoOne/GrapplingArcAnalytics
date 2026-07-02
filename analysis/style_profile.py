@@ -98,23 +98,29 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
         if m.status == "final" and m.sequence
     ]
 
-    # ADCC-leaderboard standings → this fighter's rank + the elite-opposition set.
-    # rank_elo is the public leaderboard target (vs the grown graph ``elo``); rank only
-    # within athletes that carry one, so the number means a real leaderboard position.
-    ranked = list(session.execute(
-        select(Athlete.id, Athlete.rank_elo, Athlete.weight_class)
-        .where(Athlete.rank_elo.isnot(None))
-        .order_by(Athlete.rank_elo.desc())
-    ))
+    # Standings scoped to the fighter's own DISCIPLINE pool (mma / grappling /
+    # wrestling) — grappling ranks by rank_elo, MMA by UFC Elo, wrestling by grown
+    # graph elo. See analysis.discipline.ranked_pools for the rating sources.
+    from analysis.discipline import athlete_disciplines, ranked_pools
+
+    disc = athlete_disciplines(session).get(athlete.id, "grappling")
+    ranked = ranked_pools(session)[disc]  # [(athlete_id, name, rating)] desc
     elite_ids = {row[0] for row in ranked[:_ELITE_TOP_N]}
-    same_class = [row for row in ranked if row[2] == athlete.weight_class]
+    weight_classes = {
+        aid: wc for aid, wc in session.execute(select(Athlete.id, Athlete.weight_class))
+    }
+    same_class = [
+        row for row in ranked if weight_classes.get(row[0]) == athlete.weight_class
+    ]
     elo_rank = next(
         (i + 1 for i, row in enumerate(same_class) if row[0] == athlete.id), None
     )
-    # Relative standing (top X%) across the whole leaderboard — shown instead of the
-    # raw rating, which is never surfaced. See [[grappling-elo-presentation]].
+    # Relative standing (top X%) within the discipline pool — shown instead of the raw
+    # rating, which is never surfaced. See [[grappling-elo-presentation]]. Pools too
+    # small to rank honestly (<5) leave the fighter unranked.
     overall = next((i + 1 for i, row in enumerate(ranked) if row[0] == athlete.id), None)
-    elo_percentile = max(1, round(overall / len(ranked) * 100)) if overall and ranked else None
+    elo_percentile = (max(1, round(overall / len(ranked) * 100))
+                      if overall and len(ranked) >= 5 else None)
 
     type_counts: Counter[str] = Counter()
     label_counts: Counter[str] = Counter()

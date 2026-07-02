@@ -14,7 +14,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from collections import Counter, defaultdict
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -54,7 +54,6 @@ def build_fighter_graph(
 
     for m in matches:
         winner = m.get("fighter", "")
-        opponent = m.get("opponent", "")
         if _athlete_key(winner) != key:
             continue
 
@@ -314,7 +313,9 @@ def compare_positions(
         fg_nodes = fg.get("nodes", [])
         fg_top = sorted(fg_nodes, key=lambda x: x.get("proficiency", 0), reverse=True)[:top_n]
 
-        user_labels_lower = {n.get("english", "").lower().strip() for n in user_top if n.get("english")}
+        user_labels_lower = {
+            n.get("english", "").lower().strip() for n in user_top if n.get("english")
+        }
         fg_labels = {n.get("label", "").lower().strip() for n in fg_top}
         overlap = user_labels_lower & fg_labels
 
@@ -627,5 +628,6 @@ def export_comparison(
     out = Path(output_path)
     with open(out, "w") as f:
         json.dump(safe, f, indent=2, default=str, ensure_ascii=False)
-    logger.info("Exported graph comparison (%d fighters) → %s", len(safe["meta"]["fighters_with_graphs"]), out)
+    logger.info("Exported graph comparison (%d fighters) → %s",
+                len(safe["meta"]["fighters_with_graphs"]), out)
     return str(out)

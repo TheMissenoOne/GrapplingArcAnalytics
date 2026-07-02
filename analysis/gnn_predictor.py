@@ -1,5 +1,4 @@
 """Graph Neural Network predictor for match outcomes — GCN baseline.
-# ruff: noqa: N803, N806, E501
 
 Builds a fighter×fight bipartite graph where:
   - Fighter nodes carry style-vector features (the 8-bucket type shares).
@@ -15,6 +14,7 @@ Reference
 Drexler (2024). "Sports Analytics with Graph Neural Networks and Graph
 Convolutional Networks." *Preprints*.
 """
+# ruff: noqa: N803, N806, E501  (matrix notation follows the GCN literature)
 
 from __future__ import annotations
 

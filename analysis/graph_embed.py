@@ -113,7 +113,9 @@ def embed_technique_graph(
     if len(nodes) < MIN_WALK_NODES:
         # Fall back to one-hot degree features.
         from sklearn.decomposition import PCA
-        degs = np.array([g.degree(n, weight="weight") for n in nodes], dtype=np.float64).reshape(-1, 1)
+        degs = np.array(
+            [g.degree(n, weight="weight") for n in nodes], dtype=np.float64
+        ).reshape(-1, 1)
         if len(nodes) <= dim:
             pad = np.zeros((len(nodes), dim - 1))
             emb = np.concatenate([degs, pad], axis=1)
