@@ -447,11 +447,13 @@ def replay_and_persist_athlete(athlete: Athlete, session: Session) -> list[float
     """Replay every FINAL match this athlete participates in, FROM THEIR SIDE; persist
     the grown graph + ``athlete.elo`` + ``athlete.elo_series``. Returns the snapshots.
     Draft matches are held out until approved."""
-    from analysis.athlete_elo import replay_matches  # local: avoid import cycle
+    from analysis.athlete_elo import COMPETITIVE_K_MULT, replay_matches  # local: avoid import cycle
 
     target = rank_elo_for_athlete(athlete.name)
+    is_competitive = target is not None or athlete.source == "leaderboard"
     if target is None:
         target = athlete.rank_elo if athlete.rank_elo is not None else 1000.0
+    comp_mult = COMPETITIVE_K_MULT if is_competitive else 1.0
     # get_matches_for_athlete already orders by (year, created_at, id); re-sort only to
     # coalesce NULL years to the front and keep that deterministic id tiebreak.
     final = sorted(
@@ -461,7 +463,8 @@ def replay_and_persist_athlete(athlete: Athlete, session: Session) -> list[float
     views = [_perspective_view(m, athlete.id) for m in final]
     opp_elos = [opponent_input_elo(m, athlete.id, session) for m in final]
     graph, snapshots = replay_matches(
-        athlete.name, views, target, opp_elos, belt=athlete.belt or "black"
+        athlete.name, views, target, opp_elos, belt=athlete.belt or "black",
+        competitive_mult=comp_mult,
     )
     upsert_graph_from_athlete_graph(graph, athlete.id, session)
     if graph.user_elo is not None:
