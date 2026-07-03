@@ -11,6 +11,10 @@ build/
 .env
 .env.local
 
+# Local database
+db.sqlite
+*.sqlite
+
 # Data (downloaded datasets — large, not committed)
 data/raw/*
 data/processed/*
