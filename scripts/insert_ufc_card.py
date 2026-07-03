@@ -25,7 +25,7 @@ except ImportError:
     pass
 
 from scripts.dump_import import run_dump  # noqa: E402
-from scripts.ufc_card_data import RAW  # noqa: E402
+from scripts.dumps.ufc_card_data import RAW  # noqa: E402
 
 
 def main() -> int:

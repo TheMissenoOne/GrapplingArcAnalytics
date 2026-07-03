@@ -45,7 +45,7 @@ except ImportError:
     pass
 
 from analysis.names import _normalize_name  # noqa: E402
-from scripts.ufc_matches_data import RAW as _RAW  # noqa: E402
+from scripts.dumps.ufc_matches_data import RAW as _RAW  # noqa: E402
 
 # The dump is keyed by (athlete_a_name, year) tuples; the literal types loosely.
 RAW = cast("list[dict[tuple[str, int], dict[str, Any]]]", _RAW)

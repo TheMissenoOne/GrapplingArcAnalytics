@@ -24,7 +24,7 @@ try:
 except ImportError:
     pass
 
-from scripts.cji_data import RAW  # noqa: E402
+from scripts.dumps.cji_data import RAW  # noqa: E402
 from scripts.dump_import import run_dump  # noqa: E402
 
 

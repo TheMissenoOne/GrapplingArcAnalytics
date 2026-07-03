@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """Convert a root bjj-match-analyzer dump (``<Event>.py`` dict literal(s)) into a
-``scripts/<slug>_data.py`` RAW module consumable by ``scripts.dump_import``.
+``scripts/dumps/<slug>_data.py`` RAW module consumable by ``scripts.dump_import``.
 
     uv run python scripts/convert_dump.py ../ADCC2022Women.py adcc2022_women
 """
@@ -23,7 +23,7 @@ def main() -> int:
     if not blocks:
         print(f"{src_path}: no dict literals found", file=sys.stderr)
         return 1
-    out = Path(__file__).resolve().parent / f"{slug}_data.py"
+    out = Path(__file__).resolve().parent / "dumps" / f"{slug}_data.py"
     out.write_text(
         f'"""{src_path.stem} match dump (bjj-match-analyzer schema) — converted for import.\n\n'
         f'Generated from {src_path.name} by convert_dump.py; keyed by (athlete_a_name, year).\n'
