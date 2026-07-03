@@ -44,7 +44,7 @@ try:
 except ImportError:
     pass
 
-from analysis.names import _normalize_name, clean_athlete_name  # noqa: E402
+from analysis.names import _normalize_name, athlete_key  # noqa: E402
 from scripts.dumps.ufc_matches_data import RAW as _RAW  # noqa: E402
 
 # The dump is keyed by (athlete_a_name, year) tuples; the literal types loosely.
@@ -149,14 +149,14 @@ def _derive_opponent(
 ) -> str | None:
     """The other participant: the winner if it isn't athlete_a, else the lone non-referee
     actor that isn't athlete_a. None when undeterminable (skip the row)."""
-    a_norm = _normalize_name(clean_athlete_name(a_name))
-    if winner_name and _normalize_name(winner_name) != a_norm:
+    a_norm = athlete_key(a_name)
+    if winner_name and athlete_key(winner_name) != a_norm:
         return winner_name
     others = {
         e.get("actor", "")
         for e in events
         if str(e.get("actor", "")).lower() != "referee"
-        and _normalize_name(str(e.get("actor", ""))) != a_norm
+        and athlete_key(str(e.get("actor", ""))) != a_norm
     }
     return next(iter(others)) if len(others) == 1 else None
 
@@ -167,12 +167,12 @@ def _clean_events(
     """Drop referee/reset events; tag each remaining event with its actor's name (resolved
     to an id later), retype takedown-labelled transitions, and preserve timestamps (ts in
     seconds) if present."""
-    a_norm, b_norm = _normalize_name(clean_athlete_name(a_name)), _normalize_name(clean_athlete_name(b_name))
+    a_norm, b_norm = athlete_key(a_name), athlete_key(b_name)
     out: list[dict[str, Any]] = []
     for e in events:
         if str(e.get("type")) == "reset" or str(e.get("actor", "")).lower() == "referee":
             continue
-        actor_norm = _normalize_name(str(e.get("actor", "")))
+        actor_norm = athlete_key(str(e.get("actor", "")))
         if actor_norm == a_norm:
             actor = "a"
         elif actor_norm == b_norm:
