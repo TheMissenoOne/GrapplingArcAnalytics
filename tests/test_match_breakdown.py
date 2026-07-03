@@ -125,6 +125,59 @@ class TestTransitionGraph:
         }
 
 
+class TestTimestamps:
+    """ts (absolute video seconds) flows storage → sequence view → graph nodes (video seek)."""
+
+    SEQ_TS: list[dict[str, Any]] = [
+        {"label": "Double Leg Takedown", "type": "takedown", "actor_id": "B",
+         "successful": True, "ts": 4115},
+        {"label": "Mount", "type": "control", "actor_id": "B", "ts": 4200},
+        {"label": "Mount", "type": "control", "actor_id": "B", "ts": 4300},
+        {"label": "Sweep / Reversal", "type": "sweep", "actor_id": "A", "successful": True},
+    ]
+
+    def _build(self) -> dict[str, Any]:
+        a = _athlete("A", "Dricus du Plessis")
+        b = _athlete("B", "Khamzat Chimaev")
+        return build_match_breakdown(_match(self.SEQ_TS, "B"), a, b)
+
+    def test_sequence_rows_carry_ts(self) -> None:
+        seq = self._build()["sequence"]
+        assert [e.get("ts") for e in seq] == [4115, 4200, 4300, None]
+
+    def test_graph_node_gets_first_seen_ts(self) -> None:
+        nodes = {n["id"]: n for n in self._build()["transition_graph"]["nodes"]}
+        assert nodes["double leg takedown"]["data"]["ts"] == 4115
+        assert nodes["mount"]["data"]["ts"] == 4200  # first occurrence, not the repeat
+        assert "ts" not in nodes["sweep reversal"]["data"]  # untimed event stays untimed
+
+    def test_timestamp_parse_round_trips(self) -> None:
+        from scripts.insert_ufc_matches import _parse_timestamp
+
+        assert _parse_timestamp("1:08:35") == 4115
+        assert _parse_timestamp("23:26") == 1406
+        assert _parse_timestamp("?") is None
+        assert _parse_timestamp("") is None
+        for secs in (0, 59, 61, 3599, 3600, 4115, 13199):
+            h, r = divmod(secs, 3600)
+            mi, s = divmod(r, 60)
+            text = f"{h}:{mi:02d}:{s:02d}" if h else f"{mi}:{s:02d}"
+            assert _parse_timestamp(text) == secs
+
+    def test_clean_events_keeps_ts(self) -> None:
+        from scripts.insert_ufc_matches import _clean_events
+
+        events = [
+            {"label": "Mount", "type": "control", "actor": "Khabib Nurmagomedov",
+             "timestamp": "1:08:35"},
+            {"label": "Armbar", "type": "submission", "actor": "Khabib Nurmagomedov",
+             "successful": True},  # no timestamp → no ts key
+        ]
+        out = _clean_events("Khabib Nurmagomedov", "Justin Gaethje", events)
+        assert out[0]["ts"] == 4115
+        assert "ts" not in out[1]
+
+
 class TestMeta:
     def test_winner_and_fighters(self) -> None:
         bd = _build()

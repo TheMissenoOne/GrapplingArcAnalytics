@@ -54,3 +54,6 @@ kanban/.obsidian/*
 
 # GrappleMap full icon render (CV-derived bulk; regenerate via export/grapplemap_icons_export.py)
 data/grapplemap_icons/
+
+# Raw transcripts + root match dumps (source corpus, large; see TRANSCRIPT_PROCESSING.md)
+transcripts/

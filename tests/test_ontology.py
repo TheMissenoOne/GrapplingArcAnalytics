@@ -12,9 +12,13 @@ from export.ontology import validate_seed
 
 def test_propose_from_network_yields_systems():
     g = nx.DiGraph()
-    # Two loosely-coupled clusters (a guard family + a leg-lock family).
+    # Two loosely-coupled clusters (a guard family + a leg-lock family). PtV attrs:
+    # the submissions land often (ok_count), so ashi garami is a real two-branch fork.
+    subs = {"armbar", "triangle", "heel hook", "knee bar"}
     for n in ("closed guard", "armbar", "triangle", "ashi garami", "heel hook", "knee bar"):
-        g.add_node(n, occ=5, reward_risk=1.0)
+        g.add_node(n, occ=5, denom=5, reward=0, risk=0, reward_risk=1.0,
+                   ok_count=4 if n in subs else 0,
+                   type="submission" if n in subs else "guard")
     g.add_edge("closed guard", "armbar", weight=4)
     g.add_edge("closed guard", "triangle", weight=3)
     g.add_edge("armbar", "triangle", weight=2)
@@ -28,6 +32,13 @@ def test_propose_from_network_yields_systems():
         assert p["key"].endswith("-system")
         assert len(p["member_positions"]) >= 2
         assert isinstance(p["entry_positions"], list)
+
+    # Dilemma = ≥2 high-PtV out-edges (path_to_victory), not "high reward-risk node":
+    # ashi garami forks into two landed finishes → proposed with both branches.
+    all_dilemmas = [d for p in proposals for d in p["candidate_dilemmas"]]
+    ashi = next(d for d in all_dilemmas if d["around"] == "ashi garami")
+    assert set(ashi["branches"]) == {"heel hook", "knee bar"}
+    assert "subtree" in ashi
 
 
 def _athlete(aid: str, name: str) -> Athlete:

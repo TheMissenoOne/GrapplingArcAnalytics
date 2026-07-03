@@ -237,6 +237,41 @@ def profile_narrative(p: dict[str, Any]) -> list[Section]:
     if fin_bits:
         sections.append(("Where it ends", [", ".join(fin_bits) + "."]))
 
+    # Systems — community decomposition of the career graph (stashed as _systems
+    # by build_fighters; appended last so sections[0]/[1] keep their meaning).
+    sysd = p.get("_systems") or {}
+    systems = sysd.get("systems") or []
+    if systems:
+        top = systems[0]
+        n = sysd.get("system_count", len(systems))
+        line = (
+            f"Run community detection over the career graph and it separates into "
+            f"{n} self-contained system{'s' if n != 1 else ''}. The biggest orbits "
+            f"{top['hub']}: {top['size']} techniques wired together by "
+            f"{top['transition_count']} internal transitions."
+        )
+        dom = sysd.get("dominant_type")
+        if dom:
+            line += f" The whole game leans {dom}."
+        sections.append(("The systems", [line]))
+
+    # Dilemmas — the forks where every branch hurts (path-to-victory model; raw PtV
+    # numbers never surface, only the structure).
+    forks = p.get("_dilemmas") or []
+    if forks:
+        top = forks[0]
+        branches = [b[0] for b in top.get("branches", [])][:2]
+        if len(branches) == 2:
+            line = (
+                f"The sharpest fork in the game sits at {top['node']}: commit to stopping "
+                f"{branches[0]} and {branches[1]} opens up — both branches carry real "
+                f"finishing value, which is what makes it a true dilemma."
+            )
+            if len(forks) > 1:
+                others = ", ".join(f["node"] for f in forks[1:3])
+                line += f" Secondary forks: {others}."
+            sections.append(("The dilemmas", [line]))
+
     return sections
 
 

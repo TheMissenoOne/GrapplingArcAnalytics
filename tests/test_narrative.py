@@ -129,3 +129,32 @@ class TestProfileNarrative:
     def test_no_template_leftovers(self) -> None:
         body = _flat(profile_narrative(_profile()))
         assert "{" not in body and "}" not in body
+
+    def test_systems_section(self) -> None:
+        p = _profile()
+        p["_systems"] = {
+            "system_count": 3, "dominant_type": "submission",
+            "systems": [{"name": "Submission (back control)", "hub": "back control",
+                         "size": 5, "transition_count": 7}],
+        }
+        secs = profile_narrative(p)
+        assert "The systems" in [h for h, _ in secs]
+        body = _flat(secs)
+        assert "3" in body and "back control" in body
+
+    def test_systems_section_absent_without_data(self) -> None:
+        assert "The systems" not in [h for h, _ in profile_narrative(_profile())]
+
+    def test_dilemma_prose(self) -> None:
+        p = _profile()
+        p["_dilemmas"] = [
+            {"node": "Mount", "branches": [["Armbar", 0.71], ["Triangle", 0.64]]},
+        ]
+        secs = profile_narrative(p)
+        assert "The dilemmas" in [h for h, _ in secs]
+        body = _flat(secs)
+        assert "Mount" in body and "Armbar" in body and "Triangle" in body
+        assert "0.71" not in body  # raw PtV never shown
+
+    def test_dilemma_prose_absent_without_data(self) -> None:
+        assert "The dilemmas" not in [h for h, _ in profile_narrative(_profile())]

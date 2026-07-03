@@ -274,8 +274,13 @@ def build_technique_library(
     effectiveness: dict[str, dict[str, Any]],
     existing_nodes: list[dict[str, Any]],
     match_techs: list[dict[str, str]] | None = None,
+    elo_deviance: dict[str, int] | None = None,
 ) -> list[dict[str, Any]]:
-    """Build enriched NodeLibraryItem[] from all sources."""
+    """Build enriched NodeLibraryItem[] from all sources.
+
+    elo_deviance: optional dict of node_key → signed ELO offset (from path-to-victory analysis).
+    """
+    elo_deviance = elo_deviance or {}
 
     library: list[dict[str, Any]] = []
     seen_normalized: set[str] = set()
@@ -324,6 +329,10 @@ def build_technique_library(
         if adcc_eff:
             entry["effectiveness"] = adcc_eff
 
+        # Attach ELO deviance if available
+        if norm in elo_deviance:
+            entry["eloDeviance"] = elo_deviance[norm]
+
         library.append(entry)
         index += 1
 
@@ -356,6 +365,8 @@ def build_technique_library(
             "already_in_app": existing,
             "effectiveness": eff,
         }
+        if norm in elo_deviance:
+            entry["eloDeviance"] = elo_deviance[norm]
         library.append(entry)
         index += 1
 
@@ -374,7 +385,7 @@ def build_technique_library(
         node_type = str(mt.get("node_type", "")).lower().strip()
         app_type = node_type if node_type in TYPE_DISPLAY else "concept"
         pt_name = DEFAULT_PT_TRANSLATIONS.get(norm, name_en)
-        library.append({
+        entry = {
             "_id": _make_oid(index),
             "name": pt_name,
             "type": app_type,
@@ -382,7 +393,10 @@ def build_technique_library(
             "variations": _generate_variations(name_en, pt_name),
             "source": "athlete_match",
             "already_in_app": False,
-        })
+        }
+        if norm in elo_deviance:
+            entry["eloDeviance"] = elo_deviance[norm]
+        library.append(entry)
         index += 1
 
     # ── 3. Sort by effectiveness descending (submissions first), then alpha ──
@@ -564,10 +578,26 @@ def export_tech_library() -> dict[str, Any]:
     effectiveness = build_effectiveness(adcc_df)
     logger.info("Built effectiveness scores for %d submission techniques", len(effectiveness))
 
+    # Compute ELO deviance from corpus PtV
+    elo_deviance = {}
+    try:
+        from analysis.network_metrics import build_transition_network
+        from analysis.path_to_victory import node_elo_deviance, path_to_victory
+        from db.base import db_session
+        with db_session() as session:
+            corpus_g = build_transition_network(session)
+            ptv_v = path_to_victory(corpus_g)
+            elo_deviance = node_elo_deviance(corpus_g, ptv_v)
+            logger.info("Computed ELO deviance for %d techniques", len(elo_deviance))
+    except Exception as e:
+        logger.warning("Could not compute ELO deviance: %s", e)
+
     match_techs = _load_match_techniques()
     if match_techs:
         logger.info("Merging %d match-derived techniques from technique_nodes", len(match_techs))
-    library = build_technique_library(tech_df, effectiveness, existing_nodes, match_techs)
+    library = build_technique_library(
+        tech_df, effectiveness, existing_nodes, match_techs, elo_deviance
+    )
 
     lib_path, eff_path = export_library(library)
 

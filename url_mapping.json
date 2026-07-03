@@ -1,0 +1,3001 @@
+{
+  "2024NCAA": {
+    "event_title": "2024NCAA",
+    "video_url": "https://www.youtube.com/watch?v=r9_ktnu-zeU",
+    "file": "2024NCAA.py",
+    "matches": [
+      {
+        "athlete": "Jesse Mendez",
+        "year": 2024,
+        "opponent": "Beau Bartlett",
+        "event": "NCAA 2024",
+        "winner": "Jesse Mendez",
+        "method": "Decision",
+        "start": "1:08:35",
+        "seconds": 4115
+      },
+      {
+        "athlete": "Caleb Henson",
+        "year": 2024,
+        "opponent": "Austin Gomez",
+        "event": "NCAA 2024",
+        "winner": "Caleb Henson",
+        "method": "Decision",
+        "start": "1:21:35",
+        "seconds": 4895
+      },
+      {
+        "athlete": "David Carr",
+        "year": 2024,
+        "opponent": "Mitchell Mesenbrink",
+        "event": "NCAA 2024",
+        "winner": "David Carr",
+        "method": "Decision",
+        "start": "1:42:59",
+        "seconds": 6179
+      },
+      {
+        "athlete": "Vito Arujau",
+        "year": 2024,
+        "opponent": "Dayton Fix",
+        "event": "NCAA 2024",
+        "winner": "Vito Arujau",
+        "method": "Decision",
+        "start": "23:26",
+        "seconds": 1406
+      },
+      {
+        "athlete": "Carter Starocci",
+        "year": 2024,
+        "opponent": "Rocco Welsh",
+        "event": "NCAA 2024",
+        "winner": "Carter Starocci",
+        "method": "Decision",
+        "start": "2:00:00",
+        "seconds": 7200
+      },
+      {
+        "athlete": "Parker Keckeisen",
+        "year": 2024,
+        "opponent": "Dustin Plott",
+        "event": "NCAA 2024",
+        "winner": "Parker Keckeisen",
+        "method": "Major Decision 14-5",
+        "start": "2:14:33",
+        "seconds": 8073
+      },
+      {
+        "athlete": "Aaron Brooks",
+        "year": 2024,
+        "opponent": "Trent Hidlay",
+        "event": "NCAA 2024",
+        "winner": "Aaron Brooks",
+        "method": "Decision",
+        "start": "2:27:14",
+        "seconds": 8834
+      },
+      {
+        "athlete": "Greg Kerkvliet",
+        "year": 2024,
+        "opponent": "Lucas Davison",
+        "event": "NCAA 2024",
+        "winner": "Greg Kerkvliet",
+        "method": "Major Decision 13-4",
+        "start": "7:31",
+        "seconds": 451
+      }
+    ]
+  },
+  "2025NCAA": {
+    "event_title": "2025NCAA",
+    "video_url": "https://www.youtube.com/watch?v=epXN_WwO6cY",
+    "file": "2025NCAA.py",
+    "matches": [
+      {
+        "athlete": "Parker Keckeisen",
+        "year": 2025,
+        "opponent": "Parker Keckeisen",
+        "event": "NCAA 2025",
+        "winner": "Carter Starocci",
+        "method": "Decision (4-3)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Troy Spratley",
+        "year": 2025,
+        "opponent": "Troy Spratley",
+        "event": "NCAA 2025",
+        "winner": "Vincent Robinson",
+        "method": "Decision (2-1 TB)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Drake Ayala",
+        "year": 2025,
+        "opponent": "Drake Ayala",
+        "event": "NCAA 2025",
+        "winner": "Lucas Byrd",
+        "method": "Decision (TB)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Brock Hardy",
+        "year": 2025,
+        "opponent": "Brock Hardy",
+        "event": "NCAA 2025",
+        "winner": "Jesse Mendez",
+        "method": "Decision (12-9)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Ridge Lovett",
+        "year": 2025,
+        "opponent": "Ridge Lovett",
+        "event": "NCAA 2025",
+        "winner": "Caleb Henson",
+        "method": "Decision (4-2)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Joey Blaze",
+        "year": 2025,
+        "opponent": "Joey Blaze",
+        "event": "NCAA 2025",
+        "winner": "Antrell Taylor",
+        "method": "Decision (4-2)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Mikey Caliendo",
+        "year": 2025,
+        "opponent": "Mikey Caliendo",
+        "event": "NCAA 2025",
+        "winner": "Mitchell Mesenbrink",
+        "method": "Decision (5-2)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Keegan O'Toole",
+        "year": 2025,
+        "opponent": "Keegan O'Toole",
+        "event": "NCAA 2025",
+        "winner": "Dean Hamiti",
+        "method": "Decision (4-1 SV)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Josh Barr",
+        "year": 2025,
+        "opponent": "Josh Barr",
+        "event": "NCAA 2025",
+        "winner": "Stephen Buchanan",
+        "method": "Decision (5-2)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Gable Steveson",
+        "year": 2025,
+        "opponent": "Gable Steveson",
+        "event": "NCAA 2025",
+        "winner": "Wyatt Hendrickson",
+        "method": "Decision (5-4)",
+        "start": "?",
+        "seconds": null
+      }
+    ]
+  },
+  "2026NCAA": {
+    "event_title": "2026NCAA",
+    "video_url": "https://www.youtube.com/watch?v=MlancZWswSk",
+    "file": "2026NCAA.py",
+    "matches": [
+      {
+        "athlete": "Sergio Vega",
+        "year": 2026,
+        "opponent": "Jesse Mendez",
+        "event": "NCAA 2026",
+        "winner": "Sergio Vega",
+        "method": "Decision 4-1 SV",
+        "start": "0:06:06",
+        "seconds": 366
+      },
+      {
+        "athlete": "Aden Valencia",
+        "year": 2026,
+        "opponent": "Shayne Van Ness",
+        "event": "NCAA 2026",
+        "winner": "Aden Valencia",
+        "method": "Decision 8-5 SV",
+        "start": "0:21:18",
+        "seconds": 1278
+      },
+      {
+        "athlete": "Landon Robideau",
+        "year": 2026,
+        "opponent": "Antrell Taylor",
+        "event": "NCAA 2026",
+        "winner": "Landon Robideau",
+        "method": "Decision 4-2",
+        "start": "0:48:14",
+        "seconds": 2894
+      },
+      {
+        "athlete": "Mitchell Mesenbrink",
+        "year": 2026,
+        "opponent": "Mikey Caliendo",
+        "event": "NCAA 2026",
+        "winner": "Mitchell Mesenbrink",
+        "method": "Points",
+        "start": "1:02:53",
+        "seconds": 3773
+      },
+      {
+        "athlete": "Levi Haines",
+        "year": 2026,
+        "opponent": "Christopher Minto",
+        "event": "NCAA 2026",
+        "winner": "Levi Haines",
+        "method": "Decision 2-1",
+        "start": "1:15:53",
+        "seconds": 4553
+      },
+      {
+        "athlete": "Max McEnelly",
+        "year": 2026,
+        "opponent": "Rocco Welsh",
+        "event": "NCAA 2026",
+        "winner": "Max McEnelly",
+        "method": "Decision 4-3",
+        "start": "1:30:19",
+        "seconds": 5419
+      },
+      {
+        "athlete": "Josh Barr",
+        "year": 2026,
+        "opponent": "Cody Merrill",
+        "event": "NCAA 2026",
+        "winner": "Josh Barr",
+        "method": "Decision 6-3",
+        "start": "1:51:23",
+        "seconds": 6683
+      },
+      {
+        "athlete": "Isaac Trumble",
+        "year": 2026,
+        "opponent": "Yonger Bastida",
+        "event": "NCAA 2026",
+        "winner": "Isaac Trumble",
+        "method": "Decision 5-0",
+        "start": "1:56:28",
+        "seconds": 6988
+      },
+      {
+        "athlete": "Luke Lilledahl",
+        "year": 2026,
+        "opponent": "Mark Anthony McGowan",
+        "event": "NCAA 2026",
+        "winner": "Luke Lilledahl",
+        "method": "Decision",
+        "start": "2:10:52",
+        "seconds": 7852
+      },
+      {
+        "athlete": "Jax Forrest",
+        "year": 2026,
+        "opponent": "Ben Davino",
+        "event": "NCAA 2026",
+        "winner": "Jax Forrest",
+        "method": "Decision 5-2",
+        "start": "2:24:38",
+        "seconds": 8678
+      }
+    ]
+  },
+  "ADCC2022+99kg": {
+    "event_title": "ADCC 2022 (+99kg)",
+    "video_url": "https://www.youtube.com/watch?v=7wr1sMq2cu8",
+    "file": "ADCC2022+99kg.py",
+    "matches": [
+      {
+        "athlete": "Gordon Ryan",
+        "year": 2022,
+        "opponent": "Haisam Rida",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Gordon Ryan",
+        "method": "Submission (RNC)",
+        "start": "0:00:25",
+        "seconds": 25
+      },
+      {
+        "athlete": "Heam Rida",
+        "year": 2022,
+        "opponent": "Cyborg",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Haisam Rida",
+        "method": "Submission (Armbar)",
+        "start": "0:07:37",
+        "seconds": 457
+      },
+      {
+        "athlete": "Felipe Pena",
+        "year": 2022,
+        "opponent": "Josh Saunders",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Felipe Pena",
+        "method": "Points",
+        "start": "0:08:50",
+        "seconds": 530
+      },
+      {
+        "athlete": "Nick Rodriguez",
+        "year": 2022,
+        "opponent": "Damon Ramos",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Nick Rodriguez",
+        "method": "Points",
+        "start": "0:23:17",
+        "seconds": 1397
+      },
+      {
+        "athlete": "Big Dan",
+        "year": 2022,
+        "opponent": "Big Dan",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Victor Hugo",
+        "method": "Points",
+        "start": "0:31:51",
+        "seconds": 1911
+      },
+      {
+        "athlete": "Vinnie Magalhaes",
+        "year": 2022,
+        "opponent": "Vinnie Magalhaes",
+        "event": "ADCC 2022 +99kg",
+        "winner": "John Hansen",
+        "method": "Points",
+        "start": "0:45:26",
+        "seconds": 2726
+      },
+      {
+        "athlete": "Roosevelt Souza",
+        "year": 2022,
+        "opponent": "Joel Rocha",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Roosevelt Souza",
+        "method": "Submission (Heel Hook)",
+        "start": "0:48:47",
+        "seconds": 2927
+      },
+      {
+        "athlete": "Orlando Sanchez",
+        "year": 2022,
+        "opponent": "Orlando Sanchez",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Max Jimenez",
+        "method": "Submission (Arm Triangle)",
+        "start": "0:59:45",
+        "seconds": 3585
+      },
+      {
+        "athlete": "Gordon Ryan [1:16:11]",
+        "year": 2022,
+        "opponent": "Victor Hugo",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Gordon Ryan",
+        "method": "Points",
+        "start": "1:16:11",
+        "seconds": 4571
+      },
+      {
+        "athlete": "Felipe Pena [1:22:56]",
+        "year": 2022,
+        "opponent": "Max Jimenez",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Felipe Pena",
+        "method": "Submission (RNC)",
+        "start": "1:22:56",
+        "seconds": 4976
+      },
+      {
+        "athlete": "Roosevelt Souza [1:33:41]",
+        "year": 2022,
+        "opponent": "Heam Rida",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Roosevelt Souza",
+        "method": "Points",
+        "start": "1:33:41",
+        "seconds": 5621
+      },
+      {
+        "athlete": "Nick Rodriguez [1:52:02]",
+        "year": 2022,
+        "opponent": "John Hansen",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Nick Rodriguez",
+        "method": "Submission (RNC)",
+        "start": "1:52:02",
+        "seconds": 6722
+      },
+      {
+        "athlete": "Gordon Ryan [1:53:04]",
+        "year": 2022,
+        "opponent": "Roosevelt Souza",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Gordon Ryan",
+        "method": "Submission (Heel Hook)",
+        "start": "1:53:04",
+        "seconds": 6784
+      },
+      {
+        "athlete": "Felipe Pena [1:57:09]",
+        "year": 2022,
+        "opponent": "Felipe Pena",
+        "event": "ADCC 2022 +99kg",
+        "winner": "Nick Rodriguez",
+        "method": "Points",
+        "start": "1:57:09",
+        "seconds": 7029
+      }
+    ]
+  },
+  "ADCC2022-88kg": {
+    "event_title": "ADCC 2022 (-88kg)",
+    "video_url": "https://www.youtube.com/watch?v=MyUe7tIEWHc",
+    "file": "ADCC2022-88kg.py",
+    "matches": [
+      {
+        "athlete": "Vagner Rocha",
+        "year": 2022,
+        "opponent": "Isaac Mitchell",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Vagner Rocha",
+        "method": "Decision",
+        "start": "0:00",
+        "seconds": 0
+      },
+      {
+        "athlete": "Owen Flanagan",
+        "year": 2022,
+        "opponent": "Santeri Lilius",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Eoghan O'Flanagan",
+        "method": "Points",
+        "start": "1:01:46",
+        "seconds": 3706
+      },
+      {
+        "athlete": "Mason Fowler",
+        "year": 2022,
+        "opponent": "De Jesus",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Mason Fowler",
+        "method": "Submission (Guillotine)",
+        "start": "1:16:29",
+        "seconds": 4589
+      },
+      {
+        "athlete": "Matheus Diniz",
+        "year": 2022,
+        "opponent": "Opponent",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Matheus Diniz",
+        "method": "Points",
+        "start": "1:30:57",
+        "seconds": 5457
+      },
+      {
+        "athlete": "Jay Rodriguez",
+        "year": 2022,
+        "opponent": "Jay Rodriguez",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Mourinho",
+        "method": "Points",
+        "start": "1:40:33",
+        "seconds": 6033
+      },
+      {
+        "athlete": "Josh Hinger",
+        "year": 2022,
+        "opponent": "Tye Ruotolo",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Josh Hinger",
+        "method": "Points",
+        "start": "22:17",
+        "seconds": 1337
+      },
+      {
+        "athlete": "Giancarlo Bodoni [2:01:54]",
+        "year": 2022,
+        "opponent": "Matheus Diniz",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Giancarlo Bodoni",
+        "method": "Submission (Triangle Choke)",
+        "start": "2:01:54",
+        "seconds": 7314
+      },
+      {
+        "athlete": "Lucas 'Hulk' Barbosa [2:10:33]",
+        "year": 2022,
+        "opponent": "Josh Hinger",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Lucas Barbosa",
+        "method": "Points",
+        "start": "2:10:33",
+        "seconds": 7833
+      },
+      {
+        "athlete": "Vagner Rocha [2:22:22]",
+        "year": 2022,
+        "opponent": "Pedro Marinho",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Vagner Rocha",
+        "method": "Decision",
+        "start": "2:22:22",
+        "seconds": 8542
+      },
+      {
+        "athlete": "Giancarlo Bodoni [2:37:24]",
+        "year": 2022,
+        "opponent": "Owen Flanagan",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Giancarlo Bodoni",
+        "method": "Submission (Estima Lock)",
+        "start": "2:37:24",
+        "seconds": 9444
+      },
+      {
+        "athlete": "Vagner Rocha [2:42:41]",
+        "year": 2022,
+        "opponent": "Vagner Rocha",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Lucas Barbosa",
+        "method": "Decision",
+        "start": "2:42:41",
+        "seconds": 9761
+      },
+      {
+        "athlete": "Giancarlo Bodoni",
+        "year": 2022,
+        "opponent": "Isaque Bahiense",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Giancarlo Bodoni",
+        "method": "Points",
+        "start": "36:20",
+        "seconds": 2180
+      },
+      {
+        "athlete": "Vagner Rocha [3:01:18]",
+        "year": 2022,
+        "opponent": "Owen Flanagan",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Vagner Rocha",
+        "method": "Submission (Toe Hold)",
+        "start": "3:01:18",
+        "seconds": 10878
+      },
+      {
+        "athlete": "Giancarlo Bodoni [3:19:03]",
+        "year": 2022,
+        "opponent": "Lucas Barbosa",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Giancarlo Bodoni",
+        "method": "Submission (RNC)",
+        "start": "3:19:03",
+        "seconds": 11943
+      },
+      {
+        "athlete": "Lucas 'Hulk' Barbosa",
+        "year": 2022,
+        "opponent": "Santeri Lilius",
+        "event": "ADCC 2022 - 88kg",
+        "winner": "Lucas Barbosa",
+        "method": "Points",
+        "start": "49:34",
+        "seconds": 2974
+      }
+    ]
+  },
+  "ADCC2022-99kg": {
+    "event_title": "ADCC 2022 (-99kg)",
+    "video_url": "https://www.youtube.com/watch?v=Lorr3RBNwFw",
+    "file": "ADCC2022-99kg.py",
+    "matches": [
+      {
+        "athlete": "Nicholas Meregali",
+        "year": 2022,
+        "opponent": "Henrique Ceconi",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Nicholas Meregali",
+        "method": "Submission (Kimura)",
+        "start": "16:24",
+        "seconds": 984
+      },
+      {
+        "athlete": "Kyle Boehm",
+        "year": 2022,
+        "opponent": "Devonte Johnson",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Kyle Boehm",
+        "method": "Decision",
+        "start": "1:24:43",
+        "seconds": 5083
+      },
+      {
+        "athlete": "Rafael Lovato Jr.",
+        "year": 2022,
+        "opponent": "Perttu Tepponen",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Rafael Lovato Jr.",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "1:29:35",
+        "seconds": 5375
+      },
+      {
+        "athlete": "Craig Jones vs Kyle Boehm QF",
+        "year": 2022,
+        "opponent": "Kyle Boehm",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Craig Jones",
+        "method": "Submission (Guillotine)",
+        "start": "1:41:52",
+        "seconds": 6112
+      },
+      {
+        "athlete": "Elder Cruz",
+        "year": 2022,
+        "opponent": "Santeri Lilius",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Elder Cruz",
+        "method": "Decision",
+        "start": "28:41",
+        "seconds": 1721
+      },
+      {
+        "athlete": "Kaynan Duarte vs Rafael Lovato Jr. SF",
+        "year": 2022,
+        "opponent": "Rafael Lovato Jr.",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Kaynan Duarte",
+        "method": "Decision",
+        "start": "2:15:47",
+        "seconds": 8147
+      },
+      {
+        "athlete": "Craig Jones vs Nicholas Meregali SF",
+        "year": 2022,
+        "opponent": "Nicholas Meregali",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Craig Jones",
+        "method": "Decision",
+        "start": "2:40:57",
+        "seconds": 9657
+      },
+      {
+        "athlete": "Rafael Lovato Jr. vs Nicholas Meregali BM",
+        "year": 2022,
+        "opponent": "Rafael Lovato Jr.",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Nicholas Meregali",
+        "method": "Decision",
+        "start": "2:53:23",
+        "seconds": 10403
+      },
+      {
+        "athlete": "Kaynan Duarte vs Craig Jones Finals",
+        "year": 2022,
+        "opponent": "Craig Jones",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Kaynan Duarte",
+        "method": "Decision",
+        "start": "3:23:17",
+        "seconds": 12197
+      },
+      {
+        "athlete": "Vinicius Trator",
+        "year": 2022,
+        "opponent": "Paul Ardila",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Vinicius Trator",
+        "method": "Decision",
+        "start": "41:21",
+        "seconds": 2481
+      },
+      {
+        "athlete": "Kaynan Duarte",
+        "year": 2022,
+        "opponent": "Owen",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Kaynan Duarte",
+        "method": "Points",
+        "start": "4:07",
+        "seconds": 247
+      },
+      {
+        "athlete": "Yuri Simoes",
+        "year": 2022,
+        "opponent": "Luke Griffith",
+        "event": "ADCC 2022 -99kg",
+        "winner": "Yuri Simoes",
+        "method": "Decision",
+        "start": "53:07",
+        "seconds": 3187
+      }
+    ]
+  },
+  "ADCC2022-ABS": {
+    "event_title": "ADCC 2022 (Absolute)",
+    "video_url": "https://www.youtube.com/watch?v=9Bmb-ReK3AY",
+    "file": "ADCC2022-ABS.py",
+    "matches": [
+      {
+        "athlete": "Felipe Pena",
+        "year": 2022,
+        "opponent": "Roberto Jimenez",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Felipe Pena",
+        "method": "Points",
+        "start": "1:11:16",
+        "seconds": 4276
+      },
+      {
+        "athlete": "Lachlan Giles",
+        "year": 2022,
+        "opponent": "Lachlan Giles",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Yuri Simoes",
+        "method": "DQ",
+        "start": "1:12:21",
+        "seconds": 4341
+      },
+      {
+        "athlete": "Cyborg [1:35:45]",
+        "year": 2022,
+        "opponent": "Victor Hugo",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Cyborg Abreu",
+        "method": "Points",
+        "start": "1:35:45",
+        "seconds": 5745
+      },
+      {
+        "athlete": "Nicholas Meregali",
+        "year": 2022,
+        "opponent": "Giancarlo Bodoni",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Nicholas Meregali",
+        "method": "Points",
+        "start": "1:47:20",
+        "seconds": 6440
+      },
+      {
+        "athlete": "Nick Rodriguez",
+        "year": 2022,
+        "opponent": "Andy Varela",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Nick Rodriguez",
+        "method": "Points",
+        "start": "22:30",
+        "seconds": 1350
+      },
+      {
+        "athlete": "Nick Rodriguez [2:01:30]",
+        "year": 2022,
+        "opponent": "Nick Rodriguez",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Yuri Simoes",
+        "method": "Decision",
+        "start": "2:01:30",
+        "seconds": 7290
+      },
+      {
+        "athlete": "Cyborg [2:28:42]",
+        "year": 2022,
+        "opponent": "Cyborg",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Yuri Simoes",
+        "method": "Points",
+        "start": "2:28:42",
+        "seconds": 8922
+      },
+      {
+        "athlete": "Nicholas Meregali [2:43:26]",
+        "year": 2022,
+        "opponent": "Tye Ruotolo",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Nicholas Meregali",
+        "method": "Decision",
+        "start": "2:43:26",
+        "seconds": 9806
+      },
+      {
+        "athlete": "Nicholas Meregali [3:03:22]",
+        "year": 2022,
+        "opponent": "Nicholas Meregali",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Yuri Simoes",
+        "method": "DQ",
+        "start": "3:03:22",
+        "seconds": 11002
+      },
+      {
+        "athlete": "Cyborg",
+        "year": 2022,
+        "opponent": "Elder Cruz",
+        "event": "ADCC 2022 - Absolute",
+        "winner": "Cyborg Abreu",
+        "method": "Points",
+        "start": "47:33",
+        "seconds": 2853
+      }
+    ]
+  },
+  "ADCC2022-Finals": {
+    "event_title": "ADCC 2022 (Finals)",
+    "video_url": "https://www.youtube.com/watch?v=RZ1UPMN7FNQ",
+    "file": "ADCC2022-Finals.py",
+    "matches": [
+      {
+        "athlete": "Kaynan Duarte",
+        "year": 2022,
+        "opponent": "Craig Jones",
+        "event": "ADCC 2022 - Finals",
+        "winner": "Kaynan Duarte",
+        "method": "Points",
+        "start": "14:45",
+        "seconds": 885
+      },
+      {
+        "athlete": "Kade Ruotolo",
+        "year": 2022,
+        "opponent": "Mica Galvão",
+        "event": "ADCC 2022 - Finals",
+        "winner": "Kade Ruotolo",
+        "method": "Submission (Heel Hook)",
+        "start": "1:07:20",
+        "seconds": 4040
+      },
+      {
+        "athlete": "Diogo Reis",
+        "year": 2022,
+        "opponent": "Gabriel Sousa",
+        "event": "ADCC 2022 - Finals",
+        "winner": "Diogo Reis",
+        "method": "Points",
+        "start": "1:29:11",
+        "seconds": 5351
+      },
+      {
+        "athlete": "Ffion Davies",
+        "year": 2022,
+        "opponent": "Brianna Ste-Marie",
+        "event": "ADCC 2022 - Finals",
+        "winner": "Ffion Davies",
+        "method": "Points",
+        "start": "2:00:40",
+        "seconds": 7240
+      },
+      {
+        "athlete": "Amy Campo",
+        "year": 2022,
+        "opponent": "Rafaela Guedes",
+        "event": "ADCC 2022 - Finals",
+        "winner": "Amy Campo",
+        "method": "Points",
+        "start": "2:29:10",
+        "seconds": 8950
+      }
+    ]
+  },
+  "ADCC2022Women": {
+    "event_title": "ADCC 2022 (Women)",
+    "video_url": "https://www.youtube.com/watch?v=n_dkNnfjx4s",
+    "file": "ADCC2022Women.py",
+    "matches": [
+      {
+        "athlete": "Bia Mesquita vs Mayssa Bastos",
+        "year": 2022,
+        "opponent": "Mayssa Bastos",
+        "event": "ADCC 2022 - Women",
+        "winner": "Bia Mesquita",
+        "method": "Decision",
+        "start": "0:02",
+        "seconds": 2
+      },
+      {
+        "athlete": "Bianca Basilio vs Julia Maele",
+        "year": 2022,
+        "opponent": "Julia Maele",
+        "event": "ADCC 2022 - Women",
+        "winner": "Bianca Basilio",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "19:25",
+        "seconds": 1165
+      },
+      {
+        "athlete": "Ffion Davies vs Bia Mesquita",
+        "year": 2022,
+        "opponent": "Bia Mesquita",
+        "event": "ADCC 2022 - Women",
+        "winner": "Ffion Davies",
+        "method": "Points",
+        "start": "1:00:22",
+        "seconds": 3622
+      },
+      {
+        "athlete": "Bia Mesquita vs Bianca Basilio Bronze",
+        "year": 2022,
+        "opponent": "Bianca Basilio",
+        "event": "ADCC 2022 - Women",
+        "winner": "Bia Mesquita",
+        "method": "Submission",
+        "start": "1:13:39",
+        "seconds": 4419
+      },
+      {
+        "athlete": "Brianna Ste-Marie vs Ffion Davies Final",
+        "year": 2022,
+        "opponent": "Brianna Ste-Marie",
+        "event": "ADCC 2022 - Women",
+        "winner": "Ffion Davies",
+        "method": "Decision",
+        "start": "1:20:11",
+        "seconds": 4811
+      },
+      {
+        "athlete": "Kendall Reusing vs Jara",
+        "year": 2022,
+        "opponent": "Jara",
+        "event": "ADCC 2022 - Women",
+        "winner": "Kendall Reusing",
+        "method": "Submission (Guillotine)",
+        "start": "1:47:08",
+        "seconds": 6428
+      },
+      {
+        "athlete": "Elizabeth Clay vs Amy Campo",
+        "year": 2022,
+        "opponent": "Elizabeth Clay",
+        "event": "ADCC 2022 - Women",
+        "winner": "Amy Campo",
+        "method": "Decision",
+        "start": "1:57:22",
+        "seconds": 7042
+      },
+      {
+        "athlete": "Raphaela Guedes vs Althea",
+        "year": 2022,
+        "opponent": "Althea",
+        "event": "ADCC 2022 - Women",
+        "winner": "Raphaela Guedes",
+        "method": "Points",
+        "start": "2:27:33",
+        "seconds": 8853
+      },
+      {
+        "athlete": "Amy Campo vs Gabi Garcia",
+        "year": 2022,
+        "opponent": "Gabi Garcia",
+        "event": "ADCC 2022 - Women",
+        "winner": "Amy Campo",
+        "method": "Decision",
+        "start": "2:47:08",
+        "seconds": 10028
+      },
+      {
+        "athlete": "Amy Campo vs Raphaela Guedes Final",
+        "year": 2022,
+        "opponent": "Raphaela Guedes",
+        "event": "ADCC 2022 - Women",
+        "winner": "Amy Campo",
+        "method": "Decision",
+        "start": "3:05:08",
+        "seconds": 11108
+      },
+      {
+        "athlete": "Brianna Ste-Marie vs Bianca Basilio",
+        "year": 2022,
+        "opponent": "Bianca Basilio",
+        "event": "ADCC 2022 - Women",
+        "winner": "Brianna Ste-Marie",
+        "method": "Decision",
+        "start": "46:47",
+        "seconds": 2807
+      }
+    ]
+  },
+  "ADCC2024+99kg": {
+    "event_title": "ADCC 2024 (+99kg)",
+    "video_url": "https://www.youtube.com/watch?v=hF7HSiZveoA",
+    "file": "ADCC2024+99kg.py",
+    "matches": [
+      {
+        "athlete": "Felipe Pena vs Brandon Reed",
+        "year": 2024,
+        "opponent": "Brandon Reed",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Felipe Pena",
+        "method": "Submission",
+        "start": "0:02",
+        "seconds": 2
+      },
+      {
+        "athlete": "Victor Onario vs Heisen Rita",
+        "year": 2024,
+        "opponent": "Victor Onario",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Heisen Rita",
+        "method": "Decision",
+        "start": "109:16",
+        "seconds": 6556
+      },
+      {
+        "athlete": "John Hansen vs Jusela",
+        "year": 2024,
+        "opponent": "Jusela",
+        "event": "ADCC 2024 +99kg",
+        "winner": "John Hansen",
+        "method": "Decision",
+        "start": "11:07",
+        "seconds": 667
+      },
+      {
+        "athlete": "Daniel Manosu vs Mark McQueen",
+        "year": 2024,
+        "opponent": "Mark McQueen",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Daniel Manosu",
+        "method": "Decision",
+        "start": "129:52",
+        "seconds": 7792
+      },
+      {
+        "athlete": "Felipe Pena vs John Hansen QF",
+        "year": 2024,
+        "opponent": "John Hansen",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Felipe Pena",
+        "method": "Decision",
+        "start": "137:37",
+        "seconds": 8257
+      },
+      {
+        "athlete": "Josh Saunders vs Damon Ramos QF",
+        "year": 2024,
+        "opponent": "Damon Ramos",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Josh Saunders",
+        "method": "Decision",
+        "start": "143:31",
+        "seconds": 8611
+      },
+      {
+        "athlete": "Heisen Rita vs Daniel Manosu SF",
+        "year": 2024,
+        "opponent": "Heisen Rita",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Daniel Manosu",
+        "method": "Decision",
+        "start": "144:35",
+        "seconds": 8675
+      },
+      {
+        "athlete": "Josh Saunders vs Felipe Pena SF",
+        "year": 2024,
+        "opponent": "Josh Saunders",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Felipe Pena",
+        "method": "Decision (Negative Points)",
+        "start": "196:46",
+        "seconds": 11806
+      },
+      {
+        "athlete": "Josh Saunders vs Daniel Manosu Bronze",
+        "year": 2024,
+        "opponent": "Josh Saunders",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Daniel Manosu",
+        "method": "Submission (Heel Hook)",
+        "start": "217:49",
+        "seconds": 13069
+      },
+      {
+        "athlete": "Luke Griffith vs Felipe Pena Finals",
+        "year": 2024,
+        "opponent": "Luke Griffith",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Felipe Pena",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "219:59",
+        "seconds": 13199
+      },
+      {
+        "athlete": "Vinicius Magalis vs Damon Ramos",
+        "year": 2024,
+        "opponent": "Vinicius Magalis",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Damon Ramos",
+        "method": "Decision",
+        "start": "26:27",
+        "seconds": 1587
+      },
+      {
+        "athlete": "Josh Saunders vs Michael Perez",
+        "year": 2024,
+        "opponent": "Michael Perez",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Josh Saunders",
+        "method": "Points",
+        "start": "42:59",
+        "seconds": 2579
+      },
+      {
+        "athlete": "Roosevelt Souza vs Vince Pizuto",
+        "year": 2024,
+        "opponent": "Vince Pizuto",
+        "event": "ADCC 2024 +99kg",
+        "winner": "Roosevelt Souza",
+        "method": "Points",
+        "start": "57:18",
+        "seconds": 3438
+      }
+    ]
+  },
+  "ADCC2024-ABS": {
+    "event_title": "ADCC 2024 (Absolute)",
+    "video_url": "https://www.youtube.com/watch?v=mvxE73j-Njc",
+    "file": "ADCC2024-ABS.py",
+    "matches": [
+      {
+        "athlete": "Diogo P. Oliva",
+        "year": 2024,
+        "opponent": "Diogo P. Oliva",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Kaynan Duarte",
+        "method": "Submission (RNC)",
+        "start": "0:17",
+        "seconds": 17
+      },
+      {
+        "athlete": "Joao H.",
+        "year": 2024,
+        "opponent": "Joao H.",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Declan Moody",
+        "method": "Submission (RNC)",
+        "start": "0:51",
+        "seconds": 51
+      },
+      {
+        "athlete": "Vagner Rocha",
+        "year": 2024,
+        "opponent": "Fabricio Andrey",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Vagner Rocha",
+        "method": "Decision",
+        "start": "16:42",
+        "seconds": 1002
+      },
+      {
+        "athlete": "Giancarlo Bodoni [1:02:09]",
+        "year": 2024,
+        "opponent": "Vagner Rocha",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Giancarlo Bodoni",
+        "method": "Submission (RNC)",
+        "start": "1:02:09",
+        "seconds": 3729
+      },
+      {
+        "athlete": "Roberto 'Cyborg' Abreu [1:03:48]",
+        "year": 2024,
+        "opponent": "Elder Cruz",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Cyborg Abreu",
+        "method": "Points",
+        "start": "1:03:48",
+        "seconds": 3828
+      },
+      {
+        "athlete": "Hailey Gettys [1:10:22]",
+        "year": 2024,
+        "opponent": "Hailey Gettys",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Adele Fornarino",
+        "method": "Submission (Kneebar)",
+        "start": "1:10:22",
+        "seconds": 4222
+      },
+      {
+        "athlete": "Bia Mesquita",
+        "year": 2024,
+        "opponent": "Amy Campo",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Bia Mesquita",
+        "method": "Points",
+        "start": "1:10:30",
+        "seconds": 4230
+      },
+      {
+        "athlete": "Dante Leon [1:11:34]",
+        "year": 2024,
+        "opponent": "Mica Galvao",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Dante Leon",
+        "method": "Submission (Ankle Lock)",
+        "start": "1:11:34",
+        "seconds": 4294
+      },
+      {
+        "athlete": "Kaynan Duarte",
+        "year": 2024,
+        "opponent": "Dean Moody",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Kaynan Duarte",
+        "method": "Submission (Guillotine)",
+        "start": "1:11:34",
+        "seconds": 4294
+      },
+      {
+        "athlete": "Elder Cruz",
+        "year": 2024,
+        "opponent": "Elder Cruz",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Mica Galvao",
+        "method": "Submission (RNC)",
+        "start": "1:17",
+        "seconds": 77
+      },
+      {
+        "athlete": "Roberto 'Cyborg' Abreu [1:26:33]",
+        "year": 2024,
+        "opponent": "Giancarlo Bodoni",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Cyborg Abreu",
+        "method": "Points",
+        "start": "1:26:33",
+        "seconds": 5193
+      },
+      {
+        "athlete": "Dante Leon [1:55:06]",
+        "year": 2024,
+        "opponent": "Giancarlo Bodoni",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Dante Leon",
+        "method": "Decision",
+        "start": "1:55:06",
+        "seconds": 6906
+      },
+      {
+        "athlete": "Dante Leon",
+        "year": 2024,
+        "opponent": "Mike Perez",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Dante Leon",
+        "method": "Decision",
+        "start": "23:32",
+        "seconds": 1412
+      },
+      {
+        "athlete": "Adele Fornarino [2:28:47]",
+        "year": 2024,
+        "opponent": "Bia Mesquita",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Adele Fornarino",
+        "method": "Points",
+        "start": "2:28:47",
+        "seconds": 8927
+      },
+      {
+        "athlete": "Kaynan Duarte [2:46:54]",
+        "year": 2024,
+        "opponent": "Roberto 'Cyborg' Abreu",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Kaynan Duarte",
+        "method": "Submission (Guillotine)",
+        "start": "2:46:54",
+        "seconds": 10014
+      },
+      {
+        "athlete": "Giancarlo Bodoni",
+        "year": 2024,
+        "opponent": "Damon Ramos",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Giancarlo Bodoni",
+        "method": "Points",
+        "start": "2:53",
+        "seconds": 173
+      },
+      {
+        "athlete": "Hailey Gettys",
+        "year": 2024,
+        "opponent": "Bianca Basilio",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Rafaela Guedes",
+        "method": "Points",
+        "start": "37:06",
+        "seconds": 2226
+      },
+      {
+        "athlete": "Roberto 'Cyborg' Abreu",
+        "year": 2024,
+        "opponent": "Luis Paulo",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Cyborg Abreu",
+        "method": "Points",
+        "start": "37:14",
+        "seconds": 2234
+      },
+      {
+        "athlete": "Isaac Michelle",
+        "year": 2024,
+        "opponent": "Ryan Atkin",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Izaak Michell",
+        "method": "Points",
+        "start": "37:18",
+        "seconds": 2238
+      },
+      {
+        "athlete": "Adele Fornarino",
+        "year": 2024,
+        "opponent": "Brianna Ste-Marie",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Adele Fornarino",
+        "method": "Submission (Armbar)",
+        "start": "38:51",
+        "seconds": 2331
+      },
+      {
+        "athlete": "Gordon Ryan",
+        "year": 2024,
+        "opponent": "Yuri Simoes",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Gordon Ryan",
+        "method": "Points",
+        "start": "3:00:34",
+        "seconds": 10834
+      },
+      {
+        "athlete": "Amanda Leve",
+        "year": 2024,
+        "opponent": "Amanda Leve",
+        "event": "ADCC 2024 - Absolute",
+        "winner": "Amy Campo",
+        "method": "Points",
+        "start": "40:39",
+        "seconds": 2439
+      }
+    ]
+  },
+  "ADCCTrials2022SouthAmericaFinals": {
+    "event_title": "ADCC Trials 2022 (South America Finals)",
+    "video_url": "https://www.youtube.com/watch?v=nDc0L96J6i4",
+    "file": "ADCCTrials2022SouthAmericaFinals.py",
+    "matches": [
+      {
+        "athlete": "Diego P vs Joo Hayes",
+        "year": 2022,
+        "opponent": "Diego P",
+        "event": "ADCC Trials 2022 South America - Finals",
+        "winner": "Joo Hayes",
+        "method": "Decision",
+        "start": "0:00",
+        "seconds": 0
+      },
+      {
+        "athlete": "Majid H vs Miki Galva",
+        "year": 2022,
+        "opponent": "Majid H",
+        "event": "ADCC Trials 2022 South America - Finals",
+        "winner": "Miki Galva",
+        "method": "Submission (Triangle Choke)",
+        "start": "13:21",
+        "seconds": 801
+      },
+      {
+        "athlete": "Claudio Kalasan vs Isaki Bayan",
+        "year": 2022,
+        "opponent": "Claudio Kalasan",
+        "event": "ADCC Trials 2022 South America - Finals",
+        "winner": "Isaki Bayan",
+        "method": "Decision",
+        "start": "16:11",
+        "seconds": 971
+      },
+      {
+        "athlete": "Joel Costa vs Enrique Cardoo",
+        "year": 2022,
+        "opponent": "Enrique Cardoo",
+        "event": "ADCC Trials 2022 South America - Finals",
+        "winner": "Joel Costa",
+        "method": "Decision",
+        "start": "26:08",
+        "seconds": 1568
+      },
+      {
+        "athlete": "Roosevelt Silva vs Pedro Alex",
+        "year": 2022,
+        "opponent": "Pedro Alex",
+        "event": "ADCC Trials 2022 South America - Finals",
+        "winner": "Roosevelt Silva",
+        "method": "Submission",
+        "start": "44:21",
+        "seconds": 2661
+      },
+      {
+        "athlete": "Gina Size vs Diana Tato",
+        "year": 2022,
+        "opponent": "Gina Size",
+        "event": "ADCC Trials 2022 South America - Finals",
+        "winner": "Diana Tato",
+        "method": "Decision",
+        "start": "47:31",
+        "seconds": 2851
+      },
+      {
+        "athlete": "Larissa Seo vs Rebecca Azavedo",
+        "year": 2022,
+        "opponent": "Larissa Seo",
+        "event": "ADCC Trials 2022 South America - Finals",
+        "winner": "Rebecca Azavedo",
+        "method": "Submission",
+        "start": "57:09",
+        "seconds": 3429
+      }
+    ]
+  },
+  "ADCCTrials2023EastCoastFinals": {
+    "event_title": "ADCC Trials 2023 (East Coast Finals)",
+    "video_url": "https://www.youtube.com/watch?v=loMqIK8s9a4",
+    "file": "ADCCTrials2023EastCoastFinals.py",
+    "matches": [
+      {
+        "athlete": "Paul Ardila vs Alex Grandy",
+        "year": 2023,
+        "opponent": "Alex Grandy",
+        "event": "ADCC Trials 2023 East Coast - Finals",
+        "winner": "Paul Ardila",
+        "method": "Submission (Heel Hook)",
+        "start": "16:48",
+        "seconds": 1008
+      },
+      {
+        "athlete": "Amanda Levy vs Bridget",
+        "year": 2023,
+        "opponent": "Bridget",
+        "event": "ADCC Trials 2023 East Coast - Finals",
+        "winner": "Amanda Levy",
+        "method": "RNC",
+        "start": "25:54",
+        "seconds": 1554
+      },
+      {
+        "athlete": "Helena Crevar vs Mo Black",
+        "year": 2023,
+        "opponent": "Helena Crevar",
+        "event": "ADCC Trials 2023 East Coast - Finals",
+        "winner": "Mo Black",
+        "method": "Decision",
+        "start": "31:33",
+        "seconds": 1893
+      },
+      {
+        "athlete": "Jasmine Rocha vs Alex Enriquez",
+        "year": 2023,
+        "opponent": "Jasmine Rocha",
+        "event": "ADCC Trials 2023 East Coast - Finals",
+        "winner": "Alex Enriquez",
+        "method": "Decision",
+        "start": "43:23",
+        "seconds": 2603
+      },
+      {
+        "athlete": "Elder Cruz vs Jacob Couch",
+        "year": 2023,
+        "opponent": "Elder Cruz",
+        "event": "ADCC Trials 2023 East Coast - Finals",
+        "winner": "Jacob Couch",
+        "method": "Submission (Heel Hook)",
+        "start": "62:45",
+        "seconds": 3765
+      },
+      {
+        "athlete": "Dan Manasoiu vs Damon Ramos",
+        "year": 2023,
+        "opponent": "Damon Ramos",
+        "event": "ADCC Trials 2023 East Coast - Finals",
+        "winner": "Dan Manasoiu",
+        "method": "smother",
+        "start": "6:15",
+        "seconds": 375
+      },
+      {
+        "athlete": "Nikki Ryan vs Elijah Dorsey",
+        "year": 2023,
+        "opponent": "Nikki Ryan",
+        "event": "ADCC Trials 2023 East Coast - Finals",
+        "winner": "Elijah Dorsey",
+        "method": "Decision",
+        "start": "71:42",
+        "seconds": 4302
+      },
+      {
+        "athlete": "Dorian Olivarez vs Dominic Mahia",
+        "year": 2023,
+        "opponent": "Dominic Mahia",
+        "event": "ADCC Trials 2023 East Coast - Finals",
+        "winner": "Dorian Olivarez",
+        "method": "north south choke",
+        "start": "90:35",
+        "seconds": 5435
+      }
+    ]
+  },
+  "ADCCTrials2023EastCoastSemifinals": {
+    "event_title": "ADCC Trials 2023 (East Coast Semifinals)",
+    "video_url": "https://www.youtube.com/watch?v=WCz5jauTn4M",
+    "file": "ADCCTrials2023EastCoastSemifinals.py",
+    "matches": [
+      {
+        "athlete": "Dan Manasoiu vs Amir Alam",
+        "year": 2023,
+        "opponent": "Amir Alam",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Dan Manasoiu",
+        "method": "Submission (Arm Triangle)",
+        "start": "0:17",
+        "seconds": 17
+      },
+      {
+        "athlete": "Amanda Levy vs Britney Elin",
+        "year": 2023,
+        "opponent": "Britney Elin",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Amanda Levy",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "16:35",
+        "seconds": 995
+      },
+      {
+        "athlete": "M. Le vs Foster",
+        "year": 2023,
+        "opponent": "Foster",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "M. Le",
+        "method": "Decision",
+        "start": "19:24",
+        "seconds": 1164
+      },
+      {
+        "athlete": "Dorian Olivarez vs Ethan Kinston",
+        "year": 2023,
+        "opponent": "Ethan Kinston",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Dorian Olivarez",
+        "method": "Decision",
+        "start": "1:00:22",
+        "seconds": 3622
+      },
+      {
+        "athlete": "Helena Crevar vs Alen O'Connell",
+        "year": 2023,
+        "opponent": "Alen O'Connell",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Helena Crevar",
+        "method": "Submission",
+        "start": "29:22",
+        "seconds": 1762
+      },
+      {
+        "athlete": "Mo Black vs Sophia Delgado",
+        "year": 2023,
+        "opponent": "Sophia Delgado",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Mo Black",
+        "method": "Submission",
+        "start": "31:35",
+        "seconds": 1895
+      },
+      {
+        "athlete": "Devonte Johnson vs Alex Grandy",
+        "year": 2023,
+        "opponent": "Devonte Johnson",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Alex Grandy",
+        "method": "Decision",
+        "start": "3:41",
+        "seconds": 221
+      },
+      {
+        "athlete": "Jasmine Rocha vs Fay",
+        "year": 2023,
+        "opponent": "Fay",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Jasmine Rocha",
+        "method": "Submission",
+        "start": "40:35",
+        "seconds": 2435
+      },
+      {
+        "athlete": "William Tackett vs Elder Cruz",
+        "year": 2023,
+        "opponent": "William Tackett",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Elder Cruz",
+        "method": "Points",
+        "start": "44:43",
+        "seconds": 2683
+      },
+      {
+        "athlete": "Nikki Ryan vs Kieran Kitek",
+        "year": 2023,
+        "opponent": "Kieran Kitek",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Nikki Ryan",
+        "method": "Submission",
+        "start": "52:00",
+        "seconds": 3120
+      },
+      {
+        "athlete": "Oliver Taza vs Elijah Dorsey",
+        "year": 2023,
+        "opponent": "Oliver Taza",
+        "event": "ADCC Trials 2023 East Coast - Semifinals",
+        "winner": "Elijah Dorsey",
+        "method": "Decision",
+        "start": "56:00",
+        "seconds": 3360
+      }
+    ]
+  },
+  "ADCCTrials2024WestCoastFinals": {
+    "event_title": "ADCC Trials 2024 (West Coast Finals)",
+    "video_url": "https://www.youtube.com/watch?v=_MfGk9NMy0U",
+    "file": "ADCCTrials2024WestCoastFinals.py",
+    "matches": [
+      {
+        "athlete": "Mike Perez vs Vince Pizuto",
+        "year": 2024,
+        "opponent": "Vince Pizuto",
+        "event": "ADCC Trials 2024 West Coast - Finals",
+        "winner": "Mike Perez",
+        "method": "Submission (Guillotine)",
+        "start": "0:19",
+        "seconds": 19
+      },
+      {
+        "athlete": "Jasmine Rocha vs Alex Enriquez",
+        "year": 2024,
+        "opponent": "Alex Enriquez",
+        "event": "ADCC Trials 2024 West Coast - Finals",
+        "winner": "Jasmine Rocha",
+        "method": "Decision",
+        "start": "1:06:27",
+        "seconds": 3987
+      },
+      {
+        "athlete": "William Tackett vs Jacob Rodriguez",
+        "year": 2024,
+        "opponent": "Jacob Rodriguez",
+        "event": "ADCC Trials 2024 West Coast - Finals",
+        "winner": "William Tackett",
+        "method": "Submission (Heel Hook)",
+        "start": "1:19:20",
+        "seconds": 4760
+      },
+      {
+        "athlete": "Andrew Tackett vs Oliver Taza",
+        "year": 2024,
+        "opponent": "Oliver Taza",
+        "event": "ADCC Trials 2024 West Coast - Finals",
+        "winner": "Andrew Tackett",
+        "method": "Decision",
+        "start": "1:28:05",
+        "seconds": 5285
+      },
+      {
+        "athlete": "DeAndre Corbe vs Keith Krikorian",
+        "year": 2024,
+        "opponent": "Keith Krikorian",
+        "event": "ADCC Trials 2024 West Coast - Finals",
+        "winner": "DeAndre Corbe",
+        "method": "Decision",
+        "start": "1:41:18",
+        "seconds": 6078
+      },
+      {
+        "athlete": "Michael Pixley vs Adam Bradley",
+        "year": 2024,
+        "opponent": "Adam Bradley",
+        "event": "ADCC Trials 2024 West Coast - Finals",
+        "winner": "Michael Pixley",
+        "method": "Decision",
+        "start": "27:45",
+        "seconds": 1665
+      },
+      {
+        "athlete": "Elizabeth Mitrovic vs Amanda Levy",
+        "year": 2024,
+        "opponent": "Amanda Levy",
+        "event": "ADCC Trials 2024 West Coast - Finals",
+        "winner": "Elizabeth Mitrovic",
+        "method": "Submission",
+        "start": "37:49",
+        "seconds": 2269
+      },
+      {
+        "athlete": "Helena Crevar vs Mo Black",
+        "year": 2024,
+        "opponent": "Mo Black",
+        "event": "ADCC Trials 2024 West Coast - Finals",
+        "winner": "Helena Crevar",
+        "method": "Decision",
+        "start": "57:17",
+        "seconds": 3437
+      }
+    ]
+  },
+  "CJI": {
+    "event_title": "CJI",
+    "video_url": "https://www.youtube.com/watch?v=IyneYOMCvI0",
+    "file": "CJI.py",
+    "matches": [
+      {
+        "athlete": "Adam Bradley",
+        "year": 2024,
+        "opponent": "Adam Bradley",
+        "event": "CJI",
+        "winner": "Nick Rodriguez",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "10:10",
+        "seconds": 610
+      },
+      {
+        "athlete": "Kyle Boehm",
+        "year": 2024,
+        "opponent": "Kyle Boehm",
+        "event": "CJI",
+        "winner": "Adam Bradley",
+        "method": "Split Decision (29-28 Bradley, 29-28 Boehm, 29-28 Bradley)",
+        "start": "1:13:58",
+        "seconds": 4438
+      },
+      {
+        "athlete": "Lucas Barbosa",
+        "year": 2024,
+        "opponent": "Lucas Barbosa",
+        "event": "CJI",
+        "winner": "Levi Jones-Leary",
+        "method": "Unanimous Decision",
+        "start": "1:14:23",
+        "seconds": 4463
+      },
+      {
+        "athlete": "Luke Rockhold",
+        "year": 2024,
+        "opponent": "Luke Rockhold",
+        "event": "CJI",
+        "winner": "Pat Downey",
+        "method": "Unanimous Decision (30-27, 30-25, 30-26)",
+        "start": "1:40:03",
+        "seconds": 6003
+      },
+      {
+        "athlete": "Kade Ruotolo",
+        "year": 2024,
+        "opponent": "Andrew Tackett",
+        "event": "CJI",
+        "winner": "Kade Ruotolo",
+        "method": "Split Decision (29-27, 29-27, 29-28)",
+        "start": "1:43:42",
+        "seconds": 6222
+      },
+      {
+        "athlete": "Max Gimenis",
+        "year": 2024,
+        "opponent": "Max Gimenis",
+        "event": "CJI",
+        "winner": "Nicky Rodriguez",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "27:14",
+        "seconds": 1634
+      },
+      {
+        "athlete": "Victor Hugo",
+        "year": 2024,
+        "opponent": "Victor Hugo",
+        "event": "CJI",
+        "winner": "Lucas Kanard",
+        "method": "Submission (Inside Heel Hook)",
+        "start": "2:14:52",
+        "seconds": 8092
+      },
+      {
+        "athlete": "Mackenzie Dern",
+        "year": 2024,
+        "opponent": "Mackenzie Dern",
+        "event": "CJI",
+        "winner": "Ffion Davies",
+        "method": "Submission (Bent Armlock)",
+        "start": "2:30:35",
+        "seconds": 9035
+      },
+      {
+        "athlete": "Daniel Kerkvliet",
+        "year": 2024,
+        "opponent": "Daniel Kerkvliet",
+        "event": "CJI",
+        "winner": "Felipe Andrew",
+        "method": "Unanimous Decision (30-27, 30-27, 30-26)",
+        "start": "2:50:26",
+        "seconds": 10226
+      },
+      {
+        "athlete": "Gabby Garcia",
+        "year": 2024,
+        "opponent": "Gabby Garcia",
+        "event": "CJI",
+        "winner": "Craig Jones",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "2:51:33",
+        "seconds": 10293
+      },
+      {
+        "athlete": "William Tackett",
+        "year": 2024,
+        "opponent": "William Tackett",
+        "event": "CJI",
+        "winner": "Joao Rocha",
+        "method": "Unanimous Decision (10-8 round 3)",
+        "start": "3:15:34",
+        "seconds": 11734
+      },
+      {
+        "athlete": "Felipe Andrew",
+        "year": 2024,
+        "opponent": "Felipe Andrew",
+        "event": "CJI",
+        "winner": "Nick Rodriguez",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "3:18:08",
+        "seconds": 11888
+      },
+      {
+        "athlete": "Levi Jones-Leary",
+        "year": 2024,
+        "opponent": "Levi Jones-Leary",
+        "event": "CJI",
+        "winner": "Kade Ruotolo",
+        "method": "Unanimous Decision (49‑46, 48‑47, 48‑47)",
+        "start": "3:30:12",
+        "seconds": 12612
+      },
+      {
+        "athlete": "Owen Livesey",
+        "year": 2024,
+        "opponent": "Owen Livesey",
+        "event": "CJI",
+        "winner": "Nicky Rodriguez",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "3:50:53",
+        "seconds": 13853
+      },
+      {
+        "athlete": "Pat Downey",
+        "year": 2024,
+        "opponent": "Pat Downey",
+        "event": "CJI",
+        "winner": "Adam Bradley",
+        "method": "Split Decision (29-28, 29-28, 29-28)",
+        "start": "3:59:53",
+        "seconds": 14393
+      },
+      {
+        "athlete": "Inacio Santos",
+        "year": 2024,
+        "opponent": "Inacio Santos",
+        "event": "CJI",
+        "winner": "Felipe Andrew",
+        "method": "Submission (Heel Hook)",
+        "start": "40:42",
+        "seconds": 2442
+      },
+      {
+        "athlete": "Mahamed Aly",
+        "year": 2024,
+        "opponent": "Mahamed Aly",
+        "event": "CJI",
+        "winner": "Owen Livesey",
+        "method": "Unanimous Decision (29-28, 30-27, 29-28)",
+        "start": "44:54",
+        "seconds": 2694
+      },
+      {
+        "athlete": "Joao Rocha",
+        "year": 2024,
+        "opponent": "Joao Rocha",
+        "event": "CJI",
+        "winner": "Felipe Andrew",
+        "method": "Unanimous Decision (30-27)",
+        "start": "4:52:19",
+        "seconds": 17539
+      },
+      {
+        "athlete": "Jason Nolf",
+        "year": 2024,
+        "opponent": "Jason Nolf",
+        "event": "CJI",
+        "winner": "Tye Ruotolo",
+        "method": "Submission (Kneebar)",
+        "start": "5:27:04",
+        "seconds": 19624
+      },
+      {
+        "athlete": "Roberto Jimenez",
+        "year": 2024,
+        "opponent": "Roberto Jimenez",
+        "event": "CJI",
+        "winner": "Levi Jones-Leary",
+        "method": "Submission (Inside Heel Hook)",
+        "start": "5:50:43",
+        "seconds": 21043
+      },
+      {
+        "athlete": "Kenta Iwamoto",
+        "year": 2024,
+        "opponent": "Kenta Iwamoto",
+        "event": "CJI",
+        "winner": "Lucas Barbosa",
+        "method": "Unanimous Decision (round 3)",
+        "start": "6:03:58",
+        "seconds": 21838
+      },
+      {
+        "athlete": "Andy Varela",
+        "year": 2024,
+        "opponent": "Andy Varela",
+        "event": "CJI",
+        "winner": "Jozef Chen",
+        "method": "Unanimous Decision (30-26, 30-27, 29-27)",
+        "start": "6:25:49",
+        "seconds": 23149
+      },
+      {
+        "athlete": "Matheus Diniz",
+        "year": 2024,
+        "opponent": "Matheus Diniz",
+        "event": "CJI",
+        "winner": "Kade Ruotolo",
+        "method": "Submission (Straight Ankle Lock / Aoki Lock)",
+        "start": "6:55:03",
+        "seconds": 24903
+      },
+      {
+        "athlete": "Magid Hage",
+        "year": 2024,
+        "opponent": "Magid Hage",
+        "event": "CJI",
+        "winner": "Eoghan O'Flanagan",
+        "method": "Submission (Outside Heel Hook)",
+        "start": "7:33:39",
+        "seconds": 27219
+      },
+      {
+        "athlete": "Nicky Ryan",
+        "year": 2024,
+        "opponent": "Nicky Ryan",
+        "event": "CJI",
+        "winner": "Andrew Tackett",
+        "method": "Unanimous Decision (30-24, 30-25, 30-25)",
+        "start": "7:42:58",
+        "seconds": 27778
+      },
+      {
+        "athlete": "Tye Ruotolo",
+        "year": 2024,
+        "opponent": "Tye Ruotolo",
+        "event": "CJI",
+        "winner": "Levi Jones-Leary",
+        "method": "Unanimous Decision (30-27, 29-28, 29-28)",
+        "start": "8:17:58",
+        "seconds": 29878
+      },
+      {
+        "athlete": "Jozeph Chen",
+        "year": 2024,
+        "opponent": "Jozeph Chen",
+        "event": "CJI",
+        "winner": "Lucas Barbosa",
+        "method": "Submission (Knee Crush / Calf Slicer)",
+        "start": "8:43:43",
+        "seconds": 31423
+      },
+      {
+        "athlete": "Jozef Chen",
+        "year": 2024,
+        "opponent": "Jozef Chen",
+        "event": "CJI",
+        "winner": "Lucas Barbosa",
+        "method": "Submission (Knee Crush / Calf Slicer)",
+        "start": "8:43:43",
+        "seconds": 31423
+      },
+      {
+        "athlete": "Tommy Langaker",
+        "year": 2024,
+        "opponent": "Tommy Langaker",
+        "event": "CJI",
+        "winner": "Kade Ruotolo",
+        "method": "Unanimous Decision (30-26, 30-26, 30-27)",
+        "start": "9:06:39",
+        "seconds": 32799
+      },
+      {
+        "athlete": "Eoghan O'Flanagan",
+        "year": 2024,
+        "opponent": "Eoghan O'Flanagan",
+        "event": "CJI",
+        "winner": "Andrew Tackett",
+        "method": "Unanimous Decision (30-26, 30-26, 30-26)",
+        "start": "9:29:50",
+        "seconds": 34190
+      }
+    ]
+  },
+  "IBJJF2023-Worlds-BlackBeltFinals": {
+    "event_title": "IBJJF 2023 (No-Gi Worlds, Black Belt Finals)",
+    "video_url": "https://www.youtube.com/watch?v=22QAtq917NI",
+    "file": "IBJJF2023-Worlds-BlackBeltFinals.py",
+    "matches": [
+      {
+        "athlete": "Maia Bastos",
+        "year": 2023,
+        "opponent": "Mariana Cabal",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Mayssa Bastos",
+        "method": "Submission (Inside Heel Hook)",
+        "start": "0:16",
+        "seconds": 16
+      },
+      {
+        "athlete": "Elizabeth Mitrovic",
+        "year": 2023,
+        "opponent": "Salli Simola",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Elizabeth Mitrovic",
+        "method": "Points",
+        "start": "1:01:58",
+        "seconds": 3718
+      },
+      {
+        "athlete": "Everton Souza",
+        "year": 2023,
+        "opponent": "Ricky Yoshinaga",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Everton Teixeira",
+        "method": "Points",
+        "start": "1:47:02",
+        "seconds": 6422
+      },
+      {
+        "athlete": "Junny Ocasio",
+        "year": 2023,
+        "opponent": "Zach Kaina",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Edwin Ocasio",
+        "method": "Advantages",
+        "start": "2:06:33",
+        "seconds": 7593
+      },
+      {
+        "athlete": "DeAndre Corban",
+        "year": 2023,
+        "opponent": "DeAndre Corban",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Lucas Valente",
+        "method": "Advantages",
+        "start": "2:43:38",
+        "seconds": 9818
+      },
+      {
+        "athlete": "Tommy Langaker",
+        "year": 2023,
+        "opponent": "Mike Perez",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Tommy Langaker",
+        "method": "Points",
+        "start": "2:58:30",
+        "seconds": 10710
+      },
+      {
+        "athlete": "David Garmo",
+        "year": 2023,
+        "opponent": "David Garmo",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Ronaldo Junior",
+        "method": "Decision",
+        "start": "3:06:20",
+        "seconds": 11180
+      },
+      {
+        "athlete": "Adam Wardzinski",
+        "year": 2023,
+        "opponent": "Adam Wardzinski",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Elder Cruz",
+        "method": "Advantages",
+        "start": "3:26:35",
+        "seconds": 12395
+      },
+      {
+        "athlete": "Vinicius Trator",
+        "year": 2023,
+        "opponent": "Javier Zazo",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Javier Zaruski",
+        "method": "Submission (Triangle)",
+        "start": "3:45:23",
+        "seconds": 13523
+      },
+      {
+        "athlete": "Ffion Davis [3:51:52]",
+        "year": 2023,
+        "opponent": "Gabby McComb",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Ffion Davies",
+        "method": "Submission (RNC)",
+        "start": "3:51:52",
+        "seconds": 13912
+      },
+      {
+        "athlete": "Ffion Davis",
+        "year": 2023,
+        "opponent": "Amanda Bruse",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Ffion Davies",
+        "method": "Points",
+        "start": "40:55",
+        "seconds": 2455
+      },
+      {
+        "athlete": "Jessa Khan",
+        "year": 2023,
+        "opponent": "Jessa Khan",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Tammi Musumeci",
+        "method": "Points",
+        "start": "4:00",
+        "seconds": 240
+      },
+      {
+        "athlete": "Gabby McComb",
+        "year": 2023,
+        "opponent": "Thamara Ferreira",
+        "event": "IBJJF 2023 Worlds - Black Belt Finals",
+        "winner": "Gabi McComb",
+        "method": "Points",
+        "start": "50:25",
+        "seconds": 3025
+      }
+    ]
+  },
+  "IBJJF2025top10": {
+    "event_title": "IBJJF 2025 (Top 10)",
+    "video_url": "https://www.youtube.com/watch?v=6Tt1tixCogw",
+    "file": "IBJJF2025top10.py",
+    "matches": [
+      {
+        "athlete": "Adam Wardzinski",
+        "year": 2025,
+        "opponent": "Roberto Jimenez",
+        "event": "IBJJF 2025 Top 10",
+        "winner": "Adam Wardzinski",
+        "method": "Points",
+        "start": "1:26:53",
+        "seconds": 5213
+      },
+      {
+        "athlete": "Raphaela Guedes",
+        "year": 2025,
+        "opponent": "Paige Ivette",
+        "event": "IBJJF 2025 Top 10",
+        "winner": "Raphaela Guedes",
+        "method": "Decision",
+        "start": "21:44",
+        "seconds": 1304
+      }
+    ]
+  },
+  "Polaris37": {
+    "event_title": "Polaris 37",
+    "video_url": "https://www.youtube.com/watch?v=TQAlgxSUivk",
+    "file": "Polaris37.py",
+    "matches": [
+      {
+        "athlete": "Ryan Mangan",
+        "year": 2024,
+        "opponent": "Rory",
+        "event": "Polaris 37",
+        "winner": "Ryan Mangan",
+        "method": "Decision",
+        "start": "0:08:37",
+        "seconds": 517
+      },
+      {
+        "athlete": "Nicholas Donnelly",
+        "year": 2024,
+        "opponent": "Jack",
+        "event": "Polaris 37",
+        "winner": "Nicholas Donnelly",
+        "method": "Decision",
+        "start": "0:31:38",
+        "seconds": 1898
+      },
+      {
+        "athlete": "George Santos",
+        "year": 2024,
+        "opponent": "Peter",
+        "event": "Polaris 37",
+        "winner": "Jorge Santos",
+        "method": "Decision",
+        "start": "0:58:14",
+        "seconds": 3494
+      },
+      {
+        "athlete": "Dylan Logan",
+        "year": 2024,
+        "opponent": "Luca Prattelli",
+        "event": "Polaris 37",
+        "winner": "Dylan Logan",
+        "method": "Submission (RNC)",
+        "start": "1:13:47",
+        "seconds": 4427
+      },
+      {
+        "athlete": "Daniel Negru",
+        "year": 2024,
+        "opponent": "Paul Redmond",
+        "event": "Polaris 37",
+        "winner": "Daniel Negru",
+        "method": "Decision",
+        "start": "1:21:29",
+        "seconds": 4889
+      },
+      {
+        "athlete": "Kieran Davin",
+        "year": 2024,
+        "opponent": "Shane Price",
+        "event": "Polaris 37",
+        "winner": "Kieran Davin",
+        "method": "Submission (Heel Hook)",
+        "start": "1:43:52",
+        "seconds": 6232
+      },
+      {
+        "athlete": "Mohammad Abdahanov",
+        "year": 2024,
+        "opponent": "Christian Osbach",
+        "event": "Polaris 37",
+        "winner": "Mohammad Abdahanov",
+        "method": "Decision",
+        "start": "1:52:01",
+        "seconds": 6721
+      },
+      {
+        "athlete": "Marcus Felen",
+        "year": 2024,
+        "opponent": "Marcus Felen",
+        "event": "Polaris 37",
+        "winner": "Nico Molition",
+        "method": "Submission (RNC)",
+        "start": "2:13:09",
+        "seconds": 7989
+      },
+      {
+        "athlete": "Martin Machvich",
+        "year": 2024,
+        "opponent": "Martin Machvich",
+        "event": "Polaris 37",
+        "winner": "Jean Luca Maltiz",
+        "method": "Decision",
+        "start": "2:37:09",
+        "seconds": 9429
+      }
+    ]
+  },
+  "SpyderKingOfKings": {
+    "event_title": "Spyder King of Kings",
+    "video_url": "https://www.youtube.com/watch?v=dQWfia0LQFQ",
+    "file": "SpyderKingOfKings.py",
+    "matches": [
+      {
+        "athlete": "Jonathan Alves",
+        "year": 2023,
+        "opponent": "J. Hill Taylor",
+        "event": "Spyder King of Kings",
+        "winner": "Johnatha Alves",
+        "method": "Submission (RNC)",
+        "start": "0:21",
+        "seconds": 21
+      },
+      {
+        "athlete": "Romulo Barral",
+        "year": 2023,
+        "opponent": "Anderson Munis",
+        "event": "Spyder King of Kings",
+        "winner": "Romulo Barral",
+        "method": "Submission (Arm Triangle)",
+        "start": "108:35",
+        "seconds": 6515
+      },
+      {
+        "athlete": "Levi Jones-Leary",
+        "year": 2023,
+        "opponent": "Gabe Arges",
+        "event": "Spyder King of Kings",
+        "winner": "Levi Jones-Leary",
+        "method": "Decision",
+        "start": "17:40",
+        "seconds": 1060
+      },
+      {
+        "athlete": "Matheus Lutes",
+        "year": 2023,
+        "opponent": "Jong-In Sung",
+        "event": "Spyder King of Kings",
+        "winner": "Matheus Lutes",
+        "method": "Points",
+        "start": "27:58",
+        "seconds": 1678
+      },
+      {
+        "athlete": "Edwin Najmi",
+        "year": 2023,
+        "opponent": "Edwin Najmi",
+        "event": "Spyder King of Kings",
+        "winner": "Matheus Gabriel",
+        "method": "Points",
+        "start": "3:15",
+        "seconds": 195
+      },
+      {
+        "athlete": "Tim Spriggs",
+        "year": 2023,
+        "opponent": "Tim Spriggs",
+        "event": "Spyder King of Kings",
+        "winner": "Nicholas Meregali",
+        "method": "Submission (Bow & Arrow Choke)",
+        "start": "40:38",
+        "seconds": 2438
+      },
+      {
+        "athlete": "Claudio Calasans",
+        "year": 2023,
+        "opponent": "Claudio Calasans",
+        "event": "Spyder King of Kings",
+        "winner": "Herberth Santos",
+        "method": "Submission (Toe Hold)",
+        "start": "45:12",
+        "seconds": 2712
+      },
+      {
+        "athlete": "Leandro Lo",
+        "year": 2023,
+        "opponent": "Leandro Lo",
+        "event": "Spyder King of Kings",
+        "winner": "Kaynan Duarte",
+        "method": "Decision",
+        "start": "56:39",
+        "seconds": 3399
+      }
+    ]
+  },
+  "UFC": {
+    "event_title": "UFC",
+    "video_url": null,
+    "file": "UFC.py",
+    "matches": [
+      {
+        "athlete": "Petr Yan",
+        "year": 2023,
+        "opponent": "Petr Yan",
+        "event": "UFC",
+        "winner": "Merab Dvalishvili",
+        "method": "Unanimous Decision (50-45)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Marcus McGee",
+        "year": 2024,
+        "opponent": "Marcus McGee",
+        "event": "UFC",
+        "winner": "Petr Yan",
+        "method": "Unanimous Decision (29-28)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Cory Sandhagen",
+        "year": 2025,
+        "opponent": "Cory Sandhagen",
+        "event": "UFC",
+        "winner": "Merab Dvalishvili",
+        "method": "Unanimous Decision (49-45, 49-45, 49-46)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Kai Kara-France",
+        "year": 2025,
+        "opponent": "Kai Kara-France",
+        "event": "UFC",
+        "winner": "Alexandre Pantoja",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Brandon Royval",
+        "year": 2025,
+        "opponent": "Brandon Royval",
+        "event": "UFC",
+        "winner": "Joshua Van",
+        "method": "Unanimous Decision (29-28, 29-28, 30-27)",
+        "start": "?",
+        "seconds": null
+      }
+    ]
+  },
+  "UFC325": {
+    "event_title": "UFC 325",
+    "video_url": "https://www.youtube.com/watch?v=PqTBCISwu7k",
+    "file": "UFC325.py",
+    "matches": [
+      {
+        "athlete": "Dan Hooker",
+        "year": 2024,
+        "opponent": "Mateusz Gamrot",
+        "event": "UFC 325",
+        "winner": "Dan Hooker",
+        "method": "Split Decision (29-28, 28-29, 29-28)",
+        "start": "42:12",
+        "seconds": 2532
+      },
+      {
+        "athlete": "Diego Lopes",
+        "year": 2025,
+        "opponent": "Jean Silva",
+        "event": "UFC 325",
+        "winner": "Diego Lopes",
+        "method": "TKO",
+        "start": "1:31:40",
+        "seconds": 5500
+      },
+      {
+        "athlete": "Benoit Saint-Denis",
+        "year": 2025,
+        "opponent": "Beneil Dariush",
+        "event": "UFC 325",
+        "winner": "Benoit Saint-Denis",
+        "method": "KO",
+        "start": "59:47",
+        "seconds": 3587
+      },
+      {
+        "athlete": "Alexander Volkanovski",
+        "year": 2026,
+        "opponent": "Diego Lopes",
+        "event": "UFC 325",
+        "winner": "Alexander Volkanovski",
+        "method": "Unanimous Decision (48-47, 49-46, 49-46)",
+        "start": "0:01",
+        "seconds": 1
+      }
+    ]
+  },
+  "WNO20": {
+    "event_title": "WNO 20",
+    "video_url": "https://www.youtube.com/watch?v=7AyoRIBXvUc",
+    "file": "WNO20.py",
+    "matches": [
+      {
+        "athlete": "R. Lovato Jr.",
+        "year": 2025,
+        "opponent": "R. Evangelista",
+        "event": "WNO 20",
+        "winner": "Rafael Lovato Jr.",
+        "method": "Submission (Triangle Choke)",
+        "start": "0:00",
+        "seconds": 0
+      },
+      {
+        "athlete": "B. Ste-Marie",
+        "year": 2025,
+        "opponent": "B. Ste-Marie",
+        "event": "WNO 20",
+        "winner": "Elisabeth Clay",
+        "method": "Decision",
+        "start": "1:15:20",
+        "seconds": 4520
+      },
+      {
+        "athlete": "D. Reis [1:32:39]",
+        "year": 2025,
+        "opponent": "G. Sousa",
+        "event": "WNO 20",
+        "winner": "Diogo Reis",
+        "method": "Decision",
+        "start": "1:32:39",
+        "seconds": 5559
+      },
+      {
+        "athlete": "R. Guedes",
+        "year": 2025,
+        "opponent": "N. Jesus",
+        "event": "WNO 20",
+        "winner": "Nathiely de Jesus",
+        "method": "Decision",
+        "start": "1:51:49",
+        "seconds": 6709
+      },
+      {
+        "athlete": "G. Sousa",
+        "year": 2025,
+        "opponent": "A. Williams",
+        "event": "WNO 20",
+        "winner": "Gabriel Sousa",
+        "method": "Submission (Kneebar)",
+        "start": "25:47",
+        "seconds": 1547
+      },
+      {
+        "athlete": "Mica Galvão [2:11:18]",
+        "year": 2025,
+        "opponent": "P. Barch",
+        "event": "WNO 20",
+        "winner": "Mica Galvão",
+        "method": "Submission (Flying Armbar)",
+        "start": "2:11:18",
+        "seconds": 7878
+      },
+      {
+        "athlete": "G. Ryan",
+        "year": 2025,
+        "opponent": "P. Gaudio",
+        "event": "WNO 20",
+        "winner": "Gordon Ryan",
+        "method": "Submission (Armbar)",
+        "start": "2:14:45",
+        "seconds": 8085
+      },
+      {
+        "athlete": "Mica Galvão",
+        "year": 2025,
+        "opponent": "J. Rodriguez",
+        "event": "WNO 20",
+        "winner": "Mica Galvão",
+        "method": "Decision",
+        "start": "38:38",
+        "seconds": 2318
+      },
+      {
+        "athlete": "A. Tackett",
+        "year": 2025,
+        "opponent": "P. Barch",
+        "event": "WNO 20",
+        "winner": "Andrew Tackett",
+        "method": "Decision",
+        "start": "56:46",
+        "seconds": 3406
+      },
+      {
+        "athlete": "D. Reis",
+        "year": 2025,
+        "opponent": "K. Krikorian",
+        "event": "WNO 20",
+        "winner": "Diogo Reis",
+        "method": "Decision",
+        "start": "8:06",
+        "seconds": 486
+      }
+    ]
+  },
+  "WNO22": {
+    "event_title": "WNO 22",
+    "video_url": "https://www.youtube.com/watch?v=hABPApjT64g",
+    "file": "WNO22.py",
+    "matches": [
+      {
+        "athlete": "Kyle Chambers",
+        "year": 2025,
+        "opponent": "Dory Auon",
+        "event": "WNO 22",
+        "winner": "Dory Aoun",
+        "method": "Decision",
+        "start": "00:00",
+        "seconds": 0
+      },
+      {
+        "athlete": "Jacob Couch",
+        "year": 2025,
+        "opponent": "Sebastian Rodriguez",
+        "event": "WNO 22",
+        "winner": "Jacob Couch",
+        "method": "Submission (Heel Hook)",
+        "start": "1:05:41",
+        "seconds": 3941
+      },
+      {
+        "athlete": "Amanda 'Tubby' Alequin",
+        "year": 2025,
+        "opponent": "Amanda 'Tubby' Alequin",
+        "event": "WNO 22",
+        "winner": "Adele Fornarino",
+        "method": "Submission (Aoki Lock)",
+        "start": "1:15:36",
+        "seconds": 4536
+      },
+      {
+        "athlete": "Tainan Dalpra",
+        "year": 2025,
+        "opponent": "Oliver Taza",
+        "event": "WNO 22",
+        "winner": "Tainan Dalpra",
+        "method": "Decision",
+        "start": "1:26:03",
+        "seconds": 5163
+      },
+      {
+        "athlete": "Dante Leon",
+        "year": 2025,
+        "opponent": "Dante Leon",
+        "event": "WNO 22",
+        "winner": "Diego Pato",
+        "method": "Submission (Heel Hook)",
+        "start": "1:53:55",
+        "seconds": 6835
+      },
+      {
+        "athlete": "Ashlee Funegra",
+        "year": 2025,
+        "opponent": "Marilyn Cruz",
+        "event": "WNO 22",
+        "winner": "Ashlee Funegra",
+        "method": "Decision",
+        "start": "25:21",
+        "seconds": 1521
+      },
+      {
+        "athlete": "Mica Galvão",
+        "year": 2025,
+        "opponent": "Kenta Iwamoto",
+        "event": "WNO 22",
+        "winner": "Mica Galvão",
+        "method": "Submission (RNC)",
+        "start": "2:15:20",
+        "seconds": 8120
+      },
+      {
+        "athlete": "Nick Rodriguez",
+        "year": 2025,
+        "opponent": "Nick Rodriguez",
+        "event": "WNO 22",
+        "winner": "Victor Hugo",
+        "method": "Decision",
+        "start": "2:41:14",
+        "seconds": 9674
+      },
+      {
+        "athlete": "Max Hanson",
+        "year": 2025,
+        "opponent": "Max Hanson",
+        "event": "WNO 22",
+        "winner": "Daniel Sathler",
+        "method": "Submission (Flying Triangle Armbar)",
+        "start": "43:53",
+        "seconds": 2633
+      },
+      {
+        "athlete": "Elijah Dorsey",
+        "year": 2025,
+        "opponent": "Ivan Herrera",
+        "event": "WNO 22",
+        "winner": "Elijah Dorsey",
+        "method": "Submission (Shoulder Lock)",
+        "start": "51:56",
+        "seconds": 3116
+      }
+    ]
+  },
+  "WNO24": {
+    "event_title": "WNO 24",
+    "video_url": "https://www.youtube.com/watch?v=tu2TiQ61Dh8",
+    "file": "WNO24.py",
+    "matches": [
+      {
+        "athlete": "Tye Ruotolo",
+        "year": 2025,
+        "opponent": "Jay Rodriguez",
+        "event": "WNO 24",
+        "winner": "Tainan Dalpra",
+        "method": "Decision",
+        "start": "1:02:15",
+        "seconds": 3735
+      },
+      {
+        "athlete": "Victor Hugo",
+        "year": 2025,
+        "opponent": "Javier Zaruski",
+        "event": "WNO 24",
+        "winner": "Victor Hugo",
+        "method": "Submission (RNC)",
+        "start": "1:28:55",
+        "seconds": 5335
+      },
+      {
+        "athlete": "Jacob Couch",
+        "year": 2025,
+        "opponent": "Jacob Couch",
+        "event": "WNO 24",
+        "winner": "Jonnatas Gracie",
+        "method": "Decision",
+        "start": "1:59:19",
+        "seconds": 7159
+      },
+      {
+        "athlete": "Jozef Chen",
+        "year": 2025,
+        "opponent": "Elijah Dorsey",
+        "event": "WNO 24",
+        "winner": "Jozef Chen",
+        "method": "Submission (RNC)",
+        "start": "20:25",
+        "seconds": 1225
+      },
+      {
+        "athlete": "Gordon Ryan",
+        "year": 2025,
+        "opponent": "Josh Saunders",
+        "event": "WNO 24",
+        "winner": "Gordon Ryan",
+        "method": "Submission (Inside Heel Hook)",
+        "start": "2:46:33",
+        "seconds": 9993
+      },
+      {
+        "athlete": "Ethan Crelinsten",
+        "year": 2025,
+        "opponent": "DeAndre Corbe",
+        "event": "WNO 24",
+        "winner": "Ethan Crelinsten",
+        "method": "Decision",
+        "start": "2:59",
+        "seconds": 179
+      },
+      {
+        "athlete": "Adele Fornarino",
+        "year": 2025,
+        "opponent": "Anna Rodriguez",
+        "event": "WNO 24",
+        "winner": "Adele Fornarino",
+        "method": "Decision",
+        "start": "42:07",
+        "seconds": 2527
+      }
+    ]
+  },
+  "WNO31": {
+    "event_title": "WNO 31",
+    "video_url": "https://www.youtube.com/watch?v=q7o5aoyy5HM",
+    "file": "WNO31.py",
+    "matches": [
+      {
+        "athlete": "Sean Magnus",
+        "year": 2025,
+        "opponent": "Sean Magnus",
+        "event": "WNO 31",
+        "winner": "Nick Fritz",
+        "method": "Submission (Heel Hook)",
+        "start": "02:23",
+        "seconds": 143
+      },
+      {
+        "athlete": "Michael Bannach",
+        "year": 2025,
+        "opponent": "Michael Bannach",
+        "event": "WNO 31",
+        "winner": "Grayson Henley",
+        "method": "Submission",
+        "start": "12:28",
+        "seconds": 748
+      },
+      {
+        "athlete": "Oliver Taza",
+        "year": 2025,
+        "opponent": "Oliver Taza",
+        "event": "WNO 31",
+        "winner": "Chris Wojcik",
+        "method": "Decision",
+        "start": "1:16:29",
+        "seconds": 4589
+      },
+      {
+        "athlete": "Gabi Pessanha",
+        "year": 2025,
+        "opponent": "Paige Ivette Clymer",
+        "event": "WNO 31",
+        "winner": "Gabi Pessanha",
+        "method": "Decision",
+        "start": "1:43:35",
+        "seconds": 6215
+      },
+      {
+        "athlete": "Katie Bochenek",
+        "year": 2025,
+        "opponent": "Katie Bochenek",
+        "event": "WNO 31",
+        "winner": "Joslyn Molina",
+        "method": "Submission (Darce Choke)",
+        "start": "21:50",
+        "seconds": 1310
+      },
+      {
+        "athlete": "Faris Ben-Lamkadem",
+        "year": 2025,
+        "opponent": "Xande Ribeiro",
+        "event": "WNO 31",
+        "winner": "Faris Ben-Lamkadem",
+        "method": "Submission",
+        "start": "2:13:02",
+        "seconds": 7982
+      },
+      {
+        "athlete": "Helena Crevar",
+        "year": 2025,
+        "opponent": "Julia Boscher",
+        "event": "WNO 31",
+        "winner": "Helena Crevar",
+        "method": "Submission (Straight Foot Lock)",
+        "start": "2:43:21",
+        "seconds": 9801
+      },
+      {
+        "athlete": "Luke Griffith",
+        "year": 2025,
+        "opponent": "Felipe Pena",
+        "event": "WNO 31",
+        "winner": "Luke Griffith",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "3:03:58",
+        "seconds": 11038
+      },
+      {
+        "athlete": "Abraham La Montagne",
+        "year": 2025,
+        "opponent": "Abraham La Montagne",
+        "event": "WNO 31",
+        "winner": "Felipe Costa",
+        "method": "Submission",
+        "start": "48:25",
+        "seconds": 2905
+      }
+    ]
+  },
+  "khabib": {
+    "event_title": "khabib",
+    "video_url": "https://www.youtube.com/watch?v=A4i6pLRF9iY",
+    "file": "khabib.py",
+    "matches": [
+      {
+        "athlete": "Kamal Shalorus",
+        "year": 2012,
+        "opponent": "Kamal Shalorus",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Thiago Tavares",
+        "year": 2013,
+        "opponent": "Thiago Tavares",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "KO",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Rafael dos Anjos",
+        "year": 2014,
+        "opponent": "Rafael dos Anjos",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "Unanimous Decision (30-27, 30-27, 30-27)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Darrell Horcher",
+        "year": 2016,
+        "opponent": "Darrell Horcher",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "TKO",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Michael Johnson",
+        "year": 2016,
+        "opponent": "Michael Johnson",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "Submission (Kimura)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Edson Barboza",
+        "year": 2017,
+        "opponent": "Edson Barboza",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "Unanimous Decision (30-25, 30-25, 30-24)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Al Iaquinta",
+        "year": 2018,
+        "opponent": "Al Iaquinta",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "Unanimous Decision (50-44, 50-43, 50-43)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Conor McGregor",
+        "year": 2018,
+        "opponent": "Conor McGregor",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "Submission (Neck Crank)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Dustin Poirier",
+        "year": 2019,
+        "opponent": "Dustin Poirier",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "Submission (Rear Naked Choke)",
+        "start": "?",
+        "seconds": null
+      },
+      {
+        "athlete": "Justin Gaethje",
+        "year": 2020,
+        "opponent": "Justin Gaethje",
+        "event": "Khabib - Career",
+        "winner": "Khabib Nurmagomedov",
+        "method": "Technical Submission (Triangle Choke)",
+        "start": "?",
+        "seconds": null
+      }
+    ]
+  }
+}

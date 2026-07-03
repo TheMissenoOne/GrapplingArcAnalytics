@@ -41,14 +41,15 @@ DEFAULT_FILE = PROCESSED_DIR / "technique_library.json"
 # Raw SQL kept as a string; sqlalchemy.text() is wrapped lazily in seed() so
 # --dry-run works without the optional `postgres` extra installed.
 _UPSERT_SQL = """
-    insert into public.technique_nodes (node_key, label, type, node_type, source)
-    values (:node_key, :label, :type, :node_type, 'library')
+    insert into public.technique_nodes (node_key, label, type, node_type, source, elo_deviance)
+    values (:node_key, :label, :type, :node_type, 'library', :elo_deviance)
     on conflict (node_key) do update set
-        label     = excluded.label,
-        type      = excluded.type,
-        node_type = excluded.node_type,
-        source    = 'library',
-        updated_at = now()
+        label         = excluded.label,
+        type          = excluded.type,
+        node_type     = excluded.node_type,
+        source        = 'library',
+        elo_deviance  = excluded.elo_deviance,
+        updated_at    = now()
 """
 
 # dataset technique type -> app node `type` bucket (mirrors export/tech_library.py)
@@ -86,6 +87,7 @@ def seed(path: Path, dry_run: bool = False) -> int:
             "label": label,
             "type": "technique",
             "node_type": _TYPE_TO_NODE_TYPE.get(dataset_type, dataset_type),
+            "elo_deviance": item.get("eloDeviance", 0),
         }
 
     logger.info("Prepared %d distinct library node_keys from %s", len(rows), path.name)

@@ -6,6 +6,7 @@ import hashlib
 import logging
 import re
 from collections.abc import Sequence
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import numpy as np
@@ -147,6 +148,143 @@ def archetype_feature_version(vectors: np.ndarray) -> str:
     """Stable hash of the vector shape for versioning."""
     digest = hashlib.md5(str(vectors.shape).encode()).hexdigest()[:8]
     return f"{FEATURE_VERSION}-{digest}"
+
+
+# ── User-graph archetype match + structural similar/differ (App Part B) ───────
+#
+# A user graph is *assigned* (not clustered): find the nearest archetype, then
+# explain the fit with a non-vectorized comparison of the interpretable feature
+# dims. The 768-d embedding decides *which* archetype (semantic nearest); the
+# 18-d feature vector explains *why* (composition / relative strength / balance).
+
+# Composition-share gaps: below NEAR = "similar", at/above DIFF = "differ".
+_COMPOSITION_NEAR = 0.05
+_COMPOSITION_DIFF = 0.10
+_DEVIANCE_DIFF = 0.15      # per-type relative-strength gap worth calling out
+_DENSITY_DIFF = 0.5        # edge-density (interconnectedness) gap worth calling out
+
+
+@dataclass
+class ArchetypeRef:
+    """Lightweight archetype record for matching — decoupled from the ORM so the
+    pure functions below are unit-testable without a DB."""
+
+    id: int
+    name: str
+    signature_types: list[str]
+    centroid_vec: np.ndarray            # 18-d feature centroid (interpretable dims)
+    embedding: np.ndarray | None = field(default=None)  # 768-d semantic centroid
+
+
+def _cosine(a: np.ndarray, b: np.ndarray) -> float:
+    na, nb = float(np.linalg.norm(a)), float(np.linalg.norm(b))
+    return float(a @ b / (na * nb)) if na > 0 and nb > 0 else -1.0
+
+
+def nearest_archetype(
+    user_vec: np.ndarray,
+    archetypes: Sequence[ArchetypeRef],
+    user_embedding: np.ndarray | None = None,
+) -> ArchetypeRef | None:
+    """Pick the archetype closest to the user. Prefers 768-d embedding cosine (the
+    semantic space); falls back to nearest 18-d feature centroid (L2) when either
+    side lacks an embedding."""
+    if not archetypes:
+        return None
+    if user_embedding is not None:
+        # Narrow embedding to non-None inside the comprehension so mypy is happy.
+        scored = [
+            (a, _cosine(user_embedding, a.embedding))
+            for a in archetypes if a.embedding is not None
+        ]
+        if scored:
+            return max(scored, key=lambda t: t[1])[0]
+    return min(archetypes, key=lambda a: float(np.linalg.norm(a.centroid_vec - user_vec)))
+
+
+def _signature_overlap(user_vec: np.ndarray, arch_sig_types: list[str]) -> dict[str, list[str]]:
+    """User's emphasized types vs the archetype's — shared / the archetype's you lack
+    (missing) / yours it lacks (extra), as human nouns."""
+    user_sig = signature_types(user_vec)
+
+    def nouns(ts: list[str]) -> list[str]:
+        return [_TYPE_NOUN.get(t, t.title()) for t in ts]
+
+    return {
+        "shared": nouns([t for t in user_sig if t in arch_sig_types]),
+        "missing": nouns([t for t in arch_sig_types if t not in user_sig]),
+        "extra": nouns([t for t in user_sig if t not in arch_sig_types]),
+    }
+
+
+def compare_feature_vectors(
+    user_vec: np.ndarray, centroid_vec: np.ndarray
+) -> dict[str, list[dict[str, Any]]]:
+    """Non-vectorized similar/differ over the v3 feature layout. Each entry is
+    ``{aspect, label, delta}``; differ is sorted by |delta| and capped."""
+    nt = len(_TYPES)
+    similar: list[dict[str, Any]] = []
+    differ: list[dict[str, Any]] = []
+
+    def entry(aspect: str, label: str, delta: float) -> dict[str, Any]:
+        return {"aspect": aspect, "label": label, "delta": round(delta, 3)}
+
+    for i, t in enumerate(_TYPES):
+        noun = _TYPE_NOUN.get(t, t.title()).lower()
+        gap = float(user_vec[i] - centroid_vec[i])              # composition share
+        if abs(gap) < _COMPOSITION_NEAR and max(user_vec[i], centroid_vec[i]) > 0.12:
+            similar.append(entry("composition", f"both build around {noun}", gap))
+        elif abs(gap) >= _COMPOSITION_DIFF:
+            more = "more" if gap > 0 else "less"
+            differ.append(entry("composition", f"you use {noun} {more}", gap))
+        dgap = float(user_vec[nt + i] - centroid_vec[nt + i])   # relative strength (deviance)
+        if abs(dgap) >= _DEVIANCE_DIFF:
+            word = "stronger" if dgap > 0 else "weaker"
+            differ.append(entry("strength", f"your {noun} is {word} vs peers", dgap))
+
+    off_gap = float(user_vec[2 * nt + 1] - centroid_vec[2 * nt + 1])  # offense_ratio
+    if abs(off_gap) >= _COMPOSITION_DIFF:
+        word = "more" if off_gap > 0 else "less"
+        differ.append(entry("offense", f"you are {word} finish-oriented", off_gap))
+    elif abs(off_gap) < _COMPOSITION_NEAR:
+        similar.append(entry("offense", "similar offense/defense balance", off_gap))
+
+    dens_gap = float(user_vec[2 * nt] - centroid_vec[2 * nt])         # edge_density
+    if abs(dens_gap) >= _DENSITY_DIFF:
+        word = "more" if dens_gap > 0 else "less"
+        differ.append(entry("connectivity", f"your game is {word} interconnected", dens_gap))
+
+    differ.sort(key=lambda d: abs(d["delta"]), reverse=True)
+    return {"similar": similar[:4], "differ": differ[:5]}
+
+
+def assign_user_archetype(
+    user_nodes: Sequence[_NodeLike],
+    by_key: Stats,
+    by_type: Stats,
+    archetypes: Sequence[ArchetypeRef],
+    edges: list[object] | None = None,
+    user_embedding: np.ndarray | None = None,
+) -> dict[str, Any] | None:
+    """Match one user graph to its nearest archetype and explain the fit.
+
+    Returns the ``archetype_report`` payload the App reads:
+    ``{archetype_id, name, similar[], differ[], signature{shared,missing,extra}}``,
+    or None when the graph is too small / there are no archetypes.
+    """
+    if len(user_nodes) < MIN_GRAPH_NODES or not archetypes:
+        return None
+    user_vec = graph_feature_vector(user_nodes, by_key, by_type, edges)
+    match = nearest_archetype(user_vec, archetypes, user_embedding)
+    if match is None:
+        return None
+    report = compare_feature_vectors(user_vec, match.centroid_vec)
+    return {
+        "archetype_id": match.id,
+        "name": match.name,
+        "signature": _signature_overlap(user_vec, match.signature_types),
+        **report,
+    }
 
 
 def run_archetype_pipeline(session: object, k: int = 6) -> None:

@@ -14,6 +14,7 @@ from analysis.athlete_systems import (
     compare_profiles,
     comparison_matrix,
     detect_athlete_systems,
+    from_career_graphview,
     match_systems,
     profile_to_dict,
     system_similarity,
@@ -389,3 +390,51 @@ class TestProfileToDict:
         d = profile_to_dict(p)
         assert d["system_count"] == 0
         assert d["systems"] == []
+
+
+# ── Career graphview adapter (dossier payload) ──────────────────────────────
+
+class TestCareerGraphviewAdapter:
+    def test_from_career_graphview_basic(self) -> None:
+        """Smoke test: career graphview → AthleteGraph → systems profile."""
+        graphview = {
+            "nodes": [
+                {"id": "closed guard", "label": "Closed Guard", "cat": "guard", "size": 3},
+                {"id": "armbar", "label": "Armbar", "cat": "submission", "size": 2},
+                {"id": "triangle", "label": "Triangle", "cat": "submission", "size": 2},
+            ],
+            "links": [
+                {"from": "closed guard", "to": "armbar", "weight": 2},
+                {"from": "closed guard", "to": "triangle", "weight": 1},
+            ],
+        }
+        ag = from_career_graphview("Test Athlete", graphview)
+        assert ag.athlete == "Test Athlete"
+        assert len(ag.nodes) == 3
+        assert len(ag.edges) == 2
+        assert ag.nodes["closed guard"].type == "guard"
+        assert ag.nodes["armbar"].type == "submission"
+
+    def test_dossier_systems_profile(self) -> None:
+        """Smoke test: dossier payload includes non-empty systems list."""
+        graphview = {
+            "nodes": [
+                {"id": "closed guard", "label": "Closed Guard", "cat": "guard", "size": 5},
+                {"id": "armbar", "label": "Armbar", "cat": "submission", "size": 4},
+                {"id": "triangle", "label": "Triangle", "cat": "submission", "size": 3},
+                {"id": "scissor sweep", "label": "Scissor Sweep", "cat": "sweep", "size": 3},
+            ],
+            "links": [
+                {"from": "closed guard", "to": "armbar", "weight": 2},
+                {"from": "closed guard", "to": "triangle", "weight": 2},
+                {"from": "closed guard", "to": "scissor sweep", "weight": 1},
+                {"from": "armbar", "to": "triangle", "weight": 1},
+            ],
+        }
+        ag = from_career_graphview("Dossier Athlete", graphview)
+        profile = build_system_profile("Dossier Athlete", ag)
+        payload = profile_to_dict(profile)
+        assert payload["athlete_name"] == "Dossier Athlete"
+        assert payload["system_count"] > 0, "Dossier payload must have systems"
+        assert len(payload["systems"]) > 0
+        assert all("hub" in s and "members" in s for s in payload["systems"])

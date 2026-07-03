@@ -26,6 +26,26 @@ from db.repository import register_match, upsert_athlete
 logger = logging.getLogger(__name__)
 
 
+def _parse_timestamp(ts: Any) -> int | None:
+    """Parse H:MM:SS or M:SS timestamp string to seconds, or return None."""
+    if not isinstance(ts, str):
+        return None
+    ts = ts.strip()
+    if not ts:
+        return None
+    try:
+        parts = ts.split(":")
+        if len(parts) == 3:
+            h, m, s = int(parts[0]), int(parts[1]), int(parts[2])
+            return h * 3600 + m * 60 + s
+        elif len(parts) == 2:
+            m, s = int(parts[0]), int(parts[1])
+            return m * 60 + s
+    except (ValueError, IndexError):
+        pass
+    return None
+
+
 def _default_outputs_dir() -> Path:
     """``$GRAPPLINGARC_HARVEST_DIR`` or the harvest processed folder."""
     env = os.environ.get("GRAPPLINGARC_HARVEST_DIR")
@@ -72,6 +92,10 @@ def analyzer_to_match_kwargs(
         }
         if "successful" in e:
             item["successful"] = bool(e["successful"])
+        raw_ts = e.get("ts", e.get("timestamp"))  # analyzer says "ts"; dumps say "timestamp"
+        ts = _parse_timestamp(raw_ts) if isinstance(raw_ts, str) else raw_ts
+        if isinstance(ts, int):
+            item["ts"] = ts
         seq.append(item)
 
     # Prefer the LLM's explicit result; fall back to inferring it from the events.

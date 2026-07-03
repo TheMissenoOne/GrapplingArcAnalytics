@@ -88,6 +88,8 @@ def _sequence_view(match: Match, a: Athlete, b: Athlete) -> list[dict[str, Any]]
         }
         if "successful" in e:
             row["successful"] = bool(e["successful"])
+        if isinstance(e.get("ts"), int):  # absolute video seconds (video-seek contract)
+            row["ts"] = e["ts"]
         rows.append(row)
     return rows
 
@@ -108,9 +110,13 @@ def _blank_side_stats() -> dict[str, Any]:
     }
 
 
-def _compute_stats(sequence: list[dict[str, Any]]) -> dict[str, Any]:
+def _compute_stats(
+    sequence: list[dict[str, Any]], ptv_v: dict[str, float] | None = None
+) -> dict[str, Any]:
     """Per-side tallies, a momentum split + running series, and positional-conversion
     rate. Uses the same keyword point-map the ELO engine scores with, so numbers agree.
+    If ptv_v (path-to-victory values) is provided, momentum_series uses PtV momentum;
+    otherwise falls back to point-share.
 
     NOTE: control *time* (seconds) can't be derived — stored events carry no timestamps.
     """
@@ -151,6 +157,13 @@ def _compute_stats(sequence: list[dict[str, Any]]) -> dict[str, Any]:
         cum[side] = s["points"]
         ctot = cum["a"] + cum["b"]
         momentum_series.append(round(cum["a"] / ctot, 3) if ctot else 0.5)
+
+    # Prefer PtV momentum if available; fall back to point-share if empty.
+    if ptv_v:
+        from analysis.path_to_victory import ptv_momentum
+        ptv_series = ptv_momentum(sequence, ptv_v)
+        if ptv_series:
+            momentum_series = ptv_series
     for s in sides.values():
         ent = s["positional_entries"]
         s["positional_conversion"] = round(s["positional_conversions"] / ent, 3) if ent else 0.0
@@ -168,11 +181,12 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
     consecutive transition along the *match timeline* (regardless of fighter), coloured by the
     ``side`` of the grappler who made the move. Shared positions are a single node, so the two
     grapplers' games read as one connected graph, distinguished by colour — not two separate
-    subgraphs. App-shaped ``{nodes, edges}`` (graphview.js contract)."""
+    subgraphs. App-shaped ``{nodes, edges}`` (graphview.js contract). Nodes carry ts (first
+    occurrence timestamp) if available."""
     nodes: dict[str, dict[str, Any]] = {}
     side_use: dict[str, dict[str, int]] = {}  # node key → per-side usage, for fighter tint
 
-    def touch(label: str, typ: str, side: str) -> str:
+    def touch(label: str, typ: str, side: str, ts: int | None = None) -> str:
         key = _normalize_name(label)
         if not key:
             return ""
@@ -182,6 +196,8 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
                 "id": key, "label": label,
                 "data": {"type": typ, "usageCount": 1, "side": side},
             }
+            if ts is not None:
+                nodes[key]["data"]["ts"] = ts
             side_use[key] = {"a": 0, "b": 0}
         else:
             node["data"]["usageCount"] += 1
@@ -209,7 +225,8 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
     prev = ""  # previous position on the single match timeline
     for e in sequence:
         side = e["side"]
-        key = touch(e["label"], e["type"], side)
+        ts = e.get("ts")
+        key = touch(e["label"], e["type"], side, ts)
         if not key:
             continue
         link(prev, key, side)  # one flow; edge coloured by the grappler making this move
@@ -245,6 +262,7 @@ def build_match_breakdown(
     a: Athlete,
     b: Athlete,
     curated_ds: dict[str, dict[str, Any]] | None = None,
+    ptv_v: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     """Assemble the self-contained breakdown bundle for one bout.
 
@@ -260,6 +278,9 @@ def build_match_breakdown(
     so a per-edge ``dsMeta`` would not map 1:1 to the timeline and would mislead (review fix
     F2). The App's ``GraphEdge.data.dsMeta`` stays a forward-declared optional for future
     per-edge DS on non-deduped graphs (e.g. user graphs).
+
+    ``ptv_v`` (optional corpus PtV dict) drives momentum_series; if not provided, falls
+    back to point-share momentum.
     """
     sequence = _sequence_view(match, a, b)
     winner_side = _side_of(match.winner_id, a, b)
@@ -282,7 +303,7 @@ def build_match_breakdown(
             "video_url": match.video_url,
         },
         "sequence": sequence,
-        "stats": _compute_stats(sequence),
+        "stats": _compute_stats(sequence, ptv_v),
         "transition_graph": _transition_graph(sequence),
         "fighters": {"a": _fighter_block(a), "b": _fighter_block(b)},
         # ── Strategic layer (RF14 / DS-12) — additive, backward-compatible ──

@@ -11,12 +11,17 @@ per-dataset differences are the dump itself and the ``event`` tag.
 
 from __future__ import annotations
 
+import json
 import logging
+import re
+from pathlib import Path
 from typing import Any
 
 from analysis.names import athlete_key, clean_athlete_name
 from analysis.technique_match import clean_label
 from scripts.insert_ufc_matches import (
+    _KO_RE,
+    _MIN_GRAPPLING,
     CanonicalMatch,
     _clean_events,
     _derive_opponent,
@@ -27,6 +32,46 @@ from scripts.insert_ufc_matches import (
 logger = logging.getLogger(__name__)
 
 Dump = list[dict[tuple[str, int], dict[str, Any]]]
+
+def _load_url_mapping() -> dict[str, Any]:
+    """Load url_mapping.json if available, else return empty dict."""
+    try:
+        path = Path(__file__).resolve().parents[1] / "url_mapping.json"
+        if path.exists():
+            return json.loads(path.read_text(encoding="utf-8"))
+    except Exception as e:
+        logger.warning("Could not load url_mapping.json: %s", e)
+    return {}
+
+
+# Trailing round tags in url_mapping "athlete" strings ("Craig Jones vs Kyle Boehm QF").
+_STAGE_RE = re.compile(
+    r"\s+(?:qf|sf|bm|bronze(?:\s+medal(?:\s+match)?)?|finals?|superfight)$", re.IGNORECASE
+)
+
+
+def video_index() -> dict[tuple[frozenset[str], int | None], str]:
+    """(participants key, year) → video URL (+``&t=<start>s`` when the bout start is known)."""
+    index: dict[tuple[frozenset[str], int | None], str] = {}
+    for mapping in _load_url_mapping().values():
+        base = mapping.get("video_url")
+        if not base:
+            continue
+        for m in mapping.get("matches", []):
+            a = _STAGE_RE.sub("", str(m.get("athlete") or "").strip())
+            b = str(m.get("opponent") or "").strip()
+            if " vs " in a:  # keyed by the full matchup: both names live in "athlete"
+                a, b = (s.strip() for s in a.split(" vs ", 1))
+            if b and athlete_key(a) == athlete_key(b):
+                # mapping quirk: "opponent" often mirrors "athlete"; the other participant
+                # is then the "winner" field (loser listed as athlete).
+                b = str(m.get("winner") or "").strip()
+            if not a or not b or athlete_key(a) == athlete_key(b):
+                continue
+            secs = m.get("seconds")
+            url = f"{base}&t={int(secs)}s" if isinstance(secs, int | float) else base
+            index.setdefault((frozenset((athlete_key(a), athlete_key(b))), m.get("year")), url)
+    return index
 
 
 def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
@@ -68,11 +113,13 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
                 for e in events:
                     e["label"] = clean_label(str(e["label"]), str(e.get("type", "")))
             submission = _submission_from_method(method, win_type)
+            strike_count = sum(1 for e in raw_events if str(e.get("type")) == "strike")
             seen[key] = CanonicalMatch(
                 a_name=a_name, b_name=b_name, year=year,
                 winner_name=winner_name or None, win_type=win_type,
                 submission=clean_label(submission) if (clean and submission) else submission,
-                events=events,
+                events=events, strike_count=strike_count,
+                ko_finish=bool(_KO_RE.search(method)),
             )
     return list(seen.values())
 
@@ -94,6 +141,8 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
     from db.base import db_session
     from db.models import Athlete, Match
     from db.repository import register_match, replay_and_persist_athlete, upsert_athlete
+
+    videos = video_index()  # (participants, year) → url once, not a scan per bout
 
     with db_session() as session:
         by_norm = {
@@ -127,6 +176,15 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
                 )
             )
             session.flush()
+            # Striking match (MMA) with too little grappling — purge (delete above ran)
+            # and don't re-register. Striking evidence = logged strikes OR a KO/TKO finish
+            # (catches empty striking marathons). Pure-grappling bouts (no strikes, not KO)
+            # are never gated, so fast submissions with 1-3 actions still import.
+            if (cm.strike_count > 0 or cm.ko_finish) and len(cm.events) < _MIN_GRAPPLING:
+                logger.info("  skip striking match %s vs %s (%s): %d grappling, %d strikes%s",
+                            cm.a_name, cm.b_name, cm.year, len(cm.events), cm.strike_count,
+                            ", KO" if cm.ko_finish else "")
+                continue
             winner_id: str | None = None
             if cm.win_type is not None and cm.winner_name:
                 winner_id = (a.id if athlete_key(cm.winner_name) == athlete_key(cm.a_name)
@@ -136,11 +194,14 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
                  "actor_id": a.id if e["actor"] == "a" else b.id}
                 for e in cm.events
             ]
+            video_url = videos.get(
+                (frozenset((athlete_key(cm.a_name), athlete_key(cm.b_name))), cm.year)
+            )
             register_match(
                 a.id, b.id, winner_id=winner_id, win_type=cm.win_type,
                 submission=cm.submission, event=event, year=cm.year,
                 weight_class=None, stage=None, sequence=seq, created_by=None,
-                session=session,
+                video_url=video_url, session=session,
             )
 
         for aid in participants:

@@ -459,6 +459,36 @@ def from_fighter_graph(fighter_name: str, fg: dict[str, Any]) -> AthleteGraph:
     return g
 
 
+def from_career_graphview(athlete_name: str, graphview: dict[str, Any]) -> AthleteGraph:
+    """Build ``AthleteGraph`` from site_data's graphview dict (nodes+links format).
+
+    The graphview dict comes from _career_graphview (truncated to 12 nodes for dossier rendering).
+    Nodes: [{"id": key, "label": label, "cat": type, "size": count, ...}]
+    Links: [{"from": source, "to": target, "weight": count, ...}]
+
+    ponytail: truncated to 12 nodes; untruncated source is export_fighter_graph via _to_graphview
+    if system detection later needs fuller resolution.
+    """
+    g = AthleteGraph(athlete=athlete_name)
+    for n in graphview.get("nodes", []):
+        node_id = str(n.get("id", "")).lower().strip()
+        label = str(n.get("label", "")).lower().strip()
+        if not node_id or not label:
+            continue
+        typ = str(n.get("cat", ""))
+        count = int(n.get("size", 1))
+        node = AthleteNode(label=label, type=typ, count=max(count, 1))
+        g.nodes[node_id] = node
+
+    for lk in graphview.get("links", []):
+        src = str(lk.get("from", "")).lower().strip()
+        tgt = str(lk.get("to", "")).lower().strip()
+        c = int(lk.get("weight", 1))
+        if src and tgt and src != tgt:
+            g.edges[(src, tgt)] = AthleteEdge(source=src, target=tgt, count=c)
+    return g
+
+
 def system_comparison_from_files(
     user_json_path: str | Path,
     competition_path: str | Path = "_analytics_export.json",

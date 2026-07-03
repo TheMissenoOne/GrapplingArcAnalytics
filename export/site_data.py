@@ -32,8 +32,16 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from analysis.athlete_systems import (
+    build_system_profile,
+    compare_profiles,
+    from_career_graphview,
+    profile_to_dict,
+)
 from analysis.event_profile import build_event_profile, event_names
 from analysis.names import _normalize_name
+from analysis.network_metrics import network_from_sequences
+from analysis.path_to_victory import dilemmas, path_to_victory
 from analysis.style_profile import MIN_DOSSIER_EVENTS, build_style_profile, qualifies
 from db.models import Archetype, Athlete
 from export.match_breakdown import (
@@ -110,18 +118,26 @@ def _archetype(athlete: Athlete | None, session: Session) -> str | None:
     return arch.name if arch else None
 
 
-def _to_graphview(app_graph: dict[str, Any], default_side: str = "a") -> dict[str, Any]:
-    """app-shaped ``{nodes,edges}`` → the ``graph.js`` ``{nodes,links}`` contract."""
+def _to_graphview(
+    app_graph: dict[str, Any], default_side: str = "a", video_id: str | None = None
+) -> dict[str, Any]:
+    """app-shaped ``{nodes,edges}`` → the ``graph.js`` ``{nodes,links}`` contract.
+    Includes ts (timestamp) and vid (video id) for seek functionality."""
     nodes = []
     for n in app_graph.get("nodes", []):
         d = n.get("data", {})
         typ = str(d.get("type", ""))
-        nodes.append({
+        node = {
             "id": n["id"], "label": n.get("label", n["id"]),
             "cat": typ if typ in _CATS else "control",
             "size": _clamp3(int(d.get("usageCount", 1))),
             "fighter": d.get("side", default_side),
-        })
+        }
+        if "ts" in d:
+            node["ts"] = d["ts"]
+        if video_id:
+            node["vid"] = video_id
+        nodes.append(node)
     links = []
     for e in app_graph.get("edges", []):
         d = e.get("data", {})
@@ -184,16 +200,29 @@ def build_breakdowns(
     full: list[tuple[str, dict[str, Any]]] = []
     featured: dict[str, Any] | None = None
     best_score = -1.0
+
+    # Build corpus PtV once for all breakdowns (pass through to each for momentum calculation).
+    from analysis.network_metrics import build_transition_network
+    corpus_g = build_transition_network(session)
+    ptv_v = path_to_victory(corpus_g)
+
     for match in _final_matches(session):
         a = session.get(Athlete, match.athlete_a_id)
         b = session.get(Athlete, match.athlete_b_id)
         if a is None or b is None:
             continue
         slug = match_slug(a, b, match.year)
-        bd = build_match_breakdown(match, a, b)
+        bd = build_match_breakdown(match, a, b, ptv_v=ptv_v)
         bd["fighters"]["a"]["elo_pct"] = standings.get(a.id)
         bd["fighters"]["b"]["elo_pct"] = standings.get(b.id)
-        gv = _to_graphview(bd["transition_graph"])
+        # Extract YouTube video ID if available
+        video_id = None
+        if match.video_url:
+            import re
+            m = re.search(r"(?:youtu\.be/|youtube\.com/watch\?v=)([A-Za-z0-9_-]{11})", match.video_url)
+            if m:
+                video_id = m.group(1)
+        gv = _to_graphview(bd["transition_graph"], video_id=video_id)
         rows.append({
             "id": slug, "href": f"breakdown-{slug}.html",
             "event": bd["meta"]["event"] or "Match",
@@ -224,6 +253,31 @@ def build_breakdowns(
     return rows, full, featured
 
 
+def _node_video_refs(
+    aid: str, matches: list[Any], session: Session
+) -> dict[str, dict[str, Any]]:
+    """node_key → {vid, ts, slug}: the first timestamped use of each technique by this
+    athlete across their filmed bouts, so a career-graph node can play the actual footage."""
+    refs: dict[str, dict[str, Any]] = {}
+    for m in matches:
+        ref = _video_ref(getattr(m, "video_url", None))
+        if ref is None:
+            continue
+        vid, _ = ref
+        a = session.get(Athlete, m.athlete_a_id)
+        b = session.get(Athlete, m.athlete_b_id)
+        slug = match_slug(a, b, m.year) if a and b else None
+        for e in m.sequence or []:
+            if not isinstance(e, dict) or e.get("actor_id") != aid:
+                continue
+            ts = e.get("ts")
+            key = _normalize_name(str(e.get("label", "")))
+            if ts is None or not key or key in refs:
+                continue
+            refs[key] = {"vid": vid, "ts": int(ts), "slug": slug}
+    return refs
+
+
 def build_fighters(
     session: Session,
 ) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
@@ -232,6 +286,7 @@ def build_fighters(
     seen: set[str] = set()
     cards: list[dict[str, Any]] = []
     details: dict[str, dict[str, Any]] = {}
+    system_profiles: dict[str, Any] = {}
     for match in _final_matches(session):
         for aid in (match.athlete_a_id, match.athlete_b_id):
             if aid in seen:
@@ -264,7 +319,52 @@ def build_fighters(
                 "nodes": card["nodes"], "links": card["links"],
                 "_rank": rank or 9999,
             })
-            details[slug] = {"athlete": athlete, "profile": profile, "career": career}
+            ag = from_career_graphview(athlete.name, career)
+            system_profile = build_system_profile(athlete.name, ag)
+            system_profiles[slug] = system_profile
+
+            # Per-fighter dilemmas: build from their final matches, get top-3 forks.
+            from db.models import Match
+            athlete_matches = session.execute(
+                select(Match).where(
+                    ((Match.athlete_a_id == aid) | (Match.athlete_b_id == aid))
+                    & (Match.sequence.isnot(None))
+                ).limit(30)
+            ).scalars().all()
+            athlete_sequences = [m.sequence for m in athlete_matches if m.sequence]
+            fighter_dilemmas_list = []
+            if athlete_sequences:
+                try:
+                    fighter_g = network_from_sequences(athlete_sequences)
+                    fighter_ptv = path_to_victory(fighter_g)
+                    fighter_dilemmas = dilemmas(fighter_g, fighter_ptv)
+                    fighter_dilemmas_list = [
+                        {
+                            "node": d["node"],
+                            "branches": [[b, ptv] for b, ptv in d["branches"]],
+                        }
+                        for d in fighter_dilemmas[:3]
+                    ]
+                except Exception:
+                    pass  # graceful fallback if graph is too sparse
+
+            details[slug] = {
+                "athlete": athlete,
+                "profile": profile,
+                "career": career,
+                "_systems": profile_to_dict(system_profile),
+                "_dilemmas": fighter_dilemmas_list,
+                "_videos": _node_video_refs(aid, athlete_matches, session),
+            }
+
+    # Compute N×N nearest analogues per athlete
+    all_profiles = list(system_profiles.values())
+    for slug, profile_dict in details.items():
+        if slug in system_profiles:
+            sp = system_profiles[slug]
+            nearest = compare_profiles(sp, all_profiles, k=5)
+            profile_dict["analogues"] = nearest
+
     cards.sort(key=lambda r: r["_rank"])
     for r in cards:
         del r["_rank"]
@@ -315,7 +415,7 @@ def _nav(active: str) -> str:
     return f"""<div class="beltline"></div>
 <header class="site-head"><div class="wrap">
   <a class="brand" href="index.html"><span class="mark">GA</span>Grappling<span class="o">Arc</span></a>
-  <nav class="site-nav">
+  <nav class="site-nav" id="siteNav">
     <a href="index.html"{cls('home')}>Home</a>
     <a href="breakdowns.html"{cls('breakdowns')}>Breakdowns</a>
     <a href="events.html"{cls('events')}>Events</a>
@@ -326,6 +426,7 @@ def _nav(active: str) -> str:
   <div class="head-right">
     <div class="lang"><button data-lang="en" class="on">EN</button><button data-lang="pt">PT</button></div>
     <a class="btn app sm" href="index.html#app">Get the App</a>
+    <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="siteNav" onclick="this.setAttribute('aria-expanded',document.body.classList.toggle('nav-open'))"><span></span><span></span></button>
   </div>
 </div></header>"""
 
@@ -408,8 +509,15 @@ _BREAKDOWN_JS = """
   }
   draw();new ResizeObserver(draw).observe(c);
 })();
+// click a node with a timestamp → seek the match video to that moment
+function gaSeek(t){
+  const f=document.getElementById('ytFrame'); if(!f||!BD.vid) return;
+  f.src='https://www.youtube-nocookie.com/embed/'+BD.vid+'?start='+Math.max(0,t|0)+'&autoplay=1';
+  f.scrollIntoView({behavior:'smooth',block:'center'});
+}
 // decisive sequence graph
-GAGraph.mount(document.getElementById('seqGraph'),{mode:'map',nodes:BD.graph.nodes,links:BD.graph.links});
+GAGraph.mount(document.getElementById('seqGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:BD.graph.nodes,links:BD.graph.links,
+  onSelect:n=>{if(n&&n.ts!=null)gaSeek(n.ts);}});
 const lc=[['takedown','Takedown'],['control','Control'],['guard','Guard'],['pass','Passing'],['sweep','Sweep'],['submission','Submission'],['escape','Escape'],['transition','Transition']];
 const dot=c=>'<span class="dot" style="background:'+c+'"></span>';
 document.getElementById('seqLegend').innerHTML=
@@ -424,22 +532,34 @@ def _stat_row(k: str, va: Any, vb: Any) -> str:
 
 
 _YT_RE = re.compile(r"(?:youtu\.be/|youtube\.com/(?:watch\?v=|embed/|shorts/|v/))([\w-]{11})")
+_YT_T_RE = re.compile(r"[?&#]t=(\d+)")
+
+
+def _video_ref(url: str | None) -> tuple[str, int] | None:
+    """Stored video URL → (youtube id, start seconds) — None when there's no valid link."""
+    if not url:
+        return None
+    m = _YT_RE.search(url)
+    if not m:
+        return None
+    t = _YT_T_RE.search(url)
+    return m.group(1), int(t.group(1)) if t else 0
 
 
 def _youtube_embed(url: str | None) -> str:
     """Responsive 16:9 YouTube embed block — empty string when there's no valid link, so the
-    section is fully hidden for matches without a video."""
-    if not url:
+    section is fully hidden for matches without a video. The iframe carries ``id="ytFrame"``
+    so the sequence graph can seek it (click a node → jump to that moment)."""
+    ref = _video_ref(url)
+    if ref is None:
         return ""
-    m = _YT_RE.search(url)
-    if not m:
-        return ""
-    vid = m.group(1)
+    vid, start = ref
+    src = f"https://www.youtube-nocookie.com/embed/{vid}" + (f"?start={start}" if start else "")
     return (
         '<section class="block"><div class="wrap prose"><div class="sec-label">Watch</div></div>'
         '<div class="wrap viz"><div style="position:relative;width:100%;aspect-ratio:16/9;'
         'border:1px solid var(--line);border-radius:var(--radius);overflow:hidden">'
-        f'<iframe src="https://www.youtube-nocookie.com/embed/{vid}" title="Match video" '
+        f'<iframe id="ytFrame" src="{src}" title="Match video" '
         'loading="lazy" frameborder="0" style="position:absolute;inset:0;width:100%;height:100%" '
         'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; '
         'picture-in-picture" allowfullscreen></iframe></div></div></section><div class="divider"></div>'
@@ -503,11 +623,18 @@ def render_breakdown_page(
         return (f'<div class="sig-card"><div class="k">{html.escape(name)} · Grappling ELO</div>'
                 f'<div class="v">{value}</div>{delta}</div>')
 
+    ref = _video_ref(meta.get("video_url"))
     payload = {
         "a": a["name"], "b": b["name"],
         "graph": bd["transition_graph_gv"],
         "stats": {"momentum_series": stats.get("momentum_series", [])},
+        "vid": ref[0] if ref else None,
     }
+    has_seek = bool(ref) and any(n.get("ts") is not None
+                                 for n in bd["transition_graph_gv"]["nodes"])
+    seq_hint = ("Each node is a position; each edge a transition, coloured by who initiated it. "
+                + ("Click a node to jump the video to that moment; hover to isolate its connections."
+                   if has_seek else "Hover any node to isolate its connections."))
     body = f"""{_nav('breakdowns')}
 <section class="art-hero"><div class="wrap">
   <div class="center"><a href="breakdowns.html" class="tag" style="text-decoration:none">← Breakdowns</a></div>
@@ -537,7 +664,7 @@ def render_breakdown_page(
       <div class="mtl-axis"><span>start</span><span>finish</span></div></div></section>
   <div class="divider"></div>
   <section class="block"><div class="wrap prose"><div class="sec-label">The decisive sequence</div>
-      <p class="editorial">Each node is a position; each edge a transition, coloured by who initiated it. Hover any node to isolate its connections.</p></div>
+      <p class="editorial">{seq_hint}</p></div>
     <div class="wrap viz"><div class="graph-card seq-card"><canvas id="seqGraph" class="graph-canvas"></canvas>
       <div class="graph-legend" id="seqLegend"></div></div></div></section>
   <div class="divider"></div>
@@ -566,22 +693,44 @@ _PROFILE_JS = """
 // radar fingerprint — same axes as the App analytics tab (pass/control/submission/
 // escape/guard/sweep/takedown), auto-scaled so the strongest category fills the web.
 (function(){
-  const c=document.getElementById('radar'); if(!c) return; const x=c.getContext('2d');
+  const c=document.getElementById('radar'); if(!c) return;
   const labels=P.radar.labels, raw=P.radar.values, N=labels.length;
   const mx=Math.max(0.0001,...raw), vals=raw.map(v=>Math.max(0.03,v/mx));
-  const cx=160,cy=150,R=98;
-  function poly(s,fill,stroke,lw){x.beginPath();labels.forEach((_,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2,r=R*s[i],
-    px=cx+Math.cos(ang)*r,py=cy+Math.sin(ang)*r;i?x.lineTo(px,py):x.moveTo(px,py);});x.closePath();
-    if(fill){x.fillStyle=fill;x.fill();}x.strokeStyle=stroke;x.lineWidth=lw;x.stroke();}
-  [0.25,0.5,0.75,1].forEach(g=>poly(labels.map(()=>g),null,'rgba(255,255,255,.10)',1));
-  labels.forEach((_,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2;x.strokeStyle='rgba(255,255,255,.10)';
-    x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(ang)*R,cy+Math.sin(ang)*R);x.stroke();});
-  poly(vals,'rgba(126,168,255,.20)','#7ea8ff',2);
-  x.fillStyle='#cdd2e0';x.font="600 10.5px 'Spline Sans Mono',monospace";x.textAlign='center';x.textBaseline='middle';
-  labels.forEach((l,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2;x.fillText(l,cx+Math.cos(ang)*(R+20),cy+Math.sin(ang)*(R+15));});
+  const wrap=c.parentElement;
+  function draw(){
+    // size from the container (capped at the 320px design width), DPR-aware
+    const w=Math.min(320,wrap.clientWidth||320), h=w*300/320, s=w/320;
+    const dpr=Math.min(devicePixelRatio||1,2);
+    c.width=w*dpr;c.height=h*dpr;c.style.width=w+'px';c.style.height=h+'px';
+    const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+    const cx=160*s,cy=150*s,R=98*s;
+    function poly(v,fill,stroke,lw){x.beginPath();labels.forEach((_,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2,r=R*v[i],
+      px=cx+Math.cos(ang)*r,py=cy+Math.sin(ang)*r;i?x.lineTo(px,py):x.moveTo(px,py);});x.closePath();
+      if(fill){x.fillStyle=fill;x.fill();}x.strokeStyle=stroke;x.lineWidth=lw;x.stroke();}
+    [0.25,0.5,0.75,1].forEach(g=>poly(labels.map(()=>g),null,'rgba(255,255,255,.10)',1));
+    labels.forEach((_,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2;x.strokeStyle='rgba(255,255,255,.10)';
+      x.beginPath();x.moveTo(cx,cy);x.lineTo(cx+Math.cos(ang)*R,cy+Math.sin(ang)*R);x.stroke();});
+    poly(vals,'rgba(126,168,255,.20)','#7ea8ff',2);
+    x.fillStyle='#cdd2e0';x.font="600 "+Math.max(9,10.5*s)+"px 'Spline Sans Mono',monospace";
+    x.textAlign='center';x.textBaseline='middle';
+    labels.forEach((l,i)=>{const ang=-Math.PI/2+i/N*Math.PI*2;x.fillText(l,cx+Math.cos(ang)*(R+20*s),cy+Math.sin(ang)*(R+15*s));});
+  }
+  draw();new ResizeObserver(draw).observe(wrap);
 })();
+// click a career node → play the first filmed use of that position (P.videos: key→{vid,ts,slug})
+function gaWatch(ref){
+  const wrap=document.getElementById('dossierVideo'); if(!wrap||!ref) return;
+  wrap.style.display='block';
+  wrap.innerHTML='<div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:inherit">'
+    +'<iframe src="https://www.youtube-nocookie.com/embed/'+ref.vid+'?start='+Math.max(0,ref.ts|0)+'&autoplay=1"'
+    +' title="Technique footage" frameborder="0" style="position:absolute;inset:0;width:100%;height:100%"'
+    +' allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>'
+    +(ref.slug?'<p class="graph-hint" style="padding:8px 12px;margin:0">Footage from <a href="breakdown-'+ref.slug+'.html" style="color:var(--ink-2);text-decoration:underline">this bout</a></p>':'');
+  wrap.scrollIntoView({behavior:'smooth',block:'center'});
+}
 // career graph
-GAGraph.mount(document.getElementById('careerGraph'),{mode:'map',nodes:P.graph.nodes,links:P.graph.links});
+GAGraph.mount(document.getElementById('careerGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:P.graph.nodes,links:P.graph.links,
+  onSelect:n=>{if(n&&P.videos)gaWatch(P.videos[n.id]);}});
 const lg=[['guard','Guard'],['pass','Passing'],['control','Control'],['submission','Submission'],['takedown','Takedown'],['transition','Transition']];
 document.getElementById('legend').innerHTML=lg.map(([k,l])=>'<span><span class="dot" style="background:'+GAGraph.CAT[k]+'"></span>'+l+'</span>').join('');
 // signature frequency
@@ -631,7 +780,11 @@ def render_profile_page(profile: dict[str, Any]) -> str:
             for sit, data in profile["responses"].items()
         ],
         "bouts": profile["bouts"],
+        "videos": profile.get("_videos") or {},
     }
+    graph_hint = "Drag to pan, scroll to zoom · touch to swim · hover to isolate a pathway"
+    if payload["videos"]:
+        graph_hint += " · click a position to watch it in a real bout"
     sub_lines = []
     for k, v in fam.get("shares", {}).items():
         sub_lines.append(f"{k} {round(v * 100)}%")
@@ -641,6 +794,59 @@ def render_profile_page(profile: dict[str, Any]) -> str:
         f'<div class="fincard"><div class="k">Decision rate</div><div class="v">{round(fin["decision_rate"] * 100)}%</div><div class="cap">of decided bouts</div></div>',
         f'<div class="fincard"><div class="k">vs Top-10 Grappling ELO</div><div class="v" style="color:var(--good)">{fin["record_vs_elite"]["wins"]}–{fin["record_vs_elite"]["losses"]}</div><div class="cap">elite opposition</div></div>',
     ])
+    # Systems section — community decomposition stashed by build_fighters as
+    # _systems (profile_to_dict) + _analogues (compare_profiles rows). Rendered
+    # server-side like the fincards; absent data → no section.
+    systems_html = ""
+    sysd = profile.get("_systems") or {}
+    if sysd.get("systems"):
+        elos = [s["system_elo"] for s in sysd["systems"] if s.get("system_elo")]
+        top_elo = max(elos) if elos else None
+        cards = []
+        for s in sysd["systems"][:6]:
+            strength = ""
+            if top_elo and s.get("system_elo"):
+                # relative to the athlete's strongest system — never a raw rating
+                strength = f'<span class="sys-str">{round(s["system_elo"] / top_elo * 100)}%</span>'
+            cards.append(
+                f'<div class="syscard"><div class="top"><span class="k">{html.escape(s["name"])}</span>{strength}</div>'
+                f'<div class="hub">{html.escape(s["hub"])}</div>'
+                f'<div class="meta">{s["size"]} techniques · {s["transition_count"]} internal transitions</div></div>'
+            )
+        # Dilemma forks (path-to-victory model) — structure only, raw PtV never shown.
+        forks = "".join(
+            f'<div class="fork"><span class="fk">{html.escape(d["node"])}</span>'
+            + '<span class="or">forces</span>'
+            + '<span class="or">·</span>'.join(
+                f'<span class="fbr">{html.escape(b[0])}</span>'
+                for b in d.get("branches", [])[:2]
+            )
+            + "</div>"
+            for d in (profile.get("_dilemmas") or [])[:3]
+            if len(d.get("branches", [])) >= 2
+        )
+        forks_html = (f'<div class="forks"><span class="kicker">Dilemma forks</span>'
+                      f'<div class="fork-rows">{forks}</div></div>') if forks else ""
+        chips = "".join(
+            f'<a class="chip" href="grapple-{slugify(a["athlete"])}.html">{html.escape(a["athlete"])}'
+            f'<span class="sim">{round(a["aggregate_similarity"] * 100)}%</span></a>'
+            for a in (profile.get("_analogues") or [])[:5]
+        )
+        ana_html = (f'<div class="ana"><span class="kicker">Grapples most like</span>'
+                    f'<div class="chips">{chips}</div></div>') if chips else ""
+        sys_prose = next((sec for sec in sections if sec[0] == "The systems"), None)
+        prose = (f'<div class="editorial sys-lead"><p>{html.escape(sys_prose[1][0])}</p></div>'
+                 if sys_prose else "")
+        n = sysd["system_count"]
+        hint = ('<p class="graph-hint">System strength relative to the athlete\'s '
+                'strongest system</p>') if top_elo else ""
+        systems_html = f"""<section class="mod"><div class="wrap">
+  <div class="sec-head"><span class="eyebrow">The systems</span>
+    <h2 class="h-lg mt16">{n} game{'s' if n != 1 else ''} inside the game</h2></div>
+  {prose}
+  <div class="sysgrid">{''.join(cards)}</div>
+  {hint}{forks_html}{ana_html}
+</div></section>"""
     sub_meta = f"<span><b>{rec['wins']}–{rec['losses']}</b> record</span>"
     sub_meta += f"<span><b>{round(f['finish_rate'] * 100)}%</b> finish rate</span>"
     if rank:
@@ -682,8 +888,10 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     <h2 class="h-lg mt16">One graph for an entire grappling game</h2></div>
   <div class="graph-card"><canvas id="careerGraph" class="graph-canvas" style="height:440px"></canvas>
     <div class="graph-legend" id="legend"></div></div>
-  <p class="graph-hint">Drag nodes to explore · hover to isolate a pathway</p>
+  <p class="graph-hint">{graph_hint}</p>
+  <div id="dossierVideo" class="graph-card" style="display:none;margin-top:14px"></div>
 </section>
+{systems_html}
 <section class="mod"><div class="wrap"><div class="mod-grid">
   <div class="mod-intro"><span class="eyebrow">Signature game</span>
     <h2 class="mt16">What he reaches for first</h2>
@@ -951,6 +1159,9 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     for slug, d in details.items():
         profile = d["profile"]
         profile["_career_gv"] = d["career"]
+        profile["_systems"] = d.get("_systems") or {}
+        profile["_analogues"] = d.get("analogues") or []
+        profile["_videos"] = d.get("_videos") or {}
         (out / f"grapple-{slug}.html").write_text(
             render_profile_page(profile), encoding="utf-8")
 

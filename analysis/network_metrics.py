@@ -64,6 +64,7 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
     denom: Counter[str] = Counter()  # appearances that have a successor
     reward: Counter[str] = Counter()
     risk: Counter[str] = Counter()
+    ok_count: Counter[str] = Counter()  # successful appearances (PtV terminal rates)
     node_type: dict[str, str] = {}
 
     for seq in sequences:
@@ -71,6 +72,8 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
         n = len(events)
         for e in events:
             occ[e["label"]] += 1
+            if e["ok"]:
+                ok_count[e["label"]] += 1
             node_type.setdefault(e["label"], e["type"])
 
         # index of each event's next *own*-actor event (None actor = no attributable flow)
@@ -111,6 +114,8 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
         g.nodes[label]["occ"] = c
         g.nodes[label]["reward"] = reward[label]
         g.nodes[label]["risk"] = risk[label]
+        g.nodes[label]["denom"] = denom[label]  # appearances with a successor (PtV rates)
+        g.nodes[label]["ok_count"] = ok_count[label]
         d = denom[label]
         g.nodes[label]["reward_risk"] = round((reward[label] - risk[label]) / d, 3) if d else 0.0
     # distance = inverse weight, for shortest-path-based betweenness

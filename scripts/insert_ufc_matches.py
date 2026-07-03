@@ -54,12 +54,53 @@ logger = logging.getLogger(__name__)
 
 _TAKEDOWN_RE = re.compile(r"\b(takedown|trip)\b", re.IGNORECASE)
 
+# Referee/admin calls and clock stats that aren't techniques — dropped as graph nodes
+# (mostly wrestling). Real athlete actions like "Stand Up Escape"/"Escaped to Neutral"
+# and scoring positions ("Near Fall") are techniques and deliberately kept.
+_NON_TECHNIQUE_RE = re.compile(
+    r"stalling|blood\s*time|injury\s*time|challenge\s*/?\s*review|riding\s*time|"
+    r"caution|penalt|reset\s*/?\s*stalemate|referee\s*stoppage|time\s*out|whistle|"
+    r"out\s*of\s*bounds",
+    re.IGNORECASE,
+)
+
+# A bout carrying strikes but fewer than this many grappling actions is a striking
+# match (MMA), not grappling — skip it entirely. Pure-grappling bouts (no strikes)
+# are never gated, so fast submissions with 1-3 actions still import.
+_MIN_GRAPPLING = 4
+
+# KO/TKO = a striking finish (no grappling match is ever a KO). Used to gate empty
+# striking marathons that logged zero events. NOTE: _win_type_from_method stores KO
+# as "DECISION", so KO must be read from the raw method string, not win_type.
+_KO_RE = re.compile(r"\b(ko|tko)\b", re.IGNORECASE)
+
+
+def _parse_timestamp(ts: Any) -> int | None:
+    """Parse H:MM:SS or M:SS timestamp string to seconds, or return None."""
+    if not isinstance(ts, str):
+        return None
+    ts = ts.strip()
+    if not ts:
+        return None
+    try:
+        parts = ts.split(":")
+        if len(parts) == 3:
+            h, m, s = int(parts[0]), int(parts[1]), int(parts[2])
+            return h * 3600 + m * 60 + s
+        elif len(parts) == 2:
+            m, s = int(parts[0]), int(parts[1])
+            return m * 60 + s
+    except (ValueError, IndexError):
+        pass
+    return None
+
 
 class CanonicalMatch:
     """One de-duped bout, ready for register_match (names not yet resolved to ids)."""
 
     __slots__ = (
         "a_name", "b_name", "year", "winner_name", "win_type", "submission", "events",
+        "strike_count", "ko_finish",
     )
 
     def __init__(
@@ -71,6 +112,8 @@ class CanonicalMatch:
         win_type: str | None,
         submission: str | None,
         events: list[dict[str, Any]],
+        strike_count: int = 0,
+        ko_finish: bool = False,
     ) -> None:
         self.a_name = a_name
         self.b_name = b_name
@@ -79,6 +122,8 @@ class CanonicalMatch:
         self.win_type = win_type
         self.submission = submission
         self.events = events
+        self.strike_count = strike_count  # raw striking events seen (pre-filter) → gate MMA
+        self.ko_finish = ko_finish  # KO/TKO striking finish → gate empty striking bouts
 
 
 def _win_type_from_method(method: str) -> str | None:
@@ -120,7 +165,8 @@ def _clean_events(
     a_name: str, b_name: str, events: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
     """Drop referee/reset events; tag each remaining event with its actor's name (resolved
-    to an id later) and retype takedown-labelled transitions."""
+    to an id later), retype takedown-labelled transitions, and preserve timestamps (ts in
+    seconds) if present."""
     a_norm, b_norm = _normalize_name(a_name), _normalize_name(b_name)
     out: list[dict[str, Any]] = []
     for e in events:
@@ -136,11 +182,19 @@ def _clean_events(
             continue
         label = str(e.get("label", ""))
         typ = str(e.get("type", ""))
+        if typ == "strike":
+            continue  # striking node — grappling graph only
+        if _NON_TECHNIQUE_RE.search(label):
+            continue  # referee call / stalling / clock stat — not a technique
         if typ == "transition" and _TAKEDOWN_RE.search(label):
             typ = "takedown"
         item: dict[str, Any] = {"label": label, "type": typ, "actor": actor}
         if "successful" in e:
             item["successful"] = bool(e["successful"])
+        raw_ts = e.get("ts", e.get("timestamp"))  # dumps say "timestamp"; harvest says "ts"
+        ts = _parse_timestamp(raw_ts) if isinstance(raw_ts, str) else raw_ts
+        if isinstance(ts, int):
+            item["ts"] = ts
         out.append(item)
     return out
 

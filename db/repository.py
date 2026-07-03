@@ -567,6 +567,41 @@ def assign_archetype_to_graph(graph_id: str, archetype_id: int, session: Session
         graph.archetype_id = archetype_id
 
 
+def archetype_refs(session: Session) -> list[Any]:
+    """Load archetypes as match-ready ``ArchetypeRef``s (18-d feature centroid +
+    optional 768-d embedding). Rows without a stored feature centroid are skipped
+    (can't be compared structurally)."""
+    import numpy as np
+
+    from analysis.archetype import ArchetypeRef
+
+    refs: list[Any] = []
+    for a in session.execute(select(Archetype)).scalars():
+        centroid = (a.centroid or {}).get("vector") if a.centroid else None
+        if not centroid:
+            continue
+        refs.append(ArchetypeRef(
+            id=a.id,
+            name=a.name,
+            signature_types=list(a.signature_types or []),
+            centroid_vec=np.asarray(centroid, dtype=np.float64),
+            embedding=(
+                np.asarray(a.embedding, dtype=np.float64) if a.embedding is not None else None
+            ),
+        ))
+    return refs
+
+
+def assign_user_archetype_to_graph(
+    graph_id: str, archetype_id: int, report: dict[str, Any], session: Session
+) -> None:
+    """Persist a user graph's matched archetype + its structural similar/differ report."""
+    graph = session.get(Graph, graph_id)
+    if graph:
+        graph.archetype_id = archetype_id
+        graph.archetype_report = report
+
+
 def clear_archetypes(session: Session) -> int:
     """Null graph refs to EMERGENT archetypes and delete those rows before a recompute.
 

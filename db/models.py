@@ -97,6 +97,10 @@ class Graph(Base):
     user_elo: Mapped[float | None] = mapped_column(Float)
     schema_version: Mapped[int] = mapped_column(Integer, default=3)
     archetype_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("archetypes.id"))
+    # User-graph structural comparison vs the nearest archetype (alembic 0015) —
+    # {name, similar[], differ[], signature{}}. Written by scripts.assign_user_archetypes;
+    # the App reads it under graphs_user_select RLS. NULL for athlete graphs / until run.
+    archetype_report: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )

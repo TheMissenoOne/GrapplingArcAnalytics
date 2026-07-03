@@ -24,6 +24,7 @@ from analysis.network_metrics import (
     reward_risk_ranking,
     route_to_submission,
 )
+from analysis.path_to_victory import control_score, dilemmas, path_to_victory
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,17 @@ def generate_insights(session: Any) -> dict[str, Any]:
     ids, mat = athlete_style_vectors(session)
     similarity = {nm: nearest_in(ids, mat, nm, 5) for nm in _notable_names(session, ids)}
 
+    # Path-to-victory analysis
+    v = path_to_victory(g)
+    ptv_ranking = sorted(
+        [(n, v[n]) for n in g], key=lambda x: abs(x[1]), reverse=True
+    )[:10]
+    dilemmas_found = dilemmas(g, v)[:10]
+    control = control_score(g, v)
+    control_ranking = sorted(
+        [(n, control[n]) for n in control], key=lambda x: x[1], reverse=True
+    )[:10]
+
     return {
         "network": {
             "nodes": g.number_of_nodes(),
@@ -61,6 +73,9 @@ def generate_insights(session: Any) -> dict[str, Any]:
         "routes": routes,
         "communities": communities,
         "similarity": similarity,
+        "path_to_victory": [[n, v] for n, v in ptv_ranking],
+        "dilemmas": dilemmas_found,
+        "control": [[n, c] for n, c in control_ranking],
     }
 
 
@@ -121,6 +136,16 @@ def render_markdown(r: dict[str, Any]) -> str:
     ]
     out += [f"| {i+1} | {n} | {rr:+.3f} | {occ} |"
             for i, (n, rr, occ) in enumerate(r["reward_risk"])]
+    out += ["", "## Path-to-Victory — multi-step advantage by position", ""]
+    out += [f"| {i+1} | {n} | {v:+.3f} |"
+            for i, (n, v) in enumerate(r["path_to_victory"])]
+    out += ["", "## Dilemma forks — high-variance either/or decisions", ""]
+    for d in r["dilemmas"][:5]:
+        branches_str = ", ".join(b for b, _ in d["branches"][:2])
+        out.append(f"- **{d['node']}** (PtV {d['ptv']:+.3f}): → {branches_str}")
+    out += ["", "## Control score — consistency of good options", ""]
+    out += [f"| {i+1} | {n} | {c:+.3f} |"
+            for i, (n, c) in enumerate(r["control"])]
     out += ["", "## Highest-probability routes to a finish", ""]
     out += [f"- **{start}** → " + " → ".join(path[1:])
             for start, path in r["routes"].items() if len(path) > 1]
