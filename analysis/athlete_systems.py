@@ -139,7 +139,14 @@ def detect_athlete_systems(
             pr = nx.pagerank(sub, weight="weight")
         except nx.PowerIterationFailedConvergence:
             pr = {n: 1.0 / len(sub) for n in sub}
-        hub = max(pr, key=pr.get) if pr else members[0]
+        # Prefer specific techniques over bare categories / placeholder labels
+        generic = {"sweep", "takedown", "pass", "guard pass", "escape", "control",
+                   "finish", "start", "entry"}
+        if pr:
+            ranked = sorted(pr, key=pr.get, reverse=True)
+            hub = next((n for n in ranked if n not in generic), ranked[0])
+        else:
+            hub = members[0]
 
         hub_node = graph.nodes.get(hub)
         hub_type = hub_node.type if hub_node else ""
@@ -152,9 +159,8 @@ def detect_athlete_systems(
 
         system_elo = float(np.mean(elos)) if elos else None
 
-        dom_type = type_counts.most_common(1)[0][0] if type_counts else ""
         label = hub_node.label if hub_node else hub
-        name = f"{dom_type.title()} ({label})" if dom_type else label
+        name = label
 
         systems.append(AthleteSystem(
             name=name,
