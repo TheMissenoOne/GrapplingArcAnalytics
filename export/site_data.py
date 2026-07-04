@@ -101,11 +101,18 @@ def _result_short(meta: dict[str, Any]) -> str:
     return "N/C"
 
 
+# Per-export memo: _archetype runs 2 remote queries/call and is hit ~1000× (2–4×/match) for
+# only ~200 distinct athletes. Cleared at the top of export_site so a fresh run re-reads.
+_ARCH_CACHE: dict[str, str | None] = {}
+
+
 def _archetype(athlete: Athlete | None, session: Session) -> str | None:
     """Emergent archetype name for an athlete — stored on their Graph (deviance v3 pipeline
-    assigns Graph.archetype_id, not Athlete.archetype_id)."""
+    assigns Graph.archetype_id, not Athlete.archetype_id). Memoized per athlete per export."""
     if athlete is None:
         return None
+    if athlete.id in _ARCH_CACHE:
+        return _ARCH_CACHE[athlete.id]
     from db.models import Graph
 
     aid = session.execute(
@@ -114,10 +121,10 @@ def _archetype(athlete: Athlete | None, session: Session) -> str | None:
                Graph.archetype_id.isnot(None))
         .limit(1)
     ).scalar_one_or_none()
-    if aid is None:
-        return None
-    arch = session.get(Archetype, aid)
-    return arch.name if arch else None
+    arch = session.get(Archetype, aid) if aid is not None else None
+    name = arch.name if arch else None
+    _ARCH_CACHE[athlete.id] = name
+    return name
 
 
 def _to_graphview(
@@ -207,6 +214,10 @@ def build_breakdowns(
     from analysis.network_metrics import build_transition_network
     corpus_g = build_transition_network(session)
     ptv_v = path_to_victory(corpus_g)
+
+    # Warm the identity map once so per-match session.get(Athlete) hits cache, not a remote
+    # round-trip per distinct athlete.
+    list(session.execute(select(Athlete)).scalars())
 
     for match in _final_matches(session):
         a = session.get(Athlete, match.athlete_a_id)
@@ -1205,17 +1216,29 @@ def _js_file(var: str, data: Any) -> str:
 
 
 def export_site(session: Session, out: Path) -> dict[str, int]:
+    from time import perf_counter as _pc
+
+    def _phase(label: str, t0: float) -> float:
+        logger.info("  [export] %s: %.1fs", label, _pc() - t0)
+        return _pc()
+
     out.mkdir(parents=True, exist_ok=True)
+    _ARCH_CACHE.clear()  # fresh archetype reads per export run
     # Prune stale generated detail pages so hidden fighters / dropped bouts don't orphan
     # (keep the hand-written static grapple-like.html index).
     for old in (*out.glob("breakdown-*.html"), *out.glob("grapple-*.html"),
                 *out.glob("event-*.html")):
         if old.name != "grapple-like.html":
             old.unlink()
+    _t = _pc()
     rows, full, featured = build_breakdowns(session)
+    _t = _phase("build_breakdowns", _t)
     fighters, details = build_fighters(session)
+    _t = _phase("build_fighters", _t)
     events, event_details = build_events(session)
+    _t = _phase("build_events", _t)
     elo = build_elo(session)
+    _t = _phase("build_elo", _t)
 
     bd_js = _js_file("GA_BREAKDOWNS", rows)
     bd_js += f"window.GA_FEATURED = {json.dumps(featured, ensure_ascii=False)};\n"
@@ -1228,18 +1251,27 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     ocean = build_ocean(session)
     (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
     (out / "the-ocean.html").write_text(render_ocean_page(), encoding="utf-8")
+    _t = _phase("build_ocean + data.js", _t)
 
     # per-match detail pages (attach archetypes + adapted graph for the template)
     dossier_slugs = frozenset(details)  # fighters that actually have a Grapple Like dossier
+    slow = ("", 0.0)
     for slug, bd in full:
+        _s = _pc()
         bd["_arch_a"] = next((r["a"]["style"] for r in rows if r["id"] == slug), "")
         bd["_arch_b"] = next((r["b"]["style"] for r in rows if r["id"] == slug), "")
         bd["transition_graph_gv"] = _to_graphview(bd["transition_graph"])
         (out / f"breakdown-{slug}.html").write_text(
             render_breakdown_page(slug, bd, dossier_slugs), encoding="utf-8")
+        if _pc() - _s > slow[1]:
+            slow = (slug, _pc() - _s)
+    logger.info("  [export] render breakdowns: %.1fs (slowest %s %.2fs)", _pc() - _t, *slow)
+    _t = _pc()
 
     # per-fighter dossiers (reuse the profile + career graph computed above)
+    slow = ("", 0.0)
     for slug, d in details.items():
+        _s = _pc()
         profile = d["profile"]
         profile["_career_gv"] = d["career"]
         profile["_systems"] = d.get("_systems") or {}
@@ -1249,11 +1281,16 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
         profile["_defense"] = d.get("_defense") or None
         (out / f"grapple-{slug}.html").write_text(
             render_profile_page(profile), encoding="utf-8")
+        if _pc() - _s > slow[1]:
+            slow = (slug, _pc() - _s)
+    logger.info("  [export] render dossiers: %.1fs (slowest %s %.2fs)", _pc() - _t, *slow)
+    _t = _pc()
 
     # per-event card pages
     for slug, ep in event_details:
         (out / f"event-{slug}.html").write_text(
             render_event_page(slug, ep), encoding="utf-8")
+    _t = _phase("render events", _t)
 
     # robots.txt + sitemap.xml (acquisition baseline — the site was invisible to crawlers).
     static_pages = ["index.html", "breakdowns.html", "events.html", "grapple-like.html",
