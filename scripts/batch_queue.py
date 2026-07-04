@@ -1,4 +1,5 @@
 """Batch-extract match data from queue transcripts and generate scripts/*_data.py modules."""
+import pprint
 import re
 from pathlib import Path
 
@@ -317,8 +318,8 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
         bt['events'] = []
         data.append({(r['a'], r['year']): bt})
 
-    # Serialize with repr for tuple keys
-    raw_str = repr(data)
+    # Serialize with pprint for readability (greppable per-bout lines, still valid Python literal)
+    raw_str = pprint.pformat(data, width=100, sort_dicts=False)
 
     module_name = snake(stem)
     module_path = DUMPS / f"{module_name}_data.py"
