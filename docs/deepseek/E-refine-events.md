@@ -90,6 +90,62 @@ These rules enforce **correctness on import**. Violate them and your events vani
 
 ---
 
+## Actor Ownership Rules (WHICH fighter owns each node)
+
+Rule 1 (above) is about spelling the name right. This is about picking the **right fighter**.
+`actor` is **not** "who is winning the exchange" or "who the commentator is talking about" — it is
+the fighter whose **game that node belongs to**. Each fighter's dossier graph is built only from the
+nodes they own, so if you attribute a guard to the passer, the guard player's game loses their guard
+and the passer's game gains one that isn't theirs.
+
+**actor = the fighter who, for that node type:**
+
+| type         | owner = the fighter who…                                                        |
+|--------------|---------------------------------------------------------------------------------|
+| `guard`      | is **playing / retaining the guard** (bottom — whoever's guard it is)            |
+| `pass`       | is **passing / clearing** the guard (top, attacking the guard)                  |
+| `control`    | **holds** the dominant position (mount, back, side, knee-on-belly, crucifix, N-S)|
+| `takedown`   | **completes** the takedown / throw                                              |
+| `sweep`      | executes the **sweep / reversal** (bottom → top)                                |
+| `submission` | **applies** the submission                                                      |
+| `escape`     | **escapes** the bad position (out of mount, back, a submission)                 |
+| `transition` | **initiates** the movement (guard pull, berimbolo, inversion, entry to a spot)  |
+
+### The one that trips people up: guard belongs to the guard player, not the passer
+
+One physical moment is often **two events with different actors**. A is on top passing, B is on
+bottom in half guard:
+
+```json
+{"label": "Half Guard", "type": "guard", "actor": "B", "ts": 140}
+{"label": "Guard Pass",  "type": "pass",  "actor": "A", "successful": false, "ts": 145}
+```
+
+Half Guard is **B's** (their game shows half guard); the pass attempt is **A's**. Never assign the
+guard to A just because A is the active/aggressing fighter.
+
+### Identifying the guard player
+
+The guard is owned by whoever **pulled guard**, is **underneath**, is **being passed against**, or is
+named with the guard: *"in Gordon's half guard"*, *"Mica's De la Riva"* → the guard is Gordon's /
+Mica's, even if the sentence is about the opponent trying to pass it. A completed pass **ends** the
+guard node (the passer now owns a `control` node); a guard recovery/retention **re-opens** it (guard
+player owns it again).
+
+### Attacks from a position keep their attacker
+
+A submission or sweep launched **from** guard is a separate node owned by whoever throws it — usually
+the guard player. Triangle from closed guard → the guard player owns **both** the `guard` (Closed
+Guard) and the `submission` (Triangle Choke). Back-take → the one taking the back owns the `control`.
+
+### Neutral / symmetric positions
+
+50/50, double guard pull, a neutral leg entanglement, standing grip-fighting: assign to the fighter
+who **initiated** it or is the more active party; if truly symmetric, assign it to the fighter who
+**breaks the symmetry** (attacks or transitions out of it) so the node lands in the game that used it.
+
+---
+
 ## Timestamp Rules (pbp → ts)
 
 `pbp[].ts` is integer seconds from bout start (e.g. `0`, `12`, `142`). Every emitted event **must** carry a `ts` field.

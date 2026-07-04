@@ -90,6 +90,14 @@ kagglehub → data/raw/{key}/ → Pipeline.clean() → Pipeline.normalize() → 
                                                               export/*.py (produce app JSON)
 ```
 
+## Match Event Model
+
+A bout's `sequence` = events `{label, type, actor, successful?, ts?}` → transition graph. **Any**
+entry path (DeepSeek refiner, `convert_dump.py`, `insert_*.py`, admin paste) must follow one
+convention — **`actor` = the fighter whose game the node belongs to**, not who's winning: a `guard`
+node is owned by the **guard player** (bottom), the `pass` by the passer. Full model + the per-type
+ownership table: **`docs/match_event_model.md`** (refiner-facing copy in `docs/deepseek/E-refine-events.md`).
+
 ## ELO Engine
 
 From `felixgnwn/adcc_elo_engine/elo_engine.py`:
