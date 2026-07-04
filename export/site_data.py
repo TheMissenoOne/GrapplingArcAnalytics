@@ -38,6 +38,8 @@ from analysis.athlete_systems import (
     from_career_graphview,
     profile_to_dict,
 )
+from analysis.counter_moves import counter_moves
+from analysis.defense_rate import defense_profile
 from analysis.event_profile import build_event_profile, event_names
 from analysis.names import _normalize_name
 from analysis.network_metrics import network_from_sequences
@@ -287,6 +289,9 @@ def build_fighters(
     cards: list[dict[str, Any]] = []
     details: dict[str, dict[str, Any]] = {}
     system_profiles: dict[str, Any] = {}
+    # Warm the identity map once so per-match opponent-ELO lookups (defense_profile →
+    # opponent_input_elo → session.get) hit cache instead of a remote round-trip each.
+    list(session.execute(select(Athlete)).scalars())
     for match in _final_matches(session):
         for aid in (match.athlete_a_id, match.athlete_b_id):
             if aid in seen:
@@ -333,6 +338,7 @@ def build_fighters(
             ).scalars().all()
             athlete_sequences = [m.sequence for m in athlete_matches if m.sequence]
             fighter_dilemmas_list = []
+            fighter_counters_list: list[dict[str, Any]] = []
             if athlete_sequences:
                 try:
                     fighter_g = network_from_sequences(athlete_sequences)
@@ -345,8 +351,29 @@ def build_fighters(
                         }
                         for d in fighter_dilemmas[:3]
                     ]
+                    # Counter moves: the athlete's best-value responses per position;
+                    # keep the few positions whose top counter lands highest.
+                    cm = counter_moves(fighter_g, fighter_ptv, top_k=2, min_count=2)
+                    top_cm = sorted(
+                        cm.items(), key=lambda kv: kv[1][0]["ptv"], reverse=True
+                    )[:5]
+                    fighter_counters_list = [
+                        {
+                            "technique": node,
+                            "counters": [
+                                {"move": c["counter"], "leads_to": c["leads_to"]}
+                                for c in cs
+                            ],
+                        }
+                        for node, cs in top_cm
+                    ]
                 except Exception:
                     pass  # graceful fallback if graph is too sparse
+
+            try:
+                fighter_defense = defense_profile(aid, athlete_matches, session)
+            except Exception:
+                fighter_defense = None
 
             details[slug] = {
                 "athlete": athlete,
@@ -354,6 +381,8 @@ def build_fighters(
                 "career": career,
                 "_systems": profile_to_dict(system_profile),
                 "_dilemmas": fighter_dilemmas_list,
+                "_counters": fighter_counters_list,
+                "_defense": fighter_defense,
                 "_videos": _node_video_refs(aid, athlete_matches, session),
             }
 
@@ -415,6 +444,7 @@ def _nav(active: str) -> str:
     return f"""<div class="beltline"></div>
 <header class="site-head"><div class="wrap">
   <a class="brand" href="index.html"><span class="mark">GA</span>Grappling<span class="o">Arc</span></a>
+  <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="siteNav" onclick="this.setAttribute('aria-expanded',document.body.classList.toggle('nav-open'))"><span></span><span></span></button>
   <nav class="site-nav" id="siteNav">
     <a href="index.html"{cls('home')}>Home</a>
     <a href="breakdowns.html"{cls('breakdowns')}>Breakdowns</a>
@@ -422,12 +452,11 @@ def _nav(active: str) -> str:
     <a href="grapple-like.html"{cls('grapple')}>Grapple Like</a>
     <a href="the-ocean.html"{cls('ocean')}>The Ocean</a>
     <a href="the-data.html"{cls('data')}>The Data</a>
+    <div class="nav-cta">
+      <div class="lang"><button data-lang="en" class="on">EN</button><button data-lang="pt">PT</button></div>
+      <a class="btn app sm" href="index.html#app">Get the App</a>
+    </div>
   </nav>
-  <div class="head-right">
-    <div class="lang"><button data-lang="en" class="on">EN</button><button data-lang="pt">PT</button></div>
-    <a class="btn app sm" href="index.html#app">Get the App</a>
-    <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="siteNav" onclick="this.setAttribute('aria-expanded',document.body.classList.toggle('nav-open'))"><span></span><span></span></button>
-  </div>
 </div></header>"""
 
 
@@ -436,8 +465,9 @@ _FOOTER = """<footer class="site-foot"><div class="wrap">
   <nav class="links">
     <a href="breakdowns.html">Breakdowns</a><a href="events.html">Events</a><a href="grapple-like.html">Grapple Like</a>
     <a href="the-ocean.html">The Ocean</a><a href="the-data.html">The Data</a>
+    <a href="../privacy.html">Privacy</a><a href="../account-deletion.html">Data &amp; Deletion</a>
   </nav>
-  <p class="copy">© 2026 GrapplingArc · generated from match data</p>
+  <p class="copy">© 2026 GrapplingArc · generated from match data · analysis &amp; education only</p>
 </div></footer>"""
 
 # Canonical/OG base — keep in sync with _config.yml url + baseurl (+ /site).
@@ -863,6 +893,57 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     h2 = (h1 + 40) % 360
     hero_bg = (f"background-image:url('assets/fighters/{slug}.jpg'),"
                f"linear-gradient(135deg,hsl({h1},38%,16%),hsl({h2},32%,7%))")
+
+    # ELO-adjusted Defense Rate — share of opponents' attempts stuffed, opp-ELO weighted.
+    defense = profile.get("_defense") or None
+    defense_html = ""
+    if defense and defense.get("categories"):
+        dcats = [(c, v) for c, v in defense["categories"].items() if v.get("rate") is not None]
+        if dcats:
+            ov = defense.get("overall")
+            ov_card = (
+                f'<div class="fincard"><div class="k">Overall defense</div>'
+                f'<div class="v" style="color:var(--good)">{round(ov * 100)}%</div>'
+                f'<div class="cap">ELO-weighted</div></div>'
+            ) if ov is not None else ""
+            dcards = "".join(
+                f'<div class="fincard"><div class="k">{html.escape(c.title())} defense</div>'
+                f'<div class="v">{round(v["rate"] * 100)}%</div>'
+                f'<div class="cap">{v["attempts"]} faced · avg opp {round(v["elo_wt"])}</div></div>'
+                for c, v in dcats
+            )
+            defense_html = f"""<section class="mod"><div class="wrap">
+  <div class="sec-head"><span class="eyebrow">Defense</span>
+    <h2 class="h-lg mt16">What he stops, weighted by who threw it</h2></div>
+  <div class="fingrid">{ov_card}{dcards}</div>
+  <p class="graph-hint">Share of opponents' attempts stuffed, each weighted by that
+  opponent's Grappling ELO — defending an elite is worth more than defending a novice.</p>
+</div></section>"""
+
+    # Counter Moves — highest-value response per position (PtV of where it lands).
+    counters = profile.get("_counters") or []
+    counters_html = ""
+    if counters:
+        rows = "".join(
+            f'<div class="fork"><span class="fk">{html.escape(cm["technique"])}</span>'
+            f'<span class="or">→</span>'
+            + '<span class="or">·</span>'.join(
+                f'<span class="fbr">{html.escape(c["move"])}'
+                + (f' <span class="or">leads to</span> {html.escape(c["leads_to"])}'
+                   if c.get("leads_to") else "")
+                + '</span>'
+                for c in cm["counters"]
+            )
+            + "</div>"
+            for cm in counters
+        )
+        counters_html = f"""<section class="mod"><div class="wrap">
+  <div class="sec-head"><span class="eyebrow orange">Counter moves</span>
+    <h2 class="h-lg mt16">His highest-value answer from each position</h2></div>
+  <div class="forks"><div class="fork-rows">{rows}</div></div>
+  <p class="graph-hint">Ranked by Path-to-Victory value of where the response lands.</p>
+</div></section>"""
+
     body = f"""{_nav('grapple')}
 <section class="dossier">
   <div class="hero-bg" style="{hero_bg}"></div>
@@ -908,6 +989,8 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     <h2 class="h-lg mt16">Where the matches end</h2></div>
   <div class="fingrid">{fincards}</div>
 </div></section>
+{defense_html}
+{counters_html}
 <section class="mod"><div class="wrap">
   <div class="sec-head flex jb ac wrap-fx" style="gap:14px"><div>
     <span class="eyebrow">From abstract to concrete</span>
@@ -1162,6 +1245,8 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
         profile["_systems"] = d.get("_systems") or {}
         profile["_analogues"] = d.get("analogues") or []
         profile["_videos"] = d.get("_videos") or {}
+        profile["_counters"] = d.get("_counters") or []
+        profile["_defense"] = d.get("_defense") or None
         (out / f"grapple-{slug}.html").write_text(
             render_profile_page(profile), encoding="utf-8")
 
