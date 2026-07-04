@@ -1,10 +1,10 @@
 """Batch-extract match data from queue transcripts and generate scripts/*_data.py modules."""
-import json, os, shutil, sys, re
+import re
 from pathlib import Path
 
 QUEUE = Path(__file__).resolve().parent.parent / "transcripts" / "queue"
 TRANSCRIPTS = QUEUE.parent
-SCRIPTS = Path(__file__).resolve().parent.parent / "scripts"
+DUMPS = Path(__file__).resolve().parent / "dumps"
 
 HEADER = '''"""%s — auto-generated from transcript."""
 # ruff: noqa: E501
@@ -32,10 +32,7 @@ def clean_name(name: str) -> str:
 def parse_match_card(text: str) -> list[dict]:
     """Parse transcript to extract match listing."""
     matches = []
-    # Strategy 1: Find the Ref: block with match card
-    ref_match = re.search(r'Ref:\s*(".*?")(?:\s*\n\s*Link:)?', text, re.DOTALL)
-    
-    # Strategy 2: CJI-style timeline (timestamp Name vs Name)
+    # CJI-style timeline (timestamp Name vs Name); Ref-block fallback lives in the caller.
     # Look for lines like "1:16:50 Luke Griffith vs Pat Downey"
     for line in text.split('\n'):
         line = line.strip()
@@ -71,7 +68,7 @@ def parse_match_card(text: str) -> list[dict]:
                 'start': vs_match.group(3),
                 'end': vs_match.group(4) or '',
             })
-    
+
     # Deduplicate by (a,b) keeping first occurrence
     seen = set()
     unique = []
@@ -90,6 +87,51 @@ def ts_to_sec(ts: str) -> int:
     elif len(parts) == 2:
         return parts[0] * 60 + parts[1]
     return parts[0]
+
+
+# YouTube auto-caption body = repeating "<timestamp>\n<duration label>\n<commentary>".
+_TS_LINE = re.compile(r'^(\d{1,2}:\d{2}(?::\d{2})?)$')
+_DUR_LINE = re.compile(r'^\d+\s+(segundos?|minutos?|seconds?|minutes?)\b', re.IGNORECASE)
+_NOISE = re.compile(r'\[(music|música|laughter|applause|aplausos?|risos?)\]', re.IGNORECASE)
+
+# Submission keywords → display name (preliminary win-type hint for the refiner).
+SUB_KEYWORDS = {
+    'armbar': 'Armbar', 'triangle': 'Triangle Choke', 'rear naked': 'Rear Naked Choke',
+    'heel hook': 'Heel Hook', 'toe hold': 'Toe Hold', 'knee bar': 'Knee Bar',
+    'kimura': 'Kimura', 'americana': 'Americana', 'guillotine': 'Guillotine',
+    "d'arce": "D'Arce Choke", 'darce': "D'Arce Choke", 'anaconda': 'Anaconda Choke',
+    'bicep': 'Bicep Slicer', 'calf slicer': 'Calf Slicer', 'omoplata': 'Omoplata',
+    'wrist lock': 'Wrist Lock', 'clock choke': 'Clock Choke', 'ezekiel': 'Ezekiel Choke',
+    'north south': 'North-South Choke', 'von flue': 'Von Flue Choke', 'twister': 'Twister',
+    'shoulder lock': 'Shoulder Lock', 'foot lock': 'Foot Lock', 'choke': 'Choke',
+}
+
+
+def parse_pbp(text: str) -> list[tuple[int, str]]:
+    """Parse the caption body into ``[(sec, commentary)]`` segments — one per timestamp,
+    with the duration label and [music]/[laughter] noise stripped. Empty lines dropped."""
+    lines = text.split('\n')
+    out: list[tuple[int, str]] = []
+    i = 0
+    while i < len(lines):
+        m = _TS_LINE.match(lines[i].strip())
+        if not m:
+            i += 1
+            continue
+        sec = ts_to_sec(m.group(1))
+        buf: list[str] = []
+        j = i + 1
+        while j < len(lines) and not _TS_LINE.match(lines[j].strip()):
+            ln = lines[j].strip()
+            if ln and not _DUR_LINE.match(ln):
+                buf.append(_NOISE.sub('', ln).strip())
+            j += 1
+        seg = ' '.join(s for s in buf if s).strip()
+        seg = re.sub(r'\s+', ' ', seg)
+        if seg:
+            out.append((sec, seg))
+        i = j
+    return out
 
 # Map stems to event names
 STUB_EVENTS = {
@@ -131,7 +173,7 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
     stem = txt_path.stem
     event = STUB_EVENTS.get(stem, stem)
     text = txt_path.read_text(encoding="utf-8", errors="replace")
-    
+
     matches = parse_match_card(text)
     if not matches:
         print(f"⚠  {stem}: no match card found, trying line-by-line")
@@ -148,27 +190,28 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
                         'start': vs.group(3),
                         'end': '',
                     })
-    
+
     if not matches:
         print(f"✗  {stem}: NO matches found — skipping")
         continue
-    
+
     year = 2025
     if "2024" in stem or "ADCC" in stem:
         year = 2024
     elif "2026" in stem or "PGF" in stem:
         year = 2026
-    
+
+    all_segments = parse_pbp(text)  # cleaned (sec, commentary) segments
     records = []
-    for i, m in enumerate(matches[:20]):
+    for i, m in enumerate(matches[:40]):
         winner = None
         win_type = None
         submission = None
-        
+
         # Determine the end point for text search
         end_sec = ts_to_sec(m['end']) if m['end'] else None
         start_sec = ts_to_sec(m['start']) if m['start'] else None
-        
+
         # If no end time, use next match's start or +5min
         if end_sec is None and start_sec is not None:
             if i + 1 < len(matches):
@@ -176,7 +219,7 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
                 end_sec = next_start if next_start else start_sec + 600
             else:
                 end_sec = start_sec + 600  # last match: +10min
-        
+
         if end_sec and start_sec:
             window_start = max(0, start_sec)
             window_end = end_sec + 120  # search 2min after end
@@ -190,7 +233,7 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
                         relevant.append(line)
                         break
             relevant_text = '\n'.join(relevant)
-            
+
             # Check for submission keywords (reliable — mentions the actual sub)
             sub_keywords = {
                 'armbar': 'Armbar', 'triangle': 'Triangle Choke', 'rear naked': 'Rear Naked Choke',
@@ -221,7 +264,7 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
                     winner = m['a']
                 elif b_lower in surrounding:
                     winner = m['b']
-            
+
             # Check for decision/draw only if not already a submission
             if not win_type:
                 lower = relevant_text.lower()
@@ -234,7 +277,13 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
                 elif 'draw' in lower:
                     win_type = "DRAW"
                 # NO default — leave as None if no evidence
-        
+
+        # Per-bout commentary window = the PRELIMINARY structure the refiner reads.
+        pbp = []
+        if start_sec is not None:
+            wend = end_sec or start_sec + 900
+            pbp = [{"ts": max(0, s - start_sec), "text": t}
+                   for (s, t) in all_segments if start_sec - 10 <= s <= wend][:500]
         records.append({
             "a": m['a'],
             "b": m['b'],
@@ -243,8 +292,9 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
             "submission": submission,
             "start": m['start'],
             "year": year,
+            "pbp": pbp,
         })
-    
+
     # Build RAW list
     data = []
     for r in records:
@@ -261,15 +311,18 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
         bt['stage'] = ""
         bt['win_type'] = r['win_type']  # None = unknown
         bt['submission'] = r['submission']
+        # PRELIMINARY play-by-play (ts relative to bout start). A refiner LLM reads `pbp`
+        # and fills `events` -> [{label, type, actor, successful}]; then `pbp` is dropped.
+        bt['pbp'] = r['pbp']
         bt['events'] = []
         data.append({(r['a'], r['year']): bt})
-    
+
     # Serialize with repr for tuple keys
     raw_str = repr(data)
-    
+
     module_name = snake(stem)
-    module_path = SCRIPTS / f"{module_name}_data.py"
-    
+    module_path = DUMPS / f"{module_name}_data.py"
+
     # Skip if module already exists with real data (has event labels, not just skeleton)
     if module_path.exists():
         existing = module_path.read_text(encoding="utf-8")
@@ -277,14 +330,14 @@ for txt_path in sorted(QUEUE.glob("*.txt")):
             print(f"∼  {stem}: module exists with event data — skipping")
             modules.append((module_name, event, snake(snake(stem))))
             continue
-    
+
     module_path.write_text(HEADER % (event, raw_str))
     modules.append((module_name, event, snake(snake(stem))))
-    print(f"✓  {stem} → scripts/{module_name}_data.py ({len(data)} matches)")
+    print(f"✓  {stem} → scripts/dumps/{module_name}_data.py ({len(data)} matches)")
 
 print(f"\n=== {len(modules)} modules generated ===")
 
 # Output reprocess_all DATASETS entries
 print("\nAdd to reprocess_all.py DATASETS:")
 for mod, ev, label in modules:
-    print(f'    ("scripts.{mod}_data", "{ev}", "{label}"),')
+    print(f'    ("scripts.dumps.{mod}_data", "{ev}", "{label}"),')
