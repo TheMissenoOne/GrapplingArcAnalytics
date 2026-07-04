@@ -1,0 +1,186 @@
+{
+  "Justin Gaethje|Rafael Fiziev: This fight is featured at the beginning of the video|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Justin Gaethje",
+      "timestamp": "0:39"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
+      "timestamp": "1:11"
+    },
+    {
+      "label": "Inverted Triangle",
+      "type": "submission",
+      "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
+      "timestamp": "1:13"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Justin Gaethje",
+      "timestamp": "1:35"
+    },
+    {
+      "label": "Knee on Belly",
+      "type": "control",
+      "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
+      "timestamp": "1:53"
+    },
+    {
+      "label": "Knee on Belly",
+      "type": "control",
+      "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
+      "timestamp": "2:44"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Justin Gaethje",
+      "timestamp": "5:44",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
+      "timestamp": "6:04"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Justin Gaethje",
+      "timestamp": "7:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Justin Gaethje",
+      "timestamp": "11:31"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
+      "timestamp": "11:52"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Justin Gaethje",
+      "timestamp": "12:04"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Justin Gaethje",
+      "timestamp": "13:00"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Justin Gaethje",
+      "timestamp": "13:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Justin Gaethje",
+      "timestamp": "15:09"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
+      "timestamp": "16:20"
+    }
+  ],
+  "Michael Chandler|Paddy Pimblett: This matchup begins at 17|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Michael Chandler",
+      "timestamp": "0:28"
+    }
+  ],
+  "Sean O'Malley|Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33|2025": [
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
+      "timestamp": "0:16"
+    },
+    {
+      "label": "Inverted Triangle",
+      "type": "submission",
+      "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
+      "timestamp": "0:18"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
+      "timestamp": "0:40"
+    },
+    {
+      "label": "Knee on Belly",
+      "type": "control",
+      "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
+      "timestamp": "0:58"
+    },
+    {
+      "label": "Knee on Belly",
+      "type": "control",
+      "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
+      "timestamp": "1:49"
+    }
+  ],
+  "Song Yadong|Ricky Simon: This main event starts at 1|2025": [
+    {
+      "label": "Knee on Belly",
+      "type": "control",
+      "actor": "Song Yadong",
+      "timestamp": "0:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Song Yadong",
+      "timestamp": "2:58",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Song Yadong",
+      "timestamp": "3:18"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Song Yadong",
+      "timestamp": "4:14"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Song Yadong",
+      "timestamp": "8:45"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Song Yadong",
+      "timestamp": "9:06"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Song Yadong",
+      "timestamp": "9:18"
+    }
+  ]
+}

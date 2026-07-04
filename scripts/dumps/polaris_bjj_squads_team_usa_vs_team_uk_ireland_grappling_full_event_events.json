@@ -1,0 +1,1501 @@
+{
+  "Match 1 (Jon Blank|Dan Strauss)|2025": [
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 1 (Jon Blank",
+      "timestamp": "0:45"
+    },
+    {
+      "label": "Ankle Lock",
+      "type": "submission",
+      "actor": "Match 1 (Jon Blank",
+      "timestamp": "1:10"
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Match 1 (Jon Blank",
+      "timestamp": "1:10"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Match 1 (Jon Blank",
+      "timestamp": "1:49"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 1 (Jon Blank",
+      "timestamp": "1:59",
+      "successful": false
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Match 1 (Jon Blank",
+      "timestamp": "2:03",
+      "successful": true
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Dan Strauss)",
+      "timestamp": "2:21"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Dan Strauss)",
+      "timestamp": "2:36"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Dan Strauss)",
+      "timestamp": "3:21",
+      "successful": false
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Dan Strauss)",
+      "timestamp": "3:21",
+      "successful": false
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 1 (Jon Blank",
+      "timestamp": "5:18"
+    }
+  ],
+  "Match 2 (Adam Benayoun|Kieran Davern)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "0:26"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "1:12"
+    },
+    {
+      "label": "50/50 Guard",
+      "type": "guard",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "1:25"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "1:29"
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Kieran Davern)",
+      "timestamp": "2:24"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "2:55",
+      "successful": false
+    },
+    {
+      "label": "Float Pass",
+      "type": "pass",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "3:06",
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "3:18"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "4:17"
+    },
+    {
+      "label": "Smash Pass",
+      "type": "pass",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "4:47"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "5:03"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "5:03"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 2 (Adam Benayoun",
+      "timestamp": "5:33"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Kieran Davern)",
+      "timestamp": "5:47",
+      "successful": false
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Kieran Davern)",
+      "timestamp": "5:47",
+      "successful": false
+    },
+    {
+      "label": "Foot Lock Attempt",
+      "type": "submission",
+      "actor": "Kieran Davern)",
+      "timestamp": "5:47",
+      "successful": false
+    }
+  ],
+  "Match 3 (Roberto Jimenez|Jed Hue)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "1:15"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Jed Hue)",
+      "timestamp": "1:25",
+      "successful": false
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Jed Hue)",
+      "timestamp": "1:25",
+      "successful": false
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "2:58"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "3:20"
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "4:03"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "4:13"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "4:13"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Jed Hue)",
+      "timestamp": "4:37"
+    },
+    {
+      "label": "North South",
+      "type": "control",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "4:54"
+    },
+    {
+      "label": "North-South Position",
+      "type": "control",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "4:54"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "4:54"
+    },
+    {
+      "label": "Bridge (Upa Escape)",
+      "type": "escape",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "5:10"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 3 (Roberto Jimenez",
+      "timestamp": "5:33",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jed Hue)",
+      "timestamp": "6:24"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Jed Hue)",
+      "timestamp": "6:39",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jed Hue)",
+      "timestamp": "6:39",
+      "successful": false
+    }
+  ],
+  "Match 4 (Nick Ronan|Ross Nicholls)|2025": [
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "0:26",
+      "successful": true
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "0:26",
+      "successful": true
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "0:59"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "1:39"
+    },
+    {
+      "label": "Shin to Shin Guard",
+      "type": "guard",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "2:57",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "3:07"
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "4:16"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "4:40"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "5:13"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Ross Nicholls)",
+      "timestamp": "5:24"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Match 4 (Nick Ronan",
+      "timestamp": "5:36"
+    }
+  ],
+  "Match 5 (Nathan Orchard|Darragh O'Connail)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "1:11"
+    },
+    {
+      "label": "50/50 Guard",
+      "type": "guard",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "1:39"
+    },
+    {
+      "label": "Calf Lock",
+      "type": "submission",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "2:33",
+      "successful": false
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "3:24"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "4:18"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "4:22",
+      "successful": false
+    },
+    {
+      "label": "Anaconda Choke",
+      "type": "submission",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "4:29"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "4:38"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 5 (Nathan Orchard",
+      "timestamp": "4:48"
+    }
+  ],
+  "Match 6 (Gio Martinez|Bradley Hill)|2025": [
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "0:16",
+      "successful": false
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "0:29"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Bradley Hill)",
+      "timestamp": "0:59",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Bradley Hill)",
+      "timestamp": "0:59",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "1:26",
+      "successful": false
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "1:41"
+    },
+    {
+      "label": "Body Lock Pass",
+      "type": "pass",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "1:41"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "1:41"
+    },
+    {
+      "label": "Leg Drag Pass",
+      "type": "pass",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "1:56",
+      "successful": false
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "1:56",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 6 (Gio Martinez",
+      "timestamp": "1:56",
+      "successful": false
+    }
+  ],
+  "Match 7 (Hunter Colvin|Ellis Younger)|2025": [
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 7 (Hunter Colvin",
+      "timestamp": "0:38"
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Match 7 (Hunter Colvin",
+      "timestamp": "1:31",
+      "successful": true
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Match 7 (Hunter Colvin",
+      "timestamp": "1:31",
+      "successful": true
+    },
+    {
+      "label": "Single Leg X",
+      "type": "guard",
+      "actor": "Ellis Younger)",
+      "timestamp": "1:38"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Ellis Younger)",
+      "timestamp": "1:38"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger)",
+      "timestamp": "1:38"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Match 7 (Hunter Colvin",
+      "timestamp": "2:29"
+    },
+    {
+      "label": "Tripod Sweep",
+      "type": "sweep",
+      "actor": "Match 7 (Hunter Colvin",
+      "timestamp": "3:53"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 7 (Hunter Colvin",
+      "timestamp": "3:53"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger)",
+      "timestamp": "4:14"
+    },
+    {
+      "label": "Ezekiel Choke",
+      "type": "submission",
+      "actor": "Match 7 (Hunter Colvin",
+      "timestamp": "4:23"
+    }
+  ],
+  "Match 8 (Nathan Orchard|Kieran Davern)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "0:04"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "0:45"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "1:09"
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "1:18",
+      "successful": false
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "1:18",
+      "successful": false
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Kieran Davern)",
+      "timestamp": "1:42"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "2:19",
+      "successful": false
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "2:27"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "2:32"
+    },
+    {
+      "label": "Snapdown",
+      "type": "takedown",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "2:37"
+    },
+    {
+      "label": "Uchi Mata",
+      "type": "takedown",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "3:11"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "3:52"
+    },
+    {
+      "label": "Groin Lock",
+      "type": "submission",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "4:07",
+      "successful": false
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "4:07",
+      "successful": false
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "4:19"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "4:19"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "4:19"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "4:45",
+      "successful": false
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "4:56"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "4:56"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Match 8 (Nathan Orchard",
+      "timestamp": "5:05"
+    }
+  ],
+  "Match 9 (Roberto Jimenez|Ben Dyson)|2025": [
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "0:28"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "0:43"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Ben Dyson)",
+      "timestamp": "1:29"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "1:49"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "2:10",
+      "successful": false
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "2:18",
+      "successful": false
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "2:46"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "2:58"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "3:06",
+      "successful": false
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "3:23"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "3:34"
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "3:47"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "3:47"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "3:54",
+      "successful": false
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "4:10"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "4:29"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 9 (Roberto Jimenez",
+      "timestamp": "5:11",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ben Dyson)",
+      "timestamp": "5:24"
+    }
+  ],
+  "Match 10 (Jon Blank|Dan Strauss)|2025": [
+    {
+      "label": "Calf Lock",
+      "type": "submission",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "0:08"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "0:08"
+    },
+    {
+      "label": "Pressure Pass",
+      "type": "pass",
+      "actor": "Dan Strauss)",
+      "timestamp": "1:03"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Dan Strauss)",
+      "timestamp": "1:03"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "1:33"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "1:44"
+    },
+    {
+      "label": "North South",
+      "type": "control",
+      "actor": "Dan Strauss)",
+      "timestamp": "3:01"
+    },
+    {
+      "label": "North-South Position",
+      "type": "control",
+      "actor": "Dan Strauss)",
+      "timestamp": "3:01"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "3:12"
+    },
+    {
+      "label": "Open Guard",
+      "type": "guard",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "3:18"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Dan Strauss)",
+      "timestamp": "3:32"
+    },
+    {
+      "label": "North South",
+      "type": "control",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "4:00"
+    },
+    {
+      "label": "North-South Position",
+      "type": "control",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "4:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 10 (Jon Blank",
+      "timestamp": "4:12"
+    }
+  ],
+  "Match 11 (Hunter Colvin|Jed Hue)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jed Hue)",
+      "timestamp": "0:12"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 11 (Hunter Colvin",
+      "timestamp": "0:41"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Match 11 (Hunter Colvin",
+      "timestamp": "1:42"
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Match 11 (Hunter Colvin",
+      "timestamp": "1:49",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jed Hue)",
+      "timestamp": "2:06"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Match 11 (Hunter Colvin",
+      "timestamp": "2:38"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 11 (Hunter Colvin",
+      "timestamp": "2:38"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Match 11 (Hunter Colvin",
+      "timestamp": "3:14"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Jed Hue)",
+      "timestamp": "3:39",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jed Hue)",
+      "timestamp": "3:49"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 11 (Hunter Colvin",
+      "timestamp": "4:52"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Jed Hue)",
+      "timestamp": "5:01"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 11 (Hunter Colvin",
+      "timestamp": "5:36"
+    }
+  ],
+  "Match 12 (Gio Martinez|Bradley Hill)|2025": [
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 12 (Gio Martinez",
+      "timestamp": "0:33",
+      "successful": false
+    },
+    {
+      "label": "Anaconda Choke",
+      "type": "submission",
+      "actor": "Bradley Hill)",
+      "timestamp": "0:49"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Bradley Hill)",
+      "timestamp": "0:59"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Bradley Hill)",
+      "timestamp": "0:59"
+    }
+  ],
+  "Heavyweight Super Fight (Sylvia Nastasa|Kyle Bame)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "0:11"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "3:55"
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "4:55"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "4:55"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "5:17"
+    },
+    {
+      "label": "K-Guard",
+      "type": "guard",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "6:40"
+    },
+    {
+      "label": "Leg Drag Pass",
+      "type": "pass",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "6:47",
+      "successful": false
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "6:47",
+      "successful": false
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "6:52"
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "7:03",
+      "successful": true
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "7:21"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "7:53",
+      "successful": true
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "8:26"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "8:26"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Heavyweight Super Fight (Sylvia Nastasa",
+      "timestamp": "10:13"
+    }
+  ],
+  "Match 13 (Nick Ronan|Ellis Younger)|2025": [
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Match 13 (Nick Ronan",
+      "timestamp": "0:00"
+    },
+    {
+      "label": "Bridge (Upa Escape)",
+      "type": "escape",
+      "actor": "Ellis Younger)",
+      "timestamp": "0:03"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Match 13 (Nick Ronan",
+      "timestamp": "0:32"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 13 (Nick Ronan",
+      "timestamp": "0:32"
+    },
+    {
+      "label": "Leg Drag Pass",
+      "type": "pass",
+      "actor": "Match 13 (Nick Ronan",
+      "timestamp": "0:44"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Match 13 (Nick Ronan",
+      "timestamp": "0:44"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 13 (Nick Ronan",
+      "timestamp": "0:54"
+    }
+  ],
+  "Match 14 (Gio Martinez|Dan Strauss)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "0:15"
+    },
+    {
+      "label": "Double Under Pass",
+      "type": "pass",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "0:28",
+      "successful": false
+    },
+    {
+      "label": "Side Control",
+      "type": "control",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "0:28",
+      "successful": false
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "0:28",
+      "successful": false
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "0:28",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "0:42"
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "1:00",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "1:12"
+    },
+    {
+      "label": "Guard Retention",
+      "type": "guard",
+      "actor": "Dan Strauss)",
+      "timestamp": "1:22",
+      "successful": false
+    },
+    {
+      "label": "Weave Pass",
+      "type": "pass",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "1:39"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "1:56"
+    },
+    {
+      "label": "Double Under Pass",
+      "type": "pass",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "2:02",
+      "successful": false
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "2:02",
+      "successful": false
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "2:02",
+      "successful": false
+    },
+    {
+      "label": "Knee on Belly",
+      "type": "control",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "2:07"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Dan Strauss)",
+      "timestamp": "2:58"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "3:40"
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "3:45"
+    },
+    {
+      "label": "Guard Retention",
+      "type": "guard",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "3:52"
+    },
+    {
+      "label": "Long Step Pass",
+      "type": "pass",
+      "actor": "Dan Strauss)",
+      "timestamp": "4:00",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "4:12",
+      "successful": false
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Match 14 (Gio Martinez",
+      "timestamp": "4:12",
+      "successful": false
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Dan Strauss)",
+      "timestamp": "5:16"
+    }
+  ],
+  "Match 15 (Gio Martinez|Darragh O'Connail)|2025": [
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "1:57",
+      "successful": false
+    },
+    {
+      "label": "Leg Staple Pass",
+      "type": "pass",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "2:08",
+      "successful": true
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "2:20"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "2:41"
+    },
+    {
+      "label": "Folding Pass",
+      "type": "pass",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "2:56"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "2:56"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "3:18",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "3:24"
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "3:44",
+      "successful": false
+    },
+    {
+      "label": "Turtle Position",
+      "type": "escape",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "3:44",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "3:44",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 15 (Gio Martinez",
+      "timestamp": "4:11"
+    }
+  ],
+  "Match 16 (Hunter Colvin|Jed Hue)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 16 (Hunter Colvin",
+      "timestamp": "0:16"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Match 16 (Hunter Colvin",
+      "timestamp": "0:45",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 16 (Hunter Colvin",
+      "timestamp": "0:45",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 16 (Hunter Colvin",
+      "timestamp": "1:40"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Jed Hue)",
+      "timestamp": "1:58",
+      "successful": false
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Jed Hue)",
+      "timestamp": "1:58",
+      "successful": false
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Jed Hue)",
+      "timestamp": "2:59"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 16 (Hunter Colvin",
+      "timestamp": "3:41"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 16 (Hunter Colvin",
+      "timestamp": "5:24"
+    }
+  ],
+  "Match 17 (Roberto Jimenez|Kieran Davern)|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Kieran Davern)",
+      "timestamp": "0:13"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 17 (Roberto Jimenez",
+      "timestamp": "0:48"
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Match 17 (Roberto Jimenez",
+      "timestamp": "1:13"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Match 17 (Roberto Jimenez",
+      "timestamp": "1:39",
+      "successful": false
+    },
+    {
+      "label": "North South",
+      "type": "control",
+      "actor": "Match 17 (Roberto Jimenez",
+      "timestamp": "2:05"
+    },
+    {
+      "label": "North-South Position",
+      "type": "control",
+      "actor": "Match 17 (Roberto Jimenez",
+      "timestamp": "2:05"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 17 (Roberto Jimenez",
+      "timestamp": "2:25",
+      "successful": false
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Kieran Davern)",
+      "timestamp": "2:33",
+      "successful": false
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Match 17 (Roberto Jimenez",
+      "timestamp": "2:40"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Match 17 (Roberto Jimenez",
+      "timestamp": "2:46"
+    }
+  ]
+}

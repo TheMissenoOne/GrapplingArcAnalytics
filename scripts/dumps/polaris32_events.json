@@ -1,0 +1,2629 @@
+{
+  "Dai Evs|Ryan Williams|2025": [
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Dai Evs",
+      "timestamp": "0:58",
+      "successful": true
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Dai Evs",
+      "timestamp": "1:28"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Dai Evs",
+      "timestamp": "6:25"
+    }
+  ],
+  "Rhys Hughes|Josh Roberts|2025": [
+    {
+      "label": "Suplex",
+      "type": "takedown",
+      "actor": "Rhys Hughes",
+      "timestamp": "0:26"
+    },
+    {
+      "label": "Inside Trip",
+      "type": "takedown",
+      "actor": "Rhys Hughes",
+      "timestamp": "0:26"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "0:26"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "2:09",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "2:09",
+      "successful": false
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "2:26"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "2:30"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "2:30"
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Rhys Hughes",
+      "timestamp": "2:44",
+      "successful": true
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "2:52"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "3:02"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "3:38",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Josh Roberts",
+      "timestamp": "4:44"
+    },
+    {
+      "label": "Suplex",
+      "type": "takedown",
+      "actor": "Rhys Hughes",
+      "timestamp": "4:51",
+      "successful": false
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "5:48"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "5:56"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "6:41"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "6:44"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "6:52"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "6:52"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "6:52"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Josh Roberts",
+      "timestamp": "7:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "7:46"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "8:04"
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Rhys Hughes",
+      "timestamp": "8:34",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "9:21"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Josh Roberts",
+      "timestamp": "9:32"
+    },
+    {
+      "label": "Crucifix",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "9:44"
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "9:56"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "9:56"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "9:56"
+    },
+    {
+      "label": "Crucifix",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "10:04"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "10:22"
+    },
+    {
+      "label": "Butterfly Sweep",
+      "type": "sweep",
+      "actor": "Rhys Hughes",
+      "timestamp": "10:24",
+      "successful": false
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "10:24",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "14:31"
+    },
+    {
+      "label": "Side Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "15:28"
+    },
+    {
+      "label": "Smash Pass",
+      "type": "pass",
+      "actor": "Rhys Hughes",
+      "timestamp": "16:50"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "16:55"
+    },
+    {
+      "label": "Worm Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "17:10"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "17:14"
+    },
+    {
+      "label": "Spider Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "17:59"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:02"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:04"
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:11"
+    },
+    {
+      "label": "Worm Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:11"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:11"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:20"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:25"
+    },
+    {
+      "label": "Worm Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:39"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:54"
+    },
+    {
+      "label": "Worm Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "18:54"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Rhys Hughes",
+      "timestamp": "19:19"
+    },
+    {
+      "label": "Spider Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "19:23"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "19:43"
+    },
+    {
+      "label": "Old School Sweep",
+      "type": "sweep",
+      "actor": "Rhys Hughes",
+      "timestamp": "19:47"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Rhys Hughes",
+      "timestamp": "19:54",
+      "successful": true
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Rhys Hughes",
+      "timestamp": "20:01"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "20:01"
+    },
+    {
+      "label": "Long Step Pass",
+      "type": "pass",
+      "actor": "Rhys Hughes",
+      "timestamp": "20:30"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Rhys Hughes",
+      "timestamp": "20:39"
+    }
+  ],
+  "Harry Loseby|Aled Rees|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Harry Loseby",
+      "timestamp": "0:36"
+    }
+  ],
+  "Ben Johnston|Gavin Thomas|2025": [
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "2:21"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Ben Johnston",
+      "timestamp": "2:21"
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Ben Johnston",
+      "timestamp": "2:40",
+      "successful": true
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "3:00"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "3:13"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "3:20"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "3:32"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Gavin Thomas",
+      "timestamp": "3:39"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "4:09"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "4:15"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Gavin Thomas",
+      "timestamp": "4:26"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "4:30"
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Ben Johnston",
+      "timestamp": "4:46"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "4:50"
+    },
+    {
+      "label": "Toe Hold",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "4:58"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Gavin Thomas",
+      "timestamp": "5:39"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Gavin Thomas",
+      "timestamp": "5:39"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "5:47"
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Gavin Thomas",
+      "timestamp": "5:54"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Thomas",
+      "timestamp": "5:54"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "6:02"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "6:14",
+      "successful": false
+    },
+    {
+      "label": "K-Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "6:14",
+      "successful": false
+    },
+    {
+      "label": "Old School Sweep",
+      "type": "sweep",
+      "actor": "Ben Johnston",
+      "timestamp": "6:23"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "6:23"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "6:32"
+    },
+    {
+      "label": "Cartwheel Pass",
+      "type": "pass",
+      "actor": "Ben Johnston",
+      "timestamp": "6:52"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "7:09"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "7:17"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "7:25"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "transition",
+      "actor": "Ben Johnston",
+      "timestamp": "7:43"
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Ben Johnston",
+      "timestamp": "8:06"
+    },
+    {
+      "label": "Single Leg X",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "8:19"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Ben Johnston",
+      "timestamp": "8:19"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "8:19"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "8:28"
+    },
+    {
+      "label": "Ezekiel Choke",
+      "type": "submission",
+      "actor": "Gavin Thomas",
+      "timestamp": "8:31"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "8:45"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "8:54"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "8:58",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "9:26",
+      "successful": false
+    },
+    {
+      "label": "Saddle (Inside Sankaku)",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "9:26",
+      "successful": false
+    },
+    {
+      "label": "Cartwheel Pass",
+      "type": "pass",
+      "actor": "Gavin Thomas",
+      "timestamp": "9:51"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Thomas",
+      "timestamp": "9:51"
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Ben Johnston",
+      "timestamp": "9:57"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "10:02"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Ben Johnston",
+      "timestamp": "10:10"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "10:10"
+    },
+    {
+      "label": "Ankle Lock",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "10:19",
+      "successful": false
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "10:19",
+      "successful": false
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Ben Johnston",
+      "timestamp": "10:29"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Ben Johnston",
+      "timestamp": "11:04"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Gavin Thomas",
+      "timestamp": "11:21"
+    },
+    {
+      "label": "Ankle Lock",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "11:41",
+      "successful": true
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Ben Johnston",
+      "timestamp": "11:41",
+      "successful": true
+    }
+  ],
+  "Shane Price|Stephen Abberley|2025": [
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Shane Price",
+      "timestamp": "0:37"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Shane Price",
+      "timestamp": "0:45"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Shane Price",
+      "timestamp": "1:58"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Shane Price",
+      "timestamp": "2:29"
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Shane Price",
+      "timestamp": "3:42"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Shane Price",
+      "timestamp": "4:04"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Shane Price",
+      "timestamp": "4:16"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Shane Price",
+      "timestamp": "4:53"
+    }
+  ],
+  "Jordan Kirk|Stefan Dabija|2025": [
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Jordan Kirk",
+      "timestamp": "2:33"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "2:33"
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Jordan Kirk",
+      "timestamp": "2:33"
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "4:01",
+      "successful": false
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Jordan Kirk",
+      "timestamp": "4:01",
+      "successful": false
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Jordan Kirk",
+      "timestamp": "4:01",
+      "successful": false
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Jordan Kirk",
+      "timestamp": "4:15"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "4:15"
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Jordan Kirk",
+      "timestamp": "5:23"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Jordan Kirk",
+      "timestamp": "6:15"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Jordan Kirk",
+      "timestamp": "7:07"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Jordan Kirk",
+      "timestamp": "7:15"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Jordan Kirk",
+      "timestamp": "7:29"
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Jordan Kirk",
+      "timestamp": "8:27",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "8:36"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Jordan Kirk",
+      "timestamp": "8:53"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "9:09"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Jordan Kirk",
+      "timestamp": "9:46"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Jordan Kirk",
+      "timestamp": "10:14",
+      "successful": false
+    },
+    {
+      "label": "Arm Triangle Choke",
+      "type": "submission",
+      "actor": "Jordan Kirk",
+      "timestamp": "10:54"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Jordan Kirk",
+      "timestamp": "10:54"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "10:54"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Jordan Kirk",
+      "timestamp": "11:07"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Jordan Kirk",
+      "timestamp": "11:19"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "11:19"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Jordan Kirk",
+      "timestamp": "11:36",
+      "successful": false
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Jordan Kirk",
+      "timestamp": "12:10",
+      "successful": false
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Jordan Kirk",
+      "timestamp": "12:38"
+    },
+    {
+      "label": "Tripod Pass",
+      "type": "pass",
+      "actor": "Jordan Kirk",
+      "timestamp": "12:49"
+    },
+    {
+      "label": "Turtle Position",
+      "type": "escape",
+      "actor": "Jordan Kirk",
+      "timestamp": "13:13"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "13:13"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Jordan Kirk",
+      "timestamp": "14:09"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jordan Kirk",
+      "timestamp": "16:46"
+    }
+  ],
+  "Gavin Stewart|Craig Ewers|2025": [
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "0:44"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "0:51"
+    },
+    {
+      "label": "Old School Sweep",
+      "type": "sweep",
+      "actor": "Gavin Stewart",
+      "timestamp": "1:08"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "1:19"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "1:23"
+    },
+    {
+      "label": "Rubber Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "1:38"
+    },
+    {
+      "label": "Snapdown",
+      "type": "takedown",
+      "actor": "Gavin Stewart",
+      "timestamp": "1:56"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "2:19"
+    },
+    {
+      "label": "Rubber Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "2:28"
+    },
+    {
+      "label": "Long Step Pass",
+      "type": "pass",
+      "actor": "Craig Ewers",
+      "timestamp": "2:37"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Craig Ewers",
+      "timestamp": "2:37"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "2:45"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "3:06",
+      "successful": false
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Gavin Stewart",
+      "timestamp": "4:03"
+    },
+    {
+      "label": "Ankle Lock",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "4:43",
+      "successful": false
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "4:43",
+      "successful": false
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "4:43",
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "4:43",
+      "successful": false
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Craig Ewers",
+      "timestamp": "5:07",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Craig Ewers",
+      "timestamp": "5:07",
+      "successful": false
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "5:17"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "5:17"
+    },
+    {
+      "label": "Ankle Lock",
+      "type": "submission",
+      "actor": "Craig Ewers",
+      "timestamp": "5:30"
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Craig Ewers",
+      "timestamp": "5:30"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Craig Ewers",
+      "timestamp": "5:30"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Craig Ewers",
+      "timestamp": "5:54"
+    },
+    {
+      "label": "Rubber Guard",
+      "type": "guard",
+      "actor": "Craig Ewers",
+      "timestamp": "5:54"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "6:15"
+    },
+    {
+      "label": "Z-Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "6:15"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Craig Ewers",
+      "timestamp": "6:47"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Craig Ewers",
+      "timestamp": "7:20"
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Gavin Stewart",
+      "timestamp": "7:25"
+    },
+    {
+      "label": "Rubber Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "7:25"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Craig Ewers",
+      "timestamp": "7:56"
+    },
+    {
+      "label": "Rubber Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "8:15",
+      "successful": false
+    },
+    {
+      "label": "K-Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "8:15",
+      "successful": false
+    },
+    {
+      "label": "50/50 Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "8:15",
+      "successful": false
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Gavin Stewart",
+      "timestamp": "8:29"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "8:32"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Gavin Stewart",
+      "timestamp": "8:39"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Craig Ewers",
+      "timestamp": "9:03"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Craig Ewers",
+      "timestamp": "9:51"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Craig Ewers",
+      "timestamp": "10:27"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Gavin Stewart",
+      "timestamp": "12:15"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "12:47"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "15:48"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "17:34",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "17:34",
+      "successful": false
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "17:45"
+    },
+    {
+      "label": "Ankle Lock",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "18:15"
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "18:15"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "19:03",
+      "successful": false
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "19:42"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gavin Stewart",
+      "timestamp": "19:53"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Gavin Stewart",
+      "timestamp": "20:49",
+      "successful": false
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Gavin Stewart",
+      "timestamp": "21:20"
+    }
+  ],
+  "Will Southern|Jack Dolan|2025": [
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Will Southern",
+      "timestamp": "0:00"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Will Southern",
+      "timestamp": "0:07"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Will Southern",
+      "timestamp": "0:07"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Will Southern",
+      "timestamp": "0:16",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Will Southern",
+      "timestamp": "0:27"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Jack Dolan",
+      "timestamp": "0:52"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Jack Dolan",
+      "timestamp": "0:52"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Will Southern",
+      "timestamp": "1:00",
+      "successful": false
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Will Southern",
+      "timestamp": "1:14"
+    },
+    {
+      "label": "Calf Lock",
+      "type": "submission",
+      "actor": "Will Southern",
+      "timestamp": "1:57"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Will Southern",
+      "timestamp": "2:41",
+      "successful": true
+    },
+    {
+      "label": "Calf Slicer",
+      "type": "submission",
+      "actor": "Jack Dolan",
+      "timestamp": "3:01",
+      "successful": true
+    }
+  ],
+  "Arya Esfandmaz|George Pearse|2025": [
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "1:06"
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "George Pearse",
+      "timestamp": "2:38",
+      "successful": false
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "George Pearse",
+      "timestamp": "2:46",
+      "successful": false
+    },
+    {
+      "label": "Arm Triangle Choke",
+      "type": "submission",
+      "actor": "George Pearse",
+      "timestamp": "2:46",
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "George Pearse",
+      "timestamp": "2:46",
+      "successful": false
+    },
+    {
+      "label": "Berimbolo",
+      "type": "transition",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "3:05"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "George Pearse",
+      "timestamp": "3:20"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "George Pearse",
+      "timestamp": "3:58"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "4:45"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "George Pearse",
+      "timestamp": "4:52"
+    },
+    {
+      "label": "Pressure Pass",
+      "type": "pass",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "5:16"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "George Pearse",
+      "timestamp": "5:23",
+      "successful": false
+    },
+    {
+      "label": "Rubber Guard",
+      "type": "guard",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "5:33"
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "5:33"
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "6:19"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "6:46"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "8:30"
+    },
+    {
+      "label": "Saddle (Inside Sankaku)",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "8:30"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "8:35",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "George Pearse",
+      "timestamp": "9:05"
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "9:13"
+    },
+    {
+      "label": "Arm Triangle Choke",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "9:13"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "9:13"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "George Pearse",
+      "timestamp": "10:10"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "George Pearse",
+      "timestamp": "10:10"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "10:18"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "10:35"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "10:44"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "11:32"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "11:46",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "12:49"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "12:58"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "13:39"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "George Pearse",
+      "timestamp": "13:45"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "14:29"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "George Pearse",
+      "timestamp": "14:39",
+      "successful": false
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "18:30"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "19:53"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "20:23",
+      "successful": false
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "20:36"
+    },
+    {
+      "label": "Snapdown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "20:38"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "20:59"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "21:07"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "21:14"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "21:28"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "21:32"
+    },
+    {
+      "label": "Duck Under",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "22:04"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "22:29"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "22:29"
+    },
+    {
+      "label": "Body Lock",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "23:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "23:26"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "23:29"
+    },
+    {
+      "label": "Leg Drag Pass",
+      "type": "pass",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "23:33",
+      "successful": false
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "23:33",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "23:33",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "24:09"
+    },
+    {
+      "label": "Ankle Pick",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "24:45"
+    },
+    {
+      "label": "Ankle Pick",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "26:16"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "26:19"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "26:19"
+    },
+    {
+      "label": "Wrist Lock",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "26:27"
+    },
+    {
+      "label": "Over-Under Pass",
+      "type": "pass",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "26:39"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "26:54",
+      "successful": false
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "27:01",
+      "successful": false
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "27:12"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "27:29"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "27:54"
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "28:04"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "28:13"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "28:21"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Arya Esfandmaz",
+      "timestamp": "28:29"
+    }
+  ],
+  "Sergio Riquelme|Finn Carey|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Sergio Riquelme",
+      "timestamp": "0:00"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Finn Carey",
+      "timestamp": "0:11"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Finn Carey",
+      "timestamp": "0:11"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "0:20",
+      "successful": false
+    },
+    {
+      "label": "Calf Lock",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "0:35"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Finn Carey",
+      "timestamp": "1:05"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "1:24"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Sergio Riquelme",
+      "timestamp": "1:53"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Finn Carey",
+      "timestamp": "1:56"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "2:08",
+      "successful": false
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "2:41"
+    },
+    {
+      "label": "Flower Sweep",
+      "type": "sweep",
+      "actor": "Sergio Riquelme",
+      "timestamp": "2:47",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Finn Carey",
+      "timestamp": "3:22",
+      "successful": false
+    },
+    {
+      "label": "Guard Pull",
+      "type": "transition",
+      "actor": "Sergio Riquelme",
+      "timestamp": "3:33"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "3:56"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Sergio Riquelme",
+      "timestamp": "3:56"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "4:02",
+      "successful": false
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "4:09"
+    },
+    {
+      "label": "Guard Retention",
+      "type": "guard",
+      "actor": "Finn Carey",
+      "timestamp": "4:32"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Sergio Riquelme",
+      "timestamp": "5:00",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Sergio Riquelme",
+      "timestamp": "5:05",
+      "successful": false
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Finn Carey",
+      "timestamp": "5:13"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Finn Carey",
+      "timestamp": "5:19"
+    },
+    {
+      "label": "Cartwheel Pass",
+      "type": "pass",
+      "actor": "Sergio Riquelme",
+      "timestamp": "5:53"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Sergio Riquelme",
+      "timestamp": "6:36"
+    }
+  ],
+  "Libby Genge|Ashley Bendle|2025": [
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "1:49"
+    },
+    {
+      "label": "Deep Half",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "1:49"
+    },
+    {
+      "label": "Deep Half Guard",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "1:49"
+    },
+    {
+      "label": "Long Step Pass",
+      "type": "pass",
+      "actor": "Ashley Bendle",
+      "timestamp": "2:24",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ashley Bendle",
+      "timestamp": "2:24",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "2:45",
+      "successful": false
+    },
+    {
+      "label": "Hip Bump Sweep",
+      "type": "sweep",
+      "actor": "Libby Genge",
+      "timestamp": "2:58"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "3:05",
+      "successful": false
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "3:13"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Libby Genge",
+      "timestamp": "3:35",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "3:35",
+      "successful": false
+    },
+    {
+      "label": "Saddle (Inside Sankaku)",
+      "type": "control",
+      "actor": "Ashley Bendle",
+      "timestamp": "3:47"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "4:13"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Ashley Bendle",
+      "timestamp": "4:33"
+    },
+    {
+      "label": "Toe Hold",
+      "type": "submission",
+      "actor": "Libby Genge",
+      "timestamp": "4:42"
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "4:54"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "4:54"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "5:27",
+      "successful": false
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "5:54"
+    },
+    {
+      "label": "Deep Half",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "5:54"
+    },
+    {
+      "label": "Deep Half Guard",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "5:54"
+    },
+    {
+      "label": "Bridge (Upa Escape)",
+      "type": "escape",
+      "actor": "Libby Genge",
+      "timestamp": "6:03"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "6:03"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "6:43"
+    },
+    {
+      "label": "Bridge (Upa Escape)",
+      "type": "escape",
+      "actor": "Libby Genge",
+      "timestamp": "7:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "7:07"
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "7:23"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Libby Genge",
+      "timestamp": "7:28",
+      "successful": false
+    },
+    {
+      "label": "Bridge (Upa Escape)",
+      "type": "escape",
+      "actor": "Libby Genge",
+      "timestamp": "7:47"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Libby Genge",
+      "timestamp": "8:03",
+      "successful": true
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "11:27"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Libby Genge",
+      "timestamp": "13:21"
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Libby Genge",
+      "timestamp": "13:27"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "13:27"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "13:46"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "14:28"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "14:51"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Libby Genge",
+      "timestamp": "15:00"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Libby Genge",
+      "timestamp": "15:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "15:32"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Libby Genge",
+      "timestamp": "15:50"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Libby Genge",
+      "timestamp": "15:50"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Libby Genge",
+      "timestamp": "15:57"
+    }
+  ],
+  "Ellis Younger|Tom Barry|2025": [
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "0:02",
+      "successful": false
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Ellis Younger",
+      "timestamp": "0:18",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "0:57"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Ellis Younger",
+      "timestamp": "1:08",
+      "successful": false
+    },
+    {
+      "label": "K-Guard",
+      "type": "guard",
+      "actor": "Tom Barry",
+      "timestamp": "1:14",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "3:00",
+      "successful": false
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Tom Barry",
+      "timestamp": "3:49"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "3:56"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Ellis Younger",
+      "timestamp": "4:15"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Ellis Younger",
+      "timestamp": "4:15"
+    },
+    {
+      "label": "K-Guard",
+      "type": "guard",
+      "actor": "Ellis Younger",
+      "timestamp": "4:24"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "4:33"
+    },
+    {
+      "label": "Hip Bump Sweep",
+      "type": "sweep",
+      "actor": "Ellis Younger",
+      "timestamp": "4:41"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Ellis Younger",
+      "timestamp": "4:41"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Ellis Younger",
+      "timestamp": "4:42"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "5:00"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Ellis Younger",
+      "timestamp": "5:38"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "5:38"
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Ellis Younger",
+      "timestamp": "5:47"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "6:09"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Ellis Younger",
+      "timestamp": "6:47"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Ellis Younger",
+      "timestamp": "6:47"
+    },
+    {
+      "label": "Flower Sweep",
+      "type": "sweep",
+      "actor": "Ellis Younger",
+      "timestamp": "7:03"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Ellis Younger",
+      "timestamp": "7:10"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Ellis Younger",
+      "timestamp": "7:31"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Ellis Younger",
+      "timestamp": "7:52",
+      "successful": false
+    }
+  ],
+  "Owen Jones|Carson Coles|2025": [
+    {
+      "label": "Ankle Lock",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "2:30",
+      "successful": true
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "2:30",
+      "successful": true
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "3:07"
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "3:16"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "3:26"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Owen Jones",
+      "timestamp": "3:48"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Owen Jones",
+      "timestamp": "4:18"
+    },
+    {
+      "label": "Snapdown",
+      "type": "takedown",
+      "actor": "Owen Jones",
+      "timestamp": "4:23"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "4:59"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Owen Jones",
+      "timestamp": "5:39",
+      "successful": false
+    },
+    {
+      "label": "North South",
+      "type": "control",
+      "actor": "Owen Jones",
+      "timestamp": "5:43"
+    },
+    {
+      "label": "North-South Position",
+      "type": "control",
+      "actor": "Owen Jones",
+      "timestamp": "5:43"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Owen Jones",
+      "timestamp": "6:02"
+    },
+    {
+      "label": "Ankle Lock",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "6:39"
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "6:39"
+    },
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Owen Jones",
+      "timestamp": "7:02"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Owen Jones",
+      "timestamp": "7:26",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Owen Jones",
+      "timestamp": "7:57"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Owen Jones",
+      "timestamp": "8:20"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Owen Jones",
+      "timestamp": "9:13"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Owen Jones",
+      "timestamp": "9:13"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Owen Jones",
+      "timestamp": "9:23",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Owen Jones",
+      "timestamp": "9:45",
+      "successful": false
+    },
+    {
+      "label": "Leg Drag Pass",
+      "type": "pass",
+      "actor": "Carson Coles",
+      "timestamp": "9:49"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Carson Coles",
+      "timestamp": "9:49"
+    }
+  ]
+}

@@ -104,6 +104,7 @@ DATASETS: list[tuple[str, str | None, str]] = [
     ("scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data", "ADCC 2024", "ADCC2024-65kg"),
     ("scripts.dumps.leandro_lo_data", None, "LeandroLo"),
     ("scripts.dumps.ruotolos_data", None, "Ruotolos"),
+    ("scripts.dumps.musumeci_data", "Musumeci", "Musumeci"),
 ]
 
 

@@ -1,0 +1,120 @@
+{
+  "Craig Jones|Richie Martinez (Quintet 3)|2025": [
+    {"label": "Pull Guard", "type": "guard", "actor": "Richie Martinez", "timestamp": "0:43"},
+    {"label": "Leg Entanglement", "type": "guard", "actor": "Richie Martinez", "timestamp": "1:04"},
+    {"label": "Double Guard Pull", "type": "guard", "actor": "Craig Jones", "timestamp": "1:28"}
+  ],
+  "Craig Jones|Kyle Bame (Quintet 4)|2025": [
+    {"label": "Snap Down", "type": "takedown", "actor": "Craig Jones", "timestamp": "0:27"},
+    {"label": "Leg Entanglement", "type": "guard", "actor": "Kyle Bame", "timestamp": "2:07"},
+    {"label": "Back Take", "type": "control", "actor": "Craig Jones", "timestamp": "2:53", "successful": true},
+    {"label": "Guard Pass", "type": "pass", "actor": "Craig Jones", "timestamp": "2:58", "successful": true},
+    {"label": "Guard Recovery", "type": "guard", "actor": "Kyle Bame", "timestamp": "3:06"},
+    {"label": "Toe Hold Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "4:29", "successful": false},
+    {"label": "Straight Ankle Lock Attempt", "type": "submission", "actor": "Kyle Bame", "timestamp": "4:08", "successful": false},
+    {"label": "Back Take", "type": "control", "actor": "Craig Jones", "timestamp": "5:27", "successful": true},
+    {"label": "Leg Entanglement", "type": "guard", "actor": "Kyle Bame", "timestamp": "6:32", "successful": true},
+    {"label": "Inside Sankaku", "type": "control", "actor": "Kyle Bame", "timestamp": "7:12"},
+    {"label": "Toe Hold Attempt", "type": "submission", "actor": "Kyle Bame", "timestamp": "7:20", "successful": false},
+    {"label": "Leg Lock Exchange", "type": "guard", "actor": "Craig Jones", "timestamp": "7:28"},
+    {"label": "Toe Hold Attempt", "type": "submission", "actor": "Kyle Bame", "timestamp": "8:04", "successful": false}
+  ],
+  "Craig Jones|Gregor Gracie (Quintet 4)|2025": [
+    {"label": "Guard Pass", "type": "pass", "actor": "Craig Jones", "timestamp": "0:51", "successful": true},
+    {"label": "North South", "type": "control", "actor": "Craig Jones", "timestamp": "0:56"},
+    {"label": "Guillotine Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "0:56", "successful": false},
+    {"label": "Guard Pass", "type": "pass", "actor": "Craig Jones", "timestamp": "1:33", "successful": true},
+    {"label": "Knee on Belly", "type": "control", "actor": "Craig Jones", "timestamp": "1:33"},
+    {"label": "Side Control", "type": "control", "actor": "Craig Jones", "timestamp": "1:33"},
+    {"label": "Escape to Guard", "type": "escape", "actor": "Gregor Gracie", "timestamp": "2:10", "successful": true},
+    {"label": "Guard Pass", "type": "pass", "actor": "Craig Jones", "timestamp": "2:23", "successful": true},
+    {"label": "North South", "type": "control", "actor": "Craig Jones", "timestamp": "2:32"},
+    {"label": "Armbar Attempt", "type": "submission", "actor": "Gregor Gracie", "timestamp": "2:50", "successful": false},
+    {"label": "Guard Pass", "type": "pass", "actor": "Craig Jones", "timestamp": "3:45", "successful": true},
+    {"label": "Toe Hold Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "5:04", "successful": false},
+    {"label": "Ezekiel Choke Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "5:35", "successful": false}
+  ],
+  "Craig Jones|Ronaldo Jr|2025": [
+    {"label": "Single Leg X", "type": "guard", "actor": "Ronaldo Jr", "timestamp": "3:37"},
+    {"label": "Leg Entry", "type": "guard", "actor": "Craig Jones", "timestamp": "4:19"},
+    {"label": "50/50 Guard", "type": "guard", "actor": "Craig Jones", "timestamp": "4:28"},
+    {"label": "Inside Heel Hook Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "4:38", "successful": false},
+    {"label": "Ankle Lock Grip", "type": "submission", "actor": "Craig Jones", "timestamp": "5:03"},
+    {"label": "Inside Heel Hook", "type": "submission", "actor": "Craig Jones", "timestamp": "5:16", "successful": true}
+  ],
+  "Craig Jones|John Blank|2025": [
+    {"label": "Back Take", "type": "control", "actor": "Craig Jones", "timestamp": "0:00"},
+    {"label": "Rear Naked Choke", "type": "submission", "actor": "Craig Jones", "timestamp": "0:23", "successful": true}
+  ],
+  "Craig Jones|Tex Johnson|2025": [
+    {"label": "Back Take", "type": "control", "actor": "Craig Jones", "timestamp": "0:42", "successful": true},
+    {"label": "Rear Naked Choke Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "0:42", "successful": false},
+    {"label": "Foot Lock", "type": "submission", "actor": "Craig Jones", "timestamp": "1:03", "successful": true}
+  ],
+  "Craig Jones|Adam Wardzinski|2025": [
+    {"label": "Butterfly Guard", "type": "guard", "actor": "Craig Jones", "timestamp": "1:43"},
+    {"label": "Triangle Choke Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "2:38", "successful": false},
+    {"label": "Side Control", "type": "control", "actor": "Craig Jones", "timestamp": "3:28"}
+  ],
+  "Craig Jones|Roberto Jimenez|2025": [
+    {"label": "Saddle", "type": "control", "actor": "Craig Jones", "timestamp": "0:48"},
+    {"label": "Heel Hook", "type": "submission", "actor": "Craig Jones", "timestamp": "2:27", "successful": true}
+  ],
+  "Craig Jones|Dante Leon|2025": [
+    {"label": "Mount", "type": "control", "actor": "Craig Jones", "timestamp": "0:23"},
+    {"label": "Heel Hook Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "0:58", "successful": false},
+    {"label": "Butterfly Guard", "type": "guard", "actor": "Craig Jones", "timestamp": "2:29"},
+    {"label": "Back Take", "type": "control", "actor": "Craig Jones", "timestamp": "3:04", "successful": true},
+    {"label": "Back Control", "type": "control", "actor": "Craig Jones", "timestamp": "3:47"},
+    {"label": "Armbar Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "3:51", "successful": false},
+    {"label": "Heel Hook", "type": "submission", "actor": "Craig Jones", "timestamp": "4:05", "successful": true}
+  ],
+  "Craig Jones|Kyle Bame|2025": [
+    {"label": "Back Take", "type": "control", "actor": "Craig Jones", "timestamp": "0:16"},
+    {"label": "Back Control", "type": "control", "actor": "Craig Jones", "timestamp": "0:46"},
+    {"label": "Guillotine Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "0:46", "successful": false}
+  ],
+  "Craig Jones|Luis Panza|2025": [
+    {"label": "Heel Hook", "type": "submission", "actor": "Craig Jones", "timestamp": "0:38", "successful": true}
+  ],
+  "Craig Jones|Mason Fowler|2025": [
+    {"label": "Leg Entry", "type": "guard", "actor": "Craig Jones", "timestamp": "0:17"},
+    {"label": "Heel Hook Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "0:38", "successful": false},
+    {"label": "Sweep", "type": "sweep", "actor": "Craig Jones", "timestamp": "0:45"},
+    {"label": "Mount", "type": "control", "actor": "Craig Jones", "timestamp": "1:23"},
+    {"label": "Kimura Trap", "type": "submission", "actor": "Craig Jones", "timestamp": "2:32"},
+    {"label": "Back Take", "type": "control", "actor": "Craig Jones", "timestamp": "3:21", "successful": true},
+    {"label": "Rear Naked Choke Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "3:21", "successful": false},
+    {"label": "Kimura Counter", "type": "submission", "actor": "Mason Fowler", "timestamp": "4:47", "successful": true},
+    {"label": "Guillotine Choke Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "5:07", "successful": false},
+    {"label": "Takedown Defense", "type": "takedown", "actor": "Craig Jones", "timestamp": "5:11"},
+    {"label": "Guillotine Choke", "type": "submission", "actor": "Craig Jones", "timestamp": "5:15", "successful": true}
+  ],
+  "Craig Jones|Micah Brakefield|2025": [
+    {"label": "Kimura Grip", "type": "control", "actor": "Craig Jones", "timestamp": "0:00"},
+    {"label": "Back Take", "type": "control", "actor": "Craig Jones", "timestamp": "0:08", "successful": true},
+    {"label": "Rear Naked Choke", "type": "submission", "actor": "Craig Jones", "timestamp": "0:13", "successful": true}
+  ],
+  "Craig Jones|Nicholas Meregali|2025": [
+    {"label": "Guard Pull", "type": "guard", "actor": "Craig Jones", "timestamp": "0:00"},
+    {"label": "Triangle Choke Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "0:14", "successful": false},
+    {"label": "Butterfly Guard", "type": "guard", "actor": "Nicholas Meregali", "timestamp": "3:28"},
+    {"label": "Leg Entry", "type": "guard", "actor": "Craig Jones", "timestamp": "5:37"},
+    {"label": "Heel Hook Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "5:53", "successful": false},
+    {"label": "Sweep", "type": "sweep", "actor": "Craig Jones", "timestamp": "9:41"},
+    {"label": "Double Leg Takedown Attempt", "type": "takedown", "actor": "Craig Jones", "timestamp": "12:29", "successful": false}
+  ],
+  "Craig Jones|Tye Ruotolo (Main Event)|2025": [
+    {"label": "Body Lock", "type": "control", "actor": "Craig Jones", "timestamp": "3:14"},
+    {"label": "Body Lock Pass", "type": "pass", "actor": "Craig Jones", "timestamp": "6:33", "successful": true},
+    {"label": "Side Control", "type": "control", "actor": "Craig Jones", "timestamp": "6:33"},
+    {"label": "Buggy Choke Attempt", "type": "submission", "actor": "Tye Ruotolo", "timestamp": "6:33", "successful": false},
+    {"label": "Straight Ankle Lock Attempt", "type": "submission", "actor": "Craig Jones", "timestamp": "7:02", "successful": false},
+    {"label": "Smash Pass", "type": "pass", "actor": "Craig Jones", "timestamp": "12:56", "successful": true},
+    {"label": "Half Guard", "type": "guard", "actor": "Tye Ruotolo", "timestamp": "12:56"},
+    {"label": "Buggy Choke Attempt", "type": "submission", "actor": "Tye Ruotolo", "timestamp": "13:31", "successful": false},
+    {"label": "Float Pass", "type": "pass", "actor": "Craig Jones", "timestamp": "15:44", "successful": true},
+    {"label": "Triangle Choke Attempt", "type": "submission", "actor": "Tye Ruotolo", "timestamp": "15:29", "successful": false},
+    {"label": "Straight Ankle Lock Attempt", "type": "submission", "actor": "Tye Ruotolo", "timestamp": "15:36", "successful": false}
+  ]
+}

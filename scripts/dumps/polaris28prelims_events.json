@@ -1,0 +1,1157 @@
+{
+  "Charles Reindorf|Arren Gurnhill|2025": [
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Charles Reindorf",
+      "timestamp": "3:36"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Charles Reindorf",
+      "timestamp": "4:25",
+      "successful": false
+    },
+    {
+      "label": "Z-Guard",
+      "type": "guard",
+      "actor": "Charles Reindorf",
+      "timestamp": "4:25",
+      "successful": false
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Charles Reindorf",
+      "timestamp": "4:25",
+      "successful": false
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "4:35"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "4:35"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Charles Reindorf",
+      "timestamp": "4:38"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "4:53"
+    },
+    {
+      "label": "Duck Under",
+      "type": "takedown",
+      "actor": "Charles Reindorf",
+      "timestamp": "4:58"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Charles Reindorf",
+      "timestamp": "5:09"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "5:31"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "6:00"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "6:40"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "6:40"
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "7:05"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "7:05"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "7:09"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "7:53"
+    },
+    {
+      "label": "Bridge (Upa Escape)",
+      "type": "escape",
+      "actor": "Charles Reindorf",
+      "timestamp": "8:37"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "8:47"
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Charles Reindorf",
+      "timestamp": "9:11"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "9:18"
+    },
+    {
+      "label": "Open Guard",
+      "type": "guard",
+      "actor": "Charles Reindorf",
+      "timestamp": "9:33"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "9:33"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "9:57"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "10:24"
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Charles Reindorf",
+      "timestamp": "10:59"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "11:07",
+      "successful": false
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "11:07",
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "11:33"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "11:33"
+    },
+    {
+      "label": "Arm Triangle Choke",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "11:37"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "11:59"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "11:59"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "12:20"
+    },
+    {
+      "label": "Toe Hold",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "12:40"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "12:58"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Charles Reindorf",
+      "timestamp": "13:20"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Charles Reindorf",
+      "timestamp": "13:32"
+    }
+  ],
+  "Sam Barker|Jamie Faulding|2025": [
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Jamie Faulding",
+      "timestamp": "0:07"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Sam Barker",
+      "timestamp": "0:32",
+      "successful": true
+    }
+  ],
+  "Christian Ozbek|Jack Hassard|2025": [],
+  "Robyn Lucas|Amy Derwanz|2025": [
+    {
+      "label": "Arm Triangle Choke",
+      "type": "submission",
+      "actor": "Amy Derwanz",
+      "timestamp": "0:09"
+    },
+    {
+      "label": "Arm Triangle Choke",
+      "type": "submission",
+      "actor": "Robyn Lucas",
+      "timestamp": "0:51",
+      "successful": true
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Robyn Lucas",
+      "timestamp": "0:51",
+      "successful": true
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Robyn Lucas",
+      "timestamp": "1:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Robyn Lucas",
+      "timestamp": "2:56"
+    },
+    {
+      "label": "Ankle Pick",
+      "type": "takedown",
+      "actor": "Robyn Lucas",
+      "timestamp": "3:19"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Robyn Lucas",
+      "timestamp": "3:19"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Amy Derwanz",
+      "timestamp": "3:27"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Amy Derwanz",
+      "timestamp": "3:27"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Robyn Lucas",
+      "timestamp": "3:33"
+    }
+  ],
+  "Jack Hampshaw|Abraham Dannon|2025": [
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Jack Hampshaw",
+      "timestamp": "2:50"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Abraham Dannon",
+      "timestamp": "2:54"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Abraham Dannon",
+      "timestamp": "2:54"
+    },
+    {
+      "label": "Saddle (Inside Sankaku)",
+      "type": "control",
+      "actor": "Abraham Dannon",
+      "timestamp": "2:54"
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Jack Hampshaw",
+      "timestamp": "3:12"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "3:19"
+    },
+    {
+      "label": "Saddle (Inside Sankaku)",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "3:19"
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "4:18",
+      "successful": false
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "4:48"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Jack Hampshaw",
+      "timestamp": "4:56",
+      "successful": false
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "5:21"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Jack Hampshaw",
+      "timestamp": "6:04"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "6:07"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "6:07"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "7:12"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "7:12"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "7:37"
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "7:56"
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "8:16"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "8:16"
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "8:57"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "8:57"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "8:57"
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "9:39"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "9:39"
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "10:59",
+      "successful": true
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "10:59",
+      "successful": true
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "11:22",
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "11:35"
+    },
+    {
+      "label": "Long Step Pass",
+      "type": "pass",
+      "actor": "Jack Hampshaw",
+      "timestamp": "11:37"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Hampshaw",
+      "timestamp": "11:37"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "11:53",
+      "successful": false
+    },
+    {
+      "label": "Deep Half",
+      "type": "guard",
+      "actor": "Jack Hampshaw",
+      "timestamp": "12:32",
+      "successful": false
+    },
+    {
+      "label": "Deep Half Guard",
+      "type": "guard",
+      "actor": "Jack Hampshaw",
+      "timestamp": "12:32",
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Jack Hampshaw",
+      "timestamp": "12:32",
+      "successful": false
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Jack Hampshaw",
+      "timestamp": "12:32",
+      "successful": false
+    }
+  ],
+  "Dom Dillon|Danny Hughes|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Danny Hughes",
+      "timestamp": "0:08"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Dom Dillon",
+      "timestamp": "0:26"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Dom Dillon",
+      "timestamp": "0:55",
+      "successful": true
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Dom Dillon",
+      "timestamp": "1:23",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Dom Dillon",
+      "timestamp": "2:27"
+    },
+    {
+      "label": "Ankle Pick",
+      "type": "takedown",
+      "actor": "Dom Dillon",
+      "timestamp": "3:13"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Danny Hughes",
+      "timestamp": "4:20"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Dom Dillon",
+      "timestamp": "4:37"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Dom Dillon",
+      "timestamp": "5:00",
+      "successful": false
+    }
+  ],
+  "Gary Priestly|Jake Goldthorpe|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gary Priestly",
+      "timestamp": "0:00",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gary Priestly",
+      "timestamp": "0:27"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Gary Priestly",
+      "timestamp": "0:30",
+      "successful": false
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Jake Goldthorpe",
+      "timestamp": "1:07"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Gary Priestly",
+      "timestamp": "1:51"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Gary Priestly",
+      "timestamp": "1:51"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gary Priestly",
+      "timestamp": "2:05"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Gary Priestly",
+      "timestamp": "3:04"
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Gary Priestly",
+      "timestamp": "3:24"
+    },
+    {
+      "label": "Single Leg X",
+      "type": "guard",
+      "actor": "Gary Priestly",
+      "timestamp": "3:41",
+      "successful": false
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Gary Priestly",
+      "timestamp": "3:41",
+      "successful": false
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Gary Priestly",
+      "timestamp": "3:49"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Gary Priestly",
+      "timestamp": "3:49"
+    },
+    {
+      "label": "Toe Hold",
+      "type": "submission",
+      "actor": "Gary Priestly",
+      "timestamp": "4:41",
+      "successful": false
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Gary Priestly",
+      "timestamp": "4:59"
+    },
+    {
+      "label": "Toe Hold",
+      "type": "submission",
+      "actor": "Gary Priestly",
+      "timestamp": "5:12"
+    },
+    {
+      "label": "Inside Trip",
+      "type": "takedown",
+      "actor": "Gary Priestly",
+      "timestamp": "6:05"
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Jake Goldthorpe",
+      "timestamp": "6:13"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Gary Priestly",
+      "timestamp": "6:23"
+    }
+  ],
+  "Lee Herbert|Chris White|2025": [
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Lee Herbert",
+      "timestamp": "1:35"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Lee Herbert",
+      "timestamp": "2:50"
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Chris White",
+      "timestamp": "3:17"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Lee Herbert",
+      "timestamp": "3:22"
+    },
+    {
+      "label": "Ezekiel Choke",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "3:57"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "4:45"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Lee Herbert",
+      "timestamp": "4:45"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Lee Herbert",
+      "timestamp": "5:24"
+    },
+    {
+      "label": "Hip Bump Sweep",
+      "type": "sweep",
+      "actor": "Lee Herbert",
+      "timestamp": "6:36",
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "6:36",
+      "successful": false
+    },
+    {
+      "label": "Butterfly Sweep",
+      "type": "sweep",
+      "actor": "Lee Herbert",
+      "timestamp": "6:41"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Lee Herbert",
+      "timestamp": "6:41"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Lee Herbert",
+      "timestamp": "6:56"
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "7:21"
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Chris White",
+      "timestamp": "7:32"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Chris White",
+      "timestamp": "7:32"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "7:57"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Lee Herbert",
+      "timestamp": "7:57"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "8:05"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Lee Herbert",
+      "timestamp": "8:11"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "8:31",
+      "successful": false
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Lee Herbert",
+      "timestamp": "9:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Lee Herbert",
+      "timestamp": "9:07"
+    },
+    {
+      "label": "Saddle (Inside Sankaku)",
+      "type": "control",
+      "actor": "Lee Herbert",
+      "timestamp": "9:07"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "9:13"
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Lee Herbert",
+      "timestamp": "9:33"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Lee Herbert",
+      "timestamp": "9:33"
+    },
+    {
+      "label": "Long Step Pass",
+      "type": "pass",
+      "actor": "Lee Herbert",
+      "timestamp": "9:47"
+    },
+    {
+      "label": "Wrist Lock",
+      "type": "submission",
+      "actor": "Lee Herbert",
+      "timestamp": "10:18"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Chris White",
+      "timestamp": "10:28",
+      "successful": false
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Lee Herbert",
+      "timestamp": "10:54"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Lee Herbert",
+      "timestamp": "11:15"
+    },
+    {
+      "label": "Butterfly Sweep",
+      "type": "sweep",
+      "actor": "Lee Herbert",
+      "timestamp": "11:23"
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Lee Herbert",
+      "timestamp": "11:23"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Lee Herbert",
+      "timestamp": "11:35"
+    },
+    {
+      "label": "Old School Sweep",
+      "type": "sweep",
+      "actor": "Lee Herbert",
+      "timestamp": "11:35"
+    }
+  ],
+  "Kevin McAloon|Fred Greenall|2025": [
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Kevin McAloon",
+      "timestamp": "0:00",
+      "successful": false
+    },
+    {
+      "label": "Duck Under",
+      "type": "takedown",
+      "actor": "Kevin McAloon",
+      "timestamp": "1:19"
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Kevin McAloon",
+      "timestamp": "1:23"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Kevin McAloon",
+      "timestamp": "1:23"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Fred Greenall",
+      "timestamp": "2:06"
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Kevin McAloon",
+      "timestamp": "2:44"
+    },
+    {
+      "label": "K-Guard",
+      "type": "guard",
+      "actor": "Kevin McAloon",
+      "timestamp": "3:29"
+    }
+  ],
+  "Julian Espinosa|Jack Sear|2025": [
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Julian Espinosa",
+      "timestamp": "1:41"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Jack Sear",
+      "timestamp": "3:02"
+    },
+    {
+      "label": "Open Guard",
+      "type": "guard",
+      "actor": "Jack Sear",
+      "timestamp": "3:10"
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Jack Sear",
+      "timestamp": "3:10"
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "3:30"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "3:30"
+    },
+    {
+      "label": "Side Control",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "3:53"
+    },
+    {
+      "label": "Smash Pass",
+      "type": "pass",
+      "actor": "Julian Espinosa",
+      "timestamp": "3:53"
+    },
+    {
+      "label": "Foot Lock",
+      "type": "submission",
+      "actor": "Julian Espinosa",
+      "timestamp": "4:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "4:00"
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "4:54"
+    },
+    {
+      "label": "Float Pass",
+      "type": "pass",
+      "actor": "Julian Espinosa",
+      "timestamp": "4:54"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jack Sear",
+      "timestamp": "6:45"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "7:44"
+    },
+    {
+      "label": "50/50 Guard",
+      "type": "guard",
+      "actor": "Julian Espinosa",
+      "timestamp": "8:23"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Jack Sear",
+      "timestamp": "10:03"
+    },
+    {
+      "label": "North-South Choke",
+      "type": "submission",
+      "actor": "Julian Espinosa",
+      "timestamp": "10:47"
+    },
+    {
+      "label": "North South",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "10:47"
+    },
+    {
+      "label": "North-South Position",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "10:47"
+    },
+    {
+      "label": "Toe Hold",
+      "type": "submission",
+      "actor": "Julian Espinosa",
+      "timestamp": "11:42"
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Jack Sear",
+      "timestamp": "11:57"
+    },
+    {
+      "label": "Leg Drag Pass",
+      "type": "pass",
+      "actor": "Jack Sear",
+      "timestamp": "11:57"
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Jack Sear",
+      "timestamp": "11:57"
+    },
+    {
+      "label": "Smash Pass",
+      "type": "pass",
+      "actor": "Julian Espinosa",
+      "timestamp": "12:09"
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Julian Espinosa",
+      "timestamp": "12:09"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Julian Espinosa",
+      "timestamp": "12:26",
+      "successful": false
+    }
+  ]
+}

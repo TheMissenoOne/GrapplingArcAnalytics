@@ -1,0 +1,510 @@
+{
+  "Cam Herd|Eric (Twisters vs. Kings)|2026": [
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Eric (Twisters vs. Kings)",
+      "timestamp": "0:09"
+    },
+    {
+      "label": "Knee on Belly",
+      "type": "control",
+      "actor": "Eric (Twisters vs. Kings)",
+      "timestamp": "0:09"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Eric (Twisters vs. Kings)",
+      "timestamp": "0:09"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Eric (Twisters vs. Kings)",
+      "timestamp": "0:09"
+    },
+    {
+      "label": "Toe Hold",
+      "type": "submission",
+      "actor": "Cam Herd",
+      "timestamp": "0:21"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Cam Herd",
+      "timestamp": "0:40"
+    }
+  ],
+  "Adam Frank|Las Vegas Kings representative|2026": [
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Adam Frank",
+      "timestamp": "0:07"
+    }
+  ],
+  "Cam Herd|Noah McCully|2026": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Cam Herd",
+      "timestamp": "0:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Cam Herd",
+      "timestamp": "1:31",
+      "successful": false
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Cam Herd",
+      "timestamp": "1:34"
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Cam Herd",
+      "timestamp": "1:39"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Cam Herd",
+      "timestamp": "2:00",
+      "successful": false
+    },
+    {
+      "label": "Stand Up",
+      "type": "escape",
+      "actor": "Cam Herd",
+      "timestamp": "3:11"
+    }
+  ],
+  "Chewy Magana|Shawn Melanson|2026": [
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Chewy Magana",
+      "timestamp": "0:19"
+    }
+  ],
+  "Jake Strauss|Sam Schwarzapfel|2026": [],
+  "Travis Haven|Parker Salsbury|2026": [
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "0:14"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "0:34"
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "0:49",
+      "successful": true
+    },
+    {
+      "label": "Saddle (Inside Sankaku)",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "1:00",
+      "successful": false
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Travis Haven",
+      "timestamp": "1:00",
+      "successful": false
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "1:14",
+      "successful": true
+    },
+    {
+      "label": "Saddle (Inside Sankaku)",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "1:24"
+    },
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Travis Haven",
+      "timestamp": "1:24"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "2:30"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "2:58"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Travis Haven",
+      "timestamp": "3:03",
+      "successful": false
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "3:27"
+    }
+  ],
+  "Cam Herd|Jake Strauss|2026": [
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Jake Strauss",
+      "timestamp": "1:08"
+    },
+    {
+      "label": "Uchi Mata",
+      "type": "takedown",
+      "actor": "Jake Strauss",
+      "timestamp": "1:08"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Cam Herd",
+      "timestamp": "1:37"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Cam Herd",
+      "timestamp": "2:10",
+      "successful": false
+    }
+  ],
+  "Travis Haven|CJ Murdoch|2026": [
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "0:00"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "0:20"
+    }
+  ],
+  "Jett Thompson|Kevin Beuhring|2026": [
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Jett Thompson",
+      "timestamp": "0:00"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jett Thompson",
+      "timestamp": "0:36"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Jett Thompson",
+      "timestamp": "1:11"
+    },
+    {
+      "label": "Shin to Shin Guard",
+      "type": "guard",
+      "actor": "Jett Thompson",
+      "timestamp": "1:16",
+      "successful": false
+    },
+    {
+      "label": "Headquarters Pass",
+      "type": "pass",
+      "actor": "Jett Thompson",
+      "timestamp": "1:25"
+    },
+    {
+      "label": "Shin to Shin Guard",
+      "type": "guard",
+      "actor": "Jett Thompson",
+      "timestamp": "2:05"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jett Thompson",
+      "timestamp": "2:05"
+    },
+    {
+      "label": "K-Guard",
+      "type": "guard",
+      "actor": "Jett Thompson",
+      "timestamp": "2:42"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Jett Thompson",
+      "timestamp": "2:50"
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Jett Thompson",
+      "timestamp": "2:59"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Jett Thompson",
+      "timestamp": "3:07"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Jett Thompson",
+      "timestamp": "4:08"
+    }
+  ],
+  "Shawn Melanson|unnamed opponent (likely subset of Phenoms vs. Kings)|2026": [
+    {
+      "label": "Turtle Position",
+      "type": "escape",
+      "actor": "Shawn Melanson",
+      "timestamp": "0:38"
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Shawn Melanson",
+      "timestamp": "0:46"
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Shawn Melanson",
+      "timestamp": "0:52"
+    }
+  ],
+  "Sam Schwarzapfel|Noah McCully|2026": [
+    {
+      "label": "Rubber Guard",
+      "type": "guard",
+      "actor": "Sam Schwarzapfel",
+      "timestamp": "0:30"
+    },
+    {
+      "label": "Truck",
+      "type": "control",
+      "actor": "Sam Schwarzapfel",
+      "timestamp": "0:30"
+    }
+  ],
+  "Derek Rayfield|Jake Strauss|2026": [
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Derek Rayfield",
+      "timestamp": "0:02",
+      "successful": false
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Derek Rayfield",
+      "timestamp": "0:07",
+      "successful": false
+    }
+  ],
+  "Kevin Beuhring|Derek Adkins|2026": [
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Kevin Beuhring",
+      "timestamp": "0:21"
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Kevin Beuhring",
+      "timestamp": "0:30"
+    }
+  ],
+  "Jake Strauss|Derek Rayfield|2026": [
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Jake Strauss",
+      "timestamp": "0:09"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Jake Strauss",
+      "timestamp": "0:43"
+    }
+  ],
+  "Travis Haven|Kyle Chambers|2026": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "0:00"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "0:28"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "0:41"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "1:20"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Kyle Chambers",
+      "timestamp": "3:08"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "3:16",
+      "successful": false
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "5:56"
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Travis Haven",
+      "timestamp": "6:03"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Kyle Chambers",
+      "timestamp": "6:11"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "7:02"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "8:04"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "8:25"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "8:55"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "9:36"
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Travis Haven",
+      "timestamp": "10:03"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "10:22"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "10:47"
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Travis Haven",
+      "timestamp": "11:15",
+      "successful": false
+    }
+  ],
+  "Elijah Carlton|Shawn Melanson|2026": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Elijah Carlton",
+      "timestamp": "0:10"
+    },
+    {
+      "label": "Turtle Position",
+      "type": "escape",
+      "actor": "Elijah Carlton",
+      "timestamp": "1:34"
+    },
+    {
+      "label": "Twister",
+      "type": "submission",
+      "actor": "Elijah Carlton",
+      "timestamp": "2:00"
+    }
+  ],
+  "Cam Herd|Brett Moyer|2026": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Cam Herd",
+      "timestamp": "0:02"
+    }
+  ]
+}
