@@ -120,8 +120,7 @@ def match_narrative(bd: dict[str, Any]) -> list[Section]:
                 f"{_name(b)} converted the cleaner — {_pct(cb)} of entries to "
                 f"{_pct(ca)}")
         sections.append(("Positional conversion", [
-            f"Position, not aggression, decided the exchanges. {edge} reached a "
-            f"dominant spot."
+            f"{edge.capitalize()} reached a dominant spot."
         ]))
 
     # Submission threats.
