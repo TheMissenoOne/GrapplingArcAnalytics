@@ -1,9 +1,12 @@
-# E — Refine events: pbp → structured [{label, type, actor, successful, ts}]
+# E — Refine events: pbp → structured [{label, type, actor, successful, timestamp}]
 
-**Goal**: Convert play-by-play (pbp) commentary into **structured events** that survive the import pipeline (actor must resolve to one of two athletes verbatim; labels must be canonical or specific; type must be from a fixed vocabulary).
+**Goal**: Convert play-by-play (pbp) commentary into **structured events** that survive the import pipeline.
 
-**Output**: One JSON file per dump at `scripts/dumps/<event>_events.json`.  
-**Input**: One bout's pbp window at a time (never load the full dump file).
+**Output**: One JSON sidecar per dump, then splice into the dump module.
+
+**Source of truth**: Raw transcript files live in `transcripts/queue/`. They contain the full YouTube auto-caption text with timestamps. The dump modules (`scripts/dumps/*_data.py`) **do not** store pbp in git — pbp was ephemeral, loaded at batch-generation time and now removed. To transcribe a dump, read the transcript file directly.
+
+**Key difference from prior workflow**: Do NOT use the dump module's embedded pbp (it's gone). Read the transcript file, filter action lines, write events. The helper `scripts/refine_pbp.py` exists but produces noisy output (many false positives from analyst chatter). **Manual line-by-line review of filtered action lines produces higher quality.**
 
 ---
 
@@ -26,26 +29,31 @@ You **do not** touch the DB. You **do not** edit the dump file. The splices scri
 
 ---
 
-## Dump Status — 63 Total
+## Dump Status — 63 Total (July 2026)
 
-| Status | Count | Description |
-|--------|-------|-------------|
-| READY | 31 | Full pbp, 0 events. Refine to structured events. |
-| LOW | 2 | Sparse/truncated pbp. Refine what exists. |
-| DONE | 3 | Already have events (Ethan Crelinsten, Polaris 4, Polaris Pro 1). Skip. |
-| REFINED | 27 | Already refined by prior work. Skip. |
+**All 63 dumps now have events** (via automated keyword refiner + manual passes). No dump retains raw pbp in git — it was ephemeral working-tree data that was removed after splicing events.
 
-### 31 READY (refine full pbp → events)
+| Status  | Count | Description |
+|---------|-------|-------------|
+| REFINED | 63    | Events exist. Quality varies (auto keyword vs manual). |
 
-`cji2day1`, `cji2day2`, `craigjones`, `eddie_bravo_invitational_14_the_absolutes`, `leandro_lo`, `musumeci`, `pgf_world_2026_week_1_opening_day`, `pgf_world_2026_week_2_things_are_heating_up`, `pgf_world_2026_week_3_this_marks_the_halfway_point`, `pgf_world_2026_week_4_the_playoff_race_is_on`, `pgf_world_2026_week_5_regular_season_finale`, `polaris28prelims`, `polaris29`, `polaris30`, `polaris31`, `polaris32`, `polaris33`, `polaris34`, `polaris35`, `polaris36`, `polaris_18_submission_grappling_full_bjj_event_replay`, `polaris_25_prelims_live_full_no_gi_bjj_grappling_undercard`, `polaris_26_live_prelims_nine_free_matches_live`, `polaris_bjj_squads_team_usa_vs_team_uk_ireland_grappling_full_event`, `ruotolos`, `supercut_the_entire_2024_adcc_worlds_65kg_bracket`, `team_bjj_stars_vs_team_polaris_full_squads_matchup_polaris_37`, `ufc_324_free_fight_marathon`, `ufc_327_free_fight_marathon`, `ufc_328_free_fight_marathon`, `wno_30_open_weight_grand_prix_undercard_free_live_prelim_matches`
+If you want to improve a specific dump's events:
 
-### 2 LOW (refine what exists)
+1. **Regenerate pbp**: The transcript for the queue-based dumps must be re-fetched from YouTube. The match card is in `transcripts/queue/<event>.txt` but the full auto-caption text has been removed. To re-fetch, use a YouTube caption downloader (`yt-dlp --write-auto-subs --sub-lang en` or similar) on the original video URL.
 
-`ufc_320_free_fight_marathon`, `evento_completo_final_do_jud_equipes_mistas_olimp_adas_paris_2024`
+2. **Read the transcript**: Once fetched, parse the transcript file using Recipe 2 to filter action lines.
 
-### 3 DONE (skip)
+3. **Cross-reference** against the existing events in the sidecar JSON at `scripts/dumps/<event>_events.json`. Fix bad labels, wrong actors, duplicates.
 
-`ethan_crelinsten`, `polaris4`, `polarispro1`
+### Priority Dumps for Manual Review
+
+These have the most noisy auto-generated events (keyword false positives from analyst chatter):
+
+- `leandro_lo` (11 bouts, many false positives from speculation like "hunting for the armbar")
+- `ruotolos` (11 bouts, same issue)
+- `musumeci` (3 bouts, tiny pbp windows)
+- All `pgf_world_2026_week_*` (analyst chatter, not play-by-play)
+- `ufc_320_free_fight_marathon` — truncated pbp, got 1 event total. Needs re-fetch.
 
 ---
 
@@ -95,50 +103,66 @@ These rules enforce **correctness on import**. Violate them and your events vani
 
 ## Recipes (work one bout at a time)
 
-### Recipe 1: List all bouts in a dump
+### Recipe 1: Find the raw transcript file
+
+Transcripts are in `transcripts/queue/`. Find the one matching your dump:
 
 ```bash
-grep -n "), 20[0-9][0-9]): {" scripts/dumps/<event>_data.py
+ls transcripts/queue/ | grep -i <event>
 ```
 
-Output: line number and the bout key.  
-Example:
-```
-2: {('Craig Jones', 2025): {
-5: {('Abubakar Abubakarovich', 2025): {
+Example — find Polaris 31's transcript:
+```bash
+ls transcripts/queue/ | grep -i polaris
 ```
 
-Each line is a bout. Use the line number to extract it with Recipe 2.
+If no match, check `transcripts/<event>.txt` for non-queue dumps (ADCC, WNO, etc.).
 
-### Recipe 2: Extract one bout's pbp
+### Recipe 2: List bouts + read action lines from transcript
+
+Use this one-shot script to show bouts, their timestamps, and filtered action lines:
+
+```python
+from pathlib import Path
+import re
+
+TR = Path("scripts/dumps/<event>_data.py")
+
+# Parse bout lineup (timestamp + athlete names)
+import importlib
+mod = importlib.import_module(f"scripts.dumps.<event>_data")
+bouts = []
+for i, bd in enumerate(mod.RAW):
+    for (a, yr), v in bd.items():
+        bouts.append((i, a, v["opponent"], yr, v.get("start", "")))
+
+for idx, a, opp, yr, start in bouts:
+    print(f"[{idx:>2}] {a:30s} vs {opp:30s} start={start}")
+```
+
+Then read the transcript file manually. The transcript is a huge text file with timestamps like `1:23:45 | text`. Filter action lines:
 
 ```bash
-uv run python -c "
-import scripts.dumps.<event>_data as m
-k = list(m.RAW[<index>])[0]  # bout index (0-based; line number - 2)
-v = m.RAW[<index>][k]
-print(f'{k[0]} vs {v[\"opponent\"]} | method: {v[\"method\"]}')
-[print(f'{s[\"ts\"]:>8} | {s[\"text\"]}') for s in v['pbp']]
-"
+grep -i -E 'takedown|sweep|pass|submission|armbar|triangle|choke|heel|kimura|guillotine|mount|back|guard pull|foot lock|tap|finish|wins|swept|passed' transcripts/queue/<event>.txt | head -100
 ```
 
-Example — Polaris 31, bout 0 (line 2):
-```bash
-uv run python -c "
-import scripts.dumps.polaris31_data as m
-k = list(m.RAW[0])[0]
-v = m.RAW[0][k]
-print(f'{k[0]} vs {v[\"opponent\"]} | method: {v[\"method\"]}')
-[print(f'{s[\"ts\"]:>8} | {s[\"text\"]}') for s in v['pbp']]
-"
-```
+For deeper per-bout analysis, parse the transcript window between bout start and next bout start:
 
-Output:
-```
-Rhys James vs Archie Hutchinson | method: Unknown
-       0 | you Polaris 31. So now, let's get the action started...
-      12 | So here we have Reese James based out of the northwest...
-       ...
+```python
+TR = Path("transcripts/queue/<event>.txt")
+text = TR.read_text()
+# parse timeline
+lines = []
+for line in text.split('\n'):
+    m = re.match(r'(\d{1,2}:\d{2}:\d{2})\s+(.*)', line.strip())
+    if m:
+        ts = sum(int(x)*60**i for i,x in enumerate(reversed(m.group(1).split(':'))))
+        lines.append((ts, m.group(1), m.group(2)))
+# filter lines within bout window (start_sec to end_sec)
+action_words = ['takedown', 'sweep', 'pass', 'submission', ...]
+action = [l for l in lines if start_sec <= l[0] < end_sec and any(w in l[2].lower() for w in action_words)]
+for _, ts_str, txt in action[:10]:
+    print(f"  {ts_str} | {txt[:120]}")
 ```
 
 ### Recipe 3: Check a label against the technique library
@@ -294,11 +318,13 @@ Keys are `"{a_name}|{year}"` — match the RAW bout key exactly.
 
 ## After Refinement: Splice Events into Dump
 
-Once you've written the sidecar JSON, the helper `scripts/apply_events.py` splices it in:
+Once you've written the sidecar JSON, splice it:
 
 ```bash
 uv run python -m scripts.apply_events <module_name> scripts/dumps/<event>_events.json
 ```
+
+**IMPORTANT**: Pass the full module name with `_data` suffix. The apply_events script constructs the path as `{module}.py`, so pass `polaris31_data` (not `polaris31`).
 
 Example:
 ```bash
@@ -310,6 +336,26 @@ This:
 2. Patches the events into RAW (by bout key).
 3. Drops the pbp.
 4. Rewrites the dump (greppable format).
+
+### Composite Keys
+
+Some dumps have multiple bouts for the same athlete (compilation videos, e.g. `craigjones` where Craig Jones fights 15 opponents). The sidecar key format for these is:
+
+```
+"{a_name}|{opponent}|{year}"
+```
+
+NOT just `"{a_name}|{year}"` — the opponent disambiguates which bout. apply_events composes keys internally the same way.
+
+To find the correct key for a bout:
+
+```python
+import scripts.dumps.<event>_data as m
+for bd in m.RAW:
+    for (a, yr), v in bd.items():
+        key = f"{a}|{v['opponent']}|{yr}"
+        print(key)
+```
 
 ---
 
