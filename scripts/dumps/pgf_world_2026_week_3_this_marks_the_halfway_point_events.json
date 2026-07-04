@@ -1,110 +1,29 @@
 {
   "Shawn Melanson|Cam Herd|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "0:31"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "0:51"
-    },
-    {
-      "label": "Stand Up",
-      "type": "escape",
-      "actor": "Shawn Melanson",
-      "timestamp": "1:27",
-      "successful": false
-    },
-    {
-      "label": "Single Leg Takedown",
-      "type": "takedown",
-      "actor": "Cam Herd",
-      "timestamp": "3:31"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "3:37"
-    },
-    {
-      "label": "Single Leg Takedown",
+      "label": "Takedown",
       "type": "takedown",
       "actor": "Shawn Melanson",
-      "timestamp": "3:48"
+      "timestamp": "75:48"
     },
     {
-      "label": "Guard Pull",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "4:09"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "4:43"
-    },
-    {
-      "label": "Guard Pull",
-      "type": "transition",
-      "actor": "Shawn Melanson",
-      "timestamp": "4:55"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "5:02"
-    },
-    {
-      "label": "Triangle Choke",
+      "label": "Submission",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "5:07",
-      "successful": false
+      "timestamp": "76:01"
     },
     {
-      "label": "Body Lock",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "5:31"
-    },
-    {
-      "label": "Knee Cut Pass",
-      "type": "pass",
-      "actor": "Shawn Melanson",
-      "timestamp": "5:31"
-    },
-    {
-      "label": "Smash Pass",
-      "type": "pass",
-      "actor": "Shawn Melanson",
-      "timestamp": "5:31"
-    },
-    {
-      "label": "Duck Under",
+      "label": "Single Leg",
       "type": "takedown",
-      "actor": "Cam Herd",
-      "timestamp": "6:31",
+      "actor": "Shawn Melanson",
+      "timestamp": "76:36"
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Shawn Melanson",
+      "timestamp": "81:09",
       "successful": true
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "6:49"
-    },
-    {
-      "label": "Armbar",
-      "type": "submission",
-      "actor": "Shawn Melanson",
-      "timestamp": "7:11",
-      "successful": false
     }
   ],
   "Jake Straus|Joshua Squires|2026": [
@@ -112,416 +31,626 @@
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Jake Straus",
-      "timestamp": "0:22"
+      "timestamp": "87:12"
     },
     {
-      "label": "Half Guard",
-      "type": "guard",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Jake Straus",
-      "timestamp": "0:34"
+      "timestamp": "87:37",
+      "successful": true
     },
     {
-      "label": "Arm Drag",
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Jake Straus",
+      "timestamp": "88:12",
+      "successful": true
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Joshua Squires",
+      "timestamp": "88:58"
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Jake Straus",
+      "timestamp": "89:52",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Jake Straus",
+      "timestamp": "90:36",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Jake Straus",
+      "timestamp": "92:25",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Jake Straus",
+      "timestamp": "92:34",
+      "successful": true
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Jake Straus",
+      "timestamp": "92:42",
+      "successful": true
+    },
+    {
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Jake Straus",
+      "timestamp": "93:44"
+    },
+    {
+      "label": "Takedown",
       "type": "takedown",
-      "actor": "Joshua Squires",
-      "timestamp": "1:14"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
       "actor": "Jake Straus",
-      "timestamp": "1:31"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Joshua Squires",
-      "timestamp": "2:08"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jake Straus",
-      "timestamp": "2:21"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Joshua Squires",
-      "timestamp": "2:57"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Straus",
-      "timestamp": "3:25"
+      "timestamp": "93:52"
     }
   ],
   "Elijah Carlton|Sam Schwartzapfel|2026": [
     {
-      "label": "Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "0:09"
+      "timestamp": "112:34"
+    },
+    {
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Elijah Carlton",
+      "timestamp": "116:02",
+      "successful": true
+    },
+    {
+      "label": "Choke",
+      "type": "submission",
+      "actor": "Elijah Carlton",
+      "timestamp": "117:44"
     }
   ],
   "Kevin Beuhring|Jayden Groner|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "0:17"
-    },
-    {
-      "label": "Twister",
+      "label": "Heel Hook",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "0:27"
+      "timestamp": "121:00"
+    },
+    {
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Kevin Beuhring",
+      "timestamp": "124:25"
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Kevin Beuhring",
+      "timestamp": "129:15",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Kevin Beuhring",
+      "timestamp": "129:31",
+      "successful": true
     }
   ],
   "Joshua Squires|Frank (Rematch)|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Joshua Squires",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Joshua Squires",
-      "timestamp": "0:06"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Frank (Rematch)",
-      "timestamp": "0:46",
-      "successful": false
-    },
-    {
       "label": "Toe Hold",
       "type": "submission",
       "actor": "Joshua Squires",
-      "timestamp": "0:54",
-      "successful": false
+      "timestamp": "139:44"
     },
     {
-      "label": "Knee Bar",
+      "label": "Finish",
       "type": "submission",
       "actor": "Joshua Squires",
-      "timestamp": "0:54",
-      "successful": false
+      "timestamp": "139:51",
+      "successful": true
+    },
+    {
+      "label": "Straight Ankle",
+      "type": "submission",
+      "actor": "Joshua Squires",
+      "timestamp": "140:21"
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Joshua Squires",
+      "timestamp": "142:18",
+      "successful": true
     }
   ],
   "Caleb Crump|Armin Bruni (Mention/Stats)|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Caleb Crump",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Caleb Crump",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Caleb Crump",
-      "timestamp": "0:39"
+      "timestamp": "144:46",
+      "successful": true
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Caleb Crump",
-      "timestamp": "0:49",
+      "timestamp": "145:16",
       "successful": true
+    },
+    {
+      "label": "Guillotine",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "148:52"
+    },
+    {
+      "label": "Guillotine",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "149:50"
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "150:54",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "151:01",
+      "successful": true
+    },
+    {
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "151:18"
+    },
+    {
+      "label": "Guillotine",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "151:51"
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "151:58",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "153:21",
+      "successful": true
+    },
+    {
+      "label": "Guillotine",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "153:41",
+      "successful": false
+    },
+    {
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Caleb Crump",
+      "timestamp": "154:06"
     }
   ],
   "Shawn Melanson|Brett Moyer|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "0:08"
-    },
-    {
-      "label": "Turtle Position",
-      "type": "escape",
-      "actor": "Shawn Melanson",
-      "timestamp": "1:38"
-    },
-    {
-      "label": "Armbar",
+      "label": "Tap",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "2:25"
+      "timestamp": "155:32",
+      "successful": true
     },
     {
-      "label": "Arm Drag",
-      "type": "takedown",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "2:25"
+      "timestamp": "157:53",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Submission",
+      "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "2:54"
+      "timestamp": "158:09"
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "3:28"
+      "timestamp": "159:07",
+      "successful": true
+    },
+    {
+      "label": "Guard Pass",
+      "type": "pass",
+      "actor": "Shawn Melanson",
+      "timestamp": "163:05",
+      "successful": true
+    },
+    {
+      "label": "Pass The Guard",
+      "type": "pass",
+      "actor": "Shawn Melanson",
+      "timestamp": "164:00",
+      "successful": false
     }
   ],
   "Andrew Kochel|Sam Schwartzapfel|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Triangle",
+      "type": "submission",
       "actor": "Andrew Kochel",
-      "timestamp": "0:12"
+      "timestamp": "166:03"
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Straight Ankle",
+      "type": "submission",
       "actor": "Andrew Kochel",
-      "timestamp": "0:43"
+      "timestamp": "167:34",
+      "successful": false
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Andrew Kochel",
-      "timestamp": "1:04"
+      "timestamp": "168:16",
+      "successful": true
     },
     {
-      "label": "Half Guard",
-      "type": "guard",
+      "label": "Submission",
+      "type": "submission",
       "actor": "Andrew Kochel",
-      "timestamp": "1:04"
+      "timestamp": "168:28"
+    },
+    {
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Andrew Kochel",
+      "timestamp": "170:06"
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Andrew Kochel",
+      "timestamp": "172:18",
+      "successful": true
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Andrew Kochel",
+      "timestamp": "174:25"
     }
   ],
   "Derek Rayfield|Jayden Groner|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Rayfield",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Double Leg Takedown",
+      "label": "Double Leg",
       "type": "takedown",
       "actor": "Derek Rayfield",
-      "timestamp": "1:00"
+      "timestamp": "175:59"
     },
     {
-      "label": "Duck Under",
+      "label": "Takedown",
       "type": "takedown",
       "actor": "Derek Rayfield",
-      "timestamp": "1:09"
+      "timestamp": "176:04"
     },
     {
-      "label": "Double Leg Takedown",
-      "type": "takedown",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "1:21",
+      "timestamp": "176:20",
       "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Jayden Groner",
+      "timestamp": "177:09",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "1:54"
+      "timestamp": "177:59",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Derek Rayfield",
+      "timestamp": "178:40",
+      "successful": true
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Derek Rayfield",
+      "timestamp": "181:58",
+      "successful": true
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Derek Rayfield",
+      "timestamp": "184:01",
+      "successful": false
+    },
+    {
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Derek Rayfield",
+      "timestamp": "184:51"
     }
   ],
   "Jake Strauss|Austin Oranday|2026": [
     {
-      "label": "Half Guard",
-      "type": "guard",
+      "label": "Triangle",
+      "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "0:00"
+      "timestamp": "186:25"
     },
     {
-      "label": "Half Guard",
-      "type": "guard",
+      "label": "Triangle",
+      "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "0:29"
+      "timestamp": "186:31"
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Jake Strauss",
+      "timestamp": "187:15"
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Jake Strauss",
+      "timestamp": "188:10"
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Jake Strauss",
+      "timestamp": "190:53",
+      "successful": true
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Jake Strauss",
+      "timestamp": "191:59",
+      "successful": true
     }
   ],
   "Kevin Beuhring|Chuy Magana|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "0:00",
-      "successful": false
-    },
-    {
-      "label": "Arm Triangle Choke",
+      "label": "Submission",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "0:34",
-      "successful": false
+      "timestamp": "194:10"
     },
     {
-      "label": "Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "0:34",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "0:42"
-    },
-    {
-      "label": "Arm Triangle Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "1:23",
+      "timestamp": "194:26",
       "successful": true
     },
     {
-      "label": "Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "1:23",
-      "successful": true
-    },
-    {
-      "label": "Arm Triangle Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "1:40"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "1:40"
+      "timestamp": "194:35"
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Kevin Beuhring",
-      "timestamp": "1:40"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "1:56"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "2:21"
+      "timestamp": "194:43"
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "3:21",
+      "timestamp": "196:16",
       "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Submission",
+      "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "3:37"
+      "timestamp": "196:50",
+      "successful": true
     },
     {
       "label": "North South",
       "type": "control",
       "actor": "Kevin Beuhring",
-      "timestamp": "4:24"
+      "timestamp": "197:19"
     },
     {
-      "label": "North-South Position",
-      "type": "control",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "4:24"
+      "timestamp": "199:01",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Triangle",
+      "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "4:46"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "5:15",
+      "timestamp": "199:29",
       "successful": false
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Tap",
+      "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "5:45"
+      "timestamp": "199:53",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Kevin Beuhring",
+      "timestamp": "201:06",
+      "successful": true
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Kevin Beuhring",
+      "timestamp": "202:02",
+      "successful": true
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Kevin Beuhring",
+      "timestamp": "202:14",
+      "successful": true
     }
   ],
   "Jet Thompson|Jeo Ortiz|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Tap",
+      "type": "submission",
       "actor": "Jet Thompson",
-      "timestamp": "0:00",
+      "timestamp": "210:25",
       "successful": true
     },
     {
-      "label": "Back Control",
+      "label": "Choke",
+      "type": "submission",
+      "actor": "Jet Thompson",
+      "timestamp": "211:12"
+    },
+    {
+      "label": "Back Take",
       "type": "control",
       "actor": "Jet Thompson",
-      "timestamp": "0:48"
+      "timestamp": "211:22"
+    },
+    {
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Jet Thompson",
+      "timestamp": "214:22",
+      "successful": true
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Jet Thompson",
+      "timestamp": "214:30",
+      "successful": true
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Jet Thompson",
+      "timestamp": "215:14"
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Jet Thompson",
+      "timestamp": "216:32"
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Jet Thompson",
+      "timestamp": "217:27"
     }
   ],
   "Derek Adkins|Kevin Beuhring|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Adkins",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "0:02"
-    },
-    {
-      "label": "Twister",
+      "label": "Tap",
       "type": "submission",
       "actor": "Derek Adkins",
-      "timestamp": "0:57"
-    },
-    {
-      "label": "Guard Pass",
-      "type": "pass",
-      "actor": "Derek Adkins",
-      "timestamp": "1:12",
-      "successful": false
-    },
-    {
-      "label": "Sweep",
-      "type": "sweep",
-      "actor": "Derek Adkins",
-      "timestamp": "1:31",
+      "timestamp": "255:18",
       "successful": true
     },
     {
-      "label": "Twister",
+      "label": "Choke",
       "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "2:05"
+      "actor": "Derek Adkins",
+      "timestamp": "256:22",
+      "successful": false
+    },
+    {
+      "label": "Choke",
+      "type": "submission",
+      "actor": "Derek Adkins",
+      "timestamp": "257:28",
+      "successful": false
+    },
+    {
+      "label": "Choke",
+      "type": "submission",
+      "actor": "Derek Adkins",
+      "timestamp": "258:33"
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Derek Adkins",
+      "timestamp": "260:39",
+      "successful": true
+    },
+    {
+      "label": "Choke",
+      "type": "submission",
+      "actor": "Derek Adkins",
+      "timestamp": "261:38"
+    },
+    {
+      "label": "Buggy Choke",
+      "type": "submission",
+      "actor": "Derek Adkins",
+      "timestamp": "261:53"
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Derek Adkins",
+      "timestamp": "262:46"
+    },
+    {
+      "label": "Choke",
+      "type": "submission",
+      "actor": "Derek Adkins",
+      "timestamp": "264:28"
     }
   ]
 }

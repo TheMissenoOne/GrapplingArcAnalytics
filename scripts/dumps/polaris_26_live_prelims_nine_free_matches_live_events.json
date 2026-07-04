@@ -358,12 +358,6 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Matthew Fitz-James",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Matthew Fitz-James",
       "timestamp": "1:37"
     },
     {
@@ -530,12 +524,6 @@
     }
   ],
   "Mike Parry|Sam Crook|2025": [
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Mike Parry",
-      "timestamp": "0:00"
-    },
     {
       "label": "Back Control",
       "type": "control",
@@ -745,18 +733,6 @@
     }
   ],
   "Kerry Isom|Jade Barker|2025": [
-    {
-      "label": "Single Leg Takedown",
-      "type": "takedown",
-      "actor": "Kerry Isom",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Kerry Isom",
-      "timestamp": "0:00"
-    },
     {
       "label": "Back Control",
       "type": "control",
@@ -1228,13 +1204,6 @@
     }
   ],
   "Nia Blackman|Amanda Pamela Nicole|2025": [
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Amanda Pamela Nicole",
-      "timestamp": "0:00",
-      "successful": false
-    },
     {
       "label": "Triangle Choke",
       "type": "submission",

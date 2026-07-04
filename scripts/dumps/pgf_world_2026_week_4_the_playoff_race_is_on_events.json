@@ -1,158 +1,71 @@
 {
   "Kyle Chambers|Cam Herd|2026": [
     {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Kyle Chambers",
-      "timestamp": "0:20"
-    },
-    {
-      "label": "Armbar",
+      "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "1:12"
+      "timestamp": "70:55",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "2:14"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "2:58"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "3:32"
-    },
-    {
-      "label": "Anaconda Choke",
+      "label": "Anaconda",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "4:11"
+      "timestamp": "74:21"
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "4:15"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "4:53"
-    },
-    {
-      "label": "Butterfly Guard",
-      "type": "guard",
-      "actor": "Kyle Chambers",
-      "timestamp": "5:08"
-    },
-    {
-      "label": "Anaconda Choke",
+      "label": "Anaconda",
       "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "5:11"
-    },
-    {
-      "label": "Duck Under",
-      "type": "takedown",
       "actor": "Kyle Chambers",
-      "timestamp": "5:16"
+      "timestamp": "75:21"
     },
     {
       "label": "North South",
       "type": "control",
       "actor": "Kyle Chambers",
-      "timestamp": "5:30"
+      "timestamp": "75:40",
+      "successful": false
     },
     {
-      "label": "North-South Position",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "5:30"
-    },
-    {
-      "label": "Smash Pass",
-      "type": "pass",
-      "actor": "Kyle Chambers",
-      "timestamp": "7:51"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Kyle Chambers",
-      "timestamp": "7:51"
-    },
-    {
-      "label": "Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "8:06"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Kyle Chambers",
-      "timestamp": "9:13"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "9:13"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Kyle Chambers",
-      "timestamp": "9:20"
+      "timestamp": "78:16"
     }
   ],
   "Derek Rayfield|Austin Oranday|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Rayfield",
-      "timestamp": "0:18",
-      "successful": false
-    },
-    {
       "label": "Toe Hold",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "0:38"
+      "timestamp": "82:08"
     },
     {
-      "label": "Anaconda Choke",
+      "label": "Finish",
       "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "1:18",
+      "actor": "Derek Rayfield",
+      "timestamp": "82:43",
+      "successful": true
+    },
+    {
+      "label": "Anaconda",
+      "type": "submission",
+      "actor": "Derek Rayfield",
+      "timestamp": "82:48",
       "successful": false
     },
     {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "1:34"
+      "timestamp": "82:57"
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "2:30"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Rayfield",
-      "timestamp": "3:06"
+      "timestamp": "84:20",
+      "successful": true
     }
   ],
   "Jett Thompson|Noah McCully|2026": [
@@ -160,2993 +73,637 @@
       "label": "Mount",
       "type": "control",
       "actor": "Jett Thompson",
-      "timestamp": "0:33",
+      "timestamp": "86:33",
       "successful": false
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "0:42"
-    },
-    {
-      "label": "Rear Naked Choke",
+      "label": "Choke",
       "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "0:48"
+      "timestamp": "86:48"
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "1:05"
-    },
-    {
-      "label": "Double Leg Takedown",
-      "type": "takedown",
-      "actor": "Jett Thompson",
-      "timestamp": "1:50"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "2:03"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Jett Thompson",
-      "timestamp": "2:15"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "2:23"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "4:03"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "4:42"
-    },
-    {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "6:53"
+      "timestamp": "86:58",
+      "successful": true
     },
     {
-      "label": "Weave Pass",
-      "type": "pass",
-      "actor": "Jett Thompson",
-      "timestamp": "7:04"
-    },
-    {
-      "label": "Weave Pass",
-      "type": "pass",
-      "actor": "Jett Thompson",
-      "timestamp": "8:34"
-    },
-    {
-      "label": "Stack Pass",
-      "type": "pass",
-      "actor": "Jett Thompson",
-      "timestamp": "8:52"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "9:02"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Jett Thompson",
-      "timestamp": "9:22"
-    },
-    {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "10:16",
-      "successful": false
+      "timestamp": "87:50"
     },
     {
-      "label": "Twister",
+      "label": "Tap",
       "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "10:48"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "10:48"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "11:08"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jett Thompson",
-      "timestamp": "11:23"
-    },
-    {
-      "label": "Truck",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "12:19"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "12:19"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jett Thompson",
-      "timestamp": "12:33"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jett Thompson",
-      "timestamp": "13:08"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "13:08"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "13:49"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jett Thompson",
-      "timestamp": "16:21"
-    },
-    {
-      "label": "Heel Hook",
-      "type": "submission",
-      "actor": "Jett Thompson",
-      "timestamp": "16:29",
-      "successful": false
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jett Thompson",
-      "timestamp": "16:53"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Jett Thompson",
-      "timestamp": "17:27",
-      "successful": false
+      "timestamp": "91:12",
+      "successful": true
     }
   ],
   "Elijah Carlton|Joshua Squires|2026": [
     {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "0:34"
+      "timestamp": "107:31"
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "0:43"
-    },
-    {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "0:52"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "1:31"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Elijah Carlton",
-      "timestamp": "2:11"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Elijah Carlton",
-      "timestamp": "2:50"
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "2:58",
+      "timestamp": "107:39",
       "successful": true
     },
     {
-      "label": "Buggy Choke",
+      "label": "Choke",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "3:07"
+      "timestamp": "107:48"
     },
     {
-      "label": "Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "3:16"
+      "timestamp": "107:57"
     },
     {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Elijah Carlton",
-      "timestamp": "3:41"
-    },
-    {
-      "label": "Back Take",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "4:06",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "4:06",
-      "successful": false
-    },
-    {
-      "label": "Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "4:22",
-      "successful": false
+      "timestamp": "108:07"
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "5:51"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "7:04"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "7:39"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "8:07"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "8:33"
-    },
-    {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "8:47"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "9:05"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Elijah Carlton",
-      "timestamp": "9:42",
-      "successful": false
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Elijah Carlton",
-      "timestamp": "10:22"
+      "timestamp": "113:42"
     }
   ],
   "Travis Haven|Caleb Crump|2026": [
     {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "0:00"
+      "timestamp": "116:16",
+      "successful": true
     },
     {
-      "label": "Triangle Choke",
+      "label": "Tap",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "0:48",
-      "successful": false
+      "timestamp": "116:47",
+      "successful": true
     },
     {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Caleb Crump",
-      "timestamp": "1:26"
+      "timestamp": "120:07",
+      "successful": true
     },
     {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "2:11"
+      "timestamp": "120:44",
+      "successful": true
     },
     {
-      "label": "Snapdown",
-      "type": "takedown",
-      "actor": "Travis Haven",
-      "timestamp": "3:01"
-    },
-    {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "3:20"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Travis Haven",
-      "timestamp": "3:42"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Travis Haven",
-      "timestamp": "3:50"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Travis Haven",
-      "timestamp": "4:23"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Travis Haven",
-      "timestamp": "4:47"
-    },
-    {
-      "label": "Turtle Position",
-      "type": "escape",
-      "actor": "Travis Haven",
-      "timestamp": "6:10"
+      "timestamp": "121:10"
     }
   ],
   "Jake Strauss|Jaden Groner|2026": [
     {
-      "label": "Turtle Position",
-      "type": "escape",
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Jake Strauss",
+      "timestamp": "121:53",
+      "successful": false
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
       "actor": "Jaden Groner",
-      "timestamp": "0:00"
+      "timestamp": "122:26",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "0:19"
-    },
-    {
-      "label": "Triangle Choke",
+      "label": "Submission",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "0:29"
+      "timestamp": "123:08"
     },
     {
-      "label": "Weave Pass",
-      "type": "pass",
-      "actor": "Jake Strauss",
-      "timestamp": "0:48",
-      "successful": false
-    },
-    {
-      "label": "Armbar",
+      "label": "Tap",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "2:22"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "2:46"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jake Strauss",
-      "timestamp": "2:54"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "3:42"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "4:04"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jake Strauss",
-      "timestamp": "4:46"
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "5:28"
-    },
-    {
-      "label": "Snapdown",
-      "type": "takedown",
-      "actor": "Jake Strauss",
-      "timestamp": "5:37"
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "6:16"
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "6:46"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "6:54",
-      "successful": false
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jake Strauss",
-      "timestamp": "7:00"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jake Strauss",
-      "timestamp": "7:44"
-    },
-    {
-      "label": "Snapdown",
-      "type": "takedown",
-      "actor": "Jake Strauss",
-      "timestamp": "8:29"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "8:43"
-    },
-    {
-      "label": "Snapdown",
-      "type": "takedown",
-      "actor": "Jake Strauss",
-      "timestamp": "8:45"
-    },
-    {
-      "label": "Duck Under",
-      "type": "takedown",
-      "actor": "Jake Strauss",
-      "timestamp": "9:01",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "9:10"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Jake Strauss",
-      "timestamp": "9:18"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "10:16"
-    },
-    {
-      "label": "Guard Recovery",
-      "type": "guard",
-      "actor": "Jake Strauss",
-      "timestamp": "10:33"
-    },
-    {
-      "label": "Arm Triangle Choke",
-      "type": "submission",
-      "actor": "Jake Strauss",
-      "timestamp": "10:45",
-      "successful": false
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Jake Strauss",
-      "timestamp": "11:16",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jake Strauss",
-      "timestamp": "11:16",
-      "successful": false
+      "timestamp": "125:51",
+      "successful": true
     }
   ],
   "Jonathan Wilson|Eric Allen|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "0:26"
+      "timestamp": "134:45",
+      "successful": true
     },
     {
-      "label": "Side Control",
-      "type": "control",
+      "label": "Sweep",
+      "type": "takedown",
       "actor": "Jonathan Wilson",
-      "timestamp": "1:34"
+      "timestamp": "135:10"
     },
     {
-      "label": "Guard Recovery",
-      "type": "guard",
-      "actor": "Jonathan Wilson",
-      "timestamp": "1:34"
-    },
-    {
-      "label": "Shrimp (Hip Escape)",
-      "type": "escape",
-      "actor": "Jonathan Wilson",
-      "timestamp": "1:43"
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "1:43"
-    },
-    {
-      "label": "Arm Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Eric Allen",
-      "timestamp": "1:57"
+      "timestamp": "135:24",
+      "successful": false
     },
     {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Eric Allen",
-      "timestamp": "1:57"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "2:34"
-    },
-    {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "2:37"
+      "timestamp": "137:04",
+      "successful": true
     },
     {
-      "label": "Rear Naked Choke",
+      "label": "Tap",
       "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "4:17"
+      "timestamp": "137:16",
+      "successful": true
     },
     {
-      "label": "Arm Drag",
-      "type": "takedown",
+      "label": "Choke",
+      "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "4:25"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "4:35"
+      "timestamp": "137:44"
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Jonathan Wilson",
-      "timestamp": "4:43",
-      "successful": false
+      "timestamp": "139:10"
     },
     {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "5:43"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "5:51"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Jonathan Wilson",
-      "timestamp": "6:39"
-    },
-    {
-      "label": "Arm Drag",
+      "label": "Sweep",
       "type": "takedown",
       "actor": "Jonathan Wilson",
-      "timestamp": "6:39"
+      "timestamp": "140:30"
     },
     {
-      "label": "Saddle (Inside Sankaku)",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "7:19"
-    },
-    {
-      "label": "Long Step Pass",
-      "type": "pass",
-      "actor": "Jonathan Wilson",
-      "timestamp": "7:19"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "7:19"
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "7:26"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "7:35"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Jonathan Wilson",
-      "timestamp": "8:45",
-      "successful": false
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Jonathan Wilson",
-      "timestamp": "8:53"
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "9:05"
-    },
-    {
-      "label": "Truck",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "9:32"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jonathan Wilson",
-      "timestamp": "9:32"
-    },
-    {
-      "label": "Single Leg",
-      "type": "takedown",
-      "actor": "Jonathan Wilson",
-      "timestamp": "9:42",
-      "successful": false
-    },
-    {
-      "label": "Single Leg Takedown",
-      "type": "takedown",
-      "actor": "Jonathan Wilson",
-      "timestamp": "9:42",
-      "successful": false
-    },
-    {
-      "label": "Guillotine Choke",
+      "label": "Choke",
       "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "9:47"
+      "timestamp": "141:23"
     },
     {
-      "label": "Guard Pass",
-      "type": "pass",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "10:20",
-      "successful": false
+      "timestamp": "141:35",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Guillotine",
+      "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "10:20",
-      "successful": false
+      "timestamp": "143:14"
     }
   ],
   "Kevin Beuhring|Sam Schwartzapfel|2026": [
     {
-      "label": "Guard Pass",
-      "type": "pass",
-      "actor": "Sam Schwartzapfel",
-      "timestamp": "0:00",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Sam Schwartzapfel",
-      "timestamp": "0:00",
-      "successful": false
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Sam Schwartzapfel",
-      "timestamp": "0:07",
-      "successful": false
-    },
-    {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "0:53"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "1:36"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Kevin Beuhring",
-      "timestamp": "1:36"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "1:55"
-    },
-    {
-      "label": "Truck",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "5:23"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Kevin Beuhring",
-      "timestamp": "6:52"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "7:43"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "7:43"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "8:10"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "8:31"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "9:45"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "13:01"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "13:43"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "13:53"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "14:40"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "15:16"
-    },
-    {
-      "label": "Guillotine Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "15:24"
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "15:24"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Kevin Beuhring",
-      "timestamp": "15:35"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "15:35"
-    },
-    {
-      "label": "Hip Bump Sweep",
-      "type": "sweep",
-      "actor": "Kevin Beuhring",
-      "timestamp": "15:58"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "16:30"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "17:07"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Kevin Beuhring",
-      "timestamp": "17:15"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "17:41"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "17:56"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Kevin Beuhring",
-      "timestamp": "18:21"
-    },
-    {
-      "label": "Ankle Lock",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "18:36"
-    },
-    {
-      "label": "Straight Ankle Lock",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "18:36"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "18:36"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "19:02"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "19:45"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "20:13"
-    },
-    {
-      "label": "Shrimp (Hip Escape)",
-      "type": "escape",
-      "actor": "Kevin Beuhring",
-      "timestamp": "21:02"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "21:02"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Kevin Beuhring",
-      "timestamp": "21:30",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "21:30",
-      "successful": false
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "21:45",
-      "successful": false
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "22:14"
-    },
-    {
-      "label": "Guillotine Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "22:14"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Kevin Beuhring",
-      "timestamp": "22:38"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "23:06"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "23:27"
-    },
-    {
-      "label": "Guillotine Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "23:39"
-    },
-    {
-      "label": "Single Leg Takedown",
-      "type": "takedown",
-      "actor": "Kevin Beuhring",
-      "timestamp": "23:39"
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "24:11"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "24:11"
-    },
-    {
-      "label": "Anaconda Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "24:17"
-    },
-    {
-      "label": "Anaconda Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "25:01"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "25:43"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "26:25"
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "27:45"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "28:24",
+      "timestamp": "144:40",
       "successful": true
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "29:02"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "29:26"
-    },
-    {
-      "label": "Turtle Position",
-      "type": "escape",
-      "actor": "Kevin Beuhring",
-      "timestamp": "29:34"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "30:15"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "31:24",
-      "successful": false
-    },
-    {
-      "label": "Armbar",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "31:24",
-      "successful": false
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "31:40"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "32:22"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Kevin Beuhring",
-      "timestamp": "33:12"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "33:24"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Kevin Beuhring",
-      "timestamp": "33:24"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Kevin Beuhring",
-      "timestamp": "33:33"
-    },
-    {
-      "label": "Heel Hook",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "34:19"
-    },
-    {
-      "label": "Ankle Lock",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "36:23",
-      "successful": false
-    },
-    {
-      "label": "Straight Ankle Lock",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "36:23",
-      "successful": false
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "37:22",
-      "successful": false
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "37:51"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kevin Beuhring",
-      "timestamp": "38:01"
     }
   ],
   "Noah McCully|Travis Haven|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Noah McCully",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Travis Haven",
-      "timestamp": "0:42"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Travis Haven",
-      "timestamp": "0:59"
-    },
-    {
-      "label": "Ankle Lock",
+      "label": "Straight Ankle",
       "type": "submission",
       "actor": "Noah McCully",
-      "timestamp": "2:50"
-    },
-    {
-      "label": "Straight Ankle Lock",
-      "type": "submission",
-      "actor": "Noah McCully",
-      "timestamp": "2:50"
-    },
-    {
-      "label": "Turtle Position",
-      "type": "escape",
-      "actor": "Noah McCully",
-      "timestamp": "3:28"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Noah McCully",
-      "timestamp": "4:05"
-    },
-    {
-      "label": "Ankle Lock",
-      "type": "submission",
-      "actor": "Noah McCully",
-      "timestamp": "4:13"
-    },
-    {
-      "label": "Straight Ankle Lock",
-      "type": "submission",
-      "actor": "Noah McCully",
-      "timestamp": "4:13"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Noah McCully",
-      "timestamp": "4:22"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Noah McCully",
-      "timestamp": "4:27"
+      "timestamp": "184:52"
     }
   ],
   "Shawn Melanson|Kevin Beuhring|2026": [
     {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kevin Beuhring",
-      "timestamp": "0:22"
-    },
-    {
-      "label": "Twister",
+      "label": "Tap",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "0:45",
+      "timestamp": "187:31",
       "successful": true
     },
     {
-      "label": "Arm Drag",
-      "type": "takedown",
+      "label": "Tap",
+      "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "1:54"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Shawn Melanson",
-      "timestamp": "2:26"
-    },
-    {
-      "label": "Smash Pass",
-      "type": "pass",
-      "actor": "Kevin Beuhring",
-      "timestamp": "2:48",
-      "successful": false
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Shawn Melanson",
-      "timestamp": "3:16"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "3:24"
-    },
-    {
-      "label": "Z-Guard",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "3:24"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Shawn Melanson",
-      "timestamp": "3:39"
-    },
-    {
-      "label": "Truck",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "6:15"
-    },
-    {
-      "label": "Single Leg Takedown",
-      "type": "takedown",
-      "actor": "Shawn Melanson",
-      "timestamp": "6:24"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "6:24"
-    },
-    {
-      "label": "Double Leg Takedown",
-      "type": "takedown",
-      "actor": "Shawn Melanson",
-      "timestamp": "7:04"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "7:14"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "7:40"
-    },
-    {
-      "label": "Double Leg Takedown",
-      "type": "takedown",
-      "actor": "Shawn Melanson",
-      "timestamp": "7:50",
+      "timestamp": "189:44",
       "successful": true
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "7:58"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "8:56"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "9:19"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "9:53"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "11:43",
-      "successful": false
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "12:33"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Shawn Melanson",
-      "timestamp": "12:38"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "13:06"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Shawn Melanson",
-      "timestamp": "13:23"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "14:59"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Shawn Melanson",
-      "timestamp": "15:09"
-    },
-    {
-      "label": "Body Lock",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "16:50",
-      "successful": false
-    },
-    {
-      "label": "Body Lock Pass",
-      "type": "pass",
-      "actor": "Shawn Melanson",
-      "timestamp": "16:50",
-      "successful": false
-    },
-    {
-      "label": "Body Lock",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "17:11"
-    },
-    {
-      "label": "Knee Cut Pass",
-      "type": "pass",
-      "actor": "Shawn Melanson",
-      "timestamp": "17:11"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "17:11"
     }
   ],
   "Jett Thompson|Joshua Squires|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Joshua Squires",
-      "timestamp": "0:00"
-    },
-    {
       "label": "Back Take",
       "type": "control",
       "actor": "Jett Thompson",
-      "timestamp": "0:03"
+      "timestamp": "204:23"
     },
     {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Joshua Squires",
-      "timestamp": "0:24"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Joshua Squires",
-      "timestamp": "1:34",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Guard Pass",
+      "type": "pass",
       "actor": "Jett Thompson",
-      "timestamp": "2:33"
+      "timestamp": "206:17"
+    },
+    {
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Jett Thompson",
+      "timestamp": "206:41"
     }
   ],
   "Cam Herd|Sam Schwartzapfel|2026": [
     {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Cam Herd",
-      "timestamp": "3:32",
-      "successful": false
-    },
-    {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "3:32",
+      "timestamp": "207:48"
+    },
+    {
+      "label": "Sweep",
+      "type": "takedown",
+      "actor": "Cam Herd",
+      "timestamp": "211:07",
       "successful": false
     },
     {
-      "label": "Knee Tap",
-      "type": "takedown",
+      "label": "Tap",
+      "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "3:54",
-      "successful": true
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "3:54",
+      "timestamp": "211:29",
       "successful": true
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "4:05",
+      "timestamp": "211:40",
       "successful": true
     },
     {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Sam Schwartzapfel",
-      "timestamp": "4:23"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "5:01"
-    },
-    {
-      "label": "Double Under Pass",
-      "type": "pass",
-      "actor": "Cam Herd",
-      "timestamp": "5:40"
-    },
-    {
-      "label": "Double Leg Takedown",
-      "type": "takedown",
-      "actor": "Cam Herd",
-      "timestamp": "5:40"
-    },
-    {
-      "label": "Smash Pass",
-      "type": "pass",
-      "actor": "Cam Herd",
-      "timestamp": "5:40"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Cam Herd",
-      "timestamp": "5:40"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "5:54",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "6:19",
-      "successful": false
-    },
-    {
-      "label": "North South",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "6:28"
-    },
-    {
-      "label": "North-South Position",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "6:28"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "6:53"
-    },
-    {
-      "label": "Double Leg Takedown",
-      "type": "takedown",
-      "actor": "Cam Herd",
-      "timestamp": "7:12"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Cam Herd",
-      "timestamp": "7:12"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "8:56"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "8:56"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "9:54"
-    },
-    {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "10:37"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "11:28"
-    },
-    {
-      "label": "Turtle Position",
-      "type": "escape",
-      "actor": "Cam Herd",
-      "timestamp": "11:39"
-    },
-    {
-      "label": "Toe Hold",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "11:53"
-    },
-    {
-      "label": "Calf Slicer",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "11:53"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "12:37"
-    },
-    {
-      "label": "Bridge (Upa Escape)",
-      "type": "escape",
-      "actor": "Cam Herd",
-      "timestamp": "12:45"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "18:36"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "20:27"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "20:43"
-    },
-    {
-      "label": "Stack Pass",
-      "type": "pass",
-      "actor": "Cam Herd",
-      "timestamp": "21:15"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "21:15"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "21:34"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "22:59"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "23:15"
-    },
-    {
-      "label": "Float Pass",
-      "type": "pass",
-      "actor": "Cam Herd",
-      "timestamp": "23:24"
-    },
-    {
-      "label": "Body Triangle",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "23:30"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "23:30"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "24:22"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "24:31"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "24:56"
-    },
-    {
-      "label": "Hip Bump Sweep",
-      "type": "sweep",
-      "actor": "Cam Herd",
-      "timestamp": "25:04"
-    },
-    {
-      "label": "Omoplata (Shoulder Lock)",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "25:04"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "25:04"
-    },
-    {
-      "label": "Back Take",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "25:10"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "25:10"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "25:13"
-    },
-    {
-      "label": "Open Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "25:13"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "27:09"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "27:16"
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "27:16"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "27:45"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "31:38"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "34:20"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "38:21"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "39:15"
-    },
-    {
-      "label": "Stack Pass",
-      "type": "pass",
-      "actor": "Cam Herd",
-      "timestamp": "40:22"
-    },
-    {
-      "label": "Butterfly Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "41:03"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "41:19",
-      "successful": false
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "41:58"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "41:58"
-    },
-    {
-      "label": "Butterfly Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "42:30",
-      "successful": false
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Cam Herd",
-      "timestamp": "42:40"
-    },
-    {
-      "label": "Long Step Pass",
-      "type": "pass",
-      "actor": "Cam Herd",
-      "timestamp": "45:22"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "45:22"
-    },
-    {
-      "label": "Ankle Lock",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "45:27"
-    },
-    {
-      "label": "Knee Bar",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "45:27"
-    },
-    {
-      "label": "Straight Ankle Lock",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "45:27"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "45:35"
-    },
-    {
-      "label": "Z-Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "45:35"
-    },
-    {
-      "label": "Knee Cut Pass",
-      "type": "pass",
-      "actor": "Cam Herd",
-      "timestamp": "45:35"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Sam Schwartzapfel",
-      "timestamp": "46:12"
+      "timestamp": "215:33",
+      "successful": true
     }
   ],
   "Derek Adkins|Joshua Squires|2026": [
     {
-      "label": "Armbar",
+      "label": "Finish",
       "type": "submission",
       "actor": "Derek Adkins",
-      "timestamp": "0:45"
+      "timestamp": "254:59",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Tap",
+      "type": "submission",
       "actor": "Derek Adkins",
-      "timestamp": "0:56"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Adkins",
-      "timestamp": "1:44"
+      "timestamp": "257:46",
+      "successful": true
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Derek Adkins",
-      "timestamp": "5:20"
-    },
-    {
-      "label": "Knee Bar",
-      "type": "submission",
-      "actor": "Derek Adkins",
-      "timestamp": "6:48",
-      "successful": false
-    },
-    {
-      "label": "Bridge (Upa Escape)",
-      "type": "escape",
-      "actor": "Derek Adkins",
-      "timestamp": "6:57"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Derek Adkins",
-      "timestamp": "7:06"
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Derek Adkins",
-      "timestamp": "7:10",
+      "timestamp": "260:19",
       "successful": false
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Derek Adkins",
-      "timestamp": "8:58"
-    },
-    {
-      "label": "Front Headlock",
-      "type": "control",
-      "actor": "Derek Adkins",
-      "timestamp": "9:10"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Adkins",
-      "timestamp": "9:58"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Derek Adkins",
-      "timestamp": "14:20"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Adkins",
-      "timestamp": "14:28"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Adkins",
-      "timestamp": "15:05"
-    },
-    {
-      "label": "Stand Up",
-      "type": "escape",
-      "actor": "Derek Adkins",
-      "timestamp": "16:09"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Derek Adkins",
-      "timestamp": "16:46"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Derek Adkins",
-      "timestamp": "18:06"
-    },
-    {
-      "label": "Heel Hook",
-      "type": "submission",
-      "actor": "Derek Adkins",
-      "timestamp": "18:13"
+      "timestamp": "263:57"
     }
   ],
   "Kyle Chambers|Jonathan Wilson|2026": [
     {
-      "label": "Front Headlock",
-      "type": "control",
+      "label": "Choke",
+      "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "1:38"
+      "timestamp": "275:10"
     },
     {
-      "label": "Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "1:48"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "2:03"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Kyle Chambers",
-      "timestamp": "2:10"
+      "timestamp": "275:20"
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Jonathan Wilson",
-      "timestamp": "2:28"
+      "timestamp": "276:00",
+      "successful": false
     },
     {
-      "label": "Saddle (Inside Sankaku)",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "2:37"
+      "label": "Finish",
+      "type": "submission",
+      "actor": "Jonathan Wilson",
+      "timestamp": "276:32",
+      "successful": true
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "3:15"
+      "timestamp": "276:47"
     },
     {
-      "label": "Ankle Lock",
+      "label": "Submission",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "3:15"
+      "timestamp": "277:29"
     },
     {
-      "label": "Straight Ankle Lock",
+      "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "3:15"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "3:15"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Kyle Chambers",
-      "timestamp": "3:41"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "3:41"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Kyle Chambers",
-      "timestamp": "4:18"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "4:42"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "5:19"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Kyle Chambers",
-      "timestamp": "7:09"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "7:45"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Kyle Chambers",
-      "timestamp": "8:22"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "8:22"
-    },
-    {
-      "label": "Duck Under",
-      "type": "takedown",
-      "actor": "Kyle Chambers",
-      "timestamp": "8:22"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "9:27"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Kyle Chambers",
-      "timestamp": "10:40",
+      "timestamp": "277:40",
       "successful": true
     },
     {
-      "label": "Stack Pass",
-      "type": "pass",
-      "actor": "Kyle Chambers",
-      "timestamp": "10:56"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "11:37"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Kyle Chambers",
-      "timestamp": "12:18"
-    },
-    {
-      "label": "Triangle Choke",
+      "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "13:11"
+      "timestamp": "279:17",
+      "successful": true
     },
     {
-      "label": "Front Headlock",
-      "type": "control",
+      "label": "Triangle",
+      "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "13:18"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Kyle Chambers",
-      "timestamp": "13:18"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Kyle Chambers",
-      "timestamp": "13:45"
+      "timestamp": "281:54"
     }
   ],
   "Shawn Melanson|Caleb Crump|2026": [
     {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Caleb Crump",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Guard Pull",
-      "type": "guard",
-      "actor": "Caleb Crump",
-      "timestamp": "0:10"
+      "label": "Submission",
+      "type": "submission",
+      "actor": "Shawn Melanson",
+      "timestamp": "287:22"
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Caleb Crump",
-      "timestamp": "0:18"
+      "timestamp": "287:40"
     },
     {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Caleb Crump",
-      "timestamp": "0:18"
-    },
-    {
-      "label": "Z-Guard",
-      "type": "guard",
-      "actor": "Caleb Crump",
-      "timestamp": "0:18"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "0:27"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "0:35"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Caleb Crump",
-      "timestamp": "1:04"
-    },
-    {
-      "label": "Armbar",
+      "label": "Finish",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "1:17"
+      "timestamp": "292:10",
+      "successful": true
     },
     {
-      "label": "Stack Pass",
-      "type": "pass",
-      "actor": "Shawn Melanson",
-      "timestamp": "1:17"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "1:34"
-    },
-    {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
       "actor": "Caleb Crump",
-      "timestamp": "3:10"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "4:31",
-      "successful": false
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Shawn Melanson",
-      "timestamp": "5:19"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Shawn Melanson",
-      "timestamp": "5:31"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Shawn Melanson",
-      "timestamp": "6:00"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Shawn Melanson",
-      "timestamp": "6:28"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Shawn Melanson",
-      "timestamp": "7:08"
+      "timestamp": "292:23"
     }
   ],
   "Cam Herd|Eric Allen|2026": [
     {
-      "label": "Twister",
+      "label": "Tap",
       "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "0:10"
+      "actor": "Eric Allen",
+      "timestamp": "295:58",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Takedown",
+      "type": "takedown",
       "actor": "Cam Herd",
-      "timestamp": "0:10"
+      "timestamp": "296:29"
     },
     {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "0:26"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "0:26"
+      "actor": "Eric Allen",
+      "timestamp": "297:04"
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Cam Herd",
-      "timestamp": "2:37"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "2:37"
-    },
-    {
-      "label": "Guard Recovery",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "2:45"
-    },
-    {
-      "label": "Guard Retention",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "2:52"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "3:09"
+      "timestamp": "297:39"
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Cam Herd",
-      "timestamp": "3:32"
-    },
-    {
-      "label": "Arm Triangle Choke",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "3:39",
-      "successful": false
-    },
-    {
-      "label": "Butterfly Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "3:47"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "3:47"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Cam Herd",
-      "timestamp": "4:21"
-    },
-    {
-      "label": "Back Take",
-      "type": "control",
-      "actor": "Eric Allen",
-      "timestamp": "5:04"
-    },
-    {
-      "label": "Knee on Belly",
-      "type": "control",
-      "actor": "Eric Allen",
-      "timestamp": "5:04"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Eric Allen",
-      "timestamp": "5:04"
+      "timestamp": "298:34"
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Eric Allen",
-      "timestamp": "5:04"
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Eric Allen",
-      "timestamp": "5:25"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "5:55"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Eric Allen",
-      "timestamp": "6:16"
+      "timestamp": "300:27"
     },
     {
       "label": "Toe Hold",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "7:15"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Cam Herd",
-      "timestamp": "7:36"
+      "timestamp": "302:17"
     },
     {
       "label": "Mount",
       "type": "control",
-      "actor": "Eric Allen",
-      "timestamp": "7:48"
+      "actor": "Cam Herd",
+      "timestamp": "302:50",
+      "successful": false
     },
     {
-      "label": "Triangle Choke",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "7:55",
+      "timestamp": "302:57",
       "successful": false
     },
     {
       "label": "Mount",
       "type": "control",
-      "actor": "Eric Allen",
-      "timestamp": "8:05"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
       "actor": "Cam Herd",
-      "timestamp": "8:14"
+      "timestamp": "303:07"
     },
     {
       "label": "Toe Hold",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "8:21"
+      "timestamp": "303:23"
     },
     {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "8:50"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Cam Herd",
-      "timestamp": "8:50"
+      "timestamp": "303:28",
+      "successful": true
     }
   ],
   "Austin Oranday|Elijah Carlton|2026": [
     {
-      "label": "Twister",
+      "label": "Tap",
       "type": "submission",
       "actor": "Austin Oranday",
-      "timestamp": "0:20"
+      "timestamp": "305:09",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "0:28"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "0:48"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "1:10"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "1:30"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "2:54"
-    },
-    {
-      "label": "Arm Drag",
+      "label": "Sweep",
       "type": "takedown",
       "actor": "Austin Oranday",
-      "timestamp": "3:16",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "3:16",
-      "successful": false
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "3:34"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "4:16"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "4:30"
+      "timestamp": "307:50"
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Austin Oranday",
-      "timestamp": "4:47",
+      "timestamp": "308:56",
       "successful": true
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Austin Oranday",
-      "timestamp": "5:17"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "5:36"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "5:56"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "6:53"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "6:58"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Austin Oranday",
-      "timestamp": "7:35"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "9:16"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Austin Oranday",
-      "timestamp": "9:41"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Austin Oranday",
-      "timestamp": "9:41"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "9:52"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Austin Oranday",
-      "timestamp": "10:22"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "10:30"
-    },
-    {
-      "label": "Body Triangle",
-      "type": "control",
-      "actor": "Austin Oranday",
-      "timestamp": "10:44"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "10:44"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Austin Oranday",
-      "timestamp": "11:40"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Austin Oranday",
-      "timestamp": "13:01"
+      "timestamp": "309:26"
     }
   ],
   "Jett Thompson|Jake Strauss|2026": [
     {
-      "label": "Twister",
+      "label": "Submission",
       "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "0:00"
+      "timestamp": "318:19"
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Finish",
+      "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "1:43"
-    },
-    {
-      "label": "Closed Guard",
-      "type": "guard",
-      "actor": "Jett Thompson",
-      "timestamp": "1:57",
-      "successful": false
-    },
-    {
-      "label": "Hip Bump Sweep",
-      "type": "sweep",
-      "actor": "Jett Thompson",
-      "timestamp": "1:57",
-      "successful": false
-    },
-    {
-      "label": "Mount",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "2:06"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "2:06"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jett Thompson",
-      "timestamp": "2:44"
-    },
-    {
-      "label": "Bridge (Upa Escape)",
-      "type": "escape",
-      "actor": "Jett Thompson",
-      "timestamp": "2:49"
+      "timestamp": "318:39",
+      "successful": true
     }
   ],
   "Chewy Magana|Elijah Carlton|2026": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Chewy Magana",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Bridge (Upa Escape)",
-      "type": "escape",
-      "actor": "Chewy Magana",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "0:39"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Elijah Carlton",
-      "timestamp": "0:48"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Elijah Carlton",
-      "timestamp": "1:40"
-    },
-    {
-      "label": "Bridge (Upa Escape)",
-      "type": "escape",
-      "actor": "Chewy Magana",
-      "timestamp": "2:37"
-    },
-    {
-      "label": "Ankle Lock",
+      "label": "Tap",
       "type": "submission",
       "actor": "Chewy Magana",
-      "timestamp": "4:16",
+      "timestamp": "321:23",
       "successful": true
     },
     {
-      "label": "Straight Ankle Lock",
+      "label": "Submission",
       "type": "submission",
       "actor": "Chewy Magana",
-      "timestamp": "4:16",
+      "timestamp": "322:37"
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Chewy Magana",
+      "timestamp": "324:06",
+      "successful": true
+    },
+    {
+      "label": "Straight Ankle",
+      "type": "submission",
+      "actor": "Chewy Magana",
+      "timestamp": "324:16",
+      "successful": true
+    },
+    {
+      "label": "Tap",
+      "type": "submission",
+      "actor": "Chewy Magana",
+      "timestamp": "324:50",
       "successful": true
     },
     {
       "label": "Foot Lock",
       "type": "submission",
       "actor": "Chewy Magana",
-      "timestamp": "5:06"
+      "timestamp": "325:06"
     }
   ],
   "Jared Fekete|Travis Haven|2026": [
     {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "0:29"
+      "timestamp": "328:12",
+      "successful": true
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Travis Haven",
-      "timestamp": "0:29"
-    },
-    {
-      "label": "Twister",
+      "label": "Choke",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "1:11"
-    },
-    {
-      "label": "Arm Drag",
-      "type": "takedown",
-      "actor": "Travis Haven",
-      "timestamp": "1:40",
-      "successful": false
-    },
-    {
-      "label": "Buggy Choke",
-      "type": "submission",
-      "actor": "Travis Haven",
-      "timestamp": "1:49"
+      "timestamp": "329:19"
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Jared Fekete",
-      "timestamp": "1:58"
-    },
-    {
-      "label": "Arm Triangle Choke",
-      "type": "submission",
-      "actor": "Jared Fekete",
-      "timestamp": "2:06",
-      "successful": false
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Jared Fekete",
-      "timestamp": "2:06",
-      "successful": false
-    },
-    {
-      "label": "Bridge (Upa Escape)",
-      "type": "escape",
-      "actor": "Travis Haven",
-      "timestamp": "2:10"
-    },
-    {
-      "label": "Body Lock",
-      "type": "control",
-      "actor": "Jared Fekete",
-      "timestamp": "2:19"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Travis Haven",
-      "timestamp": "2:33"
+      "timestamp": "329:28"
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Travis Haven",
-      "timestamp": "2:33"
+      "timestamp": "330:03"
     },
     {
-      "label": "Twister",
+      "label": "Straight Ankle",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "2:54"
-    },
-    {
-      "label": "Ankle Lock",
-      "type": "submission",
-      "actor": "Travis Haven",
-      "timestamp": "3:35"
-    },
-    {
-      "label": "Straight Ankle Lock",
-      "type": "submission",
-      "actor": "Travis Haven",
-      "timestamp": "3:35"
-    },
-    {
-      "label": "Twister",
-      "type": "submission",
-      "actor": "Jared Fekete",
-      "timestamp": "4:24"
+      "timestamp": "331:05"
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Jared Fekete",
-      "timestamp": "4:32"
+      "timestamp": "332:02"
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Jared Fekete",
-      "timestamp": "7:01"
-    },
-    {
-      "label": "Stack Pass",
-      "type": "pass",
-      "actor": "Jared Fekete",
-      "timestamp": "7:16"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Travis Haven",
-      "timestamp": "7:25"
-    },
-    {
-      "label": "Twister",
+      "label": "Finish",
       "type": "submission",
       "actor": "Jared Fekete",
-      "timestamp": "8:06"
+      "timestamp": "335:13",
+      "successful": true
     },
     {
-      "label": "Turtle Position",
-      "type": "escape",
+      "label": "Choke",
+      "type": "submission",
       "actor": "Jared Fekete",
-      "timestamp": "8:28"
+      "timestamp": "336:19"
     },
     {
-      "label": "Back Control",
-      "type": "control",
+      "label": "Submission",
+      "type": "submission",
       "actor": "Jared Fekete",
-      "timestamp": "9:31"
+      "timestamp": "336:53"
     }
   ]
 }

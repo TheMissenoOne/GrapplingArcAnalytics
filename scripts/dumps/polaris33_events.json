@@ -141,20 +141,6 @@
   ],
   "Bobby Lane|Thomas Clifford|2025": [
     {
-      "label": "Heel Hook",
-      "type": "submission",
-      "actor": "Thomas Clifford",
-      "timestamp": "0:00",
-      "successful": false
-    },
-    {
-      "label": "Heel Hook Attempt",
-      "type": "submission",
-      "actor": "Thomas Clifford",
-      "timestamp": "0:00",
-      "successful": false
-    },
-    {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bobby Lane",
@@ -1314,18 +1300,6 @@
     }
   ],
   "Hayley Carter|Julia Livesey|2025": [
-    {
-      "label": "Back Take",
-      "type": "control",
-      "actor": "Hayley Carter",
-      "timestamp": "0:00"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Hayley Carter",
-      "timestamp": "0:00"
-    },
     {
       "label": "Back Control",
       "type": "control",

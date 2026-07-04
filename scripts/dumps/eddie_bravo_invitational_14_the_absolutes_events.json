@@ -663,12 +663,6 @@
   ],
   "Gordon Ryan|Patrick Donabedian|2025": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Gordon Ryan",
-      "timestamp": "0:00"
-    },
-    {
       "label": "Kimura",
       "type": "submission",
       "actor": "Gordon Ryan",
@@ -732,12 +726,6 @@
     }
   ],
   "Casey Hellenberg|Jesse Ray Childery|2025": [
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Casey Hellenberg",
-      "timestamp": "0:00"
-    },
     {
       "label": "Half Guard",
       "type": "guard",
@@ -919,12 +907,6 @@
   ],
   "Andrew Kimler|Aaron 'Tex' Johnson|2025": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Andrew Kimler",
-      "timestamp": "0:00"
-    },
-    {
       "label": "Ankle Lock",
       "type": "submission",
       "actor": "Andrew Kimler",
@@ -970,12 +952,6 @@
   ],
   "Craig Jones|Marcel Gonzalez|2025": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Marcel Gonzalez",
-      "timestamp": "0:00"
-    },
-    {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Craig Jones",
@@ -1007,12 +983,6 @@
     }
   ],
   "Gordon Ryan|Casey Hellenberg|2025": [
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Gordon Ryan",
-      "timestamp": "0:00"
-    },
     {
       "label": "Arm Drag",
       "type": "takedown",

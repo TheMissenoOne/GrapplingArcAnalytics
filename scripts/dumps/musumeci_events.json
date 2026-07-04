@@ -3,407 +3,72 @@
     {
       "label": "Guard Pull",
       "type": "guard",
-      "actor": "Musumeci",
+      "actor": "Mikey Musumeci",
       "timestamp": "2:08"
     },
     {
-      "label": "Americana (Keylock)",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "4:01",
+      "label": "Guard Pass Attempt",
+      "type": "pass",
+      "actor": "Kevin Carrasco",
+      "timestamp": "2:37",
       "successful": false
     },
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "5:19",
-      "successful": true
-    },
-    {
-      "label": "Americana (Keylock)",
+      "label": "Foot Lock",
       "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "6:06",
+      "actor": "Mikey Musumeci",
+      "timestamp": "5:03",
       "successful": true
     }
   ],
   "Musumeci|Gabriel (UFC BJJ 1)|2025": [
     {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Gabriel (UFC BJJ 1)",
-      "timestamp": "2:06"
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Mikey Musumeci",
+      "timestamp": "8:48"
     },
     {
-      "label": "Americana (Keylock)",
+      "label": "Leg Lock Attempt",
       "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "2:43"
-    },
-    {
-      "label": "Long Step Pass",
-      "type": "pass",
-      "actor": "Musumeci",
-      "timestamp": "3:11"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "3:11"
-    },
-    {
-      "label": "Foot Lock",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "3:43"
-    },
-    {
-      "label": "Knee Bar",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "5:38"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "5:50",
+      "actor": "Mikey Musumeci",
+      "timestamp": "9:25",
       "successful": false
     },
     {
-      "label": "Knee Bar",
+      "label": "Foot Lock Attempt",
       "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "6:21"
-    },
-    {
-      "label": "Calf Slicer",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "8:44"
-    },
-    {
-      "label": "Guillotine Choke",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "9:29"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "10:01"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Gabriel (UFC BJJ 1)",
-      "timestamp": "10:50"
-    },
-    {
-      "label": "Body Lock",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "11:18"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "11:18"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Gabriel (UFC BJJ 1)",
-      "timestamp": "11:50"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Gabriel (UFC BJJ 1)",
-      "timestamp": "12:11"
-    },
-    {
-      "label": "Heel Hook",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "12:49",
+      "actor": "Mikey Musumeci",
+      "timestamp": "10:25",
       "successful": false
     },
     {
-      "label": "Knee Bar",
+      "label": "Knee Bar Attempt",
       "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "12:49",
+      "actor": "Mikey Musumeci",
+      "timestamp": "12:20",
       "successful": false
-    },
-    {
-      "label": "Heel Hook",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "13:45"
     }
   ],
   "Musumeci|Machado (UFC FPI 9)|2025": [
     {
-      "label": "Single Leg Takedown",
-      "type": "takedown",
-      "actor": "Musumeci",
-      "timestamp": "0:14"
-    },
-    {
       "label": "Guard Pull",
       "type": "guard",
-      "actor": "Musumeci",
-      "timestamp": "1:41"
+      "actor": "Mikey Musumeci",
+      "timestamp": "22:52"
     },
     {
-      "label": "Straight Ankle Lock",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "2:14"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "2:21"
-    },
-    {
-      "label": "Butterfly Guard",
-      "type": "guard",
-      "actor": "Musumeci",
-      "timestamp": "3:00"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Musumeci",
-      "timestamp": "3:00"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "3:08"
-    },
-    {
-      "label": "Stand Up",
-      "type": "escape",
-      "actor": "Musumeci",
-      "timestamp": "3:43"
-    },
-    {
-      "label": "Long Step Pass",
+      "label": "Guard Pass Attempt",
       "type": "pass",
-      "actor": "Musumeci",
-      "timestamp": "3:51"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "3:51"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "4:16"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "4:25"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "4:35"
-    },
-    {
-      "label": "Heel Hook",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "4:45",
+      "actor": "Fellipe Machado",
+      "timestamp": "23:48",
       "successful": false
     },
     {
-      "label": "Back Control",
+      "label": "Back Take Attempt",
       "type": "control",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "4:58"
-    },
-    {
-      "label": "Long Step Pass",
-      "type": "pass",
-      "actor": "Musumeci",
-      "timestamp": "5:05"
-    },
-    {
-      "label": "Butterfly Guard",
-      "type": "guard",
-      "actor": "Musumeci",
-      "timestamp": "5:15"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Musumeci",
-      "timestamp": "5:15"
-    },
-    {
-      "label": "Heel Hook",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "5:28"
-    },
-    {
-      "label": "Half Guard",
-      "type": "guard",
-      "actor": "Musumeci",
-      "timestamp": "5:36"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "6:06"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "6:26"
-    },
-    {
-      "label": "Stand Up",
-      "type": "escape",
-      "actor": "Musumeci",
-      "timestamp": "7:03"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "7:03"
-    },
-    {
-      "label": "Butterfly Guard",
-      "type": "guard",
-      "actor": "Musumeci",
-      "timestamp": "7:27"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Musumeci",
-      "timestamp": "7:27"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "8:01"
-    },
-    {
-      "label": "Long Step Pass",
-      "type": "pass",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "8:17"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "8:17"
-    },
-    {
-      "label": "Outside Ashi Garami",
-      "type": "control",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "9:10"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "9:10"
-    },
-    {
-      "label": "Foot Sweep",
-      "type": "takedown",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "9:10"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "10:49"
-    },
-    {
-      "label": "Triangle Choke",
-      "type": "submission",
-      "actor": "Musumeci",
-      "timestamp": "10:59",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "11:23"
-    },
-    {
-      "label": "Knee Cut Pass",
-      "type": "pass",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "11:37"
-    },
-    {
-      "label": "Turtle Position",
-      "type": "escape",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "11:37"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "13:12",
-      "successful": false
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "14:06",
-      "successful": false
-    },
-    {
-      "label": "Scarf Hold",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "14:09"
-    },
-    {
-      "label": "Back Control",
-      "type": "control",
-      "actor": "Musumeci",
-      "timestamp": "14:31"
-    },
-    {
-      "label": "Calf Slicer",
-      "type": "submission",
-      "actor": "Machado (UFC FPI 9)",
-      "timestamp": "14:38",
-      "successful": false
+      "actor": "Fellipe Machado",
+      "timestamp": "23:32"
     }
   ]
 }
