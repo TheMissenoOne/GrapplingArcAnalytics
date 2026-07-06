@@ -98,6 +98,10 @@ convention — **`actor` = the fighter whose game the node belongs to**, not who
 node is owned by the **guard player** (bottom), the `pass` by the passer. Full model + the per-type
 ownership table: **`docs/match_event_model.md`** (refiner-facing copy in `docs/deepseek/E-refine-events.md`).
 
+**End-to-end ingestion** (transcript → dump → refine → import → embeddings → site → validate),
+with the command + owner for each step: **`docs/ingestion_pipeline.md`**. QA a fresh batch with
+`analysis/match_deviance.py` (per-bout deviance from each athlete's usual game → recheck list).
+
 ## ELO Engine
 
 From `felixgnwn/adcc_elo_engine/elo_engine.py`:
