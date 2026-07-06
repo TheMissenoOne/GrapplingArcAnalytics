@@ -1,0 +1,791 @@
+{
+  "threshold": 0.92,
+  "total_nodes": 437,
+  "duplicate_clusters": 36,
+  "nodes_that_would_merge_away": 53,
+  "projected_canonical_count": 384,
+  "attempt_nodes": [
+    "americana attempt",
+    "arm triangle attempt",
+    "armbar attempt",
+    "armbar choi bar attempt",
+    "armbar triangle attempt",
+    "armtriangle attempt",
+    "armtriangle headarm strangle attempt",
+    "back take attempt",
+    "body lock takedown attempt",
+    "body triangle attempt",
+    "buggy choke attempt",
+    "calf slicer attempt",
+    "choi bar attempt",
+    "darce choke attempt",
+    "double leg takedown attempt",
+    "drop seoi nage attempt",
+    "ezekiel attempt",
+    "ezekiel choke attempt",
+    "face crank attempt",
+    "flying darce attempt",
+    "flying triangle attempt",
+    "foot lock attempt",
+    "foot sweep attempt",
+    "guard pass attempt",
+    "guillotine attempt",
+    "guillotine choke attempt",
+    "head and arm choke attempt",
+    "heel hook attempt",
+    "inside heel hook attempt",
+    "inversion attempt",
+    "inverted triangle attempt",
+    "kata gatame attempt",
+    "katagatame darce attempt",
+    "katagatame gift wrap attempt",
+    "kimura attempt",
+    "knee bar attempt",
+    "leg drag pass attempt",
+    "leg entanglement attempt",
+    "leg entanglement inside heel hook attempt",
+    "leg entry attempt",
+    "leg lock attempt",
+    "mount attempt",
+    "north south choke attempt",
+    "northsouth choke attempt",
+    "omoplata attempt",
+    "omoplata triangle attempt",
+    "pull guard attempt",
+    "rear naked choke attempt",
+    "rear naked choke attempt onearm",
+    "single leg takedown attempt",
+    "standing guillotine attempt",
+    "straight ankle lock attempt",
+    "straight foot lock attempt",
+    "submission attempt",
+    "sweep attempt",
+    "takedown attempt",
+    "toe hold attempt",
+    "triangle attempt",
+    "triangle choke attempt",
+    "twister attempt",
+    "uchi mata attempt",
+    "wrist lock attempt"
+  ],
+  "out_of_scope": {
+    "event_class": [
+      "blood time",
+      "blooper",
+      "body kick",
+      "body punch",
+      "caution penalty",
+      "challenge review",
+      "combination",
+      "counter",
+      "cross",
+      "elbow",
+      "front kick",
+      "head kick",
+      "injury timeout",
+      "jab",
+      "knee",
+      "knockdown",
+      "left hook",
+      "leg kick",
+      "match",
+      "overhand",
+      "right hook",
+      "spinning attack",
+      "stalling warning",
+      "strike",
+      "taunt",
+      "uppercut"
+    ],
+    "remap": [
+      "arm drag",
+      "berimbolo",
+      "lapel guard techniques",
+      "leg drag pass",
+      "singleleg defense",
+      "sprawl",
+      "worm guard"
+    ]
+  },
+  "cross_type_neardups": [],
+  "clusters": [
+    {
+      "node_type": "takedown",
+      "canonical": {
+        "key": "doubleleg takedown",
+        "label": "Double-leg takedown",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "singleleg takedown",
+          "label": "Single-leg takedown",
+          "source": "library",
+          "weak": true
+        },
+        {
+          "key": "single leg",
+          "label": "Single Leg",
+          "source": "user",
+          "weak": true
+        },
+        {
+          "key": "double leg takedown attempt",
+          "label": "Double Leg Takedown Attempt",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "single leg takedown",
+          "label": "Single Leg Takedown",
+          "source": "user",
+          "weak": true
+        },
+        {
+          "key": "single leg takedown attempt",
+          "label": "Single Leg Takedown Attempt",
+          "source": "user",
+          "weak": true
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "heel hook",
+        "label": "Heel Hook",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "inside heel hook attempt",
+          "label": "Inside Heel Hook Attempt",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "counter heel hook",
+          "label": "Counter Heel Hook",
+          "source": "library",
+          "weak": false
+        },
+        {
+          "key": "heel hook attempt",
+          "label": "Heel Hook Attempt",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "reverse heel hook",
+          "label": "Reverse Heel Hook",
+          "source": "library",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "armbar attempt",
+        "label": "Armbar Attempt",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "arm triangle attempt",
+          "label": "Arm Triangle Attempt",
+          "source": "user",
+          "weak": true
+        },
+        {
+          "key": "armtriangle attempt",
+          "label": "Arm‑Triangle Attempt",
+          "source": "user",
+          "weak": true
+        },
+        {
+          "key": "armbar triangle attempt",
+          "label": "Armbar / Triangle Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "ankle lock",
+        "label": "Ankle Lock",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "straight ankle lock",
+          "label": "Straight Ankle Lock",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "ankle lock grip",
+          "label": "Ankle Lock Grip",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "straight ankle lock attempt",
+          "label": "Straight Ankle Lock Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "north south choke",
+        "label": "North South Choke",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "northsouth choke",
+          "label": "North-South Choke",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "north south choke attempt",
+          "label": "North South Choke Attempt",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "northsouth choke attempt",
+          "label": "North‑South Choke Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "rear naked choke",
+        "label": "Rear Naked Choke",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "rear naked choke attempt onearm",
+          "label": "Rear Naked Choke Attempt (One-Arm)",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "rear naked choke attempt",
+          "label": "Rear Naked Choke Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "reverse triangle",
+        "label": "Reverse Triangle",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "inverted triangle",
+          "label": "Inverted Triangle",
+          "source": "user",
+          "weak": true
+        },
+        {
+          "key": "inverted triangle attempt",
+          "label": "Inverted Triangle Attempt",
+          "source": "user",
+          "weak": true
+        }
+      ]
+    },
+    {
+      "node_type": "guard",
+      "canonical": {
+        "key": "leg entanglement",
+        "label": "Leg Entanglement",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "leg lock entanglement",
+          "label": "Leg Lock Entanglement",
+          "source": "user",
+          "weak": false
+        },
+        {
+          "key": "leg entanglement 5050",
+          "label": "Leg Entanglement / 50/50",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "wristlock",
+        "label": "Wristlock",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "wrist lock",
+          "label": "Wrist Lock",
+          "source": "library",
+          "weak": true
+        },
+        {
+          "key": "wrist lock attempt",
+          "label": "Wrist Lock Attempt",
+          "source": "user",
+          "weak": true
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "twister",
+        "label": "Twister",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "twister attempt",
+          "label": "Twister Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "transition",
+      "canonical": {
+        "key": "pull guard",
+        "label": "Pull Guard",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "guard pull",
+          "label": "Guard Pull",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "takedown",
+      "canonical": {
+        "key": "trip",
+        "label": "Trip",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "trip takedown",
+          "label": "Trip Takedown",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "leg lock",
+        "label": "Leg Lock",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "leg lock attempt",
+          "label": "Leg Lock Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "straight foot lock",
+        "label": "Straight Foot Lock",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "straight foot lock attempt",
+          "label": "Straight Foot Lock Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "escape",
+      "canonical": {
+        "key": "upa bridge escape",
+        "label": "Upa (Bridge) Escape",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "bridge upa escape",
+          "label": "Bridge (Upa Escape)",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "transition",
+      "canonical": {
+        "key": "leg entry",
+        "label": "Leg Entry",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "leg entry attempt",
+          "label": "Leg Entry Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "toe hold",
+        "label": "Toe Hold",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "toe hold attempt",
+          "label": "Toe Hold Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "kneebar",
+        "label": "Kneebar",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "knee bar",
+          "label": "Knee Bar",
+          "source": "user",
+          "weak": true
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "americana",
+        "label": "Americana",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "americana attempt",
+          "label": "Americana Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "face crank",
+        "label": "Face Crank",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "face crank attempt",
+          "label": "Face Crank Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "takedown",
+      "canonical": {
+        "key": "ankle pick",
+        "label": "Ankle Pick",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "ankle pick takedown",
+          "label": "Ankle Pick Takedown",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "control",
+      "canonical": {
+        "key": "snap down front headlock",
+        "label": "Snap Down / Front Headlock",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "snap down to front headlock",
+          "label": "Snap Down to Front Headlock",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "takedown",
+      "canonical": {
+        "key": "foot sweep",
+        "label": "Foot Sweep",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "foot sweep attempt",
+          "label": "Foot Sweep Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "strike",
+      "canonical": {
+        "key": "left hook",
+        "label": "Left Hook",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "right hook",
+          "label": "Right Hook",
+          "source": "user",
+          "weak": true
+        }
+      ]
+    },
+    {
+      "node_type": "escape",
+      "canonical": {
+        "key": "turtle escape",
+        "label": "Turtle Escape",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "escape to turtle",
+          "label": "Escape to Turtle",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "foot lock",
+        "label": "Foot Lock",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "foot lock attempt",
+          "label": "Foot Lock Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "reverse arm lock",
+        "label": "Reverse Arm Lock",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "arm lock",
+          "label": "Arm Lock",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "flying triangle",
+        "label": "Flying Triangle",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "flying triangle attempt",
+          "label": "Flying Triangle Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "darce choke",
+        "label": "Darce Choke",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "darce choke attempt",
+          "label": "Darce Choke Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "submit",
+        "label": "Submit",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "submission",
+          "label": "Submission",
+          "source": "user",
+          "weak": true
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "buggy choke",
+        "label": "Buggy Choke",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "buggy choke attempt",
+          "label": "Buggy Choke Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "guillotine choke",
+        "label": "Guillotine Choke",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "guillotine choke attempt",
+          "label": "Guillotine Choke Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "calf slicer",
+        "label": "Calf Slicer",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "calf slicer attempt",
+          "label": "Calf Slicer Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "pass",
+      "canonical": {
+        "key": "knee cut",
+        "label": "Knee Cut",
+        "source": "user"
+      },
+      "aliases": [
+        {
+          "key": "knee cut pass",
+          "label": "Knee Cut Pass",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "triangle choke",
+        "label": "Triangle Choke",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "triangle choke attempt",
+          "label": "Triangle Choke Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    },
+    {
+      "node_type": "submission",
+      "canonical": {
+        "key": "ezekiel choke",
+        "label": "Ezekiel Choke",
+        "source": "library"
+      },
+      "aliases": [
+        {
+          "key": "ezekiel choke attempt",
+          "label": "Ezekiel Choke Attempt",
+          "source": "user",
+          "weak": false
+        }
+      ]
+    }
+  ]
+}
