@@ -550,11 +550,15 @@ _BREAKDOWN_JS = """
   }
   draw();new ResizeObserver(draw).observe(c);
 })();
+// YT API: load script once, build player instance once, seek without reload
+var gaPlayer=null;var gaPlayerReady=false;
+window.onYouTubeIframeAPIReady=function(){if(BD.vid){gaPlayer=new YT.Player('ytFrame',{events:{onReady:function(){gaPlayerReady=true;}}});}};
+if(BD.vid&&!window.YT){var tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);}
 // click a node with a timestamp → seek the match video to that moment
 function gaSeek(t){
-  const f=document.getElementById('ytFrame'); if(!f||!BD.vid) return;
-  f.src='https://www.youtube-nocookie.com/embed/'+BD.vid+'?start='+Math.max(0,t|0)+'&autoplay=1';
-  f.scrollIntoView({behavior:'smooth',block:'center'});
+  if(!BD.vid||!gaPlayer||!gaPlayerReady) return;
+  gaPlayer.seekTo(Math.max(0,t|0),true);gaPlayer.playVideo();
+  document.getElementById('ytFrame').scrollIntoView({behavior:'smooth',block:'center'});
 }
 // decisive sequence graph
 GAGraph.mount(document.getElementById('seqGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:BD.graph.nodes,links:BD.graph.links,
@@ -595,7 +599,7 @@ def _youtube_embed(url: str | None) -> str:
     if ref is None:
         return ""
     vid, start = ref
-    src = f"https://www.youtube-nocookie.com/embed/{vid}" + (f"?start={start}" if start else "")
+    src = f"https://www.youtube-nocookie.com/embed/{vid}?enablejsapi=1" + (f"&start={start}" if start else "")
     return (
         '<section class="block"><div class="wrap prose"><div class="sec-label">Watch</div></div>'
         '<div class="wrap viz"><div style="position:relative;width:100%;aspect-ratio:16/9;'
