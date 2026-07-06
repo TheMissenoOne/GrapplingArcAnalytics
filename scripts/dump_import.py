@@ -107,6 +107,21 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
             if key in seen:
                 continue
             method = str(m.get("method") or "")
+            # No explicit winner in the dump (the transcript never stated it)? A submission
+            # logged ``successful: true`` IS the finish — its actor won. Recovers winners for
+            # sub-finish bouts; decision/points bouts honestly stay NULL. See match_event_model.
+            if not winner_name:
+                fin = next(
+                    (e for e in reversed(raw_events)
+                     if str(e.get("type")) == "submission" and e.get("successful") is True
+                     and athlete_key(str(e.get("actor", "")))
+                     in (athlete_key(a_name), athlete_key(b_name))),
+                    None,
+                )
+                if fin:
+                    winner_name = str(fin.get("actor", ""))
+                    if not method or method.strip().upper() == "UNKNOWN":
+                        method = f"Submission ({fin.get('label', '')})"
             win_type = _win_type_from_method(method)
             events = _clean_events(a_name, b_name, raw_events)
             if clean:

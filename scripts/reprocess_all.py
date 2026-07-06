@@ -99,8 +99,6 @@ DATASETS: list[tuple[str, str | None, str]] = [
     ("scripts.dumps.ufc_324_free_fight_marathon_data", "UFC 324", "UFC324"),
     ("scripts.dumps.ufc_327_free_fight_marathon_data", "UFC 327", "UFC327"),
     ("scripts.dumps.ufc_328_free_fight_marathon_data", "UFC 328", "UFC328"),
-    ("scripts.dumps.evento_completo_final_do_jud_equipes_mistas_olimp_adas_paris_2024_data",
-     "Paris 2024 Judo Mixed Team", "Judo2024MixedTeam"),
     ("scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data", "ADCC 2024", "ADCC2024-65kg"),
     ("scripts.dumps.leandro_lo_data", None, "LeandroLo"),
     ("scripts.dumps.ruotolos_data", None, "Ruotolos"),
@@ -128,7 +126,11 @@ def main() -> int:
             return 2
 
     for module_path, event, label in selected:
-        raw = importlib.import_module(module_path).RAW
+        try:
+            raw = importlib.import_module(module_path).RAW
+        except ModuleNotFoundError:
+            logger.warning("Skipping %s: dump module %s not found", label, module_path)
+            continue
         logger.info("── %s (event=%r) ──", label, event)
         run_dump(raw, event=event, label=label, dry_run=args.dry_run)
 
