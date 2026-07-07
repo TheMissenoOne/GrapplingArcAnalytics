@@ -1,95 +1,5 @@
 [
   {
-    "match_id": "5f1c6764-a4f9-4f3c-91a6-dcb12c5ec72c",
-    "pair": [
-      "dan strauss",
-      "jon blank"
-    ],
-    "db_year": 2025,
-    "event": "Polaris BJJ Squads",
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2021
-  },
-  {
-    "match_id": "adb46654-eed3-4d9b-a564-60b642f19a8b",
-    "pair": [
-      "adam benayoun",
-      "kieran davern"
-    ],
-    "db_year": 2025,
-    "event": "Polaris BJJ Squads",
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2021
-  },
-  {
-    "match_id": "75dec848-2e26-4195-bb76-854e686af7a2",
-    "pair": [
-      "jed hue",
-      "roberto jimenez"
-    ],
-    "db_year": 2025,
-    "event": "Polaris BJJ Squads",
-    "bjjh_years": [
-      2022
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2022
-  },
-  {
-    "match_id": "39ffae72-6c2f-4eed-b118-d50fc69e4f62",
-    "pair": [
-      "nick ronan",
-      "ross nicholls"
-    ],
-    "db_year": 2025,
-    "event": "Polaris BJJ Squads",
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2021
-  },
-  {
-    "match_id": "fe5a1da5-d5b8-486d-be5c-ca5b95ae5f53",
-    "pair": [
-      "ben dyson",
-      "roberto jimenez"
-    ],
-    "db_year": 2025,
-    "event": "Polaris BJJ Squads",
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2021
-  },
-  {
-    "match_id": "8bdbd8da-d963-4f2f-823d-74b5e12e07d3",
-    "pair": [
-      "kieran davern",
-      "roberto jimenez"
-    ],
-    "db_year": 2025,
-    "event": "Polaris BJJ Squads",
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2021
-  },
-  {
     "match_id": "7735f8f2-6ae9-44a8-9485-cfb23fc0b638",
     "pair": [
       "felipe cesar",
@@ -169,21 +79,6 @@
     "suggested_year": null
   },
   {
-    "match_id": "ca495654-b39f-490c-a0e0-52a479a0fe1a",
-    "pair": [
-      "johnny tama",
-      "tye ruotolo"
-    ],
-    "db_year": 2020,
-    "event": null,
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": false,
-    "db_match_count": 2,
-    "suggested_year": null
-  },
-  {
     "match_id": "da9e38d0-8d2d-41cf-8e1a-5aeb1d3b6e51",
     "pair": [
       "cole franson",
@@ -212,6 +107,36 @@
     ],
     "event_corroborated": false,
     "db_match_count": 3,
+    "suggested_year": null
+  },
+  {
+    "match_id": "6e703fae-f92e-4ab6-adfe-a08ce2c7862a",
+    "pair": [
+      "kade ruotolo",
+      "mica galvao"
+    ],
+    "db_year": 2021,
+    "event": null,
+    "bjjh_years": [
+      2022
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "ca495654-b39f-490c-a0e0-52a479a0fe1a",
+    "pair": [
+      "johnny tama",
+      "tye ruotolo"
+    ],
+    "db_year": 2020,
+    "event": null,
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
     "suggested_year": null
   },
   {
@@ -246,22 +171,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "6e703fae-f92e-4ab6-adfe-a08ce2c7862a",
-    "pair": [
-      "kade ruotolo",
-      "mica galvao"
-    ],
-    "db_year": 2021,
-    "event": null,
-    "bjjh_years": [
-      2022
-    ],
-    "event_corroborated": false,
-    "db_match_count": 2,
-    "suggested_year": null
-  },
-  {
-    "match_id": "e4cc07f2-5ab3-4314-978d-68dcb497d18f",
+    "match_id": "7addc510-4b50-41c1-9558-026f18f16bab",
     "pair": [
       "elder cruz",
       "roberto abreu"
@@ -276,495 +186,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "1570824c-0694-438d-9f7a-af557511e1bc",
-    "pair": [
-      "gabi mccomb",
-      "thamara ferreira"
-    ],
-    "db_year": 2023,
-    "event": "IBJJF Worlds 2023",
-    "bjjh_years": [
-      2019
-    ],
-    "event_corroborated": true,
-    "db_match_count": 1,
-    "suggested_year": null
-  },
-  {
-    "match_id": "162a369d-fd53-4a4f-bc32-48934b43cabc",
-    "pair": [
-      "ffion davies",
-      "gabi mccomb"
-    ],
-    "db_year": 2023,
-    "event": "IBJJF Worlds 2023",
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": true,
-    "db_match_count": 1,
-    "suggested_year": null
-  },
-  {
-    "match_id": "4e94bc07-bde8-4428-8bec-42a2d2605822",
-    "pair": [
-      "edwin najmi",
-      "matheus gabriel"
-    ],
-    "db_year": 2023,
-    "event": "Spyder: King of Kings",
-    "bjjh_years": [
-      2019
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2019
-  },
-  {
-    "match_id": "8b278b1c-2fd5-4f87-a84c-3f63fe21a183",
-    "pair": [
-      "nicholas meregali",
-      "tim spriggs"
-    ],
-    "db_year": 2023,
-    "event": "Spyder: King of Kings",
-    "bjjh_years": [
-      2019
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2019
-  },
-  {
-    "match_id": "dd0c949e-64bc-4246-9933-e90eb65b9db8",
-    "pair": [
-      "claudio calasans",
-      "erberth santos"
-    ],
-    "db_year": 2023,
-    "event": "Spyder: King of Kings",
-    "bjjh_years": [
-      2016,
-      2019
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": null
-  },
-  {
-    "match_id": "376bb301-a073-46d5-a482-62519b39e187",
-    "pair": [
-      "kaynan duarte",
-      "leandro lo"
-    ],
-    "db_year": 2023,
-    "event": "Spyder: King of Kings",
-    "bjjh_years": [
-      2019
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2019
-  },
-  {
-    "match_id": "c6894978-0c4a-4fb8-b63a-f14043ca293b",
-    "pair": [
-      "diogo reis",
-      "gabriel sousa"
-    ],
-    "db_year": 2025,
-    "event": "WNO 20",
-    "bjjh_years": [
-      2022,
-      2023
-    ],
-    "event_corroborated": false,
-    "db_match_count": 2,
-    "suggested_year": null
-  },
-  {
-    "match_id": "e2a43e77-a0fb-4be6-93f2-294a462041c4",
-    "pair": [
-      "daniel sathler",
-      "max hanson"
-    ],
-    "db_year": 2025,
-    "event": "WNO 22",
-    "bjjh_years": [
-      2023,
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": null
-  },
-  {
-    "match_id": "1fae840a-8c7b-4511-aeb3-0388496f2f28",
-    "pair": [
-      "elijah dorsey",
-      "ivan herrera"
-    ],
-    "db_year": 2025,
-    "event": "WNO 22",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "d94880bd-769c-4a93-a380-0b17e96aa7c8",
-    "pair": [
-      "jacob couch",
-      "sebastian rodriguez"
-    ],
-    "db_year": 2025,
-    "event": "WNO 22",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "08408736-62be-4f86-bbff-c28e906df088",
-    "pair": [
-      "adele fornarino",
-      "amanda alequin"
-    ],
-    "db_year": 2025,
-    "event": "WNO 22",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "04df3b6a-299f-42ec-83fd-243d34554f71",
-    "pair": [
-      "oliver taza",
-      "tainan dalpra"
-    ],
-    "db_year": 2025,
-    "event": "WNO 22",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "c6496a24-0840-4619-b343-b2308f28b3fb",
-    "pair": [
-      "kenta iwamoto",
-      "mica galvao"
-    ],
-    "db_year": 2025,
-    "event": "WNO 22",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "0e1ac3a6-a38d-49f0-a14c-0fc2fd7efc7a",
-    "pair": [
-      "elijah dorsey",
-      "jozef chen"
-    ],
-    "db_year": 2025,
-    "event": "WNO 24",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "c04b6867-f3d5-405a-b662-2e99ca42d781",
-    "pair": [
-      "javier zaruski",
-      "victor hugo"
-    ],
-    "db_year": 2025,
-    "event": "WNO 24",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "f6aeaa56-4036-4904-88d4-2b14fe0d53ab",
-    "pair": [
-      "jacob couch",
-      "jonnatas gracie"
-    ],
-    "db_year": 2025,
-    "event": "WNO 24",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "c57d3e27-bd83-402e-a0f2-72cf05fd641a",
-    "pair": [
-      "marco canha",
-      "ross nicholls"
-    ],
-    "db_year": 2015,
-    "event": "Polaris 4",
-    "bjjh_years": [
-      2016
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2016
-  },
-  {
-    "match_id": "83c16ebf-4ecd-45b4-9836-f07440ac3c46",
-    "pair": [
-      "craig jones",
-      "richie martinez"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2018,
-      2023
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": null
-  },
-  {
-    "match_id": "202426c5-0691-4c01-bd9f-2330eebd6c67",
-    "pair": [
-      "craig jones",
-      "gregor gracie"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2023
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2023
-  },
-  {
-    "match_id": "04bb04b2-f53c-4cc6-affc-bff09bf96e3c",
-    "pair": [
-      "craig jones",
-      "tex johnson"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2017,
-      2019
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": null
-  },
-  {
-    "match_id": "b2d0ae3b-48d9-4a04-8337-02e654b5b012",
-    "pair": [
-      "adam wardzinski",
-      "craig jones"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2019
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2019
-  },
-  {
-    "match_id": "dc342b66-cef1-44b3-8c1f-be39cab653f9",
-    "pair": [
-      "craig jones",
-      "roberto jimenez"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2020
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2020
-  },
-  {
-    "match_id": "3de90e4e-b72f-4523-8e79-4048e2617c92",
-    "pair": [
-      "craig jones",
-      "dante leon"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2018
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2018
-  },
-  {
-    "match_id": "6f355e82-9a6e-47fc-8d80-3bb5cb0db56b",
-    "pair": [
-      "craig jones",
-      "mason fowler"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2019,
-      2020
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": null
-  },
-  {
-    "match_id": "30d98836-fdd8-486e-bdd6-90c031c0871a",
-    "pair": [
-      "craig jones",
-      "micah brakefield"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2017
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2017
-  },
-  {
-    "match_id": "98f4afbf-d97f-4d61-bc11-9483ca58ca59",
-    "pair": [
-      "craig jones",
-      "nicholas meregali"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2022
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2022
-  },
-  {
-    "match_id": "08e89939-7e04-457f-9143-b4a13a4a37f0",
-    "pair": [
-      "craig jones",
-      "tye ruotolo"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2021
-  },
-  {
-    "match_id": "cc285178-cc5e-410b-a76c-a44fb15f8758",
-    "pair": [
-      "arya esfandmaz",
-      "wayne samways"
-    ],
-    "db_year": 2025,
-    "event": "Polaris 25",
-    "bjjh_years": [
-      2023
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2023
-  },
-  {
-    "match_id": "5d7cacaf-0723-4909-8dbb-a588a54bd366",
-    "pair": [
-      "jack sear",
-      "julian espinosa"
-    ],
-    "db_year": 2025,
-    "event": "Polaris 28",
-    "bjjh_years": [
-      2024
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2024
-  },
-  {
-    "match_id": "cc1a94cf-acce-463a-b4ea-471aedff2479",
-    "pair": [
-      "andy burke",
-      "craig jones"
-    ],
-    "db_year": 2025,
-    "event": "EBI 14",
-    "bjjh_years": [
-      2017
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": 2017
-  },
-  {
-    "match_id": "49d8bc3e-2a40-4711-9eb3-753c36cbf962",
-    "pair": [
-      "aaron johnson",
-      "craig jones"
-    ],
-    "db_year": 2025,
-    "event": "EBI 14",
-    "bjjh_years": [
-      2017,
-      2019
-    ],
-    "event_corroborated": false,
-    "db_match_count": 1,
-    "suggested_year": null
-  },
-  {
-    "match_id": "d7c50bb7-4730-426f-b980-2fd42e8c1124",
-    "pair": [
-      "craig jones",
-      "gordon ryan"
-    ],
-    "db_year": 2025,
-    "event": "EBI 14",
-    "bjjh_years": [
-      2017,
-      2018
-    ],
-    "event_corroborated": false,
-    "db_match_count": 3,
-    "suggested_year": null
-  },
-  {
-    "match_id": "17e79b3b-65cb-4bb6-8ade-83805ff75ddc",
+    "match_id": "b0badc3c-3af0-4b2f-83cf-54ed152ef03e",
     "pair": [
       "leandro lo",
       "nicholas meregali"
@@ -781,7 +203,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "154616b1-f250-4592-9243-c88c86f86139",
+    "match_id": "afe33426-8321-41e5-bf3a-e80be3fa891b",
     "pair": [
       "erberth santos",
       "leandro lo"
@@ -797,7 +219,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "41f6e3f2-1550-4ea7-94d2-723419af9e1e",
+    "match_id": "1a922481-ee8b-45c3-811d-c465e22e42e7",
     "pair": [
       "alexander trans",
       "leandro lo"
@@ -813,7 +235,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "a2887e45-f754-49e7-9577-e830010c0ed9",
+    "match_id": "61c478de-c3aa-42fe-97bc-6ac2bebdbc3e",
     "pair": [
       "leandro lo",
       "tanner rice"
@@ -829,7 +251,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "59b875cd-62c6-499f-9bdb-8beb2d886542",
+    "match_id": "0700a372-347b-493b-bc45-2f8f0410f008",
     "pair": [
       "gordon ryan",
       "leandro lo"
@@ -844,22 +266,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "1217884c-908f-49bf-9bed-8af5ca17d0cd",
-    "pair": [
-      "johnny tama",
-      "tye ruotolo"
-    ],
-    "db_year": 2025,
-    "event": null,
-    "bjjh_years": [
-      2021
-    ],
-    "event_corroborated": false,
-    "db_match_count": 2,
-    "suggested_year": null
-  },
-  {
-    "match_id": "e0320694-e24d-4f3e-a046-c4a22c0ee5fc",
+    "match_id": "ae914bd3-0bd9-43b8-b880-0ea28fbfb63b",
     "pair": [
       "cole franson",
       "kade ruotolo"
@@ -874,7 +281,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "e49f5fef-8e37-4224-99fa-be861d544713",
+    "match_id": "bf70273f-8ef6-4a23-a51d-35185b8d781e",
     "pair": [
       "kade ruotolo",
       "pj barch"
@@ -890,7 +297,461 @@
     "suggested_year": null
   },
   {
-    "match_id": "b83db7f2-8a5b-4daa-9d9c-d7895ef97d05",
+    "match_id": "210424e1-ba64-45ca-ac42-1873720387ff",
+    "pair": [
+      "kade ruotolo",
+      "william tackett"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "9da009e2-e941-47fb-9bd0-fe37221675b2",
+    "pair": [
+      "gabi mccomb",
+      "thamara ferreira"
+    ],
+    "db_year": 2023,
+    "event": "IBJJF Worlds 2023",
+    "bjjh_years": [
+      2019
+    ],
+    "event_corroborated": true,
+    "db_match_count": 1,
+    "suggested_year": null
+  },
+  {
+    "match_id": "c60d4728-6901-4484-addc-c01f784fb258",
+    "pair": [
+      "ffion davies",
+      "gabi mccomb"
+    ],
+    "db_year": 2023,
+    "event": "IBJJF Worlds 2023",
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": true,
+    "db_match_count": 1,
+    "suggested_year": null
+  },
+  {
+    "match_id": "fdbee10c-70fd-43a8-a645-2df91e8b575d",
+    "pair": [
+      "edwin najmi",
+      "matheus gabriel"
+    ],
+    "db_year": 2023,
+    "event": "Spyder: King of Kings",
+    "bjjh_years": [
+      2019
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "2c7ca033-2393-4544-99ad-dd3445233737",
+    "pair": [
+      "nicholas meregali",
+      "tim spriggs"
+    ],
+    "db_year": 2023,
+    "event": "Spyder: King of Kings",
+    "bjjh_years": [
+      2019
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "82f476fa-4ff3-4ab6-861f-d1bdc86da617",
+    "pair": [
+      "claudio calasans",
+      "erberth santos"
+    ],
+    "db_year": 2023,
+    "event": "Spyder: King of Kings",
+    "bjjh_years": [
+      2016,
+      2019
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": null
+  },
+  {
+    "match_id": "49ff9b13-aca1-4b73-bfd6-f03e4608c2ae",
+    "pair": [
+      "kaynan duarte",
+      "leandro lo"
+    ],
+    "db_year": 2023,
+    "event": "Spyder: King of Kings",
+    "bjjh_years": [
+      2019
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "d254dcc8-8acf-431e-b1b8-01c522e0ef86",
+    "pair": [
+      "dan strauss",
+      "jon blank"
+    ],
+    "db_year": 2025,
+    "event": "Polaris BJJ Squads",
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": 2021
+  },
+  {
+    "match_id": "db7217b7-dd2c-4b0c-aa90-593c0fb6ad93",
+    "pair": [
+      "craig jones",
+      "richie martinez"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2018,
+      2023
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": null
+  },
+  {
+    "match_id": "09768891-1935-4db2-aab1-67ca62c5ef49",
+    "pair": [
+      "craig jones",
+      "gregor gracie"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2023
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "4879e45d-8530-4bf3-b729-50f0b2f18112",
+    "pair": [
+      "craig jones",
+      "tye ruotolo"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "560b4441-d2b7-4878-b893-7e08e6719301",
+    "pair": [
+      "diogo reis",
+      "gabriel sousa"
+    ],
+    "db_year": 2025,
+    "event": "WNO 20",
+    "bjjh_years": [
+      2022,
+      2023
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "88e8668c-9342-4c84-a4d5-fcf128135dad",
+    "pair": [
+      "daniel sathler",
+      "max hanson"
+    ],
+    "db_year": 2025,
+    "event": "WNO 22",
+    "bjjh_years": [
+      2023,
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": null
+  },
+  {
+    "match_id": "eb607798-2760-4185-9af3-0eb4edc22ac9",
+    "pair": [
+      "elijah dorsey",
+      "ivan herrera"
+    ],
+    "db_year": 2025,
+    "event": "WNO 22",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "96901793-6b07-44f7-93bb-ad82c664cafe",
+    "pair": [
+      "jacob couch",
+      "sebastian rodriguez"
+    ],
+    "db_year": 2025,
+    "event": "WNO 22",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "92310909-7924-4c04-b68c-3b05a49f7773",
+    "pair": [
+      "adele fornarino",
+      "amanda alequin"
+    ],
+    "db_year": 2025,
+    "event": "WNO 22",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "8c67f757-5a4f-4e42-99bb-f44b95166920",
+    "pair": [
+      "oliver taza",
+      "tainan dalpra"
+    ],
+    "db_year": 2025,
+    "event": "WNO 22",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "eb9d7215-0fb8-4317-8ac3-2307cde029ba",
+    "pair": [
+      "kenta iwamoto",
+      "mica galvao"
+    ],
+    "db_year": 2025,
+    "event": "WNO 22",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "e6cb7c03-3abf-401f-b567-28f9974aaabe",
+    "pair": [
+      "elijah dorsey",
+      "jozef chen"
+    ],
+    "db_year": 2025,
+    "event": "WNO 24",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "99d3af77-4fb0-4ddf-bcb2-ac7a2bfe9013",
+    "pair": [
+      "javier zaruski",
+      "victor hugo"
+    ],
+    "db_year": 2025,
+    "event": "WNO 24",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "bf747288-c60e-40c5-b6a4-c24a8aea48e3",
+    "pair": [
+      "jacob couch",
+      "jonnatas gracie"
+    ],
+    "db_year": 2025,
+    "event": "WNO 24",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "28d02ce7-60f9-4ff2-a1d6-14975cfc3d9c",
+    "pair": [
+      "craig jones",
+      "roberto jimenez"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2020
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "3ab765d2-66bc-408d-8e44-a0e7747e375f",
+    "pair": [
+      "arya esfandmaz",
+      "wayne samways"
+    ],
+    "db_year": 2025,
+    "event": "Polaris 25",
+    "bjjh_years": [
+      2023
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "4d02a55c-7cae-4fa6-b833-eff65324e74f",
+    "pair": [
+      "adam benayoun",
+      "kieran davern"
+    ],
+    "db_year": 2025,
+    "event": "Polaris BJJ Squads",
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": 2021
+  },
+  {
+    "match_id": "55b367a8-2882-408c-bffa-d35c97d0a1f2",
+    "pair": [
+      "jack sear",
+      "julian espinosa"
+    ],
+    "db_year": 2025,
+    "event": "Polaris 28",
+    "bjjh_years": [
+      2024
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "3a1bdce3-96c3-4f7b-8947-bfa7eb842f21",
+    "pair": [
+      "ben dyson",
+      "roberto jimenez"
+    ],
+    "db_year": 2025,
+    "event": "Polaris BJJ Squads",
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": 2021
+  },
+  {
+    "match_id": "41086897-109e-4074-9cb5-1e7f8bd40905",
+    "pair": [
+      "kieran davern",
+      "roberto jimenez"
+    ],
+    "db_year": 2025,
+    "event": "Polaris BJJ Squads",
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": 2021
+  },
+  {
+    "match_id": "48616f2a-1b1f-4c52-9168-74bf7875df05",
+    "pair": [
+      "nick ronan",
+      "ross nicholls"
+    ],
+    "db_year": 2025,
+    "event": "Polaris BJJ Squads",
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": 2021
+  },
+  {
+    "match_id": "5f5aa923-0455-4658-83f4-df74953f4ef5",
+    "pair": [
+      "johnny tama",
+      "tye ruotolo"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2021
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "8d324b0f-bcd6-4411-ba6c-44a5ccd30dcf",
+    "pair": [
+      "jed hue",
+      "roberto jimenez"
+    ],
+    "db_year": 2025,
+    "event": "Polaris BJJ Squads",
+    "bjjh_years": [
+      2022
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": 2022
+  },
+  {
+    "match_id": "909316ba-f33d-4354-8b66-3a596e2b8e3a",
     "pair": [
       "pedro marinho",
       "tye ruotolo"
@@ -905,7 +766,7 @@
     "suggested_year": null
   },
   {
-    "match_id": "fd87dc33-0220-4981-9c49-05c75736e478",
+    "match_id": "f2207b69-25a0-4084-8675-c94fb677dcd0",
     "pair": [
       "levi jonesleary",
       "tye ruotolo"
@@ -921,18 +782,157 @@
     "suggested_year": null
   },
   {
-    "match_id": "2ec78055-9ec0-495d-a7b1-f182d2a473c2",
+    "match_id": "ae8516e5-597b-4f1f-908c-548985e84cb0",
     "pair": [
-      "kade ruotolo",
-      "william tackett"
+      "marco canha",
+      "ross nicholls"
+    ],
+    "db_year": 2015,
+    "event": "Polaris 4",
+    "bjjh_years": [
+      2016
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "aff4e2c4-6daa-4e8e-880e-83386d9947bf",
+    "pair": [
+      "craig jones",
+      "tex johnson"
     ],
     "db_year": 2025,
     "event": null,
     "bjjh_years": [
-      2021
+      2017,
+      2019
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": null
+  },
+  {
+    "match_id": "fe75c931-6d6c-487b-ae94-4d800c0c162b",
+    "pair": [
+      "adam wardzinski",
+      "craig jones"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2019
     ],
     "event_corroborated": false,
     "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "0c6168b1-e6e1-4b0d-b7f9-8ff1fcf77a8b",
+    "pair": [
+      "craig jones",
+      "dante leon"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2018
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "4f9c6b62-9ce9-471d-904f-296590c60fee",
+    "pair": [
+      "craig jones",
+      "mason fowler"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2019,
+      2020
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": null
+  },
+  {
+    "match_id": "fe876de3-1ddb-46a2-a3de-73a234af4080",
+    "pair": [
+      "craig jones",
+      "micah brakefield"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2017
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "76f198f8-362a-432a-980d-b031084844b3",
+    "pair": [
+      "craig jones",
+      "nicholas meregali"
+    ],
+    "db_year": 2025,
+    "event": null,
+    "bjjh_years": [
+      2022
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "8bed7efb-5441-4536-ba50-79fd1aa21722",
+    "pair": [
+      "andy burke",
+      "craig jones"
+    ],
+    "db_year": 2025,
+    "event": "EBI 14",
+    "bjjh_years": [
+      2017
+    ],
+    "event_corroborated": false,
+    "db_match_count": 2,
+    "suggested_year": null
+  },
+  {
+    "match_id": "b4f7d64d-5119-4405-808c-d4ad81a0812a",
+    "pair": [
+      "aaron johnson",
+      "craig jones"
+    ],
+    "db_year": 2025,
+    "event": "EBI 14",
+    "bjjh_years": [
+      2017,
+      2019
+    ],
+    "event_corroborated": false,
+    "db_match_count": 1,
+    "suggested_year": null
+  },
+  {
+    "match_id": "f7e25acf-30b7-4837-9ab9-5f7f595a6ce0",
+    "pair": [
+      "craig jones",
+      "gordon ryan"
+    ],
+    "db_year": 2025,
+    "event": "EBI 14",
+    "bjjh_years": [
+      2017,
+      2018
+    ],
+    "event_corroborated": false,
+    "db_match_count": 3,
     "suggested_year": null
   }
 ]

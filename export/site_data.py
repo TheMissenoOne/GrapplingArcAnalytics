@@ -524,7 +524,7 @@ def _head(title: str, description: str = "", path: str = "", image: str = "logo.
 def _prose_html(sections: list[tuple[str, list[str]]]) -> str:
     parts = []
     for heading, paras in sections:
-        parts.append(f'<div class="sec-label">{html.escape(heading)}</div>')
+        parts.append(f'<h2 class="sec-label">{html.escape(heading)}</h2>')
         body = "".join(f"<p>{html.escape(p)}</p>" for p in paras)
         parts.append(f'<div class="editorial">{body}</div>')
     return "\n".join(parts)
@@ -607,14 +607,14 @@ def _train_this_style(
     nudge toward building the style in the app — the breakdown → Grapple Like → Project loop."""
     btns = []
     for f in (a, b):
-        fslug = slugify(f["name"])
+        fslug = slugify(f.get("name", "unknown"))
         if fslug in dossier_slugs:
             btns.append(f'<a class="btn" href="grapple-{fslug}.html">'
-                        f'Grapple like {html.escape(f["name"])} →</a>')
+                        f'Grapple like {html.escape(f.get("name", "unknown"))} →</a>')
     btns.append('<a class="btn app" href="index.html#app">Start a Project in the app →</a>')
     return (
         '<section class="block"><div class="wrap prose">'
-        '<div class="sec-label">Train this style</div>'
+        '<h2 class="sec-label">Train this style</h2>'
         '<div class="editorial"><p>Study the full game behind this performance, then build it '
         'into your own — start a Project in the GrapplingArc app and track your reps.</p></div>'
         f'<div class="flex g12 wrap-fx" style="margin-top:16px">{"".join(btns)}</div>'
@@ -653,7 +653,7 @@ def render_breakdown_page(
         if d is not None:
             cls = "up" if d >= 0 else "down"
             arrow = "▲" if d >= 0 else "▼"
-            delta = f'<div class="delta {cls}">{arrow} {d:+.1f}% this bout</div>'
+            delta = f'<div class="delta {cls}">{arrow} {d:+.1f} pp this bout</div>'
         return (f'<div class="sig-card"><div class="k">{html.escape(name)} · Grappling ELO</div>'
                 f'<div class="v">{value}</div>{delta}</div>')
 
@@ -672,7 +672,7 @@ def render_breakdown_page(
                 + ("Click a node to jump the video to that moment; hover to isolate its connections."
                    if has_seek else "Hover any node to isolate its connections."))
     body = f"""{_nav('breakdowns')}
-<section class="art-hero"><div class="wrap">
+<section class="art-hero" role="img" aria-label="{html.escape(a['name'])} vs {html.escape(b['name'])}"><div class="wrap">
   <div class="center"><a href="breakdowns.html" class="tag" style="text-decoration:none">← Breakdowns</a></div>
   <div class="bout">
     <div class="corner a"><span class="av">{_initials(a['name'])}</span>
@@ -695,20 +695,20 @@ def render_breakdown_page(
 <article class="art">
   <section class="block"><div class="wrap viz"><div class="statgrid">{stat_grid}</div></div></section>
   <div class="divider"></div>
-  <section class="block"><div class="wrap prose"><div class="sec-label">Momentum &amp; timeline</div>
+  <section class="block"><div class="wrap prose"><h2 class="sec-label">Momentum &amp; timeline</h2>
       <p class="editorial">Every action of the bout on one axis — momentum runs behind, each tick is
       an event. Click a tick to jump the video to five seconds before it.</p></div>
     <div class="wrap viz"><div class="mtl"><div id="seqTimeline"
       style="position:relative;width:100%;height:100%"></div></div></div></section>
   <div class="divider"></div>
-  <section class="block"><div class="wrap prose"><div class="sec-label">The decisive sequence</div>
+  <section class="block"><div class="wrap prose"><h2 class="sec-label">The decisive sequence</h2>
       <p class="editorial">{seq_hint}</p></div>
     <div class="wrap viz"><div class="graph-card seq-card"><canvas id="seqGraph" class="graph-canvas"></canvas>
       <div class="graph-legend" id="seqLegend"></div></div></div></section>
   <div class="divider"></div>
   <section class="block"><div class="wrap prose">{_prose_html(sections[1:])}</div></section>
   <div class="divider"></div>
-  <section class="block"><div class="wrap prose"><div class="sec-label">Rating &amp; significance</div></div>
+  <section class="block"><div class="wrap prose"><h2 class="sec-label">Rating &amp; significance</h2></div>
     <div class="wrap viz"><div class="sig-cards">
       {sig_card(a, a['name'])}{sig_card(b, b['name'])}
       <div class="sig-card"><div class="k">Method</div><div class="v">{html.escape(meta['method'])}</div></div>
@@ -1085,7 +1085,7 @@ def render_event_page(slug: str, ep: dict[str, Any]) -> str:
   <div class="divider"></div>
   <section class="block"><div class="wrap prose">{_prose_html(sections[1:])}</div></section>
   <div class="divider"></div>
-  <section class="block"><div class="wrap prose"><div class="sec-label">Every bout</div></div>
+  <section class="block"><div class="wrap prose"><h2 class="sec-label">Every bout</h2></div>
     <div class="wrap viz"><div class="mgrid">{bout_cards}</div></div></section>
 </article>
 {_FOOTER}
