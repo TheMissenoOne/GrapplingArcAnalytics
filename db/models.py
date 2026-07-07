@@ -213,6 +213,10 @@ class Match(Base):
     video_url: Mapped[str | None] = mapped_column(Text)  # optional YouTube link (hidden if null)
     # Events: [{label, type, actor_id, successful?}], actor_id ∈ {athlete_a_id, athlete_b_id}.
     sequence: Mapped[list[Any] | None] = mapped_column(JSONB)
+    # Full raw event timeline (superset of ``sequence``): every event incl. strikes / resets /
+    # penalties / referee calls, actor ∈ {'a','b',None}, ts kept. Drives the breakdown timeline;
+    # the graph + ELO still read ``sequence`` (the clean subset), so this never affects scoring.
+    timeline: Mapped[list[Any] | None] = mapped_column(JSONB)
     # 'final' (counts toward both graphs) | 'draft' (scraped, awaiting review — excluded
     # from the replay until approved). Manually-entered matches default final.
     status: Mapped[str] = mapped_column(String(10), nullable=False, server_default="final")

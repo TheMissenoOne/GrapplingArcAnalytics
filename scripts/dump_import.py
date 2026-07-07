@@ -25,6 +25,7 @@ from scripts.insert_ufc_matches import (
     CanonicalMatch,
     _clean_events,
     _derive_opponent,
+    _parse_timestamp,
     _submission_from_method,
     _win_type_from_method,
 )
@@ -32,6 +33,32 @@ from scripts.insert_ufc_matches import (
 logger = logging.getLogger(__name__)
 
 Dump = list[dict[tuple[str, int], dict[str, Any]]]
+
+
+def _build_timeline(
+    a_name: str, b_name: str, raw_events: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
+    """Full event timeline for the breakdown UI — keeps EVERY event (strikes, resets, penalties,
+    referee calls, non-technique) unlike ``_clean_events`` which drops them for the graph. Maps
+    actor → 'a'/'b'/None (unknown/referee) and normalizes ts to int seconds when present."""
+    a_norm, b_norm = athlete_key(a_name), athlete_key(b_name)
+    out: list[dict[str, Any]] = []
+    for e in raw_events:
+        actor_norm = athlete_key(str(e.get("actor", "")))
+        actor = "a" if actor_norm == a_norm else "b" if actor_norm == b_norm else None
+        raw_ts = e.get("ts", e.get("timestamp"))
+        ts = _parse_timestamp(raw_ts) if isinstance(raw_ts, str) else raw_ts
+        item: dict[str, Any] = {
+            "label": str(e.get("label", "")),
+            "type": str(e.get("type", "")),
+            "actor": actor,
+        }
+        if "successful" in e:
+            item["successful"] = bool(e["successful"])
+        if isinstance(ts, int):
+            item["ts"] = ts
+        out.append(item)
+    return out
 
 def _load_url_mapping() -> dict[str, Any]:
     """Load url_mapping.json if available, else return empty dict."""
@@ -129,12 +156,13 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
                     e["label"] = clean_label(str(e["label"]), str(e.get("type", "")))
             submission = _submission_from_method(method, win_type)
             strike_count = sum(1 for e in raw_events if str(e.get("type")) == "strike")
+            timeline = _build_timeline(a_name, b_name, raw_events)
             seen[key] = CanonicalMatch(
                 a_name=a_name, b_name=b_name, year=year,
                 winner_name=winner_name or None, win_type=win_type,
                 submission=clean_label(submission) if (clean and submission) else submission,
                 events=events, strike_count=strike_count,
-                ko_finish=bool(_KO_RE.search(method)),
+                ko_finish=bool(_KO_RE.search(method)), timeline=timeline,
             )
     return list(seen.values())
 
@@ -216,7 +244,7 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
                 a.id, b.id, winner_id=winner_id, win_type=cm.win_type,
                 submission=cm.submission, event=event, year=cm.year,
                 weight_class=None, stage=None, sequence=seq, created_by=None,
-                video_url=video_url, session=session,
+                video_url=video_url, timeline=cm.timeline, session=session,
             )
 
         for aid in participants:

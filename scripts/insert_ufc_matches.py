@@ -100,7 +100,7 @@ class CanonicalMatch:
 
     __slots__ = (
         "a_name", "b_name", "year", "winner_name", "win_type", "submission", "events",
-        "strike_count", "ko_finish",
+        "strike_count", "ko_finish", "timeline",
     )
 
     def __init__(
@@ -114,6 +114,7 @@ class CanonicalMatch:
         events: list[dict[str, Any]],
         strike_count: int = 0,
         ko_finish: bool = False,
+        timeline: list[dict[str, Any]] | None = None,
     ) -> None:
         self.a_name = a_name
         self.b_name = b_name
@@ -124,6 +125,8 @@ class CanonicalMatch:
         self.events = events
         self.strike_count = strike_count  # raw striking events seen (pre-filter) → gate MMA
         self.ko_finish = ko_finish  # KO/TKO striking finish → gate empty striking bouts
+        # Full event timeline (superset of ``events``): all events, actor 'a'/'b'/None, ts kept.
+        self.timeline = timeline if timeline is not None else []
 
 
 def _win_type_from_method(method: str) -> str | None:

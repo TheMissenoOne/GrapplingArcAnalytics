@@ -71,6 +71,29 @@ def _side_of(actor_id: str | None, a: Athlete, b: Athlete) -> str | None:
     return None
 
 
+def _ui_timeline(match: Match, a: Athlete, b: Athlete) -> list[dict[str, Any]]:
+    """Full event timeline for the breakdown UI. Prefers the stored ``match.timeline`` (every
+    event incl. non-technique, actor already 'a'/'b'/None). Falls back to deriving from the
+    clean ``sequence`` (actor_id → side) for older matches that predate the timeline column."""
+    stored = getattr(match, "timeline", None)
+    if stored:
+        return list(stored)
+    out: list[dict[str, Any]] = []
+    for e in match.sequence or []:
+        if not isinstance(e, dict):
+            continue
+        side = _side_of(e.get("actor_id"), a, b)
+        item: dict[str, Any] = {
+            "label": str(e.get("label", "")), "type": str(e.get("type", "")), "actor": side,
+        }
+        if "successful" in e:
+            item["successful"] = bool(e["successful"])
+        if isinstance(e.get("ts"), int):
+            item["ts"] = e["ts"]
+        out.append(item)
+    return out
+
+
 def _sequence_view(match: Match, a: Athlete, b: Athlete) -> list[dict[str, Any]]:
     """Stored events → ordered timeline rows with explicit ``side`` + fighter ``name``."""
     rows: list[dict[str, Any]] = []
@@ -124,7 +147,9 @@ def _compute_stats(
     pending_entry = {"a": False, "b": False}  # an unconverted offensive entry is open
     cum = {"a": 0, "b": 0}
     momentum_series: list[float] = []
+    momentum_ts: list[int | None] = []  # ts of each momentum point → co-plot with the timeline
     for e in sequence:
+        momentum_ts.append(e.get("ts"))
         side = e["side"]
         s = sides[side]
         typ = e["type"]
@@ -173,7 +198,7 @@ def _compute_stats(
         "b": sides["b"]["points"] / total if total else 0.5,
     }
     return {"a": sides["a"], "b": sides["b"], "momentum": momentum,
-            "momentum_series": momentum_series}
+            "momentum_series": momentum_series, "momentum_ts": momentum_ts}
 
 
 def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
@@ -311,6 +336,7 @@ def build_match_breakdown(
             "video_url": match.video_url,
         },
         "sequence": sequence,
+        "event_timeline": _ui_timeline(match, a, b),  # all events (graph = clean subset only)
         "stats": _compute_stats(sequence, ptv_v),
         "transition_graph": _transition_graph(sequence),
         "fighters": {"a": _fighter_block(a), "b": _fighter_block(b)},

@@ -282,9 +282,11 @@ def register_match(
     session: Session,
     status: str = "final",
     video_url: str | None = None,
+    timeline: list[dict[str, Any]] | None = None,
 ) -> str:
     """Store one GLOBAL match between two athletes. ``sequence`` events carry
-    ``actor_id`` (one of the two athlete ids). ``winner_id`` is None for a draw."""
+    ``actor_id`` (one of the two athlete ids). ``winner_id`` is None for a draw.
+    ``timeline`` = the full event list (actor 'a'/'b'/None) for the breakdown UI; optional."""
     match = Match(
         athlete_a_id=athlete_a_id,
         athlete_b_id=athlete_b_id,
@@ -299,6 +301,7 @@ def register_match(
         created_by=created_by,
         status=status,
         video_url=video_url,
+        timeline=timeline,
     )
     session.add(match)
     session.flush()

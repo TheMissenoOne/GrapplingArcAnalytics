@@ -530,25 +530,12 @@ def _prose_html(sections: list[tuple[str, list[str]]]) -> str:
 
 # ── breakdown detail page ────────────────────────────────────────────────────
 _BREAKDOWN_JS = """
-// momentum timeline from the real running point-share (0..1 for A → signed −1..1)
+// interactive match timeline: every event as a tick on a time axis, momentum as the
+// background; click/tap a tick → seek the video. Rendered by site/timeline.js (GATimeline).
 (function(){
-  const c=document.getElementById('momentum'); if(!c) return;
-  const series=(BD.stats.momentum_series||[]).map(v=>v*2-1);
-  function draw(){
-    const x=c.getContext('2d'),dpr=Math.min(devicePixelRatio||1,2);
-    const r=c.getBoundingClientRect();c.width=r.width*dpr;c.height=r.height*dpr;x.setTransform(dpr,0,0,dpr,0,0);
-    const W=r.width,H=r.height,mid=H/2,pts=series.length?series:[0];
-    const X=i=>pts.length<2?W/2:i/(pts.length-1)*W;
-    x.clearRect(0,0,W,H);
-    x.strokeStyle='#23232a';x.beginPath();x.moveTo(0,mid);x.lineTo(W,mid);x.stroke();
-    x.beginPath();pts.forEach((p,i)=>{const py=mid-(p>0?p:0)*(mid-12);i?x.lineTo(X(i),py):x.moveTo(X(i),py);});
-    x.lineTo(W,mid);x.lineTo(0,mid);x.closePath();x.fillStyle='rgba(77,134,255,.28)';x.fill();
-    x.beginPath();pts.forEach((p,i)=>{const py=mid+(p<0?-p:0)*(mid-12);i?x.lineTo(X(i),py):x.moveTo(X(i),py);});
-    x.lineTo(W,mid);x.lineTo(0,mid);x.closePath();x.fillStyle='rgba(252,76,2,.28)';x.fill();
-    x.beginPath();pts.forEach((p,i)=>{const py=mid-p*(mid-12);i?x.lineTo(X(i),py):x.moveTo(X(i),py);});
-    x.strokeStyle='#cfcfd6';x.lineWidth=2;x.stroke();
-  }
-  draw();new ResizeObserver(draw).observe(c);
+  const el=document.getElementById('seqTimeline'); if(!el||!window.GATimeline) return;
+  GATimeline.mount(el,{timeline:BD.timeline||[],momentum:(BD.stats.momentum_series||[]),
+    momentumTs:(BD.stats.momentum_ts||[]),a:BD.a,b:BD.b,onSeek:gaSeek});
 })();
 // YT API: load script once, build player instance once, seek without reload
 var gaPlayer=null;var gaPlayerReady=false;
@@ -557,7 +544,7 @@ if(BD.vid&&!window.YT){var tag=document.createElement('script');tag.src='https:/
 // click a node with a timestamp → seek the match video to that moment
 function gaSeek(t){
   if(!BD.vid||!gaPlayer||!gaPlayerReady) return;
-  gaPlayer.seekTo(Math.max(0,t|0),true);gaPlayer.playVideo();
+  gaPlayer.seekTo(Math.max(0,(t|0)-5),true);gaPlayer.playVideo();  // -5s → show the setup
   document.getElementById('ytFrame').scrollIntoView({behavior:'smooth',block:'center'});
 }
 // decisive sequence graph
@@ -672,7 +659,9 @@ def render_breakdown_page(
     payload = {
         "a": a["name"], "b": b["name"],
         "graph": bd["transition_graph_gv"],
-        "stats": {"momentum_series": stats.get("momentum_series", [])},
+        "stats": {"momentum_series": stats.get("momentum_series", []),
+                  "momentum_ts": stats.get("momentum_ts", [])},
+        "timeline": bd.get("event_timeline", []),
         "vid": ref[0] if ref else None,
     }
     has_seek = bool(ref) and any(n.get("ts") is not None
@@ -704,9 +693,11 @@ def render_breakdown_page(
 <article class="art">
   <section class="block"><div class="wrap viz"><div class="statgrid">{stat_grid}</div></div></section>
   <div class="divider"></div>
-  <section class="block"><div class="wrap prose"><div class="sec-label">Momentum</div></div>
-    <div class="wrap viz"><div class="mtl"><canvas id="momentum"></canvas></div>
-      <div class="mtl-axis"><span>start</span><span>finish</span></div></div></section>
+  <section class="block"><div class="wrap prose"><div class="sec-label">Momentum &amp; timeline</div>
+      <p class="editorial">Every action of the bout on one axis — momentum runs behind, each tick is
+      an event. Click a tick to jump the video to five seconds before it.</p></div>
+    <div class="wrap viz"><div class="mtl"><div id="seqTimeline"
+      style="position:relative;width:100%;height:100%"></div></div></div></section>
   <div class="divider"></div>
   <section class="block"><div class="wrap prose"><div class="sec-label">The decisive sequence</div>
       <p class="editorial">{seq_hint}</p></div>
@@ -724,7 +715,7 @@ def render_breakdown_page(
   {_train_this_style(a, b, dossier_slugs)}
 </article>
 {_FOOTER}
-<script src="graph.js"></script><script src="i18n.js"></script>
+<script src="graph.js"></script><script src="timeline.js"></script><script src="i18n.js"></script>
 <script>const BD = {json.dumps(payload, ensure_ascii=False)};
 {_BREAKDOWN_JS}</script></body></html>"""
     desc = (f"{win_line}. Interactive transition map, momentum and the decisive sequence — "

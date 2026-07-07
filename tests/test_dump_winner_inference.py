@@ -1,5 +1,5 @@
 """build_matches infers a winner from a finishing successful submission when the dump has none."""
-from scripts.dump_import import build_matches
+from scripts.dump_import import _build_timeline, build_matches
 
 
 def _dump(events):
@@ -28,7 +28,23 @@ def test_no_winner_for_failed_or_absent_finish():
     assert m.winner_name is None  # a defended attempt is not a finish — stay NULL, don't guess
 
 
+def test_timeline_keeps_all_events_with_actor_mapping():
+    # the graph drops strikes/resets/unknown-actor; the timeline keeps EVERYTHING, actor→a/b/None.
+    raw = [
+        {"label": "Guard Pull", "type": "guard", "actor": "Craig Jones", "timestamp": "1:05"},
+        {"label": "Jab", "type": "strike", "actor": "Kyle Bame"},
+        {"label": "Reset", "type": "reset", "actor": "Referee"},
+        {"label": "Stalling", "type": "penalty", "actor": "Craig Jones"},
+    ]
+    tl = _build_timeline("Craig Jones", "Kyle Bame", raw)
+    assert len(tl) == 4  # nothing dropped
+    assert [e["actor"] for e in tl] == ["a", "b", None, "a"]
+    assert [e["type"] for e in tl] == ["guard", "strike", "reset", "penalty"]
+    assert tl[0]["ts"] == 65  # "1:05" → seconds
+
+
 if __name__ == "__main__":
     test_infers_winner_from_successful_submission()
     test_no_winner_for_failed_or_absent_finish()
-    print("winner-inference self-check OK")
+    test_timeline_keeps_all_events_with_actor_mapping()
+    print("winner-inference + timeline self-check OK")
