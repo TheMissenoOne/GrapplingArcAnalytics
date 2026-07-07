@@ -688,6 +688,16 @@ def render_breakdown_page(
         _stat_row("Sub attempts", sa["submission_attempts"], sb["submission_attempts"]),
         _stat_row("Control positions", sa["controls"], sb["controls"]),
     ])
+    # F1: a bout with no tracked events for a fighter shows an all-zero column that reads as
+    # broken. Most such bouts are genuinely thin (few refined events), not a name mismatch —
+    # say so plainly instead of presenting empty stats as fact.
+    _sk = ("takedowns_landed", "positional_conversion", "transitions",
+           "submission_attempts", "controls")
+    thin_note = (
+        '<div style="font-family:var(--mono);font-size:12px;letter-spacing:1px;'
+        'text-transform:uppercase;color:var(--ink-3);margin-bottom:14px">Sparse tracked-event '
+        'data for this bout — the tale of the tape below may understate the action.</div>'
+        if all(not sa.get(k) for k in _sk) or all(not sb.get(k) for k in _sk) else "")
 
     def sig_card(f: dict[str, Any], name: str) -> str:
         # Relative standing (top X%) + a % move — never the raw rating.
@@ -738,7 +748,7 @@ def render_breakdown_page(
 </div></section>
 {_youtube_embed(meta.get('video_url'))}
 <article class="art">
-  <section class="block"><div class="wrap viz"><div class="statgrid">{stat_grid}</div></div></section>
+  <section class="block"><div class="wrap viz">{thin_note}<div class="statgrid">{stat_grid}</div></div></section>
   <div class="divider"></div>
   <section class="block"><div class="wrap prose"><h2 class="sec-label">Momentum &amp; timeline</h2>
       <p class="editorial">Every action of the bout on one axis — momentum runs behind, each tick is

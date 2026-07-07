@@ -97,14 +97,46 @@ ATHLETE_ALIASES: dict[str, str] = {
     "heisen rita": "haisam rida",       # "Heisen Rita" misspelling → Haisam Rida
     "miki galva": "mica galvao",        # "Miki Galva" misspelling → Mica Galvão
     "daniel manosu": "dan manasoiu",    # "Manosu" misspelling → Dan Manasoiu
+    # Spelling/typo + initial-form variants of the SAME human (dossier-dedup, F4). Confirmed
+    # from bout data; brothers (Tye vs Kade Ruotolo) + ambiguous (Mica vs Mike Galvão,
+    # D. vs Tex Johnson) deliberately EXCLUDED.
+    "roosevelt sousa": "roosevelt souza",   # Sousa/Souza spelling
+    "anthony salsbury": "anthony salisbury",  # typo
+    "sam schwarzapfel": "sam schwartzapfel",  # dropped 't'
+    "jozeph chen": "jozef chen",        # "Jozeph"/"Joseph" → Jozef Chen
+    "nicky rodriguez": "nick rodriguez",  # nickname → Nick Rodriguez
+    "eoghan oflannagan": "eoghan oflanagan",  # doubled 'n'
+    "devhonte johnson": "devonte johnson",   # typo
+    "ana carolina viera": "ana carolina vieira",  # Viera/Vieira
+    "nicholas renier": "nicolas renier",  # spelling
+    "nicollas renier": "nicolas renier",  # spelling
+    "hanette staack": "hannette staack",  # doubled 'n'
+    "jake straus": "jake strauss",      # dropped 's'
+    "jaden groner": "jayden groner",    # Jaden/Jayden
+    "jet thompson": "jett thompson",    # Jet/Jett
+    "erico cocco": "enrico cocco",      # Erico/Enrico
+    "josh barnet": "josh barnett",      # dropped 't'
+    "eliot kelly": "eliott kelly",      # Eliot/Eliott
+    "kamil uminski": "kamil huminski",  # dropped 'H'
+    "akira shouji": "akira shoji",      # Shouji/Shoji romanization
+    "ruan alvarena": "ruan alvarenga",  # dropped 'g'
+    "c hellenberg": "casey hellenberg",  # initial → Casey
+    "p donabedian": "patrick donabedian",  # initial → Patrick
+    "p gaudio": "patrick gaudio",       # initial → Patrick
+    "felipe pena sf": "felipe pena",    # leaked "SF" (semifinal) stage tag
     # NOTE: Junny vs Edwin Ocasio, Maia vs Mayssa Bastos, George vs Jorge Santos are
     # DISTINCT people (real bouts) — do not alias.
 }
 
 
+def raw_athlete_key(name: str) -> str:
+    """Identity key BEFORE alias resolution (cleaned, de-accented, normalized)."""
+    return _normalize_name(_deaccent(clean_athlete_name(name)))
+
+
 def athlete_key(name: str) -> str:
     """Identity key for athlete dedup: cleaned, de-accented, normalized + alias-resolved."""
-    k = _normalize_name(_deaccent(clean_athlete_name(name)))
+    k = raw_athlete_key(name)
     return ATHLETE_ALIASES.get(k, k)
 
 

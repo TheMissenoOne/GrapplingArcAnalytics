@@ -19,7 +19,7 @@ import logging
 from collections import defaultdict
 from typing import Any
 
-from analysis.names import athlete_key, clean_athlete_name
+from analysis.names import athlete_key, clean_athlete_name, raw_athlete_key
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,12 @@ def run(dry_run: bool) -> int:
             if len(rows) < 2:
                 continue
             canon = max(rows, key=lambda a: _score(a.name, n_matches(a.id)))
-            canon_clean = clean_athlete_name(canon.name)
+            # Keep the top-scored row (most bouts) as the FK target, but DISPLAY the spelling
+            # whose own key IS the cluster key — i.e. the alias target / canonical spelling —
+            # so a typo'd row with more bouts (e.g. "Felipe Pena SF", "Nicky Rodriguez") doesn't
+            # name the merged athlete. Falls back to the top row's name when no row matches.
+            preferred = next((r.name for r in rows if raw_athlete_key(r.name) == key), canon.name)
+            canon_clean = clean_athlete_name(preferred)
             dups = [a for a in rows if a.id != canon.id]
             logger.info("MERGE %-28s canonical=%r  <- %s", key, canon_clean,
                         [clean_athlete_name(d.name) for d in dups])

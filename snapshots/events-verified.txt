@@ -1,0 +1,5 @@
+uid=9_0 RootWebArea "Error response" url="http://localhost:8000/privacy.html"
+  uid=9_1 heading "Error response" level="1"
+  uid=9_2 StaticText "Error code: 404"
+  uid=9_3 StaticText "Message: File not found."
+  uid=9_4 StaticText "Error code explanation: 404 - Nothing matches the given URI."

@@ -151,3 +151,4 @@ Export layer produces JSON that matches GrapplingArc AsyncStorage keys:
 - `export/benchmark_results.py` → new importable format
 
 User bundle import: `schemas/app_types.UserBundle.from_json()` parses GrapplingArc `mock_user_bundle.json`.
+
