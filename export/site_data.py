@@ -303,7 +303,14 @@ def build_fighters(
     # Warm the identity map once so per-match opponent-ELO lookups (defense_profile →
     # opponent_input_elo → session.get) hit cache instead of a remote round-trip each.
     list(session.execute(select(Athlete)).scalars())
-    for match in _final_matches(session):
+    # All final bouts once → per-athlete index, so the per-fighter dilemma build below reuses
+    # them instead of a remote SELECT per fighter (was an N+1 over remote Supabase).
+    all_finals = _final_matches(session)
+    matches_by_athlete: dict[str, list[Any]] = {}
+    for _m in all_finals:
+        matches_by_athlete.setdefault(_m.athlete_a_id, []).append(_m)
+        matches_by_athlete.setdefault(_m.athlete_b_id, []).append(_m)
+    for match in all_finals:
         for aid in (match.athlete_a_id, match.athlete_b_id):
             if aid in seen:
                 continue
@@ -339,14 +346,9 @@ def build_fighters(
             system_profile = build_system_profile(athlete.name, ag)
             system_profiles[slug] = system_profile
 
-            # Per-fighter dilemmas: build from their final matches, get top-3 forks.
-            from db.models import Match
-            athlete_matches = session.execute(
-                select(Match).where(
-                    ((Match.athlete_a_id == aid) | (Match.athlete_b_id == aid))
-                    & (Match.sequence.isnot(None))
-                ).limit(30)
-            ).scalars().all()
+            # Per-fighter dilemmas: build from their final matches (from the in-memory index;
+            # all_finals already filtered to sequence-bearing bouts), get top-3 forks.
+            athlete_matches = matches_by_athlete.get(aid, [])[:30]
             athlete_sequences = [m.sequence for m in athlete_matches if m.sequence]
             fighter_dilemmas_list = []
             fighter_counters_list: list[dict[str, Any]] = []
