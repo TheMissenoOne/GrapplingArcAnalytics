@@ -195,7 +195,7 @@
   },
   "2026NCAA": {
     "event_title": "2026NCAA",
-    "video_url": "https://www.youtube.com/watch?v=MlancZWswSk",
+    "video_url": "https://www.youtube.com/watch?v=jT5wAzLN014",
     "file": "2026NCAA.py",
     "matches": [
       {
@@ -2519,26 +2519,6 @@
         "seconds": 0
       },
       {
-        "athlete": "B. Ste-Marie",
-        "year": 2025,
-        "opponent": "B. Ste-Marie",
-        "event": "WNO 20",
-        "winner": "Elisabeth Clay",
-        "method": "Decision",
-        "start": "1:15:20",
-        "seconds": 4520
-      },
-      {
-        "athlete": "D. Reis [1:32:39]",
-        "year": 2025,
-        "opponent": "G. Sousa",
-        "event": "WNO 20",
-        "winner": "Diogo Reis",
-        "method": "Decision",
-        "start": "1:32:39",
-        "seconds": 5559
-      },
-      {
         "athlete": "R. Guedes",
         "year": 2025,
         "opponent": "N. Jesus",
@@ -2547,66 +2527,6 @@
         "method": "Decision",
         "start": "1:51:49",
         "seconds": 6709
-      },
-      {
-        "athlete": "G. Sousa",
-        "year": 2025,
-        "opponent": "A. Williams",
-        "event": "WNO 20",
-        "winner": "Gabriel Sousa",
-        "method": "Submission (Kneebar)",
-        "start": "25:47",
-        "seconds": 1547
-      },
-      {
-        "athlete": "Mica Galvão [2:11:18]",
-        "year": 2025,
-        "opponent": "P. Barch",
-        "event": "WNO 20",
-        "winner": "Mica Galvão",
-        "method": "Submission (Flying Armbar)",
-        "start": "2:11:18",
-        "seconds": 7878
-      },
-      {
-        "athlete": "G. Ryan",
-        "year": 2025,
-        "opponent": "P. Gaudio",
-        "event": "WNO 20",
-        "winner": "Gordon Ryan",
-        "method": "Submission (Armbar)",
-        "start": "2:14:45",
-        "seconds": 8085
-      },
-      {
-        "athlete": "Mica Galvão",
-        "year": 2025,
-        "opponent": "J. Rodriguez",
-        "event": "WNO 20",
-        "winner": "Mica Galvão",
-        "method": "Decision",
-        "start": "38:38",
-        "seconds": 2318
-      },
-      {
-        "athlete": "A. Tackett",
-        "year": 2025,
-        "opponent": "P. Barch",
-        "event": "WNO 20",
-        "winner": "Andrew Tackett",
-        "method": "Decision",
-        "start": "56:46",
-        "seconds": 3406
-      },
-      {
-        "athlete": "D. Reis",
-        "year": 2025,
-        "opponent": "K. Krikorian",
-        "event": "WNO 20",
-        "winner": "Diogo Reis",
-        "method": "Decision",
-        "start": "8:06",
-        "seconds": 486
       }
     ]
   },
@@ -2994,6 +2914,23 @@
         "winner": "Khabib Nurmagomedov",
         "method": "Technical Submission (Triangle Choke)",
         "start": "?",
+        "seconds": null
+      }
+    ]
+  },
+  "WNO20-gaudio-fix": {
+    "event_title": "WNO 20 — Gaudio correction",
+    "video_url": "https://www.youtube.com/watch?v=xN0HUe8e2z0",
+    "file": "WNO20.py",
+    "matches": [
+      {
+        "athlete": "G. Ryan",
+        "year": 2025,
+        "opponent": "P. Gaudio",
+        "event": "WNO 20",
+        "winner": "Gordon Ryan",
+        "method": "Submission (Armbar)",
+        "start": "0:00:00",
         "seconds": null
       }
     ]
