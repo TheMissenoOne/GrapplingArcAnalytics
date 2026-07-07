@@ -94,25 +94,32 @@ GAUDIO_TS_OFFSET = 8085
 
 
 def _apply_gaudio_ts(match: Match, dry_run: bool) -> bool:
-    """Shift every ``sequence[].ts`` by -GAUDIO_TS_OFFSET. Returns True if applied/applicable,
-    False if it bailed out (any ts would go negative — the offset assumption doesn't hold)."""
-    seq = match.sequence or []
-    preview = [(e.get("label"), e.get("ts")) for e in seq if isinstance(e, dict) and "ts" in e]
-    shifted = [(label, ts - GAUDIO_TS_OFFSET) for label, ts in preview]
-    if any(new_ts < 0 for _, new_ts in shifted):
+    """Shift every ``ts`` by -GAUDIO_TS_OFFSET in BOTH ``sequence`` AND ``timeline`` — the
+    breakdown graph reads ``sequence`` but the UI timeline strip (_ui_timeline) prefers
+    ``timeline``, so both must move together or the timeline desyncs from the video. Returns
+    True if applied/applicable, False if it bailed (any ts would go negative → offset wrong)."""
+    fields = {f: (getattr(match, f) or []) for f in ("sequence", "timeline")}
+    all_ts = [e["ts"] for evs in fields.values() for e in evs
+              if isinstance(e, dict) and isinstance(e.get("ts"), int)]
+    if all_ts and min(all_ts) - GAUDIO_TS_OFFSET < 0:
         logger.warning(
-            "Gaudio ts offset -%ds would go negative — NOT applying. "
-            "Current DB sequence ts (label, ts): %s", GAUDIO_TS_OFFSET, preview,
+            "Gaudio ts offset -%ds would go negative (min ts %d) — NOT applying.",
+            GAUDIO_TS_OFFSET, min(all_ts),
         )
         return False
-    logger.info("Gaudio sequence ts: %s -> %s", preview, shifted)
+    logger.info("Gaudio ts shift -%d across sequence(%d)+timeline(%d)", GAUDIO_TS_OFFSET,
+                len(fields["sequence"]), len(fields["timeline"]))
     if not dry_run:
         from sqlalchemy.orm.attributes import flag_modified
 
-        for e in seq:
-            if isinstance(e, dict) and isinstance(e.get("ts"), int):
-                e["ts"] -= GAUDIO_TS_OFFSET
-        flag_modified(match, "sequence")
+        for field, evs in fields.items():
+            touched = False
+            for e in evs:
+                if isinstance(e, dict) and isinstance(e.get("ts"), int):
+                    e["ts"] -= GAUDIO_TS_OFFSET
+                    touched = True
+            if touched:
+                flag_modified(match, field)
     return True
 
 
