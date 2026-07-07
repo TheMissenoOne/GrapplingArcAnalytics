@@ -217,25 +217,22 @@ def upsert_graph_from_athlete_graph(
                 )
     _register_techniques(techs, session)
 
-    for (src, tgt), edge in athlete_graph.edges.items():
-        if not src or not tgt:
-            continue
-        edge_key = f"{src}→{tgt}"
-        # Prefer the grown edge ELO; fall back to the raw count for count-only callers.
-        edge_elo = edge.elo if edge.elo is not None else float(edge.count)
-        edge_stmt = (
-            pg_insert(GraphEdge)
-            .values(
-                graph_id=graph_id,
-                edge_key=edge_key,
-                source_key=src,
-                target_key=tgt,
-                elo=edge_elo,
-            )
-            .on_conflict_do_update(
-                index_elements=["graph_id", "edge_key"],
-                set_={"elo": edge_elo},
-            )
+    # One bulk upsert for ALL edges — a per-edge session.execute is a remote round-trip
+    # each (~200 edges × ~130ms = the whole replay cost). edge_key is unique within a graph
+    # (keyed by (src,tgt)), so no intra-statement ON CONFLICT collision.
+    # Prefer the grown edge ELO; fall back to the raw count for count-only callers.
+    edge_rows = [
+        {"graph_id": graph_id, "edge_key": f"{src}→{tgt}",
+         "source_key": src, "target_key": tgt,
+         "elo": edge.elo if edge.elo is not None else float(edge.count)}
+        for (src, tgt), edge in athlete_graph.edges.items()
+        if src and tgt
+    ]
+    if edge_rows:
+        edge_stmt = pg_insert(GraphEdge).values(edge_rows)
+        edge_stmt = edge_stmt.on_conflict_do_update(
+            index_elements=["graph_id", "edge_key"],
+            set_={"elo": edge_stmt.excluded.elo},
         )
         session.execute(edge_stmt)
 
