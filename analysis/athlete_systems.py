@@ -143,7 +143,9 @@ def detect_athlete_systems(
         generic = {"sweep", "takedown", "pass", "guard pass", "escape", "control",
                    "finish", "start", "entry"}
         if pr:
-            ranked = sorted(pr, key=pr.get, reverse=True)
+            # node name as a stable tiebreaker — pagerank ties (symmetric communities) otherwise
+            # resolve by hash-seed'd dict order, flipping the hub between export processes.
+            ranked = sorted(pr, key=lambda n: (-pr[n], n))
             hub = next((n for n in ranked if n not in generic), ranked[0])
         else:
             hub = members[0]
@@ -174,7 +176,7 @@ def detect_athlete_systems(
             internal_edges=internal,
         ))
 
-    systems.sort(key=lambda s: s.size, reverse=True)
+    systems.sort(key=lambda s: (-s.size, s.hub))  # hub tiebreaker → stable order for equal sizes
     return systems
 
 

@@ -260,14 +260,18 @@ def detect_communities(g: nx.DiGraph, min_occ: int = 1) -> list[list[str]]:
     """
     sub = g.subgraph([n for n, d in g.nodes(data=True) if d.get("occ", 0) >= min_occ])
     if sub.number_of_edges() == 0:
-        return [[n] for n in sub.nodes]
+        return [[n] for n in sorted(sub.nodes)]
     und = sub.to_undirected()
     comms = nx.community.greedy_modularity_communities(und, weight="weight")
+    # greedy_modularity_communities returns frozensets — sort with the node label as a stable
+    # tiebreaker (both within a community and across communities) so ties don't resolve by
+    # hash-seed'd set iteration. Without this the downstream systems/hubs/analogues reshuffle
+    # every export process (non-deterministic diffs).
     out = [
-        sorted(c, key=lambda n: g.nodes[n].get("occ", 0), reverse=True)
+        sorted(c, key=lambda n: (-g.nodes[n].get("occ", 0), n))
         for c in comms
     ]
-    return sorted(out, key=len, reverse=True)
+    return sorted(out, key=lambda c: (-len(c), c[0]))
 
 
 def reward_risk_ranking(
