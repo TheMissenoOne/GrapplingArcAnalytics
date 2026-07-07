@@ -1064,7 +1064,7 @@ def render_profile_page(profile: dict[str, Any]) -> str:
 </div></section>
 <section class="sec-pad-sm"><div class="wrap"><div class="appstrip">
   <div class="orb">GA</div>
-  <div style="flex:1;min-width:240px">
+  <div style="flex:1">
     <h2 class="h-lg">Grapple like {html.escape(f['name'])}</h2>
     <p class="muted mt8" style="max-width:48ch">Turn this game into a Project in the GrapplingArc app — it maps {html.escape(f['name'].split()[0])}'s signature entries against your own graph and shows exactly which positions to add.</p>
   </div>
@@ -1178,7 +1178,7 @@ _OCEAN_STYLE = """<style>
 .ocean-chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .ocean-panel{position:absolute;top:0;right:0;height:100%;width:340px;background:var(--panel);border-left:1px solid var(--line);z-index:3;padding:24px 22px;overflow:auto;box-shadow:-22px 0 44px rgba(0,0,0,.32)}
 .ocean-panel[hidden]{display:none}
-.ocean-close{position:absolute;top:13px;right:16px;background:none;border:none;color:var(--ink-3);font-size:23px;cursor:pointer;line-height:1}
+.ocean-close{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--ink-3);font-size:23px;cursor:pointer;line-height:1}
 .ocean-panel h2{font-size:21px;margin:0 30px 8px 0;letter-spacing:-.3px}
 .op-metrics{margin-top:18px;display:flex;flex-direction:column;gap:12px}
 .op-metric .op-mh{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
