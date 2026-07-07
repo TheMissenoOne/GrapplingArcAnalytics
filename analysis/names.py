@@ -124,6 +124,7 @@ ATHLETE_ALIASES: dict[str, str] = {
     "p donabedian": "patrick donabedian",  # initial → Patrick
     "p gaudio": "patrick gaudio",       # initial → Patrick
     "felipe pena sf": "felipe pena",    # leaked "SF" (semifinal) stage tag
+    "kyle bame": "kyle boehm",          # "Bame" transcription typo → Kyle Boehm
     # NOTE: Junny vs Edwin Ocasio, Maia vs Mayssa Bastos, George vs Jorge Santos are
     # DISTINCT people (real bouts) — do not alias.
 }
