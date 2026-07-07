@@ -591,7 +591,7 @@ if(BD.vid&&!window.YT){var tag=document.createElement('script');tag.src='https:/
 // click a node with a timestamp → seek the match video to that moment
 function gaSeek(t){
   if(!BD.vid||!gaPlayer||!gaPlayerReady) return;
-  gaPlayer.seekTo(Math.max(0,(t|0)-5),true);gaPlayer.playVideo();  // -5s → show the setup
+  gaPlayer.seekTo(Math.max(0,(t|0)+(BD.start||0)-5),true);gaPlayer.playVideo();  // -5s → show the setup
   document.getElementById('ytFrame').scrollIntoView({behavior:'smooth',block:'center'});
 }
 // decisive sequence graph
@@ -713,13 +713,29 @@ def render_breakdown_page(
                 f'<div class="v">{value}</div>{delta}</div>')
 
     ref = _video_ref(meta.get("video_url"))
+    start = ref[1] if ref else 0
+    # Convert broadcast-absolute ts → match-relative (subtract start offset)
+    def sub_start(ts: int | None) -> int | None:
+        if ts is None:
+            return None
+        return max(0, ts - start)
+    tgraph = bd["transition_graph_gv"]
+    for n in tgraph.get("nodes", []):
+        if "ts" in n:
+            n["ts"] = sub_start(n["ts"])
+    timeline = bd.get("event_timeline", [])
+    for e in timeline:
+        if "ts" in e:
+            e["ts"] = sub_start(e["ts"])
+    momentum_ts_adj = [sub_start(t) for t in (stats.get("momentum_ts") or [])]
     payload = {
         "a": a["name"], "b": b["name"],
-        "graph": bd["transition_graph_gv"],
+        "graph": tgraph,
         "stats": {"momentum_series": stats.get("momentum_series", []),
-                  "momentum_ts": stats.get("momentum_ts", [])},
-        "timeline": bd.get("event_timeline", []),
+                  "momentum_ts": momentum_ts_adj},
+        "timeline": timeline,
         "vid": ref[0] if ref else None,
+        "start": start,
     }
     has_seek = bool(ref) and any(n.get("ts") is not None
                                  for n in bd["transition_graph_gv"]["nodes"])
