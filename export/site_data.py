@@ -46,6 +46,8 @@ from analysis.network_metrics import network_from_sequences
 from analysis.path_to_victory import dilemmas, path_to_victory
 from analysis.style_profile import MIN_DOSSIER_EVENTS, build_style_profile, qualifies
 from db.models import Archetype, Athlete
+from db.repository import get_matches_for_athlete
+from export.incremental import ItemCache, item_hash
 from export.match_breakdown import (
     _final_matches,
     _headline,
@@ -210,6 +212,7 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
 
 def build_breakdowns(
     session: Session,
+    cache: ItemCache | None = None,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, dict[str, Any]]], dict[str, Any] | None]:
     """Returns (GA_BREAKDOWNS rows, [(slug, full breakdown)], GA_FEATURED) for sequence bouts.
 
@@ -227,17 +230,25 @@ def build_breakdowns(
     corpus_g = build_transition_network(session)
     ptv_v = path_to_victory(corpus_g)
 
-    # Warm the identity map once so per-match session.get(Athlete) hits cache, not a remote
-    # round-trip per distinct athlete.
-    list(session.execute(select(Athlete)).scalars())
+    # Strong-ref every athlete so per-match lookups hit memory. The identity map is weak-ref'd,
+    # so a discarded list(select(Athlete)) gets GC'd → session.get re-queries per match remotely.
+    athletes_by_id: dict[str, Athlete] = {
+        a.id: a for a in session.execute(select(Athlete)).scalars()}
 
     for match in _final_matches(session):
-        a = session.get(Athlete, match.athlete_a_id)
-        b = session.get(Athlete, match.athlete_b_id)
+        a = athletes_by_id.get(match.athlete_a_id)
+        b = athletes_by_id.get(match.athlete_b_id)
         if a is None or b is None:
             continue
         slug = match_slug(a, b, match.year)
-        bd = build_match_breakdown(match, a, b, ptv_v=ptv_v)
+        if cache is None:
+            bd = build_match_breakdown(match, a, b, ptv_v=ptv_v)
+        else:
+            h = item_hash(match.sequence, match.timeline, match.year, match.winner_id,
+                          match.win_type, match.event, match.video_url,
+                          a.rank_elo, b.rank_elo, a.name, b.name)
+            bd = cache.get_or_compute(
+                match.id, h, lambda: build_match_breakdown(match, a, b, ptv_v=ptv_v))
         bd["fighters"]["a"]["elo_pct"] = standings.get(a.id)
         bd["fighters"]["b"]["elo_pct"] = standings.get(b.id)
         # Extract YouTube video ID if available
@@ -303,8 +314,40 @@ def _node_video_refs(
     return refs
 
 
+def _fighter_forks(aid: str, athlete_matches: list[Any], session: Session) -> dict[str, Any]:
+    """The network-heavy per-fighter block: top-3 dilemmas, top counter-moves, and the defense
+    profile. Isolated so the export can cache it by fighter hash (its inputs are the athlete's
+    bouts + opponents, which the hash covers)."""
+    seqs = [m.sequence for m in athlete_matches if m.sequence]
+    dilemmas_list: list[dict[str, Any]] = []
+    counters_list: list[dict[str, Any]] = []
+    if seqs:
+        try:
+            g = network_from_sequences(seqs)
+            ptv = path_to_victory(g)
+            dilemmas_list = [
+                {"node": d["node"], "branches": [[b, p] for b, p in d["branches"]]}
+                for d in dilemmas(g, ptv)[:3]
+            ]
+            cm = counter_moves(g, ptv, top_k=2, min_count=2)
+            top_cm = sorted(cm.items(), key=lambda kv: kv[1][0]["ptv"], reverse=True)[:5]
+            counters_list = [
+                {"technique": node,
+                 "counters": [{"move": c["counter"], "leads_to": c["leads_to"]} for c in cs]}
+                for node, cs in top_cm
+            ]
+        except Exception:
+            pass  # graceful fallback if graph is too sparse
+    try:
+        defense = defense_profile(aid, athlete_matches, session)
+    except Exception:
+        defense = None
+    return {"dilemmas": dilemmas_list, "counters": counters_list, "defense": defense}
+
+
 def build_fighters(
     session: Session,
+    cache: ItemCache | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
     """Returns (GA_FIGHTERS card rows, {slug: {athlete, profile, career}}) for ≥3-bout
     fighters. The profile + career graph are computed once and reused for the dossier."""
@@ -312,9 +355,11 @@ def build_fighters(
     cards: list[dict[str, Any]] = []
     details: dict[str, dict[str, Any]] = {}
     system_profiles: dict[str, Any] = {}
-    # Warm the identity map once so per-match opponent-ELO lookups (defense_profile →
-    # opponent_input_elo → session.get) hit cache instead of a remote round-trip each.
-    list(session.execute(select(Athlete)).scalars())
+    # Strong-ref every athlete once so lookups hit memory. NB: SQLAlchemy's identity map is
+    # weak-ref'd — a discarded `list(select(Athlete))` gets GC'd and every session.get re-queries
+    # remotely; holding this dict keeps them resident (and we look opponents up from it directly).
+    athletes_by_id: dict[str, Athlete] = {
+        a.id: a for a in session.execute(select(Athlete)).scalars()}
     # All final bouts once → per-athlete index, so the per-fighter dilemma build below reuses
     # them instead of a remote SELECT per fighter (was an N+1 over remote Supabase).
     all_finals = _final_matches(session)
@@ -327,16 +372,35 @@ def build_fighters(
             if aid in seen:
                 continue
             seen.add(aid)
-            athlete = session.get(Athlete, aid)
+            athlete = athletes_by_id.get(aid)
             if athlete is None or not qualifies(aid, session):
                 continue
-            profile = build_style_profile(athlete, session)
+            # Fighter cache key: everything the profile + career depend on — the athlete's own
+            # fields and every one of their bouts, plus each opponent's rank_elo (defense_profile
+            # scores against it, so an opponent's rating change must invalidate this dossier too).
+            fh = None
+            if cache is not None:
+                _ams = get_matches_for_athlete(aid, session)
+                _opp = [athletes_by_id.get(m.athlete_b_id if m.athlete_a_id == aid
+                                           else m.athlete_a_id) for m in _ams]
+                fh = item_hash(aid, athlete.name, athlete.rank_elo, athlete.weight_class,
+                               [(m.id, m.sequence, m.timeline, m.year, m.winner_id, m.win_type)
+                                for m in _ams],
+                               [o.rank_elo if o else None for o in _opp])
+                profile = cache.get_or_compute(
+                    f"{aid}:p", fh, lambda: build_style_profile(athlete, session))
+            else:
+                profile = build_style_profile(athlete, session)
             # Surface the real emergent archetype (RF01, deviance v3) instead of "Grappler".
             profile["archetype"] = _archetype(athlete, session) or profile.get("archetype")
             # Hide irrelevant dossiers: a striker with a couple of scrambles is noise.
             if profile["grappling_events"] < MIN_DOSSIER_EVENTS:
                 continue
-            career = _career_graphview(athlete, profile, session, 12)
+            if cache is not None:
+                career = cache.get_or_compute(
+                    f"{aid}:c", fh, lambda: _career_graphview(athlete, profile, session, 12))
+            else:
+                career = _career_graphview(athlete, profile, session, 12)
             card = _truncate_graph(career, 8)
             slug = slugify(athlete.name)
             rec = profile["fighter"]["record"]
@@ -358,57 +422,26 @@ def build_fighters(
             system_profile = build_system_profile(athlete.name, ag)
             system_profiles[slug] = system_profile
 
-            # Per-fighter dilemmas: build from their final matches (from the in-memory index;
-            # all_finals already filtered to sequence-bearing bouts), get top-3 forks.
+            # Per-fighter forks (dilemmas + counters + defense) — the network-heavy block.
             athlete_matches = matches_by_athlete.get(aid, [])[:30]
-            athlete_sequences = [m.sequence for m in athlete_matches if m.sequence]
-            fighter_dilemmas_list = []
-            fighter_counters_list: list[dict[str, Any]] = []
-            if athlete_sequences:
-                try:
-                    fighter_g = network_from_sequences(athlete_sequences)
-                    fighter_ptv = path_to_victory(fighter_g)
-                    fighter_dilemmas = dilemmas(fighter_g, fighter_ptv)
-                    fighter_dilemmas_list = [
-                        {
-                            "node": d["node"],
-                            "branches": [[b, ptv] for b, ptv in d["branches"]],
-                        }
-                        for d in fighter_dilemmas[:3]
-                    ]
-                    # Counter moves: the athlete's best-value responses per position;
-                    # keep the few positions whose top counter lands highest.
-                    cm = counter_moves(fighter_g, fighter_ptv, top_k=2, min_count=2)
-                    top_cm = sorted(
-                        cm.items(), key=lambda kv: kv[1][0]["ptv"], reverse=True
-                    )[:5]
-                    fighter_counters_list = [
-                        {
-                            "technique": node,
-                            "counters": [
-                                {"move": c["counter"], "leads_to": c["leads_to"]}
-                                for c in cs
-                            ],
-                        }
-                        for node, cs in top_cm
-                    ]
-                except Exception:
-                    pass  # graceful fallback if graph is too sparse
-
-            try:
-                fighter_defense = defense_profile(aid, athlete_matches, session)
-            except Exception:
-                fighter_defense = None
+            if cache is not None:
+                forks = cache.get_or_compute(
+                    f"{aid}:f", fh, lambda: _fighter_forks(aid, athlete_matches, session))
+                videos = cache.get_or_compute(
+                    f"{aid}:v", fh, lambda: _node_video_refs(aid, athlete_matches, session))
+            else:
+                forks = _fighter_forks(aid, athlete_matches, session)
+                videos = _node_video_refs(aid, athlete_matches, session)
 
             details[slug] = {
                 "athlete": athlete,
                 "profile": profile,
                 "career": career,
                 "_systems": profile_to_dict(system_profile),
-                "_dilemmas": fighter_dilemmas_list,
-                "_counters": fighter_counters_list,
-                "_defense": fighter_defense,
-                "_videos": _node_video_refs(aid, athlete_matches, session),
+                "_dilemmas": forks["dilemmas"],
+                "_counters": forks["counters"],
+                "_defense": forks["defense"],
+                "_videos": videos,
             }
 
     # Compute N×N nearest analogues per athlete
@@ -1042,12 +1075,27 @@ def render_profile_page(profile: dict[str, Any]) -> str:
 # ── event (card) pages ───────────────────────────────────────────────────────
 def build_events(
     session: Session,
+    cache: ItemCache | None = None,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, dict[str, Any]]]]:
     """Returns (GA_EVENTS card rows, [(slug, event profile)]) for cards with ≥3 bouts."""
     rows: list[dict[str, Any]] = []
     details: list[tuple[str, dict[str, Any]]] = []
+    ev_matches: dict[str, list[Any]] = {}
+    if cache is not None:  # index this-event's bouts once, to hash each event by its contents
+        for m in _final_matches(session):
+            if m.event:
+                ev_matches.setdefault(m.event, []).append(m)
     for name in event_names(session):
-        ep = build_event_profile(name, session)
+        if cache is not None:
+            ms = sorted(ev_matches.get(name, []), key=lambda m: m.id)
+            # ponytail: keyed on the bouts (id/seq/result/participants); a bare athlete rename
+            # or ELO drift with no bout change self-heals on a --full run.
+            eh = item_hash(name, [(m.id, m.sequence, m.year, m.winner_id, m.win_type,
+                                   m.athlete_a_id, m.athlete_b_id) for m in ms])
+            ep = cache.get_or_compute(
+                f"ev:{slugify(name)}", eh, lambda: build_event_profile(name, session))
+        else:
+            ep = build_event_profile(name, session)
         slug = slugify(name)
         hb = ep.get("headline_bout")
         rows.append({
@@ -1224,7 +1272,7 @@ def _js_file(var: str, data: Any) -> str:
     return f"/* generated by export.site_data — do not edit */\nwindow.{var} = {json.dumps(data, ensure_ascii=False)};\n"
 
 
-def export_site(session: Session, out: Path) -> dict[str, int]:
+def export_site(session: Session, out: Path, full: bool = False) -> dict[str, int]:
     from time import perf_counter as _pc
 
     def _phase(label: str, t0: float) -> float:
@@ -1244,13 +1292,20 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
                 *out.glob("event-*.html")):
         if old.name != "grapple-like.html":
             old.unlink()
+    cache_dir = Path(__file__).resolve().parent.parent / ".export_cache"
+    bd_cache = ItemCache(cache_dir / "breakdowns.json", full=full)
+    ft_cache = ItemCache(cache_dir / "fighters.json", full=full)
+    ev_cache = ItemCache(cache_dir / "events.json", full=full)
     _t = _pc()
-    rows, full, featured = build_breakdowns(session)
-    _t = _phase("build_breakdowns", _t)
-    fighters, details = build_fighters(session)
-    _t = _phase("build_fighters", _t)
-    events, event_details = build_events(session)
-    _t = _phase("build_events", _t)
+    rows, full_bds, featured = build_breakdowns(session, cache=bd_cache)
+    bd_cache.save()
+    _t = _phase(f"build_breakdowns ({bd_cache.hits} cached, {bd_cache.misses} rebuilt)", _t)
+    fighters, details = build_fighters(session, cache=ft_cache)
+    ft_cache.save()
+    _t = _phase(f"build_fighters ({ft_cache.hits} cached, {ft_cache.misses} rebuilt)", _t)
+    events, event_details = build_events(session, cache=ev_cache)
+    ev_cache.save()
+    _t = _phase(f"build_events ({ev_cache.hits} cached, {ev_cache.misses} rebuilt)", _t)
     elo = build_elo(session)
     _t = _phase("build_elo", _t)
 
@@ -1271,7 +1326,7 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     # per-match detail pages (attach archetypes + adapted graph for the template)
     dossier_slugs = frozenset(details)  # fighters that actually have a Grapple Like dossier
     slow = ("", 0.0)
-    for slug, bd in full:
+    for slug, bd in full_bds:
         _s = _pc()
         bd["_arch_a"] = next((r["a"]["style"] for r in rows if r["id"] == slug), "")
         bd["_arch_b"] = next((r["b"]["style"] for r in rows if r["id"] == slug), "")
@@ -1310,7 +1365,7 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     # robots.txt + sitemap.xml (acquisition baseline — the site was invisible to crawlers).
     static_pages = ["index.html", "breakdowns.html", "events.html", "grapple-like.html",
                     "the-data.html", "the-ocean.html"]
-    urls = static_pages + [f"breakdown-{s}.html" for s, _ in full] \
+    urls = static_pages + [f"breakdown-{s}.html" for s, _ in full_bds] \
         + [f"grapple-{s}.html" for s in details] + [f"event-{s}.html" for s, _ in event_details]
     locs = "\n".join(f"  <url><loc>{SITE_BASE}/{u}</loc></url>" for u in urls)
     (out / "sitemap.xml").write_text(
@@ -1320,15 +1375,15 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     (out / "robots.txt").write_text(
         f"User-agent: *\nAllow: /\nSitemap: {SITE_BASE}/sitemap.xml\n", encoding="utf-8")
 
-    return {"breakdowns": len(full), "fighters": len(details),
+    return {"breakdowns": len(full_bds), "fighters": len(details),
             "events": len(event_details), "elo": sum(len(rows) for rows in elo.values()),
             "ocean": len(ocean["nodes"])}
 
 
-def run(out: Path) -> int:
+def run(out: Path, full: bool = False) -> int:
     from db.base import db_session
     with db_session() as session:
-        counts = export_site(session, out)
+        counts = export_site(session, out, full=full)
     logger.info("Generated %d breakdowns, %d dossiers, %d events, %d ELO rows, %d ocean nodes → %s",
                 counts["breakdowns"], counts["fighters"], counts["events"],
                 counts["elo"], counts["ocean"], out)
@@ -1344,8 +1399,10 @@ def main() -> int:
         pass
     ap = argparse.ArgumentParser(description="Generate the design site's data + detail pages")
     ap.add_argument("--out", type=Path, default=_DEFAULT_OUT, help="site output dir")
+    ap.add_argument("--full", action="store_true",
+                    help="ignore the incremental cache and rebuild every page")
     args = ap.parse_args()
-    return run(args.out)
+    return run(args.out, full=args.full)
 
 
 if __name__ == "__main__":

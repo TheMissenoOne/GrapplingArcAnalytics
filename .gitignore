@@ -61,3 +61,4 @@ data/grapplemap_icons/
 
 # Raw transcripts + root match dumps (source corpus, large; see TRANSCRIPT_PROCESSING.md)
 transcripts/
+.export_cache/
