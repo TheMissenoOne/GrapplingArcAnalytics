@@ -1,33 +1,126 @@
 {
   "Luke Griffith|Pat Downey|2025": [
-    {"label": "Guard Pull", "type": "guard", "actor": "Luke Griffith", "timestamp": "2:15"},
-    {"label": "Triangle Attempt", "type": "submission", "actor": "Luke Griffith", "timestamp": "10:47", "successful": false}
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Luke Griffith",
+      "ts": 135
+    },
+    {
+      "label": "Triangle",
+      "type": "submission",
+      "actor": "Luke Griffith",
+      "successful": false,
+      "ts": 647
+    }
   ],
   "Vagner Rocha|Elijah Dorsey|2025": [
-    {"label": "Guard Pull", "type": "guard", "actor": "Elijah Dorsey", "timestamp": "3:17"},
-    {"label": "Toe Hold Attempt", "type": "submission", "actor": "Vagner Rocha", "timestamp": "6:01", "successful": false},
-    {"label": "Mount", "type": "control", "actor": "Elijah Dorsey", "timestamp": "11:00"}
+    {
+      "label": "Guard Pull",
+      "type": "guard",
+      "actor": "Elijah Dorsey",
+      "ts": 197
+    },
+    {
+      "label": "Toe Hold",
+      "type": "submission",
+      "actor": "Vagner Rocha",
+      "successful": false,
+      "ts": 361
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Elijah Dorsey",
+      "ts": 660
+    }
   ],
   "Giancarlo Bodoni|Gavin Corbe|2025": [
-    {"label": "Heel Hook Attempt", "type": "submission", "actor": "Giancarlo Bodoni", "timestamp": "3:40", "successful": false},
-    {"label": "Back Take", "type": "control", "actor": "Giancarlo Bodoni", "timestamp": "4:47", "successful": true},
-    {"label": "Rear Naked Choke", "type": "submission", "actor": "Giancarlo Bodoni", "timestamp": "5:57", "successful": true}
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Giancarlo Bodoni",
+      "successful": false,
+      "ts": 220
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Giancarlo Bodoni",
+      "successful": true,
+      "ts": 287
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Giancarlo Bodoni",
+      "successful": true,
+      "ts": 357
+    }
   ],
   "Giancarlo Bodoni|Taylor Pearman|2025": [
-    {"label": "Knee Bar Attempt", "type": "submission", "actor": "Giancarlo Bodoni", "timestamp": "3:37", "successful": false}
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Giancarlo Bodoni",
+      "successful": false,
+      "ts": 217
+    }
   ],
   "Dorian Olivarez|Taylor Pearman|2025": [
-    {"label": "North South Choke Attempt", "type": "submission", "actor": "Dorian Olivarez", "timestamp": "6:28", "successful": false},
-    {"label": "Kimura Attempt", "type": "submission", "actor": "Dorian Olivarez", "timestamp": "7:20", "successful": false},
-    {"label": "Arm Triangle Attempt", "type": "submission", "actor": "Dorian Olivarez", "timestamp": "8:54", "successful": false}
+    {
+      "label": "North South Choke",
+      "type": "submission",
+      "actor": "Dorian Olivarez",
+      "successful": false,
+      "ts": 388
+    },
+    {
+      "label": "Kimura",
+      "type": "submission",
+      "actor": "Dorian Olivarez",
+      "successful": false,
+      "ts": 440
+    },
+    {
+      "label": "Arm Triangle",
+      "type": "submission",
+      "actor": "Dorian Olivarez",
+      "successful": false,
+      "ts": 534
+    }
   ],
   "Mica Galvao|Deandre Corbe|2025": [
-    {"label": "Foot Sweep Attempt", "type": "takedown", "actor": "Mica Galvao", "timestamp": "2:41", "successful": false},
-    {"label": "Knee Bar Attempt", "type": "submission", "actor": "Mica Galvao", "timestamp": "3:38", "successful": false},
-    {"label": "Back Take Attempt", "type": "control", "actor": "Mica Galvao", "timestamp": "8:58", "successful": false}
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Mica Galvao",
+      "successful": false,
+      "ts": 161
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Mica Galvao",
+      "successful": false,
+      "ts": 218
+    },
+    {
+      "label": "Back Take",
+      "type": "control",
+      "actor": "Mica Galvao",
+      "successful": false,
+      "ts": 538
+    }
   ],
   "Lucas Barbosa|Pawel Jaworski|2025": [
-    {"label": "Knee Bar Attempt", "type": "submission", "actor": "Pawel Jaworski", "timestamp": "12:53", "successful": false}
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Pawel Jaworski",
+      "successful": false,
+      "ts": 773
+    }
   ],
   "Diego Pato|Paul Ardila|2025": [],
   "PJ Barch|Lucas Kanard|2025": [],
@@ -36,7 +129,12 @@
   "Geo Martinez|Belal Etiabari|2025": [],
   "Kyle Boehm|Belal Etiabari|2025": [],
   "Ronaldo Junior|Charles Negromonte|2025": [
-    {"label": "Straight Ankle Lock", "type": "submission", "actor": "Charles Negromonte", "timestamp": "14:21"}
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Charles Negromonte",
+      "ts": 861
+    }
   ],
   "Kaynan Duarte|Owen Jones|2025": [],
   "Felipe Pena|Marcin Maciulewicz|2025": [],
@@ -51,8 +149,20 @@
   "Ana Carolina Viera|Sarah Galvão|2025": [],
   "Chris Wojcik|Jacob Couch|2025": [],
   "Helena Crevar|Adele Fornarino|2025": [
-    {"label": "Guard Pass Attempt", "type": "pass", "actor": "Helena Crevar", "timestamp": "1:54"},
-    {"label": "Straight Ankle Lock Attempt", "type": "submission", "actor": "Helena Crevar", "timestamp": "6:41", "successful": false}
+    {
+      "label": "Guard Pass",
+      "type": "pass",
+      "actor": "Helena Crevar",
+      "successful": false,
+      "ts": 114
+    },
+    {
+      "label": "Straight Ankle Lock",
+      "type": "submission",
+      "actor": "Helena Crevar",
+      "successful": false,
+      "ts": 401
+    }
   ],
   "Nicky Rodriguez|Michael Pixley|2025": [],
   "Victor Hugo|Dante Leon|2025": []

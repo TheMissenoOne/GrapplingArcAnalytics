@@ -4,98 +4,98 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Justin Gaethje",
-      "timestamp": "0:39"
+      "ts": 39
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
-      "timestamp": "1:11"
+      "ts": 71
     },
     {
       "label": "Inverted Triangle",
       "type": "submission",
       "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
-      "timestamp": "1:13"
+      "ts": 73
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Justin Gaethje",
-      "timestamp": "1:35"
+      "ts": 95
     },
     {
       "label": "Knee on Belly",
       "type": "control",
       "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
-      "timestamp": "1:53"
+      "ts": 113
     },
     {
       "label": "Knee on Belly",
       "type": "control",
       "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
-      "timestamp": "2:44"
+      "ts": 164
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Justin Gaethje",
-      "timestamp": "5:44",
-      "successful": false
+      "successful": false,
+      "ts": 344
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
-      "timestamp": "6:04"
+      "ts": 364
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Justin Gaethje",
-      "timestamp": "7:00"
+      "ts": 420
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Justin Gaethje",
-      "timestamp": "11:31"
+      "ts": 691
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
-      "timestamp": "11:52"
+      "ts": 712
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Justin Gaethje",
-      "timestamp": "12:04"
+      "ts": 724
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Justin Gaethje",
-      "timestamp": "13:00"
+      "ts": 780
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Justin Gaethje",
-      "timestamp": "13:00"
+      "ts": 780
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Justin Gaethje",
-      "timestamp": "15:09"
+      "ts": 909
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Rafael Fiziev: This fight is featured at the beginning of the video",
-      "timestamp": "16:20"
+      "ts": 980
     }
   ],
   "Michael Chandler|Paddy Pimblett: This matchup begins at 17|2025": [
@@ -103,7 +103,7 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Michael Chandler",
-      "timestamp": "0:28"
+      "ts": 28
     }
   ],
   "Sean O'Malley|Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33|2025": [
@@ -111,31 +111,31 @@
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
-      "timestamp": "0:16"
+      "ts": 16
     },
     {
       "label": "Inverted Triangle",
       "type": "submission",
       "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
-      "timestamp": "0:18"
+      "ts": 18
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
-      "timestamp": "0:40"
+      "ts": 40
     },
     {
       "label": "Knee on Belly",
       "type": "control",
       "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
-      "timestamp": "0:58"
+      "ts": 58
     },
     {
       "label": "Knee on Belly",
       "type": "control",
       "actor": "Marlon 'Chito' Vera: The bantamweight championship title defense begins at 33",
-      "timestamp": "1:49"
+      "ts": 109
     }
   ],
   "Song Yadong|Ricky Simon: This main event starts at 1|2025": [
@@ -143,44 +143,44 @@
       "label": "Knee on Belly",
       "type": "control",
       "actor": "Song Yadong",
-      "timestamp": "0:00"
+      "ts": 0
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Song Yadong",
-      "timestamp": "2:58",
-      "successful": false
+      "successful": false,
+      "ts": 178
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Song Yadong",
-      "timestamp": "3:18"
+      "ts": 198
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Song Yadong",
-      "timestamp": "4:14"
+      "ts": 254
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Song Yadong",
-      "timestamp": "8:45"
+      "ts": 525
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Song Yadong",
-      "timestamp": "9:06"
+      "ts": 546
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Song Yadong",
-      "timestamp": "9:18"
+      "ts": 558
     }
   ]
 }

@@ -4,237 +4,237 @@
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Chimaev",
-      "timestamp": "0:31"
+      "ts": 31
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "1:06"
+      "ts": 66
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "1:17"
+      "ts": 77
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Chimaev",
-      "timestamp": "3:04"
+      "ts": 184
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "3:04"
+      "ts": 184
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Chimaev",
-      "timestamp": "3:04"
+      "ts": 184
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "3:12"
+      "ts": 192
     },
     {
       "label": "Bridge (Upa Escape)",
       "type": "escape",
       "actor": "Du Plessis (Middleweight Championship)",
-      "timestamp": "4:37"
+      "ts": 277
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Du Plessis (Middleweight Championship)",
-      "timestamp": "4:50"
+      "ts": 290
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Chimaev",
-      "timestamp": "5:04"
+      "ts": 304
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "5:51"
+      "ts": 351
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Chimaev",
-      "timestamp": "6:20"
+      "ts": 380
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "6:28"
+      "ts": 388
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "7:16"
+      "ts": 436
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Du Plessis (Middleweight Championship)",
-      "timestamp": "8:35"
+      "ts": 515
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Chimaev",
-      "timestamp": "8:47"
+      "ts": 527
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "11:15"
+      "ts": 675
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Chimaev",
-      "timestamp": "12:08"
+      "ts": 728
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "12:23"
+      "ts": 743
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "12:23"
+      "ts": 743
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "13:25"
+      "ts": 805
     },
     {
       "label": "Bridge (Upa Escape)",
       "type": "escape",
       "actor": "Du Plessis (Middleweight Championship)",
-      "timestamp": "14:22"
+      "ts": 862
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "14:51"
+      "ts": 891
     },
     {
       "label": "Smash Pass",
       "type": "pass",
       "actor": "Chimaev",
-      "timestamp": "14:59",
-      "successful": false
+      "successful": false,
+      "ts": 899
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Chimaev",
-      "timestamp": "14:59",
-      "successful": false
+      "successful": false,
+      "ts": 899
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "15:50"
+      "ts": 950
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Chimaev",
-      "timestamp": "18:29"
+      "ts": 1109
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "18:32"
+      "ts": 1112
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "18:32"
+      "ts": 1112
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "18:54"
+      "ts": 1134
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "18:57"
+      "ts": 1137
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Chimaev",
-      "timestamp": "20:22"
+      "ts": 1222
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "20:27"
+      "ts": 1227
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "21:20"
+      "ts": 1280
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "21:20"
+      "ts": 1280
     },
     {
       "label": "Americana (Keylock)",
       "type": "submission",
       "actor": "Chimaev",
-      "timestamp": "22:02"
+      "ts": 1322
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "22:37"
+      "ts": 1357
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "24:30"
+      "ts": 1470
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chimaev",
-      "timestamp": "25:02"
+      "ts": 1502
     }
   ],
   "Sean Strickland|Anthony Hernandez|2025": [
@@ -242,104 +242,104 @@
       "label": "Half Guard",
       "type": "guard",
       "actor": "Sean Strickland",
-      "timestamp": "0:00"
+      "ts": 0
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "1:10"
+      "ts": 70
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "2:47"
+      "ts": 167
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Sean Strickland",
-      "timestamp": "3:31"
+      "ts": 211
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "3:36"
+      "ts": 216
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "3:58"
+      "ts": 238
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Sean Strickland",
-      "timestamp": "4:30"
+      "ts": 270
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "8:03"
+      "ts": 483
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "12:28"
+      "ts": 748
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "14:43"
+      "ts": 883
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "16:40"
+      "ts": 1000
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "19:02"
+      "ts": 1142
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "19:48"
+      "ts": 1188
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Sean Strickland",
-      "timestamp": "20:06",
-      "successful": false
+      "successful": false,
+      "ts": 1206
     },
     {
       "label": "Float Pass",
       "type": "pass",
       "actor": "Sean Strickland",
-      "timestamp": "24:27"
+      "ts": 1467
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Sean Strickland",
-      "timestamp": "24:34"
+      "ts": 1474
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Sean Strickland",
-      "timestamp": "25:28"
+      "ts": 1528
     }
   ],
   "Brandon Royval|Joshua Van|2025": [
@@ -347,14 +347,14 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Joshua Van",
-      "timestamp": "0:17"
+      "ts": 17
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Brandon Royval",
-      "timestamp": "0:35",
-      "successful": false
+      "successful": false,
+      "ts": 35
     }
   ],
   "Tatsuro Taira|Brandon Moreno|2025": [
@@ -362,466 +362,466 @@
       "label": "Float Pass",
       "type": "pass",
       "actor": "Brandon Moreno",
-      "timestamp": "0:20"
+      "ts": 20
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brandon Moreno",
-      "timestamp": "0:26"
+      "ts": 26
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Brandon Moreno",
-      "timestamp": "1:20"
+      "ts": 80
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Tatsuro Taira",
-      "timestamp": "1:43"
+      "ts": 103
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brandon Moreno",
-      "timestamp": "1:45"
+      "ts": 105
     },
     {
       "label": "Stack Pass",
       "type": "pass",
       "actor": "Tatsuro Taira",
-      "timestamp": "2:44"
+      "ts": 164
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Tatsuro Taira",
-      "timestamp": "2:49"
+      "ts": 169
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "2:52"
+      "ts": 172
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Tatsuro Taira",
-      "timestamp": "3:11"
+      "ts": 191
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "3:11"
+      "ts": 191
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "3:33"
+      "ts": 213
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "3:55"
+      "ts": 235
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Tatsuro Taira",
-      "timestamp": "3:55"
+      "ts": 235
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "3:55"
+      "ts": 235
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "4:55"
+      "ts": 295
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Brandon Moreno",
-      "timestamp": "5:09"
+      "ts": 309
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brandon Moreno",
-      "timestamp": "7:00"
+      "ts": 420
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Brandon Moreno",
-      "timestamp": "7:12"
+      "ts": 432
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Brandon Moreno",
-      "timestamp": "7:12"
+      "ts": 432
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "8:31",
-      "successful": false
+      "successful": false,
+      "ts": 511
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Tatsuro Taira",
-      "timestamp": "10:15"
+      "ts": 615
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "10:50"
+      "ts": 650
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "11:01"
+      "ts": 661
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Tatsuro Taira",
-      "timestamp": "12:46"
+      "ts": 766
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "12:46"
+      "ts": 766
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Tatsuro Taira",
-      "timestamp": "12:46"
+      "ts": 766
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "12:54"
+      "ts": 774
     },
     {
       "label": "Bridge (Upa Escape)",
       "type": "escape",
       "actor": "Tatsuro Taira",
-      "timestamp": "14:19"
+      "ts": 859
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "14:32"
+      "ts": 872
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Tatsuro Taira",
-      "timestamp": "14:46"
+      "ts": 886
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "15:33"
+      "ts": 933
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Tatsuro Taira",
-      "timestamp": "16:02"
+      "ts": 962
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "16:07"
+      "ts": 967
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "16:58"
+      "ts": 1018
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "18:24"
+      "ts": 1104
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Tatsuro Taira",
-      "timestamp": "18:29"
+      "ts": 1109
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "20:56"
+      "ts": 1256
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Tatsuro Taira",
-      "timestamp": "21:50"
+      "ts": 1310
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "22:05"
+      "ts": 1325
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "22:05"
+      "ts": 1325
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "23:07"
+      "ts": 1387
     },
     {
       "label": "Bridge (Upa Escape)",
       "type": "escape",
       "actor": "Tatsuro Taira",
-      "timestamp": "24:04"
+      "ts": 1444
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "24:32"
+      "ts": 1472
     },
     {
       "label": "Smash Pass",
       "type": "pass",
       "actor": "Tatsuro Taira",
-      "timestamp": "24:41",
-      "successful": false
+      "successful": false,
+      "ts": 1481
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Tatsuro Taira",
-      "timestamp": "24:41",
-      "successful": false
+      "successful": false,
+      "ts": 1481
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "25:31"
+      "ts": 1531
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Tatsuro Taira",
-      "timestamp": "28:10"
+      "ts": 1690
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "28:14"
+      "ts": 1694
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "28:14"
+      "ts": 1694
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "28:36"
+      "ts": 1716
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "28:39"
+      "ts": 1719
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Tatsuro Taira",
-      "timestamp": "30:04"
+      "ts": 1804
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "30:09"
+      "ts": 1809
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "31:02"
+      "ts": 1862
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "31:02"
+      "ts": 1862
     },
     {
       "label": "Americana (Keylock)",
       "type": "submission",
       "actor": "Tatsuro Taira",
-      "timestamp": "31:44"
+      "ts": 1904
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "32:19"
+      "ts": 1939
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "34:12"
+      "ts": 2052
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "34:44"
+      "ts": 2084
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Tatsuro Taira",
-      "timestamp": "36:20"
+      "ts": 2180
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "36:37"
+      "ts": 2197
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Tatsuro Taira",
-      "timestamp": "37:02"
+      "ts": 2222
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "40:38"
+      "ts": 2438
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "42:12"
+      "ts": 2532
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "43:20"
+      "ts": 2600
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Tatsuro Taira",
-      "timestamp": "44:03"
+      "ts": 2643
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "44:13"
+      "ts": 2653
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "44:44"
+      "ts": 2684
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Tatsuro Taira",
-      "timestamp": "45:55"
+      "ts": 2755
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "47:16"
+      "ts": 2836
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "48:47"
+      "ts": 2927
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Tatsuro Taira",
-      "timestamp": "49:31"
+      "ts": 2971
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "49:36"
+      "ts": 2976
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "49:58"
+      "ts": 2998
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Tatsuro Taira",
-      "timestamp": "50:30"
+      "ts": 3030
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "54:05"
+      "ts": 3245
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Tatsuro Taira",
-      "timestamp": "58:30"
+      "ts": 3510
     }
   ]
 }

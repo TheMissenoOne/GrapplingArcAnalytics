@@ -4,34 +4,34 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "49:54",
-      "successful": true
+      "successful": true,
+      "ts": 2994
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Shawn Melanson",
-      "timestamp": "50:34"
+      "ts": 3034
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "51:23",
-      "successful": true
+      "successful": true,
+      "ts": 3083
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "52:14",
-      "successful": true
+      "successful": true,
+      "ts": 3134
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "56:05"
+      "ts": 3365
     }
   ],
   "Kyle Chambers|Austin Oranday|2026": [
@@ -39,54 +39,54 @@
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "57:50"
+      "ts": 3470
     },
     {
       "label": "Straight Ankle",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "57:54"
+      "ts": 3474
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "58:13",
-      "successful": true
+      "successful": true,
+      "ts": 3493
     },
     {
       "label": "Straight Ankle",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "58:19"
+      "ts": 3499
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "59:18",
-      "successful": true
+      "successful": true,
+      "ts": 3558
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "61:47",
-      "successful": true
+      "successful": true,
+      "ts": 3707
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "62:44",
-      "successful": true
+      "successful": true,
+      "ts": 3764
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "64:19",
-      "successful": false
+      "successful": false,
+      "ts": 3859
     }
   ],
   "Sam Schwartzapfel|Travis Haven|2026": [
@@ -94,28 +94,28 @@
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "92:48",
-      "successful": false
+      "successful": false,
+      "ts": 5568
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "93:26",
-      "successful": true
+      "successful": true,
+      "ts": 5606
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "96:34",
-      "successful": true
+      "successful": true,
+      "ts": 5794
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "98:43"
+      "ts": 5923
     }
   ],
   "Anthony Salisbury|Brett Moyer|2026": [
@@ -123,33 +123,33 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Anthony Salisbury",
-      "timestamp": "102:08",
-      "successful": true
+      "successful": true,
+      "ts": 6128
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Anthony Salisbury",
-      "timestamp": "103:10",
-      "successful": true
+      "successful": true,
+      "ts": 6190
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Anthony Salisbury",
-      "timestamp": "106:58"
+      "ts": 6418
     },
     {
       "label": "Triangle",
       "type": "submission",
       "actor": "Anthony Salisbury",
-      "timestamp": "107:17"
+      "ts": 6437
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Anthony Salisbury",
-      "timestamp": "109:19"
+      "ts": 6559
     }
   ],
   "Caleb Crump|Jake Strauss|2026": [
@@ -157,14 +157,14 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Caleb Crump",
-      "timestamp": "112:41",
-      "successful": true
+      "successful": true,
+      "ts": 6761
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Caleb Crump",
-      "timestamp": "116:12"
+      "ts": 6972
     }
   ],
   "Jared Fekete|Caleb Crump|2026": [
@@ -172,21 +172,21 @@
       "label": "Choke",
       "type": "submission",
       "actor": "Jared Fekete",
-      "timestamp": "156:30"
+      "ts": 9390
     },
     {
       "label": "Triangle",
       "type": "submission",
       "actor": "Jared Fekete",
-      "timestamp": "158:42",
-      "successful": false
+      "successful": false,
+      "ts": 9522
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Jared Fekete",
-      "timestamp": "161:41",
-      "successful": true
+      "successful": true,
+      "ts": 9701
     }
   ],
   "Derek Rayfield|Elijah Carlton|2026": [
@@ -194,46 +194,46 @@
       "label": "Triangle",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "166:46"
+      "ts": 10006
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "167:14",
-      "successful": false
+      "successful": false,
+      "ts": 10034
     },
     {
       "label": "Triangle",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "167:30"
+      "ts": 10050
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "168:13"
+      "ts": 10093
     },
     {
       "label": "Triangle",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "169:35"
+      "ts": 10175
     },
     {
       "label": "Triangle",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "170:41",
-      "successful": false
+      "successful": false,
+      "ts": 10241
     },
     {
       "label": "Pass The Guard",
       "type": "pass",
       "actor": "Derek Rayfield",
-      "timestamp": "175:53",
-      "successful": false
+      "successful": false,
+      "ts": 10553
     }
   ],
   "Shawn Melanson|Anthony Salisbury|2026": [
@@ -241,21 +241,21 @@
       "label": "Triangle",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "181:42"
+      "ts": 10902
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "184:47",
-      "successful": true
+      "successful": true,
+      "ts": 11087
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "186:41",
-      "successful": true
+      "successful": true,
+      "ts": 11201
     }
   ],
   "Kyle Chambers|Jake Strauss|2026": [
@@ -263,47 +263,47 @@
       "label": "Submission",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "190:29"
+      "ts": 11429
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Kyle Chambers",
-      "timestamp": "192:03"
+      "ts": 11523
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "193:13",
-      "successful": true
+      "successful": true,
+      "ts": 11593
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "194:27",
-      "successful": true
+      "successful": true,
+      "ts": 11667
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "195:47",
-      "successful": true
+      "successful": true,
+      "ts": 11747
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "196:08",
-      "successful": true
+      "successful": true,
+      "ts": 11768
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "197:38"
+      "ts": 11858
     }
   ],
   "Joshua Squires|Derek Rayfield|2026": [
@@ -311,64 +311,64 @@
       "label": "Mount",
       "type": "control",
       "actor": "Joshua Squires",
-      "timestamp": "213:22"
+      "ts": 12802
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Joshua Squires",
-      "timestamp": "214:41",
-      "successful": false
+      "successful": false,
+      "ts": 12881
     },
     {
       "label": "Toe Hold",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "216:12"
+      "ts": 12972
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "216:54"
+      "ts": 13014
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Joshua Squires",
-      "timestamp": "217:10"
+      "ts": 13030
     },
     {
       "label": "Triangle",
       "type": "submission",
       "actor": "Joshua Squires",
-      "timestamp": "217:44"
+      "ts": 13064
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Joshua Squires",
-      "timestamp": "218:33",
-      "successful": true
+      "successful": true,
+      "ts": 13113
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Joshua Squires",
-      "timestamp": "218:57"
+      "ts": 13137
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Joshua Squires",
-      "timestamp": "219:41"
+      "ts": 13181
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Joshua Squires",
-      "timestamp": "220:25",
-      "successful": true
+      "successful": true,
+      "ts": 13225
     }
   ],
   "Andrew Kochel|Arman Brun|2026": [
@@ -376,26 +376,26 @@
       "label": "Straight Ankle",
       "type": "submission",
       "actor": "Andrew Kochel",
-      "timestamp": "220:56"
+      "ts": 13256
     },
     {
       "label": "Straight Ankle",
       "type": "submission",
       "actor": "Andrew Kochel",
-      "timestamp": "221:28"
+      "ts": 13288
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Andrew Kochel",
-      "timestamp": "222:14",
-      "successful": true
+      "successful": true,
+      "ts": 13334
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Andrew Kochel",
-      "timestamp": "222:30"
+      "ts": 13350
     }
   ],
   "Sam Schwartzapfel|Shawn Melanson|2026": [
@@ -403,14 +403,14 @@
       "label": "Pass The Guard",
       "type": "pass",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "242:52"
+      "ts": 14572
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "248:09",
-      "successful": true
+      "successful": true,
+      "ts": 14889
     }
   ],
   "Kyle Chambers|Brett Moyer|2026": [
@@ -418,41 +418,41 @@
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "250:58"
+      "ts": 15058
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Brett Moyer",
-      "timestamp": "251:54"
+      "ts": 15114
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "252:05",
-      "successful": true
+      "successful": true,
+      "ts": 15125
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "254:07",
-      "successful": true
+      "successful": true,
+      "ts": 15247
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "256:10",
-      "successful": true
+      "successful": true,
+      "ts": 15370
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kyle Chambers",
-      "timestamp": "257:00",
-      "successful": true
+      "successful": true,
+      "ts": 15420
     }
   ],
   "Elijah Carlton|Cam Hurd|2026": [
@@ -460,38 +460,38 @@
       "label": "Submission",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "270:38"
+      "ts": 16238
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Elijah Carlton",
-      "timestamp": "271:16"
+      "ts": 16276
     },
     {
       "label": "Triangle",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "271:35"
+      "ts": 16295
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Elijah Carlton",
-      "timestamp": "272:07"
+      "ts": 16327
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "277:38",
-      "successful": true
+      "successful": true,
+      "ts": 16658
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "277:42"
+      "ts": 16662
     }
   ]
 }

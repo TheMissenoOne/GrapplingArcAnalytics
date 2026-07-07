@@ -4,40 +4,40 @@
       "label": "Mount",
       "type": "control",
       "actor": "Cam Herd",
-      "timestamp": "16:23"
+      "ts": 983
     },
     {
       "label": "Toe Hold",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "16:28"
+      "ts": 988
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "18:49"
+      "ts": 1129
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "19:27",
-      "successful": true
+      "successful": true,
+      "ts": 1167
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "19:36",
-      "successful": true
+      "successful": true,
+      "ts": 1176
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "23:33",
-      "successful": true
+      "successful": true,
+      "ts": 1413
     }
   ],
   "Adam Frank|Las Vegas Kings representative|2026": [
@@ -45,54 +45,54 @@
       "label": "Mount",
       "type": "control",
       "actor": "Adam Frank",
-      "timestamp": "50:54"
+      "ts": 3054
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Adam Frank",
-      "timestamp": "53:05"
+      "ts": 3185
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Adam Frank",
-      "timestamp": "53:50",
-      "successful": true
+      "successful": true,
+      "ts": 3230
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Adam Frank",
-      "timestamp": "53:59",
-      "successful": true
+      "successful": true,
+      "ts": 3239
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Adam Frank",
-      "timestamp": "56:39",
-      "successful": true
+      "successful": true,
+      "ts": 3399
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Adam Frank",
-      "timestamp": "57:02"
+      "ts": 3422
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Adam Frank",
-      "timestamp": "58:27",
-      "successful": true
+      "successful": true,
+      "ts": 3507
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Adam Frank",
-      "timestamp": "59:18",
-      "successful": false
+      "successful": false,
+      "ts": 3558
     }
   ],
   "Cam Herd|Noah McCully|2026": [
@@ -100,22 +100,22 @@
       "label": "Submission",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "64:31",
-      "successful": false
+      "successful": false,
+      "ts": 3871
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "66:00",
-      "successful": true
+      "successful": true,
+      "ts": 3960
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "68:37",
-      "successful": true
+      "successful": true,
+      "ts": 4117
     }
   ],
   "Chewy Magana|Shawn Melanson|2026": [
@@ -123,28 +123,28 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Chewy Magana",
-      "timestamp": "93:33",
-      "successful": true
+      "successful": true,
+      "ts": 5613
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Chewy Magana",
-      "timestamp": "97:15",
-      "successful": true
+      "successful": true,
+      "ts": 5835
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Chewy Magana",
-      "timestamp": "101:35",
-      "successful": true
+      "successful": true,
+      "ts": 6095
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Chewy Magana",
-      "timestamp": "102:26"
+      "ts": 6146
     }
   ],
   "Jake Strauss|Sam Schwarzapfel|2026": [
@@ -152,41 +152,41 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "115:02",
-      "successful": true
+      "successful": true,
+      "ts": 6902
     },
     {
       "label": "North South",
       "type": "control",
       "actor": "Jake Strauss",
-      "timestamp": "118:52"
+      "ts": 7132
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "119:53"
+      "ts": 7193
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "120:41",
-      "successful": true
+      "successful": true,
+      "ts": 7241
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "120:47",
-      "successful": true
+      "successful": true,
+      "ts": 7247
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "121:29",
-      "successful": true
+      "successful": true,
+      "ts": 7289
     }
   ],
   "Travis Haven|Parker Salsbury|2026": [
@@ -194,48 +194,48 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "123:17",
-      "successful": true
+      "successful": true,
+      "ts": 7397
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "123:40",
-      "successful": true
+      "successful": true,
+      "ts": 7420
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "123:42",
-      "successful": true
+      "successful": true,
+      "ts": 7422
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "124:53"
+      "ts": 7493
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "125:17",
-      "successful": true
+      "successful": true,
+      "ts": 7517
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "126:27"
+      "ts": 7587
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "126:34",
-      "successful": true
+      "successful": true,
+      "ts": 7594
     }
   ],
   "Cam Herd|Jake Strauss|2026": [
@@ -243,28 +243,28 @@
       "label": "Armbar",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "148:15"
+      "ts": 8895
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "148:55",
-      "successful": true
+      "successful": true,
+      "ts": 8935
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "149:33",
-      "successful": true
+      "successful": true,
+      "ts": 8973
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "150:14",
-      "successful": true
+      "successful": true,
+      "ts": 9014
     }
   ],
   "Travis Haven|CJ Murdoch|2026": [
@@ -272,32 +272,32 @@
       "label": "Triangle",
       "type": "submission",
       "actor": "CJ Murdoch",
-      "timestamp": "154:58"
+      "ts": 9298
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "155:06"
+      "ts": 9306
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "159:16",
-      "successful": true
+      "successful": true,
+      "ts": 9556
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Travis Haven",
-      "timestamp": "162:43"
+      "ts": 9763
     },
     {
       "label": "North South",
       "type": "control",
       "actor": "Travis Haven",
-      "timestamp": "164:05"
+      "ts": 9845
     }
   ],
   "Jett Thompson|Kevin Beuhring|2026": [
@@ -305,28 +305,28 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "177:22",
-      "successful": true
+      "successful": true,
+      "ts": 10642
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Jett Thompson",
-      "timestamp": "178:19"
+      "ts": 10699
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "179:15",
-      "successful": true
+      "successful": true,
+      "ts": 10755
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Jett Thompson",
-      "timestamp": "181:53",
-      "successful": true
+      "successful": true,
+      "ts": 10913
     }
   ],
   "Shawn Melanson|unnamed opponent (likely subset of Phenoms vs. Kings)|2026": [
@@ -334,45 +334,45 @@
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "189:37"
+      "ts": 11377
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "189:43"
+      "ts": 11383
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "189:46"
+      "ts": 11386
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "190:22",
-      "successful": true
+      "successful": true,
+      "ts": 11422
     },
     {
       "label": "Guillotine",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "194:00"
+      "ts": 11640
     },
     {
       "label": "Triangle",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "196:39"
+      "ts": 11799
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Shawn Melanson",
-      "timestamp": "197:15",
-      "successful": true
+      "successful": true,
+      "ts": 11835
     }
   ],
   "Sam Schwarzapfel|Noah McCully|2026": [
@@ -380,27 +380,27 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Sam Schwarzapfel",
-      "timestamp": "212:31",
-      "successful": true
+      "successful": true,
+      "ts": 12751
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Sam Schwarzapfel",
-      "timestamp": "214:17",
-      "successful": true
+      "successful": true,
+      "ts": 12857
     },
     {
       "label": "Choke",
       "type": "submission",
       "actor": "Sam Schwarzapfel",
-      "timestamp": "219:11"
+      "ts": 13151
     },
     {
       "label": "Sweep",
       "type": "takedown",
       "actor": "Sam Schwarzapfel",
-      "timestamp": "222:13"
+      "ts": 13333
     }
   ],
   "Derek Rayfield|Jake Strauss|2026": [
@@ -408,14 +408,14 @@
       "label": "Submission",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "229:56"
+      "ts": 13796
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "230:35",
-      "successful": true
+      "successful": true,
+      "ts": 13835
     }
   ],
   "Kevin Beuhring|Derek Adkins|2026": [
@@ -423,22 +423,22 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "255:59",
-      "successful": true
+      "successful": true,
+      "ts": 15359
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "259:43",
-      "successful": true
+      "successful": true,
+      "ts": 15583
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Kevin Beuhring",
-      "timestamp": "261:36",
-      "successful": true
+      "successful": true,
+      "ts": 15696
     }
   ],
   "Jake Strauss|Derek Rayfield|2026": [
@@ -446,33 +446,33 @@
       "label": "Triangle",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "264:07"
+      "ts": 15847
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "265:18"
+      "ts": 15918
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "265:56"
+      "ts": 15956
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Jake Strauss",
-      "timestamp": "267:01",
-      "successful": true
+      "successful": true,
+      "ts": 16021
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Derek Rayfield",
-      "timestamp": "267:20",
-      "successful": true
+      "successful": true,
+      "ts": 16040
     }
   ],
   "Travis Haven|Kyle Chambers|2026": [
@@ -480,14 +480,14 @@
       "label": "Mount",
       "type": "control",
       "actor": "Travis Haven",
-      "timestamp": "275:59"
+      "ts": 16559
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "277:13",
-      "successful": true
+      "successful": true,
+      "ts": 16633
     }
   ],
   "Elijah Carlton|Shawn Melanson|2026": [
@@ -495,22 +495,22 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "299:59",
-      "successful": true
+      "successful": true,
+      "ts": 17999
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "300:18",
-      "successful": true
+      "successful": true,
+      "ts": 18018
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Elijah Carlton",
-      "timestamp": "300:32",
-      "successful": true
+      "successful": true,
+      "ts": 18032
     }
   ],
   "Cam Herd|Brett Moyer|2026": [
@@ -518,28 +518,28 @@
       "label": "Finish",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "324:06",
-      "successful": true
+      "successful": true,
+      "ts": 19446
     },
     {
       "label": "Finish",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "326:31",
-      "successful": true
+      "successful": true,
+      "ts": 19591
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "330:59"
+      "ts": 19859
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "331:35",
-      "successful": true
+      "successful": true,
+      "ts": 19895
     }
   ]
 }

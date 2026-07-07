@@ -1,10 +1,16 @@
 {
   "Leandro Lo|Felipe (Cesar)|2025": [
     {
+      "label": "Side Control",
+      "type": "control",
+      "actor": "Leandro Lo",
+      "ts": 3185
+    },
+    {
       "label": "Guard Recovery",
       "type": "escape",
       "actor": "Felipe",
-      "timestamp": "53:25"
+      "ts": 3205
     }
   ],
   "Leandro Lo|Dylan Danis|2025": [
@@ -12,14 +18,14 @@
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Leandro Lo",
-      "timestamp": "61:27"
+      "ts": 3687
     },
     {
-      "label": "Triangle Attempt",
+      "label": "Triangle",
       "type": "submission",
       "actor": "Leandro Lo",
-      "timestamp": "63:14",
-      "successful": false
+      "successful": false,
+      "ts": 3794
     }
   ],
   "Leandro Lo|Max Jimenez|2025": [
@@ -27,51 +33,51 @@
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Leandro Lo",
-      "timestamp": "77:49"
+      "ts": 4669
     },
     {
-      "label": "Guard Pass Attempt",
+      "label": "Guard Pass",
       "type": "pass",
       "actor": "Leandro Lo",
-      "timestamp": "79:41",
-      "successful": false
+      "successful": false,
+      "ts": 4781
     },
     {
       "label": "Guard Recovery",
       "type": "guard",
       "actor": "Max Jimenez",
-      "timestamp": "79:50"
+      "ts": 4790
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Leandro Lo",
-      "timestamp": "83:13"
+      "ts": 4993
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Leandro Lo",
-      "timestamp": "83:31"
+      "ts": 5011
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Max Jimenez",
-      "timestamp": "84:19"
+      "ts": 5059
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Leandro Lo",
-      "timestamp": "85:22"
+      "ts": 5122
     },
     {
-      "label": "Knee Bar Attempt",
+      "label": "Knee Bar",
       "type": "submission",
       "actor": "Max Jimenez",
-      "timestamp": "85:30",
-      "successful": false
+      "successful": false,
+      "ts": 5130
     }
   ],
   "Leandro Lo|Nicholas Meregali|2025": [
@@ -79,37 +85,38 @@
       "label": "Sweep",
       "type": "sweep",
       "actor": "Nicholas Meregali",
-      "timestamp": "90:16"
+      "ts": 5416
     },
     {
       "label": "Sweep",
       "type": "sweep",
       "actor": "Leandro Lo",
-      "timestamp": "90:29"
+      "ts": 5429
     },
     {
       "label": "Lasso Guard",
       "type": "guard",
       "actor": "Nicholas Meregali",
-      "timestamp": "91:36"
+      "ts": 5496
     },
     {
       "label": "Guard Pass",
       "type": "pass",
       "actor": "Leandro Lo",
-      "timestamp": "94:55"
+      "ts": 5695
     },
     {
-      "label": "Back Take Attempt",
+      "label": "Back Take",
       "type": "control",
       "actor": "Leandro Lo",
-      "timestamp": "95:03"
+      "successful": false,
+      "ts": 5703
     },
     {
       "label": "Sweep",
       "type": "sweep",
       "actor": "Leandro Lo",
-      "timestamp": "95:10"
+      "ts": 5710
     }
   ],
   "Leandro Lo|Erberth Santos|2025": [
@@ -117,33 +124,34 @@
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Leandro Lo",
-      "timestamp": "100:37"
+      "ts": 6037
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Leandro Lo",
-      "timestamp": "101:11"
+      "ts": 6071
     },
     {
-      "label": "Back Take Attempt",
+      "label": "Back Take",
       "type": "control",
       "actor": "Leandro Lo",
-      "timestamp": "102:39"
+      "successful": false,
+      "ts": 6159
     },
     {
-      "label": "Knee Bar Attempt",
+      "label": "Knee Bar",
       "type": "submission",
       "actor": "Erberth Santos",
-      "timestamp": "102:59",
-      "successful": false
+      "successful": false,
+      "ts": 6179
     },
     {
       "label": "Cross Collar Choke",
       "type": "submission",
       "actor": "Leandro Lo",
-      "timestamp": "105:41",
-      "successful": false
+      "successful": false,
+      "ts": 6341
     }
   ],
   "Leandro Lo|Alexander Trans|2025": [
@@ -151,25 +159,25 @@
       "label": "Sweep",
       "type": "sweep",
       "actor": "Alexander Trans",
-      "timestamp": "133:58"
+      "ts": 8038
     },
     {
       "label": "50/50 Guard",
       "type": "guard",
       "actor": "Alexander Trans",
-      "timestamp": "135:41"
+      "ts": 8141
     },
     {
       "label": "Guard Recovery",
       "type": "guard",
       "actor": "Leandro Lo",
-      "timestamp": "137:21"
+      "ts": 8241
     },
     {
       "label": "Guard Pass",
       "type": "pass",
       "actor": "Leandro Lo",
-      "timestamp": "138:20"
+      "ts": 8300
     }
   ],
   "Leandro Lo|Alessandro 'Feijão' Ferreira|2025": [],
@@ -178,13 +186,13 @@
       "label": "Close Guard",
       "type": "guard",
       "actor": "Leandro Lo",
-      "timestamp": "222:35"
+      "ts": 13355
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Leandro Lo",
-      "timestamp": "223:10"
+      "ts": 13390
     }
   ],
   "Leandro Lo|Evangelista|2025": [
@@ -192,49 +200,49 @@
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Leandro Lo",
-      "timestamp": "227:18"
+      "ts": 13638
     },
     {
-      "label": "Single Leg Takedown Attempt",
+      "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Leandro Lo",
-      "timestamp": "227:26",
-      "successful": false
+      "successful": false,
+      "ts": 13646
     },
     {
       "label": "Sweep",
       "type": "sweep",
       "actor": "Leandro Lo",
-      "timestamp": "227:52"
+      "ts": 13672
     },
     {
       "label": "Sweep",
       "type": "sweep",
       "actor": "Leandro Lo",
-      "timestamp": "228:16"
+      "ts": 13696
     },
     {
-      "label": "Guard Pass Attempt",
+      "label": "Guard Pass",
       "type": "pass",
       "actor": "Leandro Lo",
-      "timestamp": "232:56",
-      "successful": false
+      "successful": false,
+      "ts": 13976
     }
   ],
   "Leandro Lo|Tanner Rice|2025": [
     {
-      "label": "Single Leg Takedown Attempt",
+      "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Leandro Lo",
-      "timestamp": "263:15",
-      "successful": false
+      "successful": false,
+      "ts": 15795
     },
     {
-      "label": "Sweep Attempt",
+      "label": "Sweep",
       "type": "sweep",
       "actor": "Tanner Rice",
-      "timestamp": "267:08",
-      "successful": false
+      "successful": false,
+      "ts": 16028
     }
   ],
   "Leandro Lo|Gordon Ryan|2025": [
@@ -242,47 +250,47 @@
       "label": "Takedown",
       "type": "takedown",
       "actor": "Leandro Lo",
-      "timestamp": "353:24"
+      "ts": 21204
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Leandro Lo",
-      "timestamp": "354:52"
+      "ts": 21292
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Leandro Lo",
-      "timestamp": "355:22"
+      "ts": 21322
     },
     {
-      "label": "Sweep Attempt",
+      "label": "Sweep",
       "type": "sweep",
       "actor": "Gordon Ryan",
-      "timestamp": "355:31",
-      "successful": false
+      "successful": false,
+      "ts": 21331
     },
     {
-      "label": "Kimura Attempt",
+      "label": "Kimura",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "356:08",
-      "successful": false
+      "successful": false,
+      "ts": 21368
     },
     {
-      "label": "Guard Pass Attempt",
+      "label": "Guard Pass",
       "type": "pass",
       "actor": "Gordon Ryan",
-      "timestamp": "361:19",
-      "successful": false
+      "successful": false,
+      "ts": 21679
     },
     {
-      "label": "Sweep Attempt",
+      "label": "Sweep",
       "type": "sweep",
       "actor": "Gordon Ryan",
-      "timestamp": "361:26",
-      "successful": false
+      "successful": false,
+      "ts": 21686
     }
   ]
 }

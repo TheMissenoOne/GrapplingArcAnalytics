@@ -4,21 +4,21 @@
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Mikey Musumeci",
-      "timestamp": "2:08"
+      "ts": 128
     },
     {
-      "label": "Guard Pass Attempt",
+      "label": "Guard Pass",
       "type": "pass",
       "actor": "Kevin Carrasco",
-      "timestamp": "2:37",
-      "successful": false
+      "successful": false,
+      "ts": 157
     },
     {
       "label": "Foot Lock",
       "type": "submission",
       "actor": "Mikey Musumeci",
-      "timestamp": "5:03",
-      "successful": true
+      "successful": true,
+      "ts": 303
     }
   ],
   "Musumeci|Gabriel (UFC BJJ 1)|2025": [
@@ -26,28 +26,28 @@
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Mikey Musumeci",
-      "timestamp": "8:48"
+      "ts": 528
     },
     {
-      "label": "Leg Lock Attempt",
+      "label": "Leg Lock",
       "type": "submission",
       "actor": "Mikey Musumeci",
-      "timestamp": "9:25",
-      "successful": false
+      "successful": false,
+      "ts": 565
     },
     {
-      "label": "Foot Lock Attempt",
+      "label": "Foot Lock",
       "type": "submission",
       "actor": "Mikey Musumeci",
-      "timestamp": "10:25",
-      "successful": false
+      "successful": false,
+      "ts": 625
     },
     {
-      "label": "Knee Bar Attempt",
+      "label": "Knee Bar",
       "type": "submission",
       "actor": "Mikey Musumeci",
-      "timestamp": "12:20",
-      "successful": false
+      "successful": false,
+      "ts": 740
     }
   ],
   "Musumeci|Machado (UFC FPI 9)|2025": [
@@ -55,20 +55,21 @@
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Mikey Musumeci",
-      "timestamp": "22:52"
+      "ts": 1372
     },
     {
-      "label": "Guard Pass Attempt",
+      "label": "Guard Pass",
       "type": "pass",
       "actor": "Fellipe Machado",
-      "timestamp": "23:48",
-      "successful": false
+      "successful": false,
+      "ts": 1428
     },
     {
-      "label": "Back Take Attempt",
+      "label": "Back Take",
       "type": "control",
       "actor": "Fellipe Machado",
-      "timestamp": "23:32"
+      "successful": false,
+      "ts": 1412
     }
   ]
 }

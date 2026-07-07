@@ -4,252 +4,254 @@
       "label": "Takedown",
       "type": "takedown",
       "actor": "Tye Ruotolo",
-      "timestamp": "2:55"
+      "ts": 175
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Tye Ruotolo",
-      "timestamp": "3:20"
+      "ts": 200
     },
     {
-      "label": "Arm Triangle Attempt",
+      "label": "Arm Triangle",
       "type": "submission",
       "actor": "Tye Ruotolo",
-      "timestamp": "4:38",
-      "successful": false
+      "successful": false,
+      "ts": 278
     },
     {
-      "label": "Heel Hook Attempt",
+      "label": "Heel Hook",
       "type": "submission",
       "actor": "Johnny Tama",
-      "timestamp": "4:55",
-      "successful": false
+      "successful": false,
+      "ts": 295
     }
   ],
   "Kade Ruotolo|Cole Franson|2025": [
     {
-      "label": "Guard Pass Attempt",
+      "label": "Guard Pass",
       "type": "pass",
       "actor": "Kade Ruotolo",
-      "timestamp": "13:39",
-      "successful": false
+      "successful": false,
+      "ts": 819
     },
     {
-      "label": "Leg Lock Attempt",
+      "label": "Leg Lock",
       "type": "submission",
       "actor": "Kade Ruotolo",
-      "timestamp": "14:11",
-      "successful": false
+      "successful": false,
+      "ts": 851
     }
   ],
   "Kade Ruotolo|PJ Barch|2025": [
     {
-      "label": "D'Arce Choke Attempt",
+      "label": "D'Arce Choke",
       "type": "submission",
       "actor": "Kade Ruotolo",
-      "timestamp": "216:46",
-      "successful": false
+      "successful": false,
+      "ts": 13006
     },
     {
-      "label": "Guard Pass Attempt",
+      "label": "Guard Pass",
       "type": "pass",
       "actor": "Kade Ruotolo",
-      "timestamp": "217:27",
-      "successful": false
+      "successful": false,
+      "ts": 13047
     },
     {
       "label": "Stack Pass",
       "type": "pass",
       "actor": "Kade Ruotolo",
-      "timestamp": "218:43"
+      "ts": 13123
     }
   ],
   "Tye Ruotolo|Pedro Marinho|2025": [
     {
-      "label": "Foot Sweep Attempt",
+      "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Pedro Marinho",
-      "timestamp": "47:06",
-      "successful": false
+      "successful": false,
+      "ts": 2826
     },
     {
-      "label": "Guillotine Attempt",
+      "label": "Guillotine",
       "type": "submission",
       "actor": "Tye Ruotolo",
-      "timestamp": "47:31",
-      "successful": false
+      "successful": false,
+      "ts": 2851
     },
     {
-      "label": "Guillotine Attempt",
+      "label": "Guillotine",
       "type": "submission",
       "actor": "Tye Ruotolo",
-      "timestamp": "51:10",
-      "successful": false
+      "successful": false,
+      "ts": 3070
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Tye Ruotolo",
-      "timestamp": "51:59"
+      "ts": 3119
     }
   ],
   "Kade Ruotolo|Nicholas Meregali|2025": [
     {
-      "label": "Leg Lock Attempt",
+      "label": "Leg Lock",
       "type": "submission",
       "actor": "Kade Ruotolo",
-      "timestamp": "70:19",
-      "successful": false
+      "successful": false,
+      "ts": 4219
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Kade Ruotolo",
-      "timestamp": "70:26"
+      "ts": 4226
     },
     {
-      "label": "Back Take Attempt",
+      "label": "Back Take",
       "type": "control",
       "actor": "Kade Ruotolo",
-      "timestamp": "72:16"
+      "successful": false,
+      "ts": 4336
     }
   ],
   "Tye Ruotolo|Levi Jones-Leary|2025": [
     {
-      "label": "Arm Triangle Attempt",
+      "label": "Arm Triangle",
       "type": "submission",
       "actor": "Tye Ruotolo",
-      "timestamp": "97:18",
-      "successful": false
+      "successful": false,
+      "ts": 5838
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Tye Ruotolo",
-      "timestamp": "97:43"
+      "ts": 5863
     },
     {
-      "label": "Guard Pass Attempt",
+      "label": "Guard Pass",
       "type": "pass",
       "actor": "Tye Ruotolo",
-      "timestamp": "99:07",
-      "successful": false
+      "successful": false,
+      "ts": 5947
     },
     {
-      "label": "Heel Hook Attempt",
+      "label": "Heel Hook",
       "type": "submission",
       "actor": "Tye Ruotolo",
-      "timestamp": "99:22",
-      "successful": false
+      "successful": false,
+      "ts": 5962
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Tye Ruotolo",
-      "timestamp": "99:38",
-      "successful": true
+      "successful": true,
+      "ts": 5978
     },
     {
       "label": "Inside Heel Hook",
       "type": "submission",
       "actor": "Tye Ruotolo",
-      "timestamp": "100:01",
-      "successful": true
+      "successful": true,
+      "ts": 6001
     }
   ],
   "Kade Ruotolo|William Tackett|2025": [
     {
-      "label": "Single Leg Takedown Attempt",
+      "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Kade Ruotolo",
-      "timestamp": "101:34",
-      "successful": false
+      "successful": false,
+      "ts": 6094
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Kade Ruotolo",
-      "timestamp": "101:51"
+      "ts": 6111
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Kade Ruotolo",
-      "timestamp": "103:04"
+      "ts": 6184
     },
     {
       "label": "Reversal",
       "type": "transition",
       "actor": "William Tackett",
-      "timestamp": "103:55"
+      "ts": 6235
     },
     {
-      "label": "Buggy Choke Attempt",
+      "label": "Buggy Choke",
       "type": "submission",
       "actor": "William Tackett",
-      "timestamp": "104:03",
-      "successful": false
+      "successful": false,
+      "ts": 6243
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Kade Ruotolo",
-      "timestamp": "104:20"
+      "ts": 6260
     }
   ],
   "Kade Ruotolo|Mike Galvão|2025": [
     {
-      "label": "Sweep Attempt",
+      "label": "Sweep",
       "type": "sweep",
       "actor": "Mike Galvão",
-      "timestamp": "166:54",
-      "successful": false
+      "successful": false,
+      "ts": 10014
     },
     {
-      "label": "Back Take Attempt",
+      "label": "Back Take",
       "type": "control",
       "actor": "Kade Ruotolo",
-      "timestamp": "170:10"
+      "successful": false,
+      "ts": 10210
     },
     {
       "label": "Submission",
       "type": "submission",
       "actor": "Kade Ruotolo",
-      "timestamp": "170:37",
-      "successful": true
+      "successful": true,
+      "ts": 10237
     }
   ],
   "Tye Ruotolo|Mike Galvão|2025": [
     {
-      "label": "Guillotine Attempt",
+      "label": "Guillotine",
       "type": "submission",
       "actor": "Tye Ruotolo",
-      "timestamp": "179:17",
-      "successful": false
+      "successful": false,
+      "ts": 10757
     },
     {
-      "label": "Foot Sweep Attempt",
+      "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Tye Ruotolo",
-      "timestamp": "179:25",
-      "successful": false
+      "successful": false,
+      "ts": 10765
     },
     {
-      "label": "Foot Sweep Attempt",
+      "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Tye Ruotolo",
-      "timestamp": "182:47",
-      "successful": false
+      "successful": false,
+      "ts": 10967
     }
   ],
   "Kade Ruotolo|Cody Steele|2025": [
     {
-      "label": "Foot Sweep Attempt",
+      "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Kade Ruotolo",
-      "timestamp": "256:15",
-      "successful": false
+      "successful": false,
+      "ts": 15375
     }
   ],
   "Kade Ruotolo|P.J. Barch (Rematch)|2025": []

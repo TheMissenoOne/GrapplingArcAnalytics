@@ -4,127 +4,127 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Jack Gover",
-      "timestamp": "2:28"
+      "ts": 148
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Kane Evans",
-      "timestamp": "3:14"
+      "ts": 194
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Kane Evans",
-      "timestamp": "3:14"
+      "ts": 194
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Jack Gover",
-      "timestamp": "3:40"
+      "ts": 220
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Jack Gover",
-      "timestamp": "4:05"
+      "ts": 245
     },
     {
       "label": "Front Headlock",
       "type": "control",
       "actor": "Kane Evans",
-      "timestamp": "4:09"
+      "ts": 249
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Jack Gover",
-      "timestamp": "4:21"
+      "ts": 261
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jack Gover",
-      "timestamp": "4:21"
+      "ts": 261
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Jack Gover",
-      "timestamp": "4:26",
-      "successful": false
+      "successful": false,
+      "ts": 266
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jack Gover",
-      "timestamp": "4:43"
+      "ts": 283
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Jack Gover",
-      "timestamp": "4:51",
-      "successful": true
+      "successful": true,
+      "ts": 291
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Jack Gover",
-      "timestamp": "4:51",
-      "successful": true
+      "successful": true,
+      "ts": 291
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Jack Gover",
-      "timestamp": "5:16"
+      "ts": 316
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Jack Gover",
-      "timestamp": "5:16"
+      "ts": 316
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Kane Evans",
-      "timestamp": "5:32"
+      "ts": 332
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Jack Gover",
-      "timestamp": "5:43",
-      "successful": true
+      "successful": true,
+      "ts": 343
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Jack Gover",
-      "timestamp": "5:43",
-      "successful": true
+      "successful": true,
+      "ts": 343
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jack Gover",
-      "timestamp": "5:43",
-      "successful": true
+      "successful": true,
+      "ts": 343
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Kane Evans",
-      "timestamp": "6:01"
+      "ts": 361
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Kane Evans",
-      "timestamp": "6:01"
+      "ts": 361
     }
   ],
   "Francesca Lana|Hannah Bang Bendz|2025": [
@@ -132,208 +132,208 @@
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Francesca Lana",
-      "timestamp": "1:21"
+      "ts": 81
     },
     {
       "label": "Ankle Lock",
       "type": "submission",
       "actor": "Francesca Lana",
-      "timestamp": "3:36"
+      "ts": 216
     },
     {
       "label": "Straight Ankle Lock",
       "type": "submission",
       "actor": "Francesca Lana",
-      "timestamp": "3:36"
+      "ts": 216
     },
     {
       "label": "Spider Guard",
       "type": "guard",
       "actor": "Francesca Lana",
-      "timestamp": "3:51"
+      "ts": 231
     },
     {
       "label": "Stack Pass",
       "type": "pass",
       "actor": "Francesca Lana",
-      "timestamp": "4:08"
+      "ts": 248
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Francesca Lana",
-      "timestamp": "4:16"
+      "ts": 256
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Francesca Lana",
-      "timestamp": "4:16"
+      "ts": 256
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Hannah Bang Bendz",
-      "timestamp": "5:14",
-      "successful": false
+      "successful": false,
+      "ts": 314
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Francesca Lana",
-      "timestamp": "5:39"
+      "ts": 339
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Hannah Bang Bendz",
-      "timestamp": "6:33"
+      "ts": 393
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Hannah Bang Bendz",
-      "timestamp": "6:48"
+      "ts": 408
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Hannah Bang Bendz",
-      "timestamp": "6:48"
+      "ts": 408
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Francesca Lana",
-      "timestamp": "6:56"
+      "ts": 416
     },
     {
       "label": "Guard Pull",
       "type": "transition",
       "actor": "Hannah Bang Bendz",
-      "timestamp": "8:13"
+      "ts": 493
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Francesca Lana",
-      "timestamp": "8:28"
+      "ts": 508
     },
     {
       "label": "Knee Cut Pass",
       "type": "pass",
       "actor": "Francesca Lana",
-      "timestamp": "8:46",
-      "successful": false
+      "successful": false,
+      "ts": 526
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Hannah Bang Bendz",
-      "timestamp": "9:19"
+      "ts": 559
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Francesca Lana",
-      "timestamp": "10:07"
+      "ts": 607
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Francesca Lana",
-      "timestamp": "11:06"
+      "ts": 666
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Francesca Lana",
-      "timestamp": "11:06"
+      "ts": 666
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Francesca Lana",
-      "timestamp": "12:52"
+      "ts": 772
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Francesca Lana",
-      "timestamp": "12:57"
+      "ts": 777
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Francesca Lana",
-      "timestamp": "13:52"
+      "ts": 832
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Francesca Lana",
-      "timestamp": "14:54"
+      "ts": 894
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Francesca Lana",
-      "timestamp": "14:54"
+      "ts": 894
     },
     {
       "label": "Double Under Pass",
       "type": "pass",
       "actor": "Francesca Lana",
-      "timestamp": "15:12"
+      "ts": 912
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Francesca Lana",
-      "timestamp": "15:12"
+      "ts": 912
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Francesca Lana",
-      "timestamp": "15:12"
+      "ts": 912
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Francesca Lana",
-      "timestamp": "15:35"
+      "ts": 935
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Hannah Bang Bendz",
-      "timestamp": "16:13"
+      "ts": 973
     },
     {
       "label": "Spider Guard",
       "type": "guard",
       "actor": "Francesca Lana",
-      "timestamp": "16:40"
+      "ts": 1000
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Francesca Lana",
-      "timestamp": "16:49"
+      "ts": 1009
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Francesca Lana",
-      "timestamp": "17:41"
+      "ts": 1061
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Hannah Bang Bendz",
-      "timestamp": "17:48",
-      "successful": false
+      "successful": false,
+      "ts": 1068
     }
   ],
   "Henry Pike|CJ Smith|2025": [
@@ -341,280 +341,280 @@
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Henry Pike",
-      "timestamp": "3:00",
-      "successful": false
+      "successful": false,
+      "ts": 180
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Henry Pike",
-      "timestamp": "3:00",
-      "successful": false
+      "successful": false,
+      "ts": 180
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "CJ Smith",
-      "timestamp": "3:06"
+      "ts": 186
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Henry Pike",
-      "timestamp": "3:27"
+      "ts": 207
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "3:40"
+      "ts": 220
     },
     {
       "label": "Duck Under",
       "type": "takedown",
       "actor": "Henry Pike",
-      "timestamp": "4:03"
+      "ts": 243
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Henry Pike",
-      "timestamp": "4:03"
+      "ts": 243
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "4:18"
+      "ts": 258
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "5:42",
-      "successful": false
+      "successful": false,
+      "ts": 342
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "5:42",
-      "successful": false
+      "successful": false,
+      "ts": 342
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "5:42",
-      "successful": false
+      "successful": false,
+      "ts": 342
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "CJ Smith",
-      "timestamp": "5:49"
+      "ts": 349
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "CJ Smith",
-      "timestamp": "5:57"
+      "ts": 357
     },
     {
       "label": "Old School Sweep",
       "type": "sweep",
       "actor": "Henry Pike",
-      "timestamp": "6:10"
+      "ts": 370
     },
     {
       "label": "Tap",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "6:11",
-      "successful": true
+      "successful": true,
+      "ts": 371
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "6:25"
+      "ts": 385
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "6:38",
-      "successful": false
+      "successful": false,
+      "ts": 398
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "7:22"
+      "ts": 442
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "7:47"
+      "ts": 467
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "7:57"
+      "ts": 477
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Henry Pike",
-      "timestamp": "8:25"
+      "ts": 505
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "8:25"
+      "ts": 505
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "8:56"
+      "ts": 536
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Henry Pike",
-      "timestamp": "9:21"
+      "ts": 561
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Henry Pike",
-      "timestamp": "9:37"
+      "ts": 577
     },
     {
       "label": "Z-Guard",
       "type": "guard",
       "actor": "Henry Pike",
-      "timestamp": "9:37"
+      "ts": 577
     },
     {
       "label": "Knee Cut Pass",
       "type": "pass",
       "actor": "Henry Pike",
-      "timestamp": "9:37"
+      "ts": 577
     },
     {
       "label": "Long Step Pass",
       "type": "pass",
       "actor": "CJ Smith",
-      "timestamp": "9:49"
+      "ts": 589
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "CJ Smith",
-      "timestamp": "9:49"
+      "ts": 589
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "10:41"
+      "ts": 641
     },
     {
       "label": "Hip Bump Sweep",
       "type": "sweep",
       "actor": "Henry Pike",
-      "timestamp": "10:49"
+      "ts": 649
     },
     {
       "label": "Americana (Keylock)",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "11:11"
+      "ts": 671
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "11:19"
+      "ts": 679
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "CJ Smith",
-      "timestamp": "11:27"
+      "ts": 687
     },
     {
       "label": "Rear Naked Choke",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "11:35"
+      "ts": 695
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "11:35"
+      "ts": 695
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Henry Pike",
-      "timestamp": "11:35"
+      "ts": 695
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Henry Pike",
-      "timestamp": "11:35"
+      "ts": 695
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "CJ Smith",
-      "timestamp": "12:01",
-      "successful": false
+      "successful": false,
+      "ts": 721
     },
     {
       "label": "Old School Sweep",
       "type": "sweep",
       "actor": "Henry Pike",
-      "timestamp": "12:09"
+      "ts": 729
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Henry Pike",
-      "timestamp": "12:09"
+      "ts": 729
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Henry Pike",
-      "timestamp": "12:22",
-      "successful": false
+      "successful": false,
+      "ts": 742
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "CJ Smith",
-      "timestamp": "13:42"
+      "ts": 822
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "CJ Smith",
-      "timestamp": "13:42"
+      "ts": 822
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "CJ Smith",
-      "timestamp": "13:42"
+      "ts": 822
     }
   ],
   "Neal Klimek|Leo Lawson|2025": [
@@ -622,86 +622,86 @@
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Neal Klimek",
-      "timestamp": "0:33"
+      "ts": 33
     },
     {
       "label": "Inverted Triangle",
       "type": "submission",
       "actor": "Neal Klimek",
-      "timestamp": "0:58"
+      "ts": 58
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Neal Klimek",
-      "timestamp": "0:58"
+      "ts": 58
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Neal Klimek",
-      "timestamp": "1:01"
+      "ts": 61
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Neal Klimek",
-      "timestamp": "1:12"
+      "ts": 72
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Neal Klimek",
-      "timestamp": "1:22"
+      "ts": 82
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Neal Klimek",
-      "timestamp": "1:47"
+      "ts": 107
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Leo Lawson",
-      "timestamp": "2:17",
-      "successful": true
+      "successful": true,
+      "ts": 137
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Neal Klimek",
-      "timestamp": "4:38"
+      "ts": 278
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Neal Klimek",
-      "timestamp": "7:40"
+      "ts": 460
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Neal Klimek",
-      "timestamp": "8:23"
+      "ts": 503
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Neal Klimek",
-      "timestamp": "8:50"
+      "ts": 530
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Neal Klimek",
-      "timestamp": "9:18"
+      "ts": 558
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Neal Klimek",
-      "timestamp": "9:18"
+      "ts": 558
     }
   ],
   "Max Armstrong|Alexis Ioannou|2025": [
@@ -709,326 +709,326 @@
       "label": "Half Guard",
       "type": "guard",
       "actor": "Max Armstrong",
-      "timestamp": "2:50"
+      "ts": 170
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Max Armstrong",
-      "timestamp": "3:16"
+      "ts": 196
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Max Armstrong",
-      "timestamp": "3:22"
+      "ts": 202
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "3:57"
+      "ts": 237
     },
     {
       "label": "Saddle (Inside Sankaku)",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "3:57"
+      "ts": 237
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "4:23"
+      "ts": 263
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "4:55"
+      "ts": 295
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "5:37",
-      "successful": false
+      "successful": false,
+      "ts": 337
     },
     {
       "label": "Cartwheel Pass",
       "type": "pass",
       "actor": "Max Armstrong",
-      "timestamp": "5:50"
+      "ts": 350
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "6:09",
-      "successful": false
+      "successful": false,
+      "ts": 369
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "6:32",
-      "successful": false
+      "successful": false,
+      "ts": 392
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Max Armstrong",
-      "timestamp": "6:40",
-      "successful": false
+      "successful": false,
+      "ts": 400
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Max Armstrong",
-      "timestamp": "6:40",
-      "successful": false
+      "successful": false,
+      "ts": 400
     },
     {
       "label": "Foot Lock",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "6:49"
+      "ts": 409
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "7:08"
+      "ts": 428
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Max Armstrong",
-      "timestamp": "7:09"
+      "ts": 429
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Max Armstrong",
-      "timestamp": "7:09"
+      "ts": 429
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Max Armstrong",
-      "timestamp": "7:25"
+      "ts": 445
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Max Armstrong",
-      "timestamp": "7:25"
+      "ts": 445
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "7:25"
+      "ts": 445
     },
     {
       "label": "Cartwheel Pass",
       "type": "pass",
       "actor": "Max Armstrong",
-      "timestamp": "7:30"
+      "ts": 450
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "7:38"
+      "ts": 458
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "8:23"
+      "ts": 503
     },
     {
       "label": "Duck Under",
       "type": "takedown",
       "actor": "Max Armstrong",
-      "timestamp": "8:39"
+      "ts": 519
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Alexis Ioannou",
-      "timestamp": "8:52"
+      "ts": 532
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Alexis Ioannou",
-      "timestamp": "8:52"
+      "ts": 532
     },
     {
       "label": "Duck Under",
       "type": "takedown",
       "actor": "Max Armstrong",
-      "timestamp": "9:09"
+      "ts": 549
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "9:12"
+      "ts": 552
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "9:49"
+      "ts": 589
     },
     {
       "label": "Turtle",
       "type": "control",
       "actor": "Alexis Ioannou",
-      "timestamp": "9:58"
+      "ts": 598
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Alexis Ioannou",
-      "timestamp": "9:58"
+      "ts": 598
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Alexis Ioannou",
-      "timestamp": "9:58"
+      "ts": 598
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "10:08"
+      "ts": 608
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "10:16"
+      "ts": 616
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "10:28"
+      "ts": 628
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Max Armstrong",
-      "timestamp": "10:36"
+      "ts": 636
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "10:36"
+      "ts": 636
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "11:27"
+      "ts": 687
     },
     {
       "label": "Twister",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "11:34"
+      "ts": 694
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "11:43"
+      "ts": 703
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "11:46"
+      "ts": 706
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "12:01"
+      "ts": 721
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "12:14"
+      "ts": 734
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "13:00"
+      "ts": 780
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "13:00"
+      "ts": 780
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "13:00"
+      "ts": 780
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Max Armstrong",
-      "timestamp": "14:01"
+      "ts": 841
     },
     {
       "label": "Duck Under",
       "type": "takedown",
       "actor": "Max Armstrong",
-      "timestamp": "14:15"
+      "ts": 855
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "14:41",
-      "successful": false
+      "successful": false,
+      "ts": 881
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "14:59"
+      "ts": 899
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "16:22"
+      "ts": 982
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "16:53",
-      "successful": false
+      "successful": false,
+      "ts": 1013
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Max Armstrong",
-      "timestamp": "17:15"
+      "ts": 1035
     }
   ],
   "Robert Diserens|Chris Leyendecker|2025": [
@@ -1036,265 +1036,265 @@
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Robert Diserens",
-      "timestamp": "0:38"
+      "ts": 38
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "1:17"
+      "ts": 77
     },
     {
       "label": "Front Headlock",
       "type": "control",
       "actor": "Robert Diserens",
-      "timestamp": "2:40",
-      "successful": false
+      "successful": false,
+      "ts": 160
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Chris Leyendecker",
-      "timestamp": "3:17"
+      "ts": 197
     },
     {
       "label": "Foot Lock",
       "type": "submission",
       "actor": "Robert Diserens",
-      "timestamp": "4:14"
+      "ts": 254
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Chris Leyendecker",
-      "timestamp": "4:32"
+      "ts": 272
     },
     {
       "label": "Saddle (Inside Sankaku)",
       "type": "control",
       "actor": "Chris Leyendecker",
-      "timestamp": "4:32"
+      "ts": 272
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Robert Diserens",
-      "timestamp": "5:03"
+      "ts": 303
     },
     {
       "label": "Saddle (Inside Sankaku)",
       "type": "control",
       "actor": "Robert Diserens",
-      "timestamp": "5:03"
+      "ts": 303
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "5:19"
+      "ts": 319
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "5:19"
+      "ts": 319
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Robert Diserens",
-      "timestamp": "5:23"
+      "ts": 323
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "6:09"
+      "ts": 369
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "6:09"
+      "ts": 369
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "6:43"
+      "ts": 403
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "7:02"
+      "ts": 422
     },
     {
       "label": "Z-Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "7:02"
+      "ts": 422
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "7:02"
+      "ts": 422
     },
     {
       "label": "Single Leg X",
       "type": "guard",
       "actor": "Chris Leyendecker",
-      "timestamp": "7:22",
-      "successful": false
+      "successful": false,
+      "ts": 442
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Chris Leyendecker",
-      "timestamp": "7:22",
-      "successful": false
+      "successful": false,
+      "ts": 442
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Robert Diserens",
-      "timestamp": "7:43"
+      "ts": 463
     },
     {
       "label": "Double Under Pass",
       "type": "pass",
       "actor": "Robert Diserens",
-      "timestamp": "8:38"
+      "ts": 518
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Robert Diserens",
-      "timestamp": "8:38"
+      "ts": 518
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Robert Diserens",
-      "timestamp": "8:52"
+      "ts": 532
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Robert Diserens",
-      "timestamp": "8:58"
+      "ts": 538
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "9:13"
+      "ts": 553
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "9:13"
+      "ts": 553
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Chris Leyendecker",
-      "timestamp": "9:42"
+      "ts": 582
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Chris Leyendecker",
-      "timestamp": "9:42"
+      "ts": 582
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Chris Leyendecker",
-      "timestamp": "9:42"
+      "ts": 582
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "10:10"
+      "ts": 610
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Robert Diserens",
-      "timestamp": "11:07"
+      "ts": 667
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Robert Diserens",
-      "timestamp": "11:15"
+      "ts": 675
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Robert Diserens",
-      "timestamp": "11:15"
+      "ts": 675
     },
     {
       "label": "Calf Lock",
       "type": "submission",
       "actor": "Robert Diserens",
-      "timestamp": "11:44",
-      "successful": false
+      "successful": false,
+      "ts": 704
     },
     {
       "label": "50/50 Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "11:44",
-      "successful": false
+      "successful": false,
+      "ts": 704
     },
     {
       "label": "50/50 Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "12:10"
+      "ts": 730
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "12:32"
+      "ts": 752
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "12:32"
+      "ts": 752
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Robert Diserens",
-      "timestamp": "12:39"
+      "ts": 759
     },
     {
       "label": "Bridge (Upa Escape)",
       "type": "escape",
       "actor": "Robert Diserens",
-      "timestamp": "13:57"
+      "ts": 837
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Robert Diserens",
-      "timestamp": "18:40"
+      "ts": 1120
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Robert Diserens",
-      "timestamp": "19:19",
-      "successful": false
+      "successful": false,
+      "ts": 1159
     }
   ],
   "Franck Takoudjou|Dusty Miller|2025": [
@@ -1302,27 +1302,27 @@
       "label": "Armbar",
       "type": "submission",
       "actor": "Franck Takoudjou",
-      "timestamp": "0:00",
-      "successful": false
+      "successful": false,
+      "ts": 0
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Franck Takoudjou",
-      "timestamp": "0:46"
+      "ts": 46
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Franck Takoudjou",
-      "timestamp": "1:07",
-      "successful": true
+      "successful": true,
+      "ts": 67
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Franck Takoudjou",
-      "timestamp": "3:21"
+      "ts": 201
     }
   ],
   "Peter Shamarkou|Harry Fall|2025": [
@@ -1330,525 +1330,525 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "0:33"
+      "ts": 33
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Harry Fall",
-      "timestamp": "0:57"
+      "ts": 57
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Harry Fall",
-      "timestamp": "2:15",
-      "successful": false
+      "successful": false,
+      "ts": 135
     },
     {
       "label": "K-Guard",
       "type": "guard",
       "actor": "Harry Fall",
-      "timestamp": "2:15",
-      "successful": false
+      "successful": false,
+      "ts": 135
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Peter Shamarkou",
-      "timestamp": "2:31"
+      "ts": 151
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "2:31"
+      "ts": 151
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Peter Shamarkou",
-      "timestamp": "3:27"
+      "ts": 207
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "3:27"
+      "ts": 207
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Harry Fall",
-      "timestamp": "3:52"
+      "ts": 232
     },
     {
       "label": "Berimbolo",
       "type": "transition",
       "actor": "Harry Fall",
-      "timestamp": "3:52"
+      "ts": 232
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Harry Fall",
-      "timestamp": "4:17"
+      "ts": 257
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Peter Shamarkou",
-      "timestamp": "4:29"
+      "ts": 269
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "4:29"
+      "ts": 269
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Peter Shamarkou",
-      "timestamp": "4:33"
+      "ts": 273
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "4:33"
+      "ts": 273
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Harry Fall",
-      "timestamp": "5:09",
-      "successful": false
+      "successful": false,
+      "ts": 309
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Harry Fall",
-      "timestamp": "5:09",
-      "successful": false
+      "successful": false,
+      "ts": 309
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "5:19"
+      "ts": 319
     },
     {
       "label": "Berimbolo",
       "type": "transition",
       "actor": "Peter Shamarkou",
-      "timestamp": "5:19"
+      "ts": 319
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Peter Shamarkou",
-      "timestamp": "5:51"
+      "ts": 351
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "5:51"
+      "ts": 351
     },
     {
       "label": "Foot Lock",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "5:59"
+      "ts": 359
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "5:59"
+      "ts": 359
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Peter Shamarkou",
-      "timestamp": "6:08",
-      "successful": false
+      "successful": false,
+      "ts": 368
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "6:17"
+      "ts": 377
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "6:17"
+      "ts": 377
     },
     {
       "label": "Berimbolo",
       "type": "transition",
       "actor": "Peter Shamarkou",
-      "timestamp": "6:53"
+      "ts": 413
     },
     {
       "label": "Single Leg X",
       "type": "guard",
       "actor": "Harry Fall",
-      "timestamp": "7:02"
+      "ts": 422
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Harry Fall",
-      "timestamp": "7:02"
+      "ts": 422
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Harry Fall",
-      "timestamp": "7:02"
+      "ts": 422
     },
     {
       "label": "Lasso Guard",
       "type": "guard",
       "actor": "Peter Shamarkou",
-      "timestamp": "7:23"
+      "ts": 443
     },
     {
       "label": "Stack Pass",
       "type": "pass",
       "actor": "Peter Shamarkou",
-      "timestamp": "7:23"
+      "ts": 443
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "7:39"
+      "ts": 459
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Peter Shamarkou",
-      "timestamp": "7:39"
+      "ts": 459
     },
     {
       "label": "Leg Drag Pass",
       "type": "pass",
       "actor": "Peter Shamarkou",
-      "timestamp": "8:03"
+      "ts": 483
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "8:03"
+      "ts": 483
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "8:19"
+      "ts": 499
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "9:06",
-      "successful": true
+      "successful": true,
+      "ts": 546
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Peter Shamarkou",
-      "timestamp": "9:06",
-      "successful": true
+      "successful": true,
+      "ts": 546
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Peter Shamarkou",
-      "timestamp": "9:12"
+      "ts": 552
     },
     {
       "label": "Knee on Belly",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "9:26",
-      "successful": false
+      "successful": false,
+      "ts": 566
     },
     {
       "label": "Open Guard",
       "type": "guard",
       "actor": "Harry Fall",
-      "timestamp": "9:30"
+      "ts": 570
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "10:17",
-      "successful": false
+      "successful": false,
+      "ts": 617
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "10:27"
+      "ts": 627
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "10:59",
-      "successful": false
+      "successful": false,
+      "ts": 659
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "11:23"
+      "ts": 683
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "11:23"
+      "ts": 683
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "11:29"
+      "ts": 689
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "12:40"
+      "ts": 760
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "13:15",
-      "successful": true
+      "successful": true,
+      "ts": 795
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "13:15",
-      "successful": true
+      "successful": true,
+      "ts": 795
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "13:34",
-      "successful": false
+      "successful": false,
+      "ts": 814
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "13:47"
+      "ts": 827
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Harry Fall",
-      "timestamp": "13:53"
+      "ts": 833
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "14:00"
+      "ts": 840
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "14:34"
+      "ts": 874
     },
     {
       "label": "Bow and Arrow Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "14:42"
+      "ts": 882
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "14:59"
+      "ts": 899
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Harry Fall",
-      "timestamp": "15:22"
+      "ts": 922
     },
     {
       "label": "Stack Pass",
       "type": "pass",
       "actor": "Peter Shamarkou",
-      "timestamp": "15:36",
-      "successful": false
+      "successful": false,
+      "ts": 936
     },
     {
       "label": "Turtle",
       "type": "control",
       "actor": "Harry Fall",
-      "timestamp": "15:48",
-      "successful": false
+      "successful": false,
+      "ts": 948
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Harry Fall",
-      "timestamp": "15:48",
-      "successful": false
+      "successful": false,
+      "ts": 948
     },
     {
       "label": "Stack Pass",
       "type": "pass",
       "actor": "Peter Shamarkou",
-      "timestamp": "15:56"
+      "ts": 956
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:01"
+      "ts": 961
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:01"
+      "ts": 961
     },
     {
       "label": "Rear Naked Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:25"
+      "ts": 985
     },
     {
       "label": "Inverted Triangle",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:30"
+      "ts": 990
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:30"
+      "ts": 990
     },
     {
       "label": "North South",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:42"
+      "ts": 1002
     },
     {
       "label": "North-South Position",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:42"
+      "ts": 1002
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:42"
+      "ts": 1002
     },
     {
       "label": "Inverted Triangle",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:51",
-      "successful": false
+      "successful": false,
+      "ts": 1011
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:51",
-      "successful": false
+      "successful": false,
+      "ts": 1011
     },
     {
       "label": "Double Under Pass",
       "type": "pass",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:55"
+      "ts": 1015
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:55"
+      "ts": 1015
     },
     {
       "label": "Stack Pass",
       "type": "pass",
       "actor": "Peter Shamarkou",
-      "timestamp": "16:55"
+      "ts": 1015
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "17:10",
-      "successful": false
+      "successful": false,
+      "ts": 1030
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "17:17"
+      "ts": 1037
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Peter Shamarkou",
-      "timestamp": "17:25"
+      "ts": 1045
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Peter Shamarkou",
-      "timestamp": "18:23"
+      "ts": 1103
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "18:23"
+      "ts": 1103
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "18:32"
+      "ts": 1112
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Peter Shamarkou",
-      "timestamp": "18:44"
+      "ts": 1124
     },
     {
       "label": "Rear Naked Choke",
       "type": "submission",
       "actor": "Harry Fall",
-      "timestamp": "19:07",
-      "successful": true
+      "successful": true,
+      "ts": 1147
     }
   ],
   "Shane Price|Justin Moore|2025": [
@@ -1856,57 +1856,57 @@
       "label": "50/50 Guard",
       "type": "guard",
       "actor": "Shane Price",
-      "timestamp": "2:44"
+      "ts": 164
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Shane Price",
-      "timestamp": "3:04"
+      "ts": 184
     },
     {
       "label": "Saddle (Inside Sankaku)",
       "type": "control",
       "actor": "Shane Price",
-      "timestamp": "3:04"
+      "ts": 184
     },
     {
       "label": "50/50 Guard",
       "type": "guard",
       "actor": "Shane Price",
-      "timestamp": "3:04"
+      "ts": 184
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Shane Price",
-      "timestamp": "3:04"
+      "ts": 184
     },
     {
       "label": "50/50 Guard",
       "type": "guard",
       "actor": "Shane Price",
-      "timestamp": "3:19"
+      "ts": 199
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Shane Price",
-      "timestamp": "3:28",
-      "successful": true
+      "successful": true,
+      "ts": 208
     },
     {
       "label": "Saddle (Inside Sankaku)",
       "type": "control",
       "actor": "Shane Price",
-      "timestamp": "3:28",
-      "successful": true
+      "successful": true,
+      "ts": 208
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Shane Price",
-      "timestamp": "3:32"
+      "ts": 212
     }
   ],
   "Ash Gibson|Arya Esfandmaz|2025": [
@@ -1914,136 +1914,136 @@
       "label": "Half Guard",
       "type": "guard",
       "actor": "Ash Gibson",
-      "timestamp": "3:05"
+      "ts": 185
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Ash Gibson",
-      "timestamp": "3:05"
+      "ts": 185
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Ash Gibson",
-      "timestamp": "3:05"
+      "ts": 185
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Ash Gibson",
-      "timestamp": "3:22"
+      "ts": 202
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Ash Gibson",
-      "timestamp": "3:22"
+      "ts": 202
     },
     {
       "label": "John Wayne Sweep",
       "type": "sweep",
       "actor": "Ash Gibson",
-      "timestamp": "3:34",
-      "successful": false
+      "successful": false,
+      "ts": 214
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Ash Gibson",
-      "timestamp": "3:53"
+      "ts": 233
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Ash Gibson",
-      "timestamp": "5:09"
+      "ts": 309
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Ash Gibson",
-      "timestamp": "5:09"
+      "ts": 309
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Ash Gibson",
-      "timestamp": "5:36"
+      "ts": 336
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Ash Gibson",
-      "timestamp": "5:36"
+      "ts": 336
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Ash Gibson",
-      "timestamp": "6:01"
+      "ts": 361
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Ash Gibson",
-      "timestamp": "6:01"
+      "ts": 361
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Ash Gibson",
-      "timestamp": "6:11"
+      "ts": 371
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Ash Gibson",
-      "timestamp": "6:27"
+      "ts": 387
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Ash Gibson",
-      "timestamp": "6:29"
+      "ts": 389
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Ash Gibson",
-      "timestamp": "6:48"
+      "ts": 408
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Ash Gibson",
-      "timestamp": "7:15"
+      "ts": 435
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Ash Gibson",
-      "timestamp": "7:22",
-      "successful": false
+      "successful": false,
+      "ts": 442
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Ash Gibson",
-      "timestamp": "7:22",
-      "successful": false
+      "successful": false,
+      "ts": 442
     },
     {
       "label": "Omoplata (Shoulder Lock)",
       "type": "submission",
       "actor": "Ash Gibson",
-      "timestamp": "7:40"
+      "ts": 460
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Ash Gibson",
-      "timestamp": "9:51"
+      "ts": 591
     }
   ],
   "Baruc Martin|Phil Harris|2025": [
@@ -2051,187 +2051,187 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Baruc Martin",
-      "timestamp": "0:00"
+      "ts": 0
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Baruc Martin",
-      "timestamp": "0:53"
+      "ts": 53
     },
     {
       "label": "Old School Sweep",
       "type": "sweep",
       "actor": "Baruc Martin",
-      "timestamp": "3:04"
+      "ts": 184
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Baruc Martin",
-      "timestamp": "3:07"
+      "ts": 187
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Phil Harris",
-      "timestamp": "3:33"
+      "ts": 213
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Phil Harris",
-      "timestamp": "3:43"
+      "ts": 223
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Baruc Martin",
-      "timestamp": "3:49",
-      "successful": false
+      "successful": false,
+      "ts": 229
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Phil Harris",
-      "timestamp": "4:39"
+      "ts": 279
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Baruc Martin",
-      "timestamp": "5:37"
+      "ts": 337
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Phil Harris",
-      "timestamp": "5:41",
-      "successful": false
+      "successful": false,
+      "ts": 341
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Baruc Martin",
-      "timestamp": "5:51"
+      "ts": 351
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Phil Harris",
-      "timestamp": "5:59"
+      "ts": 359
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Baruc Martin",
-      "timestamp": "6:06"
+      "ts": 366
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Phil Harris",
-      "timestamp": "6:14"
+      "ts": 374
     },
     {
       "label": "Single Leg X",
       "type": "guard",
       "actor": "Baruc Martin",
-      "timestamp": "6:42",
-      "successful": false
+      "successful": false,
+      "ts": 402
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Baruc Martin",
-      "timestamp": "6:42",
-      "successful": false
+      "successful": false,
+      "ts": 402
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Baruc Martin",
-      "timestamp": "6:53"
+      "ts": 413
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Baruc Martin",
-      "timestamp": "6:53"
+      "ts": 413
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Baruc Martin",
-      "timestamp": "7:01"
+      "ts": 421
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Phil Harris",
-      "timestamp": "7:09",
-      "successful": false
+      "successful": false,
+      "ts": 429
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Phil Harris",
-      "timestamp": "7:18",
-      "successful": false
+      "successful": false,
+      "ts": 438
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Baruc Martin",
-      "timestamp": "7:39"
+      "ts": 459
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Baruc Martin",
-      "timestamp": "7:39"
+      "ts": 459
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Baruc Martin",
-      "timestamp": "9:06"
+      "ts": 546
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Baruc Martin",
-      "timestamp": "9:06"
+      "ts": 546
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Phil Harris",
-      "timestamp": "9:14"
+      "ts": 554
     },
     {
       "label": "Front Headlock",
       "type": "control",
       "actor": "Phil Harris",
-      "timestamp": "9:22"
+      "ts": 562
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Baruc Martin",
-      "timestamp": "9:30"
+      "ts": 570
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Phil Harris",
-      "timestamp": "9:36"
+      "ts": 576
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Phil Harris",
-      "timestamp": "9:36"
+      "ts": 576
     }
   ]
 }

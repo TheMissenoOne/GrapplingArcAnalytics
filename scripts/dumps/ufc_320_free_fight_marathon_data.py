@@ -14,7 +14,7 @@ RAW: list[dict[tuple[str, int], dict[str, Any]]] = [{('Alex Pereira', 2025): {'m
                            'events': [{'label': 'Back Control',
                                        'type': 'control',
                                        'actor': 'Alex Pereira',
-                                       'timestamp': '0:30'}]}},
+                                       'ts': 30}]}},
  {("Sean O'Malley", 2025): {'method': 'Unknown',
                             'start': '27:25',
                             'opponent': 'Merab Dvalishvili',

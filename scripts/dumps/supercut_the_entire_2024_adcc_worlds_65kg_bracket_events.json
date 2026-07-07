@@ -4,118 +4,118 @@
       "label": "Guard Pull",
       "type": "transition",
       "actor": "Gita Lowenthal",
-      "timestamp": "0:46"
+      "ts": 46
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "3:19"
+      "ts": 199
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Gita Lowenthal",
-      "timestamp": "3:28"
+      "ts": 208
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gita Lowenthal",
-      "timestamp": "3:28"
+      "ts": 208
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gita Lowenthal",
-      "timestamp": "4:08"
+      "ts": 248
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Gita Lowenthal",
-      "timestamp": "4:20"
+      "ts": 260
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Gita Lowenthal",
-      "timestamp": "5:06"
+      "ts": 306
     },
     {
       "label": "Bridge (Upa Escape)",
       "type": "escape",
       "actor": "Gita Lowenthal",
-      "timestamp": "5:22"
+      "ts": 322
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "5:22"
+      "ts": 322
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "5:31"
+      "ts": 331
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gita Lowenthal",
-      "timestamp": "5:39"
+      "ts": 339
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "6:00"
+      "ts": 360
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "6:22",
-      "successful": false
+      "successful": false,
+      "ts": 382
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "6:38"
+      "ts": 398
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "6:38"
+      "ts": 398
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Gita Lowenthal",
-      "timestamp": "6:47"
+      "ts": 407
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "7:02"
+      "ts": 422
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "7:36",
-      "successful": true
+      "successful": true,
+      "ts": 456
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Gita Lowenthal",
-      "timestamp": "7:36",
-      "successful": true
+      "successful": true,
+      "ts": 456
     }
   ],
   "Anna Karolina Vieira|Amanda Levy (Opening Round)|2024": [
@@ -123,321 +123,321 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "0:44"
+      "ts": 44
     },
     {
       "label": "Shin to Shin Guard",
       "type": "guard",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "1:01"
+      "ts": 61
     },
     {
       "label": "Loop Choke",
       "type": "submission",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "1:01"
+      "ts": 61
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "1:16"
+      "ts": 76
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "1:49"
+      "ts": 109
     },
     {
       "label": "Deep Half",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "1:49"
+      "ts": 109
     },
     {
       "label": "Deep Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "1:49"
+      "ts": 109
     },
     {
       "label": "Z-Guard",
       "type": "guard",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "1:57"
+      "ts": 117
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "2:57",
-      "successful": false
+      "successful": false,
+      "ts": 177
     },
     {
       "label": "Deep Half",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "3:05"
+      "ts": 185
     },
     {
       "label": "Deep Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "3:05"
+      "ts": 185
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "3:05"
+      "ts": 185
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "3:11"
+      "ts": 191
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "3:16"
+      "ts": 196
     },
     {
       "label": "Deep Half",
       "type": "guard",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "3:21"
+      "ts": 201
     },
     {
       "label": "Deep Half Guard",
       "type": "guard",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "3:21"
+      "ts": 201
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "3:21"
+      "ts": 201
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "3:29"
+      "ts": 209
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "3:52",
-      "successful": false
+      "successful": false,
+      "ts": 232
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "4:22",
-      "successful": false
+      "successful": false,
+      "ts": 262
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "5:40",
-      "successful": false
+      "successful": false,
+      "ts": 340
     },
     {
       "label": "Deep Half",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "5:40",
-      "successful": false
+      "successful": false,
+      "ts": 340
     },
     {
       "label": "Deep Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "5:40",
-      "successful": false
+      "successful": false,
+      "ts": 340
     },
     {
       "label": "Bridge (Upa Escape)",
       "type": "escape",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "6:46"
+      "ts": 406
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "6:46"
+      "ts": 406
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "7:08",
-      "successful": false
+      "successful": false,
+      "ts": 428
     },
     {
       "label": "Deep Half",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "7:08",
-      "successful": false
+      "successful": false,
+      "ts": 428
     },
     {
       "label": "Deep Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "7:08",
-      "successful": false
+      "successful": false,
+      "ts": 428
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "7:08",
-      "successful": false
+      "successful": false,
+      "ts": 428
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "7:08",
-      "successful": false
+      "successful": false,
+      "ts": 428
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "7:16"
+      "ts": 436
     },
     {
       "label": "Bridge (Upa Escape)",
       "type": "escape",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "7:32"
+      "ts": 452
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "7:32"
+      "ts": 452
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "8:20",
-      "successful": false
+      "successful": false,
+      "ts": 500
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "8:51"
+      "ts": 531
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "9:41"
+      "ts": 581
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "10:17",
-      "successful": false
+      "successful": false,
+      "ts": 617
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "11:51"
+      "ts": 711
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "12:09"
+      "ts": 729
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "12:09"
+      "ts": 729
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "12:09"
+      "ts": 729
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "12:53"
+      "ts": 773
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "13:01"
+      "ts": 781
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "13:27"
+      "ts": 807
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "13:45"
+      "ts": 825
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "14:29"
+      "ts": 869
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "14:29"
+      "ts": 869
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "15:15"
+      "ts": 915
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "16:04"
+      "ts": 964
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Amanda Levy (Opening Round)",
-      "timestamp": "16:26"
+      "ts": 986
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira",
-      "timestamp": "18:41",
-      "successful": false
+      "successful": false,
+      "ts": 1121
     }
   ],
   "Brianna Ste-Marie|Morgan Black (Opening Round)|2024": [
@@ -445,221 +445,221 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "2:46"
+      "ts": 166
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "2:54"
+      "ts": 174
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "3:03"
+      "ts": 183
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "3:38"
+      "ts": 218
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "5:10"
+      "ts": 310
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "5:10"
+      "ts": 310
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Morgan Black (Opening Round)",
-      "timestamp": "5:49"
+      "ts": 349
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "5:57"
+      "ts": 357
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "6:15"
+      "ts": 375
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "6:22"
+      "ts": 382
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "6:46"
+      "ts": 406
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "6:46"
+      "ts": 406
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "7:04"
+      "ts": 424
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "7:24"
+      "ts": 444
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Morgan Black (Opening Round)",
-      "timestamp": "7:59",
-      "successful": false
+      "successful": false,
+      "ts": 479
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "8:06"
+      "ts": 486
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "8:26"
+      "ts": 506
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "9:26"
+      "ts": 566
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "9:32"
+      "ts": 572
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "10:28"
+      "ts": 628
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "11:12"
+      "ts": 672
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "11:40"
+      "ts": 700
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "11:42"
+      "ts": 702
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "13:02"
+      "ts": 782
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Morgan Black (Opening Round)",
-      "timestamp": "13:05"
+      "ts": 785
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "13:25"
+      "ts": 805
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "13:25"
+      "ts": 805
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "14:46"
+      "ts": 886
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "15:11"
+      "ts": 911
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Morgan Black (Opening Round)",
-      "timestamp": "15:44",
-      "successful": false
+      "successful": false,
+      "ts": 944
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Morgan Black (Opening Round)",
-      "timestamp": "15:44",
-      "successful": false
+      "successful": false,
+      "ts": 944
     },
     {
       "label": "Closed Guard",
       "type": "guard",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "17:49"
+      "ts": 1069
     },
     {
       "label": "Closed Guard",
       "type": "guard",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "18:26"
+      "ts": 1106
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "18:26"
+      "ts": 1106
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "19:20",
-      "successful": false
+      "successful": false,
+      "ts": 1160
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "19:41"
+      "ts": 1181
     }
   ],
   "Bia Mesquita|Anna Karolina Vieira (Semifinal)|2024": [
@@ -667,168 +667,168 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Anna Karolina Vieira (Semifinal)",
-      "timestamp": "0:00"
+      "ts": 0
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Bia Mesquita",
-      "timestamp": "1:03"
+      "ts": 63
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "2:25"
+      "ts": 145
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "2:51"
+      "ts": 171
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Anna Karolina Vieira (Semifinal)",
-      "timestamp": "4:15"
+      "ts": 255
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Bia Mesquita",
-      "timestamp": "5:15"
+      "ts": 315
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "6:22"
+      "ts": 382
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "8:45",
-      "successful": false
+      "successful": false,
+      "ts": 525
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Bia Mesquita",
-      "timestamp": "9:38"
+      "ts": 578
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Bia Mesquita",
-      "timestamp": "9:54"
+      "ts": 594
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "11:03"
+      "ts": 663
     },
     {
       "label": "Sweep",
       "type": "sweep",
       "actor": "Bia Mesquita",
-      "timestamp": "11:27"
+      "ts": 687
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "11:27"
+      "ts": 687
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "12:01"
+      "ts": 721
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "12:01"
+      "ts": 721
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Bia Mesquita",
-      "timestamp": "12:27"
+      "ts": 747
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "12:27"
+      "ts": 747
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Anna Karolina Vieira (Semifinal)",
-      "timestamp": "12:46"
+      "ts": 766
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Anna Karolina Vieira (Semifinal)",
-      "timestamp": "13:46"
+      "ts": 826
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "13:58",
-      "successful": false
+      "successful": false,
+      "ts": 838
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Anna Karolina Vieira (Semifinal)",
-      "timestamp": "14:30",
-      "successful": false
+      "successful": false,
+      "ts": 870
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "15:28"
+      "ts": 928
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "15:57",
-      "successful": false
+      "successful": false,
+      "ts": 957
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Anna Karolina Vieira (Semifinal)",
-      "timestamp": "16:47"
+      "ts": 1007
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "17:33"
+      "ts": 1053
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "21:10"
+      "ts": 1270
     },
     {
       "label": "Lasso Guard",
       "type": "guard",
       "actor": "Bia Mesquita",
-      "timestamp": "22:46",
-      "successful": false
+      "successful": false,
+      "ts": 1366
     }
   ],
   "Brianna Ste-Marie|Helena Crevar (Semifinal)|2024": [
@@ -836,113 +836,113 @@
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "0:05"
+      "ts": 5
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "0:05"
+      "ts": 5
     },
     {
       "label": "Knee Cut Pass",
       "type": "pass",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "0:30"
+      "ts": 30
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "0:51"
+      "ts": 51
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "3:40"
+      "ts": 220
     },
     {
       "label": "Snapdown",
       "type": "takedown",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "3:40"
+      "ts": 220
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar (Semifinal)",
-      "timestamp": "4:02"
+      "ts": 242
     },
     {
       "label": "K-Guard",
       "type": "guard",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "5:58"
+      "ts": 358
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "6:35"
+      "ts": 395
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "7:14"
+      "ts": 434
     },
     {
       "label": "Berimbolo",
       "type": "transition",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "7:14"
+      "ts": 434
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "8:14",
-      "successful": false
+      "successful": false,
+      "ts": 494
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "8:14",
-      "successful": false
+      "successful": false,
+      "ts": 494
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Helena Crevar (Semifinal)",
-      "timestamp": "8:39",
-      "successful": false
+      "successful": false,
+      "ts": 519
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar (Semifinal)",
-      "timestamp": "8:39",
-      "successful": false
+      "successful": false,
+      "ts": 519
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Helena Crevar (Semifinal)",
-      "timestamp": "9:08"
+      "ts": 548
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Helena Crevar (Semifinal)",
-      "timestamp": "9:08"
+      "ts": 548
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie",
-      "timestamp": "10:05"
+      "ts": 605
     }
   ],
   "Bia Mesquita|Brianna Ste-Marie (Bronze Medal Match)|2024": [
@@ -950,264 +950,264 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "0:00"
+      "ts": 0
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Brianna Ste-Marie (Bronze Medal Match)",
-      "timestamp": "0:17"
+      "ts": 17
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Bia Mesquita",
-      "timestamp": "1:45"
+      "ts": 105
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "4:18",
-      "successful": false
+      "successful": false,
+      "ts": 258
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "4:26"
+      "ts": 266
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "5:33"
+      "ts": 333
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "5:33"
+      "ts": 333
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "6:07"
+      "ts": 367
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "7:08"
+      "ts": 428
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "7:08"
+      "ts": 428
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "7:27"
+      "ts": 447
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "7:27"
+      "ts": 447
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "8:30",
-      "successful": false
+      "successful": false,
+      "ts": 510
     },
     {
       "label": "Snapdown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "8:56"
+      "ts": 536
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Bia Mesquita",
-      "timestamp": "9:20"
+      "ts": 560
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "9:29"
+      "ts": 569
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "9:29"
+      "ts": 569
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "9:51"
+      "ts": 591
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "10:06"
+      "ts": 606
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "10:06"
+      "ts": 606
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "10:13"
+      "ts": 613
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Brianna Ste-Marie (Bronze Medal Match)",
-      "timestamp": "10:22"
+      "ts": 622
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "10:33"
+      "ts": 633
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Bia Mesquita",
-      "timestamp": "10:40",
-      "successful": false
+      "successful": false,
+      "ts": 640
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "10:48",
-      "successful": false
+      "successful": false,
+      "ts": 648
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Bia Mesquita",
-      "timestamp": "10:48",
-      "successful": false
+      "successful": false,
+      "ts": 648
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "11:24"
+      "ts": 684
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Bia Mesquita",
-      "timestamp": "11:36"
+      "ts": 696
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Bia Mesquita",
-      "timestamp": "11:36"
+      "ts": 696
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "12:00"
+      "ts": 720
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "12:19"
+      "ts": 739
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Bia Mesquita",
-      "timestamp": "12:47"
+      "ts": 767
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "13:21"
+      "ts": 801
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "13:30"
+      "ts": 810
     },
     {
       "label": "John Wayne Sweep",
       "type": "sweep",
       "actor": "Bia Mesquita",
-      "timestamp": "14:05"
+      "ts": 845
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "14:22"
+      "ts": 862
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "14:29"
+      "ts": 869
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "14:53"
+      "ts": 893
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "14:53"
+      "ts": 893
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Bia Mesquita",
-      "timestamp": "14:59"
+      "ts": 899
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Brianna Ste-Marie (Bronze Medal Match)",
-      "timestamp": "15:20"
+      "ts": 920
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "15:43"
+      "ts": 943
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Bia Mesquita",
-      "timestamp": "16:12"
+      "ts": 972
     }
   ],
   "Helena Crevar|Anna Karolina Vieira (Final)|2024": [
@@ -1215,348 +1215,348 @@
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "0:47"
+      "ts": 47
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "1:43"
+      "ts": 103
     },
     {
       "label": "Double Under Pass",
       "type": "pass",
       "actor": "Helena Crevar",
-      "timestamp": "1:57"
+      "ts": 117
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "1:57"
+      "ts": 117
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "2:10"
+      "ts": 130
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "3:11"
+      "ts": 191
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "3:16",
-      "successful": false
+      "successful": false,
+      "ts": 196
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "3:16",
-      "successful": false
+      "successful": false,
+      "ts": 196
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Helena Crevar",
-      "timestamp": "3:37"
+      "ts": 217
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "3:37"
+      "ts": 217
     },
     {
       "label": "Shin to Shin Guard",
       "type": "guard",
       "actor": "Helena Crevar",
-      "timestamp": "4:48"
+      "ts": 288
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "4:54",
-      "successful": false
+      "successful": false,
+      "ts": 294
     },
     {
       "label": "Smash Pass",
       "type": "pass",
       "actor": "Anna Karolina Vieira (Final)",
-      "timestamp": "5:11"
+      "ts": 311
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Anna Karolina Vieira (Final)",
-      "timestamp": "5:11"
+      "ts": 311
     },
     {
       "label": "Smash Pass",
       "type": "pass",
       "actor": "Helena Crevar",
-      "timestamp": "5:31",
-      "successful": false
+      "successful": false,
+      "ts": 331
     },
     {
       "label": "Double Under Pass",
       "type": "pass",
       "actor": "Helena Crevar",
-      "timestamp": "11:29"
+      "ts": 689
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "11:29"
+      "ts": 689
     },
     {
       "label": "Straight Ankle Lock",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "12:19"
+      "ts": 739
     },
     {
       "label": "50/50 Guard",
       "type": "guard",
       "actor": "Helena Crevar",
-      "timestamp": "12:39"
+      "ts": 759
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "14:24"
+      "ts": 864
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "14:32"
+      "ts": 872
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "16:47"
+      "ts": 1007
     },
     {
       "label": "Single Leg",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "17:01"
+      "ts": 1021
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "17:01"
+      "ts": 1021
     },
     {
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Helena Crevar",
-      "timestamp": "17:08"
+      "ts": 1028
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "17:39",
-      "successful": false
+      "successful": false,
+      "ts": 1059
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "17:47"
+      "ts": 1067
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "18:12"
+      "ts": 1092
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "18:43",
-      "successful": true
+      "successful": true,
+      "ts": 1123
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "18:51"
+      "ts": 1131
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "19:06"
+      "ts": 1146
     },
     {
       "label": "Body Lock",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "19:24"
+      "ts": 1164
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "20:10"
+      "ts": 1210
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "20:38"
+      "ts": 1238
     },
     {
       "label": "Folding Pass",
       "type": "pass",
       "actor": "Helena Crevar",
-      "timestamp": "20:45"
+      "ts": 1245
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "20:53"
+      "ts": 1253
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "21:04",
-      "successful": false
+      "successful": false,
+      "ts": 1264
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "21:04",
-      "successful": false
+      "successful": false,
+      "ts": 1264
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "21:17",
-      "successful": true
+      "successful": true,
+      "ts": 1277
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "22:07"
+      "ts": 1327
     },
     {
       "label": "Smash Pass",
       "type": "pass",
       "actor": "Anna Karolina Vieira (Final)",
-      "timestamp": "22:43",
-      "successful": false
+      "successful": false,
+      "ts": 1363
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Anna Karolina Vieira (Final)",
-      "timestamp": "22:50"
+      "ts": 1370
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "23:27"
+      "ts": 1407
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "23:33"
+      "ts": 1413
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "23:47"
+      "ts": 1427
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "24:16"
+      "ts": 1456
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "24:35"
+      "ts": 1475
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "24:35"
+      "ts": 1475
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "25:02"
+      "ts": 1502
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "27:03"
+      "ts": 1623
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Helena Crevar",
-      "timestamp": "27:36"
+      "ts": 1656
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "27:50"
+      "ts": 1670
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "29:36"
+      "ts": 1776
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Helena Crevar",
-      "timestamp": "31:19",
-      "successful": false
+      "successful": false,
+      "ts": 1879
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Helena Crevar",
-      "timestamp": "31:28"
+      "ts": 1888
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Helena Crevar",
-      "timestamp": "31:40"
+      "ts": 1900
     }
   ]
 }

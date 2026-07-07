@@ -5,226 +5,226 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "1:04"
+      "ts": 64
     },
     {
       "label": "Butterfly Sweep",
       "type": "sweep",
       "actor": "Casey Hellenberg",
-      "timestamp": "2:19"
+      "ts": 139
     },
     {
       "label": "Hip Bump Sweep",
       "type": "sweep",
       "actor": "Casey Hellenberg",
-      "timestamp": "2:19"
+      "ts": 139
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "2:19"
+      "ts": 139
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "2:27"
+      "ts": 147
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Casey Hellenberg",
-      "timestamp": "2:35",
-      "successful": false
+      "successful": false,
+      "ts": 155
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Casey Hellenberg",
-      "timestamp": "4:40"
+      "ts": 280
     },
     {
       "label": "Foot Sweep",
       "type": "takedown",
       "actor": "Casey Hellenberg",
-      "timestamp": "4:48"
+      "ts": 288
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:55"
+      "ts": 355
     },
     {
       "label": "Americana (Keylock)",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:31"
+      "ts": 391
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "8:13"
+      "ts": 493
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "8:54"
+      "ts": 534
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "9:32"
+      "ts": 572
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "9:32"
+      "ts": 572
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "10:55"
+      "ts": 655
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "11:03"
+      "ts": 663
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "11:11"
+      "ts": 671
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "12:50"
+      "ts": 770
     },
     {
       "label": "Rubber Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "13:14"
+      "ts": 794
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Casey Hellenberg",
-      "timestamp": "13:30"
+      "ts": 810
     },
     {
       "label": "Closed Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "13:47"
+      "ts": 827
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "14:29"
+      "ts": 869
     },
     {
       "label": "Closed Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "14:38"
+      "ts": 878
     },
     {
       "label": "Closed Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "15:01"
+      "ts": 901
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "15:01"
+      "ts": 901
     },
     {
       "label": "Closed Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "16:24"
+      "ts": 984
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "16:40"
+      "ts": 1000
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "16:40"
+      "ts": 1000
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "16:47"
+      "ts": 1007
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "16:47"
+      "ts": 1007
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "17:10"
+      "ts": 1030
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "17:17"
+      "ts": 1037
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "17:17"
+      "ts": 1037
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "17:27",
-      "successful": false
+      "successful": false,
+      "ts": 1047
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "17:27",
-      "successful": false
+      "successful": false,
+      "ts": 1047
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "17:44"
+      "ts": 1064
     },
     {
       "label": "Guillotine Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "18:32"
+      "ts": 1112
     }
   ],
   "Andrew Kimler|Rustam Chsiev|2025": [
@@ -232,168 +232,168 @@
       "label": "Snapdown",
       "type": "takedown",
       "actor": "Andrew Kimler",
-      "timestamp": "1:29"
+      "ts": 89
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "2:02",
-      "successful": false
+      "successful": false,
+      "ts": 122
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "2:02",
-      "successful": false
+      "successful": false,
+      "ts": 122
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "2:33",
-      "successful": false
+      "successful": false,
+      "ts": 153
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "3:46",
-      "successful": false
+      "successful": false,
+      "ts": 226
     },
     {
       "label": "Ankle Lock",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "4:50"
+      "ts": 290
     },
     {
       "label": "Straight Ankle Lock",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "4:50"
+      "ts": 290
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "5:19"
+      "ts": 319
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Andrew Kimler",
-      "timestamp": "5:46"
+      "ts": 346
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "5:56",
-      "successful": false
+      "successful": false,
+      "ts": 356
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "6:39"
+      "ts": 399
     },
     {
       "label": "Ankle Lock",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "7:18"
+      "ts": 438
     },
     {
       "label": "Straight Ankle Lock",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "7:18"
+      "ts": 438
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Andrew Kimler",
-      "timestamp": "8:18"
+      "ts": 498
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Andrew Kimler",
-      "timestamp": "8:54",
-      "successful": false
+      "successful": false,
+      "ts": 534
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Andrew Kimler",
-      "timestamp": "10:09",
-      "successful": false
+      "successful": false,
+      "ts": 609
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "10:09",
-      "successful": false
+      "successful": false,
+      "ts": 609
     },
     {
       "label": "Twister",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "10:09",
-      "successful": false
+      "successful": false,
+      "ts": 609
     },
     {
       "label": "Spider Guard",
       "type": "guard",
       "actor": "Andrew Kimler",
-      "timestamp": "11:10"
+      "ts": 670
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "11:10"
+      "ts": 670
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "11:43"
+      "ts": 703
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "12:29"
+      "ts": 749
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "12:29"
+      "ts": 749
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "12:36"
+      "ts": 756
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Rustam Chsiev",
-      "timestamp": "13:10",
-      "successful": false
+      "successful": false,
+      "ts": 790
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Rustam Chsiev",
-      "timestamp": "13:10",
-      "successful": false
+      "successful": false,
+      "ts": 790
     }
   ],
   "Aaron 'Tex' Johnson|Matt Kershwin|2025": [
@@ -401,174 +401,174 @@
       "label": "Closed Guard",
       "type": "guard",
       "actor": "Matt Kershwin",
-      "timestamp": "1:50"
+      "ts": 110
     },
     {
       "label": "Wrist Lock",
       "type": "submission",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "1:58"
+      "ts": 118
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "2:25",
-      "successful": true
+      "successful": true,
+      "ts": 145
     },
     {
       "label": "Weave Pass",
       "type": "pass",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "3:44"
+      "ts": 224
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "3:52"
+      "ts": 232
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "3:52"
+      "ts": 232
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "3:52"
+      "ts": 232
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "4:28"
+      "ts": 268
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "4:42"
+      "ts": 282
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "4:56",
-      "successful": false
+      "successful": false,
+      "ts": 296
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Matt Kershwin",
-      "timestamp": "5:27",
-      "successful": false
+      "successful": false,
+      "ts": 327
     },
     {
       "label": "Butterfly Sweep",
       "type": "sweep",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "5:59"
+      "ts": 359
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "5:59"
+      "ts": 359
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "6:05"
+      "ts": 365
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "6:43",
-      "successful": false
+      "successful": false,
+      "ts": 403
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "6:51"
+      "ts": 411
     },
     {
       "label": "Weave Pass",
       "type": "pass",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "7:15"
+      "ts": 435
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "7:32"
+      "ts": 452
     },
     {
       "label": "Guard Pass",
       "type": "pass",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "9:43",
-      "successful": false
+      "successful": false,
+      "ts": 583
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "9:50"
+      "ts": 590
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "9:59"
+      "ts": 599
     },
     {
       "label": "Worm Guard",
       "type": "guard",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "10:06"
+      "ts": 606
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "10:32"
+      "ts": 632
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "11:04"
+      "ts": 664
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "11:32"
+      "ts": 692
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "12:23"
+      "ts": 743
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "12:23"
+      "ts": 743
     },
     {
       "label": "Worm Guard",
       "type": "guard",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "12:23"
+      "ts": 743
     }
   ],
   "Marcel Gonzalez|Travis Moore|2025": [
@@ -576,62 +576,62 @@
       "label": "Calf Slicer",
       "type": "submission",
       "actor": "Marcel Gonzalez",
-      "timestamp": "3:44"
+      "ts": 224
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Travis Moore",
-      "timestamp": "5:49",
-      "successful": false
+      "successful": false,
+      "ts": 349
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Marcel Gonzalez",
-      "timestamp": "6:05"
+      "ts": 365
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Marcel Gonzalez",
-      "timestamp": "6:43"
+      "ts": 403
     },
     {
       "label": "Rear Naked Choke",
       "type": "submission",
       "actor": "Marcel Gonzalez",
-      "timestamp": "7:16"
+      "ts": 436
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Marcel Gonzalez",
-      "timestamp": "7:27"
+      "ts": 447
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Marcel Gonzalez",
-      "timestamp": "7:35"
+      "ts": 455
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Marcel Gonzalez",
-      "timestamp": "7:35"
+      "ts": 455
     },
     {
       "label": "Rear Naked Choke",
       "type": "submission",
       "actor": "Marcel Gonzalez",
-      "timestamp": "7:35"
+      "ts": 455
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Marcel Gonzalez",
-      "timestamp": "7:45"
+      "ts": 465
     }
   ],
   "Craig Jones|Andy Burke|2025": [
@@ -639,26 +639,26 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Craig Jones",
-      "timestamp": "0:53"
+      "ts": 53
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Craig Jones",
-      "timestamp": "1:52"
+      "ts": 112
     },
     {
       "label": "Snapdown",
       "type": "takedown",
       "actor": "Craig Jones",
-      "timestamp": "2:09",
-      "successful": true
+      "successful": true,
+      "ts": 129
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Craig Jones",
-      "timestamp": "3:38"
+      "ts": 218
     }
   ],
   "Gordon Ryan|Patrick Donabedian|2025": [
@@ -666,63 +666,63 @@
       "label": "Kimura",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "1:18",
-      "successful": true
+      "successful": true,
+      "ts": 78
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "1:18",
-      "successful": true
+      "successful": true,
+      "ts": 78
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "1:28"
+      "ts": 88
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "2:03"
+      "ts": 123
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "2:18"
+      "ts": 138
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "2:18"
+      "ts": 138
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "2:33"
+      "ts": 153
     },
     {
       "label": "Spider Guard",
       "type": "guard",
       "actor": "Gordon Ryan",
-      "timestamp": "2:33"
+      "ts": 153
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "2:42"
+      "ts": 162
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "3:12"
+      "ts": 192
     }
   ],
   "Casey Hellenberg|Jesse Ray Childery|2025": [
@@ -730,179 +730,179 @@
       "label": "Half Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "0:40"
+      "ts": 40
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "1:24"
+      "ts": 84
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jesse Ray Childery",
-      "timestamp": "2:26"
+      "ts": 146
     },
     {
       "label": "Over-Under Pass",
       "type": "pass",
       "actor": "Casey Hellenberg",
-      "timestamp": "3:38"
+      "ts": 218
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jesse Ray Childery",
-      "timestamp": "4:13"
+      "ts": 253
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Casey Hellenberg",
-      "timestamp": "4:22",
-      "successful": false
+      "successful": false,
+      "ts": 262
     },
     {
       "label": "Snapdown",
       "type": "takedown",
       "actor": "Jesse Ray Childery",
-      "timestamp": "4:54"
+      "ts": 294
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jesse Ray Childery",
-      "timestamp": "4:54"
+      "ts": 294
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:11"
+      "ts": 311
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:11"
+      "ts": 311
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:11"
+      "ts": 311
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:19",
-      "successful": false
+      "successful": false,
+      "ts": 319
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:19",
-      "successful": false
+      "successful": false,
+      "ts": 319
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:19",
-      "successful": false
+      "successful": false,
+      "ts": 319
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:35"
+      "ts": 335
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "5:50"
+      "ts": 350
     },
     {
       "label": "Bow and Arrow Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:15"
+      "ts": 375
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:15"
+      "ts": 375
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:23"
+      "ts": 383
     },
     {
       "label": "Ezekiel Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:23"
+      "ts": 383
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:31"
+      "ts": 391
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:39"
+      "ts": 399
     },
     {
       "label": "Spider Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:46"
+      "ts": 406
     },
     {
       "label": "Stack Pass",
       "type": "pass",
       "actor": "Casey Hellenberg",
-      "timestamp": "7:01"
+      "ts": 421
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "7:22"
+      "ts": 442
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "8:01"
+      "ts": 481
     },
     {
       "label": "Spider Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "8:01"
+      "ts": 481
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "8:17"
+      "ts": 497
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "8:53"
+      "ts": 533
     }
   ],
   "Andrew Kimler|Aaron 'Tex' Johnson|2025": [
@@ -910,44 +910,44 @@
       "label": "Ankle Lock",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "0:53"
+      "ts": 53
     },
     {
       "label": "Straight Ankle Lock",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "0:53"
+      "ts": 53
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "2:37",
-      "successful": false
+      "successful": false,
+      "ts": 157
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Aaron 'Tex' Johnson",
-      "timestamp": "3:15"
+      "ts": 195
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Andrew Kimler",
-      "timestamp": "3:46"
+      "ts": 226
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "3:46"
+      "ts": 226
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Andrew Kimler",
-      "timestamp": "4:25"
+      "ts": 265
     }
   ],
   "Craig Jones|Marcel Gonzalez|2025": [
@@ -955,31 +955,31 @@
       "label": "Half Guard",
       "type": "guard",
       "actor": "Craig Jones",
-      "timestamp": "0:38"
+      "ts": 38
     },
     {
       "label": "Z-Guard",
       "type": "guard",
       "actor": "Craig Jones",
-      "timestamp": "0:38"
+      "ts": 38
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Craig Jones",
-      "timestamp": "1:27"
+      "ts": 87
     },
     {
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Craig Jones",
-      "timestamp": "1:49"
+      "ts": 109
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Craig Jones",
-      "timestamp": "3:32"
+      "ts": 212
     }
   ],
   "Gordon Ryan|Casey Hellenberg|2025": [
@@ -987,270 +987,270 @@
       "label": "Arm Drag",
       "type": "takedown",
       "actor": "Casey Hellenberg",
-      "timestamp": "0:40"
+      "ts": 40
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "1:02"
+      "ts": 62
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "1:11",
-      "successful": false
+      "successful": false,
+      "ts": 71
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "1:17"
+      "ts": 77
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "1:29",
-      "successful": false
+      "successful": false,
+      "ts": 89
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "1:29",
-      "successful": false
+      "successful": false,
+      "ts": 89
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "2:00"
+      "ts": 120
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "2:09"
+      "ts": 129
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "2:09"
+      "ts": 129
     },
     {
       "label": "Rear Naked Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "2:33"
+      "ts": 153
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "2:33"
+      "ts": 153
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "3:25"
+      "ts": 205
     },
     {
       "label": "Inverted Triangle",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "3:32",
-      "successful": false
+      "successful": false,
+      "ts": 212
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "3:32",
-      "successful": false
+      "successful": false,
+      "ts": 212
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "3:39"
+      "ts": 219
     },
     {
       "label": "Spider Guard",
       "type": "guard",
       "actor": "Gordon Ryan",
-      "timestamp": "3:39"
+      "ts": 219
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "3:39"
+      "ts": 219
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "3:57"
+      "ts": 237
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "4:15"
+      "ts": 255
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "4:15"
+      "ts": 255
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Gordon Ryan",
-      "timestamp": "4:39"
+      "ts": 279
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Gordon Ryan",
-      "timestamp": "5:31"
+      "ts": 331
     },
     {
       "label": "Knee Bar",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "6:11"
+      "ts": 371
     },
     {
       "label": "Turtle Position",
       "type": "escape",
       "actor": "Gordon Ryan",
-      "timestamp": "6:20"
+      "ts": 380
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "6:20"
+      "ts": 380
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:43",
-      "successful": false
+      "successful": false,
+      "ts": 403
     },
     {
       "label": "Butterfly Guard",
       "type": "guard",
       "actor": "Casey Hellenberg",
-      "timestamp": "6:51"
+      "ts": 411
     },
     {
       "label": "Knee Cut Pass",
       "type": "pass",
       "actor": "Gordon Ryan",
-      "timestamp": "6:58"
+      "ts": 418
     },
     {
       "label": "Crucifix",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "7:07"
+      "ts": 427
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Casey Hellenberg",
-      "timestamp": "9:44",
-      "successful": false
+      "successful": false,
+      "ts": 584
     },
     {
       "label": "Spider Guard",
       "type": "guard",
       "actor": "Gordon Ryan",
-      "timestamp": "10:51"
+      "ts": 651
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "10:51"
+      "ts": 651
     },
     {
       "label": "Arm Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "11:13",
-      "successful": false
+      "successful": false,
+      "ts": 673
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "11:13",
-      "successful": false
+      "successful": false,
+      "ts": 673
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "11:39"
+      "ts": 699
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "11:39"
+      "ts": 699
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "11:59"
+      "ts": 719
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "11:59"
+      "ts": 719
     },
     {
       "label": "Ankle Lock",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "12:06",
-      "successful": false
+      "successful": false,
+      "ts": 726
     },
     {
       "label": "Straight Ankle Lock",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "12:06",
-      "successful": false
+      "successful": false,
+      "ts": 726
     },
     {
       "label": "Rear Naked Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "12:36"
+      "ts": 756
     },
     {
       "label": "Rear Naked Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "13:19"
+      "ts": 799
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "14:46"
+      "ts": 886
     }
   ],
   "Craig Jones|Aaron 'Tex' Johnson|2025": [
@@ -1258,50 +1258,50 @@
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Craig Jones",
-      "timestamp": "0:37"
+      "ts": 37
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Craig Jones",
-      "timestamp": "0:54"
+      "ts": 54
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Craig Jones",
-      "timestamp": "4:27",
-      "successful": false
+      "successful": false,
+      "ts": 267
     },
     {
       "label": "Armbar",
       "type": "submission",
       "actor": "Craig Jones",
-      "timestamp": "4:51"
+      "ts": 291
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Craig Jones",
-      "timestamp": "4:59"
+      "ts": 299
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Craig Jones",
-      "timestamp": "5:15"
+      "ts": 315
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Craig Jones",
-      "timestamp": "5:40"
+      "ts": 340
     },
     {
       "label": "Heel Hook",
       "type": "submission",
       "actor": "Craig Jones",
-      "timestamp": "5:54"
+      "ts": 354
     }
   ],
   "Gordon Ryan|Craig Jones|2025": [
@@ -1309,86 +1309,86 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Craig Jones",
-      "timestamp": "0:24"
+      "ts": 24
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "1:36"
+      "ts": 96
     },
     {
       "label": "Body Triangle",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "2:50"
+      "ts": 170
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "2:50"
+      "ts": 170
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "3:15"
+      "ts": 195
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "3:15"
+      "ts": 195
     },
     {
       "label": "Triangle Choke",
       "type": "submission",
       "actor": "Gordon Ryan",
-      "timestamp": "3:24",
-      "successful": false
+      "successful": false,
+      "ts": 204
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Gordon Ryan",
-      "timestamp": "5:29"
+      "ts": 329
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Gordon Ryan",
-      "timestamp": "5:46"
+      "ts": 346
     },
     {
       "label": "Z-Guard",
       "type": "guard",
       "actor": "Gordon Ryan",
-      "timestamp": "8:24"
+      "ts": 504
     },
     {
       "label": "Kimura",
       "type": "submission",
       "actor": "Craig Jones",
-      "timestamp": "9:27"
+      "ts": 567
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Craig Jones",
-      "timestamp": "9:50"
+      "ts": 590
     },
     {
       "label": "Z-Guard",
       "type": "guard",
       "actor": "Craig Jones",
-      "timestamp": "9:50"
+      "ts": 590
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Craig Jones",
-      "timestamp": "9:50"
+      "ts": 590
     }
   ]
 }

@@ -74,6 +74,20 @@ _MIN_GRAPPLING = 4
 # as "DECISION", so KO must be read from the raw method string, not win_type.
 _KO_RE = re.compile(r"\b(ko|tko)\b", re.IGNORECASE)
 
+# Labels whose wording mirrors narrator speculation ("hunting for the armbar") 
+# rather than a real action — drop these at import time (defense-in-depth for
+# any entry path that let them through).
+_SPECULATION_RE = re.compile(
+    r"\b(trying (to|for)|hunting (for|the)|looking (for|to)|"
+    r"hoping (to|for)|(could|cannot|can't) (get|find|lock|finish)|"
+    r"searching (for|to)|wants (to|the)|needs (to|the)|if (he|she|they) (can|wants|gets)|"
+    r"just (showing|looking|setting|working))\b",
+    re.IGNORECASE,
+)
+
+# Labels ending with " Attempt" / " attempt" — strip suffix and mark unsuccessful.
+_ATTEMPT_RE = re.compile(r"\s+[Aa]ttempt$")
+
 
 def _parse_timestamp(ts: Any) -> int | None:
     """Parse H:MM:SS or M:SS timestamp string to seconds, or return None."""
@@ -189,9 +203,16 @@ def _clean_events(
             continue  # striking node — grappling graph only
         if _NON_TECHNIQUE_RE.search(label):
             continue  # referee call / stalling / clock stat — not a technique
+        if _SPECULATION_RE.search(label):
+            continue  # narrator speculation ("hunting for the armbar") → not a real event
         if typ == "transition" and _TAKEDOWN_RE.search(label):
             typ = "takedown"
         item: dict[str, Any] = {"label": label, "type": typ, "actor": actor}
+        # Strip " Attempt" suffix → set successful: false if not already specified
+        if (m := _ATTEMPT_RE.search(label)):
+            item["label"] = label[:m.start()]
+            if "successful" not in e:
+                item["successful"] = False
         if "successful" in e:
             item["successful"] = bool(e["successful"])
         raw_ts = e.get("ts", e.get("timestamp"))  # dumps say "timestamp"; harvest says "ts"

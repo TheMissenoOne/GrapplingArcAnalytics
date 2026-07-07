@@ -2,11 +2,11 @@
   "Travis Haven|Jayden Groner|2026": [],
   "Anthony Salsbury|Sam Schwartzapfel|2026": [
     {
-      "label": "Buggy Choke Attempt",
+      "label": "Buggy Choke",
       "type": "submission",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "52:05",
-      "successful": false
+      "successful": false,
+      "ts": 3125
     }
   ],
   "Jake Strauss|Brett Moyer|2026": [
@@ -14,7 +14,7 @@
       "label": "Body Lock Pass",
       "type": "pass",
       "actor": "Jake Strauss",
-      "timestamp": "64:49"
+      "ts": 3889
     }
   ],
   "Derrick Rayfield|Cam Herd|2026": [
@@ -22,46 +22,46 @@
       "label": "Guard Pull",
       "type": "guard",
       "actor": "Derrick Rayfield",
-      "timestamp": "73:56"
+      "ts": 4436
     },
     {
       "label": "North South",
       "type": "control",
       "actor": "Derrick Rayfield",
-      "timestamp": "74:38"
+      "ts": 4478
     }
   ],
   "Kyle Chambers|Chuy Magana|2026": [],
   "Kevin Beuhring|Cam Herd|2026": [
     {
-      "label": "Kimura Attempt",
+      "label": "Kimura",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "140:35",
-      "successful": false
+      "successful": false,
+      "ts": 8435
     }
   ],
   "Austin Oranday|Travis Haven|2026": [
     {
-      "label": "Buggy Choke Attempt",
+      "label": "Buggy Choke",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "152:07",
-      "successful": false
+      "successful": false,
+      "ts": 9127
     },
     {
-      "label": "Heel Hook Attempt",
+      "label": "Heel Hook",
       "type": "submission",
       "actor": "Austin Oranday",
-      "timestamp": "153:16",
-      "successful": false
+      "successful": false,
+      "ts": 9196
     },
     {
-      "label": "Buggy Choke Attempt",
+      "label": "Buggy Choke",
       "type": "submission",
       "actor": "Travis Haven",
-      "timestamp": "154:44",
-      "successful": false
+      "successful": false,
+      "ts": 9284
     }
   ],
   "Jared Fekete|Jake Strauss|2026": [
@@ -69,14 +69,14 @@
       "label": "Back Take",
       "type": "control",
       "actor": "Jake Strauss",
-      "timestamp": "167:47"
+      "ts": 10067
     },
     {
-      "label": "Americana Attempt",
+      "label": "Americana",
       "type": "submission",
       "actor": "Jared Fekete",
-      "timestamp": "168:00",
-      "successful": false
+      "successful": false,
+      "ts": 10080
     }
   ],
   "Kyle Chambers|Sam Schwartzapfel|2026": [
@@ -84,21 +84,21 @@
       "label": "Guard Pass",
       "type": "pass",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "204:00"
+      "ts": 12240
     },
     {
-      "label": "Knee Bar Attempt",
+      "label": "Knee Bar",
       "type": "submission",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "204:17",
-      "successful": false
+      "successful": false,
+      "ts": 12257
     },
     {
-      "label": "Straight Ankle Lock Attempt",
+      "label": "Straight Ankle Lock",
       "type": "submission",
       "actor": "Sam Schwartzapfel",
-      "timestamp": "204:37",
-      "successful": false
+      "successful": false,
+      "ts": 12277
     }
   ],
   "Shawn Melanson|Travis Haven|2026": [],
@@ -107,13 +107,13 @@
       "label": "Body Lock Pass",
       "type": "pass",
       "actor": "Jake Strauss",
-      "timestamp": "272:23"
+      "ts": 16343
     },
     {
       "label": "Guard Recovery",
       "type": "guard",
       "actor": "Noah McCully",
-      "timestamp": "274:41"
+      "ts": 16481
     }
   ],
   "Cam Herd|Caleb Crump|2026": [
@@ -121,14 +121,14 @@
       "label": "Guard Pass",
       "type": "pass",
       "actor": "Cam Herd",
-      "timestamp": "292:08"
+      "ts": 17528
     },
     {
       "label": "Foot Lock",
       "type": "submission",
       "actor": "Cam Herd",
-      "timestamp": "295:50",
-      "successful": true
+      "successful": true,
+      "ts": 17750
     }
   ],
   "Jet Thompson|Jonathan Wilson (Squires)|2026": [
@@ -136,19 +136,19 @@
       "label": "Body Lock Pass",
       "type": "pass",
       "actor": "Jet Thompson",
-      "timestamp": "299:20"
+      "ts": 17960
     },
     {
       "label": "Mount",
       "type": "control",
       "actor": "Jet Thompson",
-      "timestamp": "299:27"
+      "ts": 17967
     },
     {
       "label": "Back Take",
       "type": "control",
       "actor": "Jet Thompson",
-      "timestamp": "299:30"
+      "ts": 17970
     }
   ]
 }

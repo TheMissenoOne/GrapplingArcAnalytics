@@ -4,263 +4,263 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "0:42"
+      "ts": 42
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "2:29"
+      "ts": 149
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "3:12"
+      "ts": 192
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Khalil Rountree Jr.: Starts at",
-      "timestamp": "4:20"
+      "ts": 260
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Jiri Prochazka",
-      "timestamp": "6:56"
+      "ts": 416
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "8:07"
+      "ts": 487
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Jiri Prochazka",
-      "timestamp": "8:42"
+      "ts": 522
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Jiri Prochazka",
-      "timestamp": "9:17"
+      "ts": 557
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Jiri Prochazka",
-      "timestamp": "9:17"
+      "ts": 557
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Jiri Prochazka",
-      "timestamp": "9:56"
+      "ts": 596
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Jiri Prochazka",
-      "timestamp": "11:20"
+      "ts": 680
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "12:11"
+      "ts": 731
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Jiri Prochazka",
-      "timestamp": "12:22"
+      "ts": 742
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "16:33"
+      "ts": 993
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "17:16"
+      "ts": 1036
     },
     {
       "label": "Float Pass",
       "type": "pass",
       "actor": "Jiri Prochazka",
-      "timestamp": "17:29",
-      "successful": false
+      "successful": false,
+      "ts": 1049
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "18:41"
+      "ts": 1121
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "19:16"
+      "ts": 1156
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "20:16",
-      "successful": false
+      "successful": false,
+      "ts": 1216
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Jiri Prochazka",
-      "timestamp": "20:55"
+      "ts": 1255
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "27:35"
+      "ts": 1655
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "29:21"
+      "ts": 1761
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "29:56"
+      "ts": 1796
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "32:10"
+      "ts": 1930
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "34:21"
+      "ts": 2061
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Jiri Prochazka",
-      "timestamp": "35:42"
+      "ts": 2142
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "35:52"
+      "ts": 2152
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "36:27",
-      "successful": false
+      "successful": false,
+      "ts": 2187
     },
     {
       "label": "Snapdown",
       "type": "takedown",
       "actor": "Jiri Prochazka",
-      "timestamp": "36:59"
+      "ts": 2219
     },
     {
       "label": "Truck",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "37:39"
+      "ts": 2259
     },
     {
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Jiri Prochazka",
-      "timestamp": "40:34",
-      "successful": false
+      "successful": false,
+      "ts": 2434
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "41:31"
+      "ts": 2491
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "45:06"
+      "ts": 2706
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Jiri Prochazka",
-      "timestamp": "46:19"
+      "ts": 2779
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "46:53"
+      "ts": 2813
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "47:36"
+      "ts": 2856
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Khalil Rountree Jr.: Starts at",
-      "timestamp": "48:43"
+      "ts": 2923
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Jiri Prochazka",
-      "timestamp": "51:20"
+      "ts": 3080
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Jiri Prochazka",
-      "timestamp": "52:31"
+      "ts": 3151
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Jiri Prochazka",
-      "timestamp": "53:11"
+      "ts": 3191
     },
     {
       "label": "Single Leg Takedown",
       "type": "takedown",
       "actor": "Jiri Prochazka",
-      "timestamp": "53:41"
+      "ts": 3221
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Jiri Prochazka",
-      "timestamp": "53:41"
+      "ts": 3221
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Jiri Prochazka",
-      "timestamp": "54:21"
+      "ts": 3261
     }
   ],
   "Carlos Ulberg|Dominick Reyes: Starts at|2025": [
@@ -268,45 +268,45 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Carlos Ulberg",
-      "timestamp": "0:00"
+      "ts": 0
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Carlos Ulberg",
-      "timestamp": "0:44"
+      "ts": 44
     },
     {
       "label": "Float Pass",
       "type": "pass",
       "actor": "Carlos Ulberg",
-      "timestamp": "0:56",
-      "successful": false
+      "successful": false,
+      "ts": 56
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Carlos Ulberg",
-      "timestamp": "2:09"
+      "ts": 129
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Carlos Ulberg",
-      "timestamp": "2:44"
+      "ts": 164
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Carlos Ulberg",
-      "timestamp": "3:44",
-      "successful": false
+      "successful": false,
+      "ts": 224
     },
     {
       "label": "Uchi Mata",
       "type": "takedown",
       "actor": "Carlos Ulberg",
-      "timestamp": "4:16"
+      "ts": 256
     }
   ],
   "Paulo Costa|Roman Kopylov: Starts at|2025": [
@@ -314,62 +314,62 @@
       "label": "Back Control",
       "type": "control",
       "actor": "Paulo Costa",
-      "timestamp": "2:15"
+      "ts": 135
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Paulo Costa",
-      "timestamp": "4:00"
+      "ts": 240
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Paulo Costa",
-      "timestamp": "4:36"
+      "ts": 276
     },
     {
       "label": "Side Control",
       "type": "control",
       "actor": "Paulo Costa",
-      "timestamp": "6:49"
+      "ts": 409
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Paulo Costa",
-      "timestamp": "9:00"
+      "ts": 540
     },
     {
       "label": "Half Guard",
       "type": "guard",
       "actor": "Paulo Costa",
-      "timestamp": "10:22"
+      "ts": 622
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Paulo Costa",
-      "timestamp": "10:31"
+      "ts": 631
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Paulo Costa",
-      "timestamp": "11:06",
-      "successful": false
+      "successful": false,
+      "ts": 666
     },
     {
       "label": "Snapdown",
       "type": "takedown",
       "actor": "Paulo Costa",
-      "timestamp": "11:39"
+      "ts": 699
     },
     {
       "label": "Truck",
       "type": "control",
       "actor": "Paulo Costa",
-      "timestamp": "12:19"
+      "ts": 739
     }
   ],
   "Azamat Murzakanov|Aleksandar Rakic: Starts at|2025": [
@@ -377,37 +377,37 @@
       "label": "Double Leg Takedown",
       "type": "takedown",
       "actor": "Azamat Murzakanov",
-      "timestamp": "0:31"
+      "ts": 31
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Azamat Murzakanov",
-      "timestamp": "1:27"
+      "ts": 87
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Azamat Murzakanov",
-      "timestamp": "5:05"
+      "ts": 305
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Azamat Murzakanov",
-      "timestamp": "6:47"
+      "ts": 407
     },
     {
       "label": "Back Control",
       "type": "control",
       "actor": "Azamat Murzakanov",
-      "timestamp": "7:31"
+      "ts": 451
     },
     {
       "label": "Stand Up",
       "type": "escape",
       "actor": "Azamat Murzakanov",
-      "timestamp": "8:42"
+      "ts": 522
     }
   ]
 }
