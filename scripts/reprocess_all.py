@@ -125,6 +125,10 @@ def main() -> int:
             logger.error("Unknown dataset label(s): %s", ", ".join(sorted(missing)))
             return 2
 
+    # Insert phase: every dump's matches, replay deferred. An athlete appearing across N
+    # datasets was previously replayed N times (once per dump's own run_dump call) — fold
+    # to one replay pass below, over the union of participants, after ALL inserts land.
+    all_participants: set[str] = set()
     for module_path, event, label in selected:
         try:
             raw = importlib.import_module(module_path).RAW
@@ -132,9 +136,26 @@ def main() -> int:
             logger.warning("Skipping %s: dump module %s not found", label, module_path)
             continue
         logger.info("── %s (event=%r) ──", label, event)
-        run_dump(raw, event=event, label=label, dry_run=args.dry_run)
+        run_dump(raw, event=event, label=label, dry_run=args.dry_run,
+                  replay=False, out_participants=all_participants)
 
-    if args.dry_run or args.no_export:
+    if args.dry_run:
+        return 0
+
+    if all_participants:
+        from db.base import db_session
+        from db.models import Athlete
+        from db.repository import replay_and_persist_athlete
+
+        logger.info("Replaying %d unique athletes (across %d datasets)",
+                    len(all_participants), len(selected))
+        with db_session() as session:
+            for aid in all_participants:
+                athlete = session.get(Athlete, aid)
+                if athlete is not None:
+                    replay_and_persist_athlete(athlete, session)
+
+    if args.no_export:
         return 0
 
     from export.match_breakdown import _DEFAULT_OUT
