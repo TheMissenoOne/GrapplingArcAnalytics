@@ -40,15 +40,39 @@ def _deaccent(s: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))
 
 
+_PAREN_ANNOT_RE = re.compile(r"\s*\([^()]*\)")   # "(Opening Round)" / "(UFC BJJ 3)" / "(Rematch)"
+_TRAIL_DIGITS_RE = re.compile(r"\s+\d+$")        # "Magomed Ankalaev 2" disambiguator suffix
+
+
+def _sanitize_name(n: str) -> str:
+    """Strip transcript/refiner scaffolding that leaks into a bout key so it doesn't become a
+    junk ``Athlete.name`` (dump-validation F10). Handles the shapes seen across 11 dumps:
+      * colon clause      "Marlon Vera: The bantamweight title defense…" → "Marlon Vera"
+      * leaked stage prefix (unbalanced '(')  "Match 1 (Jon Blank" / "Grande Final (França"
+      * balanced annotation "(Opening Round)" / "(Encore/Replay)" / "(UFC BJJ 3)"        → dropped
+      * unbalanced trailing ')'  "Dan Strauss)"                                            → dropped
+      * trailing digits    "Johnny Walker 2"                                               → dropped
+    No real grappling name contains a ':' , '(' , ')' or a bare trailing number, so this is safe."""
+    n = n.split(":", 1)[0]                       # colon clause → keep the name before it
+    if n.count("(") > n.count(")"):              # leaked prefix like "Match 1 (Name"
+        n = n[n.rfind("(") + 1:]
+    n = _PAREN_ANNOT_RE.sub("", n)               # balanced "(…)" annotations
+    n = n.replace(")", "")                       # leftover unbalanced trailing ')'
+    n = _TRAIL_DIGITS_RE.sub("", n)              # trailing disambiguator digits
+    return n
+
+
 def clean_athlete_name(raw: str) -> str:
     """Clean a scraped athlete display name (KEEP accents/case).
 
-    Strips transcript junk that split one human into many rows: ``[H:MM:SS]`` timestamps and
-    space-delimited ``'nicknames'`` (but not the apostrophe in ``Sean O'Malley``). Collapses
+    Strips transcript junk that split one human into many rows: ``[H:MM:SS]`` timestamps,
+    space-delimited ``'nicknames'`` (but not the apostrophe in ``Sean O'Malley``), and
+    leaked bout-label / round / annotation scaffolding (``_sanitize_name``). Collapses
     whitespace. Returns the display form; use ``athlete_key`` for merge/identity comparison.
     """
     n = re.sub(r"\[[0-9:]+\]", "", raw)               # [2:11:18] transcript timestamp
     n = re.sub(r"(?<=\s)'[^']+'(?=\s|$)", "", n)      # spaced 'Hulk' / 'Cyborg' nickname
+    n = _sanitize_name(n)                             # leaked stage-label / annotation junk (F10)
     return re.sub(r"\s+", " ", n).strip()
 
 
