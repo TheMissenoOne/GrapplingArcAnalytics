@@ -377,10 +377,38 @@ def upsert_athlete(
     return athlete.id
 
 
+# ponytail: process-wide read cache for the read-only site export, where
+# get_matches_for_athlete is called ~5×/fighter (qualifies, style_profile, disciplines,
+# defense) — each a remote round-trip. prime once → serve from memory. None = live query
+# (the default everywhere else; replay/import paths mutate and must NOT use it).
+_MATCH_INDEX: dict[str, list[Match]] | None = None
+
+
+def prime_match_cache(session: Session) -> None:
+    """Load every match once and index by both participants (deterministic order), so the
+    export's per-athlete lookups hit memory instead of one remote query each. Call
+    clear_match_cache() when done."""
+    global _MATCH_INDEX
+    idx: dict[str, list[Match]] = {}
+    for m in session.execute(
+        select(Match).order_by(Match.year, Match.created_at, Match.id)
+    ).scalars():
+        idx.setdefault(m.athlete_a_id, []).append(m)
+        idx.setdefault(m.athlete_b_id, []).append(m)
+    _MATCH_INDEX = idx
+
+
+def clear_match_cache() -> None:
+    global _MATCH_INDEX
+    _MATCH_INDEX = None
+
+
 def get_matches_for_athlete(athlete_id: str, session: Session) -> list[Match]:
     """Every global match the athlete participates in (either side), in a deterministic
     order (year, created_at, id). Without the explicit ORDER BY the DB return order is
     arbitrary, so same-year matches would replay in a nondeterministic order."""
+    if _MATCH_INDEX is not None:
+        return list(_MATCH_INDEX.get(athlete_id, ()))
     return list(
         session.execute(
             select(Match)

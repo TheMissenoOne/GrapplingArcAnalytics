@@ -106,6 +106,18 @@ def _result_short(meta: dict[str, Any]) -> str:
 _ARCH_CACHE: dict[str, str | None] = {}
 
 
+def _prime_arch_cache(session: Session) -> None:
+    """Bulk-load every athlete's emergent archetype in one query so ``_archetype`` never
+    round-trips per athlete (it's hit for both sides of every breakdown + every dossier)."""
+    from db.models import Graph
+    for oid, name in session.execute(
+        select(Graph.owner_id, Archetype.name)
+        .join(Archetype, Graph.archetype_id == Archetype.id)
+        .where(Graph.owner_kind == "athlete", Graph.archetype_id.isnot(None))
+    ).all():
+        _ARCH_CACHE.setdefault(oid, name)
+
+
 def _archetype(athlete: Athlete | None, session: Session) -> str | None:
     """Emergent archetype name for an athlete — stored on their Graph (deviance v3 pipeline
     assigns Graph.archetype_id, not Athlete.archetype_id). Memoized per athlete per export."""
@@ -1221,6 +1233,11 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
 
     out.mkdir(parents=True, exist_ok=True)
     _ARCH_CACHE.clear()  # fresh archetype reads per export run
+    # Load every match once → the build phases' per-athlete lookups (get_matches_for_athlete,
+    # called ~5×/fighter) hit memory instead of a remote query each. Cleared after the builds.
+    from db.repository import clear_match_cache, prime_match_cache
+    prime_match_cache(session)
+    _prime_arch_cache(session)
     # Prune stale generated detail pages so hidden fighters / dropped bouts don't orphan
     # (keep the hand-written static grapple-like.html index).
     for old in (*out.glob("breakdown-*.html"), *out.glob("grapple-*.html"),
@@ -1249,6 +1266,7 @@ def export_site(session: Session, out: Path) -> dict[str, int]:
     (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
     (out / "the-ocean.html").write_text(render_ocean_page(), encoding="utf-8")
     _t = _phase("build_ocean + data.js", _t)
+    clear_match_cache()  # renders below use precomputed data; don't leak the cache past the builds
 
     # per-match detail pages (attach archetypes + adapted graph for the template)
     dossier_slugs = frozenset(details)  # fighters that actually have a Grapple Like dossier
