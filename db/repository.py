@@ -236,6 +236,16 @@ def upsert_graph_from_athlete_graph(
         )
         session.execute(edge_stmt)
 
+    # Prune stale edges: replay derives the FULL current graph, so any edge_key from a
+    # prior persist that's no longer in this athlete_graph (technique dropped, renamed,
+    # re-derivation shrank the game) must go — upsert above only adds/updates, never
+    # deletes. Scoped to THIS graph_id and only edge_keys absent from the fresh set.
+    keep_keys = [r["edge_key"] for r in edge_rows]
+    stale_stmt = delete(GraphEdge).where(GraphEdge.graph_id == graph_id)
+    if keep_keys:
+        stale_stmt = stale_stmt.where(GraphEdge.edge_key.notin_(keep_keys))
+    session.execute(stale_stmt)
+
     return graph_id
 
 
@@ -308,6 +318,25 @@ def register_match(
     if status == "final":
         _register_techniques(_techniques_from_sequence(sequence), session)
     return match.id
+
+
+def register_matches_bulk(rows: list[dict[str, Any]], session: Session) -> None:
+    """Insert many GLOBAL final matches in one round trip.
+
+    Same field shape as ``register_match``'s kwargs (minus ``session``/``status``,
+    always 'final') and same technique-registration behavior, but batched: the dump
+    importer previously called ``register_match`` once per bout (delete + insert each,
+    ~2 round trips/bout dominating reprocess cost). Caller still issues its own
+    delete(s) beforehand; this only inserts + registers techniques, once."""
+    if not rows:
+        return
+    from sqlalchemy import insert
+
+    session.execute(insert(Match), [{**r, "status": "final"} for r in rows])
+    techs: dict[str, dict[str, str]] = {}
+    for r in rows:
+        techs.update(_techniques_from_sequence(r.get("sequence") or []))
+    _register_techniques(techs, session)
 
 
 def get_match(match_id: str, session: Session) -> Match | None:

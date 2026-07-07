@@ -167,8 +167,21 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
     return list(seen.values())
 
 
-def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False) -> int:
-    """Build + (unless ``dry_run``) persist a dump, tagging each bout with ``event``."""
+def run_dump(
+    raw: Dump,
+    *,
+    event: str | None,
+    label: str,
+    dry_run: bool = False,
+    replay: bool = True,
+    out_participants: set[str] | None = None,
+) -> int:
+    """Build + (unless ``dry_run``) persist a dump, tagging each bout with ``event``.
+
+    ``replay=False`` skips the per-athlete graph rebuild (caller does it later, once per
+    unique athlete instead of once per dump — see ``scripts.reprocess_all``).
+    ``out_participants``, if given, gets every athlete id touched by this dump added to it.
+    """
     matches = build_matches(raw)
     logger.info("%s import: %d de-duped bouts (from %d raw entries)",
                 label, len(matches), sum(len(b) for b in raw))
@@ -183,7 +196,7 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
 
     from db.base import db_session
     from db.models import Athlete, Match
-    from db.repository import register_match, replay_and_persist_athlete, upsert_athlete
+    from db.repository import register_matches_bulk, replay_and_persist_athlete, upsert_athlete
 
     videos = video_index()  # (participants, year) → url once, not a scan per bout
 
@@ -205,12 +218,14 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
             return ath
 
         participants: set[str] = set()
+        delete_conds = []
+        match_rows: list[dict[str, Any]] = []
         for cm in matches:
             a = resolve(cm.a_name, source="manual")
             b = resolve(cm.b_name, source="opponent")
             participants.update((a.id, b.id))
-            session.execute(
-                delete(Match).where(
+            delete_conds.append(
+                and_(
                     Match.year.is_(cm.year) if cm.year is None else Match.year == cm.year,
                     or_(
                         and_(Match.athlete_a_id == a.id, Match.athlete_b_id == b.id),
@@ -218,11 +233,10 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
                     ),
                 )
             )
-            session.flush()
-            # Striking match (MMA) with too little grappling — purge (delete above ran)
-            # and don't re-register. Striking evidence = logged strikes OR a KO/TKO finish
-            # (catches empty striking marathons). Pure-grappling bouts (no strikes, not KO)
-            # are never gated, so fast submissions with 1-3 actions still import.
+            # Striking match (MMA) with too little grappling — purged by the batched delete
+            # below regardless, just not re-registered. Striking evidence = logged strikes OR
+            # a KO/TKO finish (catches empty striking marathons). Pure-grappling bouts (no
+            # strikes, not KO) are never gated, so fast submissions with 1-3 actions still import.
             if (cm.strike_count > 0 or cm.ko_finish) and len(cm.events) < _MIN_GRAPPLING:
                 logger.info("  skip striking match %s vs %s (%s): %d grappling, %d strikes%s",
                             cm.a_name, cm.b_name, cm.year, len(cm.events), cm.strike_count,
@@ -240,17 +254,30 @@ def run_dump(raw: Dump, *, event: str | None, label: str, dry_run: bool = False)
             video_url = videos.get(
                 (frozenset((athlete_key(cm.a_name), athlete_key(cm.b_name))), cm.year)
             )
-            register_match(
-                a.id, b.id, winner_id=winner_id, win_type=cm.win_type,
+            match_rows.append(dict(
+                athlete_a_id=a.id, athlete_b_id=b.id, winner_id=winner_id, win_type=cm.win_type,
                 submission=cm.submission, event=event, year=cm.year,
                 weight_class=None, stage=None, sequence=seq, created_by=None,
-                video_url=video_url, timeline=cm.timeline, session=session,
-            )
+                video_url=video_url, timeline=cm.timeline,
+            ))
 
-        for aid in participants:
-            athlete = session.get(Athlete, aid)
-            if athlete is not None:
-                replay_and_persist_athlete(athlete, session)
+        # One delete covering every bout in this dump + one bulk insert, instead of a
+        # delete+insert round trip per bout (the pair dominated reprocess cost).
+        if delete_conds:
+            session.execute(delete(Match).where(or_(*delete_conds)))
+        register_matches_bulk(match_rows, session)
 
-        logger.info("Inserted %d bouts; replayed %d athletes", len(matches), len(participants))
+        if out_participants is not None:
+            out_participants.update(participants)
+
+        if replay:
+            for aid in participants:
+                athlete = session.get(Athlete, aid)
+                if athlete is not None:
+                    replay_and_persist_athlete(athlete, session)
+
+        logger.info(
+            "Inserted %d bouts%s", len(matches),
+            f"; replayed {len(participants)} athletes" if replay else "",
+        )
     return 0
