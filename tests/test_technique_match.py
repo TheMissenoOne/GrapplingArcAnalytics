@@ -29,6 +29,15 @@ class TestCleanLabel:
         assert clean_label("Back Take", "control") == "Back Control"
         assert clean_label("Back Take", "submission") == "Back Take"
 
+    def test_attempt_strips_to_base_technique(self) -> None:
+        # "<X> Attempt" is not a distinct technique — it canonicalises to <X>.
+        assert clean_label("Heel Hook Attempt") == "Heel Hook"
+        assert clean_label("Triangle Choke Attempt") == "Triangle Choke"
+        assert clean_label("Back Take Attempt") == "Back Control"  # strip, then variant-resolve
+        assert clean_label("Rear Naked Choke Attempted") == "Rear Naked Choke"
+        # A base that isn't in the library still loses the "attempt" word (no fragment node).
+        assert "attempt" not in clean_label("Some Made Up Move Attempt").lower()
+
     def test_empty(self) -> None:
         assert clean_label("") == ""
         assert clean_label("  ") == ""

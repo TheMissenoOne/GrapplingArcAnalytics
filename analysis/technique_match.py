@@ -18,6 +18,7 @@ guesses), so cleanup only ever *canonicalises* known techniques.
 from __future__ import annotations
 
 import json
+import re
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -25,6 +26,11 @@ from typing import Any
 from analysis.names import _normalize_name, _resolve_aliases
 
 _LIB_PATH = Path(__file__).resolve().parent / "data" / "technique_library.json"
+
+# "<X> Attempt / Attempted / Attempting" — an unfinished attempt is not a distinct
+# technique, it's <X>. Only ~15 library entries carry an explicit "<x> attempt" variant,
+# so without this the other ~50 attempt labels fragment into their own nodes.
+_ATTEMPT_RE = re.compile(r"\battempt(?:s|ed|ing)?\b", re.IGNORECASE)
 
 
 @lru_cache(maxsize=1)
@@ -59,6 +65,14 @@ def clean_label(label: str, type_hint: str = "") -> str:
     idx = _index()
     hit = idx.get(norm) or idx.get(_resolve_aliases(norm))
     if hit is None:
+        # Not a known technique as-is. If it's an "<X> Attempt" label, strip the attempt
+        # word and canonicalise the base <X> — so attempt labels collapse into their parent
+        # technique instead of fragmenting, and replays never recreate an attempt node.
+        if _ATTEMPT_RE.search(raw):
+            base = _ATTEMPT_RE.sub(" ", raw)
+            base = re.sub(r"\s{2,}", " ", base).strip(" /-")  # tidy leftover separators
+            if base and _normalize_name(base) != norm:
+                return clean_label(base, type_hint)
         return raw
     en, lib_type = hit
     hint = _normalize_name(type_hint)
