@@ -33,7 +33,7 @@ def test_direct_career_links_collapses_pair_and_orients_by_net_weight() -> None:
         {"from": "rear naked choke", "to": "back control", "fighter": "a", "weight": 1},
     ]
     node_type = {"back control": "control", "rear naked choke": "submission"}
-    out = _direct_career_links(links, node_type, net, success_thresh=None)
+    out = _direct_career_links(links, node_type, net)
     assert len(out) == 1  # reciprocal pair collapsed to one link
     lk = out[0]
     assert lk["from"] == "back control" and lk["to"] == "rear naked choke"  # 3 > 1, majority wins
@@ -41,16 +41,16 @@ def test_direct_career_links_collapses_pair_and_orients_by_net_weight() -> None:
     assert lk["weight"] == 3  # real net weight, not the placeholder 1 the caller passed in
 
 
-def test_direct_career_links_dashes_below_threshold() -> None:
-    net = network_from_sequences([
-        [_e("Closed Guard", "guard", "A"), _e("Armbar", "submission", "A", False)],
-        [_e("Closed Guard", "guard", "A"), _e("Armbar", "submission", "A", False)],
-        [_e("Closed Guard", "guard", "A"), _e("Armbar", "submission", "A", True)],
-    ])
+def test_direct_career_links_dashes_low_landing() -> None:
+    # Fixed rule: dash iff weight >= 5, gated target type, success < 0.40.
+    miss = [_e("Closed Guard", "guard", "A"), _e("Armbar", "submission", "A", False)]
+    land = [_e("Closed Guard", "guard", "A"), _e("Armbar", "submission", "A", True)]
+    net = network_from_sequences([miss, miss, miss, miss, land])  # 5x, 1 landing → 0.2
     links = [{"from": "closed guard", "to": "armbar", "fighter": "a", "weight": 1}]
     node_type = {"closed guard": "guard", "armbar": "submission"}
-    out = _direct_career_links(links, node_type, net, success_thresh=0.5)
-    assert out[0]["dashed"] is True  # 1/3 success < 0.5 threshold, target is a gated type
+    out = _direct_career_links(links, node_type, net)
+    assert out[0]["dashed"] is True  # weight 5, success 0.2 < 0.40, submission gated
 
-    out_ok = _direct_career_links(links, node_type, net, success_thresh=0.2)
-    assert out_ok[0]["dashed"] is False  # 1/3 success >= 0.2 threshold
+    net_ok = network_from_sequences([miss, land, land])  # 3x → below weight-5 floor
+    out_ok = _direct_career_links(links, node_type, net_ok)
+    assert out_ok[0]["dashed"] is False  # weight 3 < 5 floor

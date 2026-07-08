@@ -5,14 +5,13 @@ from __future__ import annotations
 from typing import Any
 
 from analysis.network_metrics import (
-    corpus_success_threshold,
     detect_communities,
     edge_arrow,
+    edge_dashed,
     network_from_sequences,
     pagerank_ranking,
     reward_risk_ranking,
     route_to_submission,
-    success_threshold,
 )
 
 
@@ -94,25 +93,11 @@ def test_edge_arrow_rules() -> None:
     assert edge_arrow(0, 0) is False
 
 
-def test_success_threshold_25th_percentile_gated_by_weight_and_type() -> None:
-    edges = [
-        (5, 1, "submission"),   # success 0.2 — qualifies
-        (5, 3, "submission"),   # success 0.6 — qualifies
-        (5, 5, "submission"),   # success 1.0 — qualifies
-        (5, 5, "control"),      # not a gated target type — excluded
-        (2, 0, "submission"),   # below weight floor — excluded
-    ]
-    thresh = success_threshold(edges, q=0.25, min_n=3)
-    assert thresh is not None
-    assert 0.19 < thresh < 0.4  # 25th pct of [0.2, 0.6, 1.0]
-
-
-def test_success_threshold_none_when_too_few_qualify() -> None:
-    assert success_threshold([(5, 1, "submission")], min_n=3) is None
-
-
-def test_corpus_success_threshold_reads_off_the_graph() -> None:
-    g = network_from_sequences(_sequences())
-    # only 2 distinct submission-targeted edges in the fixture (BC->RNC, CG->TRI) — below
-    # min_n=3, so nothing qualifies for a corpus-wide threshold yet.
-    assert corpus_success_threshold(g) is None
+def test_edge_dashed_fixed_rule() -> None:
+    # dash iff weight >= 5 AND target type gated AND success < 0.40
+    assert edge_dashed(5, 1, "submission") is True    # 0.2 < 0.40, w>=5, gated
+    assert edge_dashed(5, 2, "submission") is False   # 0.4 not < 0.40
+    assert edge_dashed(4, 0, "submission") is False   # below weight floor
+    assert edge_dashed(8, 0, "submission") is True    # never lands, high volume
+    assert edge_dashed(8, 1, "control") is False      # target type not gated
+    assert edge_dashed(0, 0, "submission") is False   # weight 0 guard

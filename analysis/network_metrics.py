@@ -18,9 +18,7 @@ functions are pure on the graph.
 
 from __future__ import annotations
 
-import statistics
 from collections import Counter, defaultdict
-from collections.abc import Iterable
 from typing import Any
 
 import networkx as nx
@@ -33,7 +31,8 @@ _SUBMISSION = "submission"
 # Directed-edge rendering constants (data-directed graph edges, see kanban/TODO/013).
 MIN_EDGE_ARROW = 2       # below this max(f,r) an edge is drawn undirected
 TWO_WAY_RATIO = 0.34     # minority share above which a two-way exchange stays undirected
-MIN_DASH_WEIGHT = 3      # edges below this weight are never dashed (unknown, not bad)
+DASH_WEIGHT_MIN = 5      # edges below this weight are never dashed (unknown, not bad)
+DASH_SUCCESS_MAX = 0.40  # fixed per-edge success ceiling — below it, dashed (see kanban/TODO/013)
 GATED_TARGET_TYPES = frozenset({"submission", "takedown", "sweep", "pass", "escape"})
 
 
@@ -60,7 +59,7 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
     so the network is a map of real technique transitions, never a cross-fighter artifact
     (e.g. A's escape followed by B's takedown is *not* an edge). Edge ``weight`` = count,
     edge ``ok`` = how many of those transitions landed on a *successful* target event
-    (drives the data-directed / dashed rendering — see ``edge_arrow``/``success_threshold``).
+    (drives the data-directed / dashed rendering — see ``edge_arrow``/``edge_dashed``).
 
     Markov reward-risk per node (Lamas et al. 2024), over appearances that have a successor
     (a position that simply ends the recorded sequence is excluded from the denominator):
@@ -160,34 +159,16 @@ def edge_arrow(f: int, r: int, min_edge: int = MIN_EDGE_ARROW,
     return True
 
 
-def success_threshold(
-    edges_success_and_meta: Iterable[tuple[int, int, str]],
-    q: float = 0.25,
-    min_n: int = MIN_DASH_WEIGHT,
-    gated_types: frozenset[str] = GATED_TARGET_TYPES,
-) -> float | None:
-    """25th-percentile of per-edge success (``ok / weight``) over qualifying edges.
-
-    ``edges_success_and_meta`` = ``(weight, ok, target_type)`` per directed edge. An edge
-    qualifies when ``weight >= min_n`` and ``target_type`` is in ``gated_types``. Returns
-    ``None`` when fewer than ``min_n`` edges qualify — too few to call a threshold, so
-    nothing dashes.
-    """
-    vals = sorted(ok / weight for weight, ok, ttype in edges_success_and_meta
-                  if weight >= min_n and ttype in gated_types)
-    if len(vals) < min_n:
-        return None
-    return statistics.quantiles(vals, n=round(1 / q))[0]
-
-
-def corpus_success_threshold(
-    g: nx.DiGraph, q: float = 0.25, min_n: int = MIN_DASH_WEIGHT,
-) -> float | None:
-    """``success_threshold`` computed straight off a transition network's edges — the single
-    corpus-wide value both the ocean map and career dossiers dash against."""
-    edges = ((d.get("weight", 0), d.get("ok", 0), g.nodes[v].get("type", ""))
-             for _u, v, d in g.edges(data=True))
-    return success_threshold(edges, q=q, min_n=min_n)
+def edge_dashed(
+    weight: int, ok: int, target_type: str, gated_types: frozenset[str] = GATED_TARGET_TYPES,
+) -> bool:
+    """Rule-2 dash decision, fixed threshold (zero-inflated success data broke the
+    data-driven quartile — see kanban/TODO/013): dashed iff ``weight >= DASH_WEIGHT_MIN``,
+    ``target_type`` is gated, and ``ok / weight < DASH_SUCCESS_MAX``. Edges below the sample
+    floor or of a non-gated target type are never dashed (solid = unknown, not bad)."""
+    if weight < DASH_WEIGHT_MIN or target_type not in gated_types:
+        return False
+    return (ok / weight) < DASH_SUCCESS_MAX
 
 
 # ── metrics (pure on the graph) ──────────────────────────────────────────────

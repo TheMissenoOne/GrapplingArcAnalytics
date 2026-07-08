@@ -42,14 +42,7 @@ from analysis.counter_moves import counter_moves
 from analysis.defense_rate import defense_profile
 from analysis.event_profile import build_event_profile, event_names
 from analysis.names import _normalize_name
-from analysis.network_metrics import (
-    GATED_TARGET_TYPES,
-    MIN_DASH_WEIGHT,
-    build_transition_network,
-    corpus_success_threshold,
-    edge_arrow,
-    network_from_sequences,
-)
+from analysis.network_metrics import edge_arrow, edge_dashed, network_from_sequences
 from analysis.path_to_victory import dilemmas, path_to_victory
 from analysis.style_profile import MIN_DOSSIER_EVENTS, build_style_profile, qualifies
 from db.models import Archetype, Athlete
@@ -191,13 +184,11 @@ def _truncate_graph(g: dict[str, Any], limit: int) -> dict[str, Any]:
 
 
 def _direct_career_links(
-    links: list[dict[str, Any]], node_type: dict[str, str],
-    net: Any | None, success_thresh: float | None,
+    links: list[dict[str, Any]], node_type: dict[str, str], net: Any | None,
 ) -> list[dict[str, Any]]:
     """Collapse reciprocal pairs + orient/dash career links (aggregate graph, rule 1+2) against
-    the fighter's own transition ``net`` (raw within-actor counts) and the corpus-wide success
-    threshold. Node ids are ``node_key``s; ``net`` node labels are canonical library names, so
-    pairing goes through ``_normalize_name``."""
+    the fighter's own transition ``net`` (raw within-actor counts). Node ids are ``node_key``s;
+    ``net`` node labels are canonical library names, so pairing goes through ``_normalize_name``."""
     label_by_key: dict[str, str] = (
         {_normalize_name(lbl): lbl for lbl in net.nodes} if net is not None else {}
     )
@@ -216,11 +207,10 @@ def _direct_career_links(
         frm, to = (a, b) if f >= r else (b, a)
         weight = max(f, r)
         dashed = False
-        if (net is not None and weight >= MIN_DASH_WEIGHT and success_thresh is not None
-                and node_type.get(to) in GATED_TARGET_TYPES):
+        if net is not None and weight > 0:
             maj_from, maj_to = (la, lb) if f >= r else (lb, la)
             ok = net[maj_from][maj_to].get("ok", 0)
-            dashed = (ok / weight) < success_thresh
+            dashed = edge_dashed(weight, ok, node_type.get(to, ""))
         out.append({
             "from": frm, "to": to,
             "weight": _clamp3(weight) if weight else lk["weight"],
@@ -230,11 +220,10 @@ def _direct_career_links(
 
 
 def _career_graphview(athlete: Athlete, profile: dict[str, Any], session: Session,
-                      limit: int = 12, net: Any | None = None,
-                      success_thresh: float | None = None) -> dict[str, Any]:
+                      limit: int = 12, net: Any | None = None) -> dict[str, Any]:
     """Fighter's career graph (adapted + truncated), falling back to signature transitions.
     Links are directed/dashed against ``net`` (the fighter's own transition network, reused
-    from ``_fighter_forks`` — see ``build_fighters``) + the corpus-wide ``success_thresh``."""
+    from ``_fighter_forks`` — see ``build_fighters``)."""
     g = export_fighter_graph(athlete, session)
     if g and g.get("nodes"):
         gv = _truncate_graph(_to_graphview(g, "a"), limit)
@@ -250,7 +239,7 @@ def _career_graphview(athlete: Athlete, profile: dict[str, Any], session: Sessio
                           "fighter": "a", "weight": _clamp3(int(t["count"]))})
         gv = {"nodes": list(nodes.values()), "links": links}
     node_type = {n["id"]: n.get("cat", "") for n in gv["nodes"]}
-    gv["links"] = _direct_career_links(gv["links"], node_type, net, success_thresh)
+    gv["links"] = _direct_career_links(gv["links"], node_type, net)
     return gv
 
 
@@ -425,11 +414,6 @@ def build_fighters(
     for _m in all_finals:
         matches_by_athlete.setdefault(_m.athlete_a_id, []).append(_m)
         matches_by_athlete.setdefault(_m.athlete_b_id, []).append(_m)
-    # Corpus-wide success threshold for the aggregate directed/dashed edges — computed once,
-    # reused for every dossier's career graph (same value the ocean map dashes against).
-    # ponytail: rebuilds the corpus network separately from build_breakdowns' copy; hoist +
-    # share if export perf ever demands it (currently dwarfed by the per-item cache savings).
-    fighters_thresh = corpus_success_threshold(build_transition_network(session))
     for match in all_finals:
         for aid in (match.athlete_a_id, match.athlete_b_id):
             if aid in seen:
@@ -474,9 +458,9 @@ def build_fighters(
             if cache is not None:
                 career = cache.get_or_compute(
                     f"{aid}:c", fh,
-                    lambda: _career_graphview(athlete, profile, session, 12, _net(), fighters_thresh))
+                    lambda: _career_graphview(athlete, profile, session, 12, _net()))
             else:
-                career = _career_graphview(athlete, profile, session, 12, _net(), fighters_thresh)
+                career = _career_graphview(athlete, profile, session, 12, _net())
             card = _truncate_graph(career, 8)
             slug = slugify(athlete.name)
             rec = profile["fighter"]["record"]

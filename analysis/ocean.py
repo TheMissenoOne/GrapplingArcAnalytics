@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import Any
 
 from analysis.names import _normalize_name
-from analysis.network_metrics import GATED_TARGET_TYPES, MIN_DASH_WEIGHT, edge_arrow
+from analysis.network_metrics import edge_arrow, edge_dashed
 from analysis.technique_match import clean_label
 
 _EFF_PATH = (Path(__file__).resolve().parent.parent
@@ -109,11 +109,12 @@ def _clamp3(n: int) -> int:
 
 
 def _direct_map_links(
-    edges: list[dict[str, Any]], node_type: dict[str, str], success_thresh: float | None,
+    edges: list[dict[str, Any]], node_type: dict[str, str],
 ) -> list[dict[str, Any]]:
     """Collapse a directed edge list into one link per unordered pair (rule 1 — no split,
-    two-way stays undirected) and dash the bottom-quartile-success edges (rule 2). Edges carry
-    ``count``/``ok``/``rev`` from ``map_from_network``."""
+    two-way stays undirected) and dash the low-success edges (rule 2, fixed threshold — see
+    ``network_metrics.edge_dashed``). Edges carry ``count``/``ok``/``rev`` from
+    ``map_from_network``."""
     by_pair: dict[frozenset[str], dict[tuple[str, str], dict[str, Any]]] = defaultdict(dict)
     for e in edges:
         by_pair[frozenset((e["source"], e["target"]))][(e["source"], e["target"])] = e
@@ -127,11 +128,7 @@ def _direct_map_links(
         arrow = edge_arrow(f, r)
         frm, to, maj = (u, v, e_fwd) if f >= r else (v, u, e_bwd)
         weight = max(f, r)
-        dashed = bool(
-            maj and weight >= MIN_DASH_WEIGHT and success_thresh is not None
-            and node_type.get(to) in GATED_TARGET_TYPES
-            and (maj.get("ok", 0) / weight) < success_thresh
-        )
+        dashed = bool(maj) and edge_dashed(weight, maj.get("ok", 0), node_type.get(to, ""))
         out.append({
             "from": frm, "to": to, "weight": _clamp3(weight), "arrow": arrow, "dashed": dashed,
         })
@@ -140,13 +137,8 @@ def _direct_map_links(
 
 def ocean_from_map(
     gmap: dict[str, Any], eff_index: dict[str, float] | None = None,
-    success_thresh: float | None = None,
 ) -> dict[str, Any]:
-    """Pure: assembled map → The Ocean payload (observed nodes only, with relative metrics).
-
-    ``success_thresh`` is the corpus-wide 25th-percentile edge-success value (see
-    ``network_metrics.corpus_success_threshold``) — ``None`` means nothing dashes.
-    """
+    """Pure: assembled map → The Ocean payload (observed nodes only, with relative metrics)."""
     nodes = [n for n in gmap["nodes"].values() if n.get("observed")]
     relativize(nodes, eff_index)
     regions = name_regions(nodes)
@@ -163,7 +155,7 @@ def ocean_from_map(
     } for n in nodes]
     qualifying = [e for e in gmap["edges"]
                   if not e["suggested"] and e["source"] in keep and e["target"] in keep]
-    out_links = _direct_map_links(qualifying, node_type, success_thresh)
+    out_links = _direct_map_links(qualifying, node_type)
     return {"nodes": out_nodes, "links": out_links, "regions": regions,
             "meta": {"positions": len(out_nodes), "transitions": len(out_links)}}
 
@@ -172,10 +164,9 @@ def build_ocean(session: Any) -> dict[str, Any]:
     """Session wrapper: assemble the map, attach hybrid neighbours, build the Ocean payload."""
     from analysis.embeddings import semantic_neighbours_fn
     from analysis.grappling_map import attach_neighbors, build_grappling_map
-    from analysis.network_metrics import corpus_success_threshold
     from analysis.vector_store import structural_neighbours_fn
 
     gmap = build_grappling_map(session)
     graph = gmap.pop("_graph")
     attach_neighbors(gmap, semantic_neighbours_fn(session), structural_neighbours_fn(graph))
-    return ocean_from_map(gmap, success_thresh=corpus_success_threshold(graph))
+    return ocean_from_map(gmap)

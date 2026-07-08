@@ -82,14 +82,18 @@ def test_ocean_collapses_reciprocal_pairs_and_orients_the_arrow() -> None:
     assert pair_links[0]["from"] == bc and pair_links[0]["to"] == rnc and pair_links[0]["arrow"]
 
 
-def test_ocean_dashes_below_the_corpus_success_threshold() -> None:
-    # A submission-targeted edge with weight >= 3 and success well below a low threshold dashes;
-    # a same-shape edge with success above it doesn't.
-    gmap = map_from_network(network_from_sequences(_sequences()))
-    ocean_low = ocean_from_map(gmap, eff_index={}, success_thresh=0.1)
+def test_ocean_dashes_low_landing_edges() -> None:
+    # Fixed rule: dash iff weight >= 5, target type gated, and success < 0.40.
+    # CG -> TRI five times, only one landing → success 0.2 → dashed.
+    # BC -> RNC four times, all landing → below weight floor AND success 1.0 → not dashed.
+    miss = [_e(CG, "guard", "B"), _e(TRI, "submission", "B", False)]
+    land = [_e(CG, "guard", "B"), _e(TRI, "submission", "B", True)]
+    seqs = _sequences() + [miss, miss, miss, miss, land]
+    gmap = map_from_network(network_from_sequences(seqs))
+    ocean = ocean_from_map(gmap, eff_index={})
+    cg, tri = _normalize_name(CG), _normalize_name(TRI)
     bc, rnc = _normalize_name(BC), _normalize_name(RNC)
-    link = next(lk for lk in ocean_low["links"] if lk["from"] == bc and lk["to"] == rnc)
-    assert link["dashed"] is False  # BC->RNC success is 1.0 (all 4 landed) >= 0.1
-    ocean_high = ocean_from_map(gmap, eff_index={}, success_thresh=1.01)
-    link_high = next(lk for lk in ocean_high["links"] if lk["from"] == bc and lk["to"] == rnc)
-    assert link_high["dashed"] is True  # 1.0 < 1.01
+    cg_tri = next(lk for lk in ocean["links"] if {lk["from"], lk["to"]} == {cg, tri})
+    assert cg_tri["dashed"] is True   # weight 5, success 1/5 = 0.2 < 0.40
+    bc_rnc = next(lk for lk in ocean["links"] if {lk["from"], lk["to"]} == {bc, rnc})
+    assert bc_rnc["dashed"] is False  # weight 4 < 5 floor (and success 1.0)
