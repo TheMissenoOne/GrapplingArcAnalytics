@@ -5,11 +5,14 @@ from __future__ import annotations
 from typing import Any
 
 from analysis.network_metrics import (
+    corpus_success_threshold,
     detect_communities,
+    edge_arrow,
     network_from_sequences,
     pagerank_ranking,
     reward_risk_ranking,
     route_to_submission,
+    success_threshold,
 )
 
 
@@ -65,3 +68,51 @@ def test_communities_partition_the_graph() -> None:
     members = {n for c in comms for n in c}
     assert members == {BC, RNC, CG, TRI}
     assert len(comms) >= 1
+
+
+def test_edge_ok_counts_target_successes() -> None:
+    # BC -> RNC happens 4x, all landing on a *successful* RNC (ok=True in the fixture).
+    g = network_from_sequences(_sequences())
+    assert g[BC][RNC]["ok"] == 4
+
+
+def test_edge_ok_only_counts_the_target_event() -> None:
+    # A miss on the source shouldn't matter — only whether the TARGET event succeeded.
+    seq = [
+        [{"label": "Closed Guard", "type": "guard", "actor_id": "A", "successful": False},
+         {"label": "Triangle Choke", "type": "submission", "actor_id": "A", "successful": True}],
+    ]
+    g = network_from_sequences(seq)
+    assert g["Closed Guard"]["Triangle Choke"]["weight"] == 1
+    assert g["Closed Guard"]["Triangle Choke"]["ok"] == 1
+
+
+def test_edge_arrow_rules() -> None:
+    assert edge_arrow(1, 0) is False          # below min_edge → undirected
+    assert edge_arrow(10, 4) is False          # 4 >= 0.34*10 → genuine two-way, no arrow
+    assert edge_arrow(10, 2) is True           # 2 < 0.34*10 → one direction dominates
+    assert edge_arrow(0, 0) is False
+
+
+def test_success_threshold_25th_percentile_gated_by_weight_and_type() -> None:
+    edges = [
+        (5, 1, "submission"),   # success 0.2 — qualifies
+        (5, 3, "submission"),   # success 0.6 — qualifies
+        (5, 5, "submission"),   # success 1.0 — qualifies
+        (5, 5, "control"),      # not a gated target type — excluded
+        (2, 0, "submission"),   # below weight floor — excluded
+    ]
+    thresh = success_threshold(edges, q=0.25, min_n=3)
+    assert thresh is not None
+    assert 0.19 < thresh < 0.4  # 25th pct of [0.2, 0.6, 1.0]
+
+
+def test_success_threshold_none_when_too_few_qualify() -> None:
+    assert success_threshold([(5, 1, "submission")], min_n=3) is None
+
+
+def test_corpus_success_threshold_reads_off_the_graph() -> None:
+    g = network_from_sequences(_sequences())
+    # only 2 distinct submission-targeted edges in the fixture (BC->RNC, CG->TRI) — below
+    # min_n=3, so nothing qualifies for a corpus-wide threshold yet.
+    assert corpus_success_threshold(g) is None

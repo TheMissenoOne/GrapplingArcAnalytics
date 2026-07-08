@@ -17,10 +17,12 @@ from __future__ import annotations
 
 import json
 import statistics
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
 from analysis.names import _normalize_name
+from analysis.network_metrics import GATED_TARGET_TYPES, MIN_DASH_WEIGHT, edge_arrow
 from analysis.technique_match import clean_label
 
 _EFF_PATH = (Path(__file__).resolve().parent.parent
@@ -106,14 +108,50 @@ def _clamp3(n: int) -> int:
     return 1 if n <= 1 else (2 if n == 2 else 3)
 
 
+def _direct_map_links(
+    edges: list[dict[str, Any]], node_type: dict[str, str], success_thresh: float | None,
+) -> list[dict[str, Any]]:
+    """Collapse a directed edge list into one link per unordered pair (rule 1 — no split,
+    two-way stays undirected) and dash the bottom-quartile-success edges (rule 2). Edges carry
+    ``count``/``ok``/``rev`` from ``map_from_network``."""
+    by_pair: dict[frozenset[str], dict[tuple[str, str], dict[str, Any]]] = defaultdict(dict)
+    for e in edges:
+        by_pair[frozenset((e["source"], e["target"]))][(e["source"], e["target"])] = e
+
+    out: list[dict[str, Any]] = []
+    for pair, dirs in by_pair.items():
+        u, v = tuple(pair)
+        e_fwd, e_bwd = dirs.get((u, v)), dirs.get((v, u))
+        f = e_fwd["count"] if e_fwd else 0
+        r = e_bwd["count"] if e_bwd else 0
+        arrow = edge_arrow(f, r)
+        frm, to, maj = (u, v, e_fwd) if f >= r else (v, u, e_bwd)
+        weight = max(f, r)
+        dashed = bool(
+            maj and weight >= MIN_DASH_WEIGHT and success_thresh is not None
+            and node_type.get(to) in GATED_TARGET_TYPES
+            and (maj.get("ok", 0) / weight) < success_thresh
+        )
+        out.append({
+            "from": frm, "to": to, "weight": _clamp3(weight), "arrow": arrow, "dashed": dashed,
+        })
+    return out
+
+
 def ocean_from_map(
-    gmap: dict[str, Any], eff_index: dict[str, float] | None = None
+    gmap: dict[str, Any], eff_index: dict[str, float] | None = None,
+    success_thresh: float | None = None,
 ) -> dict[str, Any]:
-    """Pure: assembled map → The Ocean payload (observed nodes only, with relative metrics)."""
+    """Pure: assembled map → The Ocean payload (observed nodes only, with relative metrics).
+
+    ``success_thresh`` is the corpus-wide 25th-percentile edge-success value (see
+    ``network_metrics.corpus_success_threshold``) — ``None`` means nothing dashes.
+    """
     nodes = [n for n in gmap["nodes"].values() if n.get("observed")]
     relativize(nodes, eff_index)
     regions = name_regions(nodes)
     keep = {n["node_key"] for n in nodes}
+    node_type = {n["node_key"]: n["type"] for n in nodes}
     pr_max = max((n["pagerank"] for n in nodes), default=0.0) or 1.0
     out_nodes = [{
         "id": n["node_key"], "label": n["label"], "pt": n.get("pt", ""), "type": n["type"],
@@ -123,9 +161,9 @@ def ocean_from_map(
         "metrics": n["metrics"],
         "neighbours": [nb for nb in n.get("neighbours", []) if nb["node_key"] in keep][:6],
     } for n in nodes]
-    out_links = [{"from": e["source"], "to": e["target"], "weight": _clamp3(e["count"])}
-                 for e in gmap["edges"]
-                 if not e["suggested"] and e["source"] in keep and e["target"] in keep]
+    qualifying = [e for e in gmap["edges"]
+                  if not e["suggested"] and e["source"] in keep and e["target"] in keep]
+    out_links = _direct_map_links(qualifying, node_type, success_thresh)
     return {"nodes": out_nodes, "links": out_links, "regions": regions,
             "meta": {"positions": len(out_nodes), "transitions": len(out_links)}}
 
@@ -134,9 +172,10 @@ def build_ocean(session: Any) -> dict[str, Any]:
     """Session wrapper: assemble the map, attach hybrid neighbours, build the Ocean payload."""
     from analysis.embeddings import semantic_neighbours_fn
     from analysis.grappling_map import attach_neighbors, build_grappling_map
+    from analysis.network_metrics import corpus_success_threshold
     from analysis.vector_store import structural_neighbours_fn
 
     gmap = build_grappling_map(session)
     graph = gmap.pop("_graph")
     attach_neighbors(gmap, semantic_neighbours_fn(session), structural_neighbours_fn(graph))
-    return ocean_from_map(gmap)
+    return ocean_from_map(gmap, success_thresh=corpus_success_threshold(graph))

@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from analysis.grappling_map import map_from_network
+from analysis.names import _normalize_name
 from analysis.network_metrics import network_from_sequences
 from analysis.ocean import name_regions, ocean_from_map, relativize
 
@@ -66,4 +67,29 @@ def test_ocean_from_map_shape() -> None:
     assert all(m in ocean["nodes"][0]["metrics"]
                for m in ("frequency", "centrality", "bridging", "favorability"))
     assert all(isinstance(e["weight"], int) for e in ocean["links"])
+    assert all({"arrow", "dashed"} <= set(e) for e in ocean["links"])
     assert isinstance(ocean["regions"], list)
+
+
+def test_ocean_collapses_reciprocal_pairs_and_orients_the_arrow() -> None:
+    # BC <-> RNC both ways, BC dominant (4x) over RNC->BC (1x) — one link, arrow toward BC.
+    seqs = _sequences() + [[_e(RNC, "submission", "A", True), _e(BC, "control", "A")]]
+    gmap = map_from_network(network_from_sequences(seqs))
+    ocean = ocean_from_map(gmap, eff_index={})
+    bc, rnc = _normalize_name(BC), _normalize_name(RNC)
+    pair_links = [lk for lk in ocean["links"] if {lk["from"], lk["to"]} == {bc, rnc}]
+    assert len(pair_links) == 1  # no split, one link per unordered pair
+    assert pair_links[0]["from"] == bc and pair_links[0]["to"] == rnc and pair_links[0]["arrow"]
+
+
+def test_ocean_dashes_below_the_corpus_success_threshold() -> None:
+    # A submission-targeted edge with weight >= 3 and success well below a low threshold dashes;
+    # a same-shape edge with success above it doesn't.
+    gmap = map_from_network(network_from_sequences(_sequences()))
+    ocean_low = ocean_from_map(gmap, eff_index={}, success_thresh=0.1)
+    bc, rnc = _normalize_name(BC), _normalize_name(RNC)
+    link = next(lk for lk in ocean_low["links"] if lk["from"] == bc and lk["to"] == rnc)
+    assert link["dashed"] is False  # BC->RNC success is 1.0 (all 4 landed) >= 0.1
+    ocean_high = ocean_from_map(gmap, eff_index={}, success_thresh=1.01)
+    link_high = next(lk for lk in ocean_high["links"] if lk["from"] == bc and lk["to"] == rnc)
+    assert link_high["dashed"] is True  # 1.0 < 1.01

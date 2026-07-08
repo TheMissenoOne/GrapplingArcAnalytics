@@ -13,6 +13,22 @@ tags: [kanban, phase-6, P1, site]
 
 # 013 — Site GAGraph Directed Edges + Settled-Frame Redraw Skip
 
+> **2026-07-08 update (supersedes the direction/dash part below):** implemented per the
+> user-approved data-directed-edges design, which changed two things vs. the original plan:
+> - **No split / no curve.** A reciprocal pair collapses to ONE link. A genuine two-way
+>   exchange (`m >= two_way_ratio*M`, `two_way_ratio=0.34`) → `arrow:false`, undirected —
+>   never two arrows, no bezier offset.
+> - **This IS a two-repo contract change for the aggregate slice** (ocean + career dossiers):
+>   Analytics now emits `arrow`/`dashed` booleans per link (`ocean_from_map` in
+>   `analysis/ocean.py`; `_career_graphview`/`_direct_career_links` in `export/site_data.py`),
+>   `graph.js` consumes them. Breakdown links (`_to_graphview`) stayed a single-repo concern as
+>   originally planned — always `arrow:true, dashed:false` (timeline fact, no gating).
+> - **New: dashed = low-success, data-driven.** A corpus-wide bottom-quartile-success gate
+>   (target-type gated, weight-floored, `analysis/network_metrics.success_threshold`) marks an
+>   edge `dashed:true`; `graph.js` draws it `[5,5]` (distinct from the existing `[3,4]`
+>   "contested handover" dash).
+> - Item 4 (settled-frame redraw-skip) is UNTOUCHED by this update — still open.
+
 ## Goal
 `GrapplingArc/site/graph.js` renders arrowheads at each edge's target end (with a small curve for
 reciprocal pairs) and stops redrawing the canvas when the layout is settled and nothing changed.

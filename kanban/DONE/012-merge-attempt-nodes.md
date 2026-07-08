@@ -4,7 +4,7 @@ slug: merge-attempt-nodes
 phase: 6
 lane: J
 priority: P1
-status: todo
+status: done
 depends: []
 branch: feature/012-merge-attempt-nodes
 created: 2026-07-07

@@ -92,9 +92,11 @@ def map_from_network(g: Any) -> dict[str, Any]:
 
     edges: list[dict[str, Any]] = []
     for u, v, d in g.edges(data=True):
+        rev = int(g[v][u]["weight"]) if g.has_edge(v, u) else 0
         edges.append({
             "source": _normalize_name(u), "target": _normalize_name(v),
-            "count": int(d["weight"]), "suggested": False,
+            "count": int(d["weight"]), "ok": int(d.get("ok", 0)), "rev": rev,
+            "suggested": False,
         })
 
     return {"nodes": nodes, "edges": edges, "_graph": g}

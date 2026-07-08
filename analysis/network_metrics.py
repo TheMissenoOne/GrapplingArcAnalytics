@@ -18,7 +18,9 @@ functions are pure on the graph.
 
 from __future__ import annotations
 
+import statistics
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from typing import Any
 
 import networkx as nx
@@ -27,6 +29,12 @@ import numpy as np
 from analysis.technique_match import clean_label
 
 _SUBMISSION = "submission"
+
+# Directed-edge rendering constants (data-directed graph edges, see kanban/TODO/013).
+MIN_EDGE_ARROW = 2       # below this max(f,r) an edge is drawn undirected
+TWO_WAY_RATIO = 0.34     # minority share above which a two-way exchange stays undirected
+MIN_DASH_WEIGHT = 3      # edges below this weight are never dashed (unknown, not bad)
+GATED_TARGET_TYPES = frozenset({"submission", "takedown", "sweep", "pass", "escape"})
 
 
 def _events(sequence: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -50,7 +58,9 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
 
     **Edges are within-actor** — one fighter's own ordered flow (their next *own* action),
     so the network is a map of real technique transitions, never a cross-fighter artifact
-    (e.g. A's escape followed by B's takedown is *not* an edge). Edge ``weight`` = count.
+    (e.g. A's escape followed by B's takedown is *not* an edge). Edge ``weight`` = count,
+    edge ``ok`` = how many of those transitions landed on a *successful* target event
+    (drives the data-directed / dashed rendering — see ``edge_arrow``/``success_threshold``).
 
     Markov reward-risk per node (Lamas et al. 2024), over appearances that have a successor
     (a position that simply ends the recorded sequence is excluded from the denominator):
@@ -85,14 +95,16 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
         for idxs in by_actor.values():
             for k in range(len(idxs) - 1):
                 next_own[idxs[k]] = idxs[k + 1]
-            # within-actor flow edges
+            # within-actor flow edges (ok = target event's own success flag)
             for k in range(len(idxs) - 1):
                 a, b = events[idxs[k]]["label"], events[idxs[k + 1]]["label"]
                 if a != b:
+                    b_ok = 1 if events[idxs[k + 1]]["ok"] else 0
                     if g.has_edge(a, b):
                         g[a][b]["weight"] += 1
+                        g[a][b]["ok"] += b_ok
                     else:
-                        g.add_edge(a, b, weight=1)
+                        g.add_edge(a, b, weight=1, ok=b_ok)
 
         for i, e in enumerate(events):
             if i + 1 >= n:
@@ -129,6 +141,53 @@ def build_transition_network(session: Any) -> nx.DiGraph:
     from export.match_breakdown import _final_matches
 
     return network_from_sequences([m.sequence or [] for m in _final_matches(session)])
+
+
+# ── data-directed edges (aggregate graphs: ocean map + career dossiers) ─────────────────────
+def edge_arrow(f: int, r: int, min_edge: int = MIN_EDGE_ARROW,
+               two_way_ratio: float = TWO_WAY_RATIO) -> bool:
+    """Rule-1 arrow decision for an unordered pair with forward/reverse weights ``f``/``r``.
+
+    ``True`` = draw a plain arrow, oriented in the majority direction (caller orients
+    ``f >= r`` → forward, else reversed). ``False`` = undirected (either too sparse to call,
+    or a genuine two-way exchange — never split into two arrows).
+    """
+    m, big_m = min(f, r), max(f, r)
+    if big_m < min_edge:
+        return False
+    if m >= min_edge and m >= two_way_ratio * big_m:
+        return False
+    return True
+
+
+def success_threshold(
+    edges_success_and_meta: Iterable[tuple[int, int, str]],
+    q: float = 0.25,
+    min_n: int = MIN_DASH_WEIGHT,
+    gated_types: frozenset[str] = GATED_TARGET_TYPES,
+) -> float | None:
+    """25th-percentile of per-edge success (``ok / weight``) over qualifying edges.
+
+    ``edges_success_and_meta`` = ``(weight, ok, target_type)`` per directed edge. An edge
+    qualifies when ``weight >= min_n`` and ``target_type`` is in ``gated_types``. Returns
+    ``None`` when fewer than ``min_n`` edges qualify — too few to call a threshold, so
+    nothing dashes.
+    """
+    vals = sorted(ok / weight for weight, ok, ttype in edges_success_and_meta
+                  if weight >= min_n and ttype in gated_types)
+    if len(vals) < min_n:
+        return None
+    return statistics.quantiles(vals, n=round(1 / q))[0]
+
+
+def corpus_success_threshold(
+    g: nx.DiGraph, q: float = 0.25, min_n: int = MIN_DASH_WEIGHT,
+) -> float | None:
+    """``success_threshold`` computed straight off a transition network's edges — the single
+    corpus-wide value both the ocean map and career dossiers dash against."""
+    edges = ((d.get("weight", 0), d.get("ok", 0), g.nodes[v].get("type", ""))
+             for _u, v, d in g.edges(data=True))
+    return success_threshold(edges, q=q, min_n=min_n)
 
 
 # ── metrics (pure on the graph) ──────────────────────────────────────────────

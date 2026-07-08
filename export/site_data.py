@@ -42,7 +42,14 @@ from analysis.counter_moves import counter_moves
 from analysis.defense_rate import defense_profile
 from analysis.event_profile import build_event_profile, event_names
 from analysis.names import _normalize_name
-from analysis.network_metrics import network_from_sequences
+from analysis.network_metrics import (
+    GATED_TARGET_TYPES,
+    MIN_DASH_WEIGHT,
+    build_transition_network,
+    corpus_success_threshold,
+    edge_arrow,
+    network_from_sequences,
+)
 from analysis.path_to_victory import dilemmas, path_to_victory
 from analysis.style_profile import MIN_DOSSIER_EVENTS, build_style_profile, qualifies
 from db.models import Archetype, Athlete
@@ -168,6 +175,9 @@ def _to_graphview(
             "from": e["source"], "to": e["target"],
             "fighter": d.get("side", default_side),
             "weight": _clamp3(int(d.get("count", 1))),
+            # per-bout breakdown = a recorded timeline fact, always a plain arrow, never
+            # dashed/volume-gated (that's aggregate-graph territory — see _career_graphview).
+            "arrow": True, "dashed": False,
         })
     return {"nodes": nodes, "links": links}
 
@@ -180,22 +190,68 @@ def _truncate_graph(g: dict[str, Any], limit: int) -> dict[str, Any]:
     return {"nodes": nodes, "links": links}
 
 
+def _direct_career_links(
+    links: list[dict[str, Any]], node_type: dict[str, str],
+    net: Any | None, success_thresh: float | None,
+) -> list[dict[str, Any]]:
+    """Collapse reciprocal pairs + orient/dash career links (aggregate graph, rule 1+2) against
+    the fighter's own transition ``net`` (raw within-actor counts) and the corpus-wide success
+    threshold. Node ids are ``node_key``s; ``net`` node labels are canonical library names, so
+    pairing goes through ``_normalize_name``."""
+    label_by_key: dict[str, str] = (
+        {_normalize_name(lbl): lbl for lbl in net.nodes} if net is not None else {}
+    )
+    seen: set[frozenset[str]] = set()
+    out: list[dict[str, Any]] = []
+    for lk in links:
+        a, b = lk["from"], lk["to"]
+        pair = frozenset((a, b))
+        if pair in seen:
+            continue
+        seen.add(pair)
+        la, lb = label_by_key.get(a), label_by_key.get(b)
+        f = net[la][lb]["weight"] if net is not None and la and lb and net.has_edge(la, lb) else 0
+        r = net[lb][la]["weight"] if net is not None and la and lb and net.has_edge(lb, la) else 0
+        arrow = edge_arrow(f, r)
+        frm, to = (a, b) if f >= r else (b, a)
+        weight = max(f, r)
+        dashed = False
+        if (net is not None and weight >= MIN_DASH_WEIGHT and success_thresh is not None
+                and node_type.get(to) in GATED_TARGET_TYPES):
+            maj_from, maj_to = (la, lb) if f >= r else (lb, la)
+            ok = net[maj_from][maj_to].get("ok", 0)
+            dashed = (ok / weight) < success_thresh
+        out.append({
+            "from": frm, "to": to,
+            "weight": _clamp3(weight) if weight else lk["weight"],
+            "fighter": lk.get("fighter", "a"), "arrow": arrow, "dashed": dashed,
+        })
+    return out
+
+
 def _career_graphview(athlete: Athlete, profile: dict[str, Any], session: Session,
-                      limit: int = 12) -> dict[str, Any]:
-    """Fighter's career graph (adapted + truncated), falling back to signature transitions."""
+                      limit: int = 12, net: Any | None = None,
+                      success_thresh: float | None = None) -> dict[str, Any]:
+    """Fighter's career graph (adapted + truncated), falling back to signature transitions.
+    Links are directed/dashed against ``net`` (the fighter's own transition network, reused
+    from ``_fighter_forks`` — see ``build_fighters``) + the corpus-wide ``success_thresh``."""
     g = export_fighter_graph(athlete, session)
     if g and g.get("nodes"):
-        return _truncate_graph(_to_graphview(g, "a"), limit)
-    nodes: dict[str, dict[str, Any]] = {}
-    links = []
-    for t in profile.get("signature_transitions", []):
-        for lb in (t["from"], t["to"]):
-            key = _normalize_name(lb)
-            nodes.setdefault(key, {"id": key, "label": lb, "cat": "control",
-                                   "size": 2, "fighter": "a"})
-        links.append({"from": _normalize_name(t["from"]), "to": _normalize_name(t["to"]),
-                      "fighter": "a", "weight": _clamp3(int(t["count"]))})
-    return {"nodes": list(nodes.values()), "links": links}
+        gv = _truncate_graph(_to_graphview(g, "a"), limit)
+    else:
+        nodes: dict[str, dict[str, Any]] = {}
+        links = []
+        for t in profile.get("signature_transitions", []):
+            for lb in (t["from"], t["to"]):
+                key = _normalize_name(lb)
+                nodes.setdefault(key, {"id": key, "label": lb, "cat": "control",
+                                       "size": 2, "fighter": "a"})
+            links.append({"from": _normalize_name(t["from"]), "to": _normalize_name(t["to"]),
+                          "fighter": "a", "weight": _clamp3(int(t["count"]))})
+        gv = {"nodes": list(nodes.values()), "links": links}
+    node_type = {n["id"]: n.get("cat", "") for n in gv["nodes"]}
+    gv["links"] = _direct_career_links(gv["links"], node_type, net, success_thresh)
+    return gv
 
 
 # ── data files ───────────────────────────────────────────────────────────────
@@ -314,16 +370,18 @@ def _node_video_refs(
     return refs
 
 
-def _fighter_forks(aid: str, athlete_matches: list[Any], session: Session) -> dict[str, Any]:
+def _fighter_forks(aid: str, athlete_matches: list[Any], session: Session,
+                   net: Any | None = None) -> dict[str, Any]:
     """The network-heavy per-fighter block: top-3 dilemmas, top counter-moves, and the defense
     profile. Isolated so the export can cache it by fighter hash (its inputs are the athlete's
-    bouts + opponents, which the hash covers)."""
+    bouts + opponents, which the hash covers). ``net`` reuses the transition network already
+    built by the caller (``build_fighters``) instead of recomputing it here."""
     seqs = [m.sequence for m in athlete_matches if m.sequence]
     dilemmas_list: list[dict[str, Any]] = []
     counters_list: list[dict[str, Any]] = []
     if seqs:
         try:
-            g = network_from_sequences(seqs)
+            g = net if net is not None else network_from_sequences(seqs)
             ptv = path_to_victory(g)
             dilemmas_list = [
                 {"node": d["node"], "branches": [[b, p] for b, p in d["branches"]]}
@@ -367,6 +425,11 @@ def build_fighters(
     for _m in all_finals:
         matches_by_athlete.setdefault(_m.athlete_a_id, []).append(_m)
         matches_by_athlete.setdefault(_m.athlete_b_id, []).append(_m)
+    # Corpus-wide success threshold for the aggregate directed/dashed edges — computed once,
+    # reused for every dossier's career graph (same value the ocean map dashes against).
+    # ponytail: rebuilds the corpus network separately from build_breakdowns' copy; hoist +
+    # share if export perf ever demands it (currently dwarfed by the per-item cache savings).
+    fighters_thresh = corpus_success_threshold(build_transition_network(session))
     for match in all_finals:
         for aid in (match.athlete_a_id, match.athlete_b_id):
             if aid in seen:
@@ -396,11 +459,24 @@ def build_fighters(
             # Hide irrelevant dossiers: a striker with a couple of scrambles is noise.
             if profile["grappling_events"] < MIN_DOSSIER_EVENTS:
                 continue
+            # This fighter's own transition net — built once, shared by the career graph's
+            # arrow/dash orientation AND _fighter_forks below (don't recompute). Lazy: the
+            # cache thunks below only call it on a miss, so a cache HIT still skips the build.
+            athlete_matches = matches_by_athlete.get(aid, [])[:30]
+            _net_box: list[Any] = []
+
+            def _net() -> Any | None:
+                if not _net_box:
+                    _seqs = [m.sequence for m in athlete_matches if m.sequence]
+                    _net_box.append(network_from_sequences(_seqs) if _seqs else None)
+                return _net_box[0]
+
             if cache is not None:
                 career = cache.get_or_compute(
-                    f"{aid}:c", fh, lambda: _career_graphview(athlete, profile, session, 12))
+                    f"{aid}:c", fh,
+                    lambda: _career_graphview(athlete, profile, session, 12, _net(), fighters_thresh))
             else:
-                career = _career_graphview(athlete, profile, session, 12)
+                career = _career_graphview(athlete, profile, session, 12, _net(), fighters_thresh)
             card = _truncate_graph(career, 8)
             slug = slugify(athlete.name)
             rec = profile["fighter"]["record"]
@@ -423,14 +499,13 @@ def build_fighters(
             system_profiles[slug] = system_profile
 
             # Per-fighter forks (dilemmas + counters + defense) — the network-heavy block.
-            athlete_matches = matches_by_athlete.get(aid, [])[:30]
             if cache is not None:
                 forks = cache.get_or_compute(
-                    f"{aid}:f", fh, lambda: _fighter_forks(aid, athlete_matches, session))
+                    f"{aid}:f", fh, lambda: _fighter_forks(aid, athlete_matches, session, _net()))
                 videos = cache.get_or_compute(
                     f"{aid}:v", fh, lambda: _node_video_refs(aid, athlete_matches, session))
             else:
-                forks = _fighter_forks(aid, athlete_matches, session)
+                forks = _fighter_forks(aid, athlete_matches, session, _net())
                 videos = _node_video_refs(aid, athlete_matches, session)
 
             details[slug] = {
