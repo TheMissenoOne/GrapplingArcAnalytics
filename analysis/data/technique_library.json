@@ -68,7 +68,8 @@
       "triângulo de braço",
       "arm triangle choke",
       "kata gatame",
-      "head and arm choke"
+      "head and arm choke",
+      "arm-triangle"
     ]
   },
   {
@@ -435,7 +436,8 @@
       "morote gari",
       "double",
       "queda de duas pernas",
-      "double leg takedown attempt"
+      "double leg takedown attempt",
+      "double-leg takedown"
     ]
   },
   {
@@ -957,7 +959,7 @@
     ]
   },
   {
-    "en": "North-South Choke",
+    "en": "North South Choke",
     "pt": "Estrangulamento Norte-Sul",
     "type": "submission",
     "variants": [
@@ -1292,7 +1294,8 @@
       "single",
       "queda simples",
       "queda de uma perna",
-      "single leg takedown attempt"
+      "single leg takedown attempt",
+      "single-leg takedown"
     ]
   },
   {
@@ -1379,7 +1382,8 @@
       "straight ankle lock",
       "botinha",
       "straight footlock",
-      "straight ankle lock attempt"
+      "straight ankle lock attempt",
+      "straight ankle"
     ]
   },
   {
