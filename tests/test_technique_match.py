@@ -37,6 +37,9 @@ class TestCleanLabel:
         assert clean_label("Rear Naked Choke Attempted") == "Rear Naked Choke"
         # A base that isn't in the library still loses the "attempt" word (no fragment node).
         assert "attempt" not in clean_label("Some Made Up Move Attempt").lower()
+        # Even when "<x> attempt" is an explicit library variant AND the event type disagrees
+        # with the base (mistyped), the attempt word is still stripped (regression: transition).
+        assert "attempt" not in clean_label("Heel Hook Attempt", "transition").lower()
 
     def test_empty(self) -> None:
         assert clean_label("") == ""

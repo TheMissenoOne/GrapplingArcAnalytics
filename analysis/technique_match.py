@@ -61,18 +61,19 @@ def clean_label(label: str, type_hint: str = "") -> str:
     raw = str(label or "").strip()
     if not raw:
         return raw
+    # "<X> Attempt/Attempted/Attempting" is never a distinct technique — strip the attempt
+    # word and canonicalise the base <X>. Done BEFORE the library lookup so it also covers
+    # the ~15 techniques that carry an explicit "<x> attempt" variant even when the event's
+    # type disagrees with the base (which would otherwise leave the attempt label untouched).
+    if _ATTEMPT_RE.search(raw):
+        base = _ATTEMPT_RE.sub(" ", raw)
+        base = re.sub(r"\s{2,}", " ", base).strip(" /-")  # tidy leftover separators
+        if base and _normalize_name(base) != _normalize_name(raw):
+            return clean_label(base, type_hint)
     norm = _normalize_name(raw)
     idx = _index()
     hit = idx.get(norm) or idx.get(_resolve_aliases(norm))
     if hit is None:
-        # Not a known technique as-is. If it's an "<X> Attempt" label, strip the attempt
-        # word and canonicalise the base <X> — so attempt labels collapse into their parent
-        # technique instead of fragmenting, and replays never recreate an attempt node.
-        if _ATTEMPT_RE.search(raw):
-            base = _ATTEMPT_RE.sub(" ", raw)
-            base = re.sub(r"\s{2,}", " ", base).strip(" /-")  # tidy leftover separators
-            if base and _normalize_name(base) != norm:
-                return clean_label(base, type_hint)
         return raw
     en, lib_type = hit
     hint = _normalize_name(type_hint)
