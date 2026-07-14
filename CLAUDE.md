@@ -71,6 +71,25 @@
 └── .claude/skills/                  # agent skills
 ```
 
+## Skill Library
+
+Local `.claude/skills/` (repo tree above) = this module's own skills (analysis/cv/pipeline) — separate
+from the workspace-root cross-module library one level up at `/home/vetor/GrapplingArc/.claude/skills`;
+check root `CLAUDE.md`'s "Skill Library" table before cross-cutting or unfamiliar work. Most relevant here:
+
+| Skill | Load when |
+|---|---|
+| ingest-to-publish | new event transcript needs to become live site pages |
+| run-and-operate | starting app/dashboard/realtime locally, change needs to reach the public site, replay decision |
+| supabase-schema-migration | adding/altering table/column/RLS/view, new alembic revision, suspected schema drift |
+| site-export-perf-campaign | public-site export slow/hangs ~10-12min, speeding up build_* functions |
+| research-methodology | experimental ELO/metric/embedding work, "is this predictive" |
+| add-ci | adding or reviewing a GitHub Actions workflow, deciding what should gate a PR |
+| diagnostics-and-tooling | need read-only current state — prod DB check, site bundle validation, run one test |
+| debugging-playbook | symptom matches a known failure mode (export stuck, sync errors, stale offline data) |
+| failure-archaeology | about to retry something that smells like a past dead end |
+| architecture-contract | change crosses a module boundary — storage key, Supabase schema, ELO export, site global |
+
 ## Dataset Registry
 
 | key | source / slug | rows | delimiter | columns |

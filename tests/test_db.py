@@ -371,7 +371,7 @@ def test_bundle_import_provenance(session):
 def test_fixture_bundle_round_trip():
     """Parse the real mock bundle fixture."""
     fixture = (
-        Path(__file__).parent.parent
+        Path(__file__).parent.parent.parent
         / "GrapplingArcApp" / "src" / "data" / "mockData" / "mock_user_bundle.json"
     )
     if not fixture.exists():

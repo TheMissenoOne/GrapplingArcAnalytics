@@ -19,6 +19,25 @@ ultra-caveman default. No filler. Fragments. Technical terms exact. Stop only on
 9. **Kaggle via kagglehub** — never hardcode Kaggle paths. Use `Pipeline.download()`
 10. **uv** — Python 3.12+, pyproject.toml, no requirements.txt
 
+## Skill Library
+
+Workspace-root library at `/home/vetor/GrapplingArc/.claude/skills` (one level up) — check root
+CLAUDE.md's "Skill Library" table before cross-cutting/unfamiliar work. Distinct from this repo's
+own `.claude/skills/` (analysis/cv/pipeline, local only). Most relevant here:
+
+| Skill | Load when |
+|---|---|
+| ingest-to-publish | new event transcript needs to become live site pages |
+| run-and-operate | starting app/dashboard/realtime locally, change needs to reach the public site, replay decision |
+| supabase-schema-migration | adding/altering table/column/RLS/view, new alembic revision, suspected schema drift |
+| site-export-perf-campaign | public-site export slow/hangs ~10-12min, speeding up build_* functions |
+| research-methodology | experimental ELO/metric/embedding work, "is this predictive" |
+| add-ci | adding or reviewing a GitHub Actions workflow, deciding what should gate a PR |
+| diagnostics-and-tooling | need read-only current state — prod DB check, site bundle validation, run one test |
+| debugging-playbook | symptom matches a known failure mode (export stuck, sync errors, stale offline data) |
+| failure-archaeology | about to retry something that smells like a past dead end |
+| architecture-contract | change crosses a module boundary — storage key, Supabase schema, ELO export, site global |
+
 ## Workflow
 
 ticket → worktree → analyze → implement → test → pr

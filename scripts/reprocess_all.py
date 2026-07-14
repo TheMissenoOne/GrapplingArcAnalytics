@@ -158,11 +158,11 @@ def main() -> int:
     if args.no_export:
         return 0
 
-    from export.match_breakdown import _DEFAULT_OUT
-    from export.match_breakdown import run as export_run
+    from export.site_data import _DEFAULT_OUT
+    from export.site_data import run as export_run
 
     logger.info("── Re-exporting site assets → %s ──", _DEFAULT_OUT)
-    return export_run(_DEFAULT_OUT, None)
+    return export_run(_DEFAULT_OUT)
 
 
 if __name__ == "__main__":
