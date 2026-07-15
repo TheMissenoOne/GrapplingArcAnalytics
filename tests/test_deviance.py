@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import pytest
+
 from analysis.deviance import (
+    is_grappling_node,
     node_deviance,
     node_population_stats,
     signature_nodes,
@@ -82,3 +85,53 @@ def test_type_deviance_vector_length_and_zero_default():
     vec = type_deviance_vector([], {}, {})
     assert len(vec) == 8
     assert all(v == 0.0 for v in vec)
+
+
+def test_is_grappling_node_rejects_known_strikes_without_rejecting_grappling_terms():
+    assert not is_grappling_node(_N("Spinning Backfist", "control", 1000.0))
+    assert not is_grappling_node(_N("GROUND-AND-POUND", "control", 1000.0))
+    assert not is_grappling_node(_N("groundandpound", "control", 1000.0))
+    assert is_grappling_node(_N("Knee on Belly", "control", 1000.0))
+    assert is_grappling_node(_N("Punch Choke", "submission", 1000.0))
+    assert is_grappling_node(_N("Jabber Guard", "guard", 1000.0))
+    assert is_grappling_node(_N("Old-school entry", "legacy", 1000.0))
+
+
+@pytest.mark.parametrize(
+    "label",
+    (
+        "knockdown leaping uppercut",
+        "jab into clinch",
+        "knockdown recovery",
+        "head kick entry",
+        "body kick counter",
+        "leg kick counter",
+        "roundhouse follow-up",
+        "spinning backfist attempt",
+        "ground-and-pound sequence",
+        "ROUND-HOUSE",
+        "UPPER-CUT",
+        "KNOCK-DOWN",
+        "ground & pound",
+    ),
+)
+def test_is_grappling_node_rejects_known_strike_concepts_inside_compound_labels(label: str):
+    assert not is_grappling_node(_N(label, "control", 1000.0))
+
+
+def test_striking_nodes_do_not_affect_population_vectors_or_signatures():
+    graphs = [
+        _graph("g1", [_N("mount", "control", 900.0), _N("Jab", "control", 3000.0)]),
+        _graph("g2", [_N("mount", "control", 1000.0)]),
+        _graph("g3", [_N("mount", "control", 1100.0)]),
+    ]
+    by_key, by_type = node_population_stats(graphs)
+    assert "Jab" not in by_key
+    mean, _std, n = by_type["control"]
+    assert mean == 1000.0
+    assert n == 3
+
+    athlete = [_N("mount", "control", 1000.0), _N("Uppercut", "control", 3000.0)]
+    vector = type_deviance_vector(athlete, by_key, by_type)
+    assert vector[5] == 0.0
+    assert signature_nodes(athlete, by_key, by_type) == []

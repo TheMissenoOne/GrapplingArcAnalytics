@@ -13,12 +13,27 @@ Used by the archetype feature vector (relative-strength-by-type) and by signatur
 
 from __future__ import annotations
 
+import re
 import statistics
 from collections.abc import Sequence
 from typing import Protocol
 
 # Ordered node-type buckets — must match analysis.archetype._TYPES.
 TYPES = ["guard", "pass", "sweep", "submission", "takedown", "control", "escape", "transition"]
+_STRIKING_PATTERNS = tuple(
+    re.compile(pattern)
+    for pattern in (
+        r"(?<![a-z0-9])upper[^a-z0-9]*cut(?![a-z0-9])",
+        r"(?<![a-z0-9])jab(?![a-z0-9])",
+        r"(?<![a-z0-9])knock[^a-z0-9]*down(?![a-z0-9])",
+        r"(?<![a-z0-9])head[^a-z0-9]*kick(?![a-z0-9])",
+        r"(?<![a-z0-9])body[^a-z0-9]*kick(?![a-z0-9])",
+        r"(?<![a-z0-9])leg[^a-z0-9]*kick(?![a-z0-9])",
+        r"(?<![a-z0-9])round[^a-z0-9]*house(?![a-z0-9])",
+        r"(?<![a-z0-9])spinning[^a-z0-9]*backfist(?![a-z0-9])",
+        r"(?<![a-z0-9])ground[^a-z0-9]*(?:and[^a-z0-9]*)?pound(?![a-z0-9])",
+    )
+)
 
 MIN_POP = 3  # below this many observations a node_key z is unstable → fall back to its type
 _CLAMP = 3.0  # clamp |z| so one outlier node can't dominate the feature vector
@@ -37,6 +52,15 @@ Stats = dict[str, tuple[float, float, int]]  # key → (mean, std, n)
 def _bucket(node_type: str | None) -> str:
     t = (node_type or "").lower().strip()
     return t if t in TYPES else "transition"
+
+
+def is_grappling_node(node: _NodeLike) -> bool:
+    """Return whether a node belongs in grappling-only deviance calculations.
+
+    Unknown historical node types remain eligible and fall back to ``transition`` via
+    :func:`_bucket`; only exact known striking concepts are excluded.
+    """
+    return not any(pattern.search(node.node_key.casefold()) for pattern in _STRIKING_PATTERNS)
 
 
 def _stats(values: list[float]) -> tuple[float, float, int]:
@@ -60,7 +84,7 @@ def node_population_stats(
     by_type: dict[str, list[float]] = {}
     for _gid, nodes in graphs:
         for nd in nodes:
-            if nd.computed_elo is None:
+            if not is_grappling_node(nd) or nd.computed_elo is None:
                 continue
             by_key.setdefault(nd.node_key, []).append(float(nd.computed_elo))
             by_type.setdefault(_bucket(nd.node_type), []).append(float(nd.computed_elo))
@@ -102,6 +126,8 @@ def type_deviance_vector(
     sums: dict[str, float] = {t: 0.0 for t in TYPES}
     counts: dict[str, int] = {t: 0 for t in TYPES}
     for nd in nodes:
+        if not is_grappling_node(nd):
+            continue
         z = node_deviance(nd, by_key, by_type)
         b = _bucket(nd.node_type)
         sums[b] += z
@@ -117,6 +143,10 @@ def signature_nodes(
     Returns ``[(node_key, z), ...]`` sorted by z descending — the athlete's genuinely
     above-population positions (the back-take de-bias: only above-average back-takers qualify).
     """
-    out = [(nd.node_key, node_deviance(nd, by_key, by_type)) for nd in nodes]
+    out = [
+        (nd.node_key, node_deviance(nd, by_key, by_type))
+        for nd in nodes
+        if is_grappling_node(nd)
+    ]
     out = [(k, z) for k, z in out if z >= threshold]
     return sorted(out, key=lambda kv: kv[1], reverse=True)
