@@ -30,6 +30,20 @@ logger = logging.getLogger(__name__)
 SEED_VERSION = "1.0.0"
 
 
+def _athlete_graph_owner_map(session: Any, graph_model: Any) -> dict[Any, tuple[Any, Any]]:
+    """Load only the graph columns needed for athlete-profile ownership."""
+    from sqlalchemy import select
+
+    return {
+        graph_id: (owner_id, archetype_id)
+        for graph_id, owner_id, archetype_id in session.execute(
+            select(graph_model.id, graph_model.owner_id, graph_model.archetype_id).where(
+                graph_model.owner_kind == "athlete"
+            )
+        ).all()
+    }
+
+
 def _empty_seed() -> dict[str, Any]:
     return {
         "version": SEED_VERSION,
@@ -209,12 +223,7 @@ def build_ontology_seed() -> dict[str, Any]:
             ]
             if rows:
                 by_key, by_type = node_population_stats(rows)
-                graph_owner = {
-                    g.id: (g.owner_id, g.archetype_id)
-                    for g in session.execute(
-                        select(Graph).where(Graph.owner_kind == "athlete")
-                    ).scalars()
-                }
+                graph_owner = _athlete_graph_owner_map(session, Graph)
                 owner_ids = {graph_owner[gid][0] for gid, _ in rows if gid in graph_owner}
                 ath_name = {
                     a.id: a.name

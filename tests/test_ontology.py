@@ -3,11 +3,79 @@
 from __future__ import annotations
 
 import networkx as nx
+from sqlalchemy.dialects import postgresql
 
 from analysis.systems import propose_from_network
-from db.models import Athlete, Match
+from db.models import Athlete, Graph, Match
+from db.repository import graphs_for_clustering
 from export.match_breakdown import build_match_breakdown
-from export.ontology import validate_seed
+from export.ontology import _athlete_graph_owner_map, validate_seed
+
+
+class _Rows:
+    def __init__(self, rows=(), scalars=()):
+        self._rows = rows
+        self._scalars = scalars
+
+    def all(self):
+        return self._rows
+
+    def scalars(self):
+        return self._scalars
+
+
+class _RecordingSession:
+    statement = None
+
+    def execute(self, statement):
+        self.statement = statement
+        return _Rows(rows=[("graph-1", "athlete-1", "archetype-1")])
+
+
+class _GraphId(str):
+    @property
+    def id(self):
+        return str(self)
+
+
+class _ClusteringRecordingSession:
+    def __init__(self):
+        self.statements = []
+
+    def execute(self, statement):
+        self.statements.append(statement)
+        if len(self.statements) == 2:
+            return _Rows(scalars=[_GraphId("graph-1")])
+        return _Rows()
+
+
+def test_athlete_graph_owner_map_projects_only_scalar_columns():
+    session = _RecordingSession()
+
+    owners = _athlete_graph_owner_map(session, Graph)
+
+    assert owners == {"graph-1": ("athlete-1", "archetype-1")}
+    sql = str(
+        session.statement.compile(
+            dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
+        )
+    )
+    assert "graphs.id, graphs.owner_id, graphs.archetype_id" in sql
+    assert "graphs.embedding" not in sql
+
+
+def test_graphs_for_clustering_projects_graph_ids_only():
+    session = _ClusteringRecordingSession()
+
+    assert graphs_for_clustering(session, owner_kind="athlete") == [("graph-1", [])]
+
+    sql = str(
+        session.statements[1].compile(
+            dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}
+        )
+    )
+    assert "SELECT graphs.id" in sql
+    assert "graphs.embedding" not in sql
 
 
 def test_propose_from_network_yields_systems():

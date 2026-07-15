@@ -573,13 +573,13 @@ def graphs_for_clustering(
             select(TechniqueNode.node_key, TechniqueNode.node_type)
         ).all()
     }
-    graph_q = select(Graph)
+    graph_q = select(Graph.id)
     if owner_kind is not None:
         graph_q = graph_q.where(Graph.owner_kind == owner_kind)
-    graphs = list(session.execute(graph_q).scalars())
+    graph_ids = list(session.execute(graph_q).scalars())
     result = []
-    for g in graphs:
-        edges = session.execute(select(GraphEdge).where(GraphEdge.graph_id == g.id)).scalars()
+    for graph_id in graph_ids:
+        edges = session.execute(select(GraphEdge).where(GraphEdge.graph_id == graph_id)).scalars()
         incident = incident_edge_elos(edges)
         nodes = [
             DerivedNode(
@@ -589,7 +589,7 @@ def graphs_for_clustering(
             )
             for key, elos in incident.items()
         ]
-        result.append((g.id, nodes))
+        result.append((graph_id, nodes))
     return result
 
 
