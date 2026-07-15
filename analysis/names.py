@@ -45,9 +45,19 @@ SYNONYMS: dict[str, str] = {
     "ankle pick takedown": "ankle pick",
     "trip takedown": "trip",
     "turtle escape": "escape to turtle",
-    "snap down to front headlock": "snap down front headlock",
     "pass the guard": "guard pass",
     "stand up escape": "standup escape",
+    "arm lock": "armbar",
+    "reverse arm lock": "armbar",
+    "snatch single leg takedown": "single leg takedown",
+    "single leg x guard entry": "single leg x",
+    "half guard recovery": "half guard",
+    # foot lock (occ=143) vs straight foot lock (occ=62, 2026-07-15 corpus check) — lower folds
+    # into higher.
+    "straight foot lock": "foot lock",
+    "leg entry 5050": "5050 guard",  # DB node_key is "5050 guard" (en "50/50 Guard"), not "5050"
+    "armbar choi bar": "choi bar",  # choi bar is a distinct technique, not an armbar variant
+    "half guard control": "top control half guard",
 }
 
 
@@ -65,9 +75,18 @@ CANONICAL_LABELS: dict[str, str] = {
     "ankle pick": "Ankle Pick",
     "trip": "Trip",
     "escape to turtle": "Escape to Turtle",
-    "snap down front headlock": "Snap Down / Front Headlock",
     "guard pass": "Guard Pass",
     "standup escape": "Stand‑up Escape",  # non-breaking hyphen, matches technique_nodes row
+    "armbar": "Armbar",
+    "single leg takedown": "Single Leg Takedown",
+    "single leg x": "Single Leg X",
+    "half guard": "Half Guard",
+    "foot lock": "Foot Lock",
+    "5050 guard": "50/50 Guard",
+    "choi bar": "Choi Bar",
+    # curated rename, not the raw technique_nodes label ("Top Control (Half Guard)") —
+    # human-confirmed 2026-07-15.
+    "top control half guard": "Chest to Chest Half Guard",
 }
 
 
