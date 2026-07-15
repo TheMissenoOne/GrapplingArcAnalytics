@@ -35,6 +35,47 @@ def _normalize_name(name: str) -> str:
     return n
 
 
+# ponytail: operator-confirmed synonym allowlist (human review of
+# analysis.grappling_map's synonym_candidates output). Applied AFTER
+# _normalize_name, ONLY in Analytics-internal derivation (aggregate grappling
+# map + published athlete-graph replay) — never touches the node_key contract
+# the App/Supabase sync relies on for user data. Extend by re-reviewing
+# synonym_candidates as the corpus grows.
+SYNONYMS: dict[str, str] = {
+    "ankle pick takedown": "ankle pick",
+    "trip takedown": "trip",
+    "turtle escape": "escape to turtle",
+    "snap down to front headlock": "snap down front headlock",
+    "pass the guard": "guard pass",
+    "stand up escape": "standup escape",
+}
+
+
+def canonicalize(key: str) -> str:
+    """Collapse a normalized node_key to its synonym-merged canonical form (identity if none)."""
+    return SYNONYMS.get(key, key)
+
+
+# ponytail: curated display labels for synonym-collapsed nodes — a canonical key folds two+
+# raw event labels (e.g. "Ankle Pick" / "Ankle Pick Takedown"), so pick ONE deterministic label
+# per key instead of whichever raw variant happened to be first-seen. Matches the live
+# `technique_nodes.label` rows (2026-07-14 check) so this never fights the DB-persisted graphs.
+# Extend alongside SYNONYMS when a new pair is added.
+CANONICAL_LABELS: dict[str, str] = {
+    "ankle pick": "Ankle Pick",
+    "trip": "Trip",
+    "escape to turtle": "Escape to Turtle",
+    "snap down front headlock": "Snap Down / Front Headlock",
+    "guard pass": "Guard Pass",
+    "standup escape": "Stand‑up Escape",  # non-breaking hyphen, matches technique_nodes row
+}
+
+
+def canonical_label(key: str, fallback: str) -> str:
+    """Curated display label for a canonicalized node key, else the caller's own label."""
+    return CANONICAL_LABELS.get(key, fallback)
+
+
 def _deaccent(s: str) -> str:
     """Strip combining accents (ã→a) so 'Galvão' and 'Galvao' match. Display keeps accents."""
     return "".join(c for c in unicodedata.normalize("NFKD", s) if not unicodedata.combining(c))

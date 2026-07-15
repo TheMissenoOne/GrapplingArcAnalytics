@@ -21,7 +21,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from analysis.names import _normalize_name
+from analysis.names import _normalize_name, canonicalize
 from analysis.network_metrics import edge_arrow, edge_dashed
 from analysis.technique_match import clean_label
 
@@ -45,9 +45,9 @@ def _effectiveness_index() -> dict[str, float]:
         score = v.get("effectiveness_score") if isinstance(v, dict) else None
         if score is None:
             continue
-        key = _normalize_name(clean_label(str(name), "submission"))
+        key = canonicalize(_normalize_name(clean_label(str(name), "submission")))
         if key:
-            out[key] = float(score)
+            out[key] = float(score)  # ponytail: synonym collision → last score wins (rare)
     return out
 
 

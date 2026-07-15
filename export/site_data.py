@@ -41,7 +41,7 @@ from analysis.athlete_systems import (
 from analysis.counter_moves import counter_moves
 from analysis.defense_rate import defense_profile
 from analysis.event_profile import build_event_profile, event_names
-from analysis.names import _normalize_name
+from analysis.names import _normalize_name, canonical_label, canonicalize
 from analysis.network_metrics import edge_arrow, edge_dashed, network_from_sequences
 from analysis.path_to_victory import dilemmas, path_to_victory
 from analysis.style_profile import MIN_DOSSIER_EVENTS, build_style_profile, qualifies
@@ -189,8 +189,10 @@ def _direct_career_links(
     """Collapse reciprocal pairs + orient/dash career links (aggregate graph, rule 1+2) against
     the fighter's own transition ``net`` (raw within-actor counts). Node ids are ``node_key``s;
     ``net`` node labels are canonical library names, so pairing goes through ``_normalize_name``."""
+    # ponytail: synonym collision keeps last label seen (~6-pair list, rare) — only affects
+    # which raw net label backs the weight lookup below, not the node ids themselves.
     label_by_key: dict[str, str] = (
-        {_normalize_name(lbl): lbl for lbl in net.nodes} if net is not None else {}
+        {canonicalize(_normalize_name(lbl)): lbl for lbl in net.nodes} if net is not None else {}
     )
     seen: set[frozenset[str]] = set()
     out: list[dict[str, Any]] = []
@@ -232,10 +234,14 @@ def _career_graphview(athlete: Athlete, profile: dict[str, Any], session: Sessio
         links = []
         for t in profile.get("signature_transitions", []):
             for lb in (t["from"], t["to"]):
-                key = _normalize_name(lb)
-                nodes.setdefault(key, {"id": key, "label": lb, "cat": "control",
-                                       "size": 2, "fighter": "a"})
-            links.append({"from": _normalize_name(t["from"]), "to": _normalize_name(t["to"]),
+                key = canonicalize(_normalize_name(lb))
+                nodes.setdefault(key, {"id": key, "label": canonical_label(key, lb),
+                                       "cat": "control", "size": 2, "fighter": "a"})
+            frm = canonicalize(_normalize_name(t["from"]))
+            to = canonicalize(_normalize_name(t["to"]))
+            if frm == to:
+                continue  # synonym collapse turned this into a self-loop
+            links.append({"from": frm, "to": to,
                           "fighter": "a", "weight": _clamp3(int(t["count"]))})
         gv = {"nodes": list(nodes.values()), "links": links}
     node_type = {n["id"]: n.get("cat", "") for n in gv["nodes"]}
@@ -352,7 +358,7 @@ def _node_video_refs(
             if not isinstance(e, dict) or e.get("actor_id") != aid:
                 continue
             ts = e.get("ts")
-            key = _normalize_name(str(e.get("label", "")))
+            key = canonicalize(_normalize_name(str(e.get("label", ""))))
             if ts is None or not key or key in refs:
                 continue
             refs[key] = {"vid": vid, "ts": int(ts), "slug": slug}

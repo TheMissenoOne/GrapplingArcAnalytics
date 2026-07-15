@@ -20,7 +20,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-from analysis.names import _normalize_name
+from analysis.names import _normalize_name, canonical_label, canonicalize
 from analysis.network_metrics import (
     build_transition_network,
     detect_communities,
@@ -39,7 +39,7 @@ def _library() -> dict[str, dict[str, Any]]:
     out: dict[str, dict[str, Any]] = {}
     for t in data:
         en = str(t.get("en", "")).strip()
-        key = _normalize_name(en)
+        key = canonicalize(_normalize_name(en))
         if key:
             out[key] = {"label": en, "type": str(t.get("type", "")), "pt": str(t.get("pt", ""))}
     return out
@@ -65,15 +65,26 @@ def map_from_network(g: Any) -> dict[str, Any]:
 
     nodes: dict[str, dict[str, Any]] = {}
     for n, d in g.nodes(data=True):
-        key = _normalize_name(n)
+        key = canonicalize(_normalize_name(n))
         le = lib.get(key, {})
         c = cents.get(n, {})
+        occ = int(d.get("occ", 0))
+        if key in nodes:
+            # synonym fold (e.g. "Ankle Pick Takedown" -> "ankle pick"): sum occurrence
+            # counts, keep the stronger centrality reading. ponytail: reward_risk/community
+            # keep first-seen rather than a proper weighted merge — good enough at current
+            # synonym-list size (6 pairs); revisit if reward_risk needs to fold too.
+            existing = nodes[key]
+            existing["occ"] += occ
+            existing["pagerank"] = max(existing["pagerank"], c.get("pagerank", 0.0))
+            existing["betweenness"] = max(existing["betweenness"], c.get("betweenness", 0.0))
+            continue
         nodes[key] = {
             "node_key": key,
-            "label": le.get("label") or n,
+            "label": canonical_label(key, le.get("label") or n),
             "type": d.get("type") or le.get("type", ""),
             "pt": le.get("pt", ""),
-            "occ": int(d.get("occ", 0)),
+            "occ": occ,
             "pagerank": c.get("pagerank", 0.0),
             "betweenness": c.get("betweenness", 0.0),
             "reward_risk": d.get("reward_risk", 0.0),
@@ -85,19 +96,33 @@ def map_from_network(g: Any) -> dict[str, Any]:
     for key, le in lib.items():
         if key not in nodes:
             nodes[key] = {
-                "node_key": key, "label": le["label"], "type": le.get("type", ""),
+                "node_key": key, "label": canonical_label(key, le["label"]),
+                "type": le.get("type", ""),
                 "pt": le.get("pt", ""), "occ": 0, "pagerank": 0.0, "betweenness": 0.0,
                 "reward_risk": 0.0, "community": None, "observed": False, "neighbours": [],
             }
 
     edges: list[dict[str, Any]] = []
+    edge_by_key: dict[tuple[str, str], dict[str, Any]] = {}
     for u, v, d in g.edges(data=True):
         rev = int(g[v][u]["weight"]) if g.has_edge(v, u) else 0
-        edges.append({
-            "source": _normalize_name(u), "target": _normalize_name(v),
+        src, tgt = canonicalize(_normalize_name(u)), canonicalize(_normalize_name(v))
+        if src == tgt:
+            continue  # synonym collapse turned this into a self-loop, not a real transition
+        key = (src, tgt)
+        if key in edge_by_key:
+            e = edge_by_key[key]
+            e["count"] += int(d["weight"])
+            e["ok"] += int(d.get("ok", 0))
+            e["rev"] += rev
+            continue
+        e = {
+            "source": src, "target": tgt,
             "count": int(d["weight"]), "ok": int(d.get("ok", 0)), "rev": rev,
             "suggested": False,
-        })
+        }
+        edge_by_key[key] = e
+        edges.append(e)
 
     return {"nodes": nodes, "edges": edges, "_graph": g}
 

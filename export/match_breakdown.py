@@ -33,7 +33,7 @@ from sqlalchemy.orm import Session
 
 from analysis.athlete_elo import _points_for_entry
 from analysis.decision_space import sequence_decision_space
-from analysis.names import _normalize_name
+from analysis.names import _normalize_name, canonical_label, canonicalize
 from db.models import Athlete, Graph, Match
 from export.athlete_graph_export import athlete_graph_to_app_json
 
@@ -220,13 +220,13 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
     def touch(label: str, typ: str, side: str, ts: int | None = None) -> str:
-        key = _normalize_name(label)
+        key = canonicalize(_normalize_name(label))
         if not key or key in _GENERIC:
             return ""
         node = nodes.get(key)
         if node is None:
             nodes[key] = {
-                "id": key, "label": label,
+                "id": key, "label": canonical_label(key, label),
                 "data": {"type": typ, "usageCount": 1, "side": side},
             }
             if ts is not None:

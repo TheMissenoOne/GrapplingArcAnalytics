@@ -21,7 +21,7 @@ from typing import Any
 
 from analysis.athlete_graph import AthleteEdge, AthleteGraph, AthleteNode
 from analysis.elo_calibration import _expected
-from analysis.names import _normalize_name
+from analysis.names import _normalize_name, canonicalize
 
 # ── Belt-base ladder ────────────────────────────────────────────────────────
 # App ``beltSystems.ts`` bases shifted so black belt = 800 (was 1200).  Pro
@@ -260,7 +260,7 @@ def replay_matches(
         for entry in your:
             label = str(entry.get("label", ""))
             typ = str(entry.get("type", ""))
-            norm = _normalize_name(label)
+            norm = canonicalize(_normalize_name(label))
             node = graph.nodes.get(norm)
             if node is None:
                 node = AthleteNode(label=label, type=typ, count=0, computed_elo=seed)
@@ -270,8 +270,8 @@ def replay_matches(
 
         # Consecutive-pair edges (skip self-loops), mirroring build_athlete_graph.
         for j in range(1, len(your)):
-            src = _normalize_name(your[j - 1].get("label", ""))
-            tgt = _normalize_name(your[j].get("label", ""))
+            src = canonicalize(_normalize_name(your[j - 1].get("label", "")))
+            tgt = canonicalize(_normalize_name(your[j].get("label", "")))
             if src == tgt:
                 continue
             edge = graph.edges.get((src, tgt))
