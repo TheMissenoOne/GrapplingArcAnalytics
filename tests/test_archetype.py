@@ -1,4 +1,4 @@
-"""Archetype clustering tests (v3 — deviance feature) — no DB required."""
+"""Archetype clustering tests (v4 — deviance feature) — no DB required."""
 
 from __future__ import annotations
 
@@ -6,6 +6,7 @@ import numpy as np
 
 from analysis.archetype import (
     ArchetypeRef,
+    archetype_feature_version,
     assign_archetype,
     assign_user_archetype,
     compare_feature_vectors,
@@ -16,7 +17,7 @@ from analysis.archetype import (
 )
 from analysis.deviance import TYPES
 
-# v3 feature length: composition (8) + per-type deviance (8) + edge_density + offense_ratio.
+# v4 feature length: composition (8) + per-type deviance (8) + edge_density + offense_ratio.
 FEATURE_LEN = 2 * len(TYPES) + 2
 _EMPTY: tuple[dict, dict] = ({}, {})  # no population stats → deviance block falls to 0
 
@@ -26,6 +27,12 @@ class _FakeNode:
         self.node_key = key or f"{node_type}-node"
         self.node_type = node_type
         self.computed_elo = computed_elo
+
+
+class _Edge:
+    def __init__(self, source_key: str, target_key: str) -> None:
+        self.source_key = source_key
+        self.target_key = target_key
 
 
 def _nodes(types: list[str]) -> list[_FakeNode]:
@@ -46,6 +53,10 @@ def test_feature_vector_empty():
     vec = graph_feature_vector([], *_EMPTY)
     assert vec.shape == (FEATURE_LEN,)
     assert np.linalg.norm(vec) == 0.0
+
+
+def test_feature_version_uses_v4_prefix():
+    assert archetype_feature_version(np.zeros((2, FEATURE_LEN))).startswith("v4-")
 
 
 def test_deviance_block_shifts_vector():
@@ -94,6 +105,19 @@ def test_guard_heavy_vs_submission_heavy():
     assert not np.allclose(v1, v2)
 
 
+def test_mount_and_mount_plus_jab_have_identical_features():
+    mount = _FakeNode("control", 1000.0, key="mount")
+    jab = _FakeNode("strike", 3000.0, key="jab")
+    mount_only = graph_feature_vector([mount], *_EMPTY, edges=[_Edge("mount", "mount")])
+    padded = graph_feature_vector(
+        [mount, jab],
+        *_EMPTY,
+        edges=[_Edge("mount", "mount"), _Edge("mount", "jab"), _Edge("jab", "jab")],
+    )
+
+    assert np.allclose(mount_only, padded)
+
+
 # ── user-graph archetype match (App Part B) ──────────────────────────────────
 
 def test_compare_identical_has_no_differ():
@@ -139,3 +163,15 @@ def test_assign_user_archetype_end_to_end():
 def test_assign_user_archetype_skips_tiny_graph():
     assert assign_user_archetype(_nodes(["guard"]), {}, {}, [ArchetypeRef(1, "X", [], np.zeros(18))]) is None  # noqa: E501
     assert assign_user_archetype(_nodes(["guard"] * 5), {}, {}, []) is None
+
+
+def test_strike_only_padding_cannot_make_graph_archetype_eligible():
+    nodes = [
+        _FakeNode("control", key="mount"),
+        _FakeNode("guard", key="closed guard"),
+        _FakeNode("strike", key="jab"),
+        _FakeNode("strike", key="uppercut"),
+        _FakeNode("strike", key="elbow"),
+    ]
+
+    assert assign_user_archetype(nodes, {}, {}, [ArchetypeRef(1, "X", [], np.zeros(18))]) is None

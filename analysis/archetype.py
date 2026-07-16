@@ -14,15 +14,15 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score
 
 from analysis.deviance import TYPES as _TYPES
-from analysis.deviance import Stats, type_deviance_vector
+from analysis.deviance import Stats, grappling_nodes, type_deviance_vector
 
 logger = logging.getLogger(__name__)
 
-# v3: the ELO signal is now PROPORTIONAL DEVIANCE (per-type mean z-score vs the population),
+# v4: the ELO signal is now PROPORTIONAL DEVIANCE (per-type mean z-score vs the population),
 # replacing the misleading raw avg_elo/400 — archetypes reflect what a grappler is *relatively*
 # elite at, not which universally-high-ELO nodes they happen to touch. New vector shape +
 # semantics → old (v1/v2) centroids must not be reused.
-FEATURE_VERSION = "v3"
+FEATURE_VERSION = "v4"
 
 # How much the relative-strength (deviance) block outweighs raw composition in clustering.
 DEVIANCE_WEIGHT = 1.5
@@ -67,7 +67,7 @@ def graph_feature_vector(
     edges: list[object] | None = None,
     deviance_weight: float = DEVIANCE_WEIGHT,
 ) -> np.ndarray:
-    """Build an L2-normalized feature vector for one graph (v3).
+    """Build an L2-normalized feature vector for one graph (v4).
 
     Dimensions (len = 2*len(_TYPES) + 2 = 18):
       - node-type share for each bucket in _TYPES                  (composition, 8)
@@ -77,6 +77,7 @@ def graph_feature_vector(
 
     ``by_key`` / ``by_type`` are the population stats from ``analysis.deviance``.
     """
+    nodes = grappling_nodes(nodes)
     n = len(nodes)
     counts = {t: 0 for t in _TYPES}
     for node in nodes:
@@ -86,7 +87,13 @@ def graph_feature_vector(
     shares = np.array([counts[t] / max(n, 1) for t in _TYPES], dtype=np.float64)
     deviance = np.array(type_deviance_vector(nodes, by_key, by_type), dtype=np.float64)
 
-    n_edges = len(edges) if edges is not None else 0
+    retained_keys = {node.node_key for node in nodes}
+    n_edges = sum(
+        1
+        for edge in edges or []
+        if getattr(edge, "source_key", None) in retained_keys
+        and getattr(edge, "target_key", None) in retained_keys
+    )
     edge_density = n_edges / max(n, 1)
     offense = counts["submission"] + counts["takedown"] + counts["sweep"]
     total_typed = sum(counts.values())
@@ -98,7 +105,7 @@ def graph_feature_vector(
 
 
 def signature_types(centroid: np.ndarray, min_deviance: float = 1e-3) -> list[str]:
-    """Top one or two positive per-type deviance dims of a centroid (v3 layout).
+    """Top one or two positive per-type deviance dims of a centroid (v4 layout).
 
     Deviance block = indices [len(_TYPES) : 2*len(_TYPES)). Returns the emphasized node-type
     slugs (e.g. ["submission","control"]) — empty when no type stands out."""
@@ -220,7 +227,7 @@ def _signature_overlap(user_vec: np.ndarray, arch_sig_types: list[str]) -> dict[
 def compare_feature_vectors(
     user_vec: np.ndarray, centroid_vec: np.ndarray
 ) -> dict[str, list[dict[str, Any]]]:
-    """Non-vectorized similar/differ over the v3 feature layout. Each entry is
+    """Non-vectorized similar/differ over the v4 feature layout. Each entry is
     ``{aspect, label, delta}``; differ is sorted by |delta| and capped."""
     nt = len(_TYPES)
     similar: list[dict[str, Any]] = []
@@ -272,6 +279,7 @@ def assign_user_archetype(
     ``{archetype_id, name, similar[], differ[], signature{shared,missing,extra}}``,
     or None when the graph is too small / there are no archetypes.
     """
+    user_nodes = grappling_nodes(user_nodes)
     if len(user_nodes) < MIN_GRAPH_NODES or not archetypes:
         return None
     user_vec = graph_feature_vector(user_nodes, by_key, by_type, edges)
@@ -304,7 +312,11 @@ def run_archetype_pipeline(session: object, k: int = 6) -> None:
     all_rows = graphs_for_clustering(session, owner_kind="athlete")  # type: ignore[arg-type]
     # Drop empty/near-empty graphs (leaderboard-seeded athletes with no matches) — their
     # zero vectors would swamp one cluster and distort the population baseline.
-    rows = [(gid, nodes) for gid, nodes in all_rows if len(nodes) >= MIN_GRAPH_NODES]
+    rows = [
+        (gid, nodes)
+        for gid, raw_nodes in all_rows
+        if len(nodes := grappling_nodes(raw_nodes)) >= MIN_GRAPH_NODES
+    ]
     if not rows:
         logger.warning("No non-empty athlete graphs found for clustering")
         return

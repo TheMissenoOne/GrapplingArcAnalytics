@@ -57,10 +57,18 @@ def _bucket(node_type: str | None) -> str:
 def is_grappling_node(node: _NodeLike) -> bool:
     """Return whether a node belongs in grappling-only deviance calculations.
 
-    Unknown historical node types remain eligible and fall back to ``transition`` via
-    :func:`_bucket`; only exact known striking concepts are excluded.
+    ``node_type='strike'`` is authoritative. Older nodes without that type fall back
+    to the known striking-label patterns. Unknown historical types remain eligible and
+    fall back to ``transition`` via :func:`_bucket`.
     """
+    if (node.node_type or "").casefold().strip() == "strike":
+        return False
     return not any(pattern.search(node.node_key.casefold()) for pattern in _STRIKING_PATTERNS)
+
+
+def grappling_nodes(nodes: Sequence[_NodeLike]) -> list[_NodeLike]:
+    """Return the grappling subset once for a graph-level calculation."""
+    return [node for node in nodes if is_grappling_node(node)]
 
 
 def _stats(values: list[float]) -> tuple[float, float, int]:
@@ -83,8 +91,8 @@ def node_population_stats(
     by_key: dict[str, list[float]] = {}
     by_type: dict[str, list[float]] = {}
     for _gid, nodes in graphs:
-        for nd in nodes:
-            if not is_grappling_node(nd) or nd.computed_elo is None:
+        for nd in grappling_nodes(nodes):
+            if nd.computed_elo is None:
                 continue
             by_key.setdefault(nd.node_key, []).append(float(nd.computed_elo))
             by_type.setdefault(_bucket(nd.node_type), []).append(float(nd.computed_elo))
@@ -125,9 +133,7 @@ def type_deviance_vector(
     """
     sums: dict[str, float] = {t: 0.0 for t in TYPES}
     counts: dict[str, int] = {t: 0 for t in TYPES}
-    for nd in nodes:
-        if not is_grappling_node(nd):
-            continue
+    for nd in grappling_nodes(nodes):
         z = node_deviance(nd, by_key, by_type)
         b = _bucket(nd.node_type)
         sums[b] += z
@@ -145,8 +151,7 @@ def signature_nodes(
     """
     out = [
         (nd.node_key, node_deviance(nd, by_key, by_type))
-        for nd in nodes
-        if is_grappling_node(nd)
+        for nd in grappling_nodes(nodes)
     ]
     out = [(k, z) for k, z in out if z >= threshold]
     return sorted(out, key=lambda kv: kv[1], reverse=True)

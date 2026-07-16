@@ -9,7 +9,7 @@ from analysis.systems import propose_from_network
 from db.models import Athlete, Graph, Match
 from db.repository import graphs_for_clustering
 from export.match_breakdown import build_match_breakdown
-from export.ontology import _athlete_graph_owner_map, validate_seed
+from export.ontology import _athlete_graph_owner_map, eligible_grappling_graphs, validate_seed
 
 
 class _Rows:
@@ -32,12 +32,6 @@ class _RecordingSession:
         return _Rows(rows=[("graph-1", "athlete-1", "archetype-1")])
 
 
-class _GraphId(str):
-    @property
-    def id(self):
-        return str(self)
-
-
 class _ClusteringRecordingSession:
     def __init__(self):
         self.statements = []
@@ -45,7 +39,7 @@ class _ClusteringRecordingSession:
     def execute(self, statement):
         self.statements.append(statement)
         if len(self.statements) == 2:
-            return _Rows(scalars=[_GraphId("graph-1")])
+            return _Rows(scalars=["graph-1"])
         return _Rows()
 
 
@@ -76,6 +70,33 @@ def test_graphs_for_clustering_projects_graph_ids_only():
     )
     assert "SELECT graphs.id" in sql
     assert "graphs.embedding" not in sql
+
+
+def test_export_eligibility_ignores_strike_only_padding():
+    class Node:
+        def __init__(self, key: str, node_type: str) -> None:
+            self.node_key = key
+            self.node_type = node_type
+            self.computed_elo = 1000.0
+
+    rows = eligible_grappling_graphs([
+        ("padded", [
+            Node("mount", "control"),
+            Node("closed guard", "guard"),
+            Node("jab", "strike"),
+            Node("uppercut", "strike"),
+        ]),
+        ("eligible", [
+            Node("mount", "control"),
+            Node("closed guard", "guard"),
+            Node("armbar", "submission"),
+            Node("jab", "strike"),
+        ]),
+    ])
+
+    assert [(graph_id, [node.node_key for node in nodes]) for graph_id, nodes in rows] == [
+        ("eligible", ["mount", "closed guard", "armbar"]),
+    ]
 
 
 def test_propose_from_network_yields_systems():

@@ -20,9 +20,11 @@ from __future__ import annotations
 
 import json
 import logging
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+from analysis.deviance import grappling_nodes
 from pipelines.etl import PROCESSED_DIR
 
 logger = logging.getLogger(__name__)
@@ -42,6 +44,17 @@ def _athlete_graph_owner_map(session: Any, graph_model: Any) -> dict[Any, tuple[
             )
         ).all()
     }
+
+
+def eligible_grappling_graphs(
+    graphs: Sequence[tuple[Any, Sequence[Any]]], minimum_nodes: int = 3
+) -> list[tuple[Any, list[Any]]]:
+    """Keep exportable athlete graphs after excluding striking nodes."""
+    return [
+        (graph_id, nodes)
+        for graph_id, raw_nodes in graphs
+        if len(nodes := grappling_nodes(raw_nodes)) >= minimum_nodes
+    ]
 
 
 def _empty_seed() -> dict[str, Any]:
@@ -216,11 +229,9 @@ def build_ontology_seed() -> dict[str, Any]:
             ]
 
             # ── Per-athlete profiles: emergent archetype + proportional deviance ──
-            rows = [
-                (gid, nodes)
-                for gid, nodes in graphs_for_clustering(session, owner_kind="athlete")
-                if len(nodes) >= 3
-            ]
+            rows = eligible_grappling_graphs(
+                graphs_for_clustering(session, owner_kind="athlete")
+            )
             if rows:
                 by_key, by_type = node_population_stats(rows)
                 graph_owner = _athlete_graph_owner_map(session, Graph)

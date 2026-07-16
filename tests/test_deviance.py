@@ -88,6 +88,7 @@ def test_type_deviance_vector_length_and_zero_default():
 
 
 def test_is_grappling_node_rejects_known_strikes_without_rejecting_grappling_terms():
+    assert not is_grappling_node(_N("Mount", "strike", 1000.0))
     assert not is_grappling_node(_N("Spinning Backfist", "control", 1000.0))
     assert not is_grappling_node(_N("GROUND-AND-POUND", "control", 1000.0))
     assert not is_grappling_node(_N("groundandpound", "control", 1000.0))
@@ -113,6 +114,9 @@ def test_is_grappling_node_rejects_known_strikes_without_rejecting_grappling_ter
         "UPPER-CUT",
         "KNOCK-DOWN",
         "ground & pound",
+        "Knockdown (right hand)",
+        "Knockdown (head kick)",
+        "Knockdown (punches)",
     ),
 )
 def test_is_grappling_node_rejects_known_strike_concepts_inside_compound_labels(label: str):
