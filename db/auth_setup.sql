@@ -85,10 +85,28 @@ create policy graph_edges_user_all on public.graph_edges
     where g.id = graph_edges.graph_id and g.owner_kind = 'user' and g.owner_id = auth.uid()
   ));
 
+-- ── 4b. user_sessions / user_sync_meta — real FK to profiles(id), owner-only ────
+-- (alembic 0017/0018). No owner_kind predicate needed (unlike graphs' polymorphic
+-- owner_id) — cascade delete is automatic via the FK, no trigger needed.
+alter table public.user_sessions enable row level security;
+
+drop policy if exists user_sessions_owner_all on public.user_sessions;
+create policy user_sessions_owner_all on public.user_sessions
+  for all using (owner_id = auth.uid())
+  with check (owner_id = auth.uid());
+
+alter table public.user_sync_meta enable row level security;
+
+drop policy if exists user_sync_meta_owner_all on public.user_sync_meta;
+create policy user_sync_meta_owner_all on public.user_sync_meta
+  for all using (owner_id = auth.uid())
+  with check (owner_id = auth.uid());
+
 -- ── 5. Grants (RLS still applies; anon/authenticated need table privileges) ──
 grant usage on schema public to anon, authenticated;
 grant select, insert, update, delete on public.graphs, public.graph_edges to authenticated;
 grant select, insert, update on public.profiles to authenticated;
+grant select, insert, update, delete on public.user_sessions, public.user_sync_meta to authenticated;
 
 -- ── 6. Cascade deletes ──────────────────────────────────────────────────────
 -- edges follow their graph.

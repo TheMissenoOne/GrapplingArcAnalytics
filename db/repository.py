@@ -21,6 +21,8 @@ from db.models import (
     Match,
     Profile,
     TechniqueNode,
+    UserSession,
+    UserSyncMeta,
 )
 from schemas.app_types import UserBundle
 
@@ -401,6 +403,70 @@ def upsert_athlete(
     session.add(athlete)
     session.flush()
     return athlete.id
+
+
+def upsert_user_session(
+    owner_id: str,
+    session_id: str,
+    data: dict[str, Any] | None,
+    updated_at: datetime,
+    session: Session,
+    *,
+    deleted_at: datetime | None = None,
+) -> None:
+    """Upsert one raw ``SessionState`` row by ``id`` (device-generated). Pass
+    ``deleted_at`` to write a tombstone (delete propagation, alembic 0019); ``data`` may be
+    None for a tombstone whose session was never pushed live. The ON CONFLICT arm relies on
+    the DB ``trg_user_sessions_stale_write`` guard to drop a write whose ``updated_at`` is
+    older than the server row — the app can't be trusted to order concurrent pushes, so
+    last-write-wins is enforced on ``updated_at`` in Postgres."""
+    stmt = (
+        pg_insert(UserSession)
+        .values(
+            id=session_id, owner_id=owner_id, data=data,
+            updated_at=updated_at, deleted_at=deleted_at,
+        )
+        .on_conflict_do_update(
+            index_elements=["id"],
+            set_={"data": data, "updated_at": updated_at, "deleted_at": deleted_at},
+        )
+    )
+    session.execute(stmt)
+
+
+def get_user_sessions_since(
+    owner_id: str, since: datetime | None, session: Session
+) -> list[UserSession]:
+    """All sessions for ``owner_id`` with ``updated_at`` on or after ``since`` (all, if None).
+
+    Boundary is inclusive (``>=``) to match the app's own cursor query — a row sharing the
+    exact cursor timestamp with an already-synced row must not be skipped; the merge's strict
+    ``remote.updated_at > local`` comparison is what dedupes/no-ops it, not this query.
+
+    Tombstones (``deleted_at`` set) are intentionally included — the caller needs them to
+    propagate deletions to other devices. Do NOT add a ``deleted_at IS NULL`` filter."""
+    stmt = select(UserSession).where(UserSession.owner_id == owner_id)
+    if since is not None:
+        stmt = stmt.where(UserSession.updated_at >= since)
+    return list(session.execute(stmt).scalars().all())
+
+
+def get_sync_meta(owner_id: str, session: Session) -> UserSyncMeta | None:
+    return session.get(UserSyncMeta, owner_id)
+
+
+def upsert_sync_meta(owner_id: str, session: Session, **fields: Any) -> UserSyncMeta:
+    """Create or update the sync-progress row for ``owner_id``. ``fields`` may set any
+    of ``big_sync_completed_at``/``last_sync_at``/``session_count``."""
+    meta = session.get(UserSyncMeta, owner_id)
+    if meta is None:
+        meta = UserSyncMeta(owner_id=owner_id, **fields)
+        session.add(meta)
+    else:
+        for key, value in fields.items():
+            setattr(meta, key, value)
+    session.flush()
+    return meta
 
 
 # ponytail: process-wide read cache for the read-only site export, where

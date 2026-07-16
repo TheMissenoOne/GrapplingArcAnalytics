@@ -383,3 +383,132 @@ def test_fixture_bundle_round_trip():
     bundle = UserBundle.from_json(data)
     assert bundle.user is not None
     assert bundle.graph is not None
+
+
+# ── user_sessions / user_sync_meta (alembic 0017/0018) ──────────────────────────
+
+
+def test_user_session_upsert_insert_and_update(session):
+    from datetime import UTC, datetime
+
+    from db.models import Profile, UserSession
+    from db.repository import upsert_user_session
+
+    owner_id = str(uuid.uuid4())
+    session.add(Profile(id=owner_id))
+    session.flush()
+
+    t1 = datetime(2026, 7, 1, tzinfo=UTC)
+    upsert_user_session(owner_id, "s-1-abc", {"exercises": []}, t1, session)
+    session.commit()
+
+    row = session.get(UserSession, "s-1-abc")
+    assert row is not None
+    assert row.owner_id == owner_id
+    assert row.updated_at.replace(tzinfo=UTC) == t1
+
+    # Update-on-conflict: same id, new data/updated_at overwrites in place.
+    t2 = datetime(2026, 7, 2, tzinfo=UTC)
+    upsert_user_session(owner_id, "s-1-abc", {"exercises": ["squat"]}, t2, session)
+    session.commit()
+
+    row = session.get(UserSession, "s-1-abc")
+    assert row.data == {"exercises": ["squat"]}
+    assert row.updated_at.replace(tzinfo=UTC) == t2
+    assert len(list(session.execute(select(UserSession)).scalars())) == 1
+
+
+def test_get_user_sessions_since_filters_by_updated_at(session):
+    from datetime import UTC, datetime
+
+    from db.models import Profile
+    from db.repository import get_user_sessions_since, upsert_user_session
+
+    owner_id = str(uuid.uuid4())
+    session.add(Profile(id=owner_id))
+    session.flush()
+
+    old = datetime(2026, 1, 1, tzinfo=UTC)
+    new = datetime(2026, 7, 1, tzinfo=UTC)
+    upsert_user_session(owner_id, "s-old", {}, old, session)
+    upsert_user_session(owner_id, "s-new", {}, new, session)
+    session.commit()
+
+    all_sessions = get_user_sessions_since(owner_id, None, session)
+    assert {s.id for s in all_sessions} == {"s-old", "s-new"}
+
+    recent = get_user_sessions_since(owner_id, datetime(2026, 6, 1, tzinfo=UTC), session)
+    assert [s.id for s in recent] == ["s-new"]
+
+
+def test_sync_meta_create_and_update(session):
+    from datetime import UTC, datetime
+
+    from db.models import Profile
+    from db.repository import get_sync_meta, upsert_sync_meta
+
+    owner_id = str(uuid.uuid4())
+    session.add(Profile(id=owner_id))
+    session.flush()
+
+    assert get_sync_meta(owner_id, session) is None
+
+    upsert_sync_meta(owner_id, session, session_count=3)
+    session.commit()
+    meta = get_sync_meta(owner_id, session)
+    assert meta is not None
+    assert meta.session_count == 3
+    assert meta.big_sync_completed_at is None
+
+    done_at = datetime(2026, 7, 16, tzinfo=UTC)
+    upsert_sync_meta(owner_id, session, big_sync_completed_at=done_at, session_count=10)
+    session.commit()
+    meta = get_sync_meta(owner_id, session)
+    assert meta.big_sync_completed_at.replace(tzinfo=UTC) == done_at
+    assert meta.session_count == 10
+
+
+# ── delete tombstones (alembic 0019) ────────────────────────────────────────────
+# NB: the concurrent-push stale-write guard is a Postgres BEFORE UPDATE trigger, not
+# exercised here (SQLite in-memory) — see 0019's docstring. These validate the model
+# shape + that the incremental read does not filter tombstones out.
+
+
+def test_user_session_deleted_at_roundtrips(session):
+    from datetime import UTC, datetime
+
+    from db.models import Profile, UserSession
+    from db.repository import upsert_user_session
+
+    owner_id = str(uuid.uuid4())
+    session.add(Profile(id=owner_id))
+    session.flush()
+
+    t = datetime(2026, 7, 3, tzinfo=UTC)
+    upsert_user_session(owner_id, "s-del", {}, t, session, deleted_at=t)
+    session.commit()
+
+    row = session.get(UserSession, "s-del")
+    assert row.deleted_at is not None
+    assert row.deleted_at.replace(tzinfo=UTC) == t
+
+
+def test_get_user_sessions_since_includes_tombstones(session):
+    from datetime import UTC, datetime
+
+    from db.models import Profile
+    from db.repository import get_user_sessions_since, upsert_user_session
+
+    owner_id = str(uuid.uuid4())
+    session.add(Profile(id=owner_id))
+    session.flush()
+
+    t = datetime(2026, 7, 1, tzinfo=UTC)
+    upsert_user_session(owner_id, "s-live", {}, t, session)
+    upsert_user_session(owner_id, "s-tomb", {}, t, session, deleted_at=t)
+    session.commit()
+
+    rows = get_user_sessions_since(owner_id, None, session)
+    assert {r.id for r in rows} == {"s-live", "s-tomb"}  # tombstone not filtered out
+    tomb = next(r for r in rows if r.id == "s-tomb")
+    assert tomb.deleted_at is not None

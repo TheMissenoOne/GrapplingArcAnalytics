@@ -115,6 +115,48 @@ class Graph(Base):
     embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
 
 
+class UserSession(Base):
+    """Raw per-device training session synced from the app (``SessionState``, media
+    stripped) — the true source data ``graphs``/``graph_edges`` are derived from.
+    ``id`` is device-generated (``s-{timestamp}-{random}``); the app merges across
+    devices by ``id`` + ``updated_at``. RLS lives in ``db/auth_setup.sql`` (alembic 0017)."""
+
+    __tablename__ = "user_sessions"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    # Nullable (alembic 0019): a tombstone (deleted_at set) for a session that was never
+    # pushed live has nothing to strip-and-upload, so data is NULL on those rows.
+    data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    # Tombstone (alembic 0019): set when the app deletes a session, so other devices'
+    # incremental pull sees the deletion instead of resurrecting the row. NULL = live.
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class UserSyncMeta(Base):
+    """Per-user session-sync progress (alembic 0018). One row per owner. RLS lives in
+    ``db/auth_setup.sql``."""
+
+    __tablename__ = "user_sync_meta"
+
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), primary_key=True
+    )
+    big_sync_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_sync_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+    session_count: Mapped[int | None] = mapped_column(Integer, server_default="0")
+
+
 class TechniqueNode(Base):
     """Shared canonical technique library — one row per distinct node_key, reused
     across all user/athlete graphs. Replaces the per-user node identity rows.
