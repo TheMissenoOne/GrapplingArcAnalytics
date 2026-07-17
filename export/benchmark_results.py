@@ -2,18 +2,28 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import logging
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from analysis.benchmark import compare, pro_baseline, user_submission_profile
+from analysis.benchmark import (
+    compare,
+    pro_baseline,
+    user_submission_profile,
+)
 from pipelines.adcc_historical import ADCCHistoricalPipeline
 from pipelines.etl import PROCESSED_DIR
 from schemas.app_types import UserBundle
 
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
 logger = logging.getLogger(__name__)
+
+PRO_BASELINE_SCHEMA_VERSION = 1
 
 
 def export_benchmark_results(bundle_path: str | Path) -> dict[str, Any]:
@@ -112,3 +122,83 @@ def export_benchmark_results(bundle_path: str | Path) -> dict[str, Any]:
         "no_pro_data": no_pro_data,
         "output_path": str(output_path),
     }
+
+
+def export_pro_baseline_db(
+    session: Session, output_path: str | Path | None = None
+) -> dict[str, Any]:
+    """Export the app-facing `ProBaselineV1` asset (`src/data/pro_baseline.json`):
+    p25/median/p75 distributions of pro style-mix + submission-family shares,
+    DB-backed (real 7-axis event sequences — see
+    `analysis.benchmark.athlete_style_distribution_db`).
+
+    Replaces the old offline `export_pro_baseline` (ADCC match-outcome corpus only —
+    6 of 7 style-mix axes came back flat zero, no per-event sequence data offline).
+
+    Output schema (schemaVersion 1) — UNCHANGED from the offline export it replaces:
+    {
+        "schemaVersion": 1,
+        "generatedAt": "ISO datetime",
+        "sample": {"athletes": int, "bouts": int, "events": int},
+        "styleMix": {"<axis>": {"p25": float, "median": float, "p75": float}, ...},
+        "submissionFamilies": {"strangle"|"leglock"|"armlock": {"p25", "median", "p75"}, ...}
+    }
+    """
+    from analysis.benchmark import athlete_style_distribution_db
+
+    dist = athlete_style_distribution_db(session)
+
+    output = {
+        "schemaVersion": PRO_BASELINE_SCHEMA_VERSION,
+        "generatedAt": datetime.now(UTC).isoformat(),
+        "sample": dist["sample"],
+        "styleMix": dist["styleMix"],
+        "submissionFamilies": dist["submissionFamilies"],
+    }
+
+    target = Path(output_path) if output_path is not None else PROCESSED_DIR / "pro_baseline.json"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with open(target, "w") as f:
+        json.dump(output, f, indent=2)
+
+    logger.info("Exported pro baseline to %s", target)
+    return output
+
+
+def _main() -> int:
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        pass
+
+    ap = argparse.ArgumentParser(description="Export benchmark JSON assets")
+    ap.add_argument(
+        "--pro-baseline-db", action="store_true",
+        help="run the DB-backed pro-baseline export (needs a live DB connection)",
+    )
+    ap.add_argument(
+        "--out", type=Path, default=None,
+        help="output path (default: data/processed/pro_baseline.json)",
+    )
+    args = ap.parse_args()
+
+    if not args.pro_baseline_db:
+        ap.error("nothing to do — pass --pro-baseline-db")
+
+    from db.base import db_session
+
+    with db_session() as session:
+        result = export_pro_baseline_db(session, args.out)
+    logger.info(
+        "Exported pro baseline: %d athletes, %d bouts, %d events -> %s",
+        result["sample"]["athletes"], result["sample"]["bouts"],
+        result["sample"]["events"], args.out or PROCESSED_DIR / "pro_baseline.json",
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(_main())
