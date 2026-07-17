@@ -1,0 +1,46 @@
+name: Publish Pro Analytics
+
+on:
+  workflow_dispatch:
+    inputs:
+      cadence:
+        description: Completed period to publish
+        required: true
+        type: choice
+        options: [daily, weekly]
+      user_id:
+        description: Optional single Pro profile UUID
+        required: false
+        type: string
+      athlete_id:
+        description: Optional single published athlete UUID (weekly)
+        required: false
+        type: string
+      dry_run:
+        description: Build and validate without writing rows
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra postgres
+      - name: Publish batch
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: >-
+          uv run python -m jobs.publish_pro_analytics
+          --cadence "${{ inputs.cadence }}"
+          ${{ inputs.user_id != '' && format('--user-id {0}', inputs.user_id) || '' }}
+          ${{ inputs.athlete_id != '' && format('--athlete-id {0}', inputs.athlete_id) || '' }}
+          ${{ inputs.dry_run && '--dry-run' || '' }}

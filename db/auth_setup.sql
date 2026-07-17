@@ -54,6 +54,15 @@ drop policy if exists profiles_update_own on public.profiles;
 create policy profiles_update_own on public.profiles
   for update using (id = auth.uid()) with check (id = auth.uid());
 
+-- ``is_pro`` is admin-granted. RLS owns rows, not fields, so use column privileges
+-- to prevent an authenticated user from promoting their own profile.
+revoke insert, update on public.profiles from authenticated;
+grant insert (id, full_name, belt_rank, belt_degrees, is_guest, archetype_id)
+  on public.profiles to authenticated;
+grant update (full_name, belt_rank, belt_degrees, is_guest, archetype_id)
+  on public.profiles to authenticated;
+grant select on public.profiles to authenticated;
+
 -- ── 3. graphs — a user owns their own 'user' graph (read + write) ───────────
 alter table public.graphs enable row level security;
 
@@ -102,11 +111,33 @@ create policy user_sync_meta_owner_all on public.user_sync_meta
   for all using (owner_id = auth.uid())
   with check (owner_id = auth.uid());
 
+-- ── 4c. Pro payloads — service writer, entitled reader only ──────────────────
+alter table public.user_performance_snapshots enable row level security;
+
+drop policy if exists user_performance_snapshots_pro_owner_select on public.user_performance_snapshots;
+create policy user_performance_snapshots_pro_owner_select on public.user_performance_snapshots
+  for select using (
+    owner_id = auth.uid()
+    and exists (
+      select 1 from public.profiles p where p.id = auth.uid() and p.is_pro = true
+    )
+  );
+
+alter table public.athlete_dossiers enable row level security;
+
+drop policy if exists athlete_dossiers_pro_select on public.athlete_dossiers;
+create policy athlete_dossiers_pro_select on public.athlete_dossiers
+  for select using (
+    exists (
+      select 1 from public.profiles p where p.id = auth.uid() and p.is_pro = true
+    )
+  );
+
 -- ── 5. Grants (RLS still applies; anon/authenticated need table privileges) ──
 grant usage on schema public to anon, authenticated;
 grant select, insert, update, delete on public.graphs, public.graph_edges to authenticated;
-grant select, insert, update on public.profiles to authenticated;
 grant select, insert, update, delete on public.user_sessions, public.user_sync_meta to authenticated;
+grant select on public.user_performance_snapshots, public.athlete_dossiers to authenticated;
 
 -- ── 6. Cascade deletes ──────────────────────────────────────────────────────
 -- edges follow their graph.

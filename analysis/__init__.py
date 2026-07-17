@@ -11,6 +11,7 @@ from .elo_calibration import (
     draw_probability,
     expected_with_draw,
 )
+from .pro_analytics import build_athlete_dossier_v1, build_performance_snapshot_v1
 from .similarity import (
     fighter_similarity,
     fighter_vectors,
@@ -29,4 +30,5 @@ __all__ = [
     "fighter_similarity", "find_similar_fighters", "fighter_vectors",
     "top_similar", "user_vector",
     "export_insights", "generate_insights", "load_competition_data",
+    "build_performance_snapshot_v1", "build_athlete_dossier_v1",
 ]

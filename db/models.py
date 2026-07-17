@@ -9,6 +9,7 @@ from typing import Any
 from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     Boolean,
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,
@@ -57,6 +58,11 @@ class Profile(Base):
     belt_rank: Mapped[str | None] = mapped_column(String(40))
     belt_degrees: Mapped[int] = mapped_column(Integer, default=0)
     is_guest: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Admin-granted entitlement. Authenticated clients receive no UPDATE privilege on this column
+    # (see db/auth_setup.sql); RLS alone cannot prevent a user from changing their own field.
+    is_pro: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
     archetype_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("archetypes.id"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
@@ -155,6 +161,52 @@ class UserSyncMeta(Base):
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
     session_count: Mapped[int | None] = mapped_column(Integer, server_default="0")
+
+
+class UserPerformanceSnapshot(Base):
+    """Versioned, batch-generated Pro analytics for one user's completed period."""
+
+    __tablename__ = "user_performance_snapshots"
+    __table_args__ = (
+        UniqueConstraint("owner_id", "cadence", "period_end", name="uq_pro_snapshot_period"),
+        CheckConstraint("cadence IN ('daily', 'weekly')", name="ck_pro_snapshot_cadence"),
+        CheckConstraint(
+            "status IN ('ready', 'insufficient_data', 'failed')",
+            name="ck_pro_snapshot_status",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    cadence: Mapped[str] = mapped_column(String(10), nullable=False)
+    period_start: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    period_end: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    schema_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    metrics: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, server_default="{}")
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class AthleteDossier(Base):
+    """Versioned, batch-generated athlete dossier gated to entitled users."""
+
+    __tablename__ = "athlete_dossiers"
+
+    athlete_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("athletes.id", ondelete="CASCADE"), primary_key=True
+    )
+    graph_id: Mapped[str | None] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("graphs.id", ondelete="SET NULL"), nullable=True
+    )
+    schema_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    payload: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, server_default="{}")
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
 
 
 class TechniqueNode(Base):

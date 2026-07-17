@@ -1,0 +1,22 @@
+name: Analytics CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --all-extras
+      - run: uv run pytest
+      - run: uv run ruff check analysis/pro_analytics.py jobs db/models.py alembic/versions/0021_pro_analytics.py tests/test_pro_analytics.py tests/test_pro_analytics_models.py tests/test_publish_pro_analytics.py
