@@ -1,0 +1,68 @@
+{
+  "_comment": "Canonical parity fixture for analysis.style_profile.reduce_style_events (Python) vs src/services/styleProfile.ts buildStyleProfile (App). ASCII-only labels — sidesteps accent-normalization divergence (Python _normalize_name has no deaccent step; App's normalizeLabel mirrors it char-for-char). One flat, continuous event stream ('one athlete's perspective', no bout/round boundary) so both single-call reductions line up exactly. Analytics OWNS this file; App's copy (src/services/__tests__/fixtures/style_parity.json) must stay byte-identical.",
+  "events": [
+    { "label": "Double Leg Takedown", "type": "takedown", "actor": "other", "successful": true },
+    { "label": "Escape to Turtle", "type": "escape", "actor": "you", "successful": true },
+    { "label": "Guard Pass", "type": "pass", "actor": "other", "successful": true },
+    { "label": "Hip Bump Sweep", "type": "sweep", "actor": "you", "successful": true },
+    { "label": "Back Control", "type": "control", "actor": "other", "successful": true },
+    { "label": "Rear Naked Choke", "type": "submission", "actor": "you", "successful": true },
+    { "label": "Butterfly Sweep", "type": "sweep", "actor": "other", "successful": true },
+    { "label": "Heel Hook", "type": "submission", "actor": "you", "successful": false },
+    { "label": "Armbar", "type": "submission", "actor": "you", "successful": true },
+    { "label": "Kneebar", "type": "submission", "actor": "you", "successful": true },
+    { "label": "Knee Slice Pass", "type": "pass", "actor": "you", "successful": true },
+    { "label": "Mount Control", "type": "control", "actor": "you", "successful": true },
+    { "label": "Closed Guard", "type": "guard", "actor": "you", "successful": true },
+    { "label": "Single Leg Takedown", "type": "takedown", "actor": "you", "successful": true },
+    { "label": "Escape to Turtle", "type": "escape", "actor": "you", "successful": true },
+    { "label": "Hip Bump Sweep", "type": "sweep", "actor": "you", "successful": true },
+    { "label": "Rear Naked Choke", "type": "submission", "actor": "you", "successful": true },
+    { "label": "Heel Hook", "type": "submission", "actor": "you", "successful": false },
+    { "label": "Armbar", "type": "submission", "actor": "you", "successful": true },
+    { "label": "Knee Slice Pass", "type": "pass", "actor": "you", "successful": true },
+    { "label": "Mount Control", "type": "control", "actor": "you", "successful": true },
+    { "label": "Closed Guard", "type": "guard", "actor": "you", "successful": true }
+  ],
+  "expected": {
+    "total_typed": 18,
+    "_note_pct": "pct/style_mix values are Python's round(x,3) exact output. The App port does NOT round (raw float division) — both test harnesses compare these with a small tolerance (~1e-3), not exact equality; a genuine rounding-convention difference between the two ports, not an algorithmic drift.",
+    "signature_techniques": [
+      { "label": "Escape to Turtle", "count": 2, "pct": 0.111 },
+      { "label": "Hip Bump Sweep", "count": 2, "pct": 0.111 },
+      { "label": "Rear Naked Choke", "count": 2, "pct": 0.111 },
+      { "label": "Heel Hook", "count": 2, "pct": 0.111 },
+      { "label": "Armbar", "count": 2, "pct": 0.111 },
+      { "label": "Knee Slice Pass", "count": 2, "pct": 0.111 },
+      { "label": "Mount Control", "count": 2, "pct": 0.111 },
+      { "label": "Closed Guard", "count": 2, "pct": 0.111 }
+    ],
+    "style_mix": {
+      "pass": 0.111,
+      "control": 0.111,
+      "submission": 0.389,
+      "escape": 0.111,
+      "guard": 0.111,
+      "sweep": 0.111,
+      "takedown": 0.056
+    },
+    "responses": {
+      "taken down": { "total": 1, "moves": [{ "move": "Escape to Turtle", "count": 1, "pct": 1.0 }] },
+      "guard passed": { "total": 1, "moves": [{ "move": "Hip Bump Sweep", "count": 1, "pct": 1.0 }] },
+      "back taken": { "total": 1, "moves": [{ "move": "Rear Naked Choke", "count": 1, "pct": 1.0 }] },
+      "swept": { "total": 1, "moves": [{ "move": "Heel Hook", "count": 1, "pct": 1.0 }] }
+    },
+    "submission_family": [
+      { "family": "Strangles", "count": 2, "pct": 0.4 },
+      { "family": "Leg locks", "count": 1, "pct": 0.2 },
+      { "family": "Arm locks", "count": 2, "pct": 0.4 }
+    ],
+    "submissions_attempted": 7,
+    "submissions_landed": 5,
+    "favorite_finishes": [
+      { "label": "Rear Naked Choke", "count": 2 },
+      { "label": "Armbar", "count": 2 },
+      { "label": "Kneebar", "count": 1 }
+    ]
+  }
+}

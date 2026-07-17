@@ -80,6 +80,98 @@ def _situation(typ: str, label: str, successful: Any) -> str | None:
     return None
 
 
+def reduce_style_events(events: list[dict[str, Any]]) -> dict[str, Any]:
+    """Pure event-stream reduction shared with the App's `buildStyleProfile` port
+    (``src/services/styleProfile.ts``) — the ONLY piece under cross-module parity
+    test (``tests/test_style_parity.py`` / App's ``styleProfileParity.test.ts``).
+
+    Walks a flat sequence of ``{label, type, actor, successful}`` events, one
+    athlete's perspective, ``actor`` already normalized to ``"you"`` / anything
+    else = opponent. No DB/bout awareness here — a caller that needs per-bout
+    scoping (pending-situation reset across bouts, cross-bout transitions) does
+    that itself around this call (see ``build_style_profile``).
+    """
+    type_counts: Counter[str] = Counter()
+    label_counts: Counter[str] = Counter()
+    resp_moves: dict[str, Counter[str]] = {}
+    finish_labels: Counter[str] = Counter()
+    sub_attempt_labels: Counter[str] = Counter()
+    pending: str | None = None
+
+    for e in events:
+        label = str(e.get("label", ""))
+        typ = str(e.get("type", ""))
+        if e.get("actor") == "you":
+            if not label:
+                continue
+            type_counts[typ] += 1
+            label_counts[label] += 1
+            if typ == "submission":
+                sub_attempt_labels[label] += 1
+                if e.get("successful") is True:
+                    finish_labels[label] += 1
+            if pending:
+                resp_moves.setdefault(pending, Counter())[label] += 1
+                pending = None
+        else:
+            sit = _situation(typ, label, e.get("successful"))
+            if sit:
+                pending = sit
+
+    total_typed = sum(type_counts.values())
+    style_mix = {
+        t: round(type_counts.get(t, 0) / total_typed, 3) if total_typed else 0.0
+        for t in _TYPES
+    }
+
+    responses: dict[str, Any] = {}
+    for sit, moves in resp_moves.items():
+        tot = sum(moves.values())
+        responses[sit] = {
+            "total": tot,
+            "moves": [
+                {"move": mv, "count": c, "pct": round(c / tot, 3) if tot else 0.0}
+                for mv, c in moves.most_common(4)
+            ],
+        }
+
+    fam_source = finish_labels if finish_labels else sub_attempt_labels
+    fam_counts: Counter[str] = Counter()
+    for lb, c in fam_source.items():
+        fam = _sub_family(lb)
+        if fam:
+            fam_counts[fam] += c
+    fam_total = sum(fam_counts.values())
+    submission_family = {
+        "dominant": _FAMILY_LABELS[fam_counts.most_common(1)[0][0]] if fam_counts else None,
+        "shares": {
+            _FAMILY_LABELS[f]: round(fam_counts.get(f, 0) / fam_total, 3)
+            for f in ("strangle", "leglock", "armlock") if fam_counts.get(f)
+        },
+        "counts": {_FAMILY_LABELS[f]: fam_counts[f] for f in fam_counts},
+    }
+
+    return {
+        "type_counts": dict(type_counts),
+        "label_counts": dict(label_counts),
+        "sub_attempt_labels": dict(sub_attempt_labels),
+        "finish_labels": dict(finish_labels),
+        "signature_techniques": [
+            {"label": lb, "count": c,
+             "pct": round(c / total_typed, 3) if total_typed else 0.0}
+            for lb, c in label_counts.most_common(8)
+        ],
+        "style_mix": style_mix,
+        "responses": responses,
+        "submissions_attempted": sum(sub_attempt_labels.values()),
+        "submissions_landed": sum(finish_labels.values()),
+        "submission_family": submission_family,
+        "favorite_finishes": [
+            {"label": lb, "count": c} for lb, c in finish_labels.most_common(4)
+        ],
+    }
+
+
 def qualifies(athlete_id: str, session: Session) -> bool:
     """True if the athlete has >= MIN_SEQUENCE_BOUTS final bouts with a sequence."""
     n = 0
@@ -122,18 +214,14 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
     elo_percentile = (max(1, round(overall / len(ranked) * 100))
                       if overall and len(ranked) >= 5 else None)
 
-    type_counts: Counter[str] = Counter()
-    label_counts: Counter[str] = Counter()
     transitions: Counter[tuple[str, str]] = Counter()
-    resp_moves: dict[str, Counter[str]] = {}
     resp_bouts: dict[str, set[str]] = {}
-    finish_labels: Counter[str] = Counter()
-    sub_attempt_labels: Counter[str] = Counter()
     own_events = back_events = 0
     elite_wins = elite_losses = 0
     wins = losses = draws = by_sub = by_dec = 0
     bouts: list[dict[str, Any]] = []
     notable: list[dict[str, Any]] = []
+    all_events: list[dict[str, Any]] = []  # flattened → reduce_style_events
 
     for m in matches:
         other_id = m.athlete_b_id if m.athlete_a_id == athlete.id else m.athlete_a_id
@@ -149,22 +237,21 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
         for e in pv.sequence:
             label = str(e.get("label", ""))
             typ = str(e.get("type", ""))
-            if e.get("actor") == "you":
+            is_you = e.get("actor") == "you"
+            all_events.append({
+                "label": label, "type": typ,
+                "actor": "you" if is_you else "other",
+                "successful": e.get("successful"),
+            })
+            if is_you:
                 if label:
                     own_events += 1
-                    type_counts[typ] += 1
-                    label_counts[label] += 1
                     if "back" in _normalize_name(label):
                         back_events += 1
                     if prev_own and _normalize_name(prev_own) != _normalize_name(label):
                         transitions[(prev_own, label)] += 1
                     prev_own = label
-                    if typ == "submission":
-                        sub_attempt_labels[label] += 1
-                        if e.get("successful") is True:
-                            finish_labels[label] += 1
                     if pending:
-                        resp_moves.setdefault(pending, Counter())[label] += 1
                         resp_bouts.setdefault(pending, set()).add(slug)
                         pending = None
             else:
@@ -198,25 +285,24 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
         bouts.append({"slug": slug, "opponent": opp_name, "year": m.year,
                       "result": result, "win_type": m.win_type})
 
-    total_typed = sum(type_counts.values())
-    style_mix: dict[str, float] = {
-        t: round(type_counts.get(t, 0) / total_typed, 3) if total_typed else 0.0
-        for t in _TYPES
-    }
-    offense = sum(type_counts.get(t, 0) for t in _OFFENSE)
+    # ── shared event-stream reduction (parity-tested against the App port) ──
+    # ponytail: reduce_style_events walks ALL bouts concatenated in one pass, so its
+    # own `pending`-situation tracking (unlike `resp_bouts` above, which stays bout-
+    # scoped) can in theory carry a trailing opponent situation across a bout
+    # boundary into the next bout's first "you" move. No current test exercises
+    # this (single-bout fixture in test_discipline.py); if a multi-bout athlete's
+    # `responses` ever look off at a bout seam, give reduce_style_events a bout-
+    # boundary marker instead of one flat list.
+    reduced = reduce_style_events(all_events)
+    total_typed = sum(reduced["type_counts"].values())
+    style_mix: dict[str, float] = dict(reduced["style_mix"])
+    offense = sum(reduced["type_counts"].get(t, 0) for t in _OFFENSE)
     style_mix["offense_ratio"] = round(offense / total_typed, 3) if total_typed else 0.0
 
-    responses: dict[str, Any] = {}
-    for sit, moves in resp_moves.items():
-        tot = sum(moves.values())
-        responses[sit] = {
-            "total": tot,
-            "moves": [
-                {"move": mv, "count": c, "pct": round(c / tot, 3) if tot else 0.0}
-                for mv, c in moves.most_common(4)
-            ],
-            "bouts": sorted(resp_bouts.get(sit, set())),
-        }
+    responses: dict[str, Any] = {
+        sit: {**r, "bouts": sorted(resp_bouts.get(sit, set()))}
+        for sit, r in reduced["responses"].items()
+    }
 
     archetype = None
     if athlete.archetype_id is not None:
@@ -224,20 +310,9 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
         archetype = arch.name if arch else None
 
     # ── derived dossier analytics ───────────────────────────────────────────
-    # Submission-family split — from finishes, falling back to attempts if unfinished.
-    fam_source = finish_labels if finish_labels else sub_attempt_labels
-    fam_counts: Counter[str] = Counter()
-    for lb, c in fam_source.items():
-        fam = _sub_family(lb)
-        if fam:
-            fam_counts[fam] += c
-    fam_total = sum(fam_counts.values())
     submission_family = {
-        "dominant": _FAMILY_LABELS[fam_counts.most_common(1)[0][0]] if fam_counts else None,
-        "shares": {
-            _FAMILY_LABELS[f]: round(fam_counts.get(f, 0) / fam_total, 3)
-            for f in ("strangle", "leglock", "armlock") if fam_counts.get(f)
-        },
+        "dominant": reduced["submission_family"]["dominant"],
+        "shares": reduced["submission_family"]["shares"],
     }
 
     decided = wins + losses
@@ -245,6 +320,7 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
     decision_rate = round(by_dec / decided, 3) if decided else 0.0
 
     # Style fingerprint (radar) — six 0..1 axes derived from the move mix + labels.
+    sub_attempt_labels = reduced["sub_attempt_labels"]
     leg_subs = sum(c for lb, c in sub_attempt_labels.items() if _sub_family(lb) == "leglock")
     total_subs = sum(sub_attempt_labels.values())
     avg_events = own_events / len(matches) if matches else 0.0
@@ -275,11 +351,7 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
         "archetype": archetype,
         "style_mix": style_mix,
         "fingerprint": fingerprint,
-        "signature_techniques": [
-            {"label": lb, "count": c,
-             "pct": round(c / total_typed, 3) if total_typed else 0.0}
-            for lb, c in label_counts.most_common(8)
-        ],
+        "signature_techniques": reduced["signature_techniques"],
         "signature_transitions": [
             {"from": fr, "to": to, "count": c}
             for (fr, to), c in transitions.most_common(6)
@@ -291,9 +363,7 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
             "finish_rate": finish_rate, "decision_rate": decision_rate,
             "submission_family": submission_family,
             "record_vs_elite": {"wins": elite_wins, "losses": elite_losses},
-            "favorite_finishes": [
-                {"label": lb, "count": c} for lb, c in finish_labels.most_common(4)
-            ],
+            "favorite_finishes": reduced["favorite_finishes"],
             "notable_wins": [
                 {k: v for k, v in n.items() if k != "rank_elo"} for n in notable[:3]
             ],
