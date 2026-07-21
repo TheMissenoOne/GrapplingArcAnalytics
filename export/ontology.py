@@ -46,6 +46,91 @@ def _athlete_graph_owner_map(session: Any, graph_model: Any) -> dict[Any, tuple[
     }
 
 
+MAX_SYSTEMS_PER_ATHLETE = 3
+
+
+def _athlete_systems_by_graph(
+    rows: Sequence[tuple[Any, Sequence[Any]]], session: Any, edge_model: Any
+) -> dict[Any, list[dict[str, Any]]]:
+    """Detect per-athlete technique systems (RF-adjacent, staging: Grapple-Like follow-ups).
+
+    Rebuilds each eligible graph's edges from ``graph_edges`` (bulk query, not one per
+    graph_id) and runs ``analysis.athlete_systems.detect_athlete_systems`` on it. Trimmed
+    to the 3 fields the app needs to render "systems + follow-ups": ``hub`` (anchor
+    node_key), ``members`` (node_keys in the system), ``internal_edges`` (the follow-up
+    graph). Dropped vs. ``profile_to_dict``: ``name``/``hub_type`` (recoverable from the
+    hub's own tech-library entry), ``size``/``transition_count`` (== len(members)/
+    len(internal_edges)), ``type_vector``/``system_elo`` (analysis-only, not needed to
+    stage a system). Detector-valid systems, including two-member pairs, are retained;
+    then capped to the ``MAX_SYSTEMS_PER_ATHLETE`` largest — seed ships inside the app bundle.
+
+    ponytail: ``graph_edges`` has no persisted transition-occurrence count (only ``elo``,
+    which is overloaded as a count fallback at write time — unreliable to reuse here), so
+    every internal edge is weight 1 (uniform). Community/hub detection still resolves from
+    graph structure. Upgrade: a real occurrence column on graph_edges, if edge-thickness
+    in the app UI ever needs it.
+    """
+    from sqlalchemy import select
+
+    from analysis.athlete_graph import AthleteEdge, AthleteGraph, AthleteNode
+    from analysis.athlete_systems import build_system_profile
+    from db.models import TechniqueNode
+
+    graph_ids = [gid for gid, _ in rows]
+    if not graph_ids:
+        return {}
+
+    edges_by_graph: dict[Any, list[Any]] = {}
+    for e in session.execute(
+        select(edge_model).where(edge_model.graph_id.in_(graph_ids))
+    ).scalars():
+        edges_by_graph.setdefault(e.graph_id, []).append(e)
+
+    node_keys = {nd.node_key for _gid, nodes in rows for nd in nodes}
+    labels: dict[str, str] = {
+        k: lbl
+        for k, lbl in session.execute(
+            select(TechniqueNode.node_key, TechniqueNode.label).where(
+                TechniqueNode.node_key.in_(node_keys)
+            )
+        ).all()
+    }
+
+    out: dict[Any, list[dict[str, Any]]] = {}
+    for gid, nodes in rows:
+        g = AthleteGraph(athlete=str(gid))
+        for nd in nodes:
+            g.nodes[nd.node_key] = AthleteNode(
+                label=labels.get(nd.node_key, nd.node_key),
+                type=nd.node_type,
+                count=1,
+                computed_elo=nd.computed_elo,
+            )
+        for e in edges_by_graph.get(gid, []):
+            if (
+                e.source_key == e.target_key
+                or e.source_key not in g.nodes
+                or e.target_key not in g.nodes
+            ):
+                continue
+            g.edges[(e.source_key, e.target_key)] = AthleteEdge(
+                source=e.source_key, target=e.target_key, count=1
+            )
+        profile = build_system_profile(str(gid), g)
+        out[gid] = [
+            {
+                "hub": s.hub,
+                "members": s.members,
+                "internal_edges": [
+                    {"source": src, "target": tgt, "count": c}
+                    for src, tgt, c in s.internal_edges
+                ],
+            }
+            for s in profile.systems[:MAX_SYSTEMS_PER_ATHLETE]
+        ]
+    return out
+
+
 def eligible_grappling_graphs(
     graphs: Sequence[tuple[Any, Sequence[Any]]], minimum_nodes: int = 3
 ) -> list[tuple[Any, list[Any]]]:
@@ -90,6 +175,7 @@ def build_ontology_seed() -> dict[str, Any]:
             Athlete,
             Dilemma,
             Graph,
+            GraphEdge,
             Intent,
             Milestone,
             Principle,
@@ -242,6 +328,12 @@ def build_ontology_seed() -> dict[str, Any]:
                         select(Athlete).where(Athlete.id.in_(owner_ids))
                     ).scalars()
                 }
+                named_rows = [
+                    (gid, nodes)
+                    for gid, nodes in rows
+                    if ath_name.get(graph_owner.get(gid, (None, None))[0])
+                ]
+                systems_by_graph = _athlete_systems_by_graph(named_rows, session, GraphEdge)
                 for gid, nodes in rows:
                     owner_id, arch_id = graph_owner.get(gid, (None, None))
                     name = ath_name.get(owner_id) if owner_id else None
@@ -262,6 +354,7 @@ def build_ontology_seed() -> dict[str, Any]:
                             "type_deviance": {
                                 t: round(float(z), 3) for t, z in zip(TYPES, devs)
                             },
+                            "systems": systems_by_graph.get(gid, []),
                         }
                     )
     except Exception as exc:
