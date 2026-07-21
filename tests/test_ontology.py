@@ -176,6 +176,36 @@ def test_athlete_systems_by_graph_trims_to_staging_shape():
     assert not any(tgt == "striking jab" or src == "striking jab" for src, tgt in all_pairs)
 
 
+def test_athlete_systems_by_graph_keeps_detected_two_member_system():
+    """A detector-valid pair remains available to Grapple-Like staging."""
+
+    class Node:
+        def __init__(self, key, node_type, elo=1000.0):
+            self.node_key = key
+            self.node_type = node_type
+            self.computed_elo = elo
+
+    class Edge:
+        def __init__(self, graph_id, source_key, target_key):
+            self.graph_id = graph_id
+            self.source_key = source_key
+            self.target_key = target_key
+
+    rows = [("g1", [Node("closed guard", "guard"), Node("armbar", "submission")])]
+    session = _SystemsSession(
+        [Edge("g1", "closed guard", "armbar")],
+        [("closed guard", "Closed Guard"), ("armbar", "Armbar")],
+    )
+
+    systems = _athlete_systems_by_graph(rows, session, GraphEdge)["g1"]
+
+    assert len(systems) == 1
+    assert systems[0]["members"] == ["armbar", "closed guard"]
+    assert systems[0]["internal_edges"] == [
+        {"source": "closed guard", "target": "armbar", "count": 1}
+    ]
+
+
 def test_propose_from_network_yields_systems():
     g = nx.DiGraph()
     # Two loosely-coupled clusters (a guard family + a leg-lock family). PtV attrs:

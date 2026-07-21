@@ -47,9 +47,6 @@ def _athlete_graph_owner_map(session: Any, graph_model: Any) -> dict[Any, tuple[
 
 
 MAX_SYSTEMS_PER_ATHLETE = 3
-MIN_SYSTEM_MEMBERS = 3  # matches app's detectSystems MIN_SYSTEM_ANCHORS=2 discarding a lone
-# anchor + the anchor itself == 2 members min there; here we go one further and drop the
-# genuinely trivial 2-member pairs too — a "system" of 2 techniques carries no follow-up path.
 
 
 def _athlete_systems_by_graph(
@@ -64,9 +61,8 @@ def _athlete_systems_by_graph(
     graph). Dropped vs. ``profile_to_dict``: ``name``/``hub_type`` (recoverable from the
     hub's own tech-library entry), ``size``/``transition_count`` (== len(members)/
     len(internal_edges)), ``type_vector``/``system_elo`` (analysis-only, not needed to
-    stage a system). Systems under ``MIN_SYSTEM_MEMBERS`` dropped (a 2-node "system" has
-    no follow-up path to stage), then capped to the ``MAX_SYSTEMS_PER_ATHLETE`` largest —
-    seed ships inside the app bundle.
+    stage a system). Detector-valid systems, including two-member pairs, are retained;
+    then capped to the ``MAX_SYSTEMS_PER_ATHLETE`` largest — seed ships inside the app bundle.
 
     ponytail: ``graph_edges`` has no persisted transition-occurrence count (only ``elo``,
     which is overloaded as a count fallback at write time — unreliable to reuse here), so
@@ -121,7 +117,6 @@ def _athlete_systems_by_graph(
                 source=e.source_key, target=e.target_key, count=1
             )
         profile = build_system_profile(str(gid), g)
-        kept = [s for s in profile.systems if len(s.members) >= MIN_SYSTEM_MEMBERS]
         out[gid] = [
             {
                 "hub": s.hub,
@@ -131,7 +126,7 @@ def _athlete_systems_by_graph(
                     for src, tgt, c in s.internal_edges
                 ],
             }
-            for s in kept[:MAX_SYSTEMS_PER_ATHLETE]
+            for s in profile.systems[:MAX_SYSTEMS_PER_ATHLETE]
         ]
     return out
 
