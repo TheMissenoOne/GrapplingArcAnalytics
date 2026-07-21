@@ -6,10 +6,15 @@ import networkx as nx
 from sqlalchemy.dialects import postgresql
 
 from analysis.systems import propose_from_network
-from db.models import Athlete, Graph, Match
+from db.models import Athlete, Graph, GraphEdge, Match
 from db.repository import graphs_for_clustering
 from export.match_breakdown import build_match_breakdown
-from export.ontology import _athlete_graph_owner_map, eligible_grappling_graphs, validate_seed
+from export.ontology import (
+    _athlete_graph_owner_map,
+    _athlete_systems_by_graph,
+    eligible_grappling_graphs,
+    validate_seed,
+)
 
 
 class _Rows:
@@ -97,6 +102,78 @@ def test_export_eligibility_ignores_strike_only_padding():
     assert [(graph_id, [node.node_key for node in nodes]) for graph_id, nodes in rows] == [
         ("eligible", ["mount", "closed guard", "armbar"]),
     ]
+
+
+class _SystemsSession:
+    """Two canned reads in call order: edges query, then TechniqueNode label query."""
+
+    def __init__(self, edges, labels):
+        self._edges = edges
+        self._labels = labels
+        self.calls = 0
+
+    def execute(self, statement):
+        self.calls += 1
+        if self.calls == 1:
+            return _Rows(scalars=self._edges)
+        return _Rows(rows=self._labels)
+
+
+def test_athlete_systems_by_graph_trims_to_staging_shape():
+    """Emitted per-system shape is exactly hub/members/internal_edges (F1-adjacent
+    seed-size guard); self-loops and edges to nodes outside the eligible set are
+    dropped (a node the grappling-node filter excluded shouldn't leak into edges)."""
+
+    class Node:
+        def __init__(self, key, node_type, elo=1000.0):
+            self.node_key = key
+            self.node_type = node_type
+            self.computed_elo = elo
+
+    class Edge:
+        """Duck-typed stand-in for a ``GraphEdge`` row (session.execute is stubbed
+        below, so this never has to be a real ORM instance)."""
+
+        def __init__(self, graph_id, source_key, target_key):
+            self.graph_id = graph_id
+            self.source_key = source_key
+            self.target_key = target_key
+
+    rows = [
+        (
+            "g1",
+            [
+                Node("kimura", "submission"),
+                Node("guard pull", "guard"),
+                Node("guard pass", "pass"),
+            ],
+        ),
+    ]
+    edges = [
+        Edge("g1", "guard pull", "guard pass"),
+        Edge("g1", "guard pass", "kimura"),
+        Edge("g1", "kimura", "kimura"),  # self-loop → dropped
+        Edge("g1", "kimura", "striking jab"),  # target outside the node set → dropped
+    ]
+    labels = [("kimura", "Kimura"), ("guard pull", "Guard Pull"), ("guard pass", "Guard Pass")]
+    session = _SystemsSession(edges, labels)
+
+    # edge_model must be the real mapped class (query-building runs for real; only
+    # the DB round-trip via session.execute is stubbed).
+    out = _athlete_systems_by_graph(rows, session, GraphEdge)
+
+    assert set(out) == {"g1"}
+    systems = out["g1"]
+    assert systems  # 3 edge-connected nodes → at least one system
+    for s in systems:
+        assert set(s) == {"hub", "members", "internal_edges"}
+
+    all_members = {m for s in systems for m in s["members"]}
+    assert all_members == {"kimura", "guard pull", "guard pass"}
+
+    all_pairs = {(e["source"], e["target"]) for s in systems for e in s["internal_edges"]}
+    assert ("kimura", "kimura") not in all_pairs
+    assert not any(tgt == "striking jab" or src == "striking jab" for src, tgt in all_pairs)
 
 
 def test_propose_from_network_yields_systems():
