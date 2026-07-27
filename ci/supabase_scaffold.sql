@@ -9,9 +9,20 @@
 -- Supabase emulator and must not grow into one -- if a future migration needs
 -- more of the platform, that is the signal to run the real Supabase CLI stack in
 -- CI instead of extending this file.
-CREATE ROLE anon NOLOGIN;
-CREATE ROLE authenticated NOLOGIN;
-CREATE ROLE service_role NOLOGIN;
+-- No `CREATE ROLE IF NOT EXISTS` in Postgres — guard each one so this stays
+-- safe to run more than once against the same database (CI gets a fresh one
+-- every run, but a local dev DB doesn't).
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'anon') THEN
+        CREATE ROLE anon NOLOGIN;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'authenticated') THEN
+        CREATE ROLE authenticated NOLOGIN;
+    END IF;
+    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'service_role') THEN
+        CREATE ROLE service_role NOLOGIN;
+    END IF;
+END $$;
 
 CREATE SCHEMA IF NOT EXISTS auth;
 

@@ -23,7 +23,7 @@ jobs:
       - run: uv run pytest
       - name: alembic single head
         run: |
-          heads=$(uv run alembic heads | grep -c .)
+          heads=$(uv run alembic heads | grep -c '(head)')
           if [ "$heads" -ne 1 ]; then
             echo "Expected exactly 1 alembic head, found $heads:"
             uv run alembic heads
@@ -60,10 +60,18 @@ jobs:
       # provisions rather than creating: the anon/authenticated/service_role
       # roles, auth.uid()/auth.users, and the extensions schema. Without this a
       # vanilla pgvector image dies at revision 0003 on a missing role.
+      #
+      # Applied via psycopg (already an installed dependency, see the `postgres`
+      # extra above) rather than shelling out to `psql` — the runner image
+      # having a Postgres client at all is an assumption not worth making.
       - name: Scaffold the Supabase-provided objects
         env:
-          PGPASSWORD: postgres
-        run: psql -h localhost -U postgres -d grapplingarc_ci -v ON_ERROR_STOP=1 -f ci/supabase_scaffold.sql
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
+        run: >-
+          uv run python -c
+          "import os, psycopg;
+          conn = psycopg.connect(os.environ['DATABASE_URL'], autocommit=True);
+          conn.cursor().execute(open('ci/supabase_scaffold.sql').read())"
       - name: alembic upgrade head (empty DB)
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
