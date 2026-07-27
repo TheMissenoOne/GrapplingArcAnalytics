@@ -11,7 +11,7 @@
     Fetches each video's transcript and writes a file (transcript + processing prompt) to
     <code>data/harvest/inbox/</code>. No AI runs here — you process the files yourself.
   </p>
-  <form method="post" action="/admin/harvest/run">
+  <form method="post" action="/admin/harvest/run"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label>Video URLs, search URLs, or "Name vs Name" queries (one per line)</label>
     <textarea name="urls" rows="5" placeholder="https://youtu.be/XXXXXXXXXXX&#10;Gordon Ryan vs Felipe Pena ADCC 2022&#10;https://www.youtube.com/results?search_query=Tye+Ruotolo+vs+Levi+Jones-Leary"></textarea>
     <p style="color:#888;font-size:0.82rem;margin:-6px 0 12px">A search URL or plain query harvests the <strong>top</strong> result. Note: YouTube may rate-limit transcript fetches — if a video shows "no_transcript", retry later or pick another upload.</p>
@@ -33,7 +33,7 @@
   <details style="margin-bottom:10px">
     <summary style="cursor:pointer;color:#7c9ef5">{{ f.name }}</summary>
     <textarea readonly rows="10" onclick="this.select()" style="margin-top:8px;font-family:monospace;font-size:0.8rem">{{ f.content }}</textarea>
-    <form method="post" action="/admin/harvest/delete" style="display:inline">
+    <form method="post" action="/admin/harvest/delete" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="hidden" name="name" value="{{ f.name }}"><input type="hidden" name="kind" value="inbox">
       <button class="btn btn-danger" style="padding:4px 10px">Delete</button>
     </form>
@@ -48,7 +48,7 @@
   <p style="color:#888;font-size:0.88rem;margin-bottom:12px">
     Paste the JSON object the model returned. Saved to <code>data/harvest/processed/</code>.
   </p>
-  <form method="post" action="/admin/harvest/processed">
+  <form method="post" action="/admin/harvest/processed"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label>Filename (optional)</label>
     <input name="filename" placeholder="gordon_vs_pena_2022">
     <label>Processed match JSON</label>
@@ -71,7 +71,7 @@
       <tr>
         <td>{{ name }}</td>
         <td>
-          <form method="post" action="/admin/harvest/delete" style="display:inline">
+          <form method="post" action="/admin/harvest/delete" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="name" value="{{ name }}"><input type="hidden" name="kind" value="processed">
             <button class="btn btn-danger" style="padding:2px 10px">Delete</button>
           </form>
@@ -82,7 +82,7 @@
       {% endfor %}
     </tbody>
   </table>
-  <form method="post" action="/admin/harvest/import">
+  <form method="post" action="/admin/harvest/import"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <button type="submit" class="btn btn-success">Import processed → drafts</button>
   </form>
 </div>

@@ -16,7 +16,7 @@
     <button type="button" id="paste-fill" class="btn">Fill form ↓</button>
   </details>
 
-  <form method="post" action="/admin/athletes/{{ athlete.id }}/matches/{{ match.id }}" id="match-form">
+  <form method="post" action="/admin/athletes/{{ athlete.id }}/matches/{{ match.id }}" id="match-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="grid2">
       <div>
         <label>Opponent (athlete)</label>

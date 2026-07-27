@@ -6,7 +6,7 @@
   {% if athlete.is_published %}
     <span class="badge badge-green">published</span>
   {% else %}
-    <form method="post" action="/admin/athletes/{{ athlete.id }}/publish" style="display:inline">
+    <form method="post" action="/admin/athletes/{{ athlete.id }}/publish" style="display:inline"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <button type="submit" class="btn btn-success">Publish Graph</button>
     </form>
   {% endif %}
@@ -94,7 +94,7 @@
     <textarea id="paste-json" rows="5" placeholder='{"opponent":"Felipe Pena","event":"ADCC 2024","year":2024,"weight_class":"ABS","win_type":"POINTS","stage":"SPF","submission":null,"won":true,"sequence":[{"label":"Takedown","type":"takedown","actor":"you"}]}'></textarea>
     <button type="button" id="paste-fill" class="btn">Fill form ↓</button>
   </details>
-  <form method="post" action="/admin/athletes/{{ athlete.id }}/matches" id="match-form">
+  <form method="post" action="/admin/athletes/{{ athlete.id }}/matches" id="match-form"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="grid2">
       <div>
         <label>Opponent (athlete)</label>
@@ -218,7 +218,7 @@
 
 <div style="display:flex;align-items:center;gap:14px;margin-top:28px">
   <h2 style="margin:0">Draft Queue ({{ drafts|length }})</h2>
-  <form method="post" action="/admin/scraped/import" style="margin:0">
+  <form method="post" action="/admin/scraped/import" style="margin:0"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <button type="submit" class="btn">Import scraped drafts</button>
   </form>
   <span style="color:#666;font-size:0.82rem">Scraped matches stay out of the graph until approved.</span>
@@ -243,11 +243,11 @@
       </td>
       <td style="white-space:nowrap">
         <a href="/admin/athletes/{{ athlete.id }}/matches/{{ m.id }}/edit" style="color:#7c9ef5">edit</a>
-        <form method="post" action="/admin/athletes/{{ athlete.id }}/matches/{{ m.id }}/approve" style="display:inline;margin-left:8px">
+        <form method="post" action="/admin/athletes/{{ athlete.id }}/matches/{{ m.id }}/approve" style="display:inline;margin-left:8px"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button type="submit" class="btn btn-success" style="padding:2px 10px">Approve</button>
         </form>
         <form method="post" action="/admin/athletes/{{ athlete.id }}/matches/{{ m.id }}/delete" style="display:inline;margin-left:4px"
-              onsubmit="return confirm('Delete this draft?')">
+              onsubmit="return confirm('Delete this draft?')"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button type="submit" class="btn" style="padding:2px 10px">Delete</button>
         </form>
       </td>

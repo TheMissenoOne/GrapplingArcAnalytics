@@ -6,14 +6,14 @@
   <h1 style="margin-bottom:0;">{{ system.name }}</h1>
   <span style="color:#666;">{{ system.key }}</span>
   <form method="post" action="/admin/ontology/systems/{{ system.id }}/delete" style="margin-left:auto;"
-        onsubmit="return confirm('Delete this system?');">
+        onsubmit="return confirm('Delete this system?');"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <button class="btn btn-danger" type="submit">Delete system</button>
   </form>
 </div>
 
 <div class="card">
   <h2>Core</h2>
-  <form method="post" action="/admin/ontology/systems/{{ system.id }}">
+  <form method="post" action="/admin/ontology/systems/{{ system.id }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="grid2">
       <div><label>Name</label><input name="name" value="{{ system.name }}" required></div>
       <div>
@@ -74,13 +74,13 @@
         <td>{{ m.name }}</td>
         <td style="color:#aaa;">{{ m.description or "—" }}</td>
         <td><form method="post"
-            action="/admin/ontology/systems/{{ system.id }}/milestones/{{ m.id }}/delete">
+            action="/admin/ontology/systems/{{ system.id }}/milestones/{{ m.id }}/delete"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button class="btn btn-danger" type="submit">✕</button></form></td>
       </tr>
       {% else %}<tr><td colspan="5" style="color:#666;">No milestones yet.</td></tr>{% endfor %}
     </tbody>
   </table>
-  <form method="post" action="/admin/ontology/systems/{{ system.id }}/milestones" class="grid2">
+  <form method="post" action="/admin/ontology/systems/{{ system.id }}/milestones" class="grid2"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div><label>Ordinal</label><input name="ordinal" type="number" value="{{ milestones|length }}"></div>
     <div><label>Kind</label><select name="kind">
       {% for k in milestone_kinds %}<option value="{{ k }}">{{ k }}</option>{% endfor %}
@@ -102,13 +102,13 @@
         <td>{{ im.name or "—" }}</td>
         <td style="color:#aaa;">{{ im.notes or "—" }}</td>
         <td><form method="post"
-            action="/admin/ontology/systems/{{ system.id }}/implementations/{{ im.id }}/delete">
+            action="/admin/ontology/systems/{{ system.id }}/implementations/{{ im.id }}/delete"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <button class="btn btn-danger" type="submit">✕</button></form></td>
       </tr>
       {% else %}<tr><td colspan="4" style="color:#666;">No implementations yet.</td></tr>{% endfor %}
     </tbody>
   </table>
-  <form method="post" action="/admin/ontology/systems/{{ system.id }}/implementations" class="grid2">
+  <form method="post" action="/admin/ontology/systems/{{ system.id }}/implementations" class="grid2"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div><label>Athlete</label><select name="athlete_id" required>
       {% for a in athletes %}<option value="{{ a.id }}">{{ a.name }}</option>{% endfor %}
     </select></div>
