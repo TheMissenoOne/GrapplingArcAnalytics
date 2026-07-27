@@ -74,7 +74,7 @@ _MIN_GRAPPLING = 4
 # as "DECISION", so KO must be read from the raw method string, not win_type.
 _KO_RE = re.compile(r"\b(ko|tko)\b", re.IGNORECASE)
 
-# Labels whose wording mirrors narrator speculation ("hunting for the armbar") 
+# Labels whose wording mirrors narrator speculation ("hunting for the armbar")
 # rather than a real action — drop these at import time (defense-in-depth for
 # any entry path that let them through).
 _SPECULATION_RE = re.compile(

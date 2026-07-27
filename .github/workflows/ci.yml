@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -18,5 +18,53 @@ jobs:
         with:
           python-version: "3.12"
       - run: uv sync --all-extras
+      - run: uv run ruff check .
+      - run: uv run mypy .
       - run: uv run pytest
-      - run: uv run ruff check analysis/pro_analytics.py jobs db/models.py alembic/versions/0021_pro_analytics.py tests/test_pro_analytics.py tests/test_pro_analytics_models.py tests/test_publish_pro_analytics.py
+      - name: alembic single head
+        run: |
+          heads=$(uv run alembic heads | grep -c .)
+          if [ "$heads" -ne 1 ]; then
+            echo "Expected exactly 1 alembic head, found $heads:"
+            uv run alembic heads
+            exit 1
+          fi
+      - name: import smoke
+        run: >-
+          uv run python -c
+          "import export, analysis, db, admin, schemas"
+
+  migrations-smoke:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: grapplingarc_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra postgres
+      # The revisions target Supabase and reference objects the platform
+      # provisions rather than creating: the anon/authenticated/service_role
+      # roles, auth.uid()/auth.users, and the extensions schema. Without this a
+      # vanilla pgvector image dies at revision 0003 on a missing role.
+      - name: Scaffold the Supabase-provided objects
+        env:
+          PGPASSWORD: postgres
+        run: psql -h localhost -U postgres -d grapplingarc_ci -v ON_ERROR_STOP=1 -f ci/supabase_scaffold.sql
+      - name: alembic upgrade head (empty DB)
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
+        run: uv run alembic upgrade head

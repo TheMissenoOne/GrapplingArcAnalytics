@@ -1,6 +1,7 @@
 """Ethan Crelinsten vs Shai Gerena — Polaris 36 (2026), single-match transcript."""
 # ruff: noqa: E501
 from __future__ import annotations
+
 from typing import Any
 
 RAW: list[dict[tuple[str, int], dict[str, Any]]] = [

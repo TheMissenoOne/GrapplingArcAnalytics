@@ -1,7 +1,10 @@
 """Detect anomalies in batch-generated data modules: names, dupes, missing results."""
 from __future__ import annotations
-import importlib, re, sys
+
+import importlib
+import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 SCRIPTS = Path(__file__).resolve().parent

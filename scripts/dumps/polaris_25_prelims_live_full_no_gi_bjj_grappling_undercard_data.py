@@ -1,6 +1,7 @@
 """Polaris 25 — refined from transcript."""
 # ruff: noqa: E501
 from __future__ import annotations
+
 from typing import Any
 
 RAW: list[dict[tuple[str, int], dict[str, Any]]] = [{('Harry Fall', 2025): {'method': 'Unknown',

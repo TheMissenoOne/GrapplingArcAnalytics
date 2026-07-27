@@ -185,6 +185,16 @@ def test_render_position_icon(gmap):
 # ─── exporter: app vocab subset + require-index code-gen ─────────────────────
 
 def test_export_icons_writes_subset_and_index(gmap, tmp_path):
+    # Matching needs the app node library, which lives in the sibling repo. That
+    # repo is absent in CI and in any worktree checkout, and load_app_nodes()
+    # degrades to [] rather than raising — so without this guard the test fails
+    # on an empty match set instead of reporting the real reason. Same pattern as
+    # test_db.py::test_fixture_bundle_round_trip.
+    from cv.vocab_map import _DEFAULT_NODES_PATH
+
+    if not _DEFAULT_NODES_PATH.exists():
+        pytest.skip("grappling-arch.nodes.json not found (sibling app repo absent)")
+
     from export.grapplemap_icons_export import export_icons
 
     full_dir   = tmp_path / "full"

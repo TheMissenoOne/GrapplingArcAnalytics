@@ -1,5 +1,6 @@
 """Verify found YouTube URLs by fetching their titles."""
 from dotenv import load_dotenv
+
 load_dotenv()
 from harvest.transcripts import get_video_title
 

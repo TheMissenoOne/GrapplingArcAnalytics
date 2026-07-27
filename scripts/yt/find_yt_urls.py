@@ -1,9 +1,11 @@
 """Find YouTube URLs for each event .py file."""
 from dotenv import load_dotenv
+
 load_dotenv()
-from harvest.transcripts import search_video_id
-from pathlib import Path
 import re
+from pathlib import Path
+
+from harvest.transcripts import search_video_id
 
 ROOT = Path("/home/vetor/GrapplingArc")
 
@@ -33,7 +35,7 @@ for py in py_files:
         print(f"  -> {url}", flush=True)
         results[py.stem] = url
     else:
-        print(f"  -> NOT FOUND", flush=True)
+        print("  -> NOT FOUND", flush=True)
         results[py.stem] = None
 
 print("\n\n=== FINAL RESULTS ===")

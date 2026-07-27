@@ -9,7 +9,6 @@ Usage:
 """
 import json
 import re
-import sys
 from pathlib import Path
 
 DUMPS = Path(__file__).resolve().parent / "dumps"
@@ -405,7 +404,7 @@ def main():
             ["uv", "run", "python", "-m", "scripts.apply_events", name, str(out_path)],
             capture_output=True, text=True, cwd=Path(__file__).resolve().parent.parent,
         )
-        print(f"  → spliced into dump")
+        print("  → spliced into dump")
 
     if not args.only and not args.dump:
         print("\n✓ All unrefined dumps processed")
