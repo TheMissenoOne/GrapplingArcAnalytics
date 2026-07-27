@@ -3,14 +3,14 @@
 {% block content %}
 <div style="display:flex;align-items:center;gap:16px">
   <h1 style="margin:0">Athletes</h1>
-  <form method="post" action="/admin/athletes/seed" style="margin-left:auto">
+  <form method="post" action="/admin/athletes/seed" style="margin-left:auto"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <button type="submit" class="btn btn-primary">Seed from leaderboard</button>
   </form>
 </div>
 
 <div class="card">
   <h2>Add Athlete</h2>
-  <form method="post" action="/admin/athletes">
+  <form method="post" action="/admin/athletes"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="grid2">
       <div>
         <label>Name *</label>
@@ -66,7 +66,7 @@
 
 <div class="card" style="margin-top:32px">
   <h2>Recompute Archetypes</h2>
-  <form method="post" action="/admin/archetypes/recompute">
+  <form method="post" action="/admin/archetypes/recompute"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <label>k (clusters)</label>
     <input type="number" name="k" value="6" min="2" max="20" style="width:80px;display:inline-block;margin-right:10px">
     <button type="submit" class="btn btn-primary">Run</button>

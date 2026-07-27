@@ -2,21 +2,29 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, Form, HTTPException, Request, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from admin.auth import (
     _COOKIE_NAME,
+    SESSION_TTL_SECONDS,
+    audit,
+    check_csrf,
     check_password,
+    check_rate_limit,
     create_session,
+    csrf_token_for,
     destroy_session,
     is_authenticated,
+    record_login_attempt,
 )
 from cv.vocab_map import load_app_nodes
 from db.base import db_session
@@ -75,7 +83,65 @@ from harvest.harvester import (
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"
-templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
+
+
+def _csrf_context(request: Request) -> dict[str, Any]:
+    """Injected into every template render — the hidden field every POST form carries."""
+    return {"csrf_token": csrf_token_for(request) or ""}
+
+
+templates = Jinja2Templates(directory=str(TEMPLATES_DIR), context_processors=[_csrf_context])
+
+# Cookie hardening (admin/server.py:211 target). Default secure=True; dev sets it false
+# over plain HTTP. Routes exempt from the auth+CSRF middleware — login page/submit (or
+# nothing could ever log in) and static assets (public, GET-only, no session data).
+_COOKIE_SECURE = os.environ.get("ADMIN_COOKIE_SECURE", "true").strip().lower() not in (
+    "false",
+    "0",
+    "",
+)
+_AUTH_EXEMPT_PATHS = {"/admin/login"}
+_AUTH_EXEMPT_PREFIXES = ("/admin/static/",)
+_CSRF_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+
+
+def _auth_exempt(path: str) -> bool:
+    return path in _AUTH_EXEMPT_PATHS or path.startswith(_AUTH_EXEMPT_PREFIXES)
+
+
+class AdminAuthCSRFMiddleware(BaseHTTPMiddleware):
+    """Single choke point for auth + CSRF — replaces ~30 copy-pasted inline checks.
+
+    Any new route is protected automatically; nobody has to remember to add a guard.
+    """
+
+    async def dispatch(self, request: Request, call_next: Any) -> Any:
+        path = request.url.path
+        if _auth_exempt(path):
+            return await call_next(request)
+        if not is_authenticated(request):
+            # Preserves current behavior: every route today redirects to login on
+            # auth failure (GET or POST) — none return JSON, so no 401 branch is
+            # exercised yet. ponytail: add one if/when a JSON route shows up.
+            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
+        if request.method in _CSRF_METHODS:
+            # Reading the form here drains the request stream, and the route downstream
+            # would then see an empty body — every Form(...) parameter fails validation
+            # with a 422. Buffer the body and hand call_next a receive channel that
+            # replays it. Yes, request._receive is private; it is the standard fix, and
+            # the alternative is putting the CSRF check back on all ~30 routes.
+            body = await request.body()
+            form = await request.form()
+            submitted = form.get("csrf_token")
+            submitted = submitted if isinstance(submitted, str) else None
+            if not check_csrf(request, submitted):
+                return JSONResponse({"detail": "Invalid or missing CSRF token"}, status_code=403)
+
+            async def _replay() -> dict[str, Any]:
+                return {"type": "http.request", "body": body, "more_body": False}
+
+            request._receive = _replay
+        return await call_next(request)
 
 
 def _lines(raw: str) -> list[str]:
@@ -185,6 +251,7 @@ def _opponent_options(athlete_id: str, session: Any) -> list[dict[str, Any]]:
 
 def create_admin_app() -> FastAPI:
     app = FastAPI(title="GrapplingArc Admin", docs_url=None, redoc_url=None)
+    app.add_middleware(AdminAuthCSRFMiddleware)
 
     if STATIC_DIR.is_dir():
         app.mount("/admin/static", StaticFiles(directory=str(STATIC_DIR)), name="admin-static")
@@ -202,19 +269,41 @@ def create_admin_app() -> FastAPI:
         request: Request,
         password: str = Form(...),
     ) -> Any:
+        ip = request.client.host if request.client else "unknown"
+        if not check_rate_limit(ip):
+            audit(actor=ip, action="login", entity="admin_session", result="rate_limited")
+            return templates.TemplateResponse(
+                request,
+                "login.html",
+                context={"error": "Too many attempts. Try again in a few minutes."},
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
         if not check_password(password):
+            record_login_attempt(ip, success=False)
+            audit(actor=ip, action="login", entity="admin_session", result="failure")
             return templates.TemplateResponse(
                 request, "login.html", context={"error": "Invalid password"}
             )
-        token = create_session()
+        record_login_attempt(ip, success=True)
+        audit(actor=ip, action="login", entity="admin_session", result="success")
+        token, _csrf = create_session()
         resp = RedirectResponse("/admin/athletes", status_code=status.HTTP_303_SEE_OTHER)
-        resp.set_cookie(_COOKIE_NAME, token, httponly=True, samesite="lax")
+        resp.set_cookie(
+            _COOKIE_NAME,
+            token,
+            httponly=True,
+            samesite="lax",
+            secure=_COOKIE_SECURE,
+            max_age=SESSION_TTL_SECONDS,
+        )
         return resp
 
     @app.get("/admin/logout")
     def logout(request: Request) -> RedirectResponse:
+        ip = request.client.host if request.client else "unknown"
         token = request.cookies.get(_COOKIE_NAME, "")
         destroy_session(token)
+        audit(actor=ip, action="logout", entity="admin_session", result="success")
         resp = RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         resp.delete_cookie(_COOKIE_NAME)
         return resp
@@ -222,8 +311,6 @@ def create_admin_app() -> FastAPI:
     # ── Athletes list ──────────────────────────────────────────────────────
     @app.get("/admin/athletes", response_class=HTMLResponse)
     def athletes_list(request: Request) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             athletes = list(
                 session.execute(
@@ -243,8 +330,6 @@ def create_admin_app() -> FastAPI:
         weight_class: str = Form(""),
         belt: str = Form(""),
     ) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             athlete_id = upsert_athlete(
                 name=name,
@@ -261,8 +346,6 @@ def create_admin_app() -> FastAPI:
     # ── Seed athletes from the ADCC leaderboard ─────────────────────────────
     @app.post("/admin/athletes/seed")
     def seed_athletes(request: Request) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             seed_athletes_from_leaderboard(session)
         return RedirectResponse("/admin/athletes", status_code=status.HTTP_303_SEE_OTHER)
@@ -270,8 +353,6 @@ def create_admin_app() -> FastAPI:
     # ── Athlete detail ─────────────────────────────────────────────────────
     @app.get("/admin/athletes/{athlete_id}", response_class=HTMLResponse)
     def athlete_detail(request: Request, athlete_id: str) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             athlete = session.get(Athlete, athlete_id)
             if athlete is None:
@@ -328,8 +409,6 @@ def create_admin_app() -> FastAPI:
         won: str = Form("true"),
         sequence_json: str = Form("[]"),
     ) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         import json
 
         try:
@@ -375,8 +454,6 @@ def create_admin_app() -> FastAPI:
     @app.get("/admin/athletes/{athlete_id}/matches/{match_id}/edit",
              response_class=HTMLResponse)
     def edit_match_form(request: Request, athlete_id: str, match_id: str) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             athlete = session.get(Athlete, athlete_id)
             match = get_match(match_id, session)
@@ -429,8 +506,6 @@ def create_admin_app() -> FastAPI:
         won: str = Form("true"),
         sequence_json: str = Form("[]"),
     ) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         import json
 
         try:
@@ -481,8 +556,6 @@ def create_admin_app() -> FastAPI:
     # ── Draft queue: import scraped, approve, delete ────────────────────────
     @app.post("/admin/scraped/import")
     def scraped_import(request: Request) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             import_scraped_dir(session)  # drafts only — no replay (held out of graphs)
         return RedirectResponse("/admin/athletes", status_code=status.HTTP_303_SEE_OTHER)
@@ -495,8 +568,6 @@ def create_admin_app() -> FastAPI:
 
     @app.get("/admin/harvest", response_class=HTMLResponse)
     def harvest_page(request: Request) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         inbox = [
             {"name": p.name, "content": p.read_text(encoding="utf-8")}
             for p in sorted(HARVEST_INBOX.glob("*.harvest.md"), reverse=True)
@@ -524,8 +595,6 @@ def create_admin_app() -> FastAPI:
         year: str = Form(""),
         lang: str = Form("en"),
     ) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         langs = (lang or "en",)
         # Split on newlines only — queries/URLs may contain spaces ("Name vs Name").
         url_list = [u.strip() for u in urls.replace("\r", "\n").split("\n") if u.strip()]
@@ -555,8 +624,6 @@ def create_admin_app() -> FastAPI:
         processed_json: str = Form(""),
         filename: str = Form(""),
     ) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         import json
         import re
         from datetime import datetime
@@ -580,8 +647,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/harvest/import")
     def harvest_import(request: Request) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             created = import_scraped_dir(session)
         return RedirectResponse(
@@ -590,8 +655,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/harvest/delete")
     def harvest_delete(request: Request, name: str = Form(""), kind: str = Form("inbox")) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         folder = HARVEST_PROCESSED if kind == "processed" else HARVEST_INBOX
         p = _safe_in(name, folder)
         if p:
@@ -601,8 +664,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/athletes/{athlete_id}/matches/{match_id}/approve")
     def approve_match_route(request: Request, athlete_id: str, match_id: str) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             match = approve_match(match_id, session)
             for aid in (match.athlete_a_id, match.athlete_b_id):
@@ -615,8 +676,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/athletes/{athlete_id}/matches/{match_id}/delete")
     def delete_match_route(request: Request, athlete_id: str, match_id: str) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             match = get_match(match_id, session)
             if match is None:
@@ -636,8 +695,6 @@ def create_admin_app() -> FastAPI:
     # ── Publish athlete ────────────────────────────────────────────────────
     @app.post("/admin/athletes/{athlete_id}/publish")
     def publish(request: Request, athlete_id: str) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         with db_session() as session:
             publish_athlete(athlete_id, session)
         return RedirectResponse(
@@ -647,8 +704,6 @@ def create_admin_app() -> FastAPI:
     # ── Recompute archetypes ───────────────────────────────────────────────
     @app.post("/admin/archetypes/recompute")
     def recompute_archetypes(request: Request, k: int = Form(6)) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         from analysis.archetype import run_archetype_pipeline
 
         with db_session() as session:
@@ -658,8 +713,6 @@ def create_admin_app() -> FastAPI:
     # ── Analytics overview ─────────────────────────────────────────────────
     @app.get("/admin/analytics", response_class=HTMLResponse)
     def analytics(request: Request) -> Any:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
         # Type distribution over the shared technique library, aggregated in SQL
         # (the library grows with every synced technique — don't materialize it all).
         with db_session() as session:
@@ -676,15 +729,8 @@ def create_admin_app() -> FastAPI:
         )
 
     # ── Ontology authoring (RF04-06, RF20, DS-01/04) ────────────────────────
-    def _guard(request: Request) -> RedirectResponse | None:
-        if not is_authenticated(request):
-            return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
-        return None
-
     @app.get("/admin/ontology", response_class=HTMLResponse)
     def ontology_home(request: Request) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             systems = list(session.execute(select(System).order_by(System.name)).scalars())
             sys_rows = []
@@ -720,8 +766,6 @@ def create_admin_app() -> FastAPI:
     def create_target_archetype(request: Request, name: str = Form(...),
                                 description: str = Form(""),
                                 signature_types: str = Form("")) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         sig = [t.strip() for t in signature_types.replace(",", " ").split() if t.strip()]
         with db_session() as session:
             upsert_target_archetype(name=name, description=description or None,
@@ -730,8 +774,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/ontology/archetypes/{archetype_id}/delete")
     def remove_target_archetype(request: Request, archetype_id: str) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             delete_archetype(archetype_id, session)
         return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
@@ -739,8 +781,6 @@ def create_admin_app() -> FastAPI:
     @app.post("/admin/ontology/principles")
     def create_principle(request: Request, name: str = Form(...), type: str = Form(""),
                          description: str = Form("")) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             upsert_principle(key=slugify(name), name=name, type=type or None,
                              description=description or None, session=session)
@@ -748,8 +788,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/ontology/principles/{principle_id}/delete")
     def remove_principle(request: Request, principle_id: str) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             delete_principle(principle_id, session)
         return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
@@ -758,8 +796,6 @@ def create_admin_app() -> FastAPI:
     def create_dilemma(request: Request, name: str = Form(...), situation: str = Form(""),
                       option_a: str = Form(""), option_b: str = Form(""),
                       principle_keys: str = Form("")) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             upsert_dilemma(key=slugify(name), name=name, situation=situation or None,
                            option_a=option_a or None, option_b=option_b or None,
@@ -768,16 +804,12 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/ontology/dilemmas/{dilemma_id}/delete")
     def remove_dilemma(request: Request, dilemma_id: str) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             delete_dilemma(dilemma_id, session)
         return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
 
     @app.post("/admin/ontology/systems")
     def create_system(request: Request, name: str = Form(...), objective: str = Form("")) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             sid = upsert_system(
                 key=slugify(name), name=name, objective=objective or None,
@@ -788,8 +820,6 @@ def create_admin_app() -> FastAPI:
 
     @app.get("/admin/ontology/systems/{system_id}", response_class=HTMLResponse)
     def edit_system(request: Request, system_id: str) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             system = session.get(System, system_id)
             if system is None:
@@ -841,8 +871,6 @@ def create_admin_app() -> FastAPI:
         principle_ids: list[str] = Form(default=[]),
         dilemma_ids: list[str] = Form(default=[]),
     ) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             system = session.get(System, system_id)
             if system is None:
@@ -862,8 +890,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/ontology/systems/{system_id}/delete")
     def remove_system(request: Request, system_id: str) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             delete_system(system_id, session)
         return RedirectResponse("/admin/ontology", status_code=status.HTTP_303_SEE_OTHER)
@@ -872,8 +898,6 @@ def create_admin_app() -> FastAPI:
     def create_milestone(request: Request, system_id: str, kind: str = Form(...),
                         ordinal: int = Form(0), name: str = Form(...),
                         description: str = Form("")) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             add_milestone(system_id=system_id, ordinal=ordinal, kind=kind, name=name,
                           description=description or None, session=session)
@@ -882,8 +906,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/ontology/systems/{system_id}/milestones/{milestone_id}/delete")
     def remove_milestone(request: Request, system_id: str, milestone_id: str) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             delete_milestone(milestone_id, session)
         return RedirectResponse(f"/admin/ontology/systems/{system_id}",
@@ -892,8 +914,6 @@ def create_admin_app() -> FastAPI:
     @app.post("/admin/ontology/systems/{system_id}/implementations")
     def create_implementation(request: Request, system_id: str, athlete_id: str = Form(...),
                             name: str = Form(""), notes: str = Form("")) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             upsert_implementation(system_id=system_id, athlete_id=athlete_id,
                                   name=name or None, notes=notes, session=session)
@@ -902,8 +922,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/ontology/systems/{system_id}/implementations/{impl_id}/delete")
     def remove_implementation(request: Request, system_id: str, impl_id: str) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             delete_implementation(impl_id, session)
         return RedirectResponse(f"/admin/ontology/systems/{system_id}",
@@ -913,8 +931,6 @@ def create_admin_app() -> FastAPI:
     def set_position_ds(request: Request, node_key: str = Form(...),
                       attacker_score: float = Form(...), defender_score: float = Form(...),
                       expected_reactions: str = Form(""), constraints: str = Form("")) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         with db_session() as session:
             set_position_decision_space(
                 node_key=node_key.strip().lower(), attacker_score=attacker_score,
@@ -924,8 +940,6 @@ def create_admin_app() -> FastAPI:
 
     @app.post("/admin/ontology/export")
     def export_seed(request: Request) -> Any:
-        if (r := _guard(request)) is not None:
-            return r
         from export.ontology import export_ontology_seed
 
         export_ontology_seed()
