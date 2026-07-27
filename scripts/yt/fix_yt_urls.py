@@ -1,7 +1,8 @@
 """Fix wrong YouTube URLs with more specific search queries."""
 from dotenv import load_dotenv
+
 load_dotenv()
-from harvest.transcripts import search_video_id, get_video_title
+from harvest.transcripts import get_video_title, search_video_id
 
 queries = {
     "2024NCAA": "Full replay 2024 NCAA wrestling championships",

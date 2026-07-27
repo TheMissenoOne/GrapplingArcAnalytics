@@ -86,15 +86,95 @@ target-version = "py312"
 line-length = 100
 extend-exclude = ["notebooks", "transcripts"]  # exploratory notebooks + raw match dumps/transcripts
 
+# ponytail: `ruff format --check .` is NOT gated in CI (2026-07-27) — 205 of 283 files would be
+# reformatted today. Running it now would collide with every worktree/PR in flight. Debt: run
+# `uv run ruff format .` in its own follow-up PR (no logic changes, one big diff, land when the
+# in-flight worktrees have merged), then add `uv run ruff format --check .` to ci.yml.
+
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
+
+# ponytail: measured 2026-07-27 — `scripts/` (one-off dump/import/verify scripts) carries 49
+# pre-existing findings (37 E501, 5 E402, 3 F841, 2 N806, 1 E722, 1 E741) that are debt, not new
+# breakage. Ignored HERE (not globally, not `# noqa`) so `ruff check .` gates the rest of the repo
+# clean. Upgrade path: pick these off script-by-script, then drop this block once `scripts/` is
+# clean under `ruff check .` unscoped.
+[tool.ruff.lint.per-file-ignores]
+"scripts/**/*.py" = ["E501", "E402", "F841", "N806", "E722", "E741"]
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
 warn_unused_ignores = true
 ignore_missing_imports = true
-exclude = ["notebooks/"]
+# ponytail: `scripts/` excluded from mypy entirely — mypy resolves `scripts/*.py` under two module
+# names (once via `scripts.foo`, once bare `foo`) because the dir has no package `__init__.py`
+# structure matching its ad-hoc one-off scripts, and errors out with "Source file found twice
+# under different module names" before checking anything. `--explicit-package-bases`/`MYPYPATH`
+# fixes the resolution but scripts/ isn't meant to be a typed package — simplest real fix is to
+# not typecheck it. Upgrade path: if scripts/ ever needs typing, add __init__.py files + drop this
+# exclude, or split truly reusable helpers out of scripts/ into a typed package.
+exclude = ["notebooks/", "scripts/"]
+
+# ponytail: measured 2026-07-27 (re-confirmed against this worktree, not copied blind) — with
+# `scripts/` excluded above, `uv run mypy .` still finds 320 errors across 48 modules (31 tests/,
+# 14 analysis/, 2 export/, 1 scripts/-imported-by-tests). Rather than `ignore_errors` globally
+# (which would let new files ship unchecked), list the dirty modules explicitly so the ~138
+# already-clean files stay gated and no new file can quietly join this list. Upgrade path: clean a
+# module's mypy errors, then delete its line below — never add a new module here without a
+# follow-up ticket to remove it.
+[[tool.mypy.overrides]]
+module = [
+    "analysis.archetype",
+    "analysis.athlete_elo",
+    "analysis.athlete_systems",
+    "analysis.defense_rate",
+    "analysis.fighter_similarity",
+    "analysis.gnn_predictor",
+    "analysis.graph_comparison",
+    "analysis.grappling_map",
+    "analysis.match_deviance",
+    "analysis.metric_evaluation",
+    "analysis.ocean",
+    "analysis.ufc_elo_engine",
+    "analysis.user_insights",
+    "analysis.user_profile",
+    "export.grapplemap_icons_export",
+    "export.site_data",
+    "scripts.dump_import",
+    "tests.test_admin",
+    "tests.test_apply_video_fixes",
+    "tests.test_archetype",
+    "tests.test_athlete_elo",
+    "tests.test_athlete_graph",
+    "tests.test_benchmark",
+    "tests.test_db",
+    "tests.test_decision_space",
+    "tests.test_deviance",
+    "tests.test_discipline",
+    "tests.test_dump_winner_inference",
+    "tests.test_elo_convergence",
+    "tests.test_embeddings",
+    "tests.test_grapplemap",
+    "tests.test_inference",
+    "tests.test_match_breakdown",
+    "tests.test_merge_attempt_nodes",
+    "tests.test_merge_technique_dups",
+    "tests.test_name_sanitize",
+    "tests.test_ocean",
+    "tests.test_ontology",
+    "tests.test_path_to_victory",
+    "tests.test_priors",
+    "tests.test_pro_analytics_models",
+    "tests.test_publish_pro_analytics",
+    "tests.test_realtime_app",
+    "tests.test_roboflow_classifier",
+    "tests.test_server",
+    "tests.test_vector_store",
+    "tests.test_video_index",
+    "tests.test_vocab_map",
+]
+ignore_errors = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

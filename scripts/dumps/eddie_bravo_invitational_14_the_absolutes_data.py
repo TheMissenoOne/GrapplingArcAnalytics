@@ -1,6 +1,7 @@
 """EBI 14: The Absolutes — refined from transcript."""
 # ruff: noqa: E501
 from __future__ import annotations
+
 from typing import Any
 
 RAW: list[dict[tuple[str, int], dict[str, Any]]] = [{('Patrick Donabedian', 2025): {'method': 'Unknown',

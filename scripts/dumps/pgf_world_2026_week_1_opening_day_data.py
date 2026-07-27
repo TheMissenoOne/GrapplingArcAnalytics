@@ -1,6 +1,7 @@
 """PGF World 2026 - Week 1 — refined from transcript."""
 # ruff: noqa: E501
 from __future__ import annotations
+
 from typing import Any
 
 RAW: list[dict[tuple[str, int], dict[str, Any]]] = [{('Travis Haven', 2026): {'method': 'Unknown',

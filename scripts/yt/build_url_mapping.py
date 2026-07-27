@@ -1,6 +1,7 @@
 """Build url_mapping.json: event→URL + per-match {athlete, timestamp}."""
+import ast
+import json
 from pathlib import Path
-import json, ast, re, os
 
 ROOT = Path("/home/vetor/GrapplingArc")
 OUT = Path("/home/vetor/GrapplingArc/GrapplingArcAnalytics/url_mapping.json")

@@ -212,7 +212,7 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
     side_use: dict[str, dict[str, int]] = {}  # node key → per-side usage, for fighter tint
 
     # Generic labels to skip (bare type-words, not specific techniques)
-    _GENERIC = {
+    generic_labels = {
         "sweep", "takedown", "pass", "guard pass", "guard", "control", "submission",
         "escape", "transition", "reversal", "scramble", "clinch", "pull guard",
         "takedown attempt", "submission attempt", "sweep attempt", "pass attempt",
@@ -221,7 +221,7 @@ def _transition_graph(sequence: list[dict[str, Any]]) -> dict[str, Any]:
 
     def touch(label: str, typ: str, side: str, ts: int | None = None) -> str:
         key = canonicalize(_normalize_name(label))
-        if not key or key in _GENERIC:
+        if not key or key in generic_labels:
             return ""
         node = nodes.get(key)
         if node is None:
