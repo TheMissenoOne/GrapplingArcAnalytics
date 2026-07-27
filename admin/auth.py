@@ -51,6 +51,23 @@ def _prune_sessions() -> None:
         _CSRF_TOKENS.pop(token, None)
 
 
+def _prune_login_attempts() -> None:
+    """Drop rate-limit entries whose window has elapsed.
+
+    An IP that fails once and never comes back was never removed otherwise —
+    the dict only lost entries when the *same* IP tried again (pop on
+    success, overwrite on failure), so a one-off attacker's entry sat in
+    memory forever.
+    """
+    now = time.time()
+    for ip in [
+        ip
+        for ip, (_, window_start) in _LOGIN_ATTEMPTS.items()
+        if now - window_start > _RATE_LIMIT_WINDOW_SECONDS
+    ]:
+        _LOGIN_ATTEMPTS.pop(ip, None)
+
+
 def hash_password(password: str, *, salt: bytes | None = None) -> str:
     """Format: scrypt$n$r$p$salt_b64$hash_b64 — params travel with the hash."""
     salt = salt if salt is not None else secrets.token_bytes(16)
@@ -86,6 +103,7 @@ def check_password(password: str) -> bool:
 
 def check_rate_limit(ip: str) -> bool:
     """True if `ip` may attempt another login right now."""
+    _prune_login_attempts()
     count, window_start = _LOGIN_ATTEMPTS.get(ip, (0, time.time()))
     if time.time() - window_start > _RATE_LIMIT_WINDOW_SECONDS:
         return True

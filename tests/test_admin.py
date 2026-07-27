@@ -314,3 +314,26 @@ def test_post_form_fields_survive_the_middleware(authed_client):
     assert kwargs["name"] == "Gordon Ryan"
     assert kwargs["nickname"] == "King"
     assert kwargs["team"] == "New Wave"
+
+
+def test_expired_rate_limit_entries_are_pruned(real_password):
+    """An IP that fails once and never returns must not sit in the dict forever.
+
+    _LOGIN_ATTEMPTS only lost entries on a *subsequent* attempt from the same
+    IP (pop on success, overwrite on failure) — an IP that never comes back
+    stayed in memory indefinitely. This asserts pruning happens on read, the
+    same pattern _prune_sessions already uses for _SESSIONS.
+    """
+    auth_mod.record_login_attempt("10.0.0.9", success=False)
+    assert "10.0.0.9" in auth_mod._LOGIN_ATTEMPTS
+
+    # Simulate the rate-limit window having elapsed with nobody checking back in.
+    count, _ = auth_mod._LOGIN_ATTEMPTS["10.0.0.9"]
+    auth_mod._LOGIN_ATTEMPTS["10.0.0.9"] = (
+        count,
+        time.time() - auth_mod._RATE_LIMIT_WINDOW_SECONDS - 1,
+    )
+
+    auth_mod.check_rate_limit("10.0.1.1")  # any read should trigger the prune
+
+    assert "10.0.0.9" not in auth_mod._LOGIN_ATTEMPTS
