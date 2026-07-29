@@ -36,7 +36,7 @@ Implement fixes per `docs/qa_implementation_plan.md`. Tickets F1–F14, Lane F.
 | `analysis/names.py` | F1, F4 |
 | `site/search.js` | F6 |
 | `site/site.css` | F6, F7 |
-| `site/logo.svg` | F11 |
+| `site/brand-symbol.svg`, `site/brand-mark.svg`, `site/brand-og.png` | F11 |
 | `GrapplingArc/index.html` | F13 |
 | `GrapplingArc/_config.yml` | F8, F9 |
 | `GrapplingArc/.github/workflows/` | F9 |
@@ -55,8 +55,8 @@ uv run python -m export.site_data --out /tmp/site-test
 
 - `site/` is pre-built by `export.site_data` — no Jekyll build needed
 - events-data.js is auto-generated; fix the generator, not the output
-- fighter OG images: add fallback to logo.svg if fighter JPG missing at export time
-- logo.svg: replace with optimized version, target <2KB
+- fighter OG images: add fallback to brand-og.png if fighter JPG missing at export time
+- radial SVG brand assets: optimize brand-symbol.svg and brand-mark.svg, target <2KB each
 
 ## Files to Read First
 
