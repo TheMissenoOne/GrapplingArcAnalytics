@@ -59,6 +59,26 @@
     ]
   },
   {
+    "en": "Arm Drag Takedown",
+    "pt": "Queda de Arm Drag",
+    "type": "takedown",
+    "variants": [
+      "arm drag takedown",
+      "queda de arm drag"
+    ]
+  },
+  {
+    "en": "Arm Lock",
+    "pt": "Chave de Braço",
+    "type": "submission",
+    "variants": [
+      "armlock",
+      "arm lock",
+      "bent armlock",
+      "chave no braco"
+    ]
+  },
+  {
     "en": "Arm Triangle Choke",
     "pt": "Triângulo de Braço",
     "type": "submission",
@@ -99,6 +119,24 @@
       "back",
       "controle das costas",
       "back take"
+    ]
+  },
+  {
+    "en": "Back Escape",
+    "pt": "Fuga das Costas",
+    "type": "escape",
+    "variants": [
+      "back escape",
+      "fuga das costas"
+    ]
+  },
+  {
+    "en": "Back Triangle",
+    "pt": "Triângulo pelas Costas",
+    "type": "submission",
+    "variants": [
+      "back triangle",
+      "triangulo pelas costas"
     ]
   },
   {
@@ -176,6 +214,15 @@
       "passagem body lock",
       "body lock pass",
       "passagem de cintura"
+    ]
+  },
+  {
+    "en": "Body Lock Takedown",
+    "pt": "Queda de Abraço",
+    "type": "takedown",
+    "variants": [
+      "body lock takedown",
+      "queda de abraco"
     ]
   },
   {
@@ -285,6 +332,26 @@
     ]
   },
   {
+    "en": "Choi Bar",
+    "pt": "Choi Bar",
+    "type": "submission",
+    "variants": [
+      "choi bar",
+      "choibar"
+    ]
+  },
+  {
+    "en": "Choke",
+    "pt": "Estrangulamento",
+    "type": "submission",
+    "variants": [
+      "choke",
+      "strangle",
+      "estrangulamento",
+      "smother"
+    ]
+  },
+  {
     "en": "Circle Throw",
     "pt": "Tomoe Nage",
     "type": "takedown",
@@ -295,6 +362,15 @@
       "queda do círculo",
       "stomach throw",
       "tomoe-nage"
+    ]
+  },
+  {
+    "en": "Clinch",
+    "pt": "Clinch",
+    "type": "transition",
+    "variants": [
+      "clinch",
+      "agarre"
     ]
   },
   {
@@ -332,6 +408,16 @@
     ]
   },
   {
+    "en": "Collar Tie",
+    "pt": "Pegada na Nuca",
+    "type": "control",
+    "variants": [
+      "collar tie",
+      "pegada na nuca",
+      "pegada de nuca"
+    ]
+  },
+  {
     "en": "Connection",
     "pt": "Conexão",
     "type": "concept",
@@ -351,6 +437,36 @@
       "chave de polícia",
       "police lock",
       "algema"
+    ]
+  },
+  {
+    "en": "Counter Takedown",
+    "pt": "Contra-Queda",
+    "type": "takedown",
+    "variants": [
+      "counter takedown",
+      "contra queda"
+    ]
+  },
+  {
+    "en": "Cradle",
+    "pt": "Cradle",
+    "type": "takedown",
+    "variants": [
+      "cradle",
+      "cradle takedown"
+    ]
+  },
+  {
+    "en": "Cross Ashi",
+    "pt": "Ashi Garami Cruzado",
+    "type": "control",
+    "variants": [
+      "cross ashi",
+      "cross ashi garami",
+      "crossed ashi",
+      "ashi cruzado",
+      "ashi garami cruzado"
     ]
   },
   {
@@ -425,6 +541,16 @@
     ]
   },
   {
+    "en": "Double Guard Pull",
+    "pt": "Puxada Dupla",
+    "type": "guard",
+    "variants": [
+      "double guard pull",
+      "puxada dupla",
+      "dupla puxada"
+    ]
+  },
+  {
     "en": "Double Leg Takedown",
     "pt": "Double Leg Takedown",
     "type": "takedown",
@@ -464,6 +590,29 @@
     ]
   },
   {
+    "en": "Escape to Standing",
+    "pt": "Levantada",
+    "type": "escape",
+    "variants": [
+      "escape to standing",
+      "stand up",
+      "stand up escape",
+      "stand-up escape",
+      "quick stand-up escape",
+      "levantada",
+      "escapar em pe"
+    ]
+  },
+  {
+    "en": "Escape to Turtle",
+    "pt": "Fuga para Tartaruga",
+    "type": "escape",
+    "variants": [
+      "escape to turtle",
+      "fuga para tartaruga"
+    ]
+  },
+  {
     "en": "Ezekiel Choke",
     "pt": "Ezequiel",
     "type": "submission",
@@ -474,6 +623,16 @@
       "ezekiel",
       "estrangulamento ezequiel",
       "sode guruma jime"
+    ]
+  },
+  {
+    "en": "False Reap",
+    "pt": "False Reap",
+    "type": "transition",
+    "variants": [
+      "false reap",
+      "false reap entry",
+      "reap falso"
     ]
   },
   {
@@ -523,6 +682,18 @@
     ]
   },
   {
+    "en": "Foot Lock",
+    "pt": "Chave de Pé",
+    "type": "submission",
+    "variants": [
+      "footlock",
+      "foot lock",
+      "straight foot lock",
+      "chave de pe",
+      "chave no pe"
+    ]
+  },
+  {
     "en": "Foot Sweep",
     "pt": "Ashi Barai",
     "type": "takedown",
@@ -547,6 +718,18 @@
     ]
   },
   {
+    "en": "Front Headlock",
+    "pt": "Frontal",
+    "type": "control",
+    "variants": [
+      "front headlock",
+      "front headlock control",
+      "frontal",
+      "gravata frontal",
+      "snap down to front headlock"
+    ]
+  },
+  {
     "en": "Ghost Escape",
     "pt": "Fuga Fantasma",
     "type": "escape",
@@ -554,6 +737,16 @@
       "ghost escape",
       "fuga fantasma",
       "ghost"
+    ]
+  },
+  {
+    "en": "Gift Wrap",
+    "pt": "Gift Wrap",
+    "type": "control",
+    "variants": [
+      "gift wrap",
+      "giftwrap",
+      "embrulho de presente"
     ]
   },
   {
@@ -601,6 +794,28 @@
     ]
   },
   {
+    "en": "Guard Break",
+    "pt": "Abertura de Guarda",
+    "type": "transition",
+    "variants": [
+      "guard break",
+      "abertura de guarda",
+      "abrir a guarda"
+    ]
+  },
+  {
+    "en": "Guard Pass",
+    "pt": "Passagem de Guarda",
+    "type": "pass",
+    "variants": [
+      "guard pass",
+      "pass",
+      "pass the guard",
+      "passagem",
+      "passagem de guarda"
+    ]
+  },
+  {
     "en": "Guard Pull",
     "pt": "Puxada para Guarda",
     "type": "transition",
@@ -612,6 +827,28 @@
       "puxada",
       "pull guard",
       "pull guard attempt"
+    ]
+  },
+  {
+    "en": "Guard Recovery",
+    "pt": "Recomposição de Guarda",
+    "type": "guard",
+    "variants": [
+      "guard recovery",
+      "guard retention",
+      "recomposicao de guarda",
+      "recomposicao",
+      "retencao de guarda"
+    ]
+  },
+  {
+    "en": "Guard Recovery Escape",
+    "pt": "Fuga para Guarda",
+    "type": "escape",
+    "variants": [
+      "escape to guard",
+      "escape to half guard",
+      "fuga para guarda"
     ]
   },
   {
@@ -628,6 +865,15 @@
     ]
   },
   {
+    "en": "Guillotine Sweep",
+    "pt": "Raspagem de Guilhotina",
+    "type": "sweep",
+    "variants": [
+      "guillotine sweep",
+      "raspagem de guilhotina"
+    ]
+  },
+  {
     "en": "Half Guard",
     "pt": "Meia Guarda",
     "type": "guard",
@@ -641,6 +887,15 @@
       "lockdown",
       "z-guard",
       "knee shield"
+    ]
+  },
+  {
+    "en": "Half Guard Pass",
+    "pt": "Passagem de Meia-Guarda",
+    "type": "pass",
+    "variants": [
+      "half guard pass",
+      "passagem de meia guarda"
     ]
   },
   {
@@ -684,6 +939,15 @@
     ]
   },
   {
+    "en": "High Crotch",
+    "pt": "High Crotch",
+    "type": "takedown",
+    "variants": [
+      "high crotch",
+      "high crotch takedown"
+    ]
+  },
+  {
     "en": "Hip Bump Sweep",
     "pt": "Raspagem da Cintura",
     "type": "sweep",
@@ -721,6 +985,25 @@
     ]
   },
   {
+    "en": "Hooks In",
+    "pt": "Ganchos Encaixados",
+    "type": "control",
+    "variants": [
+      "hooks in",
+      "ganchos",
+      "ganchos encaixados"
+    ]
+  },
+  {
+    "en": "Imanari Roll",
+    "pt": "Rolamento Imanari",
+    "type": "transition",
+    "variants": [
+      "imanari roll",
+      "rolamento imanari"
+    ]
+  },
+  {
     "en": "Inside Arm Stack Pass",
     "pt": "Stack Control Braço Dentro",
     "type": "pass",
@@ -730,6 +1013,17 @@
       "stack control braço dentro",
       "inside arm stack pass",
       "inside arm stack"
+    ]
+  },
+  {
+    "en": "Inside Ashi",
+    "pt": "Ashi Garami Interno",
+    "type": "control",
+    "variants": [
+      "inside ashi",
+      "inside ashi garami",
+      "ashi interno",
+      "ashi garami interno"
     ]
   },
   {
@@ -743,6 +1037,27 @@
       "ouchigari",
       "rasteira interna",
       "o-uchi-gari"
+    ]
+  },
+  {
+    "en": "Inverted De La Riva Guard",
+    "pt": "De La Riva Invertida",
+    "type": "guard",
+    "variants": [
+      "inverted de la riva",
+      "inverted de la riva guard",
+      "reverse de la riva",
+      "de la riva invertida",
+      "rdlr"
+    ]
+  },
+  {
+    "en": "Inverted Half Guard",
+    "pt": "Meia-Guarda Invertida",
+    "type": "guard",
+    "variants": [
+      "inverted half guard",
+      "meia guarda invertida"
     ]
   },
   {
@@ -790,6 +1105,25 @@
       "double wrist lock",
       "ude-garami",
       "kimura attempt"
+    ]
+  },
+  {
+    "en": "Kimura Grip",
+    "pt": "Pegada Kimura",
+    "type": "control",
+    "variants": [
+      "kimura grip",
+      "pegada kimura"
+    ]
+  },
+  {
+    "en": "Kimura Trap",
+    "pt": "Kimura Trap",
+    "type": "submission",
+    "variants": [
+      "kimura trap",
+      "kimura counter",
+      "armadilha kimura"
     ]
   },
   {
@@ -843,6 +1177,17 @@
     ]
   },
   {
+    "en": "Knee Shield Half Guard",
+    "pt": "Meia-Guarda com Escudo",
+    "type": "guard",
+    "variants": [
+      "knee shield half guard",
+      "knee shield",
+      "escudo de joelho",
+      "meia guarda com escudo"
+    ]
+  },
+  {
     "en": "Knee Tap",
     "pt": "Knee Tap",
     "type": "takedown",
@@ -885,6 +1230,55 @@
       "leg drag pass",
       "legdrag",
       "arrasto de perna"
+    ]
+  },
+  {
+    "en": "Leg Drag to Straddle",
+    "pt": "Leg Drag para Straddle",
+    "type": "transition",
+    "variants": [
+      "leg drag to straddle"
+    ]
+  },
+  {
+    "en": "Leg Entanglement",
+    "pt": "Emaranhado de Pernas",
+    "type": "guard",
+    "variants": [
+      "leg entanglement",
+      "leg entry",
+      "leg lock entanglement",
+      "emaranhado de pernas",
+      "entrada nas pernas"
+    ]
+  },
+  {
+    "en": "Leg Lace",
+    "pt": "Leg Lace",
+    "type": "control",
+    "variants": [
+      "leg lace",
+      "lace"
+    ]
+  },
+  {
+    "en": "Leg Lock",
+    "pt": "Chave de Perna",
+    "type": "submission",
+    "variants": [
+      "leglock",
+      "leg lock",
+      "chave de perna",
+      "chave na perna"
+    ]
+  },
+  {
+    "en": "Leg Lock Escape",
+    "pt": "Fuga de Chave de Perna",
+    "type": "escape",
+    "variants": [
+      "leg lock escape",
+      "fuga de chave de perna"
     ]
   },
   {
@@ -935,6 +1329,17 @@
     ]
   },
   {
+    "en": "Low Single Leg",
+    "pt": "Single Leg Baixo",
+    "type": "takedown",
+    "variants": [
+      "low single leg",
+      "low single leg takedown",
+      "low single takedown",
+      "single baixo"
+    ]
+  },
+  {
     "en": "Lumberjack Sweep",
     "pt": "Raspagem Lenhador",
     "type": "sweep",
@@ -942,6 +1347,17 @@
       "lumberjack sweep",
       "raspagem lenhador",
       "lenhador"
+    ]
+  },
+  {
+    "en": "Lung Lock",
+    "pt": "Chave de Pulmão",
+    "type": "submission",
+    "variants": [
+      "lung lock",
+      "chave de pulmao",
+      "chave no pulmao",
+      "rib squeeze"
     ]
   },
   {
@@ -959,6 +1375,37 @@
     ]
   },
   {
+    "en": "Mount Escape",
+    "pt": "Fuga da Montada",
+    "type": "escape",
+    "variants": [
+      "mount escape",
+      "fuga da montada"
+    ]
+  },
+  {
+    "en": "Mounted Crucifix",
+    "pt": "Crucifixo Montado",
+    "type": "control",
+    "variants": [
+      "mounted crucifix",
+      "crucifix",
+      "crucifixo"
+    ]
+  },
+  {
+    "en": "Neck Crank",
+    "pt": "Chave de Pescoço",
+    "type": "submission",
+    "variants": [
+      "neck crank",
+      "face crank",
+      "chave de pescoco",
+      "chave cervical",
+      "cervical"
+    ]
+  },
+  {
     "en": "North South Choke",
     "pt": "Estrangulamento Norte-Sul",
     "type": "submission",
@@ -966,6 +1413,25 @@
       "north-south choke",
       "estrangulamento norte-sul",
       "north south choke"
+    ]
+  },
+  {
+    "en": "North South Control",
+    "pt": "Controle Norte-Sul",
+    "type": "control",
+    "variants": [
+      "north south control",
+      "controle norte sul"
+    ]
+  },
+  {
+    "en": "North-South Pass",
+    "pt": "Passagem Norte-Sul",
+    "type": "pass",
+    "variants": [
+      "north south pass",
+      "north-south pass",
+      "passagem norte sul"
     ]
   },
   {
@@ -981,6 +1447,15 @@
       "north south",
       "norte sul",
       "kami shiho gatame"
+    ]
+  },
+  {
+    "en": "Octopus Guard",
+    "pt": "Guarda Polvo",
+    "type": "guard",
+    "variants": [
+      "octopus guard",
+      "guarda polvo"
     ]
   },
   {
@@ -1039,6 +1514,15 @@
       "outside ashi garami",
       "ashi garami externo",
       "outside sankaku"
+    ]
+  },
+  {
+    "en": "Outside Pass",
+    "pt": "Passagem por Fora",
+    "type": "pass",
+    "variants": [
+      "outside pass",
+      "passagem por fora"
     ]
   },
   {
@@ -1130,6 +1614,16 @@
     ]
   },
   {
+    "en": "Rear Body Lock",
+    "pt": "Abraço por Trás",
+    "type": "control",
+    "variants": [
+      "rear body lock",
+      "body lock por tras",
+      "abraco por tras"
+    ]
+  },
+  {
     "en": "Rear Naked Choke",
     "pt": "Mata-Leão",
     "type": "submission",
@@ -1157,6 +1651,17 @@
     ]
   },
   {
+    "en": "Roll-Through",
+    "pt": "Rolamento",
+    "type": "transition",
+    "variants": [
+      "roll through",
+      "roll-through",
+      "roll",
+      "rolamento"
+    ]
+  },
+  {
     "en": "Rolling",
     "pt": "Róla",
     "type": "concept",
@@ -1179,6 +1684,17 @@
       "guarda borracha",
       "mission control",
       "guarda de borracha"
+    ]
+  },
+  {
+    "en": "Russian Tie",
+    "pt": "Russian Tie",
+    "type": "control",
+    "variants": [
+      "russian tie",
+      "two on one",
+      "2 on 1",
+      "dois contra um"
     ]
   },
   {
@@ -1232,6 +1748,36 @@
     ]
   },
   {
+    "en": "Scramble",
+    "pt": "Scramble",
+    "type": "transition",
+    "variants": [
+      "scramble",
+      "escaped to neutral",
+      "reset to neutral"
+    ]
+  },
+  {
+    "en": "Seatbelt Control",
+    "pt": "Cinto de Segurança",
+    "type": "control",
+    "variants": [
+      "seatbelt",
+      "seatbelt control",
+      "cinto de seguranca"
+    ]
+  },
+  {
+    "en": "Seated Guard",
+    "pt": "Guarda Sentada",
+    "type": "guard",
+    "variants": [
+      "seated guard",
+      "sit guard",
+      "guarda sentada"
+    ]
+  },
+  {
     "en": "Shin to Shin Guard",
     "pt": "Guarda Canela a Canela",
     "type": "guard",
@@ -1240,6 +1786,27 @@
       "canela a canela",
       "shin guard",
       "shin to shin guard"
+    ]
+  },
+  {
+    "en": "Shoot",
+    "pt": "Entrada",
+    "type": "transition",
+    "variants": [
+      "shoot",
+      "entrada",
+      "entrada de queda"
+    ]
+  },
+  {
+    "en": "Shoulder Lock",
+    "pt": "Chave de Ombro",
+    "type": "submission",
+    "variants": [
+      "shoulder lock",
+      "shoulder crunch",
+      "chave de ombro",
+      "chave no ombro"
     ]
   },
   {
@@ -1323,6 +1890,15 @@
     ]
   },
   {
+    "en": "Smash Half Guard",
+    "pt": "Meia-Guarda Esmagada",
+    "type": "control",
+    "variants": [
+      "smash half guard",
+      "meia guarda esmagada"
+    ]
+  },
+  {
     "en": "Smash Pass",
     "pt": "Passagem Smash",
     "type": "pass",
@@ -1344,6 +1920,27 @@
       "snap down",
       "puxão de nuca",
       "snap"
+    ]
+  },
+  {
+    "en": "Snapdown to Front Headlock",
+    "pt": "Snap Down para Frontal",
+    "type": "transition",
+    "variants": [
+      "snap down / front headlock",
+      "snapdown to front headlock",
+      "snap-down go-behind takedown",
+      "snap down go behind"
+    ]
+  },
+  {
+    "en": "Snatch Single Leg",
+    "pt": "Snatch Single",
+    "type": "takedown",
+    "variants": [
+      "snatch single leg",
+      "snatch single leg takedown",
+      "snatch single"
     ]
   },
   {
@@ -1408,6 +2005,17 @@
     ]
   },
   {
+    "en": "Sweep",
+    "pt": "Raspagem",
+    "type": "sweep",
+    "variants": [
+      "sweep",
+      "reversal",
+      "raspagem",
+      "raspada"
+    ]
+  },
+  {
     "en": "Sweeping Hip Throw",
     "pt": "Harai Goshi",
     "type": "takedown",
@@ -1417,6 +2025,38 @@
       "haraigoshi",
       "harai",
       "harai-goshi"
+    ]
+  },
+  {
+    "en": "Switch Escape",
+    "pt": "Fuga de Troca",
+    "type": "escape",
+    "variants": [
+      "switch escape",
+      "sit-out escape",
+      "sit out escape",
+      "fuga de troca"
+    ]
+  },
+  {
+    "en": "Takedown",
+    "pt": "Queda",
+    "type": "takedown",
+    "variants": [
+      "takedown",
+      "take down",
+      "queda",
+      "derrubada"
+    ]
+  },
+  {
+    "en": "Takedown Defense",
+    "pt": "Defesa de Queda",
+    "type": "transition",
+    "variants": [
+      "takedown defense",
+      "defesa de queda",
+      "sprawl"
     ]
   },
   {
@@ -1443,6 +2083,26 @@
     ]
   },
   {
+    "en": "Three-Quarter Mount",
+    "pt": "Montada Três-Quartos",
+    "type": "control",
+    "variants": [
+      "three quarter mount",
+      "three-quarter mount",
+      "montada tres quartos"
+    ]
+  },
+  {
+    "en": "Throw",
+    "pt": "Projeção",
+    "type": "takedown",
+    "variants": [
+      "throw",
+      "projecao",
+      "arremesso"
+    ]
+  },
+  {
     "en": "Toe Hold",
     "pt": "Chave de Pé (Toe Hold)",
     "type": "submission",
@@ -1453,6 +2113,25 @@
       "americana de pé",
       "chave de pé",
       "toe hold attempt"
+    ]
+  },
+  {
+    "en": "Top Control",
+    "pt": "Controle por Cima",
+    "type": "control",
+    "variants": [
+      "top control",
+      "controle por cima"
+    ]
+  },
+  {
+    "en": "Top Half Guard",
+    "pt": "Meia-Guarda por Cima",
+    "type": "control",
+    "variants": [
+      "top half guard",
+      "half guard control",
+      "meia guarda por cima"
     ]
   },
   {
@@ -1478,6 +2157,17 @@
       "triangle",
       "sankaku jime",
       "sankaku"
+    ]
+  },
+  {
+    "en": "Trip",
+    "pt": "Rasteira",
+    "type": "takedown",
+    "variants": [
+      "trip",
+      "trip takedown",
+      "rasteira",
+      "varrida"
     ]
   },
   {
@@ -1515,6 +2205,15 @@
     ]
   },
   {
+    "en": "Turtle Control",
+    "pt": "Controle da Tartaruga",
+    "type": "control",
+    "variants": [
+      "turtle control",
+      "controle da tartaruga"
+    ]
+  },
+  {
     "en": "Turtle Position",
     "pt": "Quatro Apoios",
     "type": "escape",
@@ -1537,6 +2236,15 @@
       "twister lock",
       "espinha torcida",
       "twister attempt"
+    ]
+  },
+  {
+    "en": "Two-on-One Wrist Control",
+    "pt": "Controle de Punho Dois-contra-Um",
+    "type": "control",
+    "variants": [
+      "two on one wrist control",
+      "two-on-one wrist control"
     ]
   },
   {
@@ -1595,6 +2303,16 @@
       "guarda lapela",
       "worm",
       "guarda worm"
+    ]
+  },
+  {
+    "en": "Wrestle-Up",
+    "pt": "Wrestle Up",
+    "type": "transition",
+    "variants": [
+      "wrestle up",
+      "wrestle-up",
+      "wrestle up to top"
     ]
   },
   {
