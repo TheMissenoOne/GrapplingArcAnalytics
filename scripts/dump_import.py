@@ -103,7 +103,7 @@ def video_index() -> dict[tuple[frozenset[str], int | None], str]:
 
 def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
     """Flatten + de-dupe a dump into canonical bouts (labels library-cleaned when ``clean``)."""
-    seen: dict[tuple[frozenset[str], int | None], CanonicalMatch] = {}
+    seen: dict[tuple[frozenset[str], int | None, str, str], CanonicalMatch] = {}
     for block in raw:
         for (a_name, year), m in block.items():
             winner_name = str(m.get("winner") or "").strip()
@@ -130,7 +130,15 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
                 continue
             # Dedup by cleaned identity key so dirty variants (timestamps/nicknames/accents)
             # of the same human collapse to one bout instead of an "X vs X" self-match.
-            key = (frozenset((athlete_key(a_name), athlete_key(b_name))), year)
+            #
+            # The card is part of the identity: the same pair can genuinely meet twice in
+            # one year — different weeks of a league season, or two divisions of one
+            # tournament. Keying on (pair, year) alone silently dropped the second bout.
+            # Verified against every registered dump: this keeps exactly 2 extra bouts,
+            # both real (PGF World 2026 W3+W5 Adkins/Beuhring, and a two-division bracket).
+            # Re-importing the same dump still yields identical keys, so it stays idempotent.
+            key = (frozenset((athlete_key(a_name), athlete_key(b_name))), year,
+                   str(m.get("event") or ""), str(m.get("stage") or ""))
             if key in seen:
                 continue
             method = str(m.get("method") or "")

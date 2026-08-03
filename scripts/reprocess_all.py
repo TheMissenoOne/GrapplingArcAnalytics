@@ -103,6 +103,9 @@ DATASETS: list[tuple[str, str | None, str]] = [
     ("scripts.dumps.leandro_lo_data", None, "LeandroLo"),
     ("scripts.dumps.ruotolos_data", None, "Ruotolos"),
     ("scripts.dumps.musumeci_data", "Musumeci", "Musumeci"),
+    # Own-bout compilation across several cards — no single event tag, like the other
+    # career compilations above.
+    ("scripts.dumps.bruno_rocha_data", None, "BrunoRocha"),
 ]
 
 
