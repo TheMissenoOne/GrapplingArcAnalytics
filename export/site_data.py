@@ -288,12 +288,27 @@ def build_breakdowns(
     athletes_by_id: dict[str, Athlete] = {
         a.id: a for a in session.execute(select(Athlete)).scalars()}
 
+    # The same pair can meet twice in one year (two divisions of one card, two weeks of a
+    # league). dump_import keeps both bouts, but match_slug is (a, b, year) — so without a
+    # qualifier the second page overwrites the first and the dossier links both bouts to
+    # whichever survived. Disambiguate deterministically, by stage then match id.
+    slug_taken: set[str] = set()
+    _SLUG_BY_MATCH.clear()
+
     for match in _final_matches(session):
         a = athletes_by_id.get(match.athlete_a_id)
         b = athletes_by_id.get(match.athlete_b_id)
         if a is None or b is None:
             continue
         slug = match_slug(a, b, match.year)
+        if slug in slug_taken:
+            stage = slugify(str(match.stage or "").strip())
+            candidate = f"{slug}-{stage}" if stage else ""
+            if not candidate or candidate in slug_taken:
+                candidate = f"{slug}-{match.id[:8]}"
+            slug = candidate
+        slug_taken.add(slug)
+        _SLUG_BY_MATCH[match.id] = slug
         if cache is None:
             bd = build_match_breakdown(match, a, b, ptv_v=ptv_v)
         else:
@@ -603,6 +618,23 @@ _DEFAULT_DESC = (
 )
 
 
+# Fighter photos that actually exist in the output bundle. An og:image pointing at a
+# missing file is not a cosmetic issue: the social card renders broken for that page, and
+# there are only a handful of photos against hundreds of athletes. Populated by
+# export_site() before any page is rendered; empty set = fall back everywhere.
+_AVAILABLE_IMAGES: set[str] = set()
+
+# match id → the breakdown slug actually written for it. Dossier bout rows compute
+# their own slug from (a, b, year), which collides when a pair meets twice in a
+# year; this is the authority.
+_SLUG_BY_MATCH: dict[str, str] = {}
+
+
+def _og_image(path: str) -> str:
+    """``path`` if the file shipped with the bundle, else the brand card."""
+    return path if path in _AVAILABLE_IMAGES else "brand-og.png"
+
+
 def _head(title: str, description: str = "", path: str = "", image: str = "brand-og.png") -> str:
     """Full <head> with per-page SEO + Open Graph + Twitter card (acquisition baseline)."""
     e = html.escape
@@ -860,7 +892,7 @@ def render_breakdown_page(
 {_BREAKDOWN_JS}</script></body></html>"""
     desc = (f"{win_line}. Interactive transition map, momentum and the decisive sequence — "
             f"every claim traces to an edge you can hover.")
-    img = f"assets/fighters/{slugify(a['name'])}.jpg"
+    img = _og_image(f"assets/fighters/{slugify(a['name'])}.jpg")
     return _head(meta["title"], description=desc, path=f"breakdown-{slug}.html", image=img) + body
 
 
@@ -955,7 +987,10 @@ def render_profile_page(profile: dict[str, Any]) -> str:
             {"situation": sit, "icon": icons.get(sit, "?"), "moves": data["moves"]}
             for sit, data in profile["responses"].items()
         ],
-        "bouts": profile["bouts"],
+        # link each bout to the page that was actually written, not the slug the profile
+        # computed — they differ when a pair met twice in one year
+        "bouts": [{**b, "slug": _SLUG_BY_MATCH.get(b.get("match_id", ""), b["slug"])}
+                  for b in profile["bouts"]],
         "videos": profile.get("_videos") or {},
     }
     graph_hint = "Drag to pan, scroll to zoom · touch to swim · hover to isolate a pathway"
@@ -1233,7 +1268,8 @@ document.addEventListener('DOMContentLoaded', function(){{
     desc = (f"How {f['name']} wins, mapped from match data — a {arche} dossier: signature "
             f"entries, response patterns and finishing profile. The system, not the match.")
     return _head("Grapple Like " + f["name"], description=desc,
-                 path=f"grapple-{pslug}.html", image=f"assets/fighters/{pslug}.jpg") + body
+                 path=f"grapple-{pslug}.html",
+                 image=_og_image(f"assets/fighters/{pslug}.jpg")) + body
 
 
 # ── event (card) pages ───────────────────────────────────────────────────────
@@ -1495,6 +1531,11 @@ def migrate_branding(out: Path) -> dict[str, int]:
 
 def export_site(session: Session, out: Path, full: bool = False) -> dict[str, int]:
     from time import perf_counter as _pc
+
+    _AVAILABLE_IMAGES.clear()
+    _AVAILABLE_IMAGES.update(
+        f"assets/fighters/{p.name}" for p in (out / "assets/fighters").glob("*.jpg")
+    )
 
     def _phase(label: str, t0: float) -> float:
         logger.info("  [export] %s: %.1fs", label, _pc() - t0)

@@ -51,6 +51,41 @@ def _dedupe_slugs(slugs: list[str]) -> list[str]:
     return out
 
 
+def _dedupe_names(names: list[str], centroids: list[Any]) -> list[str]:
+    """Make DISPLAY names unique, not just their slugs.
+
+    Two clusters routinely share a name: both emphasise the same single node type, so
+    ``name_archetype`` returns "Passing Specialist" for each. The slug dedupe hides that
+    in the database and it surfaces on the site as two different athletes wearing the
+    same label. Qualify every member of a colliding group with its dominant composition
+    ("Passing Specialist · Guard-Based") — the axis the clusters actually differ on —
+    rather than numbering them, which would tell the reader nothing.
+    """
+    import numpy as np
+
+    groups: dict[str, list[int]] = {}
+    for i, n in enumerate(names):
+        groups.setdefault(n, []).append(i)
+
+    out = list(names)
+    nt = len(_TYPES)
+    for name, idxs in groups.items():
+        if len(idxs) < 2:
+            continue
+        for i in idxs:
+            shares = np.asarray(centroids[i])[:nt]
+            j = int(np.argmax(shares))
+            qualifier = _TYPE_NOUN[_TYPES[j]] if shares[j] > 0 else "Balanced"
+            out[i] = f"{name} · {qualifier}-Based"
+        # still colliding (same name AND same dominant share) → fall back to numbering
+        seen: dict[str, int] = {}
+        for i in idxs:
+            seen[out[i]] = seen.get(out[i], 0) + 1
+            if seen[out[i]] > 1:
+                out[i] = f"{out[i]} {seen[out[i]]}"
+    return out
+
+
 class _NodeLike(Protocol):
     """Structural type for a graph node — satisfied by db.repository.DerivedNode
     (nodes are reconstructed from edges + the shared library; graph_nodes is gone)."""
@@ -329,7 +364,7 @@ def run_archetype_pipeline(session: object, k: int = 6) -> None:
     clear_archetypes(session)  # type: ignore[arg-type]  # drop prior emergent archetypes
     fv = archetype_feature_version(vectors)
     centroids = km.cluster_centers_.tolist()
-    names = [name_archetype(c) for c in km.cluster_centers_]
+    names = _dedupe_names([name_archetype(c) for c in km.cluster_centers_], centroids)
     sig_types = [signature_types(c) for c in km.cluster_centers_]
     keys = _dedupe_slugs([f"emergent-{_slug(n)}" for n in names])
     archetype_ids = save_archetypes(

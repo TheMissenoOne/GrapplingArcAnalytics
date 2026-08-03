@@ -285,8 +285,10 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
             if is_elite:
                 elite_losses += 1
             result = f"lost to {opp_name}"
-        bouts.append({"slug": slug, "opponent": opp_name, "year": m.year,
-                      "result": result, "win_type": m.win_type})
+        # match_id lets the exporter swap in the page slug it actually wrote — two bouts
+        # between the same pair in one year share this computed slug (see build_breakdowns).
+        bouts.append({"slug": slug, "match_id": str(m.id), "opponent": opp_name,
+                      "year": m.year, "result": result, "win_type": m.win_type})
 
     # ── shared event-stream reduction (parity-tested against the App port) ──
     # ponytail: reduce_style_events walks ALL bouts concatenated in one pass, so its

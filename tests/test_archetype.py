@@ -175,3 +175,36 @@ def test_strike_only_padding_cannot_make_graph_archetype_eligible():
     ]
 
     assert assign_user_archetype(nodes, {}, {}, [ArchetypeRef(1, "X", [], np.zeros(18))]) is None
+
+
+def test_colliding_display_names_are_qualified_not_numbered() -> None:
+    """Two clusters that emphasise the same node type get the same name from
+    name_archetype. Slug dedupe hides that in the DB and it surfaces on the site as two
+    athletes wearing one label, so the display name must disambiguate too."""
+    import numpy as np
+
+    from analysis.archetype import _TYPES, _dedupe_names
+
+    nt = len(_TYPES)
+    # both "pass"-dominant in deviance (same name), differing in composition share
+    a = np.zeros(2 * nt)
+    b = np.zeros(2 * nt)
+    a[nt + _TYPES.index("pass")] = 0.9
+    b[nt + _TYPES.index("pass")] = 0.8
+    a[_TYPES.index("guard")] = 0.7
+    b[_TYPES.index("control")] = 0.7
+
+    out = _dedupe_names(["Passing Specialist", "Passing Specialist"], [a.tolist(), b.tolist()])
+    assert len(set(out)) == 2, "colliding names must end up distinct"
+    assert all("Passing Specialist" in n for n in out), "the shared root must survive"
+    assert not any(n.endswith(" 2") for n in out), "should qualify by axis, not number"
+
+
+def test_unique_names_are_left_alone() -> None:
+    import numpy as np
+
+    from analysis.archetype import _TYPES, _dedupe_names
+
+    v = np.zeros(2 * len(_TYPES)).tolist()
+    names = ["Passing Specialist", "Control-Based"]
+    assert _dedupe_names(names, [v, v]) == names

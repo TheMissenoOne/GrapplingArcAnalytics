@@ -192,3 +192,37 @@ def test_branding_only_cli_requires_explicit_out(monkeypatch) -> None:
         site_data.main()
 
     assert exc.value.code == 2
+
+
+def test_og_image_falls_back_when_the_photo_is_missing() -> None:
+    """An og:image pointing at a file the bundle does not ship renders a broken social
+    card. Only a handful of athletes have photos, so the fallback is the common path."""
+    from export.site_data import _AVAILABLE_IMAGES, _og_image
+
+    _AVAILABLE_IMAGES.clear()
+    assert _og_image("assets/fighters/nobody.jpg") == "brand-og.png"
+
+    _AVAILABLE_IMAGES.add("assets/fighters/gordon-ryan.jpg")
+    assert _og_image("assets/fighters/gordon-ryan.jpg") == "assets/fighters/gordon-ryan.jpg"
+    assert _og_image("assets/fighters/nobody.jpg") == "brand-og.png"
+    _AVAILABLE_IMAGES.clear()
+
+
+def test_same_pair_twice_in_a_year_gets_distinct_breakdown_slugs() -> None:
+    """dump_import keeps both bouts when a pair meets twice in one year (two divisions of
+    one card). match_slug is (a, b, year), so without a qualifier the second page
+    overwrites the first and the dossier links both bouts to whichever survived."""
+    from export.match_breakdown import slugify
+
+    taken: set[str] = set()
+    made: list[str] = []
+    for stage in ("Advanced Division", "Round of 16 — Intermediate Division"):
+        slug = "bruno-vs-hugo-2026"
+        if slug in taken:
+            q = slugify(stage)
+            slug = f"{slug}-{q}" if q else f"{slug}-deadbeef"
+        taken.add(slug)
+        made.append(slug)
+
+    assert len(set(made)) == 2, "both bouts must get their own page"
+    assert made[0] == "bruno-vs-hugo-2026", "the first keeps the canonical slug"
