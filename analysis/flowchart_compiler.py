@@ -1,0 +1,616 @@
+"""Compile decision patterns (+ optional expert input) into a FlowchartSpec.
+
+Pure + deterministic: same inputs → same spec. No DB, no I/O. The payload
+schema lives here as plain dicts (site/App consume JSON, not Python objects).
+
+Node kinds: root-position | position | athlete-action | opponent-condition |
+response | outcome | portal. Edges: action | reaction | response | results-in |
+returns-to | portal.
+
+Scoring (used only for ranking/truncation, never stored):
+    support*0.35 + confidence*0.25 + outcome_value*0.20
+    + athlete_specificity*0.10 + ontology_relevance*0.10
+
+See docs/decision_flows_contract.md for the authoritative payload spec.
+"""
+
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Final, Literal
+
+NodeKind = Literal[
+    "root-position", "position", "athlete-action",
+    "opponent-condition", "response", "outcome", "portal",
+]
+EdgeKind = Literal["action", "reaction", "response", "results-in", "returns-to", "portal"]
+
+_OBSERVED: Final = "observed"
+_EXPERT: Final = "expert"
+_HYBRID: Final = "hybrid"
+SourceKind = Literal["observed", "expert", "hybrid"]
+
+# Bump on any change to the compiled payload shape or node/edge semantics.
+COMPILER_VERSION: Final = "1.1.0"
+
+
+@dataclass(frozen=True)
+class FlowchartDefinition:
+    key: str
+    title: str
+    athlete_key: str
+    root_position_key: str
+    system_key: str | None = None
+    max_depth: int = 4
+    max_primary_branches: int = 6
+    max_conditions_per_action: int = 4
+    max_responses_per_condition: int = 3
+    minimum_support: int = 1
+    published: bool = True
+
+
+@dataclass(frozen=True)
+class ExpertBranch:
+    """Expert-authored (action, condition, response) triple.
+
+    condition_key lives in the ``cond:`` space; response_key is a technique
+    node_key (or ``None`` for 'denied').
+    """
+
+    action_key: str
+    condition_key: str | None
+    response_key: str | None = None
+    source: SourceKind = _EXPERT
+
+
+@dataclass(frozen=True)
+class FlowchartNode:
+    id: str
+    key: str
+    kind: NodeKind
+    title: str
+    subtitle: str | None = None
+    source: SourceKind = _OBSERVED
+    support: int | None = None
+    match_count: int | None = None
+    success_rate: float | None = None
+    confidence: float | None = None
+    evidence_ids: list[str] = field(default_factory=list)
+    warning: bool = False
+    url: str | None = None
+
+
+@dataclass(frozen=True)
+class FlowchartEdge:
+    id: str
+    source: str
+    target: str
+    kind: EdgeKind
+    label: str | None = None
+
+
+@dataclass(frozen=True)
+class FlowchartBranch:
+    id: str
+    action_key: str
+    score: float
+    conditions: list[str]
+    depth: int = 1
+
+
+@dataclass(frozen=True)
+class FlowchartSpec:
+    schema_version: int
+    key: str
+    title: str
+    athlete: str
+    athlete_label: str
+    root_position_key: str
+    root_position_label: str
+    nodes: list[FlowchartNode]
+    edges: list[FlowchartEdge]
+    branches: list[FlowchartBranch]
+    exchanges: int = 0
+    matches: int = 0
+    sources: dict[str, int] = field(default_factory=dict)
+    compiler_version: str = COMPILER_VERSION
+    layout_version: int | None = None
+    evidence: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+
+def node_id(kind: NodeKind, key: str | None) -> str:
+    return f"n:{kind}:{key or 'unknown'}"
+
+
+def cond_id(action_key: str, cond_key: str | None) -> str:
+    return f"n:opponent-condition:{action_key}:{cond_key or 'unknown'}"
+
+
+def response_id(action_key: str, cond_key: str | None, response_key: str) -> str:
+    return f"n:response:{action_key}:{cond_key or 'unknown'}:{response_key}"
+
+
+def outcome_id(action_key: str, cond_key: str | None, response_key: str | None) -> str:
+    return f"n:outcome:{action_key}:{cond_key or 'unknown'}:{response_key or 'denied'}"
+
+
+def edge_id(source: str, target: str, kind: EdgeKind) -> str:
+    return f"e:{source}:{target}:{kind}"
+
+
+def _r4(x: float) -> float:
+    return round(x, 4)
+
+
+def _canonical_root(source_position_key: str | None, root_position_key: str) -> bool:
+    if not source_position_key:
+        return False
+    s = source_position_key.strip().lower()
+    r = root_position_key.strip().lower()
+    return s == r or s == f"{r} control" or r == f"{s} control"
+
+
+def _outcome_value(outcome_type: str | None, response_key: str | None) -> float:
+    if response_key is None:
+        return 0.2  # failure / denied
+    if outcome_type == "submission":
+        return 1.0
+    if outcome_type in ("sweep", "pass", "takedown"):
+        return 0.7
+    return 0.4
+
+
+def _score(p: Any, *, ontology_relevance: float = 0.3) -> float:
+    support = min(float(p.count), 10.0) / 10.0  # cap so one match can't dominate
+    known = p.success_count + p.failure_count
+    confidence = p.confidence if known >= 3 else 0.0
+    support_w = 0.35 * support
+    confidence_w = 0.25 * confidence
+    outcome_w = 0.20 * _outcome_value(p.outcome_type, p.response_key)
+    specificity_w = 0.10 * 0.5  # no corpus comparison yet
+    ontology_w = 0.10 * ontology_relevance
+    return _r4(support_w + confidence_w + outcome_w + specificity_w + ontology_w)
+
+
+def _evidence_ids(p: Any) -> list[str]:
+    return [f"m:{ev.match_slug}:i:{ev.action_index}" for ev in p.evidence]
+
+
+def compile_flowchart(
+    definition: FlowchartDefinition,
+    patterns: list[Any],
+    *,
+    expert_branches: list[ExpertBranch] | None = None,
+    athlete_label: str | None = None,
+    root_position_label: str | None = None,
+    evidence_meta: dict[str, dict[str, Any]] | None = None,
+    layout_version: int | None = None,
+) -> FlowchartSpec:
+    """Build a spec from aggregated patterns rooted at the definition's position.
+
+    ``evidence_meta`` maps a match_slug to {matchLabel, year, videoId} so the
+    payload's evidence objects can carry display metadata the compiler itself
+    cannot know (it stays pure; the builder enriches from the DB/session).
+    """
+    expert = expert_branches or []
+    root_key = definition.root_position_key
+    root_label = root_position_label or root_key.title()
+    athlete_label = (athlete_label or definition.athlete_key).title()
+
+    nodes: list[FlowchartNode] = []
+    edges: list[FlowchartEdge] = []
+    branches: list[FlowchartBranch] = []
+    by_id: dict[str, FlowchartNode] = {}
+
+    def add(node: FlowchartNode) -> None:
+        if node.id in by_id:
+            return
+        nodes.append(node)
+        by_id[node.id] = node
+
+    def add_edge(source: str, target: str, kind: EdgeKind,
+                 label: str | None = None) -> None:
+        eid = edge_id(source, target, kind)
+        if not any(e.id == eid for e in edges):
+            edges.append(FlowchartEdge(id=eid, source=source, target=target,
+                                       kind=kind, label=label))
+
+    add(FlowchartNode(
+        id=node_id("root-position", root_key),
+        key=root_key,
+        kind="root-position",
+        title=root_label,
+        subtitle="Starting position",
+    ))
+
+    expert_lookup: set[tuple[str, str | None, str | None]] = set()
+    for eb in expert:
+        expert_lookup.add((eb.action_key, eb.condition_key, eb.response_key))
+
+    # rank primary branches (actions) by score, apply definition limits
+    action_pool: dict[str, list[Any]] = {}
+    for p in patterns:
+        if not _canonical_root(p.source_position_key, root_key):
+            continue
+        if p.count < definition.minimum_support:
+            continue
+        action_pool.setdefault(p.action_key, []).append(p)
+
+    ranked_actions = sorted(
+        action_pool.items(),
+        key=lambda item: (-_score(item[1][0]), item[0]),
+    )[: max(0, min(definition.max_primary_branches, 10))]
+
+    total_exchanges = 0
+    match_ids: set[str] = set()
+    for p in patterns:
+        for ev in p.evidence:
+            match_ids.add(ev.match_id)
+    source_counts: dict[str, int] = {_OBSERVED: 0, _EXPERT: 0, _HYBRID: 0}
+
+    for rank, (action_key, pool) in enumerate(ranked_actions):
+        total_exchanges += sum(p.count for p in pool)
+        p0 = pool[0]
+        action_label = p0.action_key.title()
+
+        # condition grouping (deterministic: score then key)
+        cond_groups: dict[str | None, list[Any]] = {}
+        for p in pool:
+            cond_groups.setdefault(p.condition_key, []).append(p)
+        ranked_conds = sorted(
+            cond_groups.items(),
+            key=lambda item: (-_score(item[1][0]), item[0] or ""),
+        )[: max(1, min(definition.max_conditions_per_action, 10))]
+
+        aid = node_id("athlete-action", action_key)
+        add(FlowchartNode(
+            id=aid,
+            key=action_key,
+            kind="athlete-action",
+            title=action_label,
+            subtitle=f"Branch {rank + 1} · {p0.count}×",
+            support=p0.count,
+            match_count=p0.match_count,
+            confidence=p0.confidence,
+            evidence_ids=_evidence_ids(p0)[:8],
+        ))
+        add_edge(node_id("root-position", root_key), aid, "action")
+
+        branch_conditions: list[str] = []
+        for ck, cg in ranked_conds:
+            cond_count = sum(p.count for p in cg)
+            cond_label = (ck or "unknown reaction").removeprefix("cond:").title()
+            cid = cond_id(action_key, ck)
+            add(FlowchartNode(
+                id=cid,
+                key=ck or "unknown",
+                kind="opponent-condition",
+                title=cond_label,
+                subtitle=f"{cond_count}×",
+                support=cond_count,
+                match_count=max(p.match_count for p in cg),
+            ))
+            add_edge(aid, cid, "reaction")
+            branch_conditions.append(cid)
+
+            # responses per condition (deterministic: score then key)
+            resp_groups: dict[str | None, list[Any]] = {}
+            for p in cg:
+                resp_groups.setdefault(p.response_key, []).append(p)
+            ranked_resps = sorted(
+                resp_groups.items(),
+                key=lambda item: (-_score(item[1][0]), item[0] or ""),
+            )[: max(1, min(definition.max_responses_per_condition, 8))]
+
+            for rk, rg in ranked_resps:
+                r0 = rg[0]
+                rcount = sum(p.count for p in rg)
+                is_hybrid = (action_key, ck, rk) in expert_lookup
+                src: SourceKind = _HYBRID if is_hybrid else _OBSERVED
+                source_counts[src] += 1
+                known = r0.success_count + r0.failure_count
+                success_rate = _r4(r0.success_count / known) if known >= 3 else None
+
+                if rk is None:
+                    rid = outcome_id(action_key, ck, None)
+                    add(FlowchartNode(
+                        id=rid,
+                        key="denied",
+                        kind="outcome",
+                        title="Denied",
+                        subtitle=f"{rcount}× · no response",
+                        source=src,
+                        support=rcount,
+                        match_count=r0.match_count,
+                        success_rate=success_rate,
+                        confidence=r0.confidence,
+                        warning=True,
+                        evidence_ids=_evidence_ids(r0)[:8],
+                    ))
+                    add_edge(cid, rid, "response")
+                    continue
+
+                rid = response_id(action_key, ck, rk)
+                resp_title = rk.title()
+                if r0.outcome_type == "submission":
+                    oid = outcome_id(action_key, ck, rk)
+                    add(FlowchartNode(
+                        id=oid,
+                        key=rk,
+                        kind="outcome",
+                        title=resp_title,
+                        subtitle=f"{rcount}× · submission",
+                        source=src,
+                        support=rcount,
+                        match_count=r0.match_count,
+                        success_rate=success_rate,
+                        confidence=r0.confidence,
+                        evidence_ids=_evidence_ids(r0)[:8],
+                    ))
+                    add_edge(cid, oid, "response")
+                    continue
+
+                add(FlowchartNode(
+                    id=rid,
+                    key=rk,
+                    kind="response",
+                    title=resp_title,
+                    subtitle=f"{rcount}×",
+                    source=src,
+                    support=rcount,
+                    match_count=r0.match_count,
+                    success_rate=success_rate,
+                    confidence=r0.confidence,
+                    evidence_ids=_evidence_ids(r0)[:8],
+                ))
+                add_edge(cid, rid, "response")
+
+                # results-in: next position (not the root, not the response itself)
+                result_pos = r0.resulting_position_key
+                if result_pos and not _canonical_root(result_pos, root_key):
+                    pid = node_id("position", result_pos)
+                    add(FlowchartNode(
+                        id=pid,
+                        key=result_pos,
+                        kind="position",
+                        title=result_pos.title(),
+                        subtitle="Leads to",
+                    ))
+                    add_edge(rid, pid, "results-in")
+
+        branches.append(FlowchartBranch(
+            id=f"branch:{rank + 1}",
+            action_key=action_key,
+            score=_score(p0),
+            conditions=branch_conditions,
+            depth=1,
+        ))
+
+    # expert branches: dashed "Expected" nodes. An action not yet observed
+    # gets a full branch; a known action gets the expert condition + response
+    # attached to its existing branch. Node ids are context-scoped, so
+    # existence checks use scoped ids.
+    existing_actions = {n.key for n in nodes if n.kind == "athlete-action"}
+    existing_node_ids = {n.id for n in nodes}
+    for eb in expert:
+        if eb.response_key is None:
+            continue
+        aid = node_id("athlete-action", eb.action_key)
+        cid = cond_id(eb.action_key, eb.condition_key)
+        rid = response_id(eb.action_key, eb.condition_key, eb.response_key)
+        # fully covered by observed/hybrid nodes (condition + response or
+        # outcome for the same technique) → expert contributes nothing.
+        covered = (cid in existing_node_ids and (
+            rid in existing_node_ids or
+            outcome_id(eb.action_key, eb.condition_key, eb.response_key)
+            in existing_node_ids))
+        if covered:
+            continue
+        added_any = False
+        if eb.action_key not in existing_actions:
+            add(FlowchartNode(
+                id=aid,
+                key=eb.action_key,
+                kind="athlete-action",
+                title=eb.action_key.title(),
+                subtitle="Expected",
+                source=_EXPERT,
+            ))
+            existing_actions.add(eb.action_key)
+            existing_node_ids.add(aid)
+            add_edge(node_id("root-position", root_key), aid, "action")
+            branches.append(FlowchartBranch(
+                id=f"branch:{len(branches) + 1}",
+                action_key=eb.action_key,
+                score=0.0,
+                conditions=[cid],
+                depth=1,
+            ))
+            added_any = True
+        else:
+            branch = next(b for b in branches
+                          if b.action_key == eb.action_key)
+            if cid not in branch.conditions:
+                branch.conditions.append(cid)
+        if cid not in existing_node_ids:
+            add(FlowchartNode(
+                id=cid,
+                key=eb.condition_key or "unknown",
+                kind="opponent-condition",
+                title=(eb.condition_key or "unknown reaction").removeprefix("cond:").title(),
+                subtitle="Expected",
+                source=_EXPERT,
+            ))
+            existing_node_ids.add(cid)
+            added_any = True
+        add_edge(aid, cid, "reaction")
+        if rid not in existing_node_ids:
+            add(FlowchartNode(
+                id=rid,
+                key=eb.response_key,
+                kind="response",
+                title=eb.response_key.title(),
+                subtitle="Expected",
+                source=_EXPERT,
+            ))
+            existing_node_ids.add(rid)
+            added_any = True
+        add_edge(cid, rid, "response")
+        if added_any:
+            source_counts[_EXPERT] += 1
+
+    # portals: a response key reused across >= 2 condition nodes and present
+    # as its own action branch → portal node (edge kind "portal")
+    resp_occurrences: dict[str, int] = {}
+    for e in edges:
+        if e.kind != "response":
+            continue
+        node = by_id.get(e.target)
+        if node is not None and node.kind == "response":
+            resp_occurrences[node.key] = resp_occurrences.get(node.key, 0) + 1
+    action_keys = {b.action_key for b in branches}
+    for nid, node in list(by_id.items()):
+        if (node.kind == "response" and resp_occurrences.get(node.key, 0) >= 2
+                and node.key in action_keys):
+            portal = FlowchartNode(
+                id=nid,
+                key=node.key,
+                kind="portal",
+                title=f"↪ {node.title}",
+                subtitle="Continues below",
+                source=node.source,
+                support=node.support,
+                match_count=node.match_count,
+                confidence=node.confidence,
+                evidence_ids=node.evidence_ids,
+            )
+            nodes[nodes.index(node)] = portal
+            by_id[nid] = portal
+
+    # evidence registry: only entries referenced by a node's evidenceIds.
+    # compiler stays pure — display metadata (label/year/videoId) arrives via
+    # evidence_meta from the builder; timestamps come from the patterns.
+    ev_by_id: dict[str, Any] = {}
+    for p in patterns:
+        for ev in p.evidence:
+            ev_by_id.setdefault(f"m:{ev.match_slug}:i:{ev.action_index}", ev)
+    meta = evidence_meta or {}
+    evidence: dict[str, dict[str, Any]] = {}
+    for node in nodes:
+        for eid in node.evidence_ids:
+            if eid in evidence:
+                continue
+            ev = ev_by_id.get(eid)
+            slug = ev.match_slug if ev is not None else str(eid).split(":", 3)[1]
+            info = meta.get(slug, {})
+            entry: dict[str, Any] = {"matchSlug": slug}
+            if ev is not None and ev.timestamp_seconds is not None:
+                entry["timestampSeconds"] = ev.timestamp_seconds
+            if info.get("matchLabel"):
+                entry["matchLabel"] = info["matchLabel"]
+            if info.get("year") is not None:
+                entry["year"] = info["year"]
+            if info.get("videoId"):
+                entry["videoId"] = info["videoId"]
+            evidence[eid] = entry
+
+    return FlowchartSpec(
+        schema_version=1,
+        key=definition.key,
+        title=definition.title,
+        athlete=definition.athlete_key,
+        athlete_label=athlete_label,
+        root_position_key=root_key,
+        root_position_label=root_label,
+        nodes=nodes,
+        edges=edges,
+        branches=branches,
+        exchanges=total_exchanges,
+        matches=len(match_ids) if match_ids else max(
+            (p.match_count for p in patterns), default=0),
+        sources=dict(sorted(source_counts.items())),
+        layout_version=layout_version,
+        evidence=evidence,
+    )
+
+
+def load_definitions(path: Path) -> list[FlowchartDefinition]:
+    """Load curated flowchart definitions from a JSON file."""
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(raw, list):
+        raise ValueError(f"flowchart definitions must be a JSON list, got {type(raw).__name__}")
+    out: list[FlowchartDefinition] = []
+    for entry in raw:
+        if not isinstance(entry, dict):
+            raise ValueError(f"flowchart definition entry must be an object, got {entry!r}")
+        required = ("key", "title", "athlete_key", "root_position_key")
+        for field_name in required:
+            if field_name not in entry:
+                raise ValueError(f"flowchart definition missing '{field_name}': {entry!r}")
+        if "published" not in entry:
+            entry = {**entry, "published": True}
+        out.append(FlowchartDefinition(**entry))
+    return out
+
+
+def spec_to_dict(spec: FlowchartSpec) -> dict[str, Any]:
+    """Serialize a spec to the contract payload shape (deterministic order)."""
+    return {
+        "schemaVersion": spec.schema_version,
+        "key": spec.key,
+        "title": spec.title,
+        "athlete": spec.athlete,
+        "athleteLabel": spec.athlete_label,
+        "rootPositionKey": spec.root_position_key,
+        "rootPositionLabel": spec.root_position_label,
+        "exchanges": spec.exchanges,
+        "matches": spec.matches,
+        "sources": spec.sources,
+        "evidence": spec.evidence,
+        "nodes": [_node_to_dict(n) for n in spec.nodes],
+        "edges": [_edge_to_dict(e) for e in spec.edges],
+        "branches": [_branch_to_dict(b) for b in spec.branches],
+        "compilerVersion": spec.compiler_version,
+        "layoutVersion": spec.layout_version,
+    }
+
+
+def _node_to_dict(n: FlowchartNode) -> dict[str, Any]:
+    d: dict[str, Any] = {
+        "id": n.id,
+        "key": n.key,
+        "kind": n.kind,
+        "title": n.title,
+        "subtitle": n.subtitle,
+        "source": n.source,
+        "support": n.support,
+        "matchCount": n.match_count,
+        "confidence": n.confidence,
+        "evidenceIds": n.evidence_ids,
+    }
+    if n.success_rate is not None:
+        d["successRate"] = n.success_rate
+    if n.warning:
+        d["warning"] = True
+    if n.url:
+        d["url"] = n.url
+    return d
+
+
+def _edge_to_dict(e: FlowchartEdge) -> dict[str, Any]:
+    d: dict[str, Any] = {"id": e.id, "source": e.source, "target": e.target, "kind": e.kind}
+    if e.label:
+        d["label"] = e.label
+    return d
+
+
+def _branch_to_dict(b: FlowchartBranch) -> dict[str, Any]:
+    return {
+        "id": b.id,
+        "actionKey": b.action_key,
+        "score": b.score,
+        "conditions": b.conditions,
+        "depth": b.depth,
+    }

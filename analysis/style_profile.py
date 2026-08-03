@@ -12,13 +12,16 @@ page. Node keys use the shared ``_normalize_name`` so they line up with the matc
 from __future__ import annotations
 
 from collections import Counter
+from dataclasses import asdict
 from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from analysis.decision_flow import aggregate_patterns, extract_patterns
 from analysis.deviance import TYPES as _TYPES
 from analysis.names import _normalize_name
+from analysis.perspective_sequence import perspective_events
 from db.models import Archetype, Athlete
 from db.repository import _perspective_view, get_matches_for_athlete
 
@@ -333,6 +336,35 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
         "scramble": round(style_mix.get("transition", 0.0) + style_mix.get("sweep", 0.0), 3),
     }
 
+    # Decision Flow patterns (for Grapple Like dossier integration).
+    # Stored as plain dicts, NOT dataclasses: the export ItemCache normalises payloads
+    # through json.dumps(default=str), which would turn a dataclass into its repr string.
+    decision_flow_patterns: list[dict[str, Any]] = []
+    if len(matches) >= MIN_SEQUENCE_BOUTS:
+        all_patterns = []
+        for m in matches:
+            other_id = m.athlete_b_id if m.athlete_a_id == athlete.id else m.athlete_a_id
+            other = session.get(Athlete, other_id)
+            opp_name = other.name if other else "Unknown"
+            a_name = athlete.name if m.athlete_a_id == athlete.id else opp_name
+            b_name = opp_name if m.athlete_a_id == athlete.id else athlete.name
+            winning = None
+            submission = getattr(m, "submission", None)
+            if submission:
+                winning = _normalize_name(str(submission))
+            all_patterns.extend(extract_patterns(
+                perspective_events(m, athlete.id),
+                match_id=str(m.id),
+                match_slug=_bout_slug(a_name, b_name, m.year),
+                athlete_id=athlete.id,
+                boundaries=None,
+                reaction_catalog=None,
+                winning_submission_key=winning,
+            ))
+        decision_flow_patterns = [
+            asdict(p) for p in aggregate_patterns(all_patterns) if p.source == "observed"
+        ]
+
     notable.sort(key=lambda r: r["rank_elo"], reverse=True)
     bouts.sort(key=lambda r: (r["year"] or 0), reverse=True)
 
@@ -369,6 +401,7 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
             ],
         },
         "bouts": bouts,
-        "grappling_events": own_events,  # relevance signal — see MIN_DOSSIER_EVENTS
+        "grappling_events": own_events,
         "career_graph_ref": f"fighters/{_slug(athlete.name)}.json",
+        "decision_flow_patterns": decision_flow_patterns,
     }

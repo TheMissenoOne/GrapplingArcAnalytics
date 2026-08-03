@@ -538,18 +538,25 @@ class _PerspectiveMatch:
 
 
 def _perspective_view(match: Match, athlete_id: str) -> _PerspectiveMatch:
-    """Remap a global match's actor_id sequence to 'you'/'opponent' for ``athlete_id``."""
+    """Remap a global match's actor_id sequence to 'you'/'opponent' for ``athlete_id``.
+
+    The shared perspective conversion lives in ``analysis.perspective_sequence``
+    (``perspective_events``); this shim keeps the historical dict shape
+    ``{label, type, actor, successful?}`` the replay/ELO/style consumers expect.
+    Both actors are preserved here — the execution graph and ELO filter
+    ``actor == 'you'`` downstream.
+    """
+    from analysis.perspective_sequence import perspective_events
+
     seq: list[dict[str, Any]] = []
-    for e in match.sequence or []:
-        if not isinstance(e, dict):
-            continue
+    for pe in perspective_events(match, athlete_id):
         item: dict[str, Any] = {
-            "label": e.get("label", ""),
-            "type": e.get("type", ""),
-            "actor": "you" if e.get("actor_id") == athlete_id else "opponent",
+            "label": pe.label,
+            "type": pe.event_type,
+            "actor": "you" if pe.actor == "you" else "opponent",
         }
-        if "successful" in e:
-            item["successful"] = e["successful"]
+        if pe.successful is not None:
+            item["successful"] = pe.successful
         seq.append(item)
     # No winner (draw OR un-inferred winner, e.g. unreviewed scraped match) → neutral
     # score for BOTH sides, not a loss for both. Force the view's win_type to DRAW so

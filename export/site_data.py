@@ -27,6 +27,7 @@ import html
 import json
 import logging
 import re
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -960,6 +961,78 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     graph_hint = "Drag to pan, scroll to zoom · touch to swim · hover to isolate a pathway"
     if payload["videos"]:
         graph_hint += " · click a position to watch it in a real bout"
+
+    # Decision Flow — second view over the same career, when the athlete has enough
+    # observed exchanges to compile one (see analysis/dossier_decision_flow eligibility).
+    # Not eligible → the career section stays exactly the single Game Map card it always was.
+    game_map_card = f'''
+  <div class="graph-card"><canvas id="careerGraph" class="graph-canvas" style="height:440px"></canvas>
+    <div class="graph-legend" id="legend"></div></div>
+  <p class="graph-hint">{graph_hint}</p>
+  <div id="dossierVideo" class="graph-card" style="display:none;margin-top:14px"></div>'''
+    df_tabs_html = ""
+    df_panel_html = game_map_card
+    df_payload_js = ""
+    df_head_includes = ""
+    df_patterns_raw = profile.get("decision_flow_patterns") or []
+    if df_patterns_raw:
+        # local: analysis.decision_flow ← analysis.network_metrics ← this module (cycle)
+        from analysis.decision_flow import DecisionPattern, PatternEvidence
+        from analysis.dossier_decision_flow import build_decision_flow_from_patterns
+
+        # style_profile stores these as plain dicts (ItemCache round-trips through JSON);
+        # rebuild the dataclasses the compiler expects. condition_indexes is a tuple there.
+        df_patterns = [
+            DecisionPattern(
+                **{k: v for k, v in p.items() if k != "evidence"},
+                evidence=[
+                    PatternEvidence(**{**e, "condition_indexes": tuple(e["condition_indexes"])})
+                    for e in p.get("evidence", [])
+                ],
+            )
+            for p in df_patterns_raw
+        ]
+        roots = Counter(p.source_position_key for p in df_patterns if p.source_position_key)
+        root_pos_key = roots.most_common(1)[0][0] if roots else "closed guard"
+        df_slug = slugify(f["name"])
+        df_payload = build_decision_flow_from_patterns(
+            athlete_name=f["name"],
+            athlete_key=df_slug,
+            patterns=df_patterns,
+            root_position_key=root_pos_key,
+            root_position_label=canonical_label(root_pos_key, root_pos_key.title()),
+        )
+        if df_payload:
+            df_global = f"GA_DECISION_FLOW_{df_slug.upper().replace('-', '_')}"
+            df_tabs_html = '''
+<div class="game-view-tabs" role="tablist">
+  <button role="tab" id="tab-game-map" aria-selected="true" aria-controls="panel-game-map">Game Map</button>
+  <button role="tab" id="tab-decision-flow" aria-selected="false" aria-controls="panel-decision-flow">Decision Flow</button>
+</div>'''
+            df_panel_html = f'''
+<div role="tabpanel" id="panel-game-map" aria-labelledby="tab-game-map">{game_map_card}
+</div>
+<div role="tabpanel" id="panel-decision-flow" aria-labelledby="tab-decision-flow" hidden>
+  <div class="flowchart-section dossier-embed">
+    <div class="flowchart-stage dossier-embed" id="flowchart-stage-{df_slug}" role="group" aria-label="Decision flow chart"></div>
+  </div>
+</div>'''
+            # _head() emits a bare <body>, so grapple-like.js's dataset auto-init can't fire —
+            # boot it explicitly instead of threading body attrs through every page's <head>.
+            df_payload_js = f"""
+<script>
+window.{df_global} = {json.dumps(df_payload, ensure_ascii=False, separators=(',', ':'))};
+document.addEventListener('DOMContentLoaded', function(){{
+  window.GAGrappleLike.initDecisionFlowTab({json.dumps(df_slug)}, {json.dumps(f['name'])});
+}});
+</script>"""
+            # flowchart.js defines window.GAFlowchart, which grapple-like.js mounts through.
+            df_head_includes = (
+                '<link rel="stylesheet" href="flowchart.css"/>'
+                '<link rel="stylesheet" href="grapple-like.css"/>'
+                '<script src="flowchart.js"></script>'
+                '<script src="grapple-like.js"></script>'
+            )
     sub_lines = []
     for k, v in fam.get("shares", {}).items():
         sub_lines.append(f"{k} {round(v * 100)}%")
@@ -1112,10 +1185,8 @@ def render_profile_page(profile: dict[str, Any]) -> str:
   <div class="sec-head" style="margin-bottom:14px">
     <span class="eyebrow">The system, not the match</span>
     <h2 class="h-lg mt16">One graph for an entire grappling game</h2></div>
-  <div class="graph-card"><canvas id="careerGraph" class="graph-canvas" style="height:440px"></canvas>
-    <div class="graph-legend" id="legend"></div></div>
-  <p class="graph-hint">{graph_hint}</p>
-  <div id="dossierVideo" class="graph-card" style="display:none;margin-top:14px"></div>
+  {df_tabs_html}
+  {df_panel_html}
 </section>
 {systems_html}
 <section class="mod"><div class="wrap"><div class="mod-grid">
@@ -1152,6 +1223,8 @@ def render_profile_page(profile: dict[str, Any]) -> str:
   <a class="btn app lg" href="index.html#app">Start this Project →</a>
 </div></div></section>
 {_FOOTER}
+{df_head_includes}
+{df_payload_js}
 <script src="graph.js"></script><script src="i18n.js"></script>
 <script>const P = {json.dumps(payload, ensure_ascii=False)};
 {_PROFILE_JS}</script></body></html>"""

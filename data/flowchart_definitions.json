@@ -1,0 +1,15 @@
+[
+  {
+    "key": "gordon-ryan-closed-guard",
+    "title": "Closed Guard Decision Flow",
+    "athlete_key": "gordon ryan",
+    "root_position_key": "closed guard",
+    "system_key": null,
+    "max_depth": 4,
+    "max_primary_branches": 6,
+    "max_conditions_per_action": 4,
+    "max_responses_per_condition": 3,
+    "minimum_support": 1,
+    "published": true
+  }
+]
