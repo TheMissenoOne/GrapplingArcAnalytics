@@ -180,11 +180,16 @@ def _provenance(pattern: Any, athlete_key: str, limit: int = 2) -> list[str]:
 
 
 def _leads_to(pool: list[Any], root_key: str, limit: int = 3) -> str | None:
-    """"lands in Mount 2×, Back Control 1×" — the positions this action actually reached."""
+    """"lands in Mount 2×, Back Control 1×" — the positions this action actually reached.
+
+    Destinations that are already drawn as response nodes in this same branch are left
+    out: the reader can see them, and repeating them here is noise, not information.
+    """
+    shown = {p.response_key for p in pool if p.response_key}
     tally: dict[str, int] = {}
     for p in pool:
         rp = p.resulting_position_key
-        if rp and not _canonical_root(rp, root_key):
+        if rp and rp not in shown and not _canonical_root(rp, root_key):
             tally[rp] = tally.get(rp, 0) + p.count
     if not tally:
         return None
@@ -496,9 +501,13 @@ def compile_flowchart(
                 ))
                 add_edge(parent, rid, "response")
 
-                # results-in: next position (not the root, not the response itself)
+                # results-in: next position (not the root, not the response itself).
+                # A response that IS a stable state already names the position it puts the
+                # athlete in — extract_patterns sets resulting_position_key to that very
+                # node_key — so drawing a second box for it says the same thing twice.
                 result_pos = r0.resulting_position_key
-                if result_pos and not _canonical_root(result_pos, root_key):
+                if (result_pos and result_pos != rk
+                        and not _canonical_root(result_pos, root_key)):
                     pid = node_id("position", result_pos)
                     add(FlowchartNode(
                         id=pid,

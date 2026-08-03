@@ -148,7 +148,11 @@ who **initiated** it or is the more active party; if truly symmetric, assign it 
 
 ## Timestamp Rules (pbp → ts)
 
-`pbp[].ts` is integer seconds from bout start (e.g. `0`, `12`, `142`). Every emitted event **must** carry a `ts` field.
+`pbp[].ts` is integer seconds, **absolute in the source video** — not relative to the bout.
+`export/site_data.py` subtracts the bout `start` at render time ("Convert broadcast-absolute
+ts → match-relative"), so a bout-relative value gets subtracted twice and every video link
+lands in the wrong place. Every emitted event **must** carry a `ts` field.
+(Corrected 2026-08-03 against the code; this line previously claimed "from bout start".)
 
 1. **(a) Order events by ts** — the events array per bout must be sorted ascending by `ts`.
 2. **(b) Dedup by ts** — repeated commentary on the same action at roughly the same ts = one event. E.g. "armbar's deep… still deep… defending hard" all at ts `310` → one `{label: "Armbar", type: "submission", actor: "...", ts: 310}`.
@@ -285,6 +289,9 @@ Use these exact strings for `actor`. No nicknames, no abbreviations.
 4. Never invent types; always pick from the 8.
 
 ### Successful
+
+> Attempts keep the technique's OWN type and carry `successful: False` — never re-typed
+> as `transition`. See `F-transcript-to-dump.md` §6 for the full rule and rationale.
 
 - **True** = landed / finished (e.g., "armbar locked in", "guard pass completed").
 - **False** = attempted but defended (e.g., "armbar attempt defended").

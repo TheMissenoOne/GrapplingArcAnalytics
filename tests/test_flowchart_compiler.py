@@ -392,3 +392,29 @@ class TestReactionFidelity:
         cond = next(n for n in spec.nodes if n.kind == "opponent-condition")
         assert cond.title == "Posts Hand and Squares Hips"
         assert "cond:" not in cond.title
+
+
+class TestNoRedundantNodes:
+    """A response that IS a position must not also be drawn as a landing position."""
+
+    def test_stable_state_response_does_not_duplicate_as_position(self) -> None:
+        # extract_patterns sets resulting_position_key to the response's own key when the
+        # response is a stable state (control/guard) — the compiler must not redraw it.
+        spec = compile_flowchart(_def(), [_pattern(
+            response_key="back control", outcome_type="control",
+            resulting_position_key="back control")])
+        assert not [n for n in spec.nodes if n.kind == "position"]
+        assert not [e for e in spec.edges if e.kind == "results-in"]
+
+    def test_genuinely_different_landing_still_drawn(self) -> None:
+        spec = compile_flowchart(_def(), [_pattern(
+            response_key="hip bump sweep", outcome_type="sweep",
+            resulting_position_key="mount")])
+        assert [n.key for n in spec.nodes if n.kind == "position"] == ["mount"]
+
+    def test_leads_to_omits_positions_already_on_screen(self) -> None:
+        spec = compile_flowchart(_def(), [_pattern(
+            response_key="back control", outcome_type="control",
+            resulting_position_key="back control")])
+        action = next(n for n in spec.nodes if n.kind == "athlete-action")
+        assert not any("lands in" in d for d in action.detail)
