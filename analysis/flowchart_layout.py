@@ -1,12 +1,13 @@
-"""Deterministic flowchart layout — desktop (4-sector) + compact (vertical).
+"""Deterministic flowchart layout — desktop (columns) + compact (vertical).
 
 Pure, no RNG, no timing: same spec + mode → byte-identical layout. Node
 heights are computed from text (chars per line), widths are fixed per kind.
 The browser only pans/zooms; it never re-lays-out.
 
-Desktop: root centered; primary branches packed into 4 sectors around it
-(top → right → bottom → left, cyclic). Compact: root on top, branches
-stacked in one column (portrait-friendly).
+Desktop: root at the left, branches stacked by rank, one GLOBAL column per
+stage (action → reaction → answer → landing position). The bands line up
+across every branch so the chart is scanned once rather than re-read per
+branch. Compact: root on top, branches stacked in one column (portrait).
 
 Edges are routed by ``flowchart_router`` (Manhattan polylines via explicit
 ports); this module only places nodes and calls the router.
@@ -29,7 +30,7 @@ from analysis.flowchart_router import (
 
 LayoutMode = Literal["desktop", "compact"]
 
-LAYOUT_VERSION = 3
+LAYOUT_VERSION = 5
 
 # fixed widths per node kind (px)
 NODE_WIDTHS: dict[str, int] = {
@@ -43,13 +44,17 @@ NODE_WIDTHS: dict[str, int] = {
 }
 
 _CHARS_PER_LINE = 26
+_DETAIL_CHARS_PER_LINE = 32   # detail is set smaller, so more fits per line
 _LINE_HEIGHT = 20.0
 _SUBTITLE_LINE = 18.0
+_DETAIL_LINE = 16.0
+_DETAIL_PAD = 6.0             # rule + breathing room above the detail block
 _BASE_HEIGHT = 68.0
 
 _SECTOR_GAP = 110.0   # gap between nodes on the same row
 _LEVEL_GAP_Y = 60.0   # gap between rows
 _ROOT_MARGIN = 110.0  # distance root → first branch layer
+_BRANCH_GAP = 90.0    # vertical gap between whole branches
 
 
 @dataclass(frozen=True)
@@ -80,19 +85,27 @@ def _node_width(kind: str) -> float:
     return float(NODE_WIDTHS.get(kind, 200))
 
 
-def _node_height(title: str | None, subtitle: str | None) -> float:
-    def lines(text: str | None) -> int:
+def _node_height(title: str | None, subtitle: str | None,
+                 detail: list[str] | None = None) -> float:
+    """Box height from its text. Detail lines wrap at their own (denser) measure —
+    a node that cites two bouts has to be taller than one that cites none."""
+    def lines(text: str | None, per_line: int = _CHARS_PER_LINE) -> int:
         if not text:
             return 0
-        return max(1, -(-len(text) // _CHARS_PER_LINE))  # ceil div
+        return max(1, -(-len(text) // per_line))  # ceil div
 
-    return (_BASE_HEIGHT
-            + (lines(title) - 1) * _LINE_HEIGHT
-            + (lines(subtitle) * _SUBTITLE_LINE if subtitle else 0.0))
+    h = (_BASE_HEIGHT
+         + (lines(title) - 1) * _LINE_HEIGHT
+         + (lines(subtitle) * _SUBTITLE_LINE if subtitle else 0.0))
+    if detail:
+        h += _DETAIL_PAD + sum(
+            lines(d, _DETAIL_CHARS_PER_LINE) * _DETAIL_LINE for d in detail)
+    return h
 
 
 def _measure(spec: Any) -> dict[str, tuple[float, float]]:
-    return {n.id: (_node_width(n.kind), _node_height(n.title, n.subtitle))
+    return {n.id: (_node_width(n.kind),
+                   _node_height(n.title, n.subtitle, getattr(n, "detail", None)))
             for n in spec.nodes}
 
 
@@ -189,68 +202,148 @@ def _resolve_overlaps(positions: dict[str, LayoutNode]) -> None:
             return
 
 
+def _tail_of(spec: Any, node_id: str, kinds: tuple[str, ...]) -> list[str]:
+    """Children of ``node_id`` restricted to ``kinds``, in spec order."""
+    kids = set(_children(spec.edges, node_id))
+    return [n.id for n in spec.nodes if n.id in kids and n.kind in kinds]
+
+
 def _layout_desktop(spec: Any, positions: dict[str, LayoutNode],
                     sizes: dict[str, tuple[float, float]]) -> None:
-    root = positions[next(n.id for n in spec.nodes if n.kind == "root-position")]
-    root_cx = root.width / 2
-    root_cy = root.height / 2
+    """Root at the left, branches stacked by rank, one column per stage.
 
-    # sectors around root; branches assigned cyclically in branch order
-    sector_branches: list[list[Any]] = [[], [], [], []]
-    for i, branch in enumerate(spec.branches):
-        sector_branches[i % 4].append(branch)
+    Column bands are GLOBAL — every action shares an x, every reaction shares the
+    next, every answer the next. That alignment is what makes the chart scannable:
+    the reader learns the bands once instead of re-orienting per branch. (The old
+    radial layout spread branches over four sectors around the root, so some chains
+    read upward and some downward and the eye had to reset at every branch.)
+    """
+    root_id = next(n.id for n in spec.nodes if n.kind == "root-position")
+    root = positions[root_id]
 
-    for sector, branches in enumerate(sector_branches):
-        if not branches:
+    resp_kinds = ("response", "outcome", "portal")
+    pos_kinds = ("position", "portal")
+
+    # ---- gather each branch's shape: action → [(condition|None, [responses])] ----
+    shaped: list[tuple[str, list[tuple[str | None, list[str]]]]] = []
+    for branch in spec.branches:
+        action_id = next((n.id for n in spec.nodes
+                          if n.kind == "athlete-action" and n.key == branch.action_key), None)
+        if action_id is None or action_id not in sizes:
             continue
-        boxes = [_branch_bbox(_rows_for(spec, b, sizes), sizes) for b in branches]
-        sector_w = sum(w for w, _ in boxes) + _SECTOR_GAP * (len(branches) - 1)
+        legs: list[tuple[str | None, list[str]]] = []
+        for cid in branch.conditions:
+            if cid in sizes:
+                legs.append((cid, _tail_of(spec, cid, resp_kinds)))
+        # responses hanging straight off the action (no recorded reaction)
+        direct = _tail_of(spec, action_id, resp_kinds)
+        if direct:
+            legs.append((None, direct))
+        shaped.append((action_id, legs))
 
-        if sector == 0:      # top: bottom edges flush at y = -_ROOT_MARGIN
-            x0 = root_cx - sector_w / 2
-        elif sector == 1:    # right: left edge past root, vertically centered
-            x0 = root.width + _ROOT_MARGIN
-        elif sector == 2:    # bottom: top edges flush below root, centered
-            x0 = root_cx - sector_w / 2
-        else:                # left: right edge past root, vertically centered
-            x0 = -_ROOT_MARGIN - sector_w
+    if not shaped:
+        return
 
-        col_x = x0
-        for branch, (bw, bh) in zip(branches, boxes):
-            rows = _rows_for(spec, branch, sizes)
-            if sector in (1, 3):
-                y = root_cy - bh / 2  # each column centered on the root
-            elif sector == 0:
-                y = -_ROOT_MARGIN - bh
-            else:
-                y = root.height + _ROOT_MARGIN
-            for row in rows:
-                row_h = max(sizes[nid][1] for nid in row)
-                x = col_x
-                for nid in row:
-                    positions[nid] = LayoutNode(x=x, y=y, width=sizes[nid][0],
-                                                height=sizes[nid][1])
-                    x += sizes[nid][0] + _SECTOR_GAP
-                y += row_h + _LEVEL_GAP_Y
-            col_x += bw + _SECTOR_GAP
+    # ---- column widths, so the bands line up across every branch ----
+    def col_width(ids: list[str]) -> float:
+        return max((sizes[i][0] for i in ids), default=0.0)
+
+    action_ids = [a for a, _ in shaped]
+    cond_ids = [c for _, legs in shaped for c, _ in legs if c]
+    resp_ids = [r for _, legs in shaped for _, rs in legs for r in rs]
+
+    x_action = root.width + _ROOT_MARGIN
+    x_cond = x_action + col_width(action_ids) + _SECTOR_GAP
+    x_resp = x_cond + (col_width(cond_ids) + _SECTOR_GAP if cond_ids else 0.0)
+    x_pos = x_resp + col_width(resp_ids) + _SECTOR_GAP
+
+    # ---- stack branches top to bottom, each leg a row block ----
+    y = 0.0
+    for action_id, legs in shaped:
+        branch_top = y
+        leg_y = y
+        for cid, responses in legs:
+            # a leg is as tall as its taller side: the reaction, or its stack of answers
+            stack_h = sum(sizes[r][1] for r in responses) + \
+                _LEVEL_GAP_Y * max(0, len(responses) - 1)
+            cond_h = sizes[cid][1] if cid else 0.0
+            leg_h = max(cond_h, stack_h)
+
+            if cid:
+                positions[cid] = LayoutNode(
+                    x=x_cond, y=leg_y + (leg_h - cond_h) / 2,
+                    width=sizes[cid][0], height=sizes[cid][1])
+
+            ry = leg_y + (leg_h - stack_h) / 2
+            for rid in responses:
+                positions[rid] = LayoutNode(x=x_resp, y=ry,
+                                            width=sizes[rid][0], height=sizes[rid][1])
+                # the position this answer lands in sits beside it, not below
+                for pid in _tail_of(spec, rid, pos_kinds):
+                    if pid not in positions:
+                        positions[pid] = LayoutNode(
+                            x=x_pos, y=ry, width=sizes[pid][0], height=sizes[pid][1])
+                ry += sizes[rid][1] + _LEVEL_GAP_Y
+            leg_y += leg_h + _LEVEL_GAP_Y
+
+        branch_h = max(leg_y - _LEVEL_GAP_Y - branch_top, sizes[action_id][1])
+        positions[action_id] = LayoutNode(
+            x=x_action, y=branch_top + (branch_h - sizes[action_id][1]) / 2,
+            width=sizes[action_id][0], height=sizes[action_id][1])
+        y = branch_top + branch_h + _BRANCH_GAP
+
+    # root sits centred against the whole stack, so its edges fan symmetrically
+    total_h = max(y - _BRANCH_GAP, root.height)
+    positions[root_id] = LayoutNode(x=0.0, y=(total_h - root.height) / 2,
+                                    width=root.width, height=root.height)
 
 
 def _layout_compact(spec: Any, positions: dict[str, LayoutNode],
                     sizes: dict[str, tuple[float, float]]) -> None:
-    root = positions[next(n.id for n in spec.nodes if n.kind == "root-position")]
+    """One node per row, in reading order — the only shape a phone can show legibly.
+
+    The previous compact mode still put a reaction and its answers side by side, so a
+    row stayed ~1100px wide and had to be scaled to ~0.3 to fit a 390px screen, which
+    made every label unreadable. A strict single column costs vertical scrolling and
+    buys full-size text.
+    """
+    root_id = next(n.id for n in spec.nodes if n.kind == "root-position")
+    root = positions[root_id]
+    col_w = max(w for w, _ in sizes.values())
+    resp_kinds = ("response", "outcome", "portal")
+    pos_kinds = ("position", "portal")
+
     y = root.height + _ROOT_MARGIN
+    seen: set[str] = {root_id}
+
+    def place(nid: str) -> None:
+        nonlocal y
+        if nid in seen or nid not in sizes:
+            return
+        seen.add(nid)
+        w, h = sizes[nid]
+        positions[nid] = LayoutNode(x=(col_w - w) / 2, y=y, width=w, height=h)
+        y += h + _LEVEL_GAP_Y
+
     for branch in spec.branches:
-        rows = _rows_for(spec, branch, sizes)
-        row_w = _rows_width(rows, sizes)
-        x = (root.width - row_w) / 2 if row_w < root.width else 0
-        for row in rows:
-            row_h = max(sizes[nid][1] for nid in row)
-            rx = x
-            for nid in row:
-                positions[nid] = LayoutNode(x=rx, y=y, width=sizes[nid][0],
-                                            height=sizes[nid][1])
-                rx += sizes[nid][0] + _SECTOR_GAP
-            y += row_h + _LEVEL_GAP_Y
+        action_id = next((n.id for n in spec.nodes
+                          if n.kind == "athlete-action" and n.key == branch.action_key), None)
+        if action_id is None:
+            continue
+        place(action_id)
+        legs = list(branch.conditions) + [None]
+        for cid in legs:
+            parent = cid if cid else action_id
+            if cid:
+                place(cid)
+            for rid in _tail_of(spec, parent, resp_kinds):
+                place(rid)
+                for pid in _tail_of(spec, rid, pos_kinds):
+                    place(pid)
+        y += _BRANCH_GAP - _LEVEL_GAP_Y
+
+    positions[root_id] = LayoutNode(x=(col_w - root.width) / 2, y=0,
+                                    width=root.width, height=root.height)
 
 
 def _place_orphans(spec: Any, positions: dict[str, LayoutNode],

@@ -33,7 +33,7 @@ _HYBRID: Final = "hybrid"
 SourceKind = Literal["observed", "expert", "hybrid"]
 
 # Bump on any change to the compiled payload shape or node/edge semantics.
-COMPILER_VERSION: Final = "1.1.0"
+COMPILER_VERSION: Final = "1.2.0"
 
 
 @dataclass(frozen=True)
@@ -72,6 +72,12 @@ class FlowchartNode:
     kind: NodeKind
     title: str
     subtitle: str | None = None
+    # BJJ event type (sweep/submission/pass/…) — colours the node by what the move IS,
+    # not by where it sits in the tree. Mirrors the app's category legend.
+    category: str | None = None
+    # Measured cue lines, in reading order. Never authored instruction — every line is
+    # something the match data says (counts, finish rate, where it led, when it happened).
+    detail: list[str] = field(default_factory=list)
     source: SourceKind = _OBSERVED
     support: int | None = None
     match_count: int | None = None
@@ -118,6 +124,91 @@ class FlowchartSpec:
     compiler_version: str = COMPILER_VERSION
     layout_version: int | None = None
     evidence: dict[str, dict[str, Any]] = field(default_factory=dict)
+
+
+def _plural(n: int, one: str, many: str) -> str:
+    return f"{n} {one if n == 1 else many}"
+
+
+def _mmss(seconds: int | None) -> str | None:
+    if seconds is None or seconds < 0:
+        return None
+    return f"{seconds // 60}:{seconds % 60:02d}"
+
+
+def _opponent_from_slug(match_slug: str, athlete_key: str) -> tuple[str | None, str | None]:
+    """('Kaynan Duarte', '25') from 'gordon-ryan-vs-kaynan-duarte-2025'.
+
+    The exporter builds the slug as ``<a>-vs-<b>-<year>`` in stored order, so which
+    half is the opponent depends on which side the athlete was on.
+    """
+    if "-vs-" not in match_slug:
+        return None, None
+    left, _, rest = match_slug.partition("-vs-")
+    right, _, year = rest.rpartition("-")
+    if not year.isdigit():
+        right, year = rest, ""
+    athlete_slug = athlete_key.replace(" ", "-")
+    other = right if left == athlete_slug else left
+    label = " ".join(w.title() for w in other.split("-") if w)
+    return (label or None), (year[-2:] if year else None)
+
+
+def _provenance(pattern: Any, athlete_key: str, limit: int = 2) -> list[str]:
+    """Up to ``limit`` "vs Duarte '25 · 3:42" lines — where this exchange was seen.
+
+    The reference charts cite an instructional's timestamp; ours cite the bout.
+    Deduped by match so one busy bout can't fill the node.
+    """
+    out: list[str] = []
+    seen: set[str] = set()
+    for ev in pattern.evidence:
+        if ev.match_id in seen:
+            continue
+        seen.add(ev.match_id)
+        who, year = _opponent_from_slug(ev.match_slug or "", athlete_key)
+        if not who:
+            continue
+        line = f"vs {who}" + (f" '{year}" if year else "")
+        ts = _mmss(ev.timestamp_seconds)
+        if ts:
+            line += f" · {ts}"
+        out.append(line)
+        if len(out) >= limit:
+            break
+    return out
+
+
+def _leads_to(pool: list[Any], root_key: str, limit: int = 3) -> str | None:
+    """"lands in Mount 2×, Back Control 1×" — the positions this action actually reached."""
+    tally: dict[str, int] = {}
+    for p in pool:
+        rp = p.resulting_position_key
+        if rp and not _canonical_root(rp, root_key):
+            tally[rp] = tally.get(rp, 0) + p.count
+    if not tally:
+        return None
+    top = sorted(tally.items(), key=lambda kv: (-kv[1], kv[0]))[:limit]
+    return "lands in " + ", ".join(f"{k.title()} {v}×" for k, v in top)
+
+
+def _condition_label(cond_key: str) -> str:
+    """'cond:posts-hand-and-cond:squares-hips' → 'Posts Hand and Squares Hips'.
+
+    Bundled reactions join with ``-and-`` and each half keeps its own ``cond:``
+    prefix, so stripping only the leading one leaks the raw key into the title.
+    """
+    parts = [p for p in cond_key.split("-and-") if p]
+    words = [p.removeprefix("cond:").replace("-", " ").strip().title() for p in parts]
+    return " and ".join(w for w in words if w) or "Reaction"
+
+
+def _rate_line(success: int, failure: int) -> str | None:
+    """Finish rate, only once enough known outcomes exist to mean anything."""
+    known = success + failure
+    if known < 3:
+        return None
+    return f"{round(success / known * 100)}% completed ({success}/{known})"
 
 
 def node_id(kind: NodeKind, key: str | None) -> str:
@@ -222,7 +313,8 @@ def compile_flowchart(
         key=root_key,
         kind="root-position",
         title=root_label,
-        subtitle="Starting position",
+        subtitle="Starting point",
+        category="position",
     ))
 
     expert_lookup: set[tuple[str, str | None, str | None]] = set()
@@ -264,14 +356,24 @@ def compile_flowchart(
             key=lambda item: (-_score(item[1][0]), item[0] or ""),
         )[: max(1, min(definition.max_conditions_per_action, 10))]
 
+        act_count = sum(p.count for p in pool)
+        act_matches = len({ev.match_id for p in pool for ev in p.evidence})
         aid = node_id("athlete-action", action_key)
         add(FlowchartNode(
             id=aid,
             key=action_key,
             kind="athlete-action",
             title=action_label,
-            subtitle=f"Branch {rank + 1} · {p0.count}×",
-            support=p0.count,
+            subtitle=f"Branch {rank + 1}",
+            category=p0.action_type,
+            detail=[ln for ln in [
+                f"{act_count}× across {_plural(act_matches, 'match', 'matches')}",
+                _rate_line(sum(p.success_count for p in pool),
+                           sum(p.failure_count for p in pool)),
+                _leads_to(pool, root_key),
+                *_provenance(p0, definition.athlete_key),
+            ] if ln],
+            support=act_count,
             match_count=p0.match_count,
             confidence=p0.confidence,
             evidence_ids=_evidence_ids(p0)[:8],
@@ -281,19 +383,28 @@ def compile_flowchart(
         branch_conditions: list[str] = []
         for ck, cg in ranked_conds:
             cond_count = sum(p.count for p in cg)
-            cond_label = (ck or "unknown reaction").removeprefix("cond:").title()
-            cid = cond_id(action_key, ck)
-            add(FlowchartNode(
-                id=cid,
-                key=ck or "unknown",
-                kind="opponent-condition",
-                title=cond_label,
-                subtitle=f"{cond_count}×",
-                support=cond_count,
-                match_count=max(p.match_count for p in cg),
-            ))
-            add_edge(aid, cid, "reaction")
-            branch_conditions.append(cid)
+            # No identified reaction = the athlete simply chained straight on. The
+            # extractor deliberately refuses to invent a condition there, so the chart
+            # must not invent a node for it either — the response hangs off the action.
+            if ck is None:
+                parent = aid
+            else:
+                cid = cond_id(action_key, ck)
+                cond_matches = len({ev.match_id for p in cg for ev in p.evidence})
+                add(FlowchartNode(
+                    id=cid,
+                    key=ck,
+                    kind="opponent-condition",
+                    title=_condition_label(ck),
+                    subtitle="Opponent reacts",
+                    detail=[f"{cond_count}× · seen in "
+                            f"{_plural(cond_matches, 'match', 'matches')}"],
+                    support=cond_count,
+                    match_count=max(p.match_count for p in cg),
+                ))
+                add_edge(aid, cid, "reaction")
+                branch_conditions.append(cid)
+                parent = cid
 
             # responses per condition (deterministic: score then key)
             resp_groups: dict[str | None, list[Any]] = {}
@@ -320,7 +431,11 @@ def compile_flowchart(
                         key="denied",
                         kind="outcome",
                         title="Denied",
-                        subtitle=f"{rcount}× · no response",
+                        subtitle="Nothing followed",
+                        detail=[ln for ln in [
+                            f"{rcount}× the exchange stopped here",
+                            *_provenance(r0, definition.athlete_key, limit=1),
+                        ] if ln],
                         source=src,
                         support=rcount,
                         match_count=r0.match_count,
@@ -329,7 +444,7 @@ def compile_flowchart(
                         warning=True,
                         evidence_ids=_evidence_ids(r0)[:8],
                     ))
-                    add_edge(cid, rid, "response")
+                    add_edge(parent, rid, "response")
                     continue
 
                 rid = response_id(action_key, ck, rk)
@@ -341,7 +456,14 @@ def compile_flowchart(
                         key=rk,
                         kind="outcome",
                         title=resp_title,
-                        subtitle=f"{rcount}× · submission",
+                        subtitle="Submission",
+                        category="submission",
+                        detail=[ln for ln in [
+                            f"{rcount}× attempted",
+                            _rate_line(sum(p.success_count for p in rg),
+                                       sum(p.failure_count for p in rg)),
+                            *_provenance(r0, definition.athlete_key),
+                        ] if ln],
                         source=src,
                         support=rcount,
                         match_count=r0.match_count,
@@ -349,7 +471,7 @@ def compile_flowchart(
                         confidence=r0.confidence,
                         evidence_ids=_evidence_ids(r0)[:8],
                     ))
-                    add_edge(cid, oid, "response")
+                    add_edge(parent, oid, "response")
                     continue
 
                 add(FlowchartNode(
@@ -357,7 +479,14 @@ def compile_flowchart(
                     key=rk,
                     kind="response",
                     title=resp_title,
-                    subtitle=f"{rcount}×",
+                    subtitle="Response",
+                    category=r0.outcome_type,
+                    detail=[ln for ln in [
+                        f"{rcount}× attempted",
+                        _rate_line(sum(p.success_count for p in rg),
+                                   sum(p.failure_count for p in rg)),
+                        *_provenance(r0, definition.athlete_key),
+                    ] if ln],
                     source=src,
                     support=rcount,
                     match_count=r0.match_count,
@@ -365,7 +494,7 @@ def compile_flowchart(
                     confidence=r0.confidence,
                     evidence_ids=_evidence_ids(r0)[:8],
                 ))
-                add_edge(cid, rid, "response")
+                add_edge(parent, rid, "response")
 
                 # results-in: next position (not the root, not the response itself)
                 result_pos = r0.resulting_position_key
@@ -376,7 +505,9 @@ def compile_flowchart(
                         key=result_pos,
                         kind="position",
                         title=result_pos.title(),
-                        subtitle="Leads to",
+                        subtitle="Continues in",
+                        category="position",
+                        url=f"the-ocean.html#{result_pos.replace(' ', '-')}",
                     ))
                     add_edge(rid, pid, "results-in")
 
@@ -584,6 +715,8 @@ def _node_to_dict(n: FlowchartNode) -> dict[str, Any]:
         "kind": n.kind,
         "title": n.title,
         "subtitle": n.subtitle,
+        "category": n.category,
+        "detail": list(n.detail),
         "source": n.source,
         "support": n.support,
         "matchCount": n.match_count,

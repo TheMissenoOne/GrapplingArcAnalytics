@@ -6,6 +6,7 @@ import pytest
 
 from analysis.flowchart_compiler import compile_flowchart
 from analysis.flowchart_layout import (
+    LAYOUT_VERSION,
     ComputedLayout,
     layout_flowchart,
     layout_to_dict,
@@ -104,22 +105,31 @@ class TestDesktop:
             assert layout.edges[e.id].points
             assert len(layout.edges[e.id].points) >= 2
 
-    def test_branch_sectors_spread_around_root(self) -> None:
-        layout = layout_flowchart(_spec(branches=5))
-        root = layout.nodes["n:root-position:closed guard"]
-        root_cx = root.x + root.width / 2
-        root_cy = root.y + root.height / 2
-        quadrants = set()
-        for nid, n in layout.nodes.items():
-            if nid == "n:root-position:closed guard":
-                continue
-            cx = n.x + n.width / 2 - root_cx
-            cy = n.y + n.height / 2 - root_cy
-            if abs(cy) >= abs(cx):
-                quadrants.add("top" if cy < 0 else "bottom")
-            else:
-                quadrants.add("left" if cx < 0 else "right")
-        assert quadrants == {"top", "right", "bottom", "left"}
+    def test_stages_form_aligned_columns(self) -> None:
+        """Every branch shares the same x per stage — that alignment is the whole
+        point of the layout: the reader learns the bands once."""
+        layout = layout_flowchart(_spec(branches=5, responses=2))
+        spec = _spec(branches=5, responses=2)
+        by_kind: dict[str, set[float]] = {}
+        for n in spec.nodes:
+            if n.id in layout.nodes:
+                by_kind.setdefault(n.kind, set()).add(layout.nodes[n.id].x)
+        for kind in ("athlete-action", "opponent-condition"):
+            assert len(by_kind.get(kind, {0})) == 1, f"{kind} not column-aligned"
+
+    def test_reads_left_to_right(self) -> None:
+        layout = layout_flowchart(_spec(branches=3, responses=1))
+        spec = _spec(branches=3, responses=1)
+        x = {n.kind: layout.nodes[n.id].x for n in spec.nodes if n.id in layout.nodes}
+        assert x["root-position"] < x["athlete-action"] < x["opponent-condition"]
+
+    def test_branches_stack_without_overlap(self) -> None:
+        layout = layout_flowchart(_spec(branches=5, responses=2))
+        boxes = list(layout.nodes.values())
+        for i, a in enumerate(boxes):
+            for b in boxes[i + 1:]:
+                assert not (a.x < b.x + b.width and b.x < a.x + a.width
+                            and a.y < b.y + b.height and b.y < a.y + a.height)
 
     def test_deterministic(self) -> None:
         a = layout_flowchart(_spec(branches=6))
@@ -170,7 +180,7 @@ class TestValidate:
     def test_layout_to_dict_shape(self) -> None:
         layout = layout_flowchart(_spec())
         d = layout_to_dict(layout)
-        assert d["layoutVersion"] == 3
+        assert d["layoutVersion"] == LAYOUT_VERSION
         assert d["routingVersion"] == 1
         assert d["mode"] == "desktop"
         assert d["width"] > 0 and d["height"] > 0
@@ -181,3 +191,18 @@ class TestValidate:
         assert len(edge["points"]) >= 2
         p0 = edge["points"][0]
         assert set(p0) == {"x", "y"}
+
+
+class TestCompactIsSingleColumn:
+    def test_every_node_on_its_own_row(self) -> None:
+        """A phone can only read one node at a time — no two may share a band."""
+        layout = layout_flowchart(_spec(branches=4, responses=2), mode="compact")
+        boxes = sorted(layout.nodes.values(), key=lambda n: n.y)
+        for a, b in zip(boxes, boxes[1:]):
+            assert a.y + a.height <= b.y, "compact rows must not overlap vertically"
+
+    def test_column_is_narrow_enough_for_a_phone(self) -> None:
+        layout = layout_flowchart(_spec(branches=4, responses=2), mode="compact")
+        widest = max(n.width for n in layout.nodes.values())
+        # the whole world may be no wider than one node — that is what makes it fit
+        assert layout.width <= widest + 1

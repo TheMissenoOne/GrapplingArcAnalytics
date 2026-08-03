@@ -78,6 +78,7 @@ class DecisionPattern:
     match_count: int = 1
     confidence: float = 0.0
     source: PatternSource = "observed"
+    action_type: str | None = None   # the ACTION's event type — drives node colour by BJJ category
     outcome_type: str | None = None  # response event type; "failure" when response is None
     evidence: list[PatternEvidence] = field(default_factory=list)
 
@@ -151,6 +152,7 @@ def extract_patterns(
                 response_key=None,
                 resulting_position_key=w.position_after_conditions,
                 failure_count=1,
+                action_type=w.action.event_type,
                 outcome_type="failure",
                 evidence=[_evidence(w, cond, None)],
             ))
@@ -165,6 +167,7 @@ def extract_patterns(
             condition_key=cond.key if cond else None,
             response_key=response.node_key,
             resulting_position_key=result_pos,
+            action_type=w.action.event_type,
             outcome_type=response.event_type,
         )
         if outcome is True:
@@ -252,6 +255,7 @@ def aggregate_patterns(patterns: list[DecisionPattern]) -> list[DecisionPattern]
                 condition_key=p.condition_key,
                 response_key=p.response_key,
                 resulting_position_key=p.resulting_position_key,
+                action_type=p.action_type,
                 outcome_type=p.outcome_type,
                 count=0,
                 match_count=0,

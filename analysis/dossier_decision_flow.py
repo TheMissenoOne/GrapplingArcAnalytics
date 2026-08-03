@@ -18,7 +18,7 @@ from analysis.flowchart_compiler import (
     compile_flowchart,
     spec_to_dict,
 )
-from analysis.flowchart_layout import layout_flowchart, layout_to_dict
+from analysis.flowchart_layout import LAYOUT_VERSION, layout_flowchart, layout_to_dict
 
 
 @dataclass(frozen=True)
@@ -175,7 +175,7 @@ def build_decision_flow_payload(
     expert_branches: list[ExpertBranch] = []
     spec = compile_flowchart(definition, patterns, expert_branches=expert_branches,
                              athlete_label=athlete_name, root_position_label=root_pos,
-                             layout_version=3)
+                             layout_version=LAYOUT_VERSION)
 
     primary_branches = _count_primary_branches(spec)
     eligibility = check_eligibility(
@@ -261,7 +261,7 @@ def build_decision_flow_from_patterns(
     )
     spec = compile_flowchart(definition, patterns, expert_branches=expert_branches or [],
                              athlete_label=athlete_name, root_position_label=root_position_label,
-                             layout_version=3)
+                             layout_version=LAYOUT_VERSION)
 
     primary_branches = len(spec.branches or [])
     distinct_matches = _count_distinct_matches(patterns)

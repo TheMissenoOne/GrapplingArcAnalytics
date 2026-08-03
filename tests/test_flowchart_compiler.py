@@ -7,6 +7,7 @@ import pytest
 
 from analysis.decision_flow import DecisionPattern, PatternEvidence
 from analysis.flowchart_compiler import (
+    COMPILER_VERSION,
     ExpertBranch,
     FlowchartDefinition,
     compile_flowchart,
@@ -83,7 +84,7 @@ class TestCompile:
         outcome = [n for n in spec.nodes if n.kind == "outcome"][0]
         assert outcome.key == "kimura grip"
         assert outcome.success_rate == 0.75
-        assert "submission" in (outcome.subtitle or "")
+        assert outcome.category == "submission"
 
     def test_plain_response_and_results_in(self) -> None:
         spec = compile_flowchart(
@@ -258,7 +259,7 @@ class TestCompile:
         assert {e["kind"] for e in d["edges"]} == {"action", "reaction", "response"}
         assert d["branches"][0]["actionKey"] == "hip bump sweep"
         assert d["sources"]["observed"] == 1
-        assert d["compilerVersion"] == "1.1.0"
+        assert d["compilerVersion"] == COMPILER_VERSION
         assert d["layoutVersion"] is None
         assert d["evidence"] == {}
 
@@ -276,7 +277,7 @@ class TestCompile:
             layout_version=2,
         )
         d = spec_to_dict(spec)
-        assert d["compilerVersion"] == "1.1.0"
+        assert d["compilerVersion"] == COMPILER_VERSION
         assert d["layoutVersion"] == 2
         eid = "m:gordon-ryan-vs-x-2021:i:14"
         entry = d["evidence"][eid]
@@ -328,3 +329,66 @@ class TestLoadDefinitions:
         p.write_text('[{"key": "k", "title": "t", "athlete_key": "a",'
                      ' "root_position_key": "r"}]', encoding="utf-8")
         assert load_definitions(p)[0].published is True
+
+
+class TestMeasuredDetail:
+    """Node detail must be measured, never authored — and must survive missing data."""
+
+    def test_action_detail_counts_matches_and_destinations(self) -> None:
+        spec = compile_flowchart(_def(), [
+            _pattern(resulting_position_key="mount", count=3,
+                     evidence=[PatternEvidence("m1", "gordon-ryan-vs-kaynan-duarte-2025",
+                                               "a", 1, (2,), 3, 222)]),
+            _pattern(condition_key="cond:frames", resulting_position_key="back control",
+                     count=1,
+                     evidence=[PatternEvidence("m2", "anna-vieira-vs-gordon-ryan-2024",
+                                               "a", 1, (2,), 3, None)]),
+        ])
+        action = next(n for n in spec.nodes if n.kind == "athlete-action")
+        assert action.detail[0] == "4× across 2 matches"
+        assert any(d.startswith("lands in Mount 3×") for d in action.detail)
+        # provenance names the OPPONENT and the clock, whichever side the athlete was on
+        assert "vs Kaynan Duarte '25 · 3:42" in action.detail
+
+    def test_no_evidence_means_no_fabricated_lines(self) -> None:
+        spec = compile_flowchart(_def(), [_pattern(evidence=[])])
+        action = next(n for n in spec.nodes if n.kind == "athlete-action")
+        # counts and rate still hold; provenance simply does not appear
+        assert action.detail == ["4× across 0 matches", "75% completed (3/4)"]
+        assert not any("vs " in d for d in action.detail)
+
+    def test_rate_line_withheld_below_three_known_outcomes(self) -> None:
+        thin = compile_flowchart(_def(), [_pattern(success_count=1, failure_count=1)])
+        assert not any("completed" in d
+                       for n in thin.nodes for d in n.detail)
+        thick = compile_flowchart(_def(), [_pattern(success_count=3, failure_count=1)])
+        action = next(n for n in thick.nodes if n.kind == "athlete-action")
+        assert "75% completed (3/4)" in action.detail
+
+    def test_category_comes_from_the_move_not_the_tree_slot(self) -> None:
+        spec = compile_flowchart(_def(), [_pattern(action_type="sweep")])
+        action = next(n for n in spec.nodes if n.kind == "athlete-action")
+        assert action.category == "sweep"
+        # opponent reactions are not techniques and must stay uncoloured
+        cond = next(n for n in spec.nodes if n.kind == "opponent-condition")
+        assert cond.category is None
+
+
+class TestReactionFidelity:
+    """The extractor refuses to invent a reaction; the chart must not invent one either."""
+
+    def test_no_condition_means_no_condition_node(self) -> None:
+        spec = compile_flowchart(_def(), [_pattern(condition_key=None)])
+        assert not [n for n in spec.nodes if n.kind == "opponent-condition"]
+        # the response hangs straight off the action instead
+        action = next(n for n in spec.nodes if n.kind == "athlete-action")
+        resp = next(n for n in spec.nodes if n.kind in ("response", "outcome"))
+        assert any(e.source == action.id and e.target == resp.id for e in spec.edges)
+        assert spec.branches[0].conditions == []
+
+    def test_bundled_condition_key_is_humanised(self) -> None:
+        spec = compile_flowchart(_def(), [
+            _pattern(condition_key="cond:posts-hand-and-cond:squares-hips")])
+        cond = next(n for n in spec.nodes if n.kind == "opponent-condition")
+        assert cond.title == "Posts Hand and Squares Hips"
+        assert "cond:" not in cond.title
