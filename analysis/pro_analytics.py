@@ -230,9 +230,10 @@ def build_athlete_dossier_v1(
     network: Mapping[str, Any],
     path_to_victory: Sequence[Mapping[str, Any]],
     generated_at: str,
+    decision_flow: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Wrap the existing athlete style-profile in the App's gated dossier contract."""
-    return {
+    payload = {
         "schemaVersion": SCHEMA_VERSION,
         "generatedAt": generated_at,
         "athlete": {
@@ -250,3 +251,6 @@ def build_athlete_dossier_v1(
         "graphId": graph_id,
         "bouts": list(style_profile.get("bouts", [])),
     }
+    if decision_flow is not None:
+        payload["decisionFlow"] = decision_flow
+    return payload

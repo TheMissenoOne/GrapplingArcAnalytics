@@ -16,6 +16,8 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from analysis.dossier_decision_flow import build_decision_flow_from_raw_patterns
+from analysis.names import _normalize_name
 from analysis.network_metrics import (
     network_from_sequences,
     node_centralities,
@@ -279,6 +281,11 @@ def publish_athlete_dossier(
         select(Graph).where(Graph.owner_kind == "athlete", Graph.owner_id == athlete_id)
     ).scalar_one_or_none()
     profile = build_style_profile(athlete, session)
+    decision_flow = build_decision_flow_from_raw_patterns(
+        athlete_name=athlete.name,
+        athlete_key=_normalize_name(athlete.name),
+        raw_patterns=profile.get("decision_flow_patterns", []),
+    )
     network, ptv = _athlete_network(athlete_id, session)
     payload = build_athlete_dossier_v1(
         athlete={
@@ -294,6 +301,7 @@ def publish_athlete_dossier(
         network=network,
         path_to_victory=ptv,
         generated_at=_iso(now),
+        decision_flow=decision_flow,
     )
     existing = session.get(AthleteDossier, athlete_id)
     if dry_run:

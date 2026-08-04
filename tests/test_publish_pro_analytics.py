@@ -3,13 +3,15 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from types import SimpleNamespace
+from unittest.mock import MagicMock
 
 import pytest
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from db.base import Base
-from db.models import Profile, UserPerformanceSnapshot, UserSession
+from db.models import Athlete, AthleteDossier, Profile, UserPerformanceSnapshot, UserSession
 from jobs import publish_pro_analytics
 
 
@@ -148,3 +150,44 @@ def test_publish_continues_after_one_user_failure_and_returns_nonzero(session: S
     ).scalar_one()
     assert exit_code == 1
     assert ready.status == "ready"
+
+
+@pytest.mark.parametrize("decision_flow", [None, {"schemaVersion": 1, "nodes": []}])
+def test_publish_athlete_dossier_optionally_persists_compiled_decision_flow(
+    monkeypatch: pytest.MonkeyPatch,
+    decision_flow: dict[str, object] | None,
+) -> None:
+    athlete = SimpleNamespace(
+        id="athlete-1",
+        name="Ada Grappler",
+        nickname=None,
+        team=None,
+        weight_class=None,
+        belt="black",
+    )
+    db = MagicMock(spec=Session)
+    db.get.side_effect = lambda model, _: athlete if model is Athlete else None
+    db.execute.return_value.scalar_one_or_none.return_value = None
+    profile = {"decision_flow_patterns": [{"action_key": "opaque"}]}
+    monkeypatch.setattr(publish_pro_analytics, "qualifies", lambda *_: True)
+    monkeypatch.setattr(publish_pro_analytics, "build_style_profile", lambda *_: profile)
+    monkeypatch.setattr(publish_pro_analytics, "_athlete_network", lambda *_: ({}, []))
+    adapter = MagicMock(return_value=decision_flow)
+    monkeypatch.setattr(publish_pro_analytics, "build_decision_flow_from_raw_patterns", adapter)
+
+    assert publish_pro_analytics.publish_athlete_dossier(
+        db,
+        athlete.id,
+        datetime(2026, 7, 17, 3, 15, tzinfo=UTC),
+    )
+
+    dossier = db.add.call_args.args[0]
+    assert isinstance(dossier, AthleteDossier)
+    assert dossier.schema_version == 1
+    assert dossier.payload.get("decisionFlow") is decision_flow
+    assert ("decisionFlow" in dossier.payload) is (decision_flow is not None)
+    adapter.assert_called_once_with(
+        athlete_name="Ada Grappler",
+        athlete_key="ada grappler",
+        raw_patterns=profile["decision_flow_patterns"],
+    )

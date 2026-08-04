@@ -7,11 +7,16 @@ used by the export layer.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from analysis.decision_flow import DecisionPattern, aggregate_patterns, extract_patterns
+from analysis.decision_flow import (
+    DecisionPattern,
+    PatternEvidence,
+    aggregate_patterns,
+    extract_patterns,
+)
 from analysis.flowchart_compiler import (
     ExpertBranch,
     FlowchartDefinition,
@@ -238,6 +243,59 @@ def _infer_root_position(patterns: list[DecisionPattern]) -> str | None:
         if p.source_position_key:
             return p.source_position_key
     return None
+
+
+def decision_pattern_from_mapping(value: Mapping[str, Any]) -> DecisionPattern:
+    """Reconstruct one pattern serialized by ``dataclasses.asdict``."""
+    evidence = [
+        PatternEvidence(
+            match_id=item["match_id"],
+            match_slug=item["match_slug"],
+            athlete_id=item["athlete_id"],
+            action_index=item["action_index"],
+            condition_indexes=tuple(int(index) for index in item["condition_indexes"]),
+            response_index=item["response_index"],
+            timestamp_seconds=item["timestamp_seconds"],
+        )
+        for item in value["evidence"]
+    ]
+    return DecisionPattern(
+        source_position_key=value["source_position_key"],
+        action_key=value["action_key"],
+        condition_key=value["condition_key"],
+        response_key=value["response_key"],
+        resulting_position_key=value["resulting_position_key"],
+        count=value["count"],
+        success_count=value["success_count"],
+        failure_count=value["failure_count"],
+        unknown_result_count=value["unknown_result_count"],
+        match_count=value["match_count"],
+        confidence=value["confidence"],
+        source=value["source"],
+        action_type=value["action_type"],
+        outcome_type=value["outcome_type"],
+        evidence=evidence,
+    )
+
+
+def build_decision_flow_from_raw_patterns(
+    *,
+    athlete_name: str,
+    athlete_key: str,
+    raw_patterns: Sequence[Mapping[str, Any]],
+) -> dict[str, Any] | None:
+    """Delegate stored style-profile patterns to the existing compiler path."""
+    patterns = [decision_pattern_from_mapping(value) for value in raw_patterns]
+    root = _infer_root_position(patterns)
+    if not root:
+        return None
+    return build_decision_flow_from_patterns(
+        athlete_name=athlete_name,
+        athlete_key=athlete_key,
+        patterns=patterns,
+        root_position_key=root,
+        root_position_label=root.replace("-", " ").title(),
+    )
 
 
 # Convenience: build from existing compiled patterns (used when patterns already aggregated)
