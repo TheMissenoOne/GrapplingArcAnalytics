@@ -12,6 +12,7 @@ from analysis.flowchart_layout import (
     layout_to_dict,
     validate_layout,
 )
+from analysis.flowchart_router import ROUTING_VERSION
 
 
 def _spec(branches: int = 1, responses: int = 1, positions: int = 0) -> Any:
@@ -181,7 +182,7 @@ class TestValidate:
         layout = layout_flowchart(_spec())
         d = layout_to_dict(layout)
         assert d["layoutVersion"] == LAYOUT_VERSION
-        assert d["routingVersion"] == 1
+        assert d["routingVersion"] == ROUTING_VERSION
         assert d["mode"] == "desktop"
         assert d["width"] > 0 and d["height"] > 0
         node = next(iter(d["nodes"].values()))

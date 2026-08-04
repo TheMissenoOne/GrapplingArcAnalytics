@@ -20,7 +20,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal
 
-ROUTING_VERSION = 1
+ROUTING_VERSION = 2
 
 PORT_STUB = 20.0
 ROUTE_GUTTER = 100.0
@@ -138,6 +138,18 @@ def _initial_run(s: _Box, t: _Box, vertical: bool) -> float:
     return min(s.y, t.y) - ROUTE_GUTTER
 
 
+def _lane_segments(lane: float, sp: Point, sb: Point, tp: Point, tb: Point,
+                   vertical: bool) -> list[tuple[Point, Point]]:
+    """The three runs of a lane route: out of the source, along the lane, into the target."""
+    if vertical:
+        return [((sp[0], sb[1]), (lane, sb[1])),
+                ((lane, sb[1]), (lane, tb[1])),
+                ((lane, tb[1]), (tp[0], tb[1]))]
+    return [((sb[0], sp[1]), (sb[0], lane)),
+            ((sb[0], lane), (tb[0], lane)),
+            ((tb[0], lane), (tb[0], tp[1]))]
+
+
 def _clear(lane: float, other: list[_Box], sp: Point, sb: Point, tp: Point, tb: Point,
            vertical: bool, exclude: set[str], c: float) -> float:
     """Shift a lane coordinate until every segment is clear.
@@ -151,14 +163,7 @@ def _clear(lane: float, other: list[_Box], sp: Point, sb: Point, tp: Point, tb: 
         push_dir = 1 if lane < tp[1] else -1
 
     for _ in range(len(other) * 2 + 2):
-        if vertical:
-            segs = [((sp[0], sb[1]), (lane, sb[1])),
-                    ((lane, sb[1]), (lane, tb[1])),
-                    ((lane, tb[1]), (tp[0], tb[1]))]
-        else:
-            segs = [((sb[0], sp[1]), (sb[0], lane)),
-                    ((sb[0], lane), (tb[0], lane)),
-                    ((tb[0], lane), (tb[0], tp[1]))]
+        segs = _lane_segments(lane, sp, sb, tp, tb, vertical)
         hit = None
         for b in other:
             if b.id in exclude:
@@ -188,7 +193,10 @@ def _route_one(edge: Any, boxes: dict[str, _Box],
     dy = t.cy - s.cy
     sside = _side_of(dx, dy, source=True)
     tside = _side_of(dx, dy, source=False)
-    vertical = sside in ("top", "bottom")
+    # The lane runs ACROSS the ports: left/right ports need a vertical lane,
+    # top/bottom ports a horizontal one. Matching the port axis instead sends the
+    # line sideways before it has left the box — two bends nobody asked for.
+    vertical = sside in ("left", "right")
     soff = offsets.get(f"{edge.source}:{sside}:{edge.id}", 0.0)
     toff = offsets.get(f"{edge.target}:{tside}:{edge.id}", 0.0)
 
@@ -199,47 +207,51 @@ def _route_one(edge: Any, boxes: dict[str, _Box],
 
     other = [b for b in boxes.values() if b.id not in (edge.source, edge.target)]
 
-    def attempt(lane: float) -> list[Point] | None:
-        if vertical:
-            lane = _clear(lane, other, sp, sb, tp, tb, True,
-                          {edge.source, edge.target}, NODE_CLEARANCE)
-            for seg in [((sp[0], sb[1]), (lane, sb[1])),
-                        ((lane, sb[1]), (lane, tb[1])),
-                        ((lane, tb[1]), (tp[0], tb[1]))]:
-                for b in other:
-                    if _crosses_box(seg, b, NODE_CLEARANCE):
-                        return None
-            raw = [sb, (lane, sb[1]), (lane, tb[1])]
-        else:
-            lane = _clear(lane, other, sp, sb, tp, tb, False,
-                          {edge.source, edge.target}, NODE_CLEARANCE)
-            for seg in [((sb[0], sp[1]), (sb[0], lane)),
-                        ((sb[0], lane), (tb[0], lane)),
-                        ((tb[0], lane), (tb[0], tp[1]))]:
-                for b in other:
-                    if _crosses_box(seg, b, NODE_CLEARANCE):
-                        return None
-            raw = [sb, (sb[0], lane), (tb[0], lane)]
-        pts = [sp] + raw + [tb, tp]
-        return pts
+    def attempt(lane: float, vert: bool) -> list[Point] | None:
+        lane = _clear(lane, other, sp, sb, tp, tb, vert,
+                      {edge.source, edge.target}, NODE_CLEARANCE)
+        for seg in _lane_segments(lane, sp, sb, tp, tb, vert):
+            for b in other:
+                if _crosses_box(seg, b, NODE_CLEARANCE):
+                    return None
+        raw = ([sb, (lane, sb[1]), (lane, tb[1])] if vert
+               else [sb, (sb[0], lane), (tb[0], lane)])
+        return [sp] + raw + [tb, tp]
 
-    if vertical:
-        lane_left = min(s.x, t.x) - ROUTE_GUTTER
-        lane_right = max(s.right, t.right) + ROUTE_GUTTER
-        pts = attempt(lane_left) or attempt(lane_right)
-        if pts is None:
-            pts = [sp, sb, (sp[0], tb[1]), tb, tp]
-    else:
-        lane_top = min(s.y, t.y) - ROUTE_GUTTER
-        lane_bottom = max(s.bottom, t.bottom) + ROUTE_GUTTER
-        pts = attempt(lane_top) or attempt(lane_bottom)
-        if pts is None:
-            pts = [sp, sb, (tb[0], sp[1]), tb, tp]
+    def lanes(vert: bool) -> list[float]:
+        # The gutter BETWEEN the two boxes first: it is the shortest route, and when
+        # the ports already line up it collapses to a straight line. Only fall out to
+        # the far side of the pair when something is in the way.
+        outside = ([min(s.x, t.x) - ROUTE_GUTTER, max(s.right, t.right) + ROUTE_GUTTER]
+                   if vert else
+                   [min(s.y, t.y) - ROUTE_GUTTER, max(s.bottom, t.bottom) + ROUTE_GUTTER])
+        return [_initial_run(s, t, vert), *outside]
+
+    pts = None
+    # Preferred axis, then the other one: a blocker sitting square between the boxes
+    # can only be dodged by a lane running the other way.
+    for vert in (vertical, not vertical):
+        for lane in lanes(vert):
+            pts = attempt(lane, vert)
+            if pts is not None:
+                break
+        if pts is not None:
+            break
+    if pts is None:  # last resort: a single elbow, orthogonal from both stubs
+        pts = [sp, sb, (sb[0], tb[1]) if not vertical else (tb[0], sb[1]), tb, tp]
 
     out: list[Point] = []
     for p in pts:
-        if not out or out[-1] != p:
-            out.append(p)
+        if out and out[-1] == p:
+            continue
+        # Drop points that only sit mid-run: three collinear points is a bend that
+        # never bends, and it is what makes an aligned pair look like a detour.
+        if len(out) >= 2 and (
+            (out[-2][0] == out[-1][0] == p[0]) or (out[-2][1] == out[-1][1] == p[1])
+        ):
+            out[-1] = p
+            continue
+        out.append(p)
     if len(out) < 2:
         raise ValueError(f"degenerate route for {edge.id}")
     return RoutedEdge(source=edge.source, target=edge.target,
