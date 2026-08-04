@@ -158,3 +158,22 @@ class TestProfileNarrative:
 
     def test_dilemma_prose_absent_without_data(self) -> None:
         assert "The dilemmas" not in [h for h, _ in profile_narrative(_profile())]
+
+
+def test_every_section_differs_between_languages() -> None:
+    """A missing _t() call shows up as identical EN/PT copy — catch it here rather than
+    on the page."""
+    from export.narrative import event_narrative
+
+    ep = {"event": "ADCC", "bout_count": 8, "year": 2026, "decided": 6,
+          "finish_rate": 0.5, "finishes": 3,
+          "headline_bout": {"a": "A", "b": "B", "winner": "A", "method": "Decision"},
+          "submissions": [("Heel Hook", 2)], "style_mix": {"submission": 0.5},
+          "top_techniques": [("Armbar", 3)], "headliners": ["A", "B"]}
+    en = event_narrative(ep, lang="en")
+    pt = event_narrative(ep, lang="pt")
+
+    assert len(en) == len(pt)
+    for (h_en, p_en), (h_pt, p_pt) in zip(en, pt):
+        assert h_en != h_pt or h_en == "Grappling ELO", f"heading not translated: {h_en}"
+        assert p_en != p_pt, f"body not translated under {h_en}"

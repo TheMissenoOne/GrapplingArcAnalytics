@@ -58,7 +58,12 @@ from export.match_breakdown import (
     match_slug,
     slugify,
 )
-from export.narrative import event_narrative, match_narrative, profile_narrative
+from export.narrative import (
+    archetype_label,
+    event_narrative,
+    match_narrative,
+    profile_narrative,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -496,7 +501,7 @@ def build_fighters(
             arche = profile.get("archetype") or "Grappler"
             cards.append({
                 "slug": slug, "name": _name_break(athlete.name),
-                "arch_en": arche, "arch_pt": arche, "rec": sub,
+                "arch_en": arche, "arch_pt": archetype_label("pt", arche), "rec": sub,
                 "href": f"grapple-{slug}.html",
                 "nodes": card["nodes"], "links": card["links"],
                 "_rank": rank or 9999,
@@ -665,13 +670,33 @@ def _head(title: str, description: str = "", path: str = "", image: str = "brand
 <link rel="stylesheet" href="site.css"/></head><body>"""
 
 
-def _prose_html(sections: list[tuple[str, list[str]]]) -> str:
+def _bi(en: str, pt: str) -> str:
+    """One string in both languages, toggled by i18n.js."""
+    return (f'<span data-lang-en>{html.escape(en)}</span>'
+            f'<span data-lang-pt>{html.escape(pt)}</span>')
+
+
+def _one_prose(sections: list[tuple[str, list[str]]]) -> str:
     parts = []
     for heading, paras in sections:
         parts.append(f'<h2 class="sec-label">{html.escape(heading)}</h2>')
         body = "".join(f"<p>{html.escape(p)}</p>" for p in paras)
         parts.append(f'<div class="editorial">{body}</div>')
     return "\n".join(parts)
+
+
+def _prose_html(en: list[tuple[str, list[str]]],
+                pt: list[tuple[str, list[str]]] | None = None) -> str:
+    """Both languages, side by side, toggled by i18n.js's data-lang-* mechanism.
+
+    Generated pages carried English only while the hand-written ones were bilingual, so
+    the actual content of the site — every breakdown, dossier and card article — was
+    English-only. Passing just ``en`` keeps the old behaviour for callers that have no
+    translation."""
+    if pt is None:
+        return _one_prose(en)
+    return (f'<div data-lang-en>{_one_prose(en)}</div>'
+            f'<div data-lang-pt>{_one_prose(pt)}</div>')
 
 
 # ── breakdown detail page ────────────────────────────────────────────────────
@@ -775,6 +800,7 @@ def render_breakdown_page(
     arche_a = bd.get("_arch_a") or ""
     arche_b = bd.get("_arch_b") or ""
     sections = match_narrative(bd)
+    sections_pt = match_narrative(bd, lang="pt")
     winner = meta.get("winner")
     win_line = (f"{winner['name']} · {meta['method']}" if winner
                 else meta["method"])
@@ -859,7 +885,7 @@ def render_breakdown_page(
     <span class="tag" style="color:var(--cat-submission);border-color:#3a2020">{html.escape(win_line)}</span>
   </div>
   <h1 class="art-title">{html.escape(_headline(bd))}</h1>
-  <div class="prose"><p class="lead art-sum">{html.escape(sections[0][1][0])}</p></div>
+  <div class="prose"><p class="lead art-sum">{_bi(sections[0][1][0], sections_pt[0][1][0])}</p></div>
 </div></section>
 {_youtube_embed(meta.get('video_url'))}
 <article class="art">
@@ -876,7 +902,7 @@ def render_breakdown_page(
     <div class="wrap viz"><div class="graph-card seq-card"><canvas id="seqGraph" class="graph-canvas"></canvas>
       <div class="graph-legend" id="seqLegend"></div></div></div></section>
   <div class="divider"></div>
-  <section class="block"><div class="wrap prose">{_prose_html(sections[1:])}</div></section>
+  <section class="block"><div class="wrap prose">{_prose_html(sections[1:], sections_pt[1:])}</div></section>
   <div class="divider"></div>
   <section class="block"><div class="wrap prose"><h2 class="sec-label">Rating &amp; significance</h2></div>
     <div class="wrap viz"><div class="sig-cards">
@@ -962,6 +988,7 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     fin = profile["finishing"]
     fam = fin.get("submission_family", {})
     sections = profile_narrative(profile)
+    sections_pt = profile_narrative(profile, lang="pt")
     rec = f["record"]
     rank = f.get("elo_rank")
     icons = {"taken down": "T", "guard passed": "P", "back taken": "B", "swept": "S"}
@@ -1138,7 +1165,7 @@ document.addEventListener('DOMContentLoaded', function(){{
     if pctile:
         sub_meta += f"<span><b>Top {pctile}%</b> overall</span>"
     arche = profile.get("archetype") or "Grappler"
-    bio = sections[0][1][0] if sections else ""
+    bio = (_bi(sections[0][1][0], sections_pt[0][1][0]) if sections else "")
     # Per-athlete lead background: their photo (assets/fighters/<slug>.jpg) over a
     # name-seeded gradient fallback, desaturated to B&W by the .hero-bg CSS filter.
     slug = f["slug"]
@@ -1207,10 +1234,10 @@ document.addEventListener('DOMContentLoaded', function(){{
   </div>
   <div class="dhead">
     <div class="athlete">
-      <span class="arch">● {html.escape(arche)}</span>
+      <span class="arch">● {_bi(arche, archetype_label("pt", arche))}</span>
       <h1>{_name_break(html.escape(f['name']))}</h1>
       <div class="sub">{sub_meta}</div>
-      <p class="editorial bio">{html.escape(bio)}</p>
+      <p class="editorial bio">{bio}</p>
     </div>
     <div class="radar-card"><div class="rt">Style fingerprint</div>
       <div class="radar-wrap"><canvas id="radar" width="320" height="300"></canvas></div></div>
@@ -1227,7 +1254,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 <section class="mod"><div class="wrap"><div class="mod-grid">
   <div class="mod-intro"><span class="eyebrow">Signature game</span>
     <h2 class="mt16">What he reaches for first</h2>
-    <div class="editorial">{_prose_html([sections[1]]) if len(sections) > 1 else ''}</div></div>
+    <div class="editorial">{_prose_html([sections[1]], [sections_pt[1]]) if len(sections) > 1 else ''}</div></div>
   <div class="freq" id="sigFreq"></div>
 </div></div></section>
 <section class="mod"><div class="wrap">
@@ -1312,6 +1339,7 @@ def build_events(
 
 def render_event_page(slug: str, ep: dict[str, Any]) -> str:
     sections = event_narrative(ep)
+    sections_pt = event_narrative(ep, lang="pt")
     name = ep["event"]
     tags = ([str(ep["year"])] if ep["year"] else []) + [f"{ep['bout_count']} bouts"]
     if ep["decided"]:
@@ -1338,12 +1366,12 @@ def render_event_page(slug: str, ep: dict[str, Any]) -> str:
   <div class="center"><a href="events.html" class="tag" style="text-decoration:none">← Events</a></div>
   <h1 class="art-title">{html.escape(name)}</h1>
   <div class="result-bar">{tagrow}</div>
-  <div class="prose"><p class="lead art-sum">{html.escape(sections[0][1][0])}</p></div>
+  <div class="prose"><p class="lead art-sum">{_bi(sections[0][1][0], sections_pt[0][1][0])}</p></div>
 </div></section>
 <article class="art">
   <section class="block"><div class="wrap viz"><div class="sig-cards">{stat_cards}</div></div></section>
   <div class="divider"></div>
-  <section class="block"><div class="wrap prose">{_prose_html(sections[1:])}</div></section>
+  <section class="block"><div class="wrap prose">{_prose_html(sections[1:], sections_pt[1:])}</div></section>
   <div class="divider"></div>
   <section class="block"><div class="wrap prose"><h2 class="sec-label">Every bout</h2></div>
     <div class="wrap viz"><div class="mgrid">{bout_cards}</div></div></section>

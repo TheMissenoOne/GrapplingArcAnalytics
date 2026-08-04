@@ -81,7 +81,8 @@ def test_explicit_athlete_og_image_is_preserved() -> None:
 
 
 def test_dossier_app_strip_has_no_redundant_ga_orb(monkeypatch) -> None:
-    monkeypatch.setattr(site_data, "profile_narrative", lambda _profile: [])
+    monkeypatch.setattr(site_data, "profile_narrative",
+                        lambda _profile, lang="en": [])
     page = site_data.render_profile_page({
         "fighter": {
             "name": "Test Fighter",
@@ -226,3 +227,17 @@ def test_same_pair_twice_in_a_year_gets_distinct_breakdown_slugs() -> None:
 
     assert len(set(made)) == 2, "both bouts must get their own page"
     assert made[0] == "bruno-vs-hugo-2026", "the first keeps the canonical slug"
+
+
+def test_generated_prose_ships_both_languages() -> None:
+    """Hand-written pages were bilingual while every generated page — the actual content
+    of the site — was English only."""
+    en = [("Overview", ["He won."])]
+    pt = [("Visão geral", ["Ele venceu."])]
+    out = site_data._prose_html(en, pt)
+
+    assert "data-lang-en" in out and "data-lang-pt" in out
+    assert "Overview" in out and "Visão geral" in out
+    assert "He won." in out and "Ele venceu." in out
+    # callers without a translation keep the old single-language behaviour
+    assert "data-lang" not in site_data._prose_html(en)

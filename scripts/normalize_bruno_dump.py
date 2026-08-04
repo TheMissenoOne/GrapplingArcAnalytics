@@ -2,7 +2,7 @@
 """Normalise the hand-authored Bruno Rocha dump into the repo's match event model.
 
     uv run python scripts/normalize_bruno_dump.py \
-        transcripts/source/BrunoRocha/grafos_lutas.py transcripts/BrunoRocha.py
+        transcripts/source/BrunoRocha/*.py transcripts/BrunoRocha.py
     uv run python scripts/convert_dump.py transcripts/BrunoRocha.py bruno_rocha
 
 The source is a first-person narration of the athlete's own bouts, converted by hand,
@@ -125,8 +125,16 @@ def normalise_event(ev: dict[str, Any], name_map: dict[str, str]) -> dict[str, A
 
 
 def main() -> int:
-    src, dst = Path(sys.argv[1]), Path(sys.argv[2])
-    raw = ast.literal_eval(src.read_text())
+    *srcs, out_path = sys.argv[1:]
+    dst = Path(out_path)
+    # One bout per file is the norm as new fights arrive; merge them all into one dump.
+    raw: dict[Any, Any] = {}
+    for src in srcs:
+        block = ast.literal_eval(Path(src).read_text())
+        for k, v in block.items():
+            if k in raw:
+                raise SystemExit(f"chave repetida entre arquivos de origem: {k!r}")
+            raw[k] = v
 
     out: list[dict[tuple[str, int | None], dict[str, Any]]] = []
     report: list[str] = []
