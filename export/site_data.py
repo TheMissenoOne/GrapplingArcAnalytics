@@ -46,7 +46,12 @@ from analysis.event_profile import build_event_profile, event_names
 from analysis.names import _normalize_name, canonical_label, canonicalize
 from analysis.network_metrics import edge_arrow, edge_dashed, network_from_sequences
 from analysis.path_to_victory import dilemmas, path_to_victory
-from analysis.style_profile import MIN_DOSSIER_EVENTS, build_style_profile, qualifies
+from analysis.style_profile import (
+    MIN_DOSSIER_EVENTS,
+    PROFILE_VERSION,
+    build_style_profile,
+    qualifies,
+)
 from db.models import Archetype, Athlete
 from db.repository import get_matches_for_athlete
 from export.incremental import ItemCache, item_hash
@@ -458,7 +463,8 @@ def build_fighters(
                 _ams = get_matches_for_athlete(aid, session)
                 _opp = [athletes_by_id.get(m.athlete_b_id if m.athlete_a_id == aid
                                            else m.athlete_a_id) for m in _ams]
-                fh = item_hash(aid, athlete.name, athlete.rank_elo, athlete.weight_class,
+                fh = item_hash(PROFILE_VERSION,
+                               aid, athlete.name, athlete.rank_elo, athlete.weight_class,
                                [(m.id, m.sequence, m.timeline, m.year, m.winner_id, m.win_type)
                                 for m in _ams],
                                [o.rank_elo if o else None for o in _opp])

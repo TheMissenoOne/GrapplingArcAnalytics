@@ -201,8 +201,13 @@ def extract_patterns(
                 position = e.node_key
                 if window is not None:
                     window.position_after_conditions = e.node_key
-            elif window is not None:
-                window.conditions.append(e)
+            else:
+                if window is not None:
+                    window.conditions.append(e)
+                if e.event_type == "escape":
+                    position = None
+                    if window is not None:
+                        window.position_after_conditions = None
             continue
         # athlete's own event
         if e.event_type in STABLE_STATE_TYPES:
@@ -231,6 +236,15 @@ def extract_patterns(
             conditions=[],
             position_after_conditions=position,
         )
+        if e.event_type == "escape":
+            # An escape IS leaving the position, so the escape itself still starts
+            # there but nothing after it does. Without this the position sticks until
+            # the next guard/control event and every later action inherits it —
+            # which is how GSP ended up "shooting a double leg from mount".
+            # ponytail: only escapes clear it. Passes/sweeps also move the position,
+            # but they are normally followed by a stable-state event that resets it
+            # anyway; widen this only if the data shows the same staleness there.
+            position = None
     # end of sequence: a dangling window is discarded (no response seen)
     return patterns
 

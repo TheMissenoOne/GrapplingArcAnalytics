@@ -291,3 +291,32 @@ def test_patterns_survive_the_export_cache_json_roundtrip() -> None:
         for p in revived
     ]
     assert rebuilt == original
+
+
+def test_escape_clears_the_position_for_what_follows() -> None:
+    """The escape starts from the position; nothing after it does.
+
+    Real case (GSP vs Condit '12): Condit mounts, GSP escapes to standing, GSP
+    shoots a double leg. Without clearing, the double leg is recorded as starting
+    from mount — and mount then wins the root-position vote for GSP's whole flow.
+    """
+    m = _match([
+        {"label": "Mount", "type": "control", "actor_id": "b1"},
+        {"label": "Escape to Standing", "type": "escape", "actor_id": "a1"},
+        {"label": "Double Leg Takedown", "type": "takedown", "actor_id": "a1"},
+        {"label": "Back Control", "type": "control", "actor_id": "a1"},
+    ])
+    by_action = {p.action_key: p for p in extract_patterns(_persp(m))}
+    assert by_action["escape to standing"].source_position_key == "mount"
+    assert by_action["double leg takedown"].source_position_key is None
+
+
+def test_opponent_escape_also_clears_the_position() -> None:
+    m = _match([
+        {"label": "Side Control", "type": "control", "actor_id": "a1"},
+        {"label": "Escape to Standing", "type": "escape", "actor_id": "b1"},
+        {"label": "Double Leg Takedown", "type": "takedown", "actor_id": "a1"},
+        {"label": "Guard Pass", "type": "pass", "actor_id": "a1"},
+    ])
+    by_action = {p.action_key: p for p in extract_patterns(_persp(m))}
+    assert by_action["double leg takedown"].source_position_key is None

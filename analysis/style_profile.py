@@ -25,6 +25,11 @@ from analysis.perspective_sequence import perspective_events
 from db.models import Archetype, Athlete
 from db.repository import _perspective_view, get_matches_for_athlete
 
+# Bump whenever the DERIVATION changes (this module or anything it calls: decision_flow,
+# deviance, perspective_sequence...). The export caches profiles by their DB inputs, so
+# without this a code fix silently keeps serving payloads computed by the old code.
+PROFILE_VERSION = 2
+
 # A fighter needs at least this many sequence-bearing bouts to be worth profiling.
 MIN_SEQUENCE_BOUTS = 3
 
