@@ -1,0 +1,10 @@
+[Unit]
+Description=Run GrapplingArc weekly Pro analytics publisher at 04:15 UTC on Sunday
+
+[Timer]
+OnCalendar=Sun *-*-* 04:15:00 UTC
+Persistent=true
+Unit=grapplingarc-pro-analytics-weekly.service
+
+[Install]
+WantedBy=timers.target

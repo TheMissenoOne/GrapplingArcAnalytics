@@ -1,0 +1,10 @@
+[Unit]
+Description=Publish GrapplingArc weekly Pro analytics snapshots and dossiers
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/vetor/GrapplingArc/GrapplingArcAnalytics
+EnvironmentFile=%h/GrapplingArc/GrapplingArcAnalytics/.env
+ExecStart=/home/vetor/.local/bin/uv run --extra postgres python -m jobs.publish_pro_analytics --cadence weekly
