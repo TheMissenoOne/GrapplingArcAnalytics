@@ -1,0 +1,4 @@
+project_id = "local"
+
+[functions.youtube-transcript]
+verify_jwt = false
