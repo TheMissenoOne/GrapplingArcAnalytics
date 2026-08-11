@@ -26,6 +26,9 @@ dependencies = [
     # ML
     "scikit-learn>=1.5",
     "xgboost>=2.1",
+    # Stats — imported directly (network_metrics._beta_ci, metric_evaluation correlations).
+    # Was only ever present transitively via scikit-learn; declare it so it cannot vanish.
+    "scipy>=1.14",
     # Viz
     "matplotlib>=3.9",
     "seaborn>=0.13",
@@ -67,6 +70,17 @@ realtime = [
     "uvicorn[standard]>=0.30",
     "python-multipart>=0.0.9",
     "qdrant-client>=1.11",
+]
+# Local admin dashboard (admin/) — single light extra so the whole thing starts with one
+# `uv run --extra web python -m admin`. Postgres here because the dashboard reads the prod DB
+# via DATABASE_URL; django-free. Never hosted — binds 127.0.0.1 only by default.
+web = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.9",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.2",
+    "jinja2>=3.1",
 ]
 viz = [
     "plotly>=5.24",

@@ -64,6 +64,9 @@
 │   └── __main__.py                  # CLI: uv run python -m harvest --url/--playlist/--urls-file
 │   # Flow: harvest → human runs file through ChatGPT/Copilot/Deepseek → save JSON to
 │   # data/harvest/processed/ → db/scraped_import imports as drafts. All via admin /admin/harvest.
+├── admin/                           # ✅ local FastAPI dashboard: athlete entry, ontology authoring,
+│   │                                #   harvest control, analytics overview (local-only, binds 127.0.0.1)
+│   └── __main__.py                  #   run: uv run --extra web python -m admin → http://127.0.0.1:8765
 ├── docs/                            # design docs, audit reports
 ├── kanban/                          # agent task board + Obsidian vault: TODO/ DOING/ DONE/, lanes A–E for parallel agents (kanban/README.md)
 ├── notebooks/                       # Jupyter notebooks (exploratory)

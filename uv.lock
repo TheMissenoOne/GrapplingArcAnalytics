@@ -1038,6 +1038,7 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "requests" },
     { name = "scikit-learn" },
+    { name = "scipy" },
     { name = "seaborn" },
     { name = "sentence-transformers" },
     { name = "xgboost" },
@@ -1077,6 +1078,14 @@ viz = [
     { name = "ipywidgets" },
     { name = "plotly" },
 ]
+web = [
+    { name = "fastapi" },
+    { name = "jinja2" },
+    { name = "psycopg", extra = ["binary"] },
+    { name = "python-multipart" },
+    { name = "sqlalchemy" },
+    { name = "uvicorn", extra = ["standard"] },
+]
 
 [package.metadata]
 requires-dist = [
@@ -1085,9 +1094,11 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.12" },
     { name = "fastapi", marker = "extra == 'dev'", specifier = ">=0.115" },
     { name = "fastapi", marker = "extra == 'realtime'", specifier = ">=0.115" },
+    { name = "fastapi", marker = "extra == 'web'", specifier = ">=0.115" },
     { name = "feedparser", specifier = ">=6.0" },
     { name = "httpx", marker = "extra == 'dev'", specifier = ">=0.27" },
     { name = "ipywidgets", marker = "extra == 'viz'", specifier = ">=8.1" },
+    { name = "jinja2", marker = "extra == 'web'", specifier = ">=3.1" },
     { name = "jupyter", specifier = ">=1.0" },
     { name = "kagglehub", extras = ["pandas-datasets"], specifier = ">=1.0" },
     { name = "matplotlib", specifier = ">=3.9" },
@@ -1103,28 +1114,33 @@ requires-dist = [
     { name = "plotly", marker = "extra == 'viz'", specifier = ">=5.24" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=3.8" },
     { name = "psycopg", extras = ["binary"], marker = "extra == 'postgres'", specifier = ">=3.2" },
+    { name = "psycopg", extras = ["binary"], marker = "extra == 'web'", specifier = ">=3.2" },
     { name = "pyarrow", specifier = ">=17" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=5.0" },
     { name = "python-dotenv", specifier = ">=1.0" },
     { name = "python-multipart", marker = "extra == 'dev'", specifier = ">=0.0.9" },
     { name = "python-multipart", marker = "extra == 'realtime'", specifier = ">=0.0.9" },
+    { name = "python-multipart", marker = "extra == 'web'", specifier = ">=0.0.9" },
     { name = "qdrant-client", marker = "extra == 'dev'", specifier = ">=1.11" },
     { name = "qdrant-client", marker = "extra == 'realtime'", specifier = ">=1.11" },
     { name = "requests", specifier = ">=2.32" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.5" },
     { name = "scikit-learn", specifier = ">=1.5" },
+    { name = "scipy", specifier = ">=1.14" },
     { name = "seaborn", specifier = ">=0.13" },
     { name = "sentence-transformers", specifier = ">=5.6.0" },
     { name = "sqlalchemy", marker = "extra == 'postgres'", specifier = ">=2.0" },
+    { name = "sqlalchemy", marker = "extra == 'web'", specifier = ">=2.0" },
     { name = "torch", marker = "extra == 'cv'", specifier = ">=2.3" },
     { name = "torchvision", marker = "extra == 'cv'", specifier = ">=0.18" },
     { name = "ultralytics", marker = "extra == 'cv'", specifier = ">=8.2" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'realtime'", specifier = ">=0.30" },
+    { name = "uvicorn", extras = ["standard"], marker = "extra == 'web'", specifier = ">=0.30" },
     { name = "xgboost", specifier = ">=2.1" },
     { name = "youtube-transcript-api", specifier = ">=0.6,<1" },
 ]
-provides-extras = ["dev", "cv", "realtime", "viz", "postgres"]
+provides-extras = ["dev", "cv", "realtime", "web", "viz", "postgres"]
 
 [[package]]
 name = "greenlet"

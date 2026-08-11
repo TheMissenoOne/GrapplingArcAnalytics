@@ -5,8 +5,6 @@ Tests for study knowledge export (TF-IDF RAG corpus generator).
 from __future__ import annotations
 
 import json
-import tempfile
-from pathlib import Path
 
 import pytest
 

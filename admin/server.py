@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -103,10 +104,20 @@ _COOKIE_SECURE = os.environ.get("ADMIN_COOKIE_SECURE", "true").strip().lower() n
 _AUTH_EXEMPT_PATHS = {"/admin/login"}
 _AUTH_EXEMPT_PREFIXES = ("/admin/static/",)
 _CSRF_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
+# JSON API from the Study page (JS posts JSON — no form to carry the hidden token).
+# Auth still enforced above; only the CSRF check is skipped for these paths.
+_CSRF_EXEMPT_PATHS = {"/admin/study/analyze"}
 
 
 def _auth_exempt(path: str) -> bool:
     return path in _AUTH_EXEMPT_PATHS or path.startswith(_AUTH_EXEMPT_PREFIXES)
+
+
+def _no_auth() -> bool:
+    """Local-only convenience: ADMIN_NO_AUTH=1 trusts the 127.0.0.1 bind entirely.
+
+    Read per-request (not at import) so tests can flip it without a subprocess."""
+    return os.environ.get("ADMIN_NO_AUTH", "0").strip().lower() in ("1", "true", "yes", "on")
 
 
 class AdminAuthCSRFMiddleware(BaseHTTPMiddleware):
@@ -117,6 +128,10 @@ class AdminAuthCSRFMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next: Any) -> Any:
         path = request.url.path
+        if _no_auth():
+            # No login → no session cookie → no CSRF token to check; skipping the gate
+            # also avoids the body-replay dance below for forms that carry no csrf_token.
+            return await call_next(request)
         if _auth_exempt(path):
             return await call_next(request)
         if not is_authenticated(request):
@@ -124,7 +139,7 @@ class AdminAuthCSRFMiddleware(BaseHTTPMiddleware):
             # auth failure (GET or POST) — none return JSON, so no 401 branch is
             # exercised yet. ponytail: add one if/when a JSON route shows up.
             return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
-        if request.method in _CSRF_METHODS:
+        if request.method in _CSRF_METHODS and path not in _CSRF_EXEMPT_PATHS:
             # Reading the form here drains the request stream, and the route downstream
             # would then see an empty body — every Form(...) parameter fails validation
             # with a 422. Buffer the body and hand call_next a receive channel that
@@ -247,6 +262,38 @@ def _opponent_options(athlete_id: str, session: Any) -> list[dict[str, Any]]:
         .order_by(Athlete.rank_elo.desc().nullslast(), Athlete.name)
     ).scalars()
     return [{"id": a.id, "name": a.name, "rank_elo": a.rank_elo} for a in rows]
+
+
+_ARTIFACT_DIRS: list[tuple[str, Path]] = [
+    ("data/processed", Path("data/processed")),
+    ("harvest / inbox", HARVEST_INBOX),
+    ("harvest / processed", HARVEST_PROCESSED),
+]
+
+
+def _dataset_artifacts() -> dict[str, list[dict[str, Any]]]:
+    """Generated-file inventory for the analytics overview, grouped by directory.
+
+    Read-only: surfaces what the pipelines have produced (parquet, joblib, harvest
+    JSON…) with size + mtime so a stale/lost artifact is visible at a glance."""
+    out: dict[str, list[dict[str, Any]]] = {}
+    for label, d in _ARTIFACT_DIRS:
+        if not d.is_dir():
+            continue
+        files = []
+        for p in sorted(d.iterdir()):
+            if not p.is_file():
+                continue
+            st = p.stat()
+            files.append(
+                {
+                    "name": p.name,
+                    "size_kb": round(st.st_size / 1024, 1),
+                    "mtime": datetime.fromtimestamp(st.st_mtime).strftime("%Y-%m-%d %H:%M"),
+                }
+            )
+        out[label] = files
+    return out
 
 
 def create_admin_app() -> FastAPI:
@@ -713,20 +760,69 @@ def create_admin_app() -> FastAPI:
     # ── Analytics overview ─────────────────────────────────────────────────
     @app.get("/admin/analytics", response_class=HTMLResponse)
     def analytics(request: Request) -> Any:
-        # Type distribution over the shared technique library, aggregated in SQL
-        # (the library grows with every synced technique — don't materialize it all).
+        # Small tables → whole-table scans; cheaper to write and read than a pile of
+        # aggregate queries, and the scalars().all() shape survives the test mock.
+        def _count(model: Any, **filters: Any) -> int:
+            stmt = select(model)
+            for col, val in filters.items():
+                stmt = stmt.where(getattr(model, col) == val)
+            return len(session.execute(stmt).scalars().all())
+
         with db_session() as session:
-            rows = session.execute(
-                select(TechniqueNode.node_type, func.count())
-                .group_by(TechniqueNode.node_type)
+            type_rows = session.execute(
+                select(TechniqueNode.node_type, func.count()).group_by(TechniqueNode.node_type)
             ).all()
-        type_counts = {(nt or "unknown"): int(cnt) for nt, cnt in rows}
+            stats = {
+                "athletes": _count(Athlete),
+                "published": _count(Athlete, is_published=True),
+                "matches_final": _count(Match, status="final"),
+                "matches_draft": _count(Match, status="draft"),
+                "systems": _count(System),
+                "principles": _count(Principle),
+                "dilemmas": _count(Dilemma),
+                "milestones": _count(Milestone),
+                "archetypes": _count(Archetype),
+                "techniques": _count(TechniqueNode),
+            }
+        type_counts = {(r[0] or "unknown"): int(r[1]) for r in type_rows}
         total_nodes = sum(type_counts.values())
         return templates.TemplateResponse(
             request,
             "analytics.html",
-            context={"type_counts": type_counts, "total_nodes": total_nodes},
+            context={
+                "stats": stats,
+                "type_counts": type_counts,
+                "total_nodes": total_nodes,
+                "artifacts": _dataset_artifacts(),
+            },
         )
+
+    # ── Study (personal instructional analysis, ported from the public site) ──
+    @app.get("/admin/study", response_class=HTMLResponse)
+    def study_page(request: Request) -> Any:
+        # Grounding corpus for the client-side RAG — the technique library the admin
+        # has locally (generated by export.tech_library). [] is fine: the Study still
+        # renders transcript + segments, just without a concept map.
+        from admin.study import load_knowledge
+
+        return templates.TemplateResponse(
+            request, "study.html", context={"knowledge": load_knowledge()}
+        )
+
+    @app.post("/admin/study/analyze")
+    async def study_analyze(request: Request) -> Any:
+        from admin.study import StudyError, build_analysis
+
+        body = await request.json()
+        url = str((body or {}).get("url") or "")
+        languages = (body or {}).get("languages") or ["en", "pt-BR", "pt"]
+        try:
+            payload = build_analysis(url, languages)
+        except StudyError as exc:
+            return JSONResponse({"error": {"message": str(exc)}}, status_code=400)
+        except Exception as exc:
+            return JSONResponse({"error": {"message": f"Analysis failed: {exc}"}}, status_code=500)
+        return JSONResponse(payload)
 
     # ── Ontology authoring (RF04-06, RF20, DS-01/04) ────────────────────────
     @app.get("/admin/ontology", response_class=HTMLResponse)
