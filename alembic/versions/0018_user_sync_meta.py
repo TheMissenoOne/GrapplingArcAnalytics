@@ -5,9 +5,9 @@ against ``user_sessions`` (0017): ``big_sync_completed_at`` marks whether the in
 upload finished, ``last_sync_at``/``session_count`` are informational for the app + admin to
 show sync status. One row per ``owner_id`` (PK doubles as the FK, mirrors ``profiles``).
 
-Scope note (mirrors 0003's split): RLS for this table is added separately in
-``db/auth_setup.sql`` (hand-run, coupled to `auth.users`/`profiles`), not here — same reasoning
-as 0017's docstring. Real FK to ``profiles(id)``, cascade delete automatic.
+Scope note (mirrors 0003's split): RLS for this table is added separately in alembic 0023
+(coupled to `auth.users`/`profiles`, adopted from the former ``db/auth_setup.sql``), not here —
+same reasoning as 0017's docstring. Real FK to ``profiles(id)``, cascade delete automatic.
 
 Scope note (test coverage): SQLite-in-memory pytest exercises the ``db/models.py`` shape only,
 not this migration file or Postgres-only DDL.

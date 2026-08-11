@@ -9,9 +9,9 @@ Idempotent: safe on databases where these objects were already created
 out-of-band (drop-if-exists on policies; enable-RLS / grant / alter-view are
 naturally idempotent).
 
-Scope note: user-graph RLS and the ``authenticated`` table grants still live in
-db/auth_setup.sql (manual), because they are coupled to Supabase's auth.users
-triggers. Only the pure public-schema athlete policies + the view's security
+Scope note: user-graph RLS and the ``authenticated`` table grants live in alembic 0023
+(adopted from the former db/auth_setup.sql), because they are coupled to Supabase's
+auth.users triggers. Only the pure public-schema athlete policies + the view's security
 model move here.
 
 Revision ID: 0003
@@ -78,7 +78,7 @@ def upgrade() -> None:
           );
 
         -- Read grants (RLS still filters rows). `authenticated` already holds
-        -- select on the graph tables via db/auth_setup.sql §5, so only anon on
+        -- select on the graph tables via alembic 0023 §5, so only anon on
         -- those tables + athletes + the view are granted here.
         grant select on public.graphs, public.graph_nodes, public.graph_edges to anon;
         grant select on public.athletes to anon, authenticated;

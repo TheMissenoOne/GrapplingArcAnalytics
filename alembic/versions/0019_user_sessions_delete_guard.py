@@ -27,11 +27,11 @@ NULL or that INSERT violates the original ``0017`` NOT NULL constraint and wedge
 sync permanently. Fix: relax ``data`` to nullable here — a tombstone-only row (``deleted_at`` set,
 ``data`` null) is a legitimate, permanent state, not a transient one to be repaired later.
 
-Scope note (mirrors 0017): RLS for ``user_sessions`` already lives in ``db/auth_setup.sql``
-(``user_sessions_owner_all``, owner-scoped ``FOR ALL``) and covers the whole row incl.
-``deleted_at`` — no policy change needed, do NOT re-shape it. The guard trigger is a plain
-data-integrity trigger (no ``auth.users`` coupling, not RLS), so it belongs here in the
-migration, not in the hand-run auth file.
+Scope note (mirrors 0017): RLS for ``user_sessions`` already lives in alembic 0023
+(``user_sessions_owner_all``, owner-scoped ``FOR ALL``, adopted from the former
+``db/auth_setup.sql``) and covers the whole row incl. ``deleted_at`` — no policy change needed,
+do NOT re-shape it. The guard trigger is a plain data-integrity trigger (no ``auth.users``
+coupling, not RLS), so it belongs here in the migration, not in a policy revision.
 
 Scope note (test coverage): this repo's pytest suite runs against SQLite in-memory
 (``tests/test_db.py``), which validates the ``db/models.py`` shape (incl. ``deleted_at``

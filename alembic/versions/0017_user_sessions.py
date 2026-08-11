@@ -8,9 +8,10 @@ already device-generated as ``s-{timestamp}-{random}``), synced/merged across de
 ``graphs``/``graph_edges`` (the derived technique graph) — this is the raw log those are
 built from.
 
-Scope note (mirrors 0003's split): RLS for this table is added separately in
-``db/auth_setup.sql`` (hand-run, coupled to `auth.users`/`profiles` — see that file's owner-row
-pattern for ``graphs``), not here. ``owner_id`` is a real FK to ``profiles(id)`` (not the
+Scope note (mirrors 0003's split): RLS for this table is added separately in alembic 0023
+(coupled to `auth.users`/`profiles` — see that revision's owner-row pattern for ``graphs``,
+adopted from the former ``db/auth_setup.sql``), not here. ``owner_id`` is a real FK to
+``profiles(id)`` (not the
 polymorphic ``owner_kind``/``owner_id`` pair `graphs` uses), so cascade delete is automatic via
 the FK — no manual on-delete trigger needed.
 

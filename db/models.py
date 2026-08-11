@@ -13,6 +13,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -59,7 +60,7 @@ class Profile(Base):
     belt_degrees: Mapped[int] = mapped_column(Integer, default=0)
     is_guest: Mapped[bool] = mapped_column(Boolean, default=False)
     # Admin-granted entitlement. Authenticated clients receive no UPDATE privilege on this column
-    # (see db/auth_setup.sql); RLS alone cannot prevent a user from changing their own field.
+    # (see alembic 0023); RLS alone cannot prevent a user from changing their own field.
     is_pro: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"
     )
@@ -125,7 +126,7 @@ class UserSession(Base):
     """Raw per-device training session synced from the app (``SessionState``, media
     stripped) — the true source data ``graphs``/``graph_edges`` are derived from.
     ``id`` is device-generated (``s-{timestamp}-{random}``); the app merges across
-    devices by ``id`` + ``updated_at``. RLS lives in ``db/auth_setup.sql`` (alembic 0017)."""
+    devices by ``id`` + ``updated_at``. RLS lives in alembic 0023 (schema in 0017)."""
 
     __tablename__ = "user_sessions"
 
@@ -149,7 +150,7 @@ class UserSession(Base):
 
 class UserSyncMeta(Base):
     """Per-user session-sync progress (alembic 0018). One row per owner. RLS lives in
-    ``db/auth_setup.sql``."""
+    alembic 0023."""
 
     __tablename__ = "user_sync_meta"
 

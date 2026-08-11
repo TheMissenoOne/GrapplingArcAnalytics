@@ -10,9 +10,11 @@ No production mutation is automated by this repository. Human/orchestrator steps
 
 ```bash
 DATABASE_URL=<prod> uv run alembic upgrade head
-psql "$DATABASE_URL" -f db/auth_setup.sql
 uv run alembic history
 ```
+
+(Policies formerly hand-run from `db/auth_setup.sql` are now alembic revision `0023`, applied
+by the same `upgrade head`.)
 
 Then verify against Postgres:
 

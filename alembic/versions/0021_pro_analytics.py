@@ -2,8 +2,9 @@
 
 The analytics publisher writes snapshots/dossiers with a service-role database connection.
 Authenticated application clients can only read rows while their own profile has ``is_pro``.
-Policies and grants live in ``db/auth_setup.sql`` because they depend on Supabase ``auth.uid()``;
-the production handoff must run that file after applying this migration.
+Policies and grants live in alembic 0023 (adopted from the former ``db/auth_setup.sql``)
+because they depend on Supabase ``auth.uid()``; the production handoff applies 0023 alongside
+this migration.
 
 Revision ID: 0021
 Revises: 0020

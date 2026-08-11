@@ -115,6 +115,11 @@ select = ["E", "F", "I", "N", "W", "UP"]
 # clean under `ruff check .` unscoped.
 [tool.ruff.lint.per-file-ignores]
 "scripts/**/*.py" = ["E501", "E402", "F841", "N806", "E722", "E741"]
+# ponytail: rls_auto_enable()'s plpgsql body is adopted byte-for-byte from
+# pg_get_functiondef (see the migration's docstring) — its raise-log format strings run
+# past 100 cols in the source, and reformatting a security-relevant function body just to
+# satisfy a linter is exactly how a byte-for-byte adoption stops being byte-for-byte.
+"alembic/versions/0023_adopt_auth_setup.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
