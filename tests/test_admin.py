@@ -132,12 +132,36 @@ def test_athletes_redirects_when_unauthenticated():
 def test_analytics_page_authenticated(client):
     with patch("admin.server.db_session") as mock_ctx:
         mock_session = MagicMock()
-        mock_session.execute.return_value.scalars.return_value = []
+        mock_session.execute.return_value.scalars.return_value.all.return_value = []
+        mock_session.execute.return_value.all.return_value = []
         mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
         resp = client.get("/admin/analytics")
     assert resp.status_code == 200
     assert b"Analytics" in resp.content
+    assert b"Athletes" in resp.content
+    assert b"<div class=\"card stat\">" in resp.content
+
+
+def test_no_auth_mode_allows_any_request_without_login_or_csrf(monkeypatch):
+    """ADMIN_NO_AUTH=1 trusts the localhost bind: a CSRF-less POST reaches the route
+    (303 = athlete upsert) instead of being login-redirected or 403-rejected."""
+    monkeypatch.setenv("ADMIN_NO_AUTH", "1")
+    from fastapi.testclient import TestClient
+
+    with (
+        patch("admin.server.db_session"),
+        patch("admin.server._build_node_options", return_value=[]),
+    ):
+        from admin.server import create_admin_app
+        app = create_admin_app()
+        with TestClient(app, raise_server_exceptions=False) as c:
+            resp = c.post(
+                "/admin/athletes",
+                data={"name": "No Auth Test", "belt": "black"},
+                follow_redirects=False,
+            )
+    assert resp.status_code == 303
 
 
 # ── GA-005 hardening ─────────────────────────────────────────────────────────

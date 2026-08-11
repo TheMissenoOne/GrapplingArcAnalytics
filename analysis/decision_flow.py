@@ -61,6 +61,10 @@ class PatternEvidence:
     condition_indexes: tuple[int, ...]
     response_index: int | None
     timestamp_seconds: int | None
+    # Who the exchange was against. Needed to enforce "a criterion is never one instance":
+    # a pattern confined to a single opponent is that matchup, not the athlete's game.
+    # Defaulted so cached payloads written before this field still rebuild.
+    opponent_id: str = ""
 
 
 @dataclass
@@ -249,6 +253,106 @@ def extract_patterns(
     return patterns
 
 
+def extract_chain_patterns(
+    events: list[PerspectiveEvent],
+    *,
+    match_id: str = "",
+    match_slug: str = "",
+    athlete_id: str = "",
+    opponent_id: str = "",
+    boundaries: set[int] | None = None,
+    reaction_catalog: list[Any] | None = None,
+    winning_submission_key: str | None = None,
+) -> list[DecisionPattern]:
+    """Chain conditioning: the opponent's move since your last move IS your condition.
+
+    ``extract_patterns`` only records a condition for opponent events that fall inside an
+    already-open window and are not ``guard``/``control``. Two things get thrown away as a
+    result, and together they are why only 9% of exchanges carry a condition:
+
+        A_guard  ->  B_pass  ->  A_sweep
+                     ^^^^^^ dropped: A_guard is a stable state, so it never opens a window,
+                            so B_pass has nothing to attach to and A_sweep gets no condition
+
+    Here every opponent event between two of the athlete's own events becomes the condition
+    for the second one — including ``guard``/``control``, and regardless of window state.
+    Emits the same ``DecisionPattern`` shape, so every existing consumer keeps working.
+
+    Sequences are not reliably alternating; an opponent run of 2+ collapses through
+    ``classify_opponent_condition`` exactly as it does today (deduped, capped at
+    ``MAX_BUNDLE_EVENTS``). ``condition_key=None`` survives as a real finding: the athlete
+    chained two moves with nothing from the opponent in between.
+
+    ⚠️ Never pool the output of this with ``extract_patterns`` into one ``aggregate_patterns``
+    call — the bucket key carries no record of which conditioning produced a row, so the two
+    meanings of ``condition_key`` would merge silently.
+    """
+    patterns: list[DecisionPattern] = []
+    bounds = boundaries or set()
+    position: str | None = None
+    source_position: str | None = None
+    last_own: PerspectiveEvent | None = None
+    pending: list[PerspectiveEvent] = []
+
+    for e in events:
+        if e.index in bounds or e.actor == "neutral":
+            # round break / referee stoppage / long gap: the chain does not span it
+            last_own, pending = None, []
+            continue
+
+        if e.actor == "opponent":
+            pending.append(e)  # every type — this is the whole point
+            if e.event_type in STABLE_STATE_TYPES:
+                position = e.node_key
+            elif e.event_type == "escape":
+                position = None
+            continue
+
+        # the athlete's own event: closes the pending chain link, then starts the next
+        if last_own is not None:
+            cond = classify_opponent_condition(pending, reaction_catalog)
+            outcome = _is_successful(e, winning_submission_key)
+            pattern = DecisionPattern(
+                source_position_key=source_position,
+                action_key=last_own.node_key,
+                condition_key=cond.key if cond else None,
+                response_key=e.node_key,
+                resulting_position_key=(
+                    e.node_key if e.event_type in STABLE_STATE_TYPES else position
+                ),
+                action_type=last_own.event_type,
+                outcome_type=e.event_type,
+                evidence=[PatternEvidence(
+                    match_id=match_id,
+                    match_slug=match_slug,
+                    athlete_id=athlete_id,
+                    action_index=last_own.index,
+                    condition_indexes=tuple(c.index for c in pending),
+                    response_index=e.index,
+                    timestamp_seconds=last_own.timestamp_seconds,
+                    opponent_id=opponent_id,
+                )],
+            )
+            if outcome is True:
+                pattern.success_count = 1
+            elif outcome is False:
+                pattern.failure_count = 1
+            else:
+                pattern.unknown_result_count = 1
+            patterns.append(pattern)
+
+        if e.event_type in STABLE_STATE_TYPES:
+            position = e.node_key
+        last_own = e
+        source_position = position  # the position this action is launched from
+        if e.event_type == "escape":
+            # an escape IS leaving the position: it starts there, nothing after it does
+            position = None
+        pending = []
+
+    return patterns
+
+
 def aggregate_patterns(patterns: list[DecisionPattern]) -> list[DecisionPattern]:
     """Fold repeated exchanges into one pattern per key, deterministically.
 
@@ -306,7 +410,13 @@ def build_athlete_decision_patterns(
     match_slug_of: Any = None,
     reaction_catalog: list[Any] | None = None,
 ) -> list[DecisionPattern]:
-    """DB-shaped convenience: one athlete, their final matches → aggregated patterns."""
+    """DB-shaped convenience: one athlete, their final matches → aggregated patterns.
+
+    Uses chain conditioning (:func:`extract_chain_patterns`): the opponent's move between two
+    of the athlete's own moves IS the condition for the second one. The old windowing dropped
+    opponent ``guard``/``control`` events and anything arriving with no window open, which cost
+    roughly four fifths of the conditions present in the data.
+    """
     from analysis.perspective_sequence import perspective_events
 
     raw: list[DecisionPattern] = []
@@ -320,11 +430,14 @@ def build_athlete_decision_patterns(
         if submission:
             from analysis.names import _normalize_name
             winning = _normalize_name(str(submission))
-        raw.extend(extract_patterns(
+        a_id = str(getattr(m, "athlete_a_id", "") or "")
+        b_id = str(getattr(m, "athlete_b_id", "") or "")
+        raw.extend(extract_chain_patterns(
             perspective_events(m, athlete_id),
             match_id=str(getattr(m, "id", "")),
             match_slug=slug,
             athlete_id=athlete_id,
+            opponent_id=b_id if a_id == str(athlete_id) else a_id,
             boundaries=sequence_boundaries(m, athlete_id),
             reaction_catalog=reaction_catalog,
             winning_submission_key=winning,

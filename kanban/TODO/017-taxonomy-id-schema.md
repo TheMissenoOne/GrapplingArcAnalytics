@@ -13,6 +13,18 @@ tags: [kanban, phase-6, P3, schemas]
 
 # 017 — taxonomy_id Column + Export Carry-Through (BLOCKED ON DATA)
 
+> **Unblocking in progress — 2026-08-10.** Two of the three blockers are cleared:
+>
+> - `docs/taxonomy.json` is **tracked**, not git-ignored as the note below claims, and is now
+>   schema **v2** (121 unique nodes; v1 had a duplicate `guard-recovery` id).
+> - The technique→subcategory mapping that did not exist is now *proposed* by
+>   `analysis/taxonomy_map.py` → `data/taxonomy_map.json` + `docs/taxonomy_mapping_review.md`,
+>   tiered `auto` / `review` / `manual`.
+>
+> Still blocked on the **human review** of the `review` and `manual` tiers. Do not add the
+> column until that review lands — the card's own reasoning still holds: no schema for data
+> that does not exist yet. The proposer writes nothing to the DB.
+
 ## Goal
 `technique_nodes` gains a nullable `taxonomy_id`, and the export node payload carries it — **only
 once a technique→subcategory mapping actually exists**. This is the minimal data step; all taxonomy

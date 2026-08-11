@@ -1,5 +1,40 @@
 # GrapplingArc Taxonomy — Implementation Plan
 
+> ## Status correction — 2026-08-10
+>
+> Parts of this document are stale or were wrong when written. Corrected against the code:
+>
+> - **`technique_nodes_rows.json` does not exist in the repo.** Every figure below sourced
+>   from it (400 nodes and its `node_type` distribution) is unverifiable and out of date.
+>   `analysis/canonicalize.py` sizes its matrix for ~437 nodes; `data/processed/
+>   technique_library.json` holds 89 entries.
+> - **`guard-recovery` was a real defect, not multi-classification.** v1 shipped 128 rows
+>   with 127 unique ids — the id was written twice, and any dict build silently dropped one.
+>   Fixed in **schema v2**: `parent` became `parents: string[]`.
+> - **Kuzushi/Off-Balancing were never actually merged.** The prose below claimed it; the
+>   data still carried both. Merged for real in v2.
+> - **Concepts and principles overlapped** on 5 names, and the worked example gave a
+>   technique identical `concepts` and `principles` arrays — the distinction was vacuous.
+>   v2 has ONE vocabulary: concepts, 12 of which carry `principle: true`.
+> - **Every `aliases` array was empty**, so the stated dedup mechanism had no data. v2 seeds
+>   67 nodes with curated alternate names.
+> - **Canonicalization phases 1–5 below are already built or already ran.**
+>   `analysis/canonicalize.py` does normalize → embedding-cluster → elect-canonical as a
+>   review artifact; the `Attempt` strip shipped as card 012 (`analysis/merge_attempt_nodes.py`),
+>   and a later pass folded 44 near-duplicates (392→348).
+> - **⚠️ Collapsing duplicates into canonical nodes is a CONFIRMED DEAD END.** It was tried
+>   and scrapped: `technique_nodes`, `graph_edges` and `map_edges` are all re-derived from raw
+>   `Match.sequence` labels on every replay/export, so merged alias nodes reappear. The durable
+>   fix collapses at *derivation* time and is already live — `analysis/names.py` `SYNONYMS` +
+>   `canonicalize()` + `CANONICAL_LABELS` (14 pairs). Extend that table. Do not re-attempt
+>   node-level merges.
+> - **Choke vs Strangle cannot be auto-mapped for guillotines** (listed under both), and
+>   "default to strangle when ambiguous" would silently misclassify every one of them.
+>
+> Current state: `docs/taxonomy.json` is schema **v2** — 121 unique nodes (9 categories,
+> 86 subcategories, 26 concepts). Loaded and validated by `analysis/taxonomy.py`; the
+> technique→subcategory mapping is proposed by `analysis/taxonomy_map.py` for human review.
+
 ## Thesis (unchanged from the original proposal)
 
 The taxonomy is a first-class layer of the knowledge graph, not category/subcategory
@@ -109,8 +144,10 @@ separate is what lets analytics answer both "how much pressure passing" (taxonom
 
 ## The taxonomy (from your specification)
 
-Generated as `taxonomy.json` — **9 categories, 87 subcategories, 20 concepts, 12
-principles**. Your proposed structure is adopted almost verbatim. Notes on the few
+Generated as `taxonomy.json`. **v1 claimed 9 categories, 87 subcategories, 20 concepts and
+12 principles (128 rows).** Schema **v2** ships 121 unique nodes: 9 categories, **86**
+subcategories (87 rows contained one duplicate), and 26 concepts of which 12 carry
+`principle: true`. Your proposed structure is adopted almost verbatim. Notes on the few
 adjustments:
 
 - **Grip** is kept as a category as you specified, but see "Grip is not a technique
@@ -119,10 +156,11 @@ adjustments:
 - **Off-Balancing** and **Kuzushi** both appear in your concept list. Kuzushi *is* the
   Japanese term for off-balancing — these are aliases of one concept, not two. Merged,
   with `kuzushi` as an alias of `off-balancing`.
-- **Guard Recovery** appears under both Escape and Transition in your structure. That is
-  actually correct in a multi-classification model — the same subcategory node is
-  referenced by techniques in both families. No change needed; it's one node
-  (`guard-recovery`) referenced twice.
+- **Guard Recovery** appears under both Escape and Transition in your structure. The
+  *intent* is correct — one subcategory referenced by two families — but "no change needed"
+  was wrong: v1 had no way to express two parents, so it wrote the row twice under one id
+  and any `{n["id"]: n for n in nodes}` dropped one silently. v2's `parents: string[]`
+  encodes it properly, and `analysis/taxonomy.py` rejects duplicate ids outright.
 
 ### Category → subcategory (as implemented)
 

@@ -54,18 +54,24 @@ def athlete_graph_to_app_json(graph_id: str, session: Session) -> dict[str, Any]
         lib = library.get(key)
         label = (lib.label if lib else None) or key
         elos = incident.get(key, [])
+        data: dict[str, Any] = {
+            "label": label,
+            "type": lib.node_type if lib else "",
+            "computedElo": max(elos) if elos else None,
+            "usageCount": len(elos),
+            "trend": "",
+        }
+        # Omitted rather than emitted as null: most nodes are unclassified while the mapping
+        # is reviewed tier by tier, and an explicit null on every node would be noise in the
+        # bundle for no reader's benefit.
+        if lib is not None and getattr(lib, "taxonomy_id", None):
+            data["taxonomyId"] = lib.taxonomy_id
         nodes.append(
             {
                 "id": key,
                 "label": label,
                 "type": lib.type if lib else "technique",
-                "data": {
-                    "label": label,
-                    "type": lib.node_type if lib else "",
-                    "computedElo": max(elos) if elos else None,
-                    "usageCount": len(elos),
-                    "trend": "",
-                },
+                "data": data,
             }
         )
 

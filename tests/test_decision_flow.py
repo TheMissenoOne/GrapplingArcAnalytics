@@ -251,9 +251,19 @@ def test_build_athlete_decision_patterns_smoke() -> None:
     ])
     patterns = build_athlete_decision_patterns(
         "a1", [m], match_slug_of=lambda x: "s-" + x.id)
-    assert len(patterns) == 1
-    assert patterns[0].action_key == "arm drag"
-    assert patterns[0].condition_key == "cond:elbow-free"
+
+    # Chain conditioning keeps BOTH links of the chain, where the old windowing kept one:
+    # the own-to-own combination (nothing from the opponent in between) is a real finding,
+    # not a gap, so it is emitted with condition_key=None.
+    by_action = {p.action_key: p for p in patterns}
+    assert set(by_action) == {"closed guard", "arm drag"}
+
+    assert by_action["arm drag"].condition_key == "cond:elbow-free"
+    assert by_action["arm drag"].response_key == "side scissor"
+    assert by_action["arm drag"].evidence[0].opponent_id == "b1"
+
+    assert by_action["closed guard"].condition_key is None
+    assert by_action["closed guard"].response_key == "arm drag"
 
 
 def test_patterns_survive_the_export_cache_json_roundtrip() -> None:
@@ -320,3 +330,153 @@ def test_opponent_escape_also_clears_the_position() -> None:
     ])
     by_action = {p.action_key: p for p in extract_patterns(_persp(m))}
     assert by_action["double leg takedown"].source_position_key is None
+
+
+# ---------------------------------------------------------------- chain conditioning
+
+
+def _chain(events, **kw):
+    from analysis.decision_flow import extract_chain_patterns
+
+    return extract_chain_patterns(events, **kw)
+
+
+def _idx(events: list[PerspectiveEvent]) -> list[PerspectiveEvent]:
+    """Re-stamp sequential indexes — `_ev` defaults them all to 0."""
+    return [
+        PerspectiveEvent(
+            index=i, actor=e.actor, label=e.label, node_key=e.node_key,
+            event_type=e.event_type, successful=e.successful,
+            timestamp_seconds=e.timestamp_seconds, raw=e.raw,
+        )
+        for i, e in enumerate(events)
+    ]
+
+
+def test_chain_recovers_the_condition_the_window_extractor_drops():
+    """A_guard -> B_pass -> A_sweep: B_pass IS A_sweep's condition.
+
+    The window extractor loses it twice over — a stable-state own event opens no window, and
+    an opponent event with no open window is discarded — so it reports no condition at all.
+    """
+    events = _idx([
+        _ev("you", "Closed Guard", "guard"),
+        _ev("opponent", "Guard Pass", "pass"),
+        _ev("you", "Hip Bump Sweep", "sweep"),
+    ])
+
+    old = extract_patterns(events)
+    assert all(p.condition_key is None for p in old), "precondition: the old path finds none"
+
+    new = _chain(events)
+    assert len(new) == 1
+    assert new[0].action_key == "closed guard"
+    assert new[0].response_key == "hip bump sweep"
+    assert new[0].condition_key is not None, "the pass must become the condition"
+
+
+def test_chain_full_alternation_conditions_every_link():
+    """A_guard -> B_pass -> A_sweep -> B_escape, from A's side: each own move is conditioned
+    on what the opponent did just before it."""
+    events = _idx([
+        _ev("you", "Closed Guard", "guard"),
+        _ev("opponent", "Guard Pass", "pass"),
+        _ev("you", "Hip Bump Sweep", "sweep"),
+        _ev("opponent", "Escape", "escape"),
+    ])
+    got = _chain(events)
+    assert [(p.action_key, p.response_key) for p in got] == [
+        ("closed guard", "hip bump sweep"),
+    ]
+    assert got[0].condition_key is not None
+
+
+def test_chain_includes_opponent_stable_state_as_a_condition():
+    """Opponent guard/control is a condition here; the window extractor treats it as position."""
+    events = _idx([
+        _ev("you", "Single Leg", "takedown"),
+        _ev("opponent", "Half Guard", "guard"),
+        _ev("you", "Knee Slice", "pass"),
+    ])
+    got = _chain(events)
+    assert len(got) == 1
+    assert got[0].condition_key is not None
+
+
+def test_chain_bundles_an_opponent_run():
+    events = _idx([
+        _ev("you", "Single Leg", "takedown"),
+        _ev("opponent", "Sprawl", "escape"),
+        _ev("opponent", "Front Headlock", "control"),
+        _ev("you", "Stand Up", "escape"),
+    ])
+    got = _chain(events)
+    assert len(got) == 1
+    assert len(got[0].evidence[0].condition_indexes) == 2
+
+
+def test_chain_emits_none_condition_for_an_own_combination():
+    """Two own moves with nothing in between is a real finding, not a gap."""
+    events = _idx([
+        _ev("you", "Arm Drag", "transition"),
+        _ev("you", "Back Take", "transition"),
+    ])
+    got = _chain(events)
+    assert len(got) == 1
+    assert got[0].condition_key is None
+
+
+def test_chain_does_not_span_a_boundary():
+    events = _idx([
+        _ev("you", "Closed Guard", "guard"),
+        _ev("opponent", "Guard Pass", "pass"),
+        _ev("you", "Hip Bump Sweep", "sweep"),
+    ])
+    assert _chain(events, boundaries={1}) == []
+
+
+def test_chain_resets_on_a_neutral_event():
+    events = _idx([
+        _ev("you", "Closed Guard", "guard"),
+        PerspectiveEvent(index=1, actor="neutral", label="Reset", node_key="reset",
+                         event_type="reset", successful=None, timestamp_seconds=None, raw={}),
+        _ev("you", "Hip Bump Sweep", "sweep"),
+    ])
+    assert _chain(events) == []
+
+
+def test_chain_carries_source_position_and_opponent_id():
+    events = _idx([
+        _ev("you", "Closed Guard", "guard"),
+        _ev("opponent", "Guard Pass", "pass"),
+        _ev("you", "Hip Bump Sweep", "sweep"),
+    ])
+    got = _chain(events, match_id="m1", athlete_id="a1", opponent_id="b1")
+    assert got[0].source_position_key == "closed guard"
+    assert got[0].evidence[0].opponent_id == "b1"
+    assert got[0].evidence[0].match_id == "m1"
+
+
+def test_chain_records_outcome_on_the_response():
+    events = _idx([
+        _ev("you", "Closed Guard", "guard"),
+        _ev("opponent", "Guard Pass", "pass"),
+        _ev("you", "Hip Bump Sweep", "sweep", successful=False),
+    ])
+    got = _chain(events)
+    assert got[0].failure_count == 1
+    assert got[0].success_count == 0
+
+
+def test_chain_produces_more_conditions_than_the_window_extractor():
+    """The whole point: same events, strictly more conditions recovered."""
+    events = _idx([
+        _ev("you", "Closed Guard", "guard"),
+        _ev("opponent", "Guard Pass", "pass"),
+        _ev("you", "Hip Bump Sweep", "sweep"),
+        _ev("opponent", "Half Guard", "guard"),
+        _ev("you", "Knee Slice", "pass"),
+    ])
+    old = sum(1 for p in extract_patterns(events) if p.condition_key)
+    new = sum(1 for p in _chain(events) if p.condition_key)
+    assert new > old

@@ -229,6 +229,14 @@ class TechniqueNode(Base):
     # constraints[], attacker_score, defender_score}. ds_mode (DS-16) = 'expert' | 'learned'.
     decision_space: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     ds_mode: Mapped[str] = mapped_column(String(10), nullable=False, server_default="expert")
+    # How far this technique's outcomes sit from the corpus norm — seeds a computed initial
+    # athlete ELO (alembic 0014). Was applied to the DB but never mapped here; that drift is
+    # closed now, so the model and the live schema agree column-for-column.
+    elo_deviance: Mapped[float] = mapped_column(Float, nullable=False, server_default="0")
+    # Node id in docs/taxonomy.json v2 (usually a subcategory, e.g. "pressure-pass"; a
+    # category when the label names the whole family). NULL = not yet classified — the
+    # mapping is confirmed tier by tier (alembic 0022, card 017).
+    taxonomy_id: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

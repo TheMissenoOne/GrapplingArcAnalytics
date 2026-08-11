@@ -18,7 +18,7 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from analysis.decision_flow import aggregate_patterns, extract_patterns
+from analysis.decision_flow import aggregate_patterns, extract_chain_patterns
 from analysis.deviance import TYPES as _TYPES
 from analysis.names import _normalize_name
 from analysis.perspective_sequence import perspective_events
@@ -28,7 +28,7 @@ from db.repository import _perspective_view, get_matches_for_athlete
 # Bump whenever the DERIVATION changes (this module or anything it calls: decision_flow,
 # deviance, perspective_sequence...). The export caches profiles by their DB inputs, so
 # without this a code fix silently keeps serving payloads computed by the old code.
-PROFILE_VERSION = 2
+PROFILE_VERSION = 3  # 3: decision_flow switched to chain conditioning (opponent's move = condition)
 
 # A fighter needs at least this many sequence-bearing bouts to be worth profiling.
 MIN_SEQUENCE_BOUTS = 3
@@ -359,11 +359,12 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
             submission = getattr(m, "submission", None)
             if submission:
                 winning = _normalize_name(str(submission))
-            all_patterns.extend(extract_patterns(
+            all_patterns.extend(extract_chain_patterns(
                 perspective_events(m, athlete.id),
                 match_id=str(m.id),
                 match_slug=_bout_slug(a_name, b_name, m.year),
                 athlete_id=athlete.id,
+                opponent_id=str(other_id or ""),
                 boundaries=None,
                 reaction_catalog=None,
                 winning_submission_key=winning,

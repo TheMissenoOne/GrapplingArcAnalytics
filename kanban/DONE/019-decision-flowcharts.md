@@ -4,7 +4,7 @@ slug: decision-flowcharts
 phase: 6
 lane: F
 priority: P1
-status: todo
+status: done
 depends: []
 branch: feature/019-decision-flowcharts
 created: 2026-07-31
@@ -12,6 +12,15 @@ tags: [kanban, phase-6, P1, export, analysis]
 ---
 
 # 019 — Decision Flowcharts (extraction → compiler → layout → site)
+
+> **Closed 2026-08-10.** The card sat in TODO long after its code shipped. All of the
+> execution plan below exists: `analysis/perspective_sequence.py`, `opponent_conditions.py`,
+> `decision_flow.py`, `flowchart_compiler.py`, `flowchart_layout.py`, `flowchart_router.py`,
+> `dossier_decision_flow.py`, the `export/site_data.py` dossier embed, `site/flowchart.{js,css}`,
+> the App's `DecisionFlowCanvas`, and tests for each. Contract: `docs/decision_flows_contract.md`.
+>
+> Follow-up lives elsewhere: the *statistical* layer — which conditions genuinely govern the
+> response, rather than merely preceding it — is `analysis/decision_criteria.py`.
 
 ## Goal
 Public-site **Decision Flow** experience: procedural instructional flowcharts from

@@ -25,7 +25,7 @@ payload — display names, timestamps, video ids, links. IDs are opaque keys.
   "matches": 6,               // distinct matches contributing evidence
   "sources": {"expert": 1, "hybrid": 1, "observed": 7},
 
-  "compilerVersion": "1.1.0", // bump on payload-shape / semantics change
+  "compilerVersion": "1.3.0", // bump on payload-shape / semantics change
   "layoutVersion": 2,         // bump on layout-constants / algorithm change
 
   "evidence": {               // ONLY entries referenced by a node's evidenceIds
@@ -62,7 +62,12 @@ payload — display names, timestamps, video ids, links. IDs are opaque keys.
   "branches": [
     {"id": "branch:1", "actionKey": "hip-bump", "score": 0.72,
      "conditions": ["n:opponent-condition:hip-bump:cond:posts-hand"],
-     "depth": 1}
+     "depth": 1,
+     "support": 9,        // observed exchanges behind this branch
+     "matchCount": 4,     // distinct matches  — lower bound (evidence is capped per pattern)
+     "opponentCount": 3}  // distinct opponents — lower bound, same reason
+    // support/matchCount/opponentCount are OMITTED on an expert-only branch: absent means
+    // "not derived from observation", where 0 would read as "observed and never happened".
   ],
 
   "layouts": {
@@ -117,6 +122,24 @@ payload — display names, timestamps, video ids, links. IDs are opaque keys.
 ## Versioning
 
 - `compilerVersion` changes when nodes/edges/evidence semantics change.
+
+### 1.3.0 — chain conditioning + branch evidence
+
+Two semantic changes, which is why this is a compiler bump and not an additive field:
+
+1. **Conditions come from chain conditioning.** Every opponent event between two of the
+   athlete's own moves is now the condition for the second one, including `guard`/`control`.
+   The previous windowing only saw opponent events that fell inside an already-open window
+   and were not stable states, which discarded roughly four fifths of the conditions actually
+   present — an exchange like `guard → opponent passes → sweep` recorded no condition at all.
+   Flowcharts therefore show substantially more conditioned branches than at 1.2.0, from the
+   same underlying matches.
+2. **Branches carry `support` / `matchCount` / `opponentCount`.** `score` ranks branches and
+   is explicitly not stored as a meaning, so there was previously no way for a reader to tell
+   a recurring pattern from one memorable exchange. These are omitted on expert-only branches.
+
+Both counts are lower bounds: per-pattern evidence is capped at 8, so a branch never claims
+more breadth than its retained evidence can demonstrate.
 - `layoutVersion` changes when layout constants/algorithm change (it also
   appears inside each layout object). Both participate in the site export
   cache key (Phase 6 cache invalidation: match-sequence hash + ontology

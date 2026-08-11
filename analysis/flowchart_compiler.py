@@ -33,7 +33,13 @@ _HYBRID: Final = "hybrid"
 SourceKind = Literal["observed", "expert", "hybrid"]
 
 # Bump on any change to the compiled payload shape or node/edge semantics.
-COMPILER_VERSION: Final = "1.2.0"
+# 1.3.0 — two changes, both semantic:
+#   * conditions now come from CHAIN conditioning (the opponent's move between two of the
+#     athlete's own moves), so a flowchart shows roughly 5x the conditions it used to;
+#   * branches carry support / matchCount / opponentCount so a reader can tell a pattern
+#     from a single memorable exchange.
+# Also invalidates the site-export cache, which is what forces regeneration.
+COMPILER_VERSION: Final = "1.3.0"
 
 
 @dataclass(frozen=True)
@@ -104,6 +110,14 @@ class FlowchartBranch:
     score: float
     conditions: list[str]
     depth: int = 1
+    # How much evidence stands behind this branch. `score` ranks branches against each other
+    # and is explicitly not stored as a meaning; these are the raw counts a reader needs to
+    # judge whether a branch is a pattern or a single memorable exchange.
+    # None on an expert-only branch — it has no observations, and a zero would read as
+    # "observed zero times" rather than "not derived from observation".
+    support: int | None = None
+    match_count: int | None = None
+    opponent_count: int | None = None
 
 
 @dataclass(frozen=True)
@@ -520,12 +534,25 @@ def compile_flowchart(
                     ))
                     add_edge(rid, pid, "results-in")
 
+        branch_matches: set[str] = set()
+        branch_opponents: set[str] = set()
+        for p in pool:
+            for ev in getattr(p, "evidence", []) or []:
+                if getattr(ev, "match_id", ""):
+                    branch_matches.add(ev.match_id)
+                if getattr(ev, "opponent_id", ""):
+                    branch_opponents.add(ev.opponent_id)
         branches.append(FlowchartBranch(
             id=f"branch:{rank + 1}",
             action_key=action_key,
             score=_score(p0),
             conditions=branch_conditions,
             depth=1,
+            support=act_count,
+            # evidence is capped per pattern, so these are lower bounds — a branch never
+            # claims more breadth than the retained evidence can show
+            match_count=len(branch_matches) or None,
+            opponent_count=len(branch_opponents) or None,
         ))
 
     # expert branches: dashed "Expected" nodes. An action not yet observed
@@ -749,10 +776,19 @@ def _edge_to_dict(e: FlowchartEdge) -> dict[str, Any]:
 
 
 def _branch_to_dict(b: FlowchartBranch) -> dict[str, Any]:
-    return {
+    d: dict[str, Any] = {
         "id": b.id,
         "actionKey": b.action_key,
         "score": b.score,
         "conditions": b.conditions,
         "depth": b.depth,
     }
+    # omitted rather than null on expert-only branches: absent means "not observed",
+    # which is the truth, where 0 would read as "observed and never happened"
+    if b.support is not None:
+        d["support"] = b.support
+    if b.match_count is not None:
+        d["matchCount"] = b.match_count
+    if b.opponent_count is not None:
+        d["opponentCount"] = b.opponent_count
+    return d

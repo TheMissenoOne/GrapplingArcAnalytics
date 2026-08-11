@@ -418,3 +418,37 @@ class TestNoRedundantNodes:
             resulting_position_key="back control")])
         action = next(n for n in spec.nodes if n.kind == "athlete-action")
         assert not any("lands in" in d for d in action.detail)
+
+
+# ---------------------------------------------------------------- branch evidence (1.3.0)
+
+
+def test_branch_carries_evidence_volume():
+    """A reader must be able to tell a recurring pattern from one memorable exchange."""
+    from analysis.flowchart_compiler import FlowchartBranch, _branch_to_dict
+
+    d = _branch_to_dict(FlowchartBranch(
+        id="branch:1", action_key="hip-bump", score=0.7, conditions=[], depth=1,
+        support=9, match_count=4, opponent_count=3,
+    ))
+    assert d["support"] == 9
+    assert d["matchCount"] == 4
+    assert d["opponentCount"] == 3
+
+
+def test_expert_branch_omits_evidence_rather_than_zeroing_it():
+    """Absent means 'not derived from observation'; 0 would read as 'never happened'."""
+    from analysis.flowchart_compiler import FlowchartBranch, _branch_to_dict
+
+    d = _branch_to_dict(FlowchartBranch(
+        id="branch:2", action_key="expected", score=0.0, conditions=[], depth=1,
+    ))
+    assert "support" not in d
+    assert "matchCount" not in d
+    assert "opponentCount" not in d
+
+
+def test_compiler_version_is_bumped_for_the_payload_change():
+    from analysis.flowchart_compiler import COMPILER_VERSION
+
+    assert COMPILER_VERSION == "1.3.0"

@@ -78,3 +78,51 @@ def test_bundle_single() -> None:
     assert c is not None
     assert c.key == "cond:posts-hand"
     assert c.source_event_keys == ("cond:posts-hand",)
+
+
+# ---------------------------------------------------------------- families / normalization
+
+
+def test_composite_key_order_does_not_matter():
+    """The classifier emits composites in event order, so one pair of opponent events
+    produces two keys and splits its own evidence. Normalizing merges them."""
+    from analysis.opponent_conditions import normalize_condition_key as nk
+
+    a = nk("cond:opponent-passes-and-cond:opponent-attacks")
+    b = nk("cond:opponent-attacks-and-cond:opponent-passes")
+    assert a == b
+
+
+def test_normalization_leaves_simple_keys_alone():
+    from analysis.opponent_conditions import normalize_condition_key as nk
+
+    assert nk("cond:sprawls") == "cond:sprawls"
+
+
+def test_every_curated_condition_has_a_family():
+    from analysis.opponent_conditions import CONDITION_ALIASES, CONDITION_FAMILIES
+
+    keys = {v.key for v in CONDITION_ALIASES.values()}
+    assert keys - set(CONDITION_FAMILIES) == set()
+
+
+def test_families_reference_only_real_conditions():
+    from analysis.opponent_conditions import CONDITION_FAMILIES, FAMILY_LABELS
+
+    assert set(CONDITION_FAMILIES.values()) <= set(FAMILY_LABELS)
+
+
+def test_composite_inherits_a_family_only_when_components_agree():
+    from analysis.opponent_conditions import condition_family
+
+    agree = "cond:opponent-attacks-and-cond:opponent-passes"
+    assert condition_family(agree) == "fam:opponent-advances"
+    # spans advance + recover: it genuinely belongs to both, so neither is the answer
+    split = "cond:opponent-attacks-and-cond:opponent-escapes"
+    assert condition_family(split) is None
+
+
+def test_unknown_condition_has_no_family():
+    from analysis.opponent_conditions import condition_family
+
+    assert condition_family("cond:not-a-real-thing") is None

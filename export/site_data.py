@@ -172,6 +172,10 @@ def _to_graphview(
             node["ts"] = d["ts"]
         if video_id:
             node["vid"] = video_id
+        # carried through when classified; omitted otherwise so the bundle stays unchanged
+        # for the majority of nodes still awaiting mapping review (card 017)
+        if d.get("taxonomyId"):
+            node["tax"] = d["taxonomyId"]
         nodes.append(node)
     links = []
     for e in app_graph.get("edges", []):

@@ -211,3 +211,109 @@ def classify_opponent_condition(
         reaction_key=bundle[0].reaction_key,
         source_event_keys=keys,
     )
+
+
+# ---------------------------------------------------------------------------
+# Condition families — the abstraction ladder for decision-criteria analysis.
+#
+# `ConditionKind` already groups conditions, but it groups them by what KIND OF THING
+# was observed (a reaction, a posture, a movement), which is a taxonomy of description.
+# For deciding what to do next, the useful grouping is what the opponent is trying to
+# ACHIEVE: `sprawls` and `hand-fight` are both `kind="reaction"` yet they present
+# completely different problems, while `sprawls` and `bases-wide` are different kinds and
+# present the same one — the opponent is denying the takedown by building a base.
+#
+# The ladder exists to concentrate evidence. Individual conditions appear a handful of
+# times each; families let a criterion be detected at the level of "the opponent is
+# defending their posture" when no single posture reaches significance. `select_level`
+# then keeps the specific condition only when it differs from its own siblings.
+#
+# Deliberately ONE level deep. A single root over all families would add a level with no
+# siblings to contrast against, so it could never change a decision.
+CONDITION_FAMILIES: dict[str, str] = {
+    # --- event-type fallbacks -------------------------------------------------------
+    # These dominate the real corpus: 210 of 232 condition-carrying observations are
+    # `cond:opponent-<event type>`, not the curated postural keys below. Grouped by what
+    # the opponent's action DOES to the exchange, which is the thing a response answers.
+    "cond:opponent-attacks": "fam:opponent-advances",
+    "cond:opponent-takedown": "fam:opponent-advances",
+    "cond:opponent-passes": "fam:opponent-advances",
+    "cond:opponent-sweeps": "fam:opponent-advances",
+    "cond:opponent-escapes": "fam:opponent-recovers",
+    "cond:opponent-transitions": "fam:opponent-repositions",
+    # --- curated postural conditions ------------------------------------------------
+    # denying entry by building structure underneath
+    "cond:sprawls": "fam:base",
+    "cond:bases-out": "fam:base",
+    "cond:bases-wide": "fam:base",
+    "cond:elbows-knees": "fam:base",
+    # recovering height and alignment
+    "cond:postures": "fam:posture",
+    "cond:sits-up": "fam:posture",
+    "cond:squares-hips": "fam:posture",
+    "cond:stands": "fam:posture",
+    # protecting the limb that is under attack
+    "cond:elbow-free": "fam:limb-defense",
+    "cond:elbow-retracted": "fam:limb-defense",
+    "cond:hides-arm": "fam:limb-defense",
+    # contesting inside position and grips
+    "cond:hand-fight": "fam:grip-contest",
+    "cond:posts-hand": "fam:grip-contest",
+    "cond:inside-space": "fam:grip-contest",
+    "cond:head-height": "fam:grip-contest",
+    # changing range or direction
+    "cond:drives-forward": "fam:distance",
+    "cond:pulls-away": "fam:distance",
+    "cond:turn-in": "fam:distance",
+}
+
+FAMILY_LABELS: dict[str, str] = {
+    "fam:opponent-advances": "Opponent advances position",
+    "fam:opponent-recovers": "Opponent recovers position",
+    "fam:opponent-repositions": "Opponent repositions",
+    "fam:base": "Opponent builds a base",
+    "fam:posture": "Opponent recovers posture",
+    "fam:limb-defense": "Opponent defends the limb",
+    "fam:grip-contest": "Opponent contests inside position",
+    "fam:distance": "Opponent changes range",
+}
+
+
+COMPOSITE_SEP = "-and-"
+
+
+def normalize_condition_key(condition_key: str) -> str:
+    """Order-insensitive form of a composite bundle key.
+
+    ``classify_opponent_condition`` builds a composite as ``f"{first}-and-{second}"`` in the
+    order the events happened, so the SAME pair of opponent events yields two different keys
+    depending on sequence — the corpus carries both ``opponent-attacks-and-opponent-passes``
+    (5) and ``opponent-passes-and-opponent-attacks`` (4) as if they were different conditions,
+    splitting the evidence for one thing across two rows.
+
+    Sorting the components merges them. Applied HERE and not in the classifier on purpose:
+    the classifier's output feeds the published flowchart payload, which must stay
+    byte-identical (card 019's regression guard). This is an analysis-side view of the same
+    data, so consolidating costs nothing downstream.
+    """
+    if COMPOSITE_SEP not in condition_key:
+        return condition_key
+    return COMPOSITE_SEP.join(sorted(condition_key.split(COMPOSITE_SEP)))
+
+
+def condition_family(condition_key: str) -> str | None:
+    """Family of a condition, or None when it has no honest family.
+
+    A composite bundle inherits a family only when EVERY component agrees on one. A bundle
+    spanning two families genuinely belongs to both, and picking one would be arbitrary.
+    """
+    if COMPOSITE_SEP in condition_key:
+        parts = condition_key.split(COMPOSITE_SEP)
+        fams = {CONDITION_FAMILIES.get(p) for p in parts}
+        return fams.pop() if len(fams) == 1 and None not in fams else None
+    return CONDITION_FAMILIES.get(condition_key)
+
+
+def family_members(family_key: str) -> set[str]:
+    """Every curated condition rolling up to a family."""
+    return {k for k, v in CONDITION_FAMILIES.items() if v == family_key}

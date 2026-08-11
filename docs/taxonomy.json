@@ -1,902 +1,1243 @@
 {
-  "version": 1,
-  "generated": "2026-04-29",
+  "version": 2,
+  "generated": "2026-08-10",
   "nodes": [
     {
       "id": "control",
       "name": "Control",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "peripheral-control",
       "name": "Peripheral Control",
       "kind": "subcategory",
-      "parent": "control",
-      "aliases": []
+      "parents": [
+        "control"
+      ],
+      "aliases": [
+        "distance management",
+        "outside control"
+      ]
     },
     {
       "id": "body-control",
       "name": "Body Control",
       "kind": "subcategory",
-      "parent": "control",
-      "aliases": []
+      "parents": [
+        "control"
+      ],
+      "aliases": [
+        "torso control",
+        "body lock control"
+      ]
     },
     {
       "id": "head-control",
       "name": "Head Control",
       "kind": "subcategory",
-      "parent": "control",
-      "aliases": []
+      "parents": [
+        "control"
+      ],
+      "aliases": [
+        "neck control"
+      ]
     },
     {
       "id": "arm-control",
       "name": "Arm Control",
       "kind": "subcategory",
-      "parent": "control",
+      "parents": [
+        "control"
+      ],
       "aliases": []
     },
     {
       "id": "leg-control",
       "name": "Leg Control",
       "kind": "subcategory",
-      "parent": "control",
+      "parents": [
+        "control"
+      ],
       "aliases": []
     },
     {
       "id": "clinch-control",
       "name": "Clinch Control",
       "kind": "subcategory",
-      "parent": "control",
+      "parents": [
+        "control"
+      ],
       "aliases": []
     },
     {
       "id": "front-headlock-control",
       "name": "Front Headlock Control",
       "kind": "subcategory",
-      "parent": "control",
-      "aliases": []
+      "parents": [
+        "control"
+      ],
+      "aliases": [
+        "front headlock",
+        "head and arm control"
+      ]
     },
     {
       "id": "top-control",
       "name": "Top Control",
       "kind": "subcategory",
-      "parent": "control",
+      "parents": [
+        "control"
+      ],
       "aliases": []
     },
     {
       "id": "bottom-control",
       "name": "Bottom Control",
       "kind": "subcategory",
-      "parent": "control",
+      "parents": [
+        "control"
+      ],
       "aliases": []
     },
     {
       "id": "back-control",
       "name": "Back Control",
       "kind": "subcategory",
-      "parent": "control",
-      "aliases": []
+      "parents": [
+        "control"
+      ],
+      "aliases": [
+        "back mount",
+        "rear mount"
+      ]
     },
     {
       "id": "pin",
       "name": "Pin",
       "kind": "subcategory",
-      "parent": "control",
-      "aliases": []
+      "parents": [
+        "control"
+      ],
+      "aliases": [
+        "holddown",
+        "osaekomi"
+      ]
     },
     {
       "id": "guard",
       "name": "Guard",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "closed-guard",
       "name": "Closed Guard",
       "kind": "subcategory",
-      "parent": "guard",
-      "aliases": []
+      "parents": [
+        "guard"
+      ],
+      "aliases": [
+        "full guard",
+        "guarda fechada"
+      ]
     },
     {
       "id": "open-guard",
       "name": "Open Guard",
       "kind": "subcategory",
-      "parent": "guard",
+      "parents": [
+        "guard"
+      ],
       "aliases": []
     },
     {
       "id": "half-guard",
       "name": "Half Guard",
       "kind": "subcategory",
-      "parent": "guard",
-      "aliases": []
+      "parents": [
+        "guard"
+      ],
+      "aliases": [
+        "meia guarda"
+      ]
     },
     {
       "id": "butterfly-guard",
       "name": "Butterfly Guard",
       "kind": "subcategory",
-      "parent": "guard",
-      "aliases": []
+      "parents": [
+        "guard"
+      ],
+      "aliases": [
+        "hooks guard",
+        "guarda de gancho"
+      ]
     },
     {
       "id": "hook-guard",
       "name": "Hook Guard",
       "kind": "subcategory",
-      "parent": "guard",
+      "parents": [
+        "guard"
+      ],
       "aliases": []
     },
     {
       "id": "sleeve-based-guard",
       "name": "Sleeve-Based Guard",
       "kind": "subcategory",
-      "parent": "guard",
+      "parents": [
+        "guard"
+      ],
       "aliases": []
     },
     {
       "id": "collar-based-guard",
       "name": "Collar-Based Guard",
       "kind": "subcategory",
-      "parent": "guard",
+      "parents": [
+        "guard"
+      ],
       "aliases": []
     },
     {
       "id": "lapel-guard",
       "name": "Lapel Guard",
       "kind": "subcategory",
-      "parent": "guard",
-      "aliases": []
+      "parents": [
+        "guard"
+      ],
+      "aliases": [
+        "worm guard",
+        "squid guard"
+      ]
     },
     {
       "id": "inverted-guard",
       "name": "Inverted Guard",
       "kind": "subcategory",
-      "parent": "guard",
-      "aliases": []
+      "parents": [
+        "guard"
+      ],
+      "aliases": [
+        "inversion guard"
+      ]
     },
     {
       "id": "leg-entanglement-guard",
       "name": "Leg Entanglement Guard",
       "kind": "subcategory",
-      "parent": "guard",
-      "aliases": []
+      "parents": [
+        "guard"
+      ],
+      "aliases": [
+        "ashi garami",
+        "leg lock position",
+        "50/50",
+        "5050"
+      ]
     },
     {
       "id": "turtle",
       "name": "Turtle",
       "kind": "subcategory",
-      "parent": "guard",
-      "aliases": []
+      "parents": [
+        "guard"
+      ],
+      "aliases": [
+        "turtle position",
+        "quatro apoios"
+      ]
     },
     {
       "id": "pass",
       "name": "Pass",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "pressure-pass",
       "name": "Pressure Pass",
       "kind": "subcategory",
-      "parent": "pass",
-      "aliases": []
+      "parents": [
+        "pass"
+      ],
+      "aliases": [
+        "smash pass",
+        "stack pass",
+        "pressure passing"
+      ]
     },
     {
       "id": "mobility-pass",
       "name": "Mobility Pass",
       "kind": "subcategory",
-      "parent": "pass",
-      "aliases": []
+      "parents": [
+        "pass"
+      ],
+      "aliases": [
+        "speed pass",
+        "movement pass"
+      ]
     },
     {
       "id": "standing-pass",
       "name": "Standing Pass",
       "kind": "subcategory",
-      "parent": "pass",
+      "parents": [
+        "pass"
+      ],
       "aliases": []
     },
     {
       "id": "dynamic-pass",
       "name": "Dynamic Pass",
       "kind": "subcategory",
-      "parent": "pass",
+      "parents": [
+        "pass"
+      ],
       "aliases": []
     },
     {
       "id": "half-guard-pass",
       "name": "Half Guard Pass",
       "kind": "subcategory",
-      "parent": "pass",
+      "parents": [
+        "pass"
+      ],
       "aliases": []
     },
     {
       "id": "headquarters-pass",
       "name": "Headquarters Pass",
       "kind": "subcategory",
-      "parent": "pass",
-      "aliases": []
+      "parents": [
+        "pass"
+      ],
+      "aliases": [
+        "hq pass",
+        "headquarters position"
+      ]
     },
     {
       "id": "leg-weave-pass",
       "name": "Leg Weave Pass",
       "kind": "subcategory",
-      "parent": "pass",
-      "aliases": []
+      "parents": [
+        "pass"
+      ],
+      "aliases": [
+        "leg weave"
+      ]
     },
     {
       "id": "folding-pass",
       "name": "Folding Pass",
       "kind": "subcategory",
-      "parent": "pass",
-      "aliases": []
+      "parents": [
+        "pass"
+      ],
+      "aliases": [
+        "folding pass",
+        "over under pass"
+      ]
     },
     {
       "id": "sweep",
       "name": "Sweep",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "elevation-sweep",
       "name": "Elevation Sweep",
       "kind": "subcategory",
-      "parent": "sweep",
-      "aliases": []
+      "parents": [
+        "sweep"
+      ],
+      "aliases": [
+        "lift sweep"
+      ]
     },
     {
       "id": "rotation-sweep",
       "name": "Rotation Sweep",
       "kind": "subcategory",
-      "parent": "sweep",
+      "parents": [
+        "sweep"
+      ],
       "aliases": []
     },
     {
       "id": "off-balance-sweep",
       "name": "Off-Balance Sweep",
       "kind": "subcategory",
-      "parent": "sweep",
-      "aliases": []
+      "parents": [
+        "sweep"
+      ],
+      "aliases": [
+        "kuzushi sweep"
+      ]
     },
     {
       "id": "hook-sweep",
       "name": "Hook Sweep",
       "kind": "subcategory",
-      "parent": "sweep",
+      "parents": [
+        "sweep"
+      ],
       "aliases": []
     },
     {
       "id": "reversal",
       "name": "Reversal",
       "kind": "subcategory",
-      "parent": "sweep",
-      "aliases": []
+      "parents": [
+        "sweep"
+      ],
+      "aliases": [
+        "reverse"
+      ]
     },
     {
       "id": "wrestle-up",
       "name": "Wrestle-Up",
       "kind": "subcategory",
-      "parent": "sweep",
-      "aliases": []
+      "parents": [
+        "sweep"
+      ],
+      "aliases": [
+        "wrestle up",
+        "get up",
+        "stand up sweep"
+      ]
     },
     {
       "id": "escape",
       "name": "Escape",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "positional-escape",
       "name": "Positional Escape",
       "kind": "subcategory",
-      "parent": "escape",
+      "parents": [
+        "escape"
+      ],
       "aliases": []
     },
     {
       "id": "guard-recovery",
       "name": "Guard Recovery",
       "kind": "subcategory",
-      "parent": "escape",
-      "aliases": []
+      "parents": [
+        "escape",
+        "transition"
+      ],
+      "aliases": [
+        "recompose guard",
+        "recover guard",
+        "reguard"
+      ]
     },
     {
       "id": "submission-escape",
       "name": "Submission Escape",
       "kind": "subcategory",
-      "parent": "escape",
-      "aliases": []
+      "parents": [
+        "escape"
+      ],
+      "aliases": [
+        "submission defense",
+        "defesa"
+      ]
     },
     {
       "id": "bridge-escape",
       "name": "Bridge Escape",
       "kind": "subcategory",
-      "parent": "escape",
-      "aliases": []
+      "parents": [
+        "escape"
+      ],
+      "aliases": [
+        "bridge and roll",
+        "upa",
+        "ponte"
+      ]
     },
     {
       "id": "hip-escape",
       "name": "Hip Escape",
       "kind": "subcategory",
-      "parent": "escape",
-      "aliases": []
+      "parents": [
+        "escape"
+      ],
+      "aliases": [
+        "shrimp",
+        "shrimping",
+        "fuga de quadril"
+      ]
     },
     {
       "id": "turtle-escape",
       "name": "Turtle Escape",
       "kind": "subcategory",
-      "parent": "escape",
+      "parents": [
+        "escape"
+      ],
       "aliases": []
     },
     {
       "id": "standing-escape",
       "name": "Standing Escape",
       "kind": "subcategory",
-      "parent": "escape",
+      "parents": [
+        "escape"
+      ],
       "aliases": []
     },
     {
       "id": "scramble-escape",
       "name": "Scramble Escape",
       "kind": "subcategory",
-      "parent": "escape",
+      "parents": [
+        "escape"
+      ],
       "aliases": []
     },
     {
       "id": "submission",
       "name": "Submission",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "choke",
       "name": "Choke",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "air choke",
+        "tracheal choke",
+        "windpipe choke"
+      ]
     },
     {
       "id": "strangle",
       "name": "Strangle",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "blood choke",
+        "estrangulamento"
+      ]
     },
     {
       "id": "arm-lock",
       "name": "Arm Lock",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "armbar",
+        "straight arm lock",
+        "chave de braco"
+      ]
     },
     {
       "id": "shoulder-lock",
       "name": "Shoulder Lock",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "kimura",
+        "americana",
+        "keylock",
+        "omoplata"
+      ]
     },
     {
       "id": "wrist-lock",
       "name": "Wrist Lock",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "mao de vaca"
+      ]
     },
     {
       "id": "leg-lock",
       "name": "Leg Lock",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "lower body submission",
+        "footlock",
+        "heel hook",
+        "ankle lock"
+      ]
     },
     {
       "id": "compression-lock",
       "name": "Compression Lock",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "slicer",
+        "crank",
+        "calf slicer",
+        "bicep slicer"
+      ]
     },
     {
       "id": "spine-lock",
       "name": "Spine Lock",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "twister",
+        "spinal lock"
+      ]
     },
     {
       "id": "neck-crank",
       "name": "Neck Crank",
       "kind": "subcategory",
-      "parent": "submission",
-      "aliases": []
+      "parents": [
+        "submission"
+      ],
+      "aliases": [
+        "can opener",
+        "cervical lock"
+      ]
     },
     {
       "id": "takedown",
       "name": "Takedown",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "hand-throw-te-waza",
       "name": "Hand Throw (Te-Waza)",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "te waza",
+        "hand technique"
+      ]
     },
     {
       "id": "hip-throw-koshi-waza",
       "name": "Hip Throw (Koshi-Waza)",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "koshi waza",
+        "hip throw"
+      ]
     },
     {
       "id": "foot-sweep-trip-reap-ashi-waza",
       "name": "Foot Sweep / Trip / Reap (Ashi-Waza)",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "ashi waza",
+        "foot sweep",
+        "trip",
+        "reap",
+        "ashi barai",
+        "ouchi gari",
+        "kouchi gari"
+      ]
     },
     {
       "id": "sacrifice-throw-sutemi-waza",
       "name": "Sacrifice Throw (Sutemi-Waza)",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "sutemi waza",
+        "sacrifice throw"
+      ]
     },
     {
       "id": "leg-attack",
       "name": "Leg Attack",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "single leg",
+        "double leg",
+        "shot",
+        "leg attack takedown"
+      ]
     },
     {
       "id": "body-lock-takedown",
       "name": "Body Lock Takedown",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "body lock"
+      ]
     },
     {
       "id": "clinch-throw",
       "name": "Clinch Throw",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "clinch takedown"
+      ]
     },
     {
       "id": "snap-down",
       "name": "Snap Down",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "snapdown"
+      ]
     },
     {
       "id": "arm-drag",
       "name": "Arm Drag",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "armdrag"
+      ]
     },
     {
       "id": "duck-under",
       "name": "Duck Under",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "duckunder"
+      ]
     },
     {
       "id": "go-behind",
       "name": "Go Behind",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "back take from standing"
+      ]
     },
     {
       "id": "counter-takedown",
       "name": "Counter Takedown",
       "kind": "subcategory",
-      "parent": "takedown",
-      "aliases": []
+      "parents": [
+        "takedown"
+      ],
+      "aliases": [
+        "counter",
+        "re-shot",
+        "sprawl and counter"
+      ]
     },
     {
       "id": "transition",
       "name": "Transition",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "position-advancement",
       "name": "Position Advancement",
       "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
+      "parents": [
+        "transition"
+      ],
+      "aliases": [
+        "advance position"
+      ]
     },
     {
       "id": "position-recovery",
       "name": "Position Recovery",
       "kind": "subcategory",
-      "parent": "transition",
+      "parents": [
+        "transition"
+      ],
       "aliases": []
     },
     {
       "id": "guard-pull",
       "name": "Guard Pull",
       "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
-    },
-    {
-      "id": "guard-recovery",
-      "name": "Guard Recovery",
-      "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
+      "parents": [
+        "transition"
+      ],
+      "aliases": [
+        "pull guard",
+        "puxada"
+      ]
     },
     {
       "id": "back-take",
       "name": "Back Take",
       "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
+      "parents": [
+        "transition"
+      ],
+      "aliases": [
+        "taking the back",
+        "pegada de costas"
+      ]
     },
     {
       "id": "mount-transition",
       "name": "Mount Transition",
       "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
+      "parents": [
+        "transition"
+      ],
+      "aliases": [
+        "mount entry",
+        "montada"
+      ]
     },
     {
       "id": "leg-entry",
       "name": "Leg Entry",
       "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
+      "parents": [
+        "transition"
+      ],
+      "aliases": [
+        "leg lock entry",
+        "entry to ashi"
+      ]
     },
     {
       "id": "stand-up",
       "name": "Stand Up",
       "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
+      "parents": [
+        "transition"
+      ],
+      "aliases": [
+        "standup",
+        "technical standup"
+      ]
     },
     {
       "id": "inversion",
       "name": "Inversion",
       "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
+      "parents": [
+        "transition"
+      ],
+      "aliases": [
+        "invert",
+        "berimbolo"
+      ]
     },
     {
       "id": "scramble",
       "name": "Scramble",
       "kind": "subcategory",
-      "parent": "transition",
-      "aliases": []
+      "parents": [
+        "transition"
+      ],
+      "aliases": [
+        "scrambling"
+      ]
     },
     {
       "id": "grip",
       "name": "Grip",
       "kind": "category",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "gi-grip",
       "name": "Gi Grip",
       "kind": "subcategory",
-      "parent": "grip",
+      "parents": [
+        "grip"
+      ],
       "aliases": []
     },
     {
       "id": "no-gi-tie",
       "name": "No-Gi Tie",
       "kind": "subcategory",
-      "parent": "grip",
-      "aliases": []
+      "parents": [
+        "grip"
+      ],
+      "aliases": [
+        "tie up",
+        "hand fighting"
+      ]
     },
     {
       "id": "sleeve-control",
       "name": "Sleeve Control",
       "kind": "subcategory",
-      "parent": "grip",
+      "parents": [
+        "grip"
+      ],
       "aliases": []
     },
     {
       "id": "collar-control",
       "name": "Collar Control",
       "kind": "subcategory",
-      "parent": "grip",
+      "parents": [
+        "grip"
+      ],
       "aliases": []
     },
     {
       "id": "pant-control",
       "name": "Pant Control",
       "kind": "subcategory",
-      "parent": "grip",
+      "parents": [
+        "grip"
+      ],
       "aliases": []
     },
     {
       "id": "wrist-control",
       "name": "Wrist Control",
       "kind": "subcategory",
-      "parent": "grip",
+      "parents": [
+        "grip"
+      ],
       "aliases": []
     },
     {
       "id": "two-on-one",
       "name": "Two-on-One",
       "kind": "subcategory",
-      "parent": "grip",
-      "aliases": []
+      "parents": [
+        "grip"
+      ],
+      "aliases": [
+        "russian tie",
+        "2 on 1"
+      ]
     },
     {
       "id": "underhook",
       "name": "Underhook",
       "kind": "subcategory",
-      "parent": "grip",
+      "parents": [
+        "grip"
+      ],
       "aliases": []
     },
     {
       "id": "overhook",
       "name": "Overhook",
       "kind": "subcategory",
-      "parent": "grip",
+      "parents": [
+        "grip"
+      ],
       "aliases": []
     },
     {
       "id": "collar-tie",
       "name": "Collar Tie",
       "kind": "subcategory",
-      "parent": "grip",
-      "aliases": []
+      "parents": [
+        "grip"
+      ],
+      "aliases": [
+        "collar tie grip"
+      ]
     },
     {
       "id": "body-lock",
       "name": "Body Lock",
       "kind": "subcategory",
-      "parent": "grip",
-      "aliases": []
+      "parents": [
+        "grip"
+      ],
+      "aliases": [
+        "body lock grip"
+      ]
     },
     {
       "id": "seatbelt",
       "name": "Seatbelt",
       "kind": "subcategory",
-      "parent": "grip",
-      "aliases": []
+      "parents": [
+        "grip"
+      ],
+      "aliases": [
+        "seat belt",
+        "harness"
+      ]
     },
     {
       "id": "concept-pressure",
       "name": "Pressure",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
       "id": "concept-connection",
       "name": "Connection",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
       "id": "concept-inside-position",
       "name": "Inside Position",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [
+        "inside control",
+        "inside space"
+      ],
+      "principle": true
     },
     {
       "id": "concept-outside-position",
       "name": "Outside Position",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "concept-frames",
       "name": "Frames",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [
+        "framing"
+      ]
     },
     {
       "id": "concept-hooks",
       "name": "Hooks",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "concept-weight-distribution",
       "name": "Weight Distribution",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
       "id": "concept-off-balancing",
       "name": "Off-Balancing",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
-    },
-    {
-      "id": "concept-kuzushi",
-      "name": "Kuzushi",
-      "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [
+        "kuzushi",
+        "off balance",
+        "desequilibrio"
+      ],
+      "principle": true
     },
     {
       "id": "concept-decision-compression",
       "name": "Decision Compression",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [
+        "decision space compression",
+        "option removal"
+      ]
     },
     {
       "id": "concept-back-exposure",
       "name": "Back Exposure",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [
+        "giving the back"
+      ]
     },
     {
       "id": "concept-scramble",
       "name": "Scramble",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "concept-chain-attack",
       "name": "Chain Attack",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [
+        "chaining",
+        "attack chain"
+      ]
     },
     {
       "id": "concept-counter-attack",
       "name": "Counter Attack",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "concept-gi",
       "name": "Gi",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "concept-no-gi",
       "name": "No-Gi",
       "kind": "concept",
-      "parent": null,
-      "aliases": []
+      "parents": [],
+      "aliases": [
+        "nogi",
+        "no gi"
+      ]
     },
     {
       "id": "concept-standing",
       "name": "Standing",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "concept-ground",
       "name": "Ground",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "concept-upper-body",
       "name": "Upper Body",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
       "id": "concept-lower-body",
       "name": "Lower Body",
       "kind": "concept",
-      "parent": null,
+      "parents": [],
       "aliases": []
     },
     {
-      "id": "principle-inside-position",
-      "name": "Inside Position",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
-    },
-    {
-      "id": "principle-connection",
-      "name": "Connection",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
-    },
-    {
-      "id": "principle-pressure",
-      "name": "Pressure",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
-    },
-    {
-      "id": "principle-weight-distribution",
-      "name": "Weight Distribution",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
-    },
-    {
-      "id": "principle-decision-space",
+      "id": "concept-decision-space",
       "name": "Decision Space",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
+      "kind": "concept",
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
-      "id": "principle-dilemma-creation",
+      "id": "concept-dilemma-creation",
       "name": "Dilemma Creation",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
+      "kind": "concept",
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
-      "id": "principle-off-balancing",
-      "name": "Off-Balancing",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
-    },
-    {
-      "id": "principle-upper-body-isolation",
+      "id": "concept-upper-body-isolation",
       "name": "Upper Body Isolation",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
+      "kind": "concept",
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
-      "id": "principle-lower-body-isolation",
+      "id": "concept-lower-body-isolation",
       "name": "Lower Body Isolation",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
+      "kind": "concept",
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
-      "id": "principle-head-control",
+      "id": "concept-head-control",
       "name": "Head Control",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
+      "kind": "concept",
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
-      "id": "principle-angle-creation",
+      "id": "concept-angle-creation",
       "name": "Angle Creation",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
+      "kind": "concept",
+      "parents": [],
+      "aliases": [],
+      "principle": true
     },
     {
-      "id": "principle-base-and-posture",
+      "id": "concept-base-and-posture",
       "name": "Base and Posture",
-      "kind": "principle",
-      "parent": null,
-      "aliases": []
+      "kind": "concept",
+      "parents": [],
+      "aliases": [],
+      "principle": true
     }
   ]
 }
