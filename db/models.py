@@ -164,6 +164,56 @@ class UserSyncMeta(Base):
     session_count: Mapped[int | None] = mapped_column(Integer, server_default="0")
 
 
+class Group(Base):
+    """A gym's students under one professor (alembic 0024). Flat — one owner, many
+    members. RLS + join_group()/group_member_sessions view live in alembic 0024."""
+
+    __tablename__ = "groups"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class GroupMember(Base):
+    __tablename__ = "group_members"
+
+    group_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("groups.id", ondelete="CASCADE"), primary_key=True
+    )
+    profile_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), primary_key=True
+    )
+    # 'professor', not 'teacher' — the word the product uses, in the data too.
+    role: Mapped[str] = mapped_column(String(16), nullable=False)
+    joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        CheckConstraint("role in ('owner','professor','student')", name="ck_group_members_role"),
+        Index("idx_group_members_profile", "profile_id"),
+    )
+
+
+class GroupInvite(Base):
+    """Its own table, not a column on ``groups``, so a code can expire/rotate without
+    touching the group or its members."""
+
+    __tablename__ = "group_invites"
+
+    code: Mapped[str] = mapped_column(Text, primary_key=True)
+    group_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("groups.id", ondelete="CASCADE"), nullable=False
+    )
+    created_by: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
 class UserPerformanceSnapshot(Base):
     """Versioned, batch-generated Pro analytics for one user's completed period."""
 

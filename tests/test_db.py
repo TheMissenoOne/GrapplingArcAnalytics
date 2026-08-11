@@ -493,6 +493,26 @@ def test_user_session_deleted_at_roundtrips(session):
     assert row.deleted_at.replace(tzinfo=UTC) == t
 
 
+# ── groups / group_members / group_invites (alembic 0024) ───────────────────────
+
+
+def test_group_membership_round_trips(session):
+    from db.models import Group, GroupMember, Profile
+
+    prof = Profile(id="11111111-1111-1111-1111-111111111111", full_name="Professor")
+    student = Profile(id="22222222-2222-2222-2222-222222222222", full_name="Aluno")
+    group = Group(id="33333333-3333-3333-3333-333333333333", owner_id=prof.id, name="Gracie Barra")
+    session.add_all([prof, student, group])
+    session.add_all([
+        GroupMember(group_id=group.id, profile_id=prof.id, role="professor"),
+        GroupMember(group_id=group.id, profile_id=student.id, role="student"),
+    ])
+    session.commit()
+
+    roles = {m.profile_id: m.role for m in session.query(GroupMember).filter_by(group_id=group.id)}
+    assert roles == {prof.id: "professor", student.id: "student"}
+
+
 def test_get_user_sessions_since_includes_tombstones(session):
     from datetime import UTC, datetime
 
