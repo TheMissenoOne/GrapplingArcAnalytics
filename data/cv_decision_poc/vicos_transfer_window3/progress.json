@@ -1,0 +1,61 @@
+{
+ "run_id": "transfer-7dc97750",
+ "pipeline": "vicos_transfer",
+ "status": "completed",
+ "phase": "done",
+ "current": 601,
+ "total": 601,
+ "percent": 100.0,
+ "message": "Transfer complete: 600 frames, role_observed_rate_raw=0.3407",
+ "started_at": "2026-08-12T12:10:29.689610+00:00",
+ "updated_at": "2026-08-12T12:13:11.673208+00:00",
+ "finished_at": "2026-08-12T12:13:11.673208+00:00",
+ "metrics": {
+  "pose_pair_rate": 0.675,
+  "role_observed_rate": 0.3407,
+  "role_flips_per_min": 4.207,
+  "segments": 29
+ },
+ "audit_pass2": {
+  "date": "2026-08-12",
+  "method": "raw-frame corroboration, pre/post windows",
+  "applied_fix": "role_conf_min 0.6 -> 0.85 commit floor (live_state.py default)",
+  "switches_before": 6,
+  "before_breakdown": {
+   "supported": 3,
+   "weak": 1,
+   "spurious": 2
+  },
+  "switches_after": 4,
+  "supported": "5336 (38/77), 5436 (75/100)",
+  "weak": "5415 (33/50)",
+  "anomaly": "5313.5 (29/0) - needs vision check",
+  "regenerated": "2026-08-12T12:13Z, report.json role_switch_events_smoothed=4",
+  "open": [
+   "5313.5 vision check",
+   "frame-level vision audit of 18 PNGs pending"
+  ]
+ },
+ "error": null,
+ "audit_vision": {
+  "date": "2026-08-12",
+  "method": "blind visual audit of extracted frames, then pipeline comparison",
+  "report": "switch_audit/vision_audit.md",
+  "frames": "switch_audit/frames (71, generated for this audit; the 18 sw*.png predate the fix and cover other switches)",
+  "candidates": {
+   "5313.5": {
+    "visual_verdict": "false_switch",
+    "confidence": "high",
+    "agreement": false,
+    "failure_mode": "single isolated frame above the 0.85 floor; camera cut; referee enters frame"
+   },
+   "5415.0": {
+    "visual_verdict": "false_switch",
+    "confidence": "medium-high",
+    "agreement": false,
+    "failure_mode": "hip-Y pair ordering inverts when an athlete inverts; false detection, not latency"
+   }
+  },
+  "recommendation": "C - investigate tracker identity continuity before cross-venue; then add elapsed-time persistence"
+ }
+}

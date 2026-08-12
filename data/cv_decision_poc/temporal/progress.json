@@ -1,0 +1,18 @@
+{
+  "run_id": "temporal-features",
+  "pipeline": "temporal_features",
+  "status": "completed",
+  "phase": "features",
+  "current": 67,
+  "total": 67,
+  "percent": 100.0,
+  "message": "Temporal features complete (backfilled)",
+  "started_at": "2026-08-11T23:59:06.181402+00:00",
+  "updated_at": 1786492890.9773722,
+  "finished_at": 1786492890.9773724,
+  "metrics": {
+    "samples": 67,
+    "pose_pair_rate_mean": 0.7642
+  },
+  "error": null
+}

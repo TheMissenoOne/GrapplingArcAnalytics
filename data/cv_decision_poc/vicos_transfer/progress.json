@@ -1,0 +1,20 @@
+{
+  "run_id": "transfer-7dc97750",
+  "pipeline": "vicos_transfer",
+  "status": "completed",
+  "phase": "done",
+  "current": 241,
+  "total": 241,
+  "percent": 100.0,
+  "message": "Transfer smoke complete: 240 frames, role_resolved_rate=0.0375",
+  "started_at": "2026-08-12T00:54:55.608328+00:00",
+  "updated_at": "2026-08-12T00:55:59.678699+00:00",
+  "finished_at": "2026-08-12T00:55:59.678699+00:00",
+  "metrics": {
+    "pose_pair_rate": 0.7542,
+    "position_coverage": 0.7542,
+    "role_resolved_rate": 0.0375,
+    "role_switch_events": 7
+  },
+  "error": null
+}

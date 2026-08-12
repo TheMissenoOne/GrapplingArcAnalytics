@@ -66,3 +66,21 @@ transcripts/
 # Supabase CLI local state
 supabase/.temp/
 supabase/.branches/
+data/external/
+
+# ── CV decision-vision ────────────────────────────────────────────────
+# Track the SOURCE (poc/, tests/poc/) and the FINDINGS. Never the pixels or
+# the weights: `data/cv_decision_poc/` is ~117MB, of which ~86MB is trained
+# model artifacts and ~27MB is audit frames that `poc/decision_vision/
+# audit_frames.py` regenerates from a match id + window. What deserves history
+# is the conclusion (vision_audit.md, report.json, progress.json) and the
+# sampled timelines the audit cites, not the images it looked at.
+data/cv_decision_poc/**
+!data/cv_decision_poc/**/
+!data/cv_decision_poc/**/*.md
+!data/cv_decision_poc/**/report.json
+!data/cv_decision_poc/**/progress.json
+!data/cv_decision_poc/**/*.csv
+# …but never these, regardless of extension:
+data/cv_decision_poc/model/**
+data/cv_decision_poc/model_probe/**

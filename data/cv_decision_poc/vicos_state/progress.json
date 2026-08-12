@@ -1,0 +1,19 @@
+{
+  "run_id": "vicos-state",
+  "pipeline": "vicos_state",
+  "status": "completed",
+  "phase": "done",
+  "current": 3,
+  "total": 3,
+  "percent": 100.0,
+  "message": "ViCoS state reconstruction complete (76343 frames)",
+  "started_at": "2026-08-12T00:44:31.210336+00:00",
+  "updated_at": "2026-08-12T00:54:41.777879+00:00",
+  "finished_at": "2026-08-12T00:54:41.777879+00:00",
+  "metrics": {
+    "samples": 76343,
+    "sequences": 16,
+    "state_macro_f1": 0.5394
+  },
+  "error": null
+}

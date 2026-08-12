@@ -1,0 +1,26 @@
+{
+  "protocol": "transfer-smoke: YOLO COCO pose (local) -> ViCoS full-fit probe",
+  "match_id": "7dc97750-d911-45a2-9675-55d545a4a12d",
+  "range": [
+    3550.0,
+    3670.0
+  ],
+  "sample_every": 0.5,
+  "frames_sampled": 240,
+  "pose_pair_rate": 0.7542,
+  "position_coverage": 0.7542,
+  "role_resolved_rate": 0.0375,
+  "role_switch_events": 7,
+  "transitions": {
+    "standing/none": 136,
+    "unknown/unknown": 59,
+    "5050_guard/none": 13,
+    "open_guard/none": 8,
+    "turtle/none": 6,
+    "side_control/athlete2": 4,
+    "takedown/none": 3,
+    "back/none": 3,
+    "side_control/none": 3,
+    "open_guard/athlete2": 2
+  }
+}

@@ -1,0 +1,68 @@
+criterion_key,match_id,source_key,criterion_label,response_key,leaf_label,family_label,category_label,frame_count,pose_pair_rate
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:3:4:5,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Straight Foot Lock Attempt,sweep,straight foot lock,straight foot lock,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:6:7:15,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Knee Bar,sweep,knee bar,knee bar,submission,5,0.6
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:6:8:15,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Mount,sweep,mount,mount,control,5,0.8
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:6:9:15,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Mount,sweep,mount,mount,control,5,0.2
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:6:10:15,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Mount,sweep,mount,mount,control,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:6:11:15,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Mount,sweep,mount,mount,control,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:6:12:15,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Mount,sweep,mount,mount,control,5,0.2
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:6:13:15,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Mount,sweep,mount,mount,control,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:6:14:15,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Mount,sweep,mount,mount,control,5,0.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:15:16:17,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Triangle Attempt,closed guard,triangle attempt,triangle attempt,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:17:18:24,d68f7604-d0a1-454f-9e54-df6b2ba81a27,closed guard,Armbar Attempt,half guard,armbar,arm-lock,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:17:19:24,d68f7604-d0a1-454f-9e54-df6b2ba81a27,closed guard,Triangle Attempt,half guard,triangle attempt,triangle attempt,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:17:20:24,d68f7604-d0a1-454f-9e54-df6b2ba81a27,closed guard,Triangle Attempt,half guard,triangle attempt,triangle attempt,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:17:21:24,d68f7604-d0a1-454f-9e54-df6b2ba81a27,closed guard,Triangle Attempt,half guard,triangle attempt,triangle attempt,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:17:22:24,d68f7604-d0a1-454f-9e54-df6b2ba81a27,closed guard,Triangle Attempt,half guard,triangle attempt,triangle attempt,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:17:23:24,d68f7604-d0a1-454f-9e54-df6b2ba81a27,closed guard,Triangle Attempt,half guard,triangle attempt,triangle attempt,submission,5,0.8
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:24:25:26,d68f7604-d0a1-454f-9e54-df6b2ba81a27,half guard,Snatch Single Leg Takedown,guillotine attempt,snatch single leg takedown,snatch single leg takedown,transition,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:31:32:34,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Snap Down / Front Headlock,guillotine attempt,snap down front headlock,snap down front headlock,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:31:33:34,d68f7604-d0a1-454f-9e54-df6b2ba81a27,sweep,Takedown Defense,guillotine attempt,takedown defense,takedown defense,transition,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:35:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Triangle Attempt,closed guard,triangle attempt,triangle attempt,submission,5,0.8
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:36:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Back Take,closed guard,back take,back-take,transition,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:37:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Arm‑Triangle Attempt,closed guard,armtriangle attempt,armtriangle attempt,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:38:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Body Triangle,closed guard,body triangle,body triangle,submission,5,0.8
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:39:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Mount,closed guard,mount,mount,control,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:40:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Mount,closed guard,mount,mount,control,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:41:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Mount,closed guard,mount,mount,control,5,0.2
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:42:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Arm‑Triangle Attempt,closed guard,armtriangle attempt,armtriangle attempt,submission,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:43:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Back Control,closed guard,back control,back-control,control,5,1.0
+d68f7604-d0a1-454f-9e54-df6b2ba81a27:34:44:45,d68f7604-d0a1-454f-9e54-df6b2ba81a27,guillotine attempt,Body Triangle,closed guard,body triangle,body triangle,submission,5,1.0
+7dc97750-d911-45a2-9675-55d545a4a12d:4:5:6,7dc97750-d911-45a2-9675-55d545a4a12d,guillotine attempt,Mount,sweep,mount,mount,control,5,0.4
+7dc97750-d911-45a2-9675-55d545a4a12d:7:8:9,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Side Control,sweep,side control,side control,control,5,0.0
+7dc97750-d911-45a2-9675-55d545a4a12d:9:10:11,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Mount,sweep,mount,mount,control,5,1.0
+7dc97750-d911-45a2-9675-55d545a4a12d:11:12:13,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Mount,guard pass,mount,mount,control,5,0.0
+7dc97750-d911-45a2-9675-55d545a4a12d:14:15:18,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Mount,sweep,mount,mount,control,5,0.0
+7dc97750-d911-45a2-9675-55d545a4a12d:14:16:18,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Mount,sweep,mount,mount,control,5,0.6
+7dc97750-d911-45a2-9675-55d545a4a12d:14:17:18,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Escape to Standing,sweep,escape to standing,escape to standing,escape,5,0.4
+7dc97750-d911-45a2-9675-55d545a4a12d:19:20:21,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Omoplata,sweep,omoplata,shoulder-lock,submission,5,0.4
+7dc97750-d911-45a2-9675-55d545a4a12d:22:23:24,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Escape to Standing,sweep,escape to standing,escape to standing,escape,5,0.8
+7dc97750-d911-45a2-9675-55d545a4a12d:25:26:30,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Triangle Attempt,leg drag to straddle,triangle attempt,triangle attempt,submission,5,0.8
+7dc97750-d911-45a2-9675-55d545a4a12d:25:27:30,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Triangle Attempt,leg drag to straddle,triangle attempt,triangle attempt,submission,5,0.4
+7dc97750-d911-45a2-9675-55d545a4a12d:25:28:30,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Mount,leg drag to straddle,mount,mount,control,5,0.6
+7dc97750-d911-45a2-9675-55d545a4a12d:25:29:30,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Arm‑Triangle Attempt,leg drag to straddle,armtriangle attempt,armtriangle attempt,submission,5,0.2
+7dc97750-d911-45a2-9675-55d545a4a12d:30:31:32,7dc97750-d911-45a2-9675-55d545a4a12d,leg drag to straddle,Mount,sweep,mount,mount,control,5,0.8
+7dc97750-d911-45a2-9675-55d545a4a12d:32:33:35,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Toe Hold,sweep,toe hold,toe hold,submission,5,0.0
+7dc97750-d911-45a2-9675-55d545a4a12d:32:34:35,7dc97750-d911-45a2-9675-55d545a4a12d,sweep,Straight Foot Lock Attempt,sweep,straight foot lock,straight foot lock,submission,5,0.4
+8e2add5c-67a1-41cc-af60-39ef684bfa42:1:2:3,8e2add5c-67a1-41cc-af60-39ef684bfa42,pull guard inversion,Pull Guard / Inversion,butterfly guard,pull guard inversion,pull guard inversion,guard,5,1.0
+8e2add5c-67a1-41cc-af60-39ef684bfa42:5:6:8,8e2add5c-67a1-41cc-af60-39ef684bfa42,triangle attempt,Mount,mount,mount,mount,control,5,1.0
+8e2add5c-67a1-41cc-af60-39ef684bfa42:5:7:8,8e2add5c-67a1-41cc-af60-39ef684bfa42,triangle attempt,Mount,mount,mount,mount,control,5,1.0
+8e2add5c-67a1-41cc-af60-39ef684bfa42:12:13:17,8e2add5c-67a1-41cc-af60-39ef684bfa42,mount,Half Guard,triangle attempt,half guard,half-guard,guard,5,1.0
+8e2add5c-67a1-41cc-af60-39ef684bfa42:12:14:17,8e2add5c-67a1-41cc-af60-39ef684bfa42,mount,Mount,triangle attempt,mount,mount,control,5,1.0
+8e2add5c-67a1-41cc-af60-39ef684bfa42:12:15:17,8e2add5c-67a1-41cc-af60-39ef684bfa42,mount,Heel Hook Attempt,triangle attempt,heel hook,leg-lock,submission,5,1.0
+8e2add5c-67a1-41cc-af60-39ef684bfa42:12:16:17,8e2add5c-67a1-41cc-af60-39ef684bfa42,mount,Butterfly Guard,triangle attempt,butterfly guard,butterfly-guard,guard,5,1.0
+7ae0b42a-8c29-4a9d-8f4c-908acd7be98a:12:13:14,7ae0b42a-8c29-4a9d-8f4c-908acd7be98a,escape to turtle,Escape to Turtle,straight foot lock,escape to turtle,escape to turtle,control,5,1.0
+7ae0b42a-8c29-4a9d-8f4c-908acd7be98a:14:15:16,7ae0b42a-8c29-4a9d-8f4c-908acd7be98a,straight foot lock,Sweep,mount,sweep,sweep,sweep,5,1.0
+7ae0b42a-8c29-4a9d-8f4c-908acd7be98a:20:21:23,7ae0b42a-8c29-4a9d-8f4c-908acd7be98a,straight foot lock,Closed Guard,straight foot lock,closed guard,closed-guard,guard,5,1.0
+7ae0b42a-8c29-4a9d-8f4c-908acd7be98a:20:22:23,7ae0b42a-8c29-4a9d-8f4c-908acd7be98a,straight foot lock,Rear Naked Choke,straight foot lock,rear naked choke,rear naked choke,submission,5,0.0
+9710782b-c909-4f8e-b553-65e0b0d5aad9:15:16:17,9710782b-c909-4f8e-b553-65e0b0d5aad9,sweep,Triangle Attempt,hooks in,triangle attempt,triangle attempt,submission,5,1.0
+9710782b-c909-4f8e-b553-65e0b0d5aad9:17:18:21,9710782b-c909-4f8e-b553-65e0b0d5aad9,hooks in,Back Take,guillotine attempt,back take,back-take,transition,5,1.0
+9710782b-c909-4f8e-b553-65e0b0d5aad9:17:19:21,9710782b-c909-4f8e-b553-65e0b0d5aad9,hooks in,Rear Naked Choke,guillotine attempt,rear naked choke,rear naked choke,submission,5,1.0
+9710782b-c909-4f8e-b553-65e0b0d5aad9:17:20:21,9710782b-c909-4f8e-b553-65e0b0d5aad9,hooks in,Rear Naked Choke,guillotine attempt,rear naked choke,rear naked choke,submission,5,0.2
+483824af-58b5-45a1-9e23-f4b952129dc4:2:3:4,483824af-58b5-45a1-9e23-f4b952129dc4,leg drag to straddle,North‑South,guard recovery,northsouth,northsouth,control,5,1.0
+483824af-58b5-45a1-9e23-f4b952129dc4:4:5:8,483824af-58b5-45a1-9e23-f4b952129dc4,guard recovery,Snatch Single Leg Takedown,pull guard inversion,snatch single leg takedown,snatch single leg takedown,transition,5,1.0
+483824af-58b5-45a1-9e23-f4b952129dc4:4:6:8,483824af-58b5-45a1-9e23-f4b952129dc4,guard recovery,Snatch Single Leg Takedown,pull guard inversion,snatch single leg takedown,snatch single leg takedown,transition,5,0.8
+483824af-58b5-45a1-9e23-f4b952129dc4:4:7:8,483824af-58b5-45a1-9e23-f4b952129dc4,guard recovery,Guard Pass,pull guard inversion,guard pass,guard pass,pass,5,1.0
+483824af-58b5-45a1-9e23-f4b952129dc4:9:10:11,483824af-58b5-45a1-9e23-f4b952129dc4,guard pass,Side Control,shin to shin guard,side control,side control,control,5,1.0
+483824af-58b5-45a1-9e23-f4b952129dc4:12:13:14,483824af-58b5-45a1-9e23-f4b952129dc4,shin to shin guard,Knee Bar,half guard,knee bar,knee bar,submission,5,1.0
+483824af-58b5-45a1-9e23-f4b952129dc4:17:18:19,483824af-58b5-45a1-9e23-f4b952129dc4,heel hook attempt,Mount,heel hook attempt,mount,mount,control,5,1.0
