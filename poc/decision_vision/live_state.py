@@ -259,26 +259,35 @@ def smooth_timeline(
             sm["position"], sm["state"] = k
         smoothed.append(sm)
 
+    # Segments are rebuilt from the FINAL rows, keyed on ALL THREE dimensions.
+    #
+    # They used to be built from the PRE-squash spans and then merged on
+    # (position, state) alone — role-blind — so a role switch occurring inside a
+    # run of one position/state was swallowed, and the surviving segment
+    # inherited the FIRST span's role. That is why segments.csv reported
+    # `standing 5414.5->5424.5 athlete2` while state_samples.csv carried
+    # `athlete1` from 5415.0: the rows were right and the segments were not.
+    # A boundary must exist wherever any semantically relevant dimension changes.
     merged: list[dict[str, Any]] = []
-    for i, span in enumerate(spans):
-        key = resolved_key[i]
-        if merged and merged[-1]["position"] == key[0] \
-                and merged[-1]["state"] == key[1]:
-            merged[-1]["end"] = span["end"]
-            merged[-1]["seconds"] = round(
-                merged[-1]["end"] - merged[-1]["start"], 2
-            )
-            continue
+    for row in smoothed:
+        key = (str(row["position"]), str(row["role"]), str(row["state"]))
+        ts = row["timestamp"]
+        if merged:
+            merged[-1]["end"] = ts
+            prev = (merged[-1]["position"], merged[-1]["role"], merged[-1]["state"])
+            if prev == key:
+                continue
         merged.append(
             {
-                "start": span["start"],
-                "end": span["end"],
+                "start": ts,
+                "end": ts,
                 "position": key[0],
-                "role": span["role"],
-                "state": key[1],
-                "seconds": round(span["end"] - span["start"], 2),
+                "role": key[1],
+                "state": key[2],
             }
         )
+    for seg in merged:
+        seg["seconds"] = round(seg["end"] - seg["start"], 2)
 
     return smoothed, merged
 

@@ -86,14 +86,11 @@ defect as unconfirmed until someone reproduces it.
 
 ---
 
-## 4. The CV work is OUTSIDE version control
+## 4. Version control — DONE (2026-08-12, `de70ef2`)
 
-`poc/`, `tests/poc/` and `data/cv_decision_poc/` have **zero tracked files**. Today's audit, both new
-tools (`audit_frames.py`, `audit_overlay.py`) and the tracker exist only on one disk.
-
-**Next action, independent of any promotion criteria:** track the source, gitignore the regenerable
-output. `data/cv_decision_poc/**/frames*` is ~27MB of PNGs that `audit_frames.py` rebuilds; the
-findings (`vision_audit.md`, `report.json`, `progress.json`) are what deserve history.
+`poc/` and `tests/poc/` are tracked (~656KB of source), along with the findings. The pixels and the
+weights are gitignored: `data/cv_decision_poc/` is ~117MB, of which ~86MB is model artifacts and
+~27MB is audit frames `audit_frames.py` regenerates from a match id and a window.
 
 Promotion criteria out of POC status: see `INDEX.md`.
 
