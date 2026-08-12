@@ -1,0 +1,96 @@
+# GrapplingArcAnalytics — start here
+
+Navigation only. No implementation detail lives here; it points at the file that owns each fact.
+
+## 1. Repository ownership
+
+Owns: data pipelines (Kaggle → parquet), schemas, analysis (ELO calibration, network metrics, CV),
+exports to the App and the public site, and the admin dashboard.
+
+**This repo owns the Supabase schema, RLS, and migrations** — App and Web are clients of it
+(`db/`, `alembic/versions/`, `test_db.py`, `test_admin.py`). A schema change starts here, never
+in a client.
+
+## 2. Start here
+
+Cold start, in order: this file → `CLAUDE.md` → `AGENTS.md` → `pipelines/`, `export/`.
+Root workspace map: `../INDEX.md`. Root cross-module contracts: `../CLAUDE.md`.
+
+## 3. Common task routes
+
+| I need to… | Go to |
+|---|---|
+| add/change a dataset pipeline | `pipelines/` (`Pipeline` base class), `CLAUDE.md` "Dataset Registry" |
+| add/change a schema | `schemas/` (`__init__.py` dataset schemas, `app_types.py` UserBundle parser) |
+| touch the Supabase table shape, RLS, or a migration | `db/`, `alembic/versions/`, skill `supabase-schema-migration` |
+| touch ELO calibration | `analysis/elo_calibration.py`, `CLAUDE.md` "ELO Engine" |
+| touch graph/directed-edge metrics | `analysis/network_metrics.py` (parity with App `directedEdges.ts`) |
+| turn a transcript into live site pages | `docs/ingestion_pipeline.md`, skill `ingest-to-publish` |
+| produce/update an app-shaped export | `export/` (`tech_library.py`, `adcc_elo_table.py`) |
+| regenerate the public site bundle | `export/site_data.py` (wraps `match_breakdown.py`) |
+| run the local admin dashboard | `admin/` (`uv run --extra web python -m admin`) |
+| run or write a test | `tests/`, § 5 below |
+| pick up unfinished work | `docs/IN_FLIGHT.md`, `docs/superpowers/plans/2026-08-12-decision-vision-identity.md` |
+
+## 4. Contracts and boundaries
+
+- **This repo owns the Supabase schema, RLS, and migrations.** App (`services/graphSync.ts` +
+  `proGraphs.ts`) and Web are clients under RLS — they never define tables or policies.
+  Full schema-side files: `db/`, `alembic/versions/`.
+- **Node key parity** — `analysis/names.py:_normalize_name` must match `normalizeLabel()` in
+  `../GrapplingArcApp/services/graphSync.ts` char-for-char.
+- **Directed-edge parity** — `analysis/network_metrics.py` (`edge_arrow`/`edge_dashed`/
+  `network_from_sequences`, constants `MIN_EDGE_ARROW`/`TWO_WAY_RATIO`/`DASH_WEIGHT_MIN`/
+  `DASH_SUCCESS_MAX`) must match `../GrapplingArcApp/services/directedEdges.ts` char-for-char.
+- **Export contracts** — `export/tech_library.py` → App `@grapplingarch:nodes_library`;
+  `export/adcc_elo_table.py` → App `@grapplingarch:elo_stats`; `schemas/app_types.py` parses
+  the App's user bundle. Reverse contract — keep both sides in sync.
+- **Site bundle contract** — `export/site_data.py` regenerates the ENTIRE `../GrapplingArc/site/`
+  bundle. Node keys via `_normalize_name`.
+- Full cross-module contract table: root `../CLAUDE.md` "Cross-Module Contracts".
+- Changing any of the above without a matching change on the App/site side breaks the product —
+  see skill `architecture-contract`.
+
+## 5. Run / test / verify
+
+```
+uv sync                  # install deps
+uv run pytest            # tests
+uv run ruff check .      # lint (note: `ruff format --check .` is NOT CI-gated, see pyproject.toml)
+uv run mypy .            # typecheck
+```
+Test layout: `tests/` (pytest, mirrors `pipelines/`/`export/`/`analysis/`/`db`/`admin` modules).
+
+## 6. Authoritative documentation
+
+| Doc | Owns |
+|---|---|
+| `CLAUDE.md` | Stack, repo structure, dataset registry, ELO engine, doc map |
+| `AGENTS.md` | Agent workflow, non-negotiables |
+| `docs/ingestion_pipeline.md` | End-to-end ingestion: transcript → dump → refine → import → embeddings → site → validate |
+| `docs/match_event_model.md` | Bout sequence/actor-ownership convention |
+| `docs/publishing.md` | Publish flow for athlete graphs / site |
+| `kanban/README.md` | Task board rules + card template |
+| `.claude/skills/` | Repo-local skills (analysis/cv/pipeline); root skills one level up |
+
+## 7. Known stale or historical
+
+- `poc/`, `tests/poc/`, and `data/cv_decision_poc/` are **currently untracked by git** (verified
+  `git status` — `??`, not gitignored). Do not assume anything under them is committed or
+  reviewable history. Promotion plan + current status: `docs/IN_FLIGHT.md` and
+  `docs/superpowers/plans/2026-08-12-decision-vision-identity.md`.
+- `docs/dump_validation_report.md`, `docs/canonicalization_report.md`,
+  `docs/date_reconcile_report.json` — point-in-time audits/reports, not current state. Link with
+  status, don't trust as live.
+- `docs/IN_FLIGHT.md` — unfinished work, current status.
+
+## 8. Neighbouring repositories
+
+- [GrapplingArcApp](../GrapplingArcApp/INDEX.md) — mobile client of the Supabase schema this repo
+  owns; consumes `export/tech_library.py` and `export/adcc_elo_table.py`.
+- [GrapplingArc](../GrapplingArc/INDEX.md) — public site, entirely generated by `export/site_data.py`.
+- [GrapplingArcWeb](../GrapplingArcWeb/INDEX.md) — reads the same Supabase database, not part of
+  the export pipeline.
+
+Workspace root: `../INDEX.md`.
+</content>

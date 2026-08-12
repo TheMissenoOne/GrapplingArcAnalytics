@@ -161,12 +161,17 @@ wrong identity sustained for 5 seconds
 
 ## Tooling defects to fix now (they will obstruct the next validation)
 
-1. **`segments.csv` can hide a role switch.** It carries the role from a segment's start and
-   segments on position/state, so the 5415.0 switch is invisible inside the `standing`
-   `5414.5→5424.5` segment while `state_samples.csv` carries `athlete1` from 5415.0. Either split
-   into `position_segments.csv` / `role_segments.csv` / `state_segments.csv`, or emit a composite
-   `(position, role, state)` segment with a boundary whenever ANY semantically relevant dimension
-   changes.
+1. **`segments.csv` can hide a role switch — precise mechanism, pinned to lines.** Spans ARE keyed
+   on `(position, role, state)` (`live_state.py:187`), so the role boundary is created correctly.
+   It is then destroyed: the min-duration squash groups runs by `(position, state)` only
+   (`live_state.py:201`) — **role-blind** — and merges across a role boundary, the merged span
+   inheriting the first span's role. The squash writes back only `position`/`state`
+   (`live_state.py:245,250`), which is why `state_samples.csv` still carries the correct
+   `athlete1` from 5415.0 while `segments.csv` shows `athlete2` for `standing 5414.5→5424.5`.
+   Fix: rebuild the spans from the FINAL smoothed rows after the squash, keyed on all three
+   dimensions, so a boundary exists wherever any semantically relevant dimension changes. (An
+   earlier draft of this plan described this as "carries the role from a segment's start", which
+   is the symptom, not the mechanism.)
 2. **`live_state.py` has two partially-working invocations.** `uv run python
    poc/decision_vision/live_state.py` dies with `ModuleNotFoundError: No module named 'cv'`
    (script-mode `sys.path[0]` is the file's own directory). Pick one: make
