@@ -537,6 +537,35 @@ class PoseIdentityTracker:
                 track.last_keypoints = kp
                 track.missing = 0
 
+        # Revive a track that aged out, from a candidate nobody claimed.
+        #
+        # Without this, `missing > max_missing` was a ONE-WAY DOOR: an aged-out
+        # track left `active` and could never be assigned again, because only
+        # active tracks are assigned. The `not active` reinit path could not
+        # rescue it either, since that needs EVERY track dead and its partner is
+        # still alive. Measured consequence: one brief occlusion — routine in
+        # grappling — permanently degraded the tracker to a single track, and it
+        # never resolved another frame. On the audited window that showed up as
+        # identity_resolved_rate 0.10 against 57% of frames having two usable
+        # candidates.
+        #
+        # Re-seeding is honest but NOT free: continuity with the past is broken,
+        # so it is counted as a reinitialization rather than passed off as
+        # tracking. The frame is usable going forward; the counter says at whose
+        # expense.
+        claimed = {id(match[0]) for match in assignments.values()}
+        spare = [c for c in candidates if id(c[0]) not in claimed]
+        for track in self.tracks.values():
+            if track.missing <= self.max_missing or not spare:
+                continue
+            kp, box = spare.pop(0)
+            track.last_box = box
+            track.last_keypoints = kp
+            track.missing = 0
+            track.athlete_id = None
+            assignments[track.track_id] = (kp, box)
+            self.reinitializations += 1
+
         return self._finish(assignments)
 
     def _finish(self, assignments: dict[str, tuple[np.ndarray, Box]]) -> PoseAssignment:

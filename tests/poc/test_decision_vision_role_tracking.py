@@ -208,3 +208,32 @@ def test_pose_tracker_dropout_beyond_max_missing_reinitializes() -> None:
     result = tracker.update([_kp(cx=150, cy=200), _kp(cx=450, cy=200)])
     assert result.identity_resolved
     assert tracker.reinitializations == 1
+
+
+def test_pose_tracker_recovers_after_a_long_occlusion() -> None:
+    """An aged-out track must be able to come back.
+
+    Regression for a ONE-WAY DOOR: `missing > max_missing` removed a track from
+    `active`, and only active tracks are assigned, so it could never return. The
+    `not active` reinit path could not rescue it either — that needs EVERY track
+    dead, and its partner was alive. Measured on real video, one brief occlusion
+    (routine in grappling) pinned identity_resolved_rate at 0.10 while 57% of
+    frames had two usable candidates.
+
+    Recovery is counted as a reinitialization, not passed off as tracking:
+    continuity with the past really was lost.
+    """
+    tracker = PoseIdentityTracker(image_width=320, image_height=240, max_missing=3)
+    tracker.update([_kp(cx=80, cy=100), _kp(cx=240, cy=100)])
+
+    # One athlete is occluded for longer than max_missing.
+    for _ in range(5):
+        assert not tracker.update([_kp(cx=80, cy=100)]).identity_resolved
+
+    # Both are visible again — the tracker must not stay dead.
+    resolved = [
+        tracker.update([_kp(cx=80, cy=100), _kp(cx=240, cy=100)]).identity_resolved
+        for _ in range(3)
+    ]
+    assert all(resolved), "an aged-out track never came back"
+    assert tracker.reinitializations >= 1, "the lost continuity was not recorded"
