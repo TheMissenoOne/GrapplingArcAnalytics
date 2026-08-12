@@ -1,5 +1,4 @@
 import numpy as np
-
 from decision_vision.role_tracking import (
     Box,
     Detection,
@@ -114,23 +113,31 @@ def _kp(cx: float, cy: float, scale: float = 40.0, conf: float = 0.9) -> np.ndar
 
 def test_pose_tracker_survives_two_people_crossing() -> None:
     """Two athletes swap screen positions (a sweep). track_0 must keep following
-    the SAME physical person, not the "upper" screen slot."""
+    the SAME physical person, not the "upper" screen slot.
+
+    Asserted by IDENTITY — is this the same array we handed in? — not by
+    coordinate. An earlier version of this test compared `track_0[0, 1]` to the
+    pose's centre, but keypoint 0 sits at `(cx - scale, cy - scale)`, so it was
+    off by `scale` and the test failed for a reason that had nothing to do with
+    tracking.
+    """
     tracker = PoseIdentityTracker(image_width=640, image_height=480)
 
-    tracker.update([_kp(cx=150, cy=100), _kp(cx=150, cy=400)])
+    a0, b0 = _kp(cx=150, cy=100), _kp(cx=150, cy=400)
+    tracker.update([a0, b0])
     # A starts higher (cy=100), B starts lower (cy=400). Interpolate A down and
     # B up over several small steps -> they cross around the midpoint.
     steps = [(100, 400), (175, 325), (250, 250), (325, 175), (400, 100)]
-    last = None
+    a_now = b_now = None
     for a_y, b_y in steps:
-        last = tracker.update([_kp(cx=150, cy=a_y), _kp(cx=150, cy=b_y)])
+        a_now, b_now = _kp(cx=150, cy=a_y), _kp(cx=150, cy=b_y)
+        last = tracker.update([a_now, b_now])
         assert last.identity_resolved
 
-    # track_0 was seeded on A (the upper one, cy=100 at t0). By the end A is at
-    # cy=400 -- identity must have followed A there, not snapped to whichever
-    # candidate is currently "upper".
-    assert last.track_0[0, 1] == pytest_approx(400)
-    assert last.track_1[0, 1] == pytest_approx(100)
+    # track_0 was seeded on A. A has travelled to cy=400 and B to cy=100 — they
+    # swapped screen slots. Identity must have followed the PERSON.
+    assert np.array_equal(last.track_0, a_now)
+    assert np.array_equal(last.track_1, b_now)
     assert tracker.assignment_swaps >= 1
 
 
@@ -145,19 +152,29 @@ def pytest_approx(value: float, tol: float = 1.0) -> float:
 
 def test_pose_tracker_hip_y_flip_does_not_swap_identity() -> None:
     """Two people barely move frame to frame, but which one has the smaller
-    box-y (the old hip_y proxy) flips. Identity must not follow that flip."""
+    box-y (the old hip_y proxy) flips. Identity must not follow that flip.
+
+    This is the 5415 case in miniature: an athlete inverts, hip_y order swaps,
+    and the old pipeline relabelled athlete1/athlete2 with no real role change.
+    """
     tracker = PoseIdentityTracker(image_width=640, image_height=480)
 
-    first = tracker.update([_kp(cx=150, cy=200), _kp(cx=450, cy=210)])
+    left0, right0 = _kp(cx=150, cy=200), _kp(cx=450, cy=210)
+    first = tracker.update([left0, right0])
     assert first.identity_resolved
-    track0_is_left = bool(np.isclose(first.track_0[0, 0], 150))
+    track0_started_left = np.array_equal(first.track_0, left0)
 
-    # Small motion only -- but B's box is now slightly "above" A's, which would
-    # flip a hip_y-sorted label even though nobody moved much.
-    second = tracker.update([_kp(cx=152, cy=203), _kp(cx=448, cy=195)])
+    # Small motion only -- but the right-hand body is now "above" the left one,
+    # which flips a hip_y sort even though nobody swapped places.
+    left1, right1 = _kp(cx=152, cy=203), _kp(cx=448, cy=195)
+    second = tracker.update([left1, right1])
     assert second.identity_resolved
-    track0_is_left_again = bool(np.isclose(second.track_0[0, 0], 152, atol=5))
-    assert track0_is_left_again == track0_is_left
+
+    # Whichever side track_0 started on, it must STILL be on.
+    if track0_started_left:
+        assert np.array_equal(second.track_0, left1)
+    else:
+        assert np.array_equal(second.track_0, right1)
 
 
 def test_pose_tracker_third_person_does_not_steal_a_track() -> None:
@@ -167,11 +184,16 @@ def test_pose_tracker_third_person_does_not_steal_a_track() -> None:
 
     # A referee enters: bigger bbox than either athlete, standing between them.
     referee = _kp(cx=300, cy=250, scale=150.0)
-    result = tracker.update([_kp(cx=158, cy=205), referee, _kp(cx=442, cy=205)])
+    athlete_a, athlete_b = _kp(cx=158, cy=205), _kp(cx=442, cy=205)
+    result = tracker.update([athlete_a, referee, athlete_b])
 
     assert result.identity_resolved
-    assert np.isclose(result.track_0[0, 0], 158, atol=10)
-    assert np.isclose(result.track_1[0, 0], 442, atol=10)
+    # By identity, not coordinate: the referee has the LARGEST bbox, so a
+    # largest-two selector would have taken it. Continuity must win over size.
+    assert np.array_equal(result.track_0, athlete_a) or np.array_equal(result.track_1, athlete_a)
+    assert np.array_equal(result.track_0, athlete_b) or np.array_equal(result.track_1, athlete_b)
+    assert not np.array_equal(result.track_0, referee)
+    assert not np.array_equal(result.track_1, referee)
     assert tracker.third_person_rejections >= 1
 
 
