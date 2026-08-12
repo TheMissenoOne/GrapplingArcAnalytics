@@ -2,9 +2,18 @@
 
 Transfers the ViCoS pose->state findings to real broadcast video without the
 bjj3 Roboflow API: per sampled frame, run the generic local pose estimator,
-order the pair by hip_y, assemble cv.pose_features.pair_to_features, and
-predict position + top/bottom role + state with the full-fit probes persisted
-by vicos_state.py --train-full.
+resolve WHO IS WHO with `role_tracking.PoseIdentityTracker`, assemble
+cv.pose_features.pair_to_features in that persistent order, and predict
+position + top/bottom role + state with the full-fit probes persisted by
+vicos_state.py --train-full.
+
+Identity is tracked, never sorted. This used to order the pair by hip_y, a
+per-frame screen-space sort with no memory: an athlete inverting swapped
+athlete1/athlete2 with no real role change. Because pair_to_features is not
+symmetric and ViCoS's athlete_idx is persistent identity rather than geometry
+(~0.47 hip-y correlation, see vicos_state.py), that corrupted the FEATURE
+VECTOR — exposing position and state, not merely the role label. A frame whose
+identity cannot be resolved is emitted as unusable rather than guessed.
 
 Instrumentation contract (research-methodology, POC Decision Vision):
   - per-head confidence (mean/median/p10/p90) on defined labels
@@ -381,6 +390,16 @@ def main() -> None:
     pose_estimator = PoseEstimator()
     stream = FrameStream(output_size=320)
 
+    # Persistent identity, NOT a per-frame screen-space sort. The old path
+    # (`select_grappler_pair` -> largest two, ordered by hip_y) recomputed
+    # athlete1/athlete2 from scratch every frame, so an inversion swapped the
+    # labels with no real role change — and because `pair_to_features` is not
+    # symmetric and ViCoS trained on a persistent ordering, that corrupted the
+    # FEATURE VECTOR, not just the label. Dimensions come from the first frame.
+    from decision_vision.role_tracking import PoseIdentityTracker
+
+    identity_tracker: PoseIdentityTracker | None = None
+
     from decision_vision.progress import ProgressReporter
 
     reporter = ProgressReporter(
@@ -411,8 +430,15 @@ def main() -> None:
     ):
         sampled += 1
         poses = pose_estimator.estimate(frame)
-        pair = pose_estimator.select_grappler_pair(poses)
-        if pair is None:
+
+        if identity_tracker is None:
+            h, w = frame.shape[0], frame.shape[1]
+            identity_tracker = PoseIdentityTracker(image_width=w, image_height=h)
+
+        assignment = identity_tracker.update(poses)
+        if not assignment.identity_resolved:
+            # Explicit non-correspondence. Dropping the frame is strictly better
+            # than guessing: a silent track_0 swap relabels a whole run.
             rows.append(
                 {
                     "timestamp": round(timestamp, 2),
@@ -423,11 +449,12 @@ def main() -> None:
                     "state": "unknown",
                     "state_conf": 0.0,
                     "pose_pair": False,
+                    "identity_resolved": False,
                 }
             )
             continue
         pose_pair_frames += 1
-        kp0, kp1 = pair
+        kp0, kp1 = assignment.track_0, assignment.track_1
         pred = classify_pose_pair(models, classes, kp0, kp1)
         rows.append(
             {
@@ -438,6 +465,7 @@ def main() -> None:
                 "role_conf": pred["role"][1],
                 "state": pred["state"][0],
                 "state_conf": pred["state"][1],
+                "identity_resolved": True,
                 "pose_pair": True,
             }
         )
@@ -488,17 +516,32 @@ def main() -> None:
         end=end,
         sample_every=args.sample_every,
     )
+    # Identity instrumentation. Without these the rerun proves nothing: a drop in
+    # role flips could just as easily mean the tracker refused every frame.
+    resolved = sum(1 for r in rows if r.get("identity_resolved"))
+    identity_metrics = {
+        "identity_resolved_rate": round(resolved / max(1, sampled), 4),
+        "tracker_reinitializations": identity_tracker.reinitializations if identity_tracker else 0,
+        "assignment_swaps": identity_tracker.assignment_swaps if identity_tracker else 0,
+        "third_person_rejections": (
+            identity_tracker.third_person_rejections if identity_tracker else 0
+        ),
+    }
+    report["identity"] = identity_metrics
     (args.output / "report.json").write_text(
         json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )
+
     reporter.complete(
         message=f"Transfer complete: {sampled} frames, "
-        f"role_observed_rate_raw={report['role_observed_rate_raw']}",
+        f"role_observed_rate_raw={report['role_observed_rate_raw']}, "
+        f"identity_resolved_rate={identity_metrics['identity_resolved_rate']}",
         metrics={
             "pose_pair_rate": report["raw"]["pose_pair_rate"],
             "role_observed_rate": report["role_observed_rate_raw"],
             "role_flips_per_min": report["raw"]["flips_per_minute"]["role"],
             "segments": len(segments),
+            **identity_metrics,
         },
     )
     logger.info("report -> %s", args.output / "report.json")

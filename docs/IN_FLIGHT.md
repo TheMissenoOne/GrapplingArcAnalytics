@@ -9,7 +9,7 @@ Last updated: 2026-08-12.
 
 ---
 
-## 1. Persistent identity in the CV pipeline — STARTED, NOT WIRED
+## 1. Persistent identity in the CV pipeline — WIRED, NOT YET RERUN
 
 **Plan:** `docs/superpowers/plans/2026-08-12-decision-vision-identity.md`
 **Evidence:** `data/cv_decision_poc/vicos_transfer_window3/switch_audit/vision_audit.md`
@@ -29,11 +29,17 @@ and `position` are exposed too, not only `role`.
   `third_person_rejections`.
 - 4 synthetic tests **written** in `tests/poc/` (crossing, hip_y-flip-must-not-swap, third person
   rejected, dropout reinit).
-- ⚠️ **The tests have never been run.** `uv run pytest` and `uv run ruff check .` not executed
-  against them.
-- ⚠️ **`live_state.py` is NOT wired.** The integration point is still
-  `live_state.py:413-414` — `pair = pose_estimator.select_grappler_pair(poses)`.
-- ⚠️ `identity_resolved` column and the four metrics are **not emitted**.
+- Tests **run** (2026-08-12). Three were broken — two failed, and one passed while asserting
+  nothing (`False == False`), because the synthetic helper puts keypoint 0 at
+  `(cx - scale, cy - scale)` and the assertions read it as the centre. **The tracker was correct;
+  the tests were not.** Rewritten to assert IDENTITY (is this the same array we handed in?) and
+  checked with a negative control. 41 tests in `tests/poc`, ruff clean.
+- `live_state.py` **wired**: `select_grappler_pair` replaced by `PoseIdentityTracker`; an
+  unresolved frame is emitted as unusable rather than guessed; `identity_resolved` rides on every
+  row; the four metrics land in `report.json["identity"]` and in the progress metrics. The module
+  docstring said "order the pair by hip_y" — corrected, it had just become false.
+- ⚠️ **The controlled rerun has NOT happened.** Nothing here has been run against real video.
+  Every claim above is about code and synthetic tests.
 
 ### Done when
 Tests green; `live_state.py` uses the tracker; the controlled rerun of the SAME window (5292–5592,
@@ -67,11 +73,16 @@ Fixing that would touch the wrong code.
 
 ---
 
-## 3. `live_state.py` has two half-working invocations
+## 3. `live_state.py` invocation — reported, NOT reproduced
 
-`uv run python poc/decision_vision/live_state.py` dies with `ModuleNotFoundError: No module named
-'cv'` — script-mode `sys.path[0]` is the file's own directory. It works via `-m` from the repo root
-or with `PYTHONPATH` set. Pick one supported path; do not document around both.
+Reported as: `uv run python poc/decision_vision/live_state.py` dies with `ModuleNotFoundError: No
+module named 'cv'`.
+
+**Could not reproduce on 2026-08-12.** Both `-m` from the repo root and the direct script path
+import `cv` fine under `uv run`, which puts the project root on `sys.path`. Note the trap that made
+a first check worthless: `--help` exits in argparse *before* `main()` imports `cv`, so it proves
+nothing. Still worth settling on ONE documented invocation rather than leaving two, but treat the
+defect as unconfirmed until someone reproduces it.
 
 ---
 
