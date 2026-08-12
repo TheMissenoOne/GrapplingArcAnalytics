@@ -513,6 +513,47 @@ def test_group_membership_round_trips(session):
     assert roles == {prof.id: "professor", student.id: "student"}
 
 
+# ── class_sessions (alembic 0026) ────────────────────────────────────────────────
+
+
+def test_class_session_round_trips_and_links_to_user_session(session):
+    from datetime import UTC, datetime
+
+    from db.models import ClassSession, Group, Profile, UserSession
+    from db.repository import upsert_user_session
+
+    prof = Profile(id=str(uuid.uuid4()), full_name="Professor")
+    student = Profile(id=str(uuid.uuid4()), full_name="Aluno")
+    group = Group(id=str(uuid.uuid4()), owner_id=prof.id, name="Gracie Barra")
+    session.add_all([prof, student, group])
+    session.flush()
+
+    klass = ClassSession(
+        group_id=group.id,
+        created_by=prof.id,
+        title="Segunda de guarda",
+        join_token="tok-123",
+        token_expires_at=datetime(2026, 8, 12, tzinfo=UTC),
+    )
+    session.add(klass)
+    session.commit()
+
+    fetched = session.get(ClassSession, klass.id)
+    assert fetched is not None
+    assert fetched.group_id == group.id
+    assert fetched.join_token == "tok-123"
+
+    t = datetime(2026, 8, 11, tzinfo=UTC)
+    upsert_user_session(student.id, "s-class", {}, t, session)
+    session.commit()
+    row = session.get(UserSession, "s-class")
+    row.class_session_id = klass.id
+    session.commit()
+
+    row = session.get(UserSession, "s-class")
+    assert row.class_session_id == klass.id
+
+
 def test_get_user_sessions_since_includes_tombstones(session):
     from datetime import UTC, datetime
 

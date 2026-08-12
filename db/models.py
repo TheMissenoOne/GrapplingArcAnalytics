@@ -140,6 +140,11 @@ class UserSession(Base):
     # Tombstone (alembic 0019): set when the app deletes a session, so other devices'
     # incremental pull sees the deletion instead of resurrecting the row. NULL = live.
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Which class this session was stamped to via attach_to_class() (alembic 0026). NULL for
+    # sessions never linked to a class.
+    class_session_id: Mapped[str | None] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("class_sessions.id", ondelete="SET NULL")
+    )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
@@ -212,6 +217,30 @@ class GroupInvite(Base):
     )
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ClassSession(Base):
+    """A professor's live class inside a group (alembic 0026). ``join_token`` is what the
+    class QR carries — a student who scans it and already belongs to the group gets that
+    day's ``user_sessions`` row stamped with this class's id via ``attach_to_class()``. RLS
+    lives in alembic 0026."""
+
+    __tablename__ = "class_sessions"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    group_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("groups.id", ondelete="CASCADE"), nullable=False
+    )
+    created_by: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    join_token: Mapped[str | None] = mapped_column(Text, unique=True)
+    token_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (Index("idx_class_sessions_group", "group_id"),)
 
 
 class UserPerformanceSnapshot(Base):
