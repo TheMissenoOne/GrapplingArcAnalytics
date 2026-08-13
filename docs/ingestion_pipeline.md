@@ -40,8 +40,9 @@ still a valid importable module. It never invents events — that's step 3.
 ## 3. Refine pbp → events  ·  **DeepSeek**  ·  → `scripts/dumps/<event>_events.json`
 
 DeepSeek walks each dump with grep + a python bout-reader, checks labels against the technique
-library, and emits a sidecar `{ "<a_name>|<year>": [ {label,type,actor,successful?,ts} ] }`.
-Spec: **`docs/deepseek/E-refine-events.md`**. The rule that governs *which fighter* owns each node
+library, and emits an enriched sidecar `{ "<bout key>": {events, scouting_observations, timing,
+adjudication} }` (the legacy `key -> [events]` shape remains accepted).
+Spec: **`docs/PROMPT_events_sidecar.md`**. The rule that governs *which fighter* owns each node
 (guard → the guard player, not the passer) is **`docs/match_event_model.md`** (§ Actor Ownership).
 
 ## 4. Splice events into the dump  ·  **maintainer**  ·  `scripts/apply_events.py`
@@ -51,8 +52,9 @@ uv run python -m scripts.apply_events <module> transcripts/deepseek/<event>_even
 uv run python -m scripts.apply_events --check     # round-trip self-test
 ```
 
-Sets each matched bout's `events`, drops its `pbp`, normalizes `ts` "M:SS"→seconds, rewrites the
-dump. Only matched bouts lose their pbp, so a partial sidecar leaves the rest refinable.
+Sets each matched bout's events and optional scouting/timing/adjudication fields, drops its `pbp`,
+normalizes timestamp strings to video-absolute seconds, and rewrites the dump. Only matched bouts
+lose their pbp, so a partial sidecar leaves the rest refinable.
 
 ## 5. Register + import to the DB  ·  **maintainer**  ·  `scripts/reprocess_all.py`
 
@@ -118,5 +120,5 @@ uv run python -m export.site_data              # regenerate site/
 uv run python -m analysis.match_deviance       # QA: what to recheck
 ```
 
-Sub-specs: refiner = `docs/deepseek/E-refine-events.md` · event/actor model =
+Sub-specs: refiner = `docs/PROMPT_events_sidecar.md` · event/actor model =
 `docs/match_event_model.md` · public-site contract = `../GrapplingArc/CLAUDE.md`.

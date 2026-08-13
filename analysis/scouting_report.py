@@ -30,6 +30,12 @@ from pathlib import Path
 from typing import Any
 
 from analysis.names import _normalize_name, athlete_key, clean_athlete_name
+from analysis.scouting_rulesets import (
+    RulesetError,
+    load_rulesets,
+    project_adcc_events,
+    validate_target_rulesets,
+)
 from analysis.style_profile import MIN_DOSSIER_EVENTS, MIN_SEQUENCE_BOUTS, reduce_style_events
 
 ModuleLoader = Callable[[str], Any]
@@ -102,6 +108,10 @@ def load_manifest(path: Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ManifestError("manifesto deve ser um objeto JSON")
     _athletes(value)
+    try:
+        validate_target_rulesets(value, load_rulesets())
+    except RulesetError as exc:
+        raise ManifestError(str(exc)) from exc
     return value
 
 
@@ -149,6 +159,24 @@ def _bout_id(module: str, a_name: str, opponent: str, year: int) -> str:
     return f"{module}:{a_name}|{opponent}|{year}"
 
 
+def _source_context(
+    source: Mapping[str, Any],
+    override: Mapping[str, Any],
+    registry: Mapping[str, Mapping[str, Any]],
+    module: str,
+) -> tuple[str, str]:
+    ruleset_id = str(override.get("ruleset_id", source.get("ruleset_id", "other-unknown")))
+    uniform = str(override.get("uniform", source.get("uniform", "unknown")))
+    preset = registry.get(ruleset_id)
+    if preset is None:
+        raise ManifestError(f"ruleset_id desconhecido em {module}: {ruleset_id}")
+    if uniform not in {"gi", "no_gi", "unknown"}:
+        raise ManifestError(f"uniform inválido em {module}: {uniform}")
+    if preset["verification_status"] == "verified" and preset["uniform"] != uniform:
+        raise ManifestError(f"uniform {uniform} incompatível com ruleset verificado {ruleset_id}")
+    return ruleset_id, uniform
+
+
 def _normalise_bout(
     module: str,
     a_name: str,
@@ -156,6 +184,9 @@ def _normalise_bout(
     raw: Mapping[str, Any],
     identity: Identity,
     issues: list[dict[str, Any]],
+    *,
+    ruleset_id: str = "other-unknown",
+    uniform: str = "unknown",
 ) -> dict[str, Any]:
     raw_opponent = str(raw.get("opponent") or "").strip()
     first, second = _participants(a_name, raw)
@@ -188,7 +219,22 @@ def _normalise_bout(
         "participants": [participant_by_key[athlete_key(first)],
                          participant_by_key[athlete_key(second)]],
         "events": events,
+        "ruleset_id": ruleset_id,
+        "uniform": uniform,
     }
+    result = {field: raw[field] for field in (
+        "winner", "method", "event", "win_type", "submission", "stage", "weight_class"
+    ) if field in raw}
+    if result:
+        bout["result"] = result
+    if isinstance(raw.get("adjudication"), dict):
+        bout["adjudication"] = raw["adjudication"]
+    if isinstance(raw.get("timing_basis"), str):
+        bout["timing_basis"] = raw["timing_basis"]
+    if isinstance(raw.get("bout_start_s"), int | float) and not isinstance(
+        raw.get("bout_start_s"), bool
+    ):
+        bout["bout_start_s"] = raw["bout_start_s"]
     if "duration_s" in raw:
         bout["duration_s"] = raw["duration_s"]
     if "overtime_start_s" in raw:
@@ -244,6 +290,7 @@ def collect_bouts(
     corpus = {str(entry["name"]): [] for entry in _athletes(manifest)}
     issues: list[dict[str, Any]] = []
     modules: dict[str, list[tuple[str, int, dict[str, Any]]]] = {}
+    registry = load_rulesets()
     for entry in _athletes(manifest):
         name = str(entry["name"])
         sources = entry.get("sources")
@@ -264,7 +311,9 @@ def collect_bouts(
                 if not hasattr(loaded, "RAW"):
                     raise ManifestError(f"{module} não declara RAW")
                 modules[module] = list(_iter_rows(loaded.RAW, module))
+            _source_context(source, {}, registry, module)
             selectors = source.get("bouts")
+            selector_context: dict[tuple[str, str, int], Mapping[str, Any]] = {}
             if selectors is None:
                 selected = []
                 for a_name, year, raw in modules[module]:
@@ -301,11 +350,13 @@ def collect_bouts(
                             f"seletor de {name} em {module} exige strings não vazias e year inteiro"
                         )
                     key = (a_value, opponent_value, year_value)
+                    _source_context(source, selector, registry, module)
                     if key not in available:
                         issues.append({"code": "selected_bout_not_found", "athlete": name,
                                        "module": module, "selector": dict(selector)})
                     else:
                         selected.append(available[key])
+                        selector_context[key] = selector
             participant_rows = 0
             for selected_a, _, selected_raw in selected:
                 selected_first, selected_second = _participants(selected_a, selected_raw)
@@ -318,7 +369,12 @@ def collect_bouts(
                 issues.append({"code": "source_no_participant_bouts", "athlete": name,
                                "module": module})
             for a_name, year, raw in selected:
-                bout = _normalise_bout(module, a_name, year, raw, identity, issues)
+                context = selector_context.get((a_name, str(raw.get("opponent") or ""), year), {})
+                ruleset_id, uniform = _source_context(source, context, registry, module)
+                bout = _normalise_bout(
+                    module, a_name, year, raw, identity, issues,
+                    ruleset_id=ruleset_id, uniform=uniform,
+                )
                 if name not in bout["participants"]:
                     issues.append({"code": "selected_bout_missing_athlete", "athlete": name,
                                    "bout_id": bout["bout_id"]})
@@ -382,6 +438,19 @@ def _weakest_grade(*facts: Mapping[str, Any]) -> str | None:
     return min((grade for grade in grades if grade is not None), key=GRADE_RANK.__getitem__)
 
 
+def _technical_comparison_scope(*facts: Mapping[str, Any]) -> dict[str, Any]:
+    rulesets = sorted({
+        str(ruleset_id)
+        for fact in facts
+        for ruleset_id in fact.get("scope", {}).get("ruleset_ids", [])
+    })
+    return {
+        "comparison_basis": "technical_cross_ruleset",
+        "uniform": "no_gi",
+        "ruleset_ids": rulesets,
+    }
+
+
 def _complete_score(bout: Mapping[str, Any]) -> bool:
     duration = bout.get("duration_s")
     score = bout.get("official_score")
@@ -424,7 +493,13 @@ def _valid_overtime(bout: Mapping[str, Any]) -> bool:
             and duration > 0 and value <= duration)
 
 
-def analyse_athlete(athlete: str, bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+def _analyse_scope(
+    athlete: str,
+    bouts: Sequence[Mapping[str, Any]],
+    *,
+    uniform: str,
+    include_observations: bool = True,
+) -> dict[str, Any]:
     """Reduce one selected corpus to raw support and safely gated facts."""
     labels: dict[str, dict[str, Any]] = {}
     section_labels: dict[str, Counter[str]] = defaultdict(Counter)
@@ -469,7 +544,7 @@ def analyse_athlete(athlete: str, bouts: Sequence[Mapping[str, Any]]) -> dict[st
                     item["bouts"].add(bout_id)
                 previous_own = event
             previous = event
-        for observation in bout.get("scouting_observations", []):
+        for observation in bout.get("scouting_observations", []) if include_observations else []:
             if not isinstance(observation, dict) or observation.get("actor") != athlete:
                 continue
             kind = str(observation.get("kind") or "")
@@ -590,6 +665,10 @@ def analyse_athlete(athlete: str, bouts: Sequence[Mapping[str, Any]]) -> dict[st
                              for key in ("true", "false", "unknown")}}
         for label, data in sorted(labels.items())
     }
+    rulesets = sorted({str(bout.get("ruleset_id", "other-unknown")) for bout in bouts})
+    scope = {"uniform": uniform, "ruleset_ids": rulesets}
+    for fact in facts:
+        fact["scope"] = scope
     return {
         "athlete": athlete,
         "facts": sorted(facts, key=lambda fact: fact["id"]),
@@ -605,6 +684,31 @@ def analyse_athlete(athlete: str, bouts: Sequence[Mapping[str, Any]]) -> dict[st
         },
         "source_bouts": sorted(str(bout["bout_id"]) for bout in bouts),
     }
+
+
+def analyse_athlete(athlete: str, bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Build no-gi primary evidence, isolated ruleset behavior, and a gi supplement."""
+    explicit_context = any("uniform" in bout for bout in bouts)
+    primary = [bout for bout in bouts if bout.get("uniform") == "no_gi"] if explicit_context else list(bouts)
+    gi = [bout for bout in bouts if bout.get("uniform") == "gi"]
+    unknown = [bout for bout in bouts if bout.get("uniform") == "unknown"]
+    profile = _analyse_scope(
+        athlete, primary, uniform="no_gi", include_observations=not explicit_context
+    )
+    ruleset_slices: dict[str, Any] = {}
+    for ruleset_id in sorted({str(bout.get("ruleset_id", "other-unknown")) for bout in primary}):
+        selected = [bout for bout in primary if str(bout.get("ruleset_id", "other-unknown")) == ruleset_id]
+        slice_profile = _analyse_scope(athlete, selected, uniform="no_gi")
+        slice_profile["facts"] = [fact for fact in slice_profile["facts"]
+                                  if fact.get("kind") == "observation"]
+        ruleset_slices[ruleset_id] = slice_profile
+    profile["ruleset_slices"] = ruleset_slices
+    profile["gi_supplement"] = _analyse_scope(athlete, gi, uniform="gi")
+    profile["excluded_unknown"] = {
+        "bout_count": len(unknown),
+        "source_bouts": sorted(str(bout["bout_id"]) for bout in unknown),
+    }
+    return profile
 
 
 def build_matchup(
@@ -634,7 +738,8 @@ def build_matchup(
                 continue
             source_bouts.update(response["source_bouts"])
             kind = "documented_response"
-            statement = (f"Contra {threat['label']}, há resposta recorrente documentada: "
+            statement = ("Transferência técnica entre regras: "
+                         f"contra {threat['label']}, há resposta recorrente documentada: "
                          f"{response['label']}.")
             own_ids = [response["id"]]
         else:
@@ -645,13 +750,15 @@ def build_matchup(
                 continue
             source_bouts.update(own_coverage["source_bouts"])
             kind = "evidence_gap"
-            statement = (f"{threat['label']} é ameaça recorrente; a resposta da atleta é uma "
+            statement = ("Transferência técnica entre regras: "
+                         f"{threat['label']} é ameaça recorrente; a resposta da atleta é uma "
                          "lacuna de evidência, não uma fraqueza demonstrada.")
             own_ids = [own_coverage["id"]]
         conclusions.append({
             "kind": kind, "statement": statement, "evidence_grade": grade,
             "opponent_fact_ids": [threat["id"]], "own_athlete_fact_ids": own_ids,
             "counterevidence": [], "source_bouts": sorted(source_bouts),
+            "scope": _technical_comparison_scope(threat, response or own_coverage),
         })
         if response:
             opponent_rate = next(
@@ -677,13 +784,15 @@ def build_matchup(
                     comparative = "superior ou igual" if opportunity else "inferior"
                     conclusions.append({
                         "kind": assessment,
-                        "statement": (f"Nos outcomes explícitos, {response['label']} tem taxa "
+                        "statement": ("Transferência técnica entre regras: nos outcomes "
+                                      f"explícitos, {response['label']} tem taxa "
                                       f"{comparative} à de {threat['label']}."),
                         "evidence_grade": rate_grade,
                         "opponent_fact_ids": [opponent_rate["id"]],
                         "own_athlete_fact_ids": [own_rate["id"]],
                         "counterevidence": [],
                         "source_bouts": sorted(rate_bouts),
+                        "scope": _technical_comparison_scope(opponent_rate, own_rate),
                     })
     return conclusions
 
@@ -697,7 +806,9 @@ def audit_manifest(
     for entry in _athletes(manifest):
         name = str(entry["name"])
         bouts = corpus[name]
-        sequence_bouts = [bout for bout in bouts if bout["events"]]
+        target_uniform = str(manifest.get("target_uniform", "no_gi"))
+        target_bouts = [bout for bout in bouts if bout.get("uniform") == target_uniform]
+        sequence_bouts = [bout for bout in target_bouts if bout["events"]]
         events = [event for bout in sequence_bouts for event in bout["events"]
                   if event.get("actor") == name]
         own_events = len(events)
@@ -724,6 +835,21 @@ def audit_manifest(
              "selected_participant_rows": source_stats.get((name, source["module"]), 0)}
             for source in entry["sources"]
         ]
+        matrix: dict[tuple[str, str], dict[str, int]] = {}
+        for bout in bouts:
+            key = (str(bout.get("ruleset_id", "other-unknown")),
+                   str(bout.get("uniform", "unknown")))
+            item = matrix.setdefault(key, {"bouts": 0, "own_events": 0})
+            item["bouts"] += 1
+            item["own_events"] += sum(event.get("actor") == name for event in bout["events"])
+        coverage_matrix = [
+            {"ruleset_id": ruleset_id, "uniform": uniform, **matrix[(ruleset_id, uniform)]}
+            for ruleset_id, uniform in sorted(matrix)
+        ]
+        excluded_uniform_counts = Counter(
+            str(bout.get("uniform", "unknown")) for bout in bouts
+            if bout.get("uniform") != target_uniform
+        )
         missing = []
         if len(sequence_bouts) < MIN_SEQUENCE_BOUTS:
             missing.append(f"{MIN_SEQUENCE_BOUTS - len(sequence_bouts)} lutas com sequência")
@@ -738,6 +864,8 @@ def audit_manifest(
                          "explicit_outcomes": explicit, "unknown_outcomes": unknown,
                          "outcome_coverage": round(explicit / own_events, 3) if own_events else 0.0,
                          "missing_fields": missing_fields, "sources": source_counts,
+                         "coverage_matrix": coverage_matrix,
+                         "excluded_uniform_counts": dict(sorted(excluded_uniform_counts.items())),
                          "missing": missing})
     return {
         "event": manifest.get("event"),
@@ -762,6 +890,19 @@ def generate_reports(
         )
     corpus, _ = collect_bouts(manifest, module_loader)
     profiles = {name: analyse_athlete(name, bouts) for name, bouts in corpus.items()}
+    registry = load_rulesets()
+    target_references = list(manifest["target_ruleset_ids"])
+    preset_ids = {reference.rpartition(":")[0] for reference in target_references}
+    projection_references = sorted(set(target_references) | {
+        f"{preset_id}:overtime" for preset_id in preset_ids
+        if "overtime" in registry[preset_id]["profiles"]
+    })
+    target_rulesets = [
+        {key: registry[reference.rpartition(":")[0]][key]
+         for key in ("id", "edition", "captured_on", "source_url")}
+        | {"profile": reference.rpartition(":")[2]}
+        for reference in target_references
+    ]
     reports = []
     for division in manifest["divisions"]:
         own = str(division["own_athlete"])
@@ -773,6 +914,19 @@ def generate_reports(
             if name == own:
                 continue
             profile = profiles[name]
+            projections = {
+                reference: [
+                    {"bout_id": bout["bout_id"], "events": project_adcc_events(
+                        bout, reference, registry
+                    )}
+                    for bout in corpus[name]
+                    if bout.get("uniform") == manifest["target_uniform"]
+                ]
+                for reference in projection_references
+            }
+            limitations = []
+            if profile["excluded_unknown"]["bout_count"]:
+                limitations.append("Lutas com uniforme desconhecido foram excluídas da análise.")
             opponents.append({
                 "athlete": name, "country": entry.get("country", ""),
                 "qualification": entry.get("qualification", ""), "facts": profile["facts"],
@@ -780,11 +934,26 @@ def generate_reports(
                 "summary": [{"statement": fact["statement"], "fact_ids": [fact["id"]],
                              "source_bouts": fact["source_bouts"]}
                             for fact in profile["facts"]],
-                "conclusions": build_matchup(profile, profiles[own]), "limitations": [],
+                "ruleset_slices": profile["ruleset_slices"],
+                "gi_supplement": profile["gi_supplement"],
+                "adcc_projection": projections,
+                "native_adjudication": [
+                    {"bout_id": bout["bout_id"], "ruleset_id": bout["ruleset_id"],
+                     **bout["adjudication"]}
+                    for bout in corpus[name] if isinstance(bout.get("adjudication"), dict)
+                ],
+                "coverage_matrix": next(
+                    item["coverage_matrix"] for item in audit["athletes"]
+                    if item["athlete"] == name
+                ),
+                "conclusions": build_matchup(profile, profiles[own]),
+                "limitations": limitations,
                 "source_bouts": profile["source_bouts"],
             })
         reports.append({"event": manifest.get("event", "ADCC 2026"),
                         "division": division["name"], "slug": division["slug"],
+                        "target_uniform": manifest["target_uniform"],
+                        "target_rulesets": target_rulesets,
                         "own_athlete": own, "own_profile": profiles[own],
                         "opponents": opponents})
     return reports
@@ -805,15 +974,46 @@ def _list(items: Sequence[Mapping[str, Any]]) -> str:
 
 
 def render_html(report: Mapping[str, Any]) -> str:
+    target_rules = report.get("target_rulesets", [])
+    target_text = ", ".join(
+        f"{item.get('id')}:{item.get('profile')} ({item.get('edition')}; snapshot {item.get('captured_on')})"
+        for item in target_rules
+    ) or "ADCC 2026 · snapshot local"
     chapters = []
     for opponent in report["opponents"]:
         limitations = [{"statement": value, "source_bouts": []}
                        for value in opponent.get("limitations", [])]
+        behavior = [fact for value in opponent.get("ruleset_slices", {}).values()
+                    for fact in value.get("facts", [])]
+        gi_facts = opponent.get("gi_supplement", {}).get("facts", [])
+        projection_items = [
+            {"statement": f"{reference}: {sum(len(bout['events']) for bout in bouts)} ações classificadas.",
+             "source_bouts": [bout["bout_id"] for bout in bouts]}
+            for reference, bouts in sorted(opponent.get("adcc_projection", {}).items())
+        ]
+        coverage_items = [
+            {"statement": (f"{item['ruleset_id']} · {item['uniform']}: "
+                           f"{item['bouts']} lutas, {item['own_events']} eventos próprios."),
+             "source_bouts": []}
+            for item in opponent.get("coverage_matrix", [])
+        ]
+        native_items = [
+            {"statement": (f"{item.get('ruleset_id')} · {item.get('kind', 'none')} · "
+                           f"{item.get('status', 'unknown')}"),
+             "source_bouts": [str(item.get("bout_id"))]}
+            for item in opponent.get("native_adjudication", [])
+        ]
         chapters.append(f"""
 <article class="opponent">
   <header><p class="eyebrow">Adversária</p><h2>{html.escape(opponent['athlete'])}</h2>
   <p>{html.escape(str(opponent.get('country', '')))} · {html.escape(str(opponent.get('qualification', '')))}</p></header>
+  <section><h3>Perfil técnico no-gi</h3>{_list(opponent.get('facts', []))}</section>
   <section><h3>Fatos observados</h3>{_list(opponent.get('facts', []))}</section>
+  <section><h3>Comportamento por ruleset</h3>{_list(behavior)}</section>
+  <section><h3>Projeção ADCC</h3>{_list(projection_items)}</section>
+  <section><h3>Suplemento gi</h3>{_list(gi_facts)}</section>
+  <section><h3>Cobertura por ruleset e uniforme</h3>{_list(coverage_items)}</section>
+  <section><h3>Adjudicação nativa</h3>{_list(native_items)}</section>
   <section><h3>Resumo factual</h3>{_list(opponent.get('summary', []))}</section>
   <section><h3>Conclusões do sistema</h3>{_list(opponent.get('conclusions', []))}</section>
   <section><h3>Limitações</h3>{_list(limitations)}</section>
@@ -842,9 +1042,11 @@ small {{ display: block; color: var(--muted); font-size: 0.78rem; }}
 </style></head><body><main>
 <section class="cover"><p class="eyebrow">Relatório local de scouting</p><h1>{html.escape(report['event'])}<br>{html.escape(report['division'])}</h1>
 <p class="dek">Visão do professor para {html.escape(report['own_athlete'])}. Afirmações separadas por nível de derivação e vinculadas às lutas-fonte.</p></section>
+<section class="opponent"><header><p class="eyebrow">Regra-alvo</p><h2>Regra-alvo</h2></header>
+<section><h3>Snapshot</h3><p>{html.escape(target_text)}</p></section></section>
 <section class="opponent"><header><p class="eyebrow">Atleta do técnico</p>
 <h2>Perfil de {html.escape(report['own_athlete'])}</h2></header>
-<section><h3>Fatos observados</h3>{_list(report['own_profile'].get('facts', []))}</section></section>
+<section><h3>Perfil técnico no-gi</h3>{_list(report['own_profile'].get('facts', []))}</section></section>
 {''.join(chapters)}</main></body></html>
 """
 

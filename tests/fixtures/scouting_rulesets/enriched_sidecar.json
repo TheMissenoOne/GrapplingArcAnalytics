@@ -1,0 +1,119 @@
+{
+  "Ana Silva|Beatriz Costa|2026": {
+    "events": [
+      {
+        "label": "Takedown",
+        "type": "takedown",
+        "actor": "Ana Silva",
+        "successful": true,
+        "ts": 642,
+        "rule_evidence": {
+          "stabilized": true,
+          "position_final": "standing"
+        }
+      },
+      {
+        "label": "Guard Pass",
+        "type": "pass",
+        "actor": "Ana Silva",
+        "successful": true,
+        "ts": 788,
+        "rule_evidence": {
+          "stabilized": true,
+          "position_final": "passing"
+        }
+      }
+    ],
+    "scouting_observations": [
+      {
+        "actor": "Beatriz Costa",
+        "kind": "setup",
+        "value": "recomposes guard after the takedown",
+        "phase": "regular",
+        "ts": 676
+      }
+    ],
+    "timing": {
+      "end_ts": 1200
+    },
+    "adjudication": {
+      "status": "verified",
+      "kind": "point_total",
+      "result": {
+        "positive": {
+          "Ana Silva": 5,
+          "Beatriz Costa": 0
+        },
+        "negative": {
+          "Ana Silva": 0,
+          "Beatriz Costa": 0
+        },
+        "advantages": {
+          "Ana Silva": 0,
+          "Beatriz Costa": 0
+        },
+        "penalties": {
+          "Ana Silva": 0,
+          "Beatriz Costa": 0
+        }
+      }
+    }
+  },
+  "Carla Mendes|Diana Rocha|2026": {
+    "events": [
+      {
+        "label": "Arm Drag",
+        "type": "transition",
+        "actor": "Carla Mendes",
+        "successful": true,
+        "ts": 915,
+        "rule_evidence": {
+          "initiated": true,
+          "out_of_submission_danger": true
+        }
+      },
+      {
+        "label": "Back Control",
+        "type": "control",
+        "actor": "Carla Mendes",
+        "ts": 1122,
+        "rule_evidence": {
+          "stabilized": true,
+          "position_final": "back_control"
+        }
+      }
+    ],
+    "scouting_observations": [
+      {
+        "actor": "Diana Rocha",
+        "kind": "initiative",
+        "value": "wins the opening exchange",
+        "phase": "round_1",
+        "ts": 638
+      }
+    ],
+    "timing": {
+      "end_ts": 1500
+    },
+    "adjudication": {
+      "status": "verified",
+      "kind": "round_cards",
+      "result": {
+        "rounds": [
+          {
+            "Diana Rocha": 10,
+            "Carla Mendes": 9
+          },
+          {
+            "Carla Mendes": 10,
+            "Diana Rocha": 9
+          },
+          {
+            "Carla Mendes": 10,
+            "Diana Rocha": 9
+          }
+        ]
+      }
+    }
+  }
+}

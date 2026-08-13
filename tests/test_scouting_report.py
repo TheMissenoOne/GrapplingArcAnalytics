@@ -55,6 +55,10 @@ def row(
 
 
 def athlete(name: str, aliases: list[str], sources: list[dict[str, object]]) -> dict[str, object]:
+    sources = [
+        {"ruleset_id": "other-unknown", "uniform": "no_gi", **source}
+        for source in sources
+    ]
     return {
         "name": name,
         "country": "Brasil",
@@ -67,6 +71,8 @@ def athlete(name: str, aliases: list[str], sources: list[dict[str, object]]) -> 
 def manifest(entries: list[dict[str, object]]) -> dict[str, object]:
     return {
         "event": "ADCC 2026",
+        "target_uniform": "no_gi",
+        "target_ruleset_ids": ["adcc-worlds-current-2026-08-13:qualifying"],
         "divisions": [
             {
                 "name": "65 kg",
@@ -412,6 +418,10 @@ def test_json_and_html_are_deterministic_and_semantically_separated() -> None:
                 "facts": [],
                 "summary": [],
                 "conclusions": [],
+                "native_adjudication": [{
+                    "bout_id": "b1", "ruleset_id": "cji-2025-women",
+                    "status": "verified", "kind": "round_cards",
+                }],
                 "limitations": ["Amostra limitada."],
                 "source_bouts": [],
             }
@@ -423,6 +433,13 @@ def test_json_and_html_are_deterministic_and_semantically_separated() -> None:
     assert html == render_html(report)
     assert "Perfil de Livia Barasine" in html
     for heading in (
+        "Regra-alvo",
+        "Perfil técnico no-gi",
+        "Comportamento por ruleset",
+        "Projeção ADCC",
+        "Suplemento gi",
+        "Cobertura por ruleset e uniforme",
+        "Adjudicação nativa",
         "Fatos observados",
         "Resumo factual",
         "Conclusões do sistema",
@@ -433,6 +450,7 @@ def test_json_and_html_are_deterministic_and_semantically_separated() -> None:
     assert "linear-gradient" not in html
     assert "#000" not in html and "#fff" not in html
     assert "@page" in html
+    assert "round_cards" in html
 
 
 def test_chrome_command_and_errors_without_launching_browser(tmp_path: Path) -> None:
@@ -660,3 +678,222 @@ def test_slug_validation_and_write_containment_precede_mkdir(tmp_path: Path) -> 
     with pytest.raises(ManifestError, match="slug"):
         write_reports([report], out)
     assert not out.exists()
+
+
+def test_source_context_and_selector_override_have_explicit_precedence() -> None:
+    source = "scripts.dumps.synthetic"
+    raw = [row("Livia", "A", 2026, [event("Sweep", "Livia")], winner="Livia", method="PTS")]
+    entry = athlete("Livia", [], [{
+        "module": source,
+        "ruleset_id": "other-unknown",
+        "uniform": "gi",
+        "bouts": [{
+            "a_name": "Livia", "opponent": "A", "year": 2026,
+            "ruleset_id": "cji-2025-women", "uniform": "no_gi",
+        }],
+    }])
+
+    corpus, issues = collect_bouts(manifest([entry]), loader({source: raw}))
+    bout = corpus["Livia"][0]
+
+    assert issues == []
+    assert bout["ruleset_id"] == "cji-2025-women"
+    assert bout["uniform"] == "no_gi"
+    assert bout["result"] == {"winner": "Livia", "method": "PTS"}
+
+
+def test_source_ruleset_exists_and_verified_uniform_must_match() -> None:
+    source = "scripts.dumps.synthetic"
+    raw = [row("Livia", "A", 2026, [event("Sweep", "Livia")])]
+    for ruleset_id, uniform, message in (
+        ("missing", "no_gi", "ruleset_id"),
+        ("cji-2025-women", "gi", "uniform"),
+    ):
+        entry = athlete("Livia", [], [{
+            "module": source, "ruleset_id": ruleset_id, "uniform": uniform,
+        }])
+        with pytest.raises(ManifestError, match=message):
+            collect_bouts(manifest([entry]), loader({source: raw}))
+
+    # Unknown presets may be specialized by explicit source evidence.
+    entry = athlete("Livia", [], [{
+        "module": source, "ruleset_id": "ibjjf-unknown", "uniform": "gi",
+    }])
+    corpus, _ = collect_bouts(manifest([entry]), loader({source: raw}))
+    assert corpus["Livia"][0]["uniform"] == "gi"
+
+
+def test_selector_ruleset_override_is_validated() -> None:
+    source = "scripts.dumps.synthetic"
+    raw = [row("Livia", "A", 2026, [event("Sweep", "Livia")])]
+    entry = athlete("Livia", [], [{
+        "module": source,
+        "bouts": [{
+            "a_name": "Livia", "opponent": "A", "year": 2026,
+            "ruleset_id": "missing", "uniform": "no_gi",
+        }],
+    }])
+    with pytest.raises(ManifestError, match="ruleset_id"):
+        collect_bouts(manifest([entry]), loader({source: raw}))
+
+    empty_entry = athlete("Livia", [], [{
+        "module": source, "ruleset_id": "missing", "uniform": "no_gi",
+    }])
+    with pytest.raises(ManifestError, match="ruleset_id"):
+        collect_bouts(manifest([empty_entry]), loader({source: []}))
+
+
+def test_missing_context_is_unknown_and_never_inferred_from_module_name() -> None:
+    source = "scripts.dumps.adcc_obviously_named"
+    raw = [row("Livia", "A", 2026, [event("Sweep", "Livia")])]
+
+    corpus, _ = collect_bouts(
+        manifest([{
+            **athlete("Livia", [], []),
+            "sources": [{"module": source}],
+        }]), loader({source: raw})
+    )
+
+    assert corpus["Livia"][0]["ruleset_id"] == "other-unknown"
+    assert corpus["Livia"][0]["uniform"] == "unknown"
+
+
+def test_gi_and_unknown_are_excluded_from_primary_readiness_and_exposed_separately() -> None:
+    bouts = []
+    for uniform, ruleset_id, prefix in (
+        ("no_gi", "cji-2025-women", "n"),
+        ("gi", "ibjjf-v6-gi", "g"),
+        ("unknown", "other-unknown", "u"),
+    ):
+        for index in range(3):
+            bouts.append({
+                "bout_id": f"{prefix}{index}", "participants": ["Livia", "A"],
+                "uniform": uniform, "ruleset_id": ruleset_id,
+                "events": [event("Sweep", "Livia", "sweep") for _ in range(5)],
+            })
+
+    profile = analyse_athlete("Livia", bouts)
+
+    assert profile["raw_support"]["bout_count"] == 3
+    assert profile["raw_support"]["own_event_count"] == 15
+    assert profile["gi_supplement"]["raw_support"]["own_event_count"] == 15
+    assert profile["excluded_unknown"]["bout_count"] == 3
+    assert all(fact["scope"]["uniform"] == "no_gi" for fact in profile["facts"])
+    assert all(fact["scope"]["uniform"] == "gi" for fact in profile["gi_supplement"]["facts"])
+
+
+def test_ruleset_behavior_is_not_aggregated_across_rulesets() -> None:
+    bouts = []
+    for ruleset_id, prefix in (("cji-2025-women", "c"), ("ibjjf-v6-no-gi", "i")):
+        for index in range(2):
+            bouts.append({
+                "bout_id": f"{prefix}{index}", "participants": ["Livia", "A"],
+                "uniform": "no_gi", "ruleset_id": ruleset_id, "events": [],
+                "scouting_observations": [{
+                    "actor": "Livia", "kind": "initiative", "value": "pressiona",
+                    "phase": "regular",
+                }] * 2,
+            })
+
+    slices = analyse_athlete("Livia", bouts)["ruleset_slices"]
+
+    assert set(slices) == {"cji-2025-women", "ibjjf-v6-no-gi"}
+    assert all(item["facts"][0]["count"] == 4 for item in slices.values())
+
+
+def test_audit_has_ruleset_uniform_matrix_and_nogi_only_readiness() -> None:
+    source = "scripts.dumps.synthetic"
+    raw = [row("Livia", "A", 2026, [event("Sweep", "Livia") for _ in range(15)])]
+    entry = athlete("Livia", [], [{"module": source, "uniform": "gi", "ruleset_id": "ibjjf-v6-gi"}])
+
+    audit = audit_manifest(manifest([entry]), loader({source: raw}))
+    athlete_audit = audit["athletes"][0]
+
+    assert athlete_audit["own_events"] == 0
+    assert athlete_audit["coverage_matrix"] == [
+        {"ruleset_id": "ibjjf-v6-gi", "uniform": "gi", "bouts": 1, "own_events": 15}
+    ]
+    assert athlete_audit["excluded_uniform_counts"] == {"gi": 1}
+
+
+def test_normalized_bout_keeps_native_adjudication_separate_from_result() -> None:
+    source = "scripts.dumps.synthetic"
+    adjudication = {
+        "status": "verified", "kind": "round_cards",
+        "result": {"rounds": [{"Livia": 10, "A": 9}]},
+    }
+    raw = [row(
+        "Livia", "A", 2026, [event("Sweep", "Livia")],
+        winner="Livia", method="decision", adjudication=adjudication,
+    )]
+
+    corpus, _ = collect_bouts(
+        manifest([athlete("Livia", [], [{
+            "module": source, "ruleset_id": "cji-2025-women", "uniform": "no_gi",
+        }])]),
+        loader({source: raw}),
+    )
+
+    assert corpus["Livia"][0]["result"] == {"winner": "Livia", "method": "decision"}
+    assert corpus["Livia"][0]["adjudication"] == adjudication
+
+
+def test_bool_bout_start_is_not_accepted_as_numeric_timing() -> None:
+    source = "scripts.dumps.synthetic"
+    raw = [row("Livia", "A", 2026, [], bout_start_s=True, timing_basis="video_absolute")]
+    corpus, _ = collect_bouts(
+        manifest([athlete("Livia", [], [{"module": source}])]), loader({source: raw})
+    )
+    assert "bout_start_s" not in corpus["Livia"][0]
+
+
+def test_cji_strategic_observation_never_drives_adcc_matchup_conclusion() -> None:
+    threat = {
+        "athlete": "Rival",
+        "facts": [{
+            "id": "cji-initiative", "kind": "observation", "observation_kind": "initiative",
+            "value": "espera", "count": 5, "evidence_grade": "sustentado",
+            "scope": {"uniform": "no_gi", "ruleset_ids": ["cji-2025-women"]},
+            "source_bouts": ["c1", "c2", "c3"],
+        }],
+    }
+    own = {
+        "athlete": "Livia",
+        "facts": [{
+            "id": "own-coverage", "kind": "evidence_coverage", "count": 15,
+            "evidence_grade": "sustentado", "source_bouts": ["a1", "a2", "a3"],
+        }],
+    }
+
+    assert build_matchup(threat, own) == []
+
+
+def test_cross_ruleset_tendency_matchup_is_explicitly_technical() -> None:
+    opponent = {
+        "athlete": "Rival",
+        "facts": [{
+            "id": "rival-tendency", "kind": "tendency", "label": "Arm Drag", "count": 5,
+            "evidence_grade": "sustentado", "source_bouts": ["c1", "c2", "c3"],
+            "scope": {"uniform": "no_gi", "ruleset_ids": ["cji-2025-women"]},
+        }],
+    }
+    own = {
+        "athlete": "Livia",
+        "facts": [{
+            "id": "own-response", "kind": "response", "condition_label": "Arm Drag",
+            "label": "Sprawl", "count": 3, "evidence_grade": "limitado",
+            "source_bouts": ["a1", "a2"],
+            "scope": {
+                "uniform": "no_gi",
+                "ruleset_ids": ["adcc-historical-unknown"],
+            },
+        }],
+    }
+
+    conclusion = build_matchup(opponent, own)[0]
+    assert conclusion["scope"] == {
+        "comparison_basis": "technical_cross_ruleset",
+        "uniform": "no_gi",
+        "ruleset_ids": ["adcc-historical-unknown", "cji-2025-women"],
+    }
+    assert "Transferência técnica entre regras" in conclusion["statement"]

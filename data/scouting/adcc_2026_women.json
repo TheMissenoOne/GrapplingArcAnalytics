@@ -1,6 +1,11 @@
 {
   "event": "ADCC 2026",
   "language": "pt-BR",
+  "target_uniform": "no_gi",
+  "target_ruleset_ids": [
+    "adcc-worlds-current-2026-08-13:qualifying",
+    "adcc-worlds-current-2026-08-13:final"
+  ],
   "divisions": [
     {
       "name": "65 kg",
@@ -19,14 +24,14 @@
           "country": "Brasil",
           "qualification": "Atual campeã",
           "aliases": ["Ana Carolina Viera", "Ana Vieira"],
-          "sources": [{"module": "scripts.dumps.cji2day1_data"}]
+          "sources": [{"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"}]
         },
         {
           "name": "Injana Goodman",
           "country": "Reino Unido",
           "qualification": "European, African & Middle East Trials",
           "aliases": [],
-          "sources": [{"module": "scripts.dumps.polaris33_data"}]
+          "sources": [{"module": "scripts.dumps.polaris33_data", "ruleset_id": "other-unknown", "uniform": "no_gi"}]
         },
         {
           "name": "Sarah Galvão",
@@ -34,8 +39,8 @@
           "qualification": "North American Trials",
           "aliases": ["Sarah Galvao"],
           "sources": [
-            {"module": "scripts.dumps.cji2day1_data"},
-            {"module": "scripts.dumps.cji2day2_data"}
+            {"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
+            {"module": "scripts.dumps.cji2day2_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"}
           ]
         },
         {
@@ -51,10 +56,10 @@
           "qualification": "Convidada",
           "aliases": ["Mo Black"],
           "sources": [
-            {"module": "scripts.dumps.adcc_trials2024_wc_data"},
-            {"module": "scripts.dumps.adcc_trials2023_ec_semis_data"},
-            {"module": "scripts.dumps.adcc_trials2023_ec_finals_data"},
-            {"module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data"}
+            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2023_ec_semis_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2023_ec_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
           ]
         },
         {
@@ -91,7 +96,7 @@
           "qualification": "Atual campeã",
           "aliases": [],
           "sources": [
-            {"module": "scripts.dumps.adcc2022_finals_data"}
+            {"module": "scripts.dumps.adcc2022_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
           ]
         },
         {
@@ -107,7 +112,7 @@
           "qualification": "East Coast Trials",
           "aliases": ["Paige Ivette Climber", "Paige Climber"],
           "sources": [
-            {"module": "scripts.dumps.ibjjf2025_top10_data"}
+            {"module": "scripts.dumps.ibjjf2025_top10_data", "ruleset_id": "ibjjf-unknown", "uniform": "unknown"}
           ]
         },
         {
@@ -122,7 +127,7 @@
           "country": "Brasil",
           "qualification": "Convidada",
           "aliases": ["Gabrielle Garcia"],
-          "sources": [{"module": "scripts.dumps.adcc2022_women_data"}]
+          "sources": [{"module": "scripts.dumps.adcc2022_women_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}]
         },
         {
           "name": "Helena Crevar",
@@ -130,12 +135,12 @@
           "qualification": "Convidada",
           "aliases": ["Helena Cravar"],
           "sources": [
-            {"module": "scripts.dumps.cji2day1_data"},
-            {"module": "scripts.dumps.cji2day2_data"},
-            {"module": "scripts.dumps.adcc_trials2024_wc_data"},
-            {"module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data"},
-            {"module": "scripts.dumps.adcc_trials2023_ec_semis_data"},
-            {"module": "scripts.dumps.adcc_trials2023_ec_finals_data"}
+            {"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
+            {"module": "scripts.dumps.cji2day2_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2023_ec_semis_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2023_ec_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
           ]
         },
         {
@@ -144,8 +149,8 @@
           "qualification": "Convidada",
           "aliases": [],
           "sources": [
-            {"module": "scripts.dumps.adcc_trials2024_wc_data"},
-            {"module": "scripts.dumps.ibjjf2023_worlds_data"}
+            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.ibjjf2023_worlds_data", "ruleset_id": "ibjjf-unknown", "uniform": "unknown"}
           ]
         }
       ]
