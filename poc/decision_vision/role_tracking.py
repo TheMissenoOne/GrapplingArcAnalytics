@@ -628,6 +628,12 @@ class PoseAssignment:
     track_1_xy: tuple[float, float] | None = None
     # True on the frame where screen order (which track is upper) flipped.
     order_flipped: bool = False
+    # True when THIS frame's assignment came from a re-seed: a shot change, a
+    # track ageing out, an implausible pair. The two slots still hold two
+    # bodies, but the binding to the PREVIOUS frame's slots is gone. A label
+    # change across this boundary says nothing about roles — it may only mean
+    # track_0 is now a different person. Consumers must not read it as evidence.
+    identity_broken: bool = False
 
 
 class PoseIdentityTracker:
@@ -696,7 +702,7 @@ class PoseIdentityTracker:
 
         if not self.tracks:
             assignments = self._cold_start(candidates) if len(candidates) >= 2 else {}
-            return self._finish(assignments)
+            return self._finish(assignments, broken=True)
 
         # The camera changed, not the scene. Geometry from the previous frame is
         # not comparable to this one, so associating across it is guessing — and
@@ -712,7 +718,7 @@ class PoseIdentityTracker:
                     self.tracks[track_id].athlete_id = athlete_id
             self.reinitializations += 1
             self.shot_change_reseeds += 1
-            return self._finish(assignments)
+            return self._finish(assignments, broken=True)
 
         active = [track for track in self.tracks.values() if track.missing <= self.max_missing]
 
@@ -767,7 +773,7 @@ class PoseIdentityTracker:
                 if athlete_id and track_id in self.tracks:
                     self.tracks[track_id].athlete_id = athlete_id
             self.reinitializations += 1
-            return self._finish(assignments)
+            return self._finish(assignments, broken=True)
 
         assignments: dict[str, tuple[np.ndarray, Box]] = {}
         for row, col in zip(row_ind, col_ind):
@@ -821,7 +827,7 @@ class PoseIdentityTracker:
                         self.tracks[track_id].athlete_id = athlete_id
                 self.reinitializations += 1
                 self.third_person_rejections += 1
-                return self._finish(assignments)
+                return self._finish(assignments, broken=True)
 
         # One track is following someone walking through the scene and the other
         # is not: that one is a bystander, not a grappler. Drop it and re-seed
@@ -830,6 +836,7 @@ class PoseIdentityTracker:
         # Only when EXACTLY one qualifies. If both look like walkers the camera
         # is panning, and re-seeding on that would be the same guess this code
         # exists to avoid.
+        rebound = False
         t0t, t1t = self.tracks.get("track_0"), self.tracks.get("track_1")
         if t0t is not None and t1t is not None:
             w0 = looks_like_a_walker(t0t.history, self.image_diag)
@@ -852,6 +859,7 @@ class PoseIdentityTracker:
                     walker.history = [(box.x, box.y)]
                     assignments[walker.track_id] = (kp, box)
                     self.walker_rejections += 1
+                    rebound = True
 
         claimed = {id(match[0]) for match in assignments.values()}
         spare = [c for c in candidates if id(c[0]) not in claimed]
@@ -866,13 +874,18 @@ class PoseIdentityTracker:
             assignments[track.track_id] = (kp, box)
             self.reinitializations += 1
 
-        return self._finish(assignments)
+        return self._finish(assignments, broken=rebound)
 
-    def _finish(self, assignments: dict[str, tuple[np.ndarray, Box]]) -> PoseAssignment:
+    def _finish(
+        self,
+        assignments: dict[str, tuple[np.ndarray, Box]],
+        *,
+        broken: bool = False,
+    ) -> PoseAssignment:
         t0 = assignments.get("track_0")
         t1 = assignments.get("track_1")
         if t0 is None or t1 is None:
-            return PoseAssignment(identity_resolved=False)
+            return PoseAssignment(identity_resolved=False, identity_broken=broken)
 
         upper_is_track_0 = t0[1].y <= t1[1].y
         flipped = (
@@ -887,6 +900,7 @@ class PoseIdentityTracker:
 
         return PoseAssignment(
             identity_resolved=True,
+            identity_broken=broken,
             track_0=t0[0],
             track_1=t1[0],
             track_0_xy=(round(t0[1].x, 1), round(t0[1].y, 1)),

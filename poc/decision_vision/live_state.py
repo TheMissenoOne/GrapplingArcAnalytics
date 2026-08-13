@@ -166,6 +166,22 @@ def smooth_timeline(
         role = str(row.get("role") or "unknown")
         role_conf = float(row.get("role_conf") or 0.0)
 
+        # The tracker re-seeded on this frame: the two slots still hold two
+        # bodies, but they are NOT bound to the previous frame's slots. A label
+        # change across that boundary carries no information about roles — it
+        # may only mean track_0 is a different person now.
+        #
+        # Both false switches in the identity rerun sat immediately after a
+        # re-seed (5352.0 after both tracks jumped together, 5378.5 after four
+        # consecutive dropped frames). Comparing the new label against a role
+        # committed under the OLD binding is comparing two different questions.
+        # Forget the commitment instead, and let the next agreeing observations
+        # establish it afresh.
+        if bool(row.get("identity_broken")):
+            committed_role = None
+            pending_role = None
+            pending_count = 0
+
         if role in ROLE_LABELS and role_conf >= role_conf_min:
             if role != committed_role:
                 if committed_role is None:
@@ -471,6 +487,7 @@ def main() -> None:
                     "state_conf": 0.0,
                     "pose_pair": False,
                     "identity_resolved": False,
+                    "identity_broken": assignment.identity_broken,
                 }
             )
             continue
@@ -487,6 +504,8 @@ def main() -> None:
                 "state": pred["state"][0],
                 "state_conf": pred["state"][1],
                 "identity_resolved": True,
+                # This frame's slots are not bound to the previous frame's.
+                "identity_broken": assignment.identity_broken,
                 # Track positions, so an identity swap can be located in time.
                 "t0_x": assignment.track_0_xy[0] if assignment.track_0_xy else None,
                 "t0_y": assignment.track_0_xy[1] if assignment.track_0_xy else None,
@@ -546,13 +565,19 @@ def main() -> None:
     # Identity instrumentation. Without these the rerun proves nothing: a drop in
     # role flips could just as easily mean the tracker refused every frame.
     resolved = sum(1 for r in rows if r.get("identity_resolved"))
+    # Every counter the tracker keeps, emitted. `tracker_reinitializations`
+    # aggregates three different causes — a shot change, a track ageing out, an
+    # implausible pair — so on its own it cannot say WHY continuity was lost.
+    # Reporting only the aggregate is the same blindness that made
+    # `assignment_swaps` useless for locating a swap in time.
+    t = identity_tracker
     identity_metrics = {
         "identity_resolved_rate": round(resolved / max(1, sampled), 4),
-        "tracker_reinitializations": identity_tracker.reinitializations if identity_tracker else 0,
-        "assignment_swaps": identity_tracker.assignment_swaps if identity_tracker else 0,
-        "third_person_rejections": (
-            identity_tracker.third_person_rejections if identity_tracker else 0
-        ),
+        "tracker_reinitializations": t.reinitializations if t else 0,
+        "assignment_swaps": t.assignment_swaps if t else 0,
+        "third_person_rejections": t.third_person_rejections if t else 0,
+        "shot_change_reseeds": getattr(t, "shot_change_reseeds", 0) if t else 0,
+        "walker_rejections": getattr(t, "walker_rejections", 0) if t else 0,
     }
     report["identity"] = identity_metrics
     (args.output / "report.json").write_text(
