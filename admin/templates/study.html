@@ -155,7 +155,8 @@
 
   <script>window.GA_CONFIG = { transcriptEndpoint: "/admin/study/analyze" };</script>
   <script>window.GA_STUDY_KNOWLEDGE = {{ knowledge | tojson }};</script>
-  <script src="/admin/static/study/study-rag.js"></script>
-  <script src="/admin/static/study/study.js"></script>
+  <!-- Query versions force browsers to pick up local admin updates. -->
+  <script src="/admin/static/study/study-rag.js?v=2"></script>
+  <script src="/admin/static/study/study.js?v=2"></script>
 </body>
 </html>
