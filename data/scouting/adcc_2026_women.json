@@ -16,31 +16,68 @@
           "name": "Livia Barasine",
           "country": "Brasil",
           "qualification": "Atleta do técnico",
-          "aliases": ["Lívia Barasine"],
+          "aliases": [
+            "Lívia Barasine"
+          ],
           "sources": []
         },
         {
           "name": "Ana Carolina Vieira",
           "country": "Brasil",
           "qualification": "Atual campeã",
-          "aliases": ["Ana Carolina Viera", "Ana Vieira"],
-          "sources": [{"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"}]
+          "aliases": [
+            "Ana Carolina Viera",
+            "Ana Vieira"
+          ],
+          "sources": [
+            {
+              "module": "scripts.dumps.cji2day1_data",
+              "ruleset_id": "cji-2025-women",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.yara_soares_data",
+              "ruleset_id": "ibjjf-unknown",
+              "uniform": "gi"
+            }
+          ]
         },
         {
           "name": "Injana Goodman",
           "country": "Reino Unido",
           "qualification": "European, African & Middle East Trials",
           "aliases": [],
-          "sources": [{"module": "scripts.dumps.polaris33_data", "ruleset_id": "other-unknown", "uniform": "no_gi"}]
+          "sources": [
+            {
+              "module": "scripts.dumps.polaris33_data",
+              "ruleset_id": "other-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.wwfi2_data",
+              "ruleset_id": "other-unknown",
+              "uniform": "no_gi"
+            }
+          ]
         },
         {
           "name": "Sarah Galvão",
           "country": "Estados Unidos",
           "qualification": "North American Trials",
-          "aliases": ["Sarah Galvao"],
+          "aliases": [
+            "Sarah Galvao"
+          ],
           "sources": [
-            {"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
-            {"module": "scripts.dumps.cji2day2_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"}
+            {
+              "module": "scripts.dumps.cji2day1_data",
+              "ruleset_id": "cji-2025-women",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.cji2day2_data",
+              "ruleset_id": "cji-2025-women",
+              "uniform": "no_gi"
+            }
           ]
         },
         {
@@ -54,12 +91,30 @@
           "name": "Morgan Black",
           "country": "Estados Unidos",
           "qualification": "Convidada",
-          "aliases": ["Mo Black"],
+          "aliases": [
+            "Mo Black"
+          ],
           "sources": [
-            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
-            {"module": "scripts.dumps.adcc_trials2023_ec_semis_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
-            {"module": "scripts.dumps.adcc_trials2023_ec_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
-            {"module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
+            {
+              "module": "scripts.dumps.adcc_trials2024_wc_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.adcc_trials2023_ec_semis_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.adcc_trials2023_ec_finals_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            }
           ]
         },
         {
@@ -73,7 +128,9 @@
           "name": "Joslyn Molina",
           "country": "Estados Unidos",
           "qualification": "Convidada",
-          "aliases": ["Jocelyn Molina"],
+          "aliases": [
+            "Jocelyn Molina"
+          ],
           "sources": []
         }
       ]
@@ -88,7 +145,13 @@
           "country": "Brasil",
           "qualification": "Atleta do técnico",
           "aliases": [],
-          "sources": []
+          "sources": [
+            {
+              "module": "scripts.dumps.yara_soares_data",
+              "ruleset_id": "ibjjf-unknown",
+              "uniform": "gi"
+            }
+          ]
         },
         {
           "name": "Rafaela Guedes",
@@ -96,23 +159,47 @@
           "qualification": "Atual campeã",
           "aliases": [],
           "sources": [
-            {"module": "scripts.dumps.adcc2022_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
+            {
+              "module": "scripts.dumps.adcc2022_finals_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.ibjjf2021_nogi_worlds_data",
+              "ruleset_id": "ibjjf-unknown",
+              "uniform": "no_gi"
+            }
           ]
         },
         {
           "name": "Anabel Lopez",
           "country": "Reino Unido",
           "qualification": "European Trials",
-          "aliases": [],
-          "sources": []
+          "aliases": [
+            "Anabel Lopez Beard"
+          ],
+          "sources": [
+            {
+              "module": "scripts.dumps.crevar_singles_data",
+              "ruleset_id": "other-unknown",
+              "uniform": "no_gi"
+            }
+          ]
         },
         {
           "name": "Paige Ivette",
           "country": "Estados Unidos",
           "qualification": "East Coast Trials",
-          "aliases": ["Paige Ivette Climber", "Paige Climber"],
+          "aliases": [
+            "Paige Ivette Climber",
+            "Paige Climber"
+          ],
           "sources": [
-            {"module": "scripts.dumps.ibjjf2025_top10_data", "ruleset_id": "ibjjf-unknown", "uniform": "unknown"}
+            {
+              "module": "scripts.dumps.ibjjf2025_top10_data",
+              "ruleset_id": "ibjjf-unknown",
+              "uniform": "unknown"
+            }
           ]
         },
         {
@@ -126,21 +213,88 @@
           "name": "Gabi Garcia",
           "country": "Brasil",
           "qualification": "Convidada",
-          "aliases": ["Gabrielle Garcia"],
-          "sources": [{"module": "scripts.dumps.adcc2022_women_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}]
+          "aliases": [
+            "Gabrielle Garcia"
+          ],
+          "sources": [
+            {
+              "module": "scripts.dumps.adcc2022_women_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.yara_soares_data",
+              "ruleset_id": "ibjjf-unknown",
+              "uniform": "gi"
+            }
+          ]
         },
         {
           "name": "Helena Crevar",
           "country": "Estados Unidos",
           "qualification": "Convidada",
-          "aliases": ["Helena Cravar"],
+          "aliases": [
+            "Helena Cravar"
+          ],
           "sources": [
-            {"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
-            {"module": "scripts.dumps.cji2day2_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
-            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
-            {"module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
-            {"module": "scripts.dumps.adcc_trials2023_ec_semis_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
-            {"module": "scripts.dumps.adcc_trials2023_ec_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
+            {
+              "module": "scripts.dumps.cji2day1_data",
+              "ruleset_id": "cji-2025-women",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.cji2day2_data",
+              "ruleset_id": "cji-2025-women",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.adcc_trials2024_wc_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.adcc_trials2023_ec_semis_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.adcc_trials2023_ec_finals_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.crevar_singles_data",
+              "ruleset_id": "other-unknown",
+              "uniform": "no_gi",
+              "bouts": [
+                {
+                  "a_name": "Helena Crevar",
+                  "opponent": "Aurelie Le Vern",
+                  "year": 2024,
+                  "ruleset_id": "adcc-historical-unknown",
+                  "uniform": "no_gi"
+                },
+                {
+                  "a_name": "Helena Crevar",
+                  "opponent": "Anabel Lopez Beard",
+                  "year": 2025,
+                  "ruleset_id": "other-unknown",
+                  "uniform": "no_gi"
+                },
+                {
+                  "a_name": "Helena Crevar",
+                  "opponent": "Ane Svendsen",
+                  "year": 2025,
+                  "ruleset_id": "ibjjf-v6-no-gi",
+                  "uniform": "no_gi"
+                }
+              ]
+            }
           ]
         },
         {
@@ -149,8 +303,16 @@
           "qualification": "Convidada",
           "aliases": [],
           "sources": [
-            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
-            {"module": "scripts.dumps.ibjjf2023_worlds_data", "ruleset_id": "ibjjf-unknown", "uniform": "unknown"}
+            {
+              "module": "scripts.dumps.adcc_trials2024_wc_data",
+              "ruleset_id": "adcc-historical-unknown",
+              "uniform": "no_gi"
+            },
+            {
+              "module": "scripts.dumps.ibjjf2023_worlds_data",
+              "ruleset_id": "ibjjf-unknown",
+              "uniform": "unknown"
+            }
           ]
         }
       ]

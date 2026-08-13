@@ -1,0 +1,156 @@
+You are refining a grappling match transcript into structured events. Return ONLY a JSON
+object. No prose, no markdown fences, no commentary.
+
+## Output shape
+
+{
+  "<bout key>": [
+    {"label": "Closed Guard", "type": "guard", "actor": "Full Name", "ts": 3185},
+    {"label": "Triangle Choke", "type": "submission", "actor": "Full Name", "ts": 3402,
+     "successful": false},
+    {"label": "Triangle Choke", "type": "submission", "actor": "Full Name", "ts": 3455,
+     "successful": true}
+  ]
+}
+
+Use EXACTLY these bout keys, verbatim, including capitalisation and spacing:
+
+  "Yara Soares|Gabi Garcia|2021"
+
+A bout with nothing reliable to report gets an empty list. Never omit a key, never invent one.
+
+## This transcript
+
+A SINGLE match filling the whole video, so the bout starts at 0:00 and ts is simply the transcript timestamp in seconds. Ignore the pre-fight build-up and the post-match interview entirely.
+
+## ts — the single most common mistake
+
+`ts` is an INTEGER number of SECONDS, counted from the START OF THE VIDEO, not from the start
+of the bout. A bout that begins at 53:05 and sees a guard pull thirty seconds in gets
+ts = 3215, not 30.
+
+The site subtracts the bout's start offset when it renders, so a bout-relative value is
+subtracted twice and every video link lands in the wrong place.
+
+Convert every timestamp you read in the transcript directly: "53:05" -> 3185, "1:12:44" -> 4364.
+
+## The transcript's shape
+
+It is a YouTube auto-caption dump: repeating triplets of a timestamp line, a duration line
+(often Portuguese — "1 minuto e 3 segundos"), then the commentary. Only the commentary carries
+events; the duration lines, "[Music]", "[Applause]", "Neste vídeo", "Pesquisar transcrição" and
+similar interface text are noise. Auto-captions also mangle names and lower-case them
+("kinska injana Goodman") — map them onto the bout key's spelling, and never invent a third
+athlete out of a mangled one.
+
+## Which lines may become events
+
+Ask of each line: is the commentator describing something that is visibly happening RIGHT NOW,
+between THESE two athletes, in THIS bout? Only then may it become an event.
+
+Include on: gets, takes, passes, sweeps, pulls, recovers, escapes, locks, finishes, taps,
+enters, lands, secures, completes.
+
+### The big one: anticipated progressions are NOT events
+
+Commentators narrate where a position COULD go far more than they narrate what happened. Every
+one of these is a description of a possibility, and none of them may produce an event:
+
+- naming the next position from the current one — "from here he can take the back",
+  "that's one step from mount", "this is where the triangle opens up"
+- announcing a setup before it lands — "he's setting up the arm drag", "he's hunting the
+  kimura grip", "the heel exposure is right there"
+- coaching the athlete — "she needs to frame", "he should stand up and disengage"
+- conditional futures — "if he posts, the triangle is there", "once she clears the knee line
+  this is a pass"
+- teaching the viewer — "closed guard is strong for leg entries"
+- tendencies and reputation — "she's known for back attacks", "he likes to invert here"
+- history — "he took her back in their last match"
+- biography, strategy talk, judging speculation, crowd noise, fatigue commentary
+- hedged observation — "it looks like she might be thinking about a kimura"
+
+Exclude on: could, might, may, should, would, probably, likely, expect, needs to, wants to,
+looking to, hunting, hunting for, setting up, working toward, thinking about, one step from,
+from here, if, once, usually, normally, tends to, known for, likes to, in their last.
+
+A position the commentator NAMES is not a position the athlete REACHED. "That's the classic
+entry into a body triangle" while she is still in back control produces a Back Control event if
+one is not already open, and nothing else.
+
+One sentence can hold both. "She's looking to take the back, and now she secures both hooks"
+yields exactly ONE event: the completed back take.
+
+When the commentary is ambiguous about whether something landed, emit nothing. A missing event
+costs a little coverage; an invented one corrupts the athlete's graph and their ELO.
+
+Emit only when a clear statement, several adjacent lines together, or an official announcement
+confirms it. Never from an isolated technique name, an unresolved pronoun, a replay of
+something you did not already catch live, or narration bleeding in from another bout.
+
+## Attempts
+
+A technique that was executed and failed keeps ITS OWN type and carries "successful": false.
+It is never re-typed as "transition".
+
+  {"label": "Guard Pass", "type": "pass", "successful": false, ...}
+  {"label": "Double Leg Takedown", "type": "takedown", "successful": false, ...}
+
+A failed guillotine is still part of that athlete's submission game. Re-typing it hides it,
+and a label whose type disagrees with the library entry is rejected on import and vanishes
+from the shared graph.
+
+Do not write "Attempt" into the label — the flag carries that.
+
+"Looking for" is not an attempt. It becomes one once materially established: one hook in is a
+Back Take attempt; both hooks in is Back Control.
+
+Use "transition" only when the action's result is genuinely no other category: arm drag, duck
+under, snap down, inversion, leg-entanglement entry, takedown defence.
+
+## actor — whose game is it
+
+The actor is the athlete whose GAME the node belongs to, not whoever is winning the exchange:
+
+  guard      -> the guard player (bottom)
+  sweep      -> the sweeper (the one who was on the bottom)
+  pass       -> the passer
+  control    -> the one holding the control
+  escape     -> the one escaping
+  takedown   -> the one taking down
+  submission -> the one attacking
+
+Use the athlete's full name exactly as it appears in the bout key. Never a nickname, never
+"the top fighter", never a pronoun. If you cannot tell which athlete it was, drop the event —
+an unresolvable actor is silently discarded on import, so a guess is worse than a gap.
+
+## type
+
+Exactly one of: guard, control, pass, sweep, takedown, submission, escape, transition
+
+## label
+
+Use one of these strings verbatim where one fits:
+
+50/50 Guard, Americana (Keylock), Anaconda Choke, Ankle Pick, Arm Drag, Arm Drag Takedown, Arm Lock, Arm Triangle Choke, Armbar, Back Control, Back Escape, Back Triangle, Base, Baseball Bat Choke, Berimbolo, Bicep Slicer, Body Lock, Body Lock Pass, Body Lock Takedown, Body Lock from Back, Body Triangle, Bow and Arrow Choke, Bridge (Upa Escape), Buggy Choke, Butterfly Guard, Butterfly Sweep, Calf Lock, Calf Slicer, Cartwheel Pass, Choi Bar, Choke, Circle Throw, Clinch, Clock Choke, Closed Guard, Collar Sleeve Guard, Collar Tie, Connection, Cop Lock, Counter Takedown, Cradle, Cross Ashi, Cross Choke, Crucifix, D'Arce Choke, DLR Leg Drag Pass, De la Riva Guard, Deep Half Guard, Double Guard Pull, Double Leg Takedown, Double Under Pass, Duck Under, Escape to Standing, Escape to Turtle, Ezekiel Choke, False Reap, Fireman's Carry, Float Pass, Flower Sweep, Folding Pass, Foot Lock, Foot Sweep, Frame, Front Headlock, Ghost Escape, Gift Wrap, Gogoplata, Granby Roll, Grip Fighting, Groin Lock, Guard Break, Guard Pass, Guard Pull, Guard Recovery, Guard Recovery Escape, Guillotine Choke, Guillotine Sweep, Half Guard, Half Guard Pass, Half Guard Smash Pass, Headquarters Pass, Heel Hook, High Crotch, Hip Bump Sweep, Hip Pin Pass, Hip Throw, Hooks In, Imanari Roll, Inside Arm Stack Pass, Inside Ashi, Inside Trip, Inverted De La Riva Guard, Inverted Half Guard, Inverted Triangle, John Wayne Sweep, K-Guard, Kimura, Kimura Grip, Kimura Trap, Knee Bar, Knee Cut Pass, Knee Shield Collapse Pass, Knee Shield Half Guard, Knee Tap, Knee on Belly, Kouchi Gari, Lasso Guard, Leg Drag Pass, Leg Drag to Straddle, Leg Entanglement, Leg Lace, Leg Lock, Leg Lock Escape, Leg Staple Pass, Level Change, Long Step Pass, Loop Choke, Low Single Leg, Lumberjack Sweep, Lung Lock, Mount, Mount Escape, Mounted Crucifix, Neck Crank, North South Choke, North South Control, North-South Pass, North-South Position, Octopus Guard, Old School Sweep, Omoplata (Shoulder Lock), Open Guard, Osoto Gari, Outside Ashi Garami, Outside Pass, Over-Under Pass, Overhook, Paper Cutter Choke, Peruvian Necktie, Posture, Pressure, Pressure Pass, Pummeling, Rear Body Lock, Rear Naked Choke, Reverse De La Riva, Roll-Through, Rolling, Rubber Guard, Russian Tie, Saddle (Inside Sankaku), Sassae Tsurikomi Ashi, Scarf Hold, Scissor Sweep, Scramble, Seatbelt Control, Seated Guard, Shin to Shin Guard, Shoot, Shoulder Lock, Shoulder Throw, Shrimp (Hip Escape), Side Control, Single Leg Takedown, Single Leg X, Single Under Pass, Smash Half Guard, Smash Pass, Snapdown, Snapdown to Front Headlock, Snatch Single Leg, Spider Guard, Stack Pass, Straight Ankle Lock, Sumi Gaeshi, Suplex, Sweep, Sweeping Hip Throw, Switch Escape, Takedown, Takedown Defense, Tani Otoshi, Technical Stand-Up, Three-Quarter Mount, Throw, Toe Hold, Top Control, Top Half Guard, Toreando Pass, Triangle Choke, Trip, Tripod Pass, Tripod Sweep, Truck, Turtle Control, Turtle Position, Twister, Two-on-One Wrist Control, Uchi Mata, Underhook, Von Flue Choke, Weave Pass, Worm Guard, Wrestle-Up, Wrist Lock, X-Guard, X-Pass, Z-Guard
+
+Prefer the short reusable label over the commentator's phrasing, and do not over-specify past
+what was actually said: "he passes the guard" is "Guard Pass", not a named variation. Normalise
+synonyms (RNC -> Rear Naked Choke, back mount -> Back Control, single-leg -> Single Leg
+Takedown). Never emit a placeholder like {"label": "Match"}.
+
+## One event per occurrence
+
+A position held across several lines is ONE event, timestamped where it was first clearly
+established. Re-emit only if it was clearly lost and then regained. A replay refines an event
+you already caught live and keeps the LIVE timestamp; if you cannot place that live moment
+confidently, emit nothing.
+
+## Before you answer, check
+
+- valid JSON, top level an object, every provided bout key present
+- every "actor" is one of that bout's two athletes, spelled as in the key
+- every "type" is from the eight allowed
+- every "ts" is an integer, in seconds, from the start of the VIDEO
+- events sorted by ts within each bout
+- no two events identical in (label, ts, type, actor, successful)
+- nothing hedged, predicted, remembered or coached made it in

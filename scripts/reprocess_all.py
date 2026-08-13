@@ -106,6 +106,13 @@ DATASETS: list[tuple[str, str | None, str]] = [
     # Own-bout compilation across several cards — no single event tag, like the other
     # career compilations above.
     ("scripts.dumps.bruno_rocha_data", None, "BrunoRocha"),
+    ("scripts.dumps.anavieira_wno_data", "WNO Championship", "AnaVieiraWNO"),
+    ("scripts.dumps.ufcbjj4_data", "UFC BJJ 4", "UFCBJJ4"),
+    ("scripts.dumps.crevar_singles_data", None, "CrevarSingles"),
+    ("scripts.dumps.ibjjf2021_nogi_worlds_data", "IBJJF No-Gi Worlds 2021", "IBJJF2021-NoGi"),
+    ("scripts.dumps.wwfi1_data", "Women Who Fight Invitational", "WWFI1"),
+    ("scripts.dumps.wwfi2_data", "Women Who Fight Invitational 2", "WWFI2"),
+    ("scripts.dumps.yara_soares_data", None, "YaraSoares"),
 ]
 
 

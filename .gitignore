@@ -86,3 +86,7 @@ data/cv_decision_poc/**
 # …but never these, regardless of extension:
 data/cv_decision_poc/model/**
 data/cv_decision_poc/model_probe/**
+
+# Raw caption transcripts — same policy as transcripts/: third-party text,
+# regenerable from the video, paired prompts in docs/prompts/ are what matter.
+docs/raw/

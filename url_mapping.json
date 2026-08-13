@@ -2934,5 +2934,310 @@
         "seconds": null
       }
     ]
+  },
+  "UFCBJJ4": {
+    "event_title": "UFC BJJ 4",
+    "video_url": "https://www.youtube.com/watch?v=dC4fc72OERQ",
+    "file": "ufcbjj4_data.py",
+    "matches": [
+      {
+        "athlete": "Aurelie Le Vern",
+        "year": 2025,
+        "opponent": "Raquel Canuto",
+        "event": "UFC BJJ 4",
+        "winner": "Aurelie Le Vern",
+        "method": "Submission (Kimura)",
+        "start": "0:00"
+      }
+    ]
+  },
+  "AnaVieiraWNO": {
+    "event_title": "WNO Championship",
+    "video_url": "https://www.youtube.com/watch?v=ZB07b_5dtRs",
+    "file": "anavieira_wno_data.py",
+    "matches": [
+      {
+        "athlete": "Ana Carolina Vieira",
+        "year": 2021,
+        "opponent": "Amanda Loewen",
+        "event": "WNO Championship",
+        "winner": "Ana Carolina Vieira",
+        "method": "Submission (Arm Triangle Choke)",
+        "start": "0:00"
+      }
+    ]
+  },
+  "CrevarSingles": {
+    "event_title": "Helena Crevar singles",
+    "file": "crevar_singles_data.py",
+    "video_url": "https://www.youtube.com/watch?v=KVW9yzKPKRg",
+    "matches": [
+      {
+        "athlete": "Helena Crevar",
+        "year": 2024,
+        "opponent": "Aurelie Le Vern",
+        "event": "ADCC 2024"
+      }
+    ]
+  },
+  "Polaris31-Crevar": {
+    "event_title": "Polaris 31",
+    "file": "crevar_singles_data.py",
+    "video_url": "https://www.youtube.com/watch?v=MDO-DPhtfng",
+    "matches": [
+      {
+        "athlete": "Helena Crevar",
+        "year": 2025,
+        "opponent": "Anabel Lopez Beard",
+        "event": "Polaris 31"
+      }
+    ]
+  },
+  "IBJJF2025-NoGi-Crevar": {
+    "event_title": "IBJJF No-Gi Worlds 2025",
+    "file": "crevar_singles_data.py",
+    "video_url": "https://www.youtube.com/watch?v=9N-qhKZOYgs",
+    "matches": [
+      {
+        "athlete": "Helena Crevar",
+        "year": 2025,
+        "opponent": "Ane Svendsen",
+        "event": "IBJJF No-Gi Worlds 2025"
+      }
+    ]
+  },
+  "IBJJF2021-NoGi-Absolute": {
+    "event_title": "IBJJF No-Gi Worlds 2021",
+    "file": "ibjjf2021_nogi_worlds_data.py",
+    "video_url": "https://www.youtube.com/watch?v=leiSMgz8QN0",
+    "matches": [
+      {
+        "athlete": "Rafaela Guedes",
+        "year": 2021,
+        "opponent": "Elisabeth Clay",
+        "event": "IBJJF No-Gi Worlds 2021"
+      }
+    ]
+  },
+  "IBJJF2021-NoGi-Heavy": {
+    "event_title": "IBJJF No-Gi Worlds 2021",
+    "file": "ibjjf2021_nogi_worlds_data.py",
+    "video_url": "https://www.youtube.com/watch?v=4dW85E5grEE",
+    "matches": [
+      {
+        "athlete": "Rafaela Guedes",
+        "year": 2021,
+        "opponent": "Maria Malyjasiak",
+        "event": "IBJJF No-Gi Worlds 2021"
+      }
+    ]
+  },
+  "WWFI1": {
+    "event_title": "Women Who Fight Invitational",
+    "file": "wwfi1_data.py",
+    "video_url": "https://www.youtube.com/watch?v=rsEYkhS9DmA",
+    "matches": [
+      {
+        "athlete": "Rosa Walsh",
+        "year": 2025,
+        "opponent": "Julia Maley",
+        "event": "Women Who Fight Invitational",
+        "seconds": 203
+      },
+      {
+        "athlete": "Nadine Tavares",
+        "year": 2025,
+        "opponent": "Selma Vic",
+        "event": "Women Who Fight Invitational",
+        "seconds": 599
+      },
+      {
+        "athlete": "Anna Castells",
+        "year": 2025,
+        "opponent": "Camilla Caniff",
+        "event": "Women Who Fight Invitational",
+        "seconds": 1076
+      },
+      {
+        "athlete": "Sula Mae Lowenthal",
+        "year": 2025,
+        "opponent": "Martina Zola",
+        "event": "Women Who Fight Invitational",
+        "seconds": 1608
+      },
+      {
+        "athlete": "Julia Maley",
+        "year": 2025,
+        "opponent": "Camilla Caniff",
+        "event": "Women Who Fight Invitational",
+        "seconds": 2186
+      },
+      {
+        "athlete": "Selma Vic",
+        "year": 2025,
+        "opponent": "Martina Zola",
+        "event": "Women Who Fight Invitational",
+        "seconds": 2432
+      },
+      {
+        "athlete": "Rosa Walsh",
+        "year": 2025,
+        "opponent": "Anna Castells",
+        "event": "Women Who Fight Invitational",
+        "seconds": 2885
+      },
+      {
+        "athlete": "Nadine Tavares",
+        "year": 2025,
+        "opponent": "Sula Mae Lowenthal",
+        "event": "Women Who Fight Invitational",
+        "seconds": 3090
+      },
+      {
+        "athlete": "Julia Maley",
+        "year": 2025,
+        "opponent": "Anna Castells",
+        "event": "Women Who Fight Invitational",
+        "seconds": 3434
+      },
+      {
+        "athlete": "Rosa Walsh",
+        "year": 2025,
+        "opponent": "Camilla Caniff",
+        "event": "Women Who Fight Invitational",
+        "seconds": 4070
+      },
+      {
+        "athlete": "Sula Mae Lowenthal",
+        "year": 2025,
+        "opponent": "Selma Vic",
+        "event": "Women Who Fight Invitational",
+        "seconds": 4519
+      },
+      {
+        "athlete": "Sula Mae Lowenthal",
+        "year": 2025,
+        "opponent": "Julia Maley",
+        "event": "Women Who Fight Invitational",
+        "seconds": 4811
+      }
+    ]
+  },
+  "WWFI2": {
+    "event_title": "Women Who Fight Invitational 2",
+    "file": "wwfi2_data.py",
+    "video_url": "https://www.youtube.com/watch?v=S_NjvIcoS-U",
+    "matches": [
+      {
+        "athlete": "Libby Geng",
+        "year": 2025,
+        "opponent": "Madison Murphy",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 188
+      },
+      {
+        "athlete": "Amanda Shirtz",
+        "year": 2025,
+        "opponent": "Zoe Lundy",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 372
+      },
+      {
+        "athlete": "Annie Senson",
+        "year": 2025,
+        "opponent": "Injana Goodman",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 825
+      },
+      {
+        "athlete": "Gabriella Ripepe",
+        "year": 2025,
+        "opponent": "Melissa Mullins",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 1309
+      },
+      {
+        "athlete": "Martina Kinska",
+        "year": 2025,
+        "opponent": "Jackie Almeida",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 1645
+      },
+      {
+        "athlete": "Melissa Mullins",
+        "year": 2025,
+        "opponent": "Amanda Shirtz",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 2267
+      },
+      {
+        "athlete": "Jackie Almeida",
+        "year": 2025,
+        "opponent": "Injana Goodman",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 2514
+      },
+      {
+        "athlete": "Zoe Lundy",
+        "year": 2025,
+        "opponent": "Gabriella Ripepe",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 2714
+      },
+      {
+        "athlete": "Injana Goodman",
+        "year": 2025,
+        "opponent": "Martina Kinska",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 4112
+      },
+      {
+        "athlete": "Melissa Mullins",
+        "year": 2025,
+        "opponent": "Zoe Lundy",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 4585
+      },
+      {
+        "athlete": "Jackie Almeida",
+        "year": 2025,
+        "opponent": "Annie Senson",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 4878
+      },
+      {
+        "athlete": "Zoe Lundy",
+        "year": 2025,
+        "opponent": "Annie Senson",
+        "event": "Women Who Fight Invitational 2",
+        "seconds": 5120
+      }
+    ]
+  },
+  "YaraWorlds2021": {
+    "event_title": "IBJJF Worlds 2021",
+    "file": "yara_soares_data.py",
+    "video_url": "https://www.youtube.com/watch?v=EvWmaELW5sU",
+    "matches": [
+      {
+        "athlete": "Yara Soares",
+        "year": 2021,
+        "opponent": "Gabi Garcia",
+        "event": "IBJJF Worlds 2021"
+      }
+    ]
+  },
+  "YaraPans2021": {
+    "event_title": "IBJJF Pans 2021",
+    "file": "yara_soares_data.py",
+    "video_url": "https://www.youtube.com/watch?v=2UE0BXwGf3o",
+    "matches": [
+      {
+        "athlete": "Yara Soares",
+        "year": 2021,
+        "opponent": "Ana Carolina Vieira",
+        "event": "IBJJF Pans 2021"
+      }
+    ]
   }
 }

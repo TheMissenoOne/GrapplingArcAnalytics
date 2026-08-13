@@ -1,0 +1,71 @@
+{
+  "Helena Crevar|Sarah Galvao|2025": {
+    "url": "https://www.youtube.com/watch?v=A7lNCSWyUnQ",
+    "events": [
+      {
+        "label": "Guard Pull",
+        "type": "guard",
+        "actor": "Helena Crevar",
+        "ts": 226
+      },
+      {
+        "label": "Guard Pass",
+        "type": "pass",
+        "actor": "Sarah Galvao",
+        "ts": 238,
+        "successful": true
+      },
+      {
+        "label": "Throw",
+        "type": "takedown",
+        "actor": "Sarah Galvao",
+        "ts": 632,
+        "successful": false
+      },
+      {
+        "label": "Sweep",
+        "type": "sweep",
+        "actor": "Sarah Galvao",
+        "ts": 672
+      },
+      {
+        "label": "Closed Guard",
+        "type": "guard",
+        "actor": "Helena Crevar",
+        "ts": 895
+      },
+      {
+        "label": "Front Headlock",
+        "type": "control",
+        "actor": "Helena Crevar",
+        "ts": 998
+      },
+      {
+        "label": "Guard Pull",
+        "type": "guard",
+        "actor": "Helena Crevar",
+        "ts": 1007
+      },
+      {
+        "label": "Stack Pass",
+        "type": "pass",
+        "actor": "Sarah Galvao",
+        "ts": 1050,
+        "successful": false
+      },
+      {
+        "label": "Guard Recovery",
+        "type": "guard",
+        "actor": "Helena Crevar",
+        "ts": 1079
+      },
+      {
+        "label": "Straight Ankle Lock",
+        "type": "submission",
+        "actor": "Helena Crevar",
+        "ts": 1127,
+        "successful": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "Rafaela Guedes|Elisabeth Clay|2021": {
+    "events": [
+      {
+        "label": "Guard Pull",
+        "type": "guard",
+        "actor": "Elisabeth Clay",
+        "ts": 9
+      },
+      {
+        "label": "Closed Guard",
+        "type": "guard",
+        "actor": "Elisabeth Clay",
+        "ts": 124
+      },
+      {
+        "label": "Guard Pass",
+        "type": "pass",
+        "actor": "Rafaela Guedes",
+        "ts": 186,
+        "successful": true
+      },
+      {
+        "label": "Half Guard",
+        "type": "guard",
+        "actor": "Elisabeth Clay",
+        "ts": 236
+      },
+      {
+        "label": "Closed Guard",
+        "type": "guard",
+        "actor": "Elisabeth Clay",
+        "ts": 253
+      },
+      {
+        "label": "Guard Recovery",
+        "type": "guard",
+        "actor": "Elisabeth Clay",
+        "ts": 340
+      },
+      {
+        "label": "Guard Pass",
+        "type": "pass",
+        "actor": "Rafaela Guedes",
+        "ts": 567,
+        "successful": false
+      },
+      {
+        "label": "Guard Pass",
+        "type": "pass",
+        "actor": "Rafaela Guedes",
+        "ts": 597,
+        "successful": false
+      }
+    ],
+    "scouting_observations": [],
+    "timing": {
+      "end_ts": 615
+    },
+    "adjudication": {
+      "status": "unknown",
+      "kind": "none"
+    }
+  },
+  "Rafaela Guedes|Maria Malyjasiak|2021": {
+    "events": [
+      {
+        "label": "Z-Guard",
+        "type": "guard",
+        "actor": "Maria Malyjasiak",
+        "ts": 162
+      },
+      {
+        "label": "Guard Pass",
+        "type": "pass",
+        "actor": "Rafaela Guedes",
+        "ts": 350,
+        "successful": false
+      },
+      {
+        "label": "Guard Recovery",
+        "type": "guard",
+        "actor": "Maria Malyjasiak",
+        "ts": 358
+      },
+      {
+        "label": "Closed Guard",
+        "type": "guard",
+        "actor": "Maria Malyjasiak",
+        "ts": 434
+      },
+      {
+        "label": "Wrist Lock",
+        "type": "submission",
+        "actor": "Rafaela Guedes",
+        "ts": 484,
+        "successful": false
+      }
+    ],
+    "scouting_observations": [],
+    "timing": {
+      "end_ts": 652
+    },
+    "adjudication": {
+      "status": "unknown",
+      "kind": "none"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "Aurelie Le Vern|Raquel Canuto|2025": {
+    "events": [
+      {
+        "label": "Inverted Triangle",
+        "type": "submission",
+        "actor": "Aurelie Le Vern",
+        "ts": 227,
+        "successful": false
+      },
+      {
+        "label": "Kimura",
+        "type": "submission",
+        "actor": "Aurelie Le Vern",
+        "ts": 237,
+        "successful": true
+      }
+    ],
+    "scouting_observations": [],
+    "timing": {
+      "end_ts": 298
+    },
+    "adjudication": {
+      "status": "unknown",
+      "kind": "none"
+    }
+  }
+}

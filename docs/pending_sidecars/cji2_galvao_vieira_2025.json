@@ -1,0 +1,80 @@
+{
+  "Sarah Galvao|Ana Carolina Vieira|2025": {
+    "url": "https://www.youtube.com/watch?v=BAdnqfWqB-o",
+    "events": [
+      {
+        "label": "Guard Pass",
+        "type": "pass",
+        "actor": "Ana Carolina Vieira",
+        "ts": 268,
+        "successful": true
+      },
+      {
+        "label": "Front Headlock",
+        "type": "control",
+        "actor": "Ana Carolina Vieira",
+        "ts": 300
+      },
+      {
+        "label": "Sweep",
+        "type": "sweep",
+        "actor": "Sarah Galvao",
+        "ts": 445,
+        "successful": true
+      },
+      {
+        "label": "Throw",
+        "type": "takedown",
+        "actor": "Sarah Galvao",
+        "ts": 684,
+        "successful": true
+      },
+      {
+        "label": "Back Triangle",
+        "type": "submission",
+        "actor": "Sarah Galvao",
+        "ts": 717,
+        "successful": false
+      },
+      {
+        "label": "Closed Guard",
+        "type": "guard",
+        "actor": "Sarah Galvao",
+        "ts": 885
+      },
+      {
+        "label": "Escape to Standing",
+        "type": "escape",
+        "actor": "Sarah Galvao",
+        "ts": 994
+      },
+      {
+        "label": "Double Leg Takedown",
+        "type": "takedown",
+        "actor": "Sarah Galvao",
+        "ts": 1007,
+        "successful": true
+      },
+      {
+        "label": "Straight Ankle Lock",
+        "type": "submission",
+        "actor": "Ana Carolina Vieira",
+        "ts": 1103,
+        "successful": false
+      },
+      {
+        "label": "Leg Drag Pass",
+        "type": "pass",
+        "actor": "Sarah Galvao",
+        "ts": 1145,
+        "successful": true
+      },
+      {
+        "label": "Side Control",
+        "type": "control",
+        "actor": "Sarah Galvao",
+        "ts": 1169
+      }
+    ]
+  }
+}

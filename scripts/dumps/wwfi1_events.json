@@ -1,0 +1,497 @@
+{
+  "Rosa Walsh|Julia Maley|2025": [
+    {
+      "label": "Guard Pull",
+      "type": "transition",
+      "actor": "Julia Maley",
+      "ts": 336
+    },
+    {
+      "label": "Deep Half Guard",
+      "type": "guard",
+      "actor": "Julia Maley",
+      "ts": 444
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Julia Maley",
+      "ts": 527,
+      "successful": true
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Julia Maley",
+      "ts": 534
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Julia Maley",
+      "ts": 534,
+      "successful": true
+    }
+  ],
+  "Nadine Tavares|Selma Vic|2025": [
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Selma Vic",
+      "ts": 638,
+      "successful": false
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Nadine Tavares",
+      "ts": 661,
+      "successful": true
+    },
+    {
+      "label": "Wrist Lock",
+      "type": "submission",
+      "actor": "Selma Vic",
+      "ts": 830,
+      "successful": false
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Selma Vic",
+      "ts": 838,
+      "successful": false
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Nadine Tavares",
+      "ts": 946,
+      "successful": true
+    },
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Selma Vic",
+      "ts": 958,
+      "successful": false
+    },
+    {
+      "label": "Takedown Defense",
+      "type": "transition",
+      "actor": "Nadine Tavares",
+      "ts": 977
+    }
+  ],
+  "Anna Castells|Camilla Caniff|2025": [
+    {
+      "label": "Two-on-One Wrist Control",
+      "type": "control",
+      "actor": "Anna Castells",
+      "ts": 1098
+    },
+    {
+      "label": "Takedown",
+      "type": "takedown",
+      "actor": "Camilla Caniff",
+      "ts": 1330,
+      "successful": true
+    },
+    {
+      "label": "Front Headlock",
+      "type": "control",
+      "actor": "Camilla Caniff",
+      "ts": 1330
+    },
+    {
+      "label": "Escape to Standing",
+      "type": "escape",
+      "actor": "Anna Castells",
+      "ts": 1339
+    },
+    {
+      "label": "Guillotine Sweep",
+      "type": "sweep",
+      "actor": "Camilla Caniff",
+      "ts": 1391,
+      "successful": true
+    },
+    {
+      "label": "Side Control",
+      "type": "control",
+      "actor": "Camilla Caniff",
+      "ts": 1448
+    },
+    {
+      "label": "Guard Recovery",
+      "type": "guard",
+      "actor": "Anna Castells",
+      "ts": 1463
+    }
+  ],
+  "Sula Mae Lowenthal|Martina Zola|2025": [
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1561,
+      "successful": false
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1600
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1608,
+      "successful": false
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1677,
+      "successful": true
+    },
+    {
+      "label": "Three-Quarter Mount",
+      "type": "control",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1684
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1732
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1741
+    },
+    {
+      "label": "Americana (Keylock)",
+      "type": "submission",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1849,
+      "successful": false
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 1866,
+      "successful": true
+    }
+  ],
+  "Julia Maley|Camilla Caniff|2025": [
+    {
+      "label": "Guard Pull",
+      "type": "transition",
+      "actor": "Camilla Caniff",
+      "ts": 2066
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Camilla Caniff",
+      "ts": 2073
+    },
+    {
+      "label": "Guard Pass",
+      "type": "pass",
+      "actor": "Julia Maley",
+      "ts": 2302,
+      "successful": true
+    },
+    {
+      "label": "Guard Recovery",
+      "type": "guard",
+      "actor": "Camilla Caniff",
+      "ts": 2311
+    },
+    {
+      "label": "Kimura",
+      "type": "submission",
+      "actor": "Camilla Caniff",
+      "ts": 2364,
+      "successful": false
+    }
+  ],
+  "Selma Vic|Martina Zola|2025": [
+    {
+      "label": "Double Leg Takedown",
+      "type": "takedown",
+      "actor": "Selma Vic",
+      "ts": 2553,
+      "successful": true
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Martina Zola",
+      "ts": 2604
+    },
+    {
+      "label": "Three-Quarter Mount",
+      "type": "control",
+      "actor": "Selma Vic",
+      "ts": 2760
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Selma Vic",
+      "ts": 2769
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Selma Vic",
+      "ts": 2794
+    }
+  ],
+  "Rosa Walsh|Anna Castells|2025": [
+    {
+      "label": "Single Leg Takedown",
+      "type": "takedown",
+      "actor": "Rosa Walsh",
+      "ts": 2913,
+      "successful": true
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Anna Castells",
+      "ts": 2938
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Anna Castells",
+      "ts": 2945
+    },
+    {
+      "label": "Rubber Guard",
+      "type": "guard",
+      "actor": "Anna Castells",
+      "ts": 2945
+    },
+    {
+      "label": "Arm Drag",
+      "type": "takedown",
+      "actor": "Anna Castells",
+      "ts": 3010
+    },
+    {
+      "label": "De la Riva Guard",
+      "type": "guard",
+      "actor": "Anna Castells",
+      "ts": 3022
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Rosa Walsh",
+      "ts": 3029,
+      "successful": true
+    }
+  ],
+  "Nadine Tavares|Sula Mae Lowenthal|2025": [
+    {
+      "label": "Seatbelt Control",
+      "type": "control",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 3288
+    },
+    {
+      "label": "Hooks In",
+      "type": "control",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 3288
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 3288
+    },
+    {
+      "label": "Choke",
+      "type": "submission",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 3305,
+      "successful": true
+    }
+  ],
+  "Julia Maley|Anna Castells|2025": [
+    {
+      "label": "Takedown",
+      "type": "takedown",
+      "actor": "Julia Maley",
+      "ts": 3540,
+      "successful": true
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Anna Castells",
+      "ts": 3610
+    },
+    {
+      "label": "Guard Pass",
+      "type": "pass",
+      "actor": "Julia Maley",
+      "ts": 3650,
+      "successful": false
+    },
+    {
+      "label": "Guard Recovery",
+      "type": "guard",
+      "actor": "Anna Castells",
+      "ts": 3667
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Anna Castells",
+      "ts": 3667
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Anna Castells",
+      "ts": 3674,
+      "successful": false
+    },
+    {
+      "label": "Guard Pass",
+      "type": "pass",
+      "actor": "Julia Maley",
+      "ts": 3752,
+      "successful": true
+    },
+    {
+      "label": "Stack Pass",
+      "type": "pass",
+      "actor": "Anna Castells",
+      "ts": 3794,
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Julia Maley",
+      "ts": 3803,
+      "successful": true
+    }
+  ],
+  "Rosa Walsh|Camilla Caniff|2025": [
+    {
+      "label": "Guard Pull",
+      "type": "transition",
+      "actor": "Camilla Caniff",
+      "ts": 4096
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Camilla Caniff",
+      "ts": 4096
+    },
+    {
+      "label": "Deep Half Guard",
+      "type": "guard",
+      "actor": "Camilla Caniff",
+      "ts": 4154
+    },
+    {
+      "label": "Wrestle-Up",
+      "type": "transition",
+      "actor": "Camilla Caniff",
+      "ts": 4319
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Camilla Caniff",
+      "ts": 4327,
+      "successful": true
+    }
+  ],
+  "Sula Mae Lowenthal|Selma Vic|2025": [
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Selma Vic",
+      "ts": 4587
+    },
+    {
+      "label": "Arm Lock",
+      "type": "submission",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 4602,
+      "successful": false
+    },
+    {
+      "label": "Triangle Choke",
+      "type": "submission",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 4679,
+      "successful": false
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 4688,
+      "successful": true
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 4746,
+      "successful": true
+    }
+  ],
+  "Sula Mae Lowenthal|Julia Maley|2025": [
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 4947
+    },
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 4964
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 4980
+    },
+    {
+      "label": "North-South Position",
+      "type": "control",
+      "actor": "Julia Maley",
+      "ts": 4995
+    },
+    {
+      "label": "Shoulder Lock",
+      "type": "submission",
+      "actor": "Sula Mae Lowenthal",
+      "ts": 5098,
+      "successful": true
+    }
+  ]
+}

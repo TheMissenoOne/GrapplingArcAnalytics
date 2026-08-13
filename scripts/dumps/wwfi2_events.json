@@ -1,0 +1,380 @@
+{
+  "Libby Geng|Madison Murphy|2025": [
+    {
+      "label": "Guard Pass",
+      "type": "pass",
+      "actor": "Libby Geng",
+      "ts": 233,
+      "successful": true
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Libby Geng",
+      "ts": 249,
+      "successful": true
+    }
+  ],
+  "Amanda Shirtz|Zoe Lundy|2025": [
+    {
+      "label": "Half Guard",
+      "type": "guard",
+      "actor": "Zoe Lundy",
+      "ts": 507
+    },
+    {
+      "label": "Guard Recovery",
+      "type": "guard",
+      "actor": "Zoe Lundy",
+      "ts": 614
+    },
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Amanda Shirtz",
+      "ts": 747,
+      "successful": false
+    }
+  ],
+  "Annie Senson|Injana Goodman|2025": [
+    {
+      "label": "50/50 Guard",
+      "type": "guard",
+      "actor": "Annie Senson",
+      "ts": 990
+    },
+    {
+      "label": "Seated Guard",
+      "type": "guard",
+      "actor": "Annie Senson",
+      "ts": 1018
+    },
+    {
+      "label": "Inversion",
+      "type": "transition",
+      "actor": "Annie Senson",
+      "ts": 1092
+    },
+    {
+      "label": "Guard Recovery",
+      "type": "guard",
+      "actor": "Annie Senson",
+      "ts": 1122
+    },
+    {
+      "label": "Single Leg X",
+      "type": "guard",
+      "actor": "Annie Senson",
+      "ts": 1131
+    },
+    {
+      "label": "50/50 Guard",
+      "type": "guard",
+      "actor": "Annie Senson",
+      "ts": 1141
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Annie Senson",
+      "ts": 1158,
+      "successful": true
+    },
+    {
+      "label": "Guard Pull",
+      "type": "transition",
+      "actor": "Annie Senson",
+      "ts": 1216
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Annie Senson",
+      "ts": 1216,
+      "successful": true
+    }
+  ],
+  "Gabriella|Melissa Mullins|2025": [
+    {
+      "label": "Heel Hook",
+      "type": "submission",
+      "actor": "Gabriella",
+      "ts": 1495,
+      "successful": false
+    },
+    {
+      "label": "Guard Pass",
+      "type": "pass",
+      "actor": "Melissa Mullins",
+      "ts": 1509,
+      "successful": true
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Melissa Mullins",
+      "ts": 1509
+    },
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Melissa Mullins",
+      "ts": 1555
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Melissa Mullins",
+      "ts": 1572,
+      "successful": true
+    }
+  ],
+  "Martina Kinska|Jackie Almeida|2025": [
+    {
+      "label": "Arm Lock",
+      "type": "submission",
+      "actor": "Martina Kinska",
+      "ts": 1654,
+      "successful": false
+    },
+    {
+      "label": "Leg Lock",
+      "type": "submission",
+      "actor": "Martina Kinska",
+      "ts": 1661,
+      "successful": false
+    },
+    {
+      "label": "Knee Bar",
+      "type": "submission",
+      "actor": "Martina Kinska",
+      "ts": 1684,
+      "successful": false
+    },
+    {
+      "label": "Inversion",
+      "type": "transition",
+      "actor": "Martina Kinska",
+      "ts": 1748
+    },
+    {
+      "label": "Guard Recovery",
+      "type": "guard",
+      "actor": "Martina Kinska",
+      "ts": 1748
+    },
+    {
+      "label": "Arm Lock",
+      "type": "submission",
+      "actor": "Martina Kinska",
+      "ts": 1756,
+      "successful": false
+    },
+    {
+      "label": "Leg Lock",
+      "type": "submission",
+      "actor": "Martina Kinska",
+      "ts": 1799,
+      "successful": false
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Martina Kinska",
+      "ts": 1888,
+      "successful": true
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Jackie Almeida",
+      "ts": 1928,
+      "successful": true
+    },
+    {
+      "label": "Arm Lock",
+      "type": "submission",
+      "actor": "Martina Kinska",
+      "ts": 1937,
+      "successful": false
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Jackie Almeida",
+      "ts": 2023,
+      "successful": true
+    }
+  ],
+  "Melissa Mullins|Amanda Shirtz|2025": [
+    {
+      "label": "Takedown",
+      "type": "takedown",
+      "actor": "Amanda Shirtz",
+      "ts": 2291,
+      "successful": true
+    },
+    {
+      "label": "Takedown",
+      "type": "takedown",
+      "actor": "Amanda Shirtz",
+      "ts": 2328,
+      "successful": true
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Amanda Shirtz",
+      "ts": 2328
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Amanda Shirtz",
+      "ts": 2421
+    },
+    {
+      "label": "Armbar",
+      "type": "submission",
+      "actor": "Amanda Shirtz",
+      "ts": 2443,
+      "successful": true
+    }
+  ],
+  "Jackie Almeida|Injana Goodman|2025": [
+    {
+      "label": "Takedown",
+      "type": "takedown",
+      "actor": "Injana Goodman",
+      "ts": 2551,
+      "successful": true
+    },
+    {
+      "label": "Side Control",
+      "type": "control",
+      "actor": "Injana Goodman",
+      "ts": 2584
+    },
+    {
+      "label": "Guard Pass",
+      "type": "pass",
+      "actor": "Injana Goodman",
+      "ts": 2609,
+      "successful": true
+    },
+    {
+      "label": "Guard Recovery",
+      "type": "guard",
+      "actor": "Jackie Almeida",
+      "ts": 2643
+    },
+    {
+      "label": "Choke",
+      "type": "submission",
+      "actor": "Injana Goodman",
+      "ts": 2651,
+      "successful": true
+    }
+  ],
+  "Zoe Lundy|Gabriella|2025": [
+    {
+      "label": "De la Riva Guard",
+      "type": "guard",
+      "actor": "Zoe Lundy",
+      "ts": 2814
+    },
+    {
+      "label": "Leg Lock",
+      "type": "submission",
+      "actor": "Gabriella",
+      "ts": 2825,
+      "successful": false
+    },
+    {
+      "label": "Leg Lock",
+      "type": "submission",
+      "actor": "Gabriella",
+      "ts": 2897,
+      "successful": false
+    },
+    {
+      "label": "Berimbolo",
+      "type": "transition",
+      "actor": "Zoe Lundy",
+      "ts": 2911
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Zoe Lundy",
+      "ts": 2911,
+      "successful": true
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Zoe Lundy",
+      "ts": 2978,
+      "successful": true
+    }
+  ],
+  "Injana Goodman|Martina Kinska|2025": [
+    {
+      "label": "Guard Recovery",
+      "type": "guard",
+      "actor": "Martina Kinska",
+      "ts": 4302
+    },
+    {
+      "label": "Closed Guard",
+      "type": "guard",
+      "actor": "Martina Kinska",
+      "ts": 4473
+    },
+    {
+      "label": "Sweep",
+      "type": "sweep",
+      "actor": "Martina Kinska",
+      "ts": 4511,
+      "successful": true
+    }
+  ],
+  "Melissa Mullins|Zoe Lundy|2025": [
+    {
+      "label": "Choi Bar",
+      "type": "submission",
+      "actor": "Zoe Lundy",
+      "ts": 4776,
+      "successful": true
+    }
+  ],
+  "Jackie Almeida|Annie Senson|2025": [
+    {
+      "label": "Back Control",
+      "type": "control",
+      "actor": "Annie Senson",
+      "ts": 5035
+    },
+    {
+      "label": "Body Triangle",
+      "type": "control",
+      "actor": "Annie Senson",
+      "ts": 5054
+    },
+    {
+      "label": "Rear Naked Choke",
+      "type": "submission",
+      "actor": "Annie Senson",
+      "ts": 5079,
+      "successful": true
+    }
+  ],
+  "Zoe Lundy|Annie Senson|2025": [
+    {
+      "label": "Seated Guard",
+      "type": "guard",
+      "actor": "Zoe Lundy",
+      "ts": 5408
+    }
+  ]
+}

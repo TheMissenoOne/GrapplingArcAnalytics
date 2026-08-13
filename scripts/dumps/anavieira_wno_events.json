@@ -1,0 +1,87 @@
+{
+  "Ana Carolina Vieira|Amanda Loewen|2021": [
+    {
+      "label": "Guard Pull",
+      "type": "transition",
+      "actor": "Amanda Loewen",
+      "ts": 168
+    },
+    {
+      "label": "Reverse De La Riva",
+      "type": "guard",
+      "actor": "Amanda Loewen",
+      "ts": 168
+    },
+    {
+      "label": "Guillotine Choke",
+      "type": "submission",
+      "actor": "Ana Carolina Vieira",
+      "ts": 241,
+      "successful": false
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Ana Carolina Vieira",
+      "ts": 257
+    },
+    {
+      "label": "Butterfly Guard",
+      "type": "guard",
+      "actor": "Amanda Loewen",
+      "ts": 352
+    },
+    {
+      "label": "Foot Sweep",
+      "type": "takedown",
+      "actor": "Ana Carolina Vieira",
+      "ts": 435,
+      "successful": false
+    },
+    {
+      "label": "De la Riva Guard",
+      "type": "guard",
+      "actor": "Amanda Loewen",
+      "ts": 458
+    },
+    {
+      "label": "Reverse De La Riva",
+      "type": "guard",
+      "actor": "Amanda Loewen",
+      "ts": 466
+    },
+    {
+      "label": "Knee Cut Pass",
+      "type": "pass",
+      "actor": "Ana Carolina Vieira",
+      "ts": 532,
+      "successful": true
+    },
+    {
+      "label": "Knee on Belly",
+      "type": "control",
+      "actor": "Ana Carolina Vieira",
+      "ts": 541
+    },
+    {
+      "label": "Ezekiel Choke",
+      "type": "submission",
+      "actor": "Ana Carolina Vieira",
+      "ts": 583,
+      "successful": false
+    },
+    {
+      "label": "Mount",
+      "type": "control",
+      "actor": "Ana Carolina Vieira",
+      "ts": 622
+    },
+    {
+      "label": "Arm Triangle Choke",
+      "type": "submission",
+      "actor": "Ana Carolina Vieira",
+      "ts": 687,
+      "successful": true
+    }
+  ]
+}
