@@ -9,86 +9,41 @@ Last updated: 2026-08-12.
 
 ---
 
-## 1. Persistent identity in the CV pipeline — WIRED, NOT YET RERUN
+## 1. Persistent identity — WIRED AND RERUN; gate half-passed
 
 **Plan:** `docs/superpowers/plans/2026-08-12-decision-vision-identity.md`
-**Evidence:** `data/cv_decision_poc/vicos_transfer_window3/switch_audit/vision_audit.md`
+**Audit + re-audit:** `data/cv_decision_poc/vicos_transfer_window3/switch_audit/vision_audit.md`
 
-### Why it matters
-`athlete1`/`athlete2` are a per-frame screen-space sort (`cv/pose_estimate.py:154-157`,
-`sorted(top_two, key=_hip_y)`), recomputed with no memory. They change meaning when a body inverts.
-This corrupts `pair_to_features` itself — it is not symmetric, and `vicos_state.py:261` records that
-**ViCoS `athlete_idx` is persistent identity, not geometry (~0.47 hip-y correlation)** — so `state`
-and `position` are exposed too, not only `role`.
+Five runs, kept side by side because each one is evidence of something:
 
-### Where it stopped
-- `PoseIdentityTracker` **written** in `poc/decision_vision/role_tracking.py`, beside the untouched
-  `PairIdentityTracker`. Hungarian assignment (`scipy.optimize.linear_sum_assignment`) over ALL
-  candidates, cost `0.6·bbox + 0.4·keypoint-displacement`, rejection above
-  `POSE_IDENTITY_COST_MAX = 0.5`, counters for `reinitializations`, `assignment_swaps`,
-  `third_person_rejections`.
-- 4 synthetic tests **written** in `tests/poc/` (crossing, hip_y-flip-must-not-swap, third person
-  rejected, dropout reinit).
-- Tests **run** (2026-08-12). Three were broken — two failed, and one passed while asserting
-  nothing (`False == False`), because the synthetic helper puts keypoint 0 at
-  `(cx - scale, cy - scale)` and the assertions read it as the centre. **The tracker was correct;
-  the tests were not.** Rewritten to assert IDENTITY (is this the same array we handed in?) and
-  checked with a negative control. 41 tests in `tests/poc`, ruff clean.
-- `live_state.py` **wired**: `select_grappler_pair` replaced by `PoseIdentityTracker`; an
-  unresolved frame is emitted as unusable rather than guessed; `identity_resolved` rides on every
-  row; the four metrics land in `report.json["identity"]` and in the progress metrics. The module
-  docstring said "order the pair by hip_y" — corrected, it had just become false.
-- **Rerun 1 (broken tracker)** exposed a one-way door: `missing > max_missing` removed a track from
-  `active` and only active tracks are assigned, so one brief occlusion killed identity permanently.
-  `identity_resolved_rate` 0.10. Fixed (`72bf427`) with counted re-seeding; the run is kept at
-  `data/cv_decision_poc/vicos_transfer_window3_identity/` as evidence of the defect, NOT a baseline.
-- **Rerun 2 (fixed)** → `data/cv_decision_poc/vicos_transfer_window3_identity2/`.
-  Coverage healthy: `identity_resolved_rate` **0.645** vs the old `pose_pair_rate` 0.675.
-  `tracker_reinitializations` 11, `assignment_swaps` 55.
-  ⚠️ **The gate did NOT pass.** Committed switches stayed at 4, and NONE share a timestamp with the
-  audited set:
+| run | what it shows |
+|---|---|
+| `..._identity`  | the one-way door: `identity_resolved_rate` **0.10**, switches 0 — a broken tracker that LOOKED like a triumph |
+| `..._identity2` | after the fix: coverage 0.645, but 4 switches sharing no timestamp with the audited set |
+| `..._identity3` | per-frame track positions added; located the referee capture |
+| **`..._identity4`** | **the good state.** Both true switches present (5336.0 recovered exactly, 5436.5 at +0.5s latency), all five known-bad ones gone |
+| `..._identity5` | the identity-break reset — REGRESSION, switches 4 → 14, segments 33 → 140. Reverted |
 
-  | switch | audited verdict | after |
-  |---|---|---|
-  | 5313.5 | **false** (corr 29%/0%) | gone ✓ |
-  | 5415.0 | **false** (failed sweep) | gone ✓ |
-  | 5336.0 | **true** (a2 takes over) | **gone** ✗ |
-  | 5436.0 | **true** (corr 75%/100%) | 5436.5 — same event, one sample later (latency, not loss) |
+**Gate status: half.** The question as posed — do the audited false switches disappear without
+losing the true ones — is **YES**. But precision did not improve: `identity4` is 2 true / 2 false,
+the same ratio the original `hip_y` run had. The false positives moved rather than reduced. Both
+new ones (5352.0, 5378.5) were audited from frames and are false.
 
-  New and unaudited: **5326.0**, **5368.5**, **5461.5**. The first two are recidivists — `pass2`
-  had called 5326 "weak, borderline" and 5369.5 **spurious**, and the 0.85 confidence floor had
-  removed them. Their return suggests that floor was masking identity instability rather than
-  fixing it.
+### Fixed along the way, each by measurement
+- Aged-out tracks could never return (one-way door). Re-seeding is counted, not silent.
+- Referee capture after a camera cut. **Three approaches were refuted by measurement first** —
+  contact ratio (distributions overlap), temporal straightness (fires too late), cut-by-cost (the
+  cut cost LESS than the frame before it). What worked: detect the cut in the IMAGE (grey-histogram
+  distance; cuts 0.0166–0.1597 vs 0.0044 loudest normal) **and** seed from the CLOSEST pair, which
+  needs no threshold. Neither works without the other.
 
-  Trading four switches for four others is evidence of CHANGE, not of improvement. Only visual
-  inspection of the new ones — and of why 5336.0 vanished — decides.
-- **Step 7 DONE.** All five re-audited from frames in `switch_audit/frames_identity/`; verdicts and
-  evidence appended to `vision_audit.md`. Scoreboard: **before 2 true / 2 false → after 1 true (0.5s
-  late), 2 false, 1 post-bout artefact, and 1 TRUE SWITCH LOST (5336.0)**.
-  **The gate does not pass.** The tracker removed both audited false switches — what it was built to
-  do — but 5336.0 went with them, and 5326.0 / 5368.5 / 5461.5 took their place.
-
-### Next, in this order
-1. **Bout-boundary guard.** 5461.5 sits where the clock runs 00:02 → 00:00 and the athletes
-   separate. Nothing should commit a role switch after the bout ends. Cheapest, removes one outright.
-2. **Investigate 5336.0.** Losing a true switch is the only outcome strictly worse than before, and
-   the cause is unknown — today's re-seeding, a reinitialization landing there, or the probe reading
-   a correctly-ordered pair differently. Start with `identity_resolved` and the reinit count around
-   5330–5340 in `..._identity2/state_samples_raw.csv`. **Do not touch a threshold before this is
-   understood.**
-3. 5326.0 and 5368.5 are recidivists the 0.85 floor had removed. Their return is evidence that floor
-   was masking identity instability rather than fixing it.
-
-### Done when
-Tests green; `live_state.py` uses the tracker; the controlled rerun of the SAME window (5292–5592,
-600 frames, same probes, same smoothing) shows the false switches at 5313.5 and 5415 gone
-**without** losing the two visually true ones.
-
-### Blocks
-WNO and Worlds. Do not go cross-venue before this — different camera work and more people in frame
-amplify exactly this failure.
-
----
+### Open
+- 5352.0 and 5378.5 are false and **uninvestigated**. Both sit immediately after a re-seed.
+- The `identity_broken` flag rides on every row but nothing consumes it. The correct use is a
+  boundary consumers refuse to compare ACROSS — re-establishing a role after a break must still
+  require agreeing observations. **Do not** clear the committed role: that was tried and measured
+  worse.
+- Thresholds come from four cuts in ONE bout. Re-measure before another venue.
 
 ## 2. `segments.csv` hides a role switch — LOCATED, NOT FIXED
 
@@ -134,7 +89,41 @@ Promotion criteria out of POC status: see `INDEX.md`.
 
 ---
 
-## 5. Pending, lower urgency
+## 5. Frame annotation flow — foundation live, UI missing
+
+**alembic 0029 is APPLIED to production** (verified: columns, both check constraints, RLS on with
+zero policies, and anon denied — proven by inserting a row as the service role and confirming anon
+still reads `[]`, because an empty table makes `[]` ambiguous).
+
+`poc/decision_vision/prelabel_frames.py` walks the **1936 events** that carry both a
+`matches.video_url` and an `ts`, runs the full pipeline with 4s of lead-in, and writes a proposal
+into `frame_annotations`. Prediction and correction are separate columns so the record of where the
+model was wrong survives the fix; the upsert's `where status = 'pending'` means a re-run can never
+erase a human decision.
+
+**Sample of 5 matches (21 frames), measured:**
+
+| | |
+|---|---|
+| identity resolved | **86%** (better than the audited window's 65% — the lead-in works) |
+| unresolved | 14%, all tracker refusals, none from a missing frame |
+| `role` = `none` | **67%** of resolved frames |
+| agreement on comparable labels | **0 / 3** (`Mount`→takedown, `Takedown`→back, `Mount`→5050_guard) |
+
+Only 3 of 21 labels are comparable at all: the rest are TECHNIQUES (`Pass`, `Rear Naked Choke`,
+`Sweep`), and a technique is not a ViCoS position. **The review UI must say this**, or every
+reviewer will reject everything for the wrong reason — the human label is context, not ground truth.
+
+**What this means for the product:** with `role` empty two thirds of the time and position wrong on
+the few verifiable cases, this will not save annotation labour. Its value is **collecting the
+corrections** — the set that says where the model errs, which is exactly what was missing every time
+a defect was chased today. So in the UI, **correcting must be cheaper than approving**, which is the
+inverse of the usual design.
+
+Missing: the review UI in `admin/`. Also worth doing first — a query over labels that map to ViCoS
+classes would give dozens of verifiable cases and a real position-accuracy number for free.
+
+## 6. Pending, lower urgency
 
 - **Persistence-in-time** (≥N agreeing observations AND ≥X seconds) — worth adding, but **after**
   identity. Applied first it sustains the wrong identity instead of filtering a spike.

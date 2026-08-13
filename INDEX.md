@@ -84,6 +84,27 @@ Test layout: `tests/` (pytest, mirrors `pipelines/`/`export/`/`analysis/`/`db`/`
   status, don't trust as live.
 - `docs/IN_FLIGHT.md` — unfinished work, current status.
 
+## Decision Vision — still a POC, and what would change that
+
+`poc/decision_vision/` is tracked but deliberately labelled a proof of concept. It graduates to a
+first-class module only when **all** of these hold:
+
+1. **The identity gate passes.** `pose → persistent identity → role-aware state → smoothing`, proven
+   by the controlled rerun in `docs/superpowers/plans/2026-08-12-decision-vision-identity.md`: the
+   false switches at 5313.5 and 5415 gone **without** losing the two visually true ones. Not a
+   tuning target — a regression test over already-audited video.
+2. **One supported invocation.** The `python file.py` vs `-m` split resolved, not documented around.
+3. `uv run pytest` and `uv run ruff check .` green, module tests under `tests/`.
+4. **No scratch at the repo root.** `scratch_audit_frames.py` is superseded by
+   `poc/decision_vision/audit_frames.py`.
+5. **Deterministic reproduction**: one command regenerates a run from a match id and a window, and
+   the run writes its own provenance.
+6. **Contract documented** in `CLAUDE.md` — inputs, outputs, owners — because promotion makes it
+   something other code may depend on.
+
+Current state, and what is NOT settled, is in [`docs/IN_FLIGHT.md`](docs/IN_FLIGHT.md).
+
+
 ## 8. Neighbouring repositories
 
 - [GrapplingArcApp](../GrapplingArcApp/INDEX.md) — mobile client of the Supabase schema this repo
