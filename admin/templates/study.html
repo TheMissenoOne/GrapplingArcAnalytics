@@ -43,22 +43,20 @@
     <section class="sec-pad">
       <div class="wrap">
         <div class="eyebrow">Instructional Analysis</div>
-        <h1 class="h-xl" style="margin-top:14px">Turn a video into a study system.</h1>
-        <p style="color:var(--ink-2);max-width:560px;margin-top:10px">Paste a YouTube link and extract the instructional structure: techniques, positions, relationships.</p>
+        <h1 class="h-xl" style="margin-top:14px">Turn videos into a study system.</h1>
+        <p style="color:var(--ink-2);max-width:560px;margin-top:10px">Paste one YouTube URL per line. The local Python pipeline processes them in order and keeps each report separate.</p>
 
         <div class="input-card">
-          <div class="url-row">
-            <input
-              class="url-input"
-              id="videoUrl"
-              type="text"
-              placeholder="https://www.youtube.com/watch?v=..."
-              aria-label="YouTube URL"
-            />
-            <button class="primary" id="analyzeBtn">Analyze</button>
+          <div class="batch-row">
+            <textarea class="url-input batch-input" id="videoUrls" rows="5" placeholder="https://www.youtube.com/watch?v=...&#10;https://youtu.be/..." aria-label="YouTube URLs"></textarea>
+            <div class="batch-actions">
+              <button class="primary" id="analyzeBtn">Process batch</button>
+              <span class="batch-hint">One URL per line · local Python analysis</span>
+            </div>
           </div>
 
           <div class="error" id="errorBox"></div>
+          <div class="batch-queue" id="batchQueue" aria-live="polite"></div>
 
           <div class="pipeline" id="pipeline">
             <div class="steps">
@@ -68,6 +66,15 @@
               <div class="step" data-stage="rendering"><div class="n">04</div><div class="l">Ready</div></div>
             </div>
             <div class="progress"><i id="progressBar"></i></div>
+          </div>
+        </div>
+
+        <div class="reports-card">
+          <div class="reports-head"><div><div class="eyebrow">Saved locally</div><h2>Study reports</h2></div><span class="report-count" id="reportCount">{{ reports|length }}</span></div>
+          <div class="report-list" id="reportList">
+            {% for report in reports %}
+            <div class="report-row"><div><strong>{{ report.title }}</strong><span>{{ report.video_id }}</span></div><div class="report-links"><a href="/admin/study/reports/{{ report.id }}.html" target="_blank">Open HTML</a><a href="/admin/study/reports/{{ report.id }}.json" download>Download JSON</a></div></div>
+            {% else %}<p class="empty-reports">No reports yet. Process a video to create the first one.</p>{% endfor %}
           </div>
         </div>
       </div>

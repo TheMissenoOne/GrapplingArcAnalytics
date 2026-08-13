@@ -16,8 +16,11 @@ Personal use only — binds to the local dashboard, no cloud, no API keys.
 
 from __future__ import annotations
 
+import json
 import math
 import re
+import time
+from html import escape
 from pathlib import Path
 from typing import Any
 
@@ -34,10 +37,111 @@ _OEMBED = "https://www.youtube.com/oembed"
 
 _PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TECHNIQUE_LIBRARY_PATH = _PROJECT_ROOT / "data" / "processed" / "technique_library.json"
+REPORTS_DIR = _PROJECT_ROOT / "data" / "study" / "reports"
 
 
 class StudyError(Exception):
     """Friendly user-facing failure; study.js shows ``error.message`` verbatim."""
+
+
+def _report_slug(value: str) -> str:
+    slug = re.sub(r"[^a-zA-Z0-9_-]+", "-", value).strip("-_")
+    return slug[:80] or "video"
+
+
+def _report_html(payload: dict[str, Any]) -> str:
+    video = payload["video"]
+    title = escape(str(video.get("title") or "Study report"))
+    channel = escape(str(video.get("channel") or "YouTube"))
+    overview = escape(str((payload.get("summary") or {}).get("overview") or ""))
+    segments = payload.get("segments") or []
+    snippets = payload.get("snippets") or []
+    nodes = payload.get("nodes") or []
+    relationships = payload.get("relationships") or []
+    segment_html = "".join(
+        f"<article><h2>{escape(str(s.get('id') or 'Segment'))}</h2>"
+        f"<p class='time'>{float(s.get('start') or 0):.1f}s–{float(s.get('end') or 0):.1f}s</p>"
+        f"<p>{escape(str(s.get('text') or ''))}</p></article>"
+        for s in segments
+    )
+    transcript_html = "".join(
+        f"<li><a href='{escape(str(video.get('url') or ''), quote=True)}"
+        f"&t={int(float(s.get('start') or 0))}s'>"
+        f"{float(s.get('start') or 0):.1f}s</a> {escape(str(s.get('text') or ''))}</li>"
+        for s in snippets
+    )
+    node_html = "".join(
+        f"<li><strong>{escape(str(n.get('label') or n.get('id') or ''))}</strong>"
+        f" <span>{escape(str(n.get('kind') or n.get('type') or 'concept'))}</span></li>"
+        for n in nodes
+    )
+    data = escape(json.dumps(payload, ensure_ascii=False), quote=False)
+    return f"""<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title} — GrapplingArc Study</title><style>
+:root{{color-scheme:dark;--bg:#0b0b0e;--panel:#15151a;--line:#2d2d35;
+--ink:#f4f4f7;--muted:#a2a2ad;--blue:#7ea8ff}}
+*{{box-sizing:border-box}}body{{margin:0;background:var(--bg);color:var(--ink);
+font:16px/1.55 system-ui,sans-serif}}
+main{{max-width:900px;margin:0 auto;padding:48px 24px}}
+h1{{font-size:clamp(30px,6vw,56px);line-height:1.05;margin:0 0 12px}}
+h2{{font-size:20px;margin:0 0 8px}}
+h3{{font-size:15px;margin:28px 0 10px;color:var(--blue)}}
+p{{margin:8px 0;color:var(--muted)}}
+.meta{{font-family:monospace;font-size:12px}}
+article{{border-top:1px solid var(--line);padding:20px 0}}
+.time,a{{color:var(--blue)}}
+ul{{padding-left:22px;color:var(--muted)}}li{{margin:7px 0}}
+section{{margin-top:42px}}.raw{{display:none}}
+</style></head><body><main><p class="meta">GRAPPLINGARC / LOCAL STUDY REPORT</p><h1>{title}</h1>
+<p>{channel} · {len(segments)} segments · {len(snippets)} captions · {len(nodes)} concepts</p>
+<p>{overview}</p>
+<section><h3>Segments</h3>{segment_html or '<p>No segments.</p>'}</section>
+<section><h3>Concepts</h3><ul>{node_html or '<li>No concepts resolved.</li>'}</ul></section>
+<section><h3>Transcript</h3><ul>{transcript_html or '<li>No transcript.</li>'}</ul></section>
+<section><h3>Relationships</h3><p>{len(relationships)} concept relationships</p></section>
+<script type="application/json" class="raw">{data}</script></main></body></html>"""
+
+
+def save_report(payload: dict[str, Any], reports_dir: Path = REPORTS_DIR) -> dict[str, str]:
+    """Persist one completed local study payload as JSON + standalone HTML."""
+    video = payload.get("video")
+    if not isinstance(video, dict):
+        raise ValueError("payload.video must be an object")
+    video_id = str(video.get("id") or "").strip()
+    if not video_id:
+        raise ValueError("payload.video.id is required")
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    report_id = f"{_report_slug(video_id)}-{time.time_ns()}"
+    json_name, html_name = f"{report_id}.json", f"{report_id}.html"
+    json_path, html_path = reports_dir / json_name, reports_dir / html_name
+    json_tmp, html_tmp = reports_dir / f".{json_name}.tmp", reports_dir / f".{html_name}.tmp"
+    json_tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    html_tmp.write_text(_report_html(payload), encoding="utf-8")
+    json_tmp.replace(json_path)
+    html_tmp.replace(html_path)
+    return {"id": report_id, "json_name": json_name, "html_name": html_name,
+            "title": str(video.get("title") or "Study report"), "video_id": video_id}
+
+
+def list_reports(reports_dir: Path = REPORTS_DIR) -> list[dict[str, str]]:
+    """Return valid saved reports, newest first."""
+    reports = []
+    for path in reports_dir.glob("*.json") if reports_dir.is_dir() else []:
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            video = payload["video"]
+            report_id = path.stem
+            html_path = reports_dir / f"{report_id}.html"
+            if not video.get("id") or not html_path.is_file():
+                continue
+            reports.append({"id": report_id, "json_name": path.name, "html_name": html_path.name,
+                            "title": str(video.get("title") or "Study report"),
+                            "video_id": str(video["id"]), "created": str(path.stat().st_mtime_ns)})
+        except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+            continue
+    return sorted(reports, key=lambda r: int(r["created"]), reverse=True)
 
 
 # ── transcript path ───────────────────────────────────────────────────────────

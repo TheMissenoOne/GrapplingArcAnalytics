@@ -19,6 +19,7 @@ db.sqlite
 data/raw/*
 data/processed/*
 data/captures/
+data/study/reports/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
