@@ -25,8 +25,8 @@ payload — display names, timestamps, video ids, links. IDs are opaque keys.
   "matches": 6,               // distinct matches contributing evidence
   "sources": {"expert": 1, "hybrid": 1, "observed": 7},
 
-  "compilerVersion": "1.3.0", // bump on payload-shape / semantics change
-  "layoutVersion": 2,         // bump on layout-constants / algorithm change
+  "compilerVersion": "1.2.0", // bump on payload-shape / semantics change
+  "layoutVersion": 5,         // bump on layout-constants / algorithm change
 
   "evidence": {               // ONLY entries referenced by a node's evidenceIds
     "m:gordon-ryan-vs-x-2021:i:14": {
@@ -72,14 +72,37 @@ payload — display names, timestamps, video ids, links. IDs are opaque keys.
 
   "layouts": {
     "desktop": {
-      "layoutVersion": 2, "mode": "desktop", "width": 2010, "height": 846,
+      "layoutVersion": 5, "routingVersion": 1,
+      "mode": "desktop", "width": 2010, "height": 846,
       "nodes": {"n:...": {"x": 900, "y": 20, "width": 280, "height": 88}},
-      "edges": {"e:...": {"sections": [[{"x": 0, "y": 0}]]}}
+      "edges": {"e:...": {"points": [{"x": 0, "y": 0}, {"x": 0, "y": 88}]}}
     },
-    "compact": { "...": "same shape, vertical layout" }
+    "compact": {
+      "layoutVersion": 5, "routingVersion": 1,
+      "...": "same shape, vertical layout"
+    }
   }
 }
 ```
+
+## Athlete dossier envelope
+
+Analytics may attach the compiled payload unchanged to the existing Pro dossier:
+
+```jsonc
+{
+  "schemaVersion": 1,
+  "decisionFlow": { "...": "the complete payload above" }
+}
+```
+
+`AthleteDossierV1.decisionFlow` is optional. It is omitted—not emitted as `null`—when patterns
+are unavailable or fail eligibility. The dossier's outer `schemaVersion` remains `1`; compiler,
+layout, and routing versions remain owned by the nested payload. Quality stays at
+`decisionFlow.decisionFlow.quality`. Consumers must treat every node, edge, evidence, and branch
+ID as an opaque byte-identical key.
+
+Public-site code and generated site output are outside this envelope contract and are not changed.
 
 ## Node kinds
 
@@ -141,6 +164,9 @@ Two semantic changes, which is why this is a compiler bump and not an additive f
 Both counts are lower bounds: per-pattern evidence is capped at 8, so a branch never claims
 more breadth than its retained evidence can demonstrate.
 - `layoutVersion` changes when layout constants/algorithm change (it also
-  appears inside each layout object). Both participate in the site export
+  appears inside each layout object).
+- `routingVersion` changes when edge-routing semantics change (it also appears inside each layout
+  object).
+- Compiler, layout, and routing versions all participate in the site export
   cache key (Phase 6 cache invalidation: match-sequence hash + ontology
-  revision + definitions hash + compilerVersion + layoutVersion).
+  revision + definitions hash + compilerVersion + layoutVersion + routingVersion).

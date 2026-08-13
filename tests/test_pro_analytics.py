@@ -95,3 +95,22 @@ def test_athlete_dossier_keeps_existing_style_profile_and_optional_graph() -> No
     assert payload["style"]["style_mix"]["pass"] == 0.5
     assert payload["graphId"] is None
     assert payload["bouts"] == [{"opponent": "Bea", "result": "def. Bea"}]
+    assert "decisionFlow" not in payload
+
+
+def test_athlete_dossier_attaches_compiled_decision_flow_unchanged() -> None:
+    build = analysis.build_athlete_dossier_v1
+    kwargs = {
+        "athlete": {"id": "athlete-1", "name": "Ada Grappler"},
+        "style_profile": {},
+        "graph_id": None,
+        "network": {},
+        "path_to_victory": [],
+        "generated_at": "2026-07-17T04:15:00+00:00",
+    }
+    without_flow = build(**kwargs)
+    decision_flow = {"schemaVersion": 1, "nodes": [{"id": "opaque:id"}]}
+    with_flow = build(**kwargs, decision_flow=decision_flow)
+
+    assert with_flow["decisionFlow"] is decision_flow
+    assert {key: value for key, value in with_flow.items() if key != "decisionFlow"} == without_flow
