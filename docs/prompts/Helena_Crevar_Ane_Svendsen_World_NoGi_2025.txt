@@ -1,0 +1,92 @@
+You are converting one grappling-match transcript into an enriched scouting sidecar. Return ONLY
+valid JSON. No prose, markdown fences, comments, or extra keys.
+
+## Input context — supplied metadata, do not infer or replace
+
+Raw transcript to paste after this prompt:
+docs/raw/ Helena Crevar vs Ane Svendsen - World Championship No-Gi 2025.md
+
+Bout key: "Helena Crevar|Ane Svendsen|2025"
+ruleset_id: ibjjf-unknown
+uniform: no_gi
+video shape: single match; bout starts at 0:00
+
+`ibjjf-unknown` records the event family without assigning an unverified historical rules version.
+
+## Required output shape
+
+{
+  "Helena Crevar|Ane Svendsen|2025": {
+    "events": [],
+    "scouting_observations": [],
+    "timing": {},
+    "adjudication": {"status": "unknown", "kind": "none"}
+  }
+}
+
+Keep all four fields. Add timing members only when established. Never invent an event,
+observation, end time, overtime, score, advantage, penalty, or ruleset detail.
+
+## Extraction rules
+
+- Every timestamp is an integer number of seconds from START OF VIDEO. `5:12` -> `312`.
+- Emit only actions or positions visibly established now. Predictions, coaching, biography,
+  reputation, judging speculation, ambiguous pronouns, and unplaced replays -> omit.
+- Each event: `label`, one of eight `type` values, exact `actor`, integer `ts`.
+- Types: `guard`, `control`, `pass`, `sweep`, `takedown`, `submission`, `escape`, `transition`.
+- `successful` appears only when explicit. Failed executed attacks keep their natural type and
+  `successful:false`; never add "Attempt" to the label.
+- One continuous position -> one event. Re-emit only after loss and recovery.
+- Ownership: guard bottom; sweep sweeper; pass passer; control controller; escape escaping athlete;
+  takedown attacker; submission attacker.
+- Actors must be exactly `Helena Crevar` or `Ane Svendsen`.
+
+Prefer canonical labels where applicable:
+50/50 Guard, Ankle Pick, Arm Drag, Armbar, Back Control, Berimbolo, Body Lock, Body Lock Pass,
+Body Lock Takedown, Body Triangle, Butterfly Guard, Butterfly Sweep, Choi Bar, Closed Guard,
+Collar Tie, Cross Ashi, De la Riva Guard, Double Leg Takedown, False Reap, Foot Lock, Front Headlock,
+Grip Fighting, Guard Pass, Guard Pull, Guard Recovery, Guillotine Choke, Half Guard, Heel Hook,
+Headquarters Pass, Hooks In, Inside Ashi, Knee Bar, Knee Cut Pass, Knee Shield Half Guard, K-Guard,
+Leg Drag Pass, Leg Entanglement, Leg Lock Escape, Mount, Outside Ashi Garami, Outside Pass, Overhook,
+Pressure Pass, Rear Body Lock, Rear Naked Choke, Russian Tie, Saddle (Inside Sankaku), Scramble,
+Seatbelt Control, Seated Guard, Side Control, Single Leg Takedown, Single Leg X, Snapdown,
+Snapdown to Front Headlock, Straight Ankle Lock, Sweep, Takedown Defense, Technical Stand-Up,
+Toe Hold, Top Half Guard, Toreando Pass, Triangle Choke, Two-on-One Wrist Control, Underhook,
+Wrestle-Up, X-Guard, Z-Guard.
+
+An event may include `rule_evidence` only when directly explicit, such as
+`{"stabilized":true,"final_position":"Side Control"}`. This supports later eligibility analysis;
+it never means that points were officially awarded.
+
+## Scouting observations
+
+Record only an occurrence in this bout:
+
+  {"actor":"Exact Full Name","kind":"posture|initiative|feint_reaction|setup","value":"concise factual observation","phase":"standing|guard|passing|control","ts":0}
+
+Encode established grips, guards, passes, leg entries, back entries, and other technical actions as
+`events`, not observations. If no canonical event is established, omit it. No career tendency,
+weakness, prediction, or tactical recommendation.
+
+## Timing and adjudication
+
+Set `end_ts` only when the ending is clear. IBJJF has no assumed overtime here; leave
+`overtime_start_ts` absent unless explicitly announced.
+
+Default: `{"status":"unknown","kind":"none"}`. For a clearly visible or officially announced
+point result, use:
+
+  {"status":"verified","kind":"point_total","result":{"positive":{"Helena Crevar":0,"Ane Svendsen":0},"negative":{"Helena Crevar":0,"Ane Svendsen":0},"advantages":{"Helena Crevar":0,"Ane Svendsen":0},"penalties":{"Helena Crevar":0,"Ane Svendsen":0}}}
+
+Replace zeros only with explicitly supported values. If only part is legible, use `status:"partial"`
+and include only supported categories. Never derive points from techniques or convert advantages
+and penalties into points.
+
+## Final validation
+
+- Exactly one top-level key; only the four allowed bout fields.
+- Exact actors; integer absolute timestamps; sorted arrays; no duplicates.
+- No inferred rules version, scoring, uniform, or cross-fight conclusion.
+
+Now process the complete contents of the raw transcript named above, pasted immediately after this
+prompt.

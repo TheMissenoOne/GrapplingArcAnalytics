@@ -1,0 +1,112 @@
+You are converting one grappling-match transcript into an enriched scouting sidecar. Return ONLY
+valid JSON. No prose, markdown fences, comments, or extra keys.
+
+## Input context — supplied metadata, do not infer or replace
+
+Raw transcript to paste after this prompt:
+docs/raw/ Helena Crevar vs Anabel lopez Beard - *FULLMATCH* - POLARIS 31.md
+
+Bout key:
+  "Helena Crevar|Anabel Lopez Beard|2025"
+
+ruleset_id: other-unknown
+uniform: no_gi
+video shape: single match; bout starts at 0:00
+
+The year comes from the repository's existing Polaris 31 dump. `other-unknown` means the exact
+Polaris rules version is not verified locally. Do not fill that gap from memory.
+
+## Required output shape
+
+{
+  "Helena Crevar|Anabel Lopez Beard|2025": {
+    "events": [],
+    "scouting_observations": [],
+    "timing": {},
+    "adjudication": {"status": "unknown", "kind": "none"}
+  }
+}
+
+Keep all four fields. Add timing members only when the transcript establishes them. Never
+invent an event, observation, end time, overtime, score, penalty, card, or ruleset detail.
+
+## Timestamps
+
+Every `ts`, `end_ts`, and `overtime_start_ts` is an integer number of seconds from the START OF THE
+VIDEO. Convert directly: `5:12` -> `312`; `1:02:03` -> `3723`. Never reset at a round, restart, or
+overtime. Events and observations must be sorted by `ts`.
+
+## Events
+
+An event requires an action or position visibly established now. Exclude predictions, coaching,
+biography, reputation, historical references, judging speculation, replays without a known live
+timestamp, and phrases such as "looking to", "trying to", "could", "might", or "setting up".
+Ambiguous action or actor -> omit.
+
+Each event uses:
+
+  {"label": "Canonical Label", "type": "guard|control|pass|sweep|takedown|submission|escape|transition", "actor": "Exact Full Name", "ts": 0}
+
+Use `successful: true|false` only when the outcome is explicit. A materially executed failed attack
+keeps its natural type and `successful: false`; never re-type it as `transition`. Do not put
+"Attempt" in the label. One continuous position is one event; emit it again only after it was lost
+and regained.
+
+Actor ownership: guard -> bottom player; sweep -> sweeper; pass -> passer; control -> controller;
+escape -> escaping athlete; takedown -> takedown attacker; submission -> submission attacker.
+Actors must be exactly `Helena Crevar` or `Anabel Lopez Beard`. Normalize transcript variants such
+as lowercase `lopez` to the bout-key spelling; never create a third athlete.
+
+Use short canonical technique labels. Prefer these established labels when applicable:
+50/50 Guard, Ankle Pick, Arm Drag, Armbar, Back Control, Berimbolo, Body Lock, Body Lock Pass,
+Body Lock Takedown, Body Triangle, Butterfly Guard, Butterfly Sweep, Choi Bar, Closed Guard,
+Collar Tie, Cross Ashi, De la Riva Guard, Double Leg Takedown, False Reap, Foot Lock, Front Headlock,
+Grip Fighting, Guard Pass, Guard Pull, Guard Recovery, Guillotine Choke, Half Guard, Heel Hook,
+Headquarters Pass, Hooks In, Inside Ashi, Knee Bar, Knee Cut Pass, Knee Shield Half Guard, K-Guard,
+Leg Drag Pass, Leg Entanglement, Leg Lock Escape, Mount, Outside Ashi Garami, Outside Pass, Overhook,
+Pressure Pass, Rear Body Lock, Rear Naked Choke, Russian Tie, Saddle (Inside Sankaku), Scramble,
+Seatbelt Control, Seated Guard, Side Control, Single Leg Takedown, Single Leg X, Snapdown,
+Snapdown to Front Headlock, Straight Ankle Lock, Sweep, Takedown Defense, Technical Stand-Up,
+Toe Hold, Top Half Guard, Toreando Pass, Triangle Choke, Two-on-One Wrist Control, Underhook,
+Wrestle-Up, X-Guard, Z-Guard.
+
+If none fits, use another exact label from GrapplingArc's technique library; do not invent a
+hyper-specific label from commentary.
+
+An event may include `rule_evidence` only when directly visible or explicitly stated, for example:
+`{"stabilized":true,"final_position":"Side Control"}`. Potential scoring is never official scoring.
+
+## Scouting observations
+
+Record only an occurrence visible in this bout, never a career-level tendency or recommendation:
+
+  {"actor": "Exact Full Name", "kind": "posture|initiative|feint_reaction|setup", "value": "concise factual observation", "phase": "standing|guard|passing|control|overtime", "ts": 0}
+
+Encode established grips, guards, passes, leg entries, back entries, and other technical actions as
+`events`, not observations. If no canonical event is established, omit it. Do not write "always",
+"usually", "weakness", "best strategy", or conclusions spanning fights.
+
+## Timing and adjudication
+
+Set `end_ts` only at a clearly established match ending. Set `overtime_start_ts` only when overtime
+is explicitly announced. Default adjudication is `{"status":"unknown","kind":"none"}`. Use
+`verified` only for an official announcement or clearly visible official display; use `partial`
+when only part is clear. Do not infer Polaris scoring from the event name.
+
+For an explicit points result only:
+`{"status":"verified","kind":"point_total","result":{"positive":{},"negative":{},"advantages":{},"penalties":{}}}`
+
+For explicit round cards only:
+`{"status":"verified","kind":"round_cards","result":{"rounds":[{"Helena Crevar":10,"Anabel Lopez Beard":9}]}}`
+
+Never convert cards into points or points into cards.
+
+## Final validation
+
+- Exactly one top-level bout key and all four allowed sidecar fields.
+- Actors match the two names exactly.
+- Absolute integer timestamps; sorted arrays; no duplicate events.
+- No inferred rules, uniform, score, card, penalty, outcome, or tendency.
+
+Now process the complete contents of the raw transcript named above, pasted immediately after this
+prompt.
