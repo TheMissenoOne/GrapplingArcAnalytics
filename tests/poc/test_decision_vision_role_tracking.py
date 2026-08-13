@@ -1,10 +1,10 @@
 import numpy as np
 from decision_vision.role_tracking import (
-    box_from_keypoints,
     Box,
     Detection,
     PairIdentityTracker,
     PoseIdentityTracker,
+    box_from_keypoints,
     parse_vicos_label,
     select_role_pair,
 )
