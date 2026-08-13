@@ -1,0 +1,6 @@
+start,end,position,role,state,seconds
+5292.0,5292.5,takedown,unknown,takedown1,0.5
+5292.5,5295.5,takedown,athlete2,takedown1,3.0
+5295.5,5535.0,unknown,athlete2,unknown,239.5
+5535.0,5570.0,open_guard,athlete2,open_guard2,35.0
+5570.0,5591.5,unknown,athlete2,unknown,21.5

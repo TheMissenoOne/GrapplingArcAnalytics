@@ -38,8 +38,46 @@ and `position` are exposed too, not only `role`.
   unresolved frame is emitted as unusable rather than guessed; `identity_resolved` rides on every
   row; the four metrics land in `report.json["identity"]` and in the progress metrics. The module
   docstring said "order the pair by hip_y" — corrected, it had just become false.
-- ⚠️ **The controlled rerun has NOT happened.** Nothing here has been run against real video.
-  Every claim above is about code and synthetic tests.
+- **Rerun 1 (broken tracker)** exposed a one-way door: `missing > max_missing` removed a track from
+  `active` and only active tracks are assigned, so one brief occlusion killed identity permanently.
+  `identity_resolved_rate` 0.10. Fixed (`72bf427`) with counted re-seeding; the run is kept at
+  `data/cv_decision_poc/vicos_transfer_window3_identity/` as evidence of the defect, NOT a baseline.
+- **Rerun 2 (fixed)** → `data/cv_decision_poc/vicos_transfer_window3_identity2/`.
+  Coverage healthy: `identity_resolved_rate` **0.645** vs the old `pose_pair_rate` 0.675.
+  `tracker_reinitializations` 11, `assignment_swaps` 55.
+  ⚠️ **The gate did NOT pass.** Committed switches stayed at 4, and NONE share a timestamp with the
+  audited set:
+
+  | switch | audited verdict | after |
+  |---|---|---|
+  | 5313.5 | **false** (corr 29%/0%) | gone ✓ |
+  | 5415.0 | **false** (failed sweep) | gone ✓ |
+  | 5336.0 | **true** (a2 takes over) | **gone** ✗ |
+  | 5436.0 | **true** (corr 75%/100%) | 5436.5 — same event, one sample later (latency, not loss) |
+
+  New and unaudited: **5326.0**, **5368.5**, **5461.5**. The first two are recidivists — `pass2`
+  had called 5326 "weak, borderline" and 5369.5 **spurious**, and the 0.85 confidence floor had
+  removed them. Their return suggests that floor was masking identity instability rather than
+  fixing it.
+
+  Trading four switches for four others is evidence of CHANGE, not of improvement. Only visual
+  inspection of the new ones — and of why 5336.0 vanished — decides.
+- **Step 7 DONE.** All five re-audited from frames in `switch_audit/frames_identity/`; verdicts and
+  evidence appended to `vision_audit.md`. Scoreboard: **before 2 true / 2 false → after 1 true (0.5s
+  late), 2 false, 1 post-bout artefact, and 1 TRUE SWITCH LOST (5336.0)**.
+  **The gate does not pass.** The tracker removed both audited false switches — what it was built to
+  do — but 5336.0 went with them, and 5326.0 / 5368.5 / 5461.5 took their place.
+
+### Next, in this order
+1. **Bout-boundary guard.** 5461.5 sits where the clock runs 00:02 → 00:00 and the athletes
+   separate. Nothing should commit a role switch after the bout ends. Cheapest, removes one outright.
+2. **Investigate 5336.0.** Losing a true switch is the only outcome strictly worse than before, and
+   the cause is unknown — today's re-seeding, a reinitialization landing there, or the probe reading
+   a correctly-ordered pair differently. Start with `identity_resolved` and the reinit count around
+   5330–5340 in `..._identity2/state_samples_raw.csv`. **Do not touch a threshold before this is
+   understood.**
+3. 5326.0 and 5368.5 are recidivists the 0.85 floor had removed. Their return is evidence that floor
+   was masking identity instability rather than fixing it.
 
 ### Done when
 Tests green; `live_state.py` uses the tracker; the controlled rerun of the SAME window (5292–5592,

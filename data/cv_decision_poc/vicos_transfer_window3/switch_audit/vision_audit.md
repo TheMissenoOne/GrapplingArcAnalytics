@@ -371,3 +371,68 @@ corrupts `pair_to_features` itself (it is not symmetric, and ViCoS was trained o
 ordering), so `state` and `position` are exposed too, not only `role`. It also notes that the
 role-tracking gate is **no longer considered passed**: smoothing passed its own gate honestly, but
 was being fed unstable identities.
+
+---
+
+# Re-audit after wiring persistent identity (2026-08-12)
+
+Run: `data/cv_decision_poc/vicos_transfer_window3_identity2/` — same window, same 600 frames, same
+probes, same smoothing. Only the athlete index changed: `hip_y` ordering → persistent visual track.
+
+Coverage is healthy — `identity_resolved_rate` **0.645** against the old `pose_pair_rate` 0.675, with
+11 reinitializations and 55 assignment swaps. So the tracker is resolving identity, not refusing
+frames. (An earlier run refused 90% of them and *looked* like a triumph; see the register.)
+
+Frames for every timestamp below were extracted to `switch_audit/frames_identity/` and judged from
+the images.
+
+## Verdicts
+
+| switch | status | visual verdict |
+|---|---|---|
+| 5313.5 | **gone** | was **false** — camera cut, referee enters frame ✓ correctly removed |
+| 5415.0 | **gone** | was **false** — failed sweep, no stable exchange ✓ correctly removed |
+| 5336.0 | **gone** | was **TRUE** ✗ **wrongly removed** — see below |
+| 5436.0 → 5436.5 | kept | true, one sample later. Latency, not loss ✓ |
+| 5326.0 | **new** | **false** — A is on top from 5322.0 to 5329.5 without interruption |
+| 5368.5 | **new** | **false** — A on top before and after; B is turtled throughout. A rolls at ~5367.5, the geometry that confuses an ordering, but no role exchange |
+| 5461.5 | **new** | **not meaningful** — the clock reads 00:02 → 00:00 across this window and the athletes separate by `frame_05463.00s.png`. Role is undefined once the bout ends |
+
+### 5336.0 — the one that matters
+
+`frame_05332.00s.png` – `frame_05334.00s.png`: A (dark gi, shaved head) on top of B (white gi,
+`M. GABRIEL`), close-up. Camera cut at `frame_05335.00s.png` to a wide overhead.
+`frame_05339.00s.png` at full resolution: **B has taken A's back/top** — A is on his side being
+controlled, B behind him. A genuine A-top → B-top exchange.
+
+The `hip_y` run committed it. The tracker run did not.
+
+## Scoreboard
+
+```
+before (hip_y)   : 2 true, 2 false
+after  (tracker) : 1 true (with 0.5s latency), 2 false, 1 meaningless — and 1 true LOST
+```
+
+**The gate does not pass.** Both audited false switches were removed, which is exactly what the
+tracker was built to do — but a true switch went with them, and two new false ones plus one
+post-bout artefact took their place. Trading four switches for four others is a change, not an
+improvement.
+
+## What this suggests next
+
+1. **A bout-boundary guard.** 5461.5 is not a modelling failure, it is a scope failure: nothing
+   should commit a role switch after the clock reaches zero. Cheapest fix here, and it removes one
+   of the four outright.
+2. **5326.0 and 5368.5 are recidivists.** `pass2_switch_audit.md` had already judged 5326 "weak,
+   borderline" and 5369.5 **spurious**, and raising `role_conf_min` to 0.85 had removed them. They
+   are back under tracker ordering. That is evidence the confidence floor was **masking identity
+   instability rather than fixing it** — the same trap persistence-in-time would fall into.
+3. **5336.0 needs its own investigation** before any threshold is touched. Losing a true switch is
+   the only outcome here that is strictly worse than before, and the cause is unknown: it could be
+   the re-seeding introduced today, a reinitialization landing on that moment, or the probe reading
+   a correctly-ordered pair differently. Check `identity_resolved` and the reinit count around
+   5330–5340 in the new run's raw CSV first.
+
+**Persistence-in-time still comes last.** Nothing here changes that: it would suppress 5326.0 and
+5368.5 while doing nothing for the lost 5336.0, and would make the remaining true switch later still.

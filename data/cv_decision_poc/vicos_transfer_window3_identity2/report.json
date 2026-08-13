@@ -1,0 +1,188 @@
+{
+  "protocol": "transfer-smoke: YOLO COCO pose (local) -> ViCoS probe + temporal smoothing",
+  "match_id": "7dc97750-d911-45a2-9675-55d545a4a12d",
+  "range": [
+    5292.0,
+    5592.0
+  ],
+  "sample_every": 0.5,
+  "raw": {
+    "frames_sampled": 600,
+    "duration_s": 299.5,
+    "pose_pair_rate": 0.645,
+    "position_coverage": 0.645,
+    "position_overall_conf": {
+      "mean": 0.697,
+      "median": 0.6885,
+      "p10": 0.4092,
+      "p90": 0.9949
+    },
+    "role_overall_conf": {
+      "mean": 0.7488,
+      "median": 0.7693,
+      "p10": 0.5029,
+      "p90": 0.9481
+    },
+    "state_overall_conf": {
+      "mean": 0.715,
+      "median": 0.7205,
+      "p10": 0.3794,
+      "p90": 0.9948
+    },
+    "per_position": {
+      "standing": {
+        "samples": 79,
+        "role_explicit_rate": 0.1266,
+        "role_conf_mean": 0.81,
+        "state_conf_mean": 0.8608
+      },
+      "takedown": {
+        "samples": 77,
+        "role_explicit_rate": 0.2338,
+        "role_conf_mean": 0.689,
+        "state_conf_mean": 0.5597
+      },
+      "open_guard": {
+        "samples": 72,
+        "role_explicit_rate": 0.7222,
+        "role_conf_mean": 0.772,
+        "state_conf_mean": 0.8178
+      },
+      "5050_guard": {
+        "samples": 71,
+        "role_explicit_rate": 0.0986,
+        "role_conf_mean": 0.8081,
+        "state_conf_mean": 0.7475
+      },
+      "back": {
+        "samples": 57,
+        "role_explicit_rate": 0.5614,
+        "role_conf_mean": 0.6784,
+        "state_conf_mean": 0.6114
+      },
+      "turtle": {
+        "samples": 20,
+        "role_explicit_rate": 0.8,
+        "role_conf_mean": 0.5946,
+        "state_conf_mean": 0.5883
+      },
+      "mount": {
+        "samples": 7,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.897,
+        "state_conf_mean": 0.7189
+      },
+      "side_control": {
+        "samples": 2,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.6896,
+        "state_conf_mean": 0.5388
+      },
+      "half_guard": {
+        "samples": 1,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.7366,
+        "state_conf_mean": 0.5685
+      },
+      "closed_guard": {
+        "samples": 1,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.8127,
+        "state_conf_mean": 0.3557
+      }
+    },
+    "flips_per_minute": {
+      "state": 29.4491,
+      "position": 32.0534,
+      "role": 4.4073
+    },
+    "median_segment_duration_s": {
+      "state": 0.5,
+      "role": 0.5,
+      "position_role": 0.5
+    }
+  },
+  "smoothed": {
+    "frames_sampled": 600,
+    "duration_s": 299.5,
+    "pose_pair_rate": 0.645,
+    "position_coverage": 0.645,
+    "position_overall_conf": {
+      "mean": 0.697,
+      "median": 0.6885,
+      "p10": 0.4092,
+      "p90": 0.9949
+    },
+    "role_overall_conf": {
+      "mean": 0.7488,
+      "median": 0.7693,
+      "p10": 0.5029,
+      "p90": 0.9481
+    },
+    "state_overall_conf": {
+      "mean": 0.715,
+      "median": 0.7205,
+      "p10": 0.3794,
+      "p90": 0.9948
+    },
+    "per_position": {
+      "open_guard": {
+        "samples": 178,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.7173,
+        "state_conf_mean": 0.7228
+      },
+      "standing": {
+        "samples": 97,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.7908,
+        "state_conf_mean": 0.7994
+      },
+      "takedown": {
+        "samples": 73,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.7201,
+        "state_conf_mean": 0.5708
+      },
+      "5050_guard": {
+        "samples": 34,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.8781,
+        "state_conf_mean": 0.7424
+      },
+      "back": {
+        "samples": 3,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.5164,
+        "state_conf_mean": 0.6971
+      },
+      "turtle": {
+        "samples": 2,
+        "role_explicit_rate": 1.0,
+        "role_conf_mean": 0.7067,
+        "state_conf_mean": 0.7549
+      }
+    },
+    "flips_per_minute": {
+      "state": 0.8013,
+      "position": 0.8013,
+      "role": 0.8013
+    },
+    "median_segment_duration_s": {
+      "state": 6.5,
+      "role": 38.0,
+      "position_role": 6.5
+    }
+  },
+  "role_observed_rate_raw": 0.3773,
+  "role_timeline_coverage": 1.0,
+  "role_inferred_rate": 0.6227,
+  "role_switch_events_smoothed": 4,
+  "segments": 32,
+  "identity": {
+    "identity_resolved_rate": 0.645,
+    "tracker_reinitializations": 11,
+    "assignment_swaps": 55,
+    "third_person_rejections": 235
+  }
+}
