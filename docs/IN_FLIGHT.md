@@ -45,7 +45,7 @@ new ones (5352.0, 5378.5) were audited from frames and are false.
   worse.
 - Thresholds come from four cuts in ONE bout. Re-measure before another venue.
 
-## 2. `segments.csv` hides a role switch — LOCATED, NOT FIXED
+## 2. `segments.csv` hides a role switch — FIXED (2026-08-12)
 
 Precise mechanism, pinned to lines:
 
@@ -59,7 +59,10 @@ That is why `state_samples.csv` carries `athlete1` from 5415.0 while `segments.c
 for `standing 5414.5→5424.5`.
 
 **Fix:** rebuild spans from the FINAL smoothed rows, keyed on all three dimensions.
-**Not implemented** — deliberately deferred while another change owned `live_state.py`.
+**Implemented**, and pinned by `tests/poc/test_decision_vision_segments.py` (4 cases). The
+invariant that would have caught the original defect is now a test: for every row, the segment
+covering its timestamp must report that row's own role. This heading said "NOT FIXED" until
+2026-08-13 — the deferral note outlived the deferral.
 
 ⚠️ An earlier write-up called this "carries the role from the segment's start". That is the symptom.
 Fixing that would touch the wrong code.
