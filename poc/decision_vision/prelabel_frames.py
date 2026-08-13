@@ -271,9 +271,15 @@ def main() -> None:
     args = parser.parse_args()
     logging.basicConfig(level=args.log_level, format="%(levelname)s %(message)s")
 
+    from dotenv import load_dotenv
+
     from decision_vision.common import find_analytics_root
 
-    find_analytics_root(None)
+    root = find_analytics_root(None)
+    # Same as the other jobs in this module: the DB URL and the video source
+    # both live in .env, and failing on a missing DATABASE_URL after streaming
+    # has started would waste the whole pass.
+    load_dotenv(Path(root) / ".env" if root else ".env")
     from decision_vision.live_state import load_probes
 
     targets = fetch_targets()
