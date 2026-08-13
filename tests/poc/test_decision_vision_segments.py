@@ -81,34 +81,6 @@ def test_position_change_still_starts_a_segment() -> None:
     assert "mount" in positions
 
 
-def test_a_label_change_across_an_identity_break_is_not_a_role_switch() -> None:
-    """The cause of both false switches in the identity rerun.
-
-    When the tracker re-seeds — a shot change, a dropout, an implausible pair —
-    the two slots still hold two bodies, but they are not bound to the previous
-    frame's slots. A label flip across that boundary may only mean track_0 is a
-    different person now. Committing a role switch on it is comparing two
-    different questions.
-
-    Observed at 5352.0 (both tracks jumped together) and 5378.5 (four
-    consecutive dropped frames), both immediately after a re-seed.
-    """
-    rows = [_row(t, "back", "athlete1", "back1") for t in (0.0, 0.5, 1.0, 1.5, 2.0)]
-    broken = _row(2.5, "back", "athlete2", "back2")
-    broken["identity_broken"] = True
-    rows.append(broken)
-    rows += [_row(t, "back", "athlete2", "back2") for t in (3.0, 3.5, 4.0)]
-
-    smoothed, _ = smooth_timeline(rows, role_conf_min=0.85, persist=2, min_duration_s=1.0)
-
-    # Before the break the committed role stands.
-    assert smoothed[0]["role"] == "athlete1"
-    # At the break it is forgotten rather than flipped — the frame carries no
-    # role claim until fresh agreeing observations establish one.
-    at_break = next(r for r in smoothed if r["timestamp"] == 2.5)
-    assert at_break["role"] != "athlete1", "the old commitment survived a broken binding"
-
-
 def test_an_ordinary_label_change_still_commits() -> None:
     """The guard must not swallow real switches: without identity_broken the
     same sequence commits normally."""

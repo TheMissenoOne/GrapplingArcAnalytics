@@ -243,6 +243,43 @@ class ClassSession(Base):
     __table_args__ = (Index("idx_class_sessions_group", "group_id"),)
 
 
+class FrameAnnotation(Base):
+    """One reviewable frame: an event that carries both a video URL and a timestamp.
+
+    Prediction and correction are separate columns on purpose. Overwriting the
+    proposal with the fix would destroy the only record of where the model was
+    wrong, which is the point of collecting these. RLS is ON with no policy —
+    admin-only data, denied to anon and authenticated. See alembic 0029.
+    """
+
+    __tablename__ = "frame_annotations"
+    __table_args__ = (
+        UniqueConstraint("match_id", "event_index", name="frame_annotations_frame_unique"),
+        Index("idx_frame_annotations_status", "status"),
+        Index("idx_frame_annotations_match", "match_id"),
+    )
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    match_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("matches.id", ondelete="CASCADE"), nullable=False
+    )
+    event_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    frame_ts: Mapped[float] = mapped_column(Float, nullable=False)
+    event_label: Mapped[str | None] = mapped_column(Text)
+    event_type: Mapped[str | None] = mapped_column(Text)
+    predicted: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    corrected: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    # pending | approved | corrected | skipped
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="pending")
+    reviewer: Mapped[str | None] = mapped_column(Text)
+    note: Mapped[str | None] = mapped_column(Text)
+    model_version: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
 class UserPerformanceSnapshot(Base):
     """Versioned, batch-generated Pro analytics for one user's completed period."""
 

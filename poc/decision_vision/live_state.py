@@ -166,21 +166,20 @@ def smooth_timeline(
         role = str(row.get("role") or "unknown")
         role_conf = float(row.get("role_conf") or 0.0)
 
-        # The tracker re-seeded on this frame: the two slots still hold two
-        # bodies, but they are NOT bound to the previous frame's slots. A label
-        # change across that boundary carries no information about roles — it
-        # may only mean track_0 is a different person now.
+        # ⚠️ A re-seed genuinely breaks the binding between this frame's slots
+        # and the previous frame's, so a label change across it carries no role
+        # information. But do NOT "forget the commitment" here — that was tried
+        # and MEASURED WORSE: clearing `committed_role` drops into the
+        # commit-immediately path (`committed_role is None`), removing the
+        # persistence requirement at exactly the moment the data is least
+        # trustworthy. With 55 re-seeds over one window it took committed
+        # switches 4 -> 14 and segments 33 -> 140.
         #
-        # Both false switches in the identity rerun sat immediately after a
-        # re-seed (5352.0 after both tracks jumped together, 5378.5 after four
-        # consecutive dropped frames). Comparing the new label against a role
-        # committed under the OLD binding is comparing two different questions.
-        # Forget the commitment instead, and let the next agreeing observations
-        # establish it afresh.
-        if bool(row.get("identity_broken")):
-            committed_role = None
-            pending_role = None
-            pending_count = 0
+        # The flag is emitted on every row regardless, because it is the only
+        # record of where continuity was lost. The correct use is a boundary
+        # consumers refuse to compare ACROSS — re-establishing a role after a
+        # break must still require the same agreeing observations, and a switch
+        # spanning a break should not be counted as one. Not implemented.
 
         if role in ROLE_LABELS and role_conf >= role_conf_min:
             if role != committed_role:
