@@ -36,6 +36,7 @@ from analysis.scouting_rulesets import (
     project_adcc_events,
     validate_target_rulesets,
 )
+from analysis.scouting_tables import build_tables
 from analysis.style_profile import MIN_DOSSIER_EVENTS, MIN_SEQUENCE_BOUTS, reduce_style_events
 
 ModuleLoader = Callable[[str], Any]
@@ -949,12 +950,20 @@ def generate_reports(
                 "conclusions": build_matchup(profile, profiles[own]),
                 "limitations": limitations,
                 "source_bouts": profile["source_bouts"],
+                "tabelas": build_tables(name, [
+                    bout for bout in corpus[name]
+                    if bout.get("uniform") == manifest["target_uniform"]
+                ]),
             })
         reports.append({"event": manifest.get("event", "ADCC 2026"),
                         "division": division["name"], "slug": division["slug"],
                         "target_uniform": manifest["target_uniform"],
                         "target_rulesets": target_rulesets,
                         "own_athlete": own, "own_profile": profiles[own],
+                        "own_tabelas": build_tables(own, [
+                            bout for bout in corpus[own]
+                            if bout.get("uniform") == manifest["target_uniform"]
+                        ]),
                         "opponents": opponents})
     return reports
 
@@ -1115,16 +1124,48 @@ def write_reports(reports: Sequence[Mapping[str, Any]], out_dir: Path) -> list[P
     return written
 
 
+def tables_manifest(
+    manifest: Mapping[str, Any], module_loader: ModuleLoader = importlib.import_module
+) -> dict[str, Any]:
+    """Spreadsheet-shaped cross-tabs for every athlete in the manifest.
+
+    Restricted to ``target_uniform``: gi and no-gi are different games, and folding
+    them into one table is the mistake the manifest exists to prevent. Bouts dropped
+    for uniform are counted, not silently discarded.
+    """
+    corpus, issues = collect_bouts(manifest, module_loader)
+    target_uniform = str(manifest.get("target_uniform", "no_gi"))
+    atletas: dict[str, Any] = {}
+    for entry in _athletes(manifest):
+        name = str(entry["name"])
+        bouts = corpus[name]
+        alvo = [bout for bout in bouts if bout.get("uniform") == target_uniform]
+        tabelas = build_tables(name, alvo)
+        tabelas["cobertura"]["uniform"] = target_uniform
+        tabelas["cobertura"]["lutas_fora_do_uniform"] = len(bouts) - len(alvo)
+        tabelas["cobertura"]["rulesets"] = dict(
+            Counter(str(bout.get("ruleset_id")) for bout in alvo)
+        )
+        atletas[name] = tabelas
+    return {"event": manifest.get("event"), "issues": issues, "atletas": atletas}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
     parser.add_argument("--out", type=Path, default=Path("reports/adcc-2026"))
     parser.add_argument("--audit", action="store_true")
+    parser.add_argument("--tabelas", action="store_true",
+                        help="cross-tabs da planilha de scout (log, luta em pé, efetividade, tempo)")
     args = parser.parse_args(argv)
     try:
         manifest = load_manifest(args.manifest)
         if args.audit:
             print(json.dumps(audit_manifest(manifest), ensure_ascii=False, indent=2,
+                             sort_keys=True))
+            return 0
+        if args.tabelas:
+            print(json.dumps(tables_manifest(manifest), ensure_ascii=False, indent=2,
                              sort_keys=True))
             return 0
         print("\n".join(str(path) for path in write_reports(generate_reports(manifest), args.out)))

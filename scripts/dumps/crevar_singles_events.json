@@ -1,6 +1,5 @@
 {
   "Helena Crevar|Aurelie Le Vern|2024": {
-    "url": "https://www.youtube.com/watch?v=KVW9yzKPKRg",
     "events": [
       {
         "label": "Closed Guard",
@@ -24,7 +23,7 @@
       },
       {
         "label": "Inside Ashi",
-        "type": "guard",
+        "type": "control",
         "actor": "Helena Crevar",
         "ts": 159
       },
@@ -48,13 +47,19 @@
         "ts": 182,
         "successful": true
       }
-    ]
+    ],
+    "scouting_observations": [],
+    "timing": {},
+    "adjudication": {
+      "status": "unknown",
+      "kind": "none"
+    }
   },
   "Helena Crevar|Anabel Lopez Beard|2025": {
     "events": [
       {
         "label": "Guard Pull",
-        "type": "guard",
+        "type": "transition",
         "actor": "Helena Crevar",
         "ts": 80
       },
@@ -66,7 +71,7 @@
       },
       {
         "label": "Kimura Grip",
-        "type": "transition",
+        "type": "control",
         "actor": "Helena Crevar",
         "ts": 94
       },
@@ -156,7 +161,7 @@
     "events": [
       {
         "label": "Guard Pull",
-        "type": "guard",
+        "type": "transition",
         "actor": "Helena Crevar",
         "ts": 27
       },
@@ -169,7 +174,7 @@
       },
       {
         "label": "Cross Ashi",
-        "type": "guard",
+        "type": "control",
         "actor": "Helena Crevar",
         "ts": 169
       },

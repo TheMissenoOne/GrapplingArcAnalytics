@@ -3,7 +3,7 @@
     "events": [
       {
         "label": "Guard Pull",
-        "type": "guard",
+        "type": "transition",
         "actor": "Elisabeth Clay",
         "ts": 9
       },
