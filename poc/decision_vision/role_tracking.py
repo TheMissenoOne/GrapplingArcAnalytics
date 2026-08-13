@@ -12,7 +12,7 @@ Association is based on bounding-box continuity between adjacent samples.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from math import hypot
 from typing import Any
 
@@ -59,6 +59,8 @@ class Track:
     last_box: Box
     athlete_id: str | None = None
     missing: int = 0
+    # Recent centres, for the walk test. Bounded so it stays a moving window.
+    history: list[tuple[float, float]] = field(default_factory=list)
     # Only populated/consulted by PoseIdentityTracker (raw YOLO keypoints have no
     # role/position label to lean on, unlike Detection, so identity needs joint
     # displacement as a second continuity signal).
@@ -379,11 +381,46 @@ POSE_IDENTITY_COST_MAX = 0.5
 # signal an instantaneous distance cannot see. That belongs in a future change.
 PAIR_CONTACT_MAX = 1.9  # centre distance / mean box "radius"
 
-# Every active track's best association degrading AT ONCE is a global
-# discontinuity — a camera cut — not motion. Associating across it is guessing:
-# on the audited window a cut at ~5335 is exactly where the tracker jumped onto
-# the referee and stayed. Re-seed instead, and count it.
+# Every active track's best association degrading AT ONCE would be a global
+# discontinuity rather than motion.
+#
+# ⚠️ MEASURED NOT TO CATCH THE CASE IT WAS WRITTEN FOR. At the known cut in the
+# audited window the worst-best cost was 0.290 — LOWER than the frame before it
+# (0.386) and squarely inside the normal range (0.083-0.386):
+#
+#   5334.5  0.386
+#   5335.0  0.290   <- the cut
+#   5335.5  0.083
+#
+# The premise was wrong. A cut does not make everything expensive; it makes a
+# WRONG match cheap — after the shot widened, the referee simply became an
+# inexpensive match for an athlete's track. Association cost cannot see that by
+# construction.
+#
+# Kept as a guard for genuinely violent discontinuities, at a value the normal
+# range never reaches. The right detector is a global FRAME difference (a cut is
+# a large change in the image itself), which is independent of pose and cheap —
+# not attempted here.
 CAMERA_CUT_COST = 0.45
+
+# Temporal coherence: two grapplers oscillate in place, a bystander walks.
+# This is the discriminator an instantaneous distance cannot see, and unlike the
+# contact ratio it SEPARATES on the audited windows:
+#
+#   captured referee   straightness 0.41   net 318.6px  (diag 905)
+#   athletes           straightness 0.04 - 0.21   net 24 - 105px
+#
+# Straightness = |net displacement| / path length: 1.0 is a straight walk, ~0 is
+# thrashing on the spot. Both conditions are required, because either alone is
+# reachable by a legitimate grappler — a sweep travels far but not straight, and
+# a stalled athlete is straight but goes nowhere.
+#
+# ⚠️ Thresholds come from THREE windows of ONE bout. They have margin on both
+# axes (0.21 -> 0.30, 0.116 -> 0.20 of the frame diagonal) but they are not
+# validated across venues. Re-measure before trusting them elsewhere.
+WALK_WINDOW = 8            # frames of history, 4s at the 0.5s sampling
+WALK_STRAIGHTNESS_MIN = 0.30
+WALK_NET_MIN_RATIO = 0.20  # of the image diagonal
 
 
 def box_from_keypoints(kp: np.ndarray, conf_thresh: float = POSE_CONF_THRESH) -> Box | None:
@@ -394,6 +431,43 @@ def box_from_keypoints(kp: np.ndarray, conf_thresh: float = POSE_CONF_THRESH) ->
     x1, y1 = float(vis[:, 0].min()), float(vis[:, 1].min())
     x2, y2 = float(vis[:, 0].max()), float(vis[:, 1].max())
     return Box(x=(x1 + x2) / 2.0, y=(y1 + y2) / 2.0, width=x2 - x1, height=y2 - y1)
+
+
+def trajectory_walk(
+    history: list[tuple[float, float]],
+    image_diag: float,
+) -> tuple[float, float] | None:
+    """(straightness, net/diag) over a trajectory, or None if too short to judge.
+
+    Straightness is net displacement over path length: a body walking across the
+    frame approaches 1.0, a body being thrown around a mat stays near 0.
+    """
+    if len(history) < 3:
+        return None
+    path = sum(
+        hypot(history[i][0] - history[i - 1][0], history[i][1] - history[i - 1][1])
+        for i in range(1, len(history))
+    )
+    net = hypot(history[-1][0] - history[0][0], history[-1][1] - history[0][1])
+    if path <= 1e-6 or image_diag <= 0:
+        return None
+    return net / path, net / image_diag
+
+
+def looks_like_a_walker(
+    history: list[tuple[float, float]],
+    image_diag: float,
+) -> bool:
+    """Is this track following someone walking through the scene?
+
+    BOTH conditions are required. A sweep covers ground without being straight;
+    a stalled athlete is straight without covering ground. Only a walk is both.
+    """
+    measured = trajectory_walk(history, image_diag)
+    if measured is None:
+        return False
+    straightness, net_ratio = measured
+    return straightness >= WALK_STRAIGHTNESS_MIN and net_ratio >= WALK_NET_MIN_RATIO
 
 
 def pair_in_contact(a: Box, b: Box, limit: float = PAIR_CONTACT_MAX) -> bool:
@@ -515,6 +589,7 @@ class PoseIdentityTracker:
         self.reinitializations = 0
         self.assignment_swaps = 0
         self.third_person_rejections = 0
+        self.walker_rejections = 0
         self._upper_is_track_0: bool | None = None
 
     def _candidates(self, poses: list[np.ndarray]) -> list[tuple[np.ndarray, Box]]:
@@ -618,6 +693,9 @@ class PoseIdentityTracker:
                 track.last_box = box
                 track.last_keypoints = kp
                 track.missing = 0
+                track.history.append((box.x, box.y))
+                if len(track.history) > WALK_WINDOW:
+                    del track.history[0]
 
         # Revive a track that aged out, from a candidate nobody claimed.
         #
@@ -654,6 +732,36 @@ class PoseIdentityTracker:
                 self.reinitializations += 1
                 self.third_person_rejections += 1
                 return self._finish(assignments)
+
+        # One track is following someone walking through the scene and the other
+        # is not: that one is a bystander, not a grappler. Drop it and re-seed
+        # from the candidate nearest the healthy track.
+        #
+        # Only when EXACTLY one qualifies. If both look like walkers the camera
+        # is panning, and re-seeding on that would be the same guess this code
+        # exists to avoid.
+        t0t, t1t = self.tracks.get("track_0"), self.tracks.get("track_1")
+        if t0t is not None and t1t is not None:
+            w0 = looks_like_a_walker(t0t.history, self.image_diag)
+            w1 = looks_like_a_walker(t1t.history, self.image_diag)
+            if w0 != w1:
+                walker, healthy = (t0t, t1t) if w0 else (t1t, t0t)
+                held = assignments.get(healthy.track_id)
+                held_id = id(held[0]) if held is not None else None
+                nearest = min(
+                    (c for c in candidates if id(c[0]) != held_id),
+                    key=lambda c: hypot(c[1].x - healthy.last_box.x, c[1].y - healthy.last_box.y),
+                    default=None,
+                )
+                if nearest is not None:
+                    kp, box = nearest
+                    walker.last_box = box
+                    walker.last_keypoints = kp
+                    walker.missing = 0
+                    walker.athlete_id = None
+                    walker.history = [(box.x, box.y)]
+                    assignments[walker.track_id] = (kp, box)
+                    self.walker_rejections += 1
 
         claimed = {id(match[0]) for match in assignments.values()}
         spare = [c for c in candidates if id(c[0]) not in claimed]
