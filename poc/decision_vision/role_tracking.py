@@ -361,6 +361,30 @@ POSE_CONF_THRESH = 0.3
 # motion, strict enough to refuse a guess when identity genuinely isn't clear.
 POSE_IDENTITY_COST_MAX = 0.5
 
+# Two grapplers are in contact; a bystander is not. True in principle, and
+# MEASURED INSUFFICIENT on its own — the distributions overlap badly on the
+# audited window:
+#
+#   likely pair (closest pair per frame)   p90 1.12  p95 1.22  p99 1.47  max 1.78
+#   pair including a third person          p5  0.88  p10 0.93  p25 1.46  min 0.00
+#
+# There is no separating threshold. At 1.1 this rejected ~10% of GENUINE pairs
+# and still failed to stop the referee capture it was written for. So it is set
+# where it cannot hurt — beyond anything a real pair was observed at — and acts
+# only as a guard against gross cases. It is NOT the fix.
+#
+# The real discriminator is temporal, not instantaneous: two grapplers move
+# together, a bystander drifts independently. On the audited window the captured
+# referee slid steadily right (x 160 -> 252) while the athletes stayed put — a
+# signal an instantaneous distance cannot see. That belongs in a future change.
+PAIR_CONTACT_MAX = 1.9  # centre distance / mean box "radius"
+
+# Every active track's best association degrading AT ONCE is a global
+# discontinuity — a camera cut — not motion. Associating across it is guessing:
+# on the audited window a cut at ~5335 is exactly where the tracker jumped onto
+# the referee and stayed. Re-seed instead, and count it.
+CAMERA_CUT_COST = 0.45
+
 
 def box_from_keypoints(kp: np.ndarray, conf_thresh: float = POSE_CONF_THRESH) -> Box | None:
     """Axis-aligned bbox over confident keypoints, or None if too few to form one."""
@@ -370,6 +394,40 @@ def box_from_keypoints(kp: np.ndarray, conf_thresh: float = POSE_CONF_THRESH) ->
     x1, y1 = float(vis[:, 0].min()), float(vis[:, 1].min())
     x2, y2 = float(vis[:, 0].max()), float(vis[:, 1].max())
     return Box(x=(x1 + x2) / 2.0, y=(y1 + y2) / 2.0, width=x2 - x1, height=y2 - y1)
+
+
+def pair_in_contact(a: Box, b: Box, limit: float = PAIR_CONTACT_MAX) -> bool:
+    """Are these two bodies plausibly grappling each other?
+
+    True when their boxes overlap at all, or when their centres are closer than
+    `limit` times their mean half-diagonal. Scale-relative on purpose: the same
+    test has to hold for a tight close-up and a wide overhead.
+    """
+    if _iou(a, b) > 0.0:
+        return True
+    reach_a = hypot(a.width, a.height) / 2.0
+    reach_b = hypot(b.width, b.height) / 2.0
+    reach = (reach_a + reach_b) / 2.0
+    if reach <= 0:
+        return False
+    return hypot(a.x - b.x, a.y - b.y) <= limit * 2.0 * reach
+
+
+def _best_contact_pair(
+    candidates: list[tuple[np.ndarray, Box]],
+) -> list[tuple[np.ndarray, Box]]:
+    """The largest pair that is actually in contact; falls back to largest-two.
+
+    The fallback matters: refusing to seed at all would make a frame where the
+    athletes are momentarily apart (a scramble, a restart) unusable, and the
+    contact test is a heuristic, not ground truth.
+    """
+    by_size = sorted(candidates, key=lambda c: -(c[1].width * c[1].height))
+    for i, (kp_a, box_a) in enumerate(by_size):
+        for kp_b, box_b in by_size[i + 1:]:
+            if pair_in_contact(box_a, box_b):
+                return [(kp_a, box_a), (kp_b, box_b)]
+    return by_size[:2]
 
 
 def _keypoint_displacement(
@@ -471,11 +529,12 @@ class PoseIdentityTracker:
         self,
         candidates: list[tuple[np.ndarray, Box]],
     ) -> dict[str, tuple[np.ndarray, Box]]:
-        # ponytail: no prior identity exists yet to be continuous WITH, so cold
-        # start has to pick *some* seed — largest-bbox-first, same heuristic the
-        # old hip_y sort used. This is the one place size is allowed to matter;
-        # every subsequent frame goes through continuity-based `update()`.
-        ordered = sorted(candidates, key=lambda c: -(c[1].width * c[1].height))[:2]
+        # No prior identity exists yet to be continuous WITH, so cold start has
+        # to pick *some* seed — the largest pair that is actually in contact.
+        # Size alone (the old heuristic, and the old hip_y sort's) is what let a
+        # referee become an athlete: he can be larger in frame than a folded-up
+        # grappler. Every subsequent frame goes through continuity in `update()`.
+        ordered = _best_contact_pair(candidates)
         assignments: dict[str, tuple[np.ndarray, Box]] = {}
         for index, (kp, box) in enumerate(ordered):
             track_id = f"track_{index}"
@@ -530,6 +589,21 @@ class PoseIdentityTracker:
         )
         row_ind, col_ind = linear_sum_assignment(cost)
 
+        # Camera cut: EVERY active track's best association degraded at once.
+        # That is a global discontinuity, not motion — nothing in the scene
+        # moved, the frame did. Associating across it is guessing, and on the
+        # audited window that guess put a track on the referee and kept it there
+        # for the rest of the sequence. Re-seed from a plausible pair instead.
+        if len(candidates) >= 2 and float(cost.min(axis=1).min()) > CAMERA_CUT_COST:
+            bindings = {key: track.athlete_id for key, track in self.tracks.items()}
+            self.tracks = {}
+            assignments = self._cold_start(candidates)
+            for track_id, athlete_id in bindings.items():
+                if athlete_id and track_id in self.tracks:
+                    self.tracks[track_id].athlete_id = athlete_id
+            self.reinitializations += 1
+            return self._finish(assignments)
+
         assignments: dict[str, tuple[np.ndarray, Box]] = {}
         for row, col in zip(row_ind, col_ind):
             if cost[row, col] <= self.cost_max:
@@ -561,6 +635,26 @@ class PoseIdentityTracker:
         # so it is counted as a reinitialization rather than passed off as
         # tracking. The frame is usable going forward; the counter says at whose
         # expense.
+        # If the surviving pair is not in contact, we are tracking a body that is
+        # not in this fight. Prefer a plausible re-seed over confidently
+        # reporting the relationship between an athlete and a bystander — which
+        # is exactly what produced role=athlete1 at 0.99 confidence for a
+        # sequence where one of the two "athletes" was the referee.
+        t0 = assignments.get("track_0")
+        t1 = assignments.get("track_1")
+        if t0 is not None and t1 is not None and not pair_in_contact(t0[1], t1[1]):
+            plausible = _best_contact_pair(candidates)
+            if len(plausible) == 2 and pair_in_contact(plausible[0][1], plausible[1][1]):
+                bindings = {key: track.athlete_id for key, track in self.tracks.items()}
+                self.tracks = {}
+                assignments = self._cold_start(candidates)
+                for track_id, athlete_id in bindings.items():
+                    if athlete_id and track_id in self.tracks:
+                        self.tracks[track_id].athlete_id = athlete_id
+                self.reinitializations += 1
+                self.third_person_rejections += 1
+                return self._finish(assignments)
+
         claimed = {id(match[0]) for match in assignments.values()}
         spare = [c for c in candidates if id(c[0]) not in claimed]
         for track in self.tracks.values():

@@ -178,13 +178,22 @@ def test_pose_tracker_hip_y_flip_does_not_swap_identity() -> None:
 
 
 def test_pose_tracker_third_person_does_not_steal_a_track() -> None:
-    tracker = PoseIdentityTracker(image_width=640, image_height=480)
-    tracker.update([_kp(cx=150, cy=200), _kp(cx=450, cy=200)])
-    tracker.update([_kp(cx=155, cy=202), _kp(cx=445, cy=202)])
+    """A bystander must not win a track, however large it is in frame.
 
-    # A referee enters: bigger bbox than either athlete, standing between them.
-    referee = _kp(cx=300, cy=250, scale=150.0)
-    athlete_a, athlete_b = _kp(cx=158, cy=205), _kp(cx=442, cy=205)
+    Geometry matters here and an earlier version of this test got it wrong: it
+    placed the two "athletes" 284px apart with 80px bodies, which is not two
+    people grappling — it is two people standing across a mat from each other.
+    The pair-contact plausibility test correctly refused it. Grapplers touch;
+    that is the whole basis of the check, so the fixture has to reflect it.
+    """
+    tracker = PoseIdentityTracker(image_width=640, image_height=480)
+    tracker.update([_kp(cx=290, cy=200), _kp(cx=330, cy=205)])
+    tracker.update([_kp(cx=292, cy=202), _kp(cx=332, cy=207)])
+
+    # A referee enters: much bigger bbox than either athlete, and — the point —
+    # standing well clear of them, as an official does.
+    referee = _kp(cx=90, cy=250, scale=150.0)
+    athlete_a, athlete_b = _kp(cx=295, cy=205), _kp(cx=335, cy=210)
     result = tracker.update([athlete_a, referee, athlete_b])
 
     assert result.identity_resolved
@@ -237,3 +246,82 @@ def test_pose_tracker_recovers_after_a_long_occlusion() -> None:
     ]
     assert all(resolved), "an aged-out track never came back"
     assert tracker.reinitializations >= 1, "the lost continuity was not recorded"
+
+
+def test_pair_in_contact_is_a_coarse_guard_not_a_classifier() -> None:
+    """Grapplers touch and a bystander does not — true, and NOT separable here.
+
+    Measured on the audited window, the two distributions overlap badly:
+    a genuine pair reaches 1.47 (p99) while a pair contaminated by a third
+    person can sit at 0.88 (p5). No threshold separates them. At 1.1 this
+    rejected ~10% of GENUINE pairs and still failed to stop the referee capture
+    it was written for, so it is set beyond anything a real pair was observed at
+    and catches only gross cases. This test pins that honest scope rather than
+    the stronger claim the first version made.
+    """
+    from decision_vision.role_tracking import Box, pair_in_contact
+
+    # Two bodies tangled on the mat — boxes overlap.
+    a = Box(x=300.0, y=200.0, width=90.0, height=70.0)
+    b = Box(x=330.0, y=210.0, width=90.0, height=70.0)
+    assert pair_in_contact(a, b)
+
+    # Someone on the far side of the mat: gross separation, correctly rejected.
+    far = Box(x=1200.0, y=150.0, width=40.0, height=190.0)
+    assert not pair_in_contact(a, far)
+
+    # But a bystander only moderately clear of the pair is NOT rejected. This is
+    # the measured limitation, asserted so nobody mistakes the guard for a
+    # classifier: separating these needs a temporal signal (grapplers move
+    # together, a bystander drifts), not an instantaneous distance.
+    nearby_official = Box(x=90.0, y=150.0, width=40.0, height=190.0)
+    assert pair_in_contact(a, nearby_official)
+
+    # Scale-relative, not a pixel constant: the same relationship in a wide shot
+    # (everything half the size, half the separation) must still read as contact.
+    assert pair_in_contact(
+        Box(x=150.0, y=100.0, width=45.0, height=35.0),
+        Box(x=165.0, y=105.0, width=45.0, height=35.0),
+    )
+
+
+def test_pose_tracker_rejects_a_bystander_that_wins_on_geometry_alone() -> None:
+    """The real 5336 failure, in miniature.
+
+    On the audited window the tracker put track_1 on the referee after a camera
+    cut and kept it there: from 5334.5 on, track_1 sat in a narrow band at the
+    top of the frame sliding steadily right, with a bounding box up to 5.2x
+    taller than wide. The pair handed to the probe was one athlete and a
+    bystander, so no role exchange could be detected — and role read athlete1 at
+    0.99 confidence, because the probe was confidently describing the wrong two
+    people.
+    """
+    tracker = PoseIdentityTracker(image_width=320, image_height=240)
+    tracker.update([_kp(cx=150, cy=175), _kp(cx=175, cy=180)])
+
+    # A bystander appears exactly where the referee was: upper band, far from
+    # the pair. It must not end up in the tracked pair.
+    bystander = _kp(cx=160, cy=95, scale=60.0)
+    a, b = _kp(cx=152, cy=176), _kp(cx=177, cy=181)
+    result = tracker.update([a, bystander, b])
+
+    assert result.identity_resolved
+    assert not np.array_equal(result.track_0, bystander)
+    assert not np.array_equal(result.track_1, bystander)
+
+
+def test_pose_tracker_reseeds_across_a_camera_cut() -> None:
+    """When EVERY association degrades at once, the frame changed, not the scene.
+
+    Associating across that is guessing, and the guess is what captured the
+    referee. The tracker must re-seed from a plausible pair and record it.
+    """
+    tracker = PoseIdentityTracker(image_width=320, image_height=240)
+    tracker.update([_kp(cx=60, cy=60), _kp(cx=85, cy=65)])
+    before = tracker.reinitializations
+
+    # Same two people, wholly different framing — nothing moved, the shot cut.
+    result = tracker.update([_kp(cx=250, cy=190), _kp(cx=275, cy=195)])
+
+    assert result.identity_resolved, "a cut must not leave the tracker blind"
+    assert tracker.reinitializations > before, "the lost continuity was not recorded"
