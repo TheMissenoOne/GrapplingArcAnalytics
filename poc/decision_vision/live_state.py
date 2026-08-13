@@ -405,9 +405,14 @@ def main() -> None:
     # labels with no real role change — and because `pair_to_features` is not
     # symmetric and ViCoS trained on a persistent ordering, that corrupted the
     # FEATURE VECTOR, not just the label. Dimensions come from the first frame.
-    from decision_vision.role_tracking import PoseIdentityTracker
+    from decision_vision.role_tracking import (
+        PoseIdentityTracker,
+        frame_signature,
+        is_shot_change,
+    )
 
     identity_tracker: PoseIdentityTracker | None = None
+    prev_signature = None
 
     from decision_vision.progress import ProgressReporter
 
@@ -444,7 +449,14 @@ def main() -> None:
             h, w = frame.shape[0], frame.shape[1]
             identity_tracker = PoseIdentityTracker(image_width=w, image_height=h)
 
-        assignment = identity_tracker.update(poses)
+        # A shot change is visible in the IMAGE and invisible in association
+        # cost, so it has to be detected here, where the frame is.
+        gray = frame[:, :, 0] if frame.ndim == 3 else frame
+        signature = frame_signature(gray)
+        shot_changed = is_shot_change(prev_signature, signature)
+        prev_signature = signature
+
+        assignment = identity_tracker.update(poses, shot_changed=shot_changed)
         if not assignment.identity_resolved:
             # Explicit non-correspondence. Dropping the frame is strictly better
             # than guessing: a silent track_0 swap relabels a whole run.

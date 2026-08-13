@@ -418,6 +418,27 @@ CAMERA_CUT_COST = 0.45
 # ⚠️ Thresholds come from THREE windows of ONE bout. They have margin on both
 # axes (0.21 -> 0.30, 0.116 -> 0.20 of the frame diagonal) but they are not
 # validated across venues. Re-measure before trusting them elsewhere.
+# A shot change is a large change in the IMAGE, which is what makes it visible
+# at all: it is invisible in association cost (measured — the audited cut cost
+# LESS than the frame before it, because a cut does not make everything
+# expensive, it makes a wrong match cheap).
+#
+# Grey-histogram correlation distance, measured on two independent frame sets
+# covering four known shot changes:
+#
+#   5417.5  0.1307   known hard cut
+#   5417.0  0.0821   its transition frame
+#   5309.5  0.0587   the "camera pushes to a close-up" the audit describes
+#   5335.0  0.1597   the cut that lost the true switch at 5336
+#   5314.5  0.0166   the other known hard cut
+#   ------  ------
+#   0.0044           highest normal frame; median 0.0007
+#
+# 0.010 sits 2.3x above the loudest normal frame and 1.7x below the quietest
+# real cut. ⚠️ Four cuts in ONE bout: re-measure before trusting it elsewhere.
+SHOT_CHANGE_DISTANCE = 0.010
+SHOT_HIST_BINS = 64
+
 WALK_WINDOW = 8            # frames of history, 4s at the 0.5s sampling
 WALK_STRAIGHTNESS_MIN = 0.30
 WALK_NET_MIN_RATIO = 0.20  # of the image diagonal
@@ -431,6 +452,36 @@ def box_from_keypoints(kp: np.ndarray, conf_thresh: float = POSE_CONF_THRESH) ->
     x1, y1 = float(vis[:, 0].min()), float(vis[:, 1].min())
     x2, y2 = float(vis[:, 0].max()), float(vis[:, 1].max())
     return Box(x=(x1 + x2) / 2.0, y=(y1 + y2) / 2.0, width=x2 - x1, height=y2 - y1)
+
+
+def frame_signature(gray: np.ndarray) -> np.ndarray:
+    """Normalized grey histogram — the cheap fingerprint a shot change moves."""
+    hist, _ = np.histogram(gray, bins=SHOT_HIST_BINS, range=(0.0, 256.0))
+    hist = hist.astype(np.float64)
+    norm = np.linalg.norm(hist)
+    return hist / norm if norm > 0 else hist
+
+
+def is_shot_change(
+    previous: np.ndarray | None,
+    current: np.ndarray,
+    threshold: float = SHOT_CHANGE_DISTANCE,
+) -> bool:
+    """Did the CAMERA change between these two frames, rather than the scene?
+
+    Correlation distance between grey histograms. Deliberately not pixel
+    difference: on the audited window mean absolute difference separated a cut
+    from normal motion by only 1.8x (22.8 -> 40.8), while this separates by two
+    orders of magnitude.
+    """
+    if previous is None:
+        return False
+    a = previous - previous.mean()
+    b = current - current.mean()
+    denom = float(np.sqrt((a * a).sum() * (b * b).sum()))
+    if denom <= 0:
+        return False
+    return (1.0 - float((a * b).sum() / denom)) > threshold
 
 
 def trajectory_walk(
@@ -490,18 +541,36 @@ def pair_in_contact(a: Box, b: Box, limit: float = PAIR_CONTACT_MAX) -> bool:
 def _best_contact_pair(
     candidates: list[tuple[np.ndarray, Box]],
 ) -> list[tuple[np.ndarray, Box]]:
-    """The largest pair that is actually in contact; falls back to largest-two.
+    """The CLOSEST pair of bodies — the two most likely to be grappling.
 
-    The fallback matters: refusing to seed at all would make a frame where the
-    athletes are momentarily apart (a scramble, a restart) unusable, and the
-    contact test is a heuristic, not ground truth.
+    Threshold-free on purpose. `pair_in_contact` needs a cutoff and the
+    measurement says no cutoff separates a real pair from a contaminated one
+    (genuine pairs reach 1.47, contaminated ones sit at 0.88). But *relative*
+    closeness does the job without one: measured per frame on the audited
+    windows, the closest pair has median separation 0.00 — the two athletes,
+    boxes overlapping — while a bystander is further from either of them than
+    they are from each other.
+
+    Size is deliberately NOT used. Size is what let a referee become an athlete:
+    he can be larger in frame than a folded-up grappler.
     """
-    by_size = sorted(candidates, key=lambda c: -(c[1].width * c[1].height))
-    for i, (kp_a, box_a) in enumerate(by_size):
-        for kp_b, box_b in by_size[i + 1:]:
-            if pair_in_contact(box_a, box_b):
-                return [(kp_a, box_a), (kp_b, box_b)]
-    return by_size[:2]
+    if len(candidates) < 2:
+        return candidates[:2]
+
+    best: tuple[float, int, int] | None = None
+    for i in range(len(candidates)):
+        for j in range(i + 1, len(candidates)):
+            a, b = candidates[i][1], candidates[j][1]
+            if _iou(a, b) > 0.0:
+                score = 0.0
+            else:
+                reach = (hypot(a.width, a.height) + hypot(b.width, b.height)) / 4.0
+                score = hypot(a.x - b.x, a.y - b.y) / reach if reach > 0 else float("inf")
+            if best is None or score < best[0]:
+                best = (score, i, j)
+
+    assert best is not None
+    return [candidates[best[1]], candidates[best[2]]]
 
 
 def _keypoint_displacement(
@@ -590,6 +659,7 @@ class PoseIdentityTracker:
         self.assignment_swaps = 0
         self.third_person_rejections = 0
         self.walker_rejections = 0
+        self.shot_change_reseeds = 0
         self._upper_is_track_0: bool | None = None
 
     def _candidates(self, poses: list[np.ndarray]) -> list[tuple[np.ndarray, Box]]:
@@ -617,11 +687,31 @@ class PoseIdentityTracker:
             assignments[track_id] = (kp, box)
         return assignments
 
-    def update(self, poses: list[np.ndarray]) -> PoseAssignment:
+    def update(
+        self,
+        poses: list[np.ndarray],
+        shot_changed: bool = False,
+    ) -> PoseAssignment:
         candidates = self._candidates(poses)
 
         if not self.tracks:
             assignments = self._cold_start(candidates) if len(candidates) >= 2 else {}
+            return self._finish(assignments)
+
+        # The camera changed, not the scene. Geometry from the previous frame is
+        # not comparable to this one, so associating across it is guessing — and
+        # that guess is what put a track on the referee at ~5335 and kept it
+        # there for four seconds. Re-seed from a plausible pair instead, and
+        # record that continuity was genuinely lost.
+        if shot_changed and len(candidates) >= 2:
+            bindings = {key: track.athlete_id for key, track in self.tracks.items()}
+            self.tracks = {}
+            assignments = self._cold_start(candidates)
+            for track_id, athlete_id in bindings.items():
+                if athlete_id and track_id in self.tracks:
+                    self.tracks[track_id].athlete_id = athlete_id
+            self.reinitializations += 1
+            self.shot_change_reseeds += 1
             return self._finish(assignments)
 
         active = [track for track in self.tracks.values() if track.missing <= self.max_missing]

@@ -1,5 +1,6 @@
 import numpy as np
 from decision_vision.role_tracking import (
+    box_from_keypoints,
     Box,
     Detection,
     PairIdentityTracker,
@@ -325,3 +326,49 @@ def test_pose_tracker_reseeds_across_a_camera_cut() -> None:
 
     assert result.identity_resolved, "a cut must not leave the tracker blind"
     assert tracker.reinitializations > before, "the lost continuity was not recorded"
+
+
+def test_shot_change_is_visible_in_the_image_not_in_geometry() -> None:
+    """A cut moves the histogram; ordinary motion does not.
+
+    Measured across two independent frame sets covering four known shot changes:
+    real cuts scored 0.0166 - 0.1597 while the loudest normal frame scored
+    0.0044 (median 0.0007). Association cost, by contrast, could not see the
+    cut at all — it scored LOWER than the frame before it.
+    """
+    from decision_vision.role_tracking import frame_signature, is_shot_change
+
+    rng = np.random.default_rng(7)
+    scene = rng.integers(0, 90, size=(120, 160), dtype=np.int64)
+
+    # Same scene, things moved inside it: a patch shifts, histogram barely stirs.
+    moved = scene.copy()
+    moved[40:70, 40:70] = scene[40:70, 60:90]
+    assert not is_shot_change(frame_signature(scene), frame_signature(moved))
+
+    # A different shot: a far brighter frame. The histogram moves wholesale.
+    other = rng.integers(150, 256, size=(120, 160), dtype=np.int64)
+    assert is_shot_change(frame_signature(scene), frame_signature(other))
+
+    # No previous frame to compare against is not a cut.
+    assert not is_shot_change(None, frame_signature(scene))
+
+
+def test_seeding_picks_the_closest_pair_not_the_largest() -> None:
+    """Size is what let a referee become an athlete: he can be larger in frame
+    than a folded-up grappler. The seed uses relative closeness instead, which
+    needs no threshold — measured, the closest pair per frame has median
+    separation 0.00 (two athletes, boxes overlapping)."""
+    from decision_vision.role_tracking import _best_contact_pair
+
+    a = _kp(cx=300, cy=200, scale=30.0)
+    b = _kp(cx=325, cy=205, scale=30.0)
+    huge_bystander = _kp(cx=90, cy=150, scale=120.0)
+
+    picked = _best_contact_pair(
+        [(kp, box_from_keypoints(kp)) for kp in (huge_bystander, a, b)]
+    )
+    chosen = [p[0] for p in picked]
+    assert any(np.array_equal(c, a) for c in chosen)
+    assert any(np.array_equal(c, b) for c in chosen)
+    assert not any(np.array_equal(c, huge_bystander) for c in chosen)
