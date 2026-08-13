@@ -1,0 +1,98 @@
+[
+  {
+    "id": "adcc-worlds-current-2026-08-13",
+    "family": "adcc",
+    "edition": "snapshot-2026-08-13",
+    "uniform": "no_gi",
+    "decision_model": "points",
+    "verification_status": "verified",
+    "source_url": "https://adcombat.com/adcc-rules-regulations/",
+    "captured_on": "2026-08-13",
+    "profiles": {
+      "qualifying": {"windows": [{"start_s": 0, "end_s": 300, "positive": false, "negative": false}, {"start_s": 300, "end_s": 600, "positive": true, "negative": true}]},
+      "final": {"windows": [{"start_s": 0, "end_s": 600, "positive": false, "negative": true}, {"start_s": 600, "end_s": 1200, "positive": true, "negative": true}]},
+      "overtime": {"windows": [{"start_s": 0, "end_s": null, "positive": true, "negative": true}]}
+    }
+  },
+  {
+    "id": "adcc-trials-current-2026-08-13",
+    "family": "adcc",
+    "edition": "snapshot-2026-08-13",
+    "uniform": "no_gi",
+    "decision_model": "points",
+    "verification_status": "verified",
+    "source_url": "https://adcombat.com/adcc-rules-regulations/",
+    "captured_on": "2026-08-13",
+    "profiles": {
+      "qualifying": {"windows": [{"start_s": 0, "end_s": 180, "positive": false, "negative": false}, {"start_s": 180, "end_s": 360, "positive": true, "negative": true}]},
+      "final": {"windows": [{"start_s": 0, "end_s": 240, "positive": false, "negative": true}, {"start_s": 240, "end_s": 480, "positive": true, "negative": true}]},
+      "overtime": {"windows": [{"start_s": 0, "end_s": null, "positive": true, "negative": true}]}
+    }
+  },
+  {
+    "id": "cji-2025-women",
+    "family": "cji",
+    "edition": "2025-women",
+    "uniform": "no_gi",
+    "decision_model": "round_cards",
+    "verification_status": "verified",
+    "source_url": "https://www.cji2.com/cji-rules",
+    "captured_on": "2026-08-13",
+    "profiles": {"women": {"rounds": 3, "scoring": "10-point-must"}}
+  },
+  {
+    "id": "ibjjf-v6-gi",
+    "family": "ibjjf",
+    "edition": "rule-book-v6.0",
+    "uniform": "gi",
+    "decision_model": "points",
+    "verification_status": "verified",
+    "source_url": "https://ibjjf.com/books-videos",
+    "captured_on": "2026-08-13",
+    "profiles": {"adult-black": {"advantages": true, "penalties": true}}
+  },
+  {
+    "id": "ibjjf-v6-no-gi",
+    "family": "ibjjf",
+    "edition": "rule-book-v6.0",
+    "uniform": "no_gi",
+    "decision_model": "points",
+    "verification_status": "verified",
+    "source_url": "https://ibjjf.com/books-videos",
+    "captured_on": "2026-08-13",
+    "profiles": {"adult-black": {"advantages": true, "penalties": true}}
+  },
+  {
+    "id": "adcc-historical-unknown",
+    "family": "adcc",
+    "edition": "unknown",
+    "uniform": "no_gi",
+    "decision_model": "unknown",
+    "verification_status": "unknown",
+    "source_url": "",
+    "captured_on": "2026-08-13",
+    "profiles": {"unknown": {}}
+  },
+  {
+    "id": "ibjjf-unknown",
+    "family": "ibjjf",
+    "edition": "unknown",
+    "uniform": "unknown",
+    "decision_model": "unknown",
+    "verification_status": "unknown",
+    "source_url": "",
+    "captured_on": "2026-08-13",
+    "profiles": {"unknown": {}}
+  },
+  {
+    "id": "other-unknown",
+    "family": "other",
+    "edition": "unknown",
+    "uniform": "unknown",
+    "decision_model": "unknown",
+    "verification_status": "unknown",
+    "source_url": "",
+    "captured_on": "2026-08-13",
+    "profiles": {"unknown": {}}
+  }
+]

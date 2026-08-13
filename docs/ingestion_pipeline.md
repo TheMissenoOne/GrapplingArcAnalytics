@@ -47,9 +47,10 @@ cleaned timestamped commentary, and an **empty `events`** list. Dumps already re
 ## 3. Refine pbp → events · **LLM, by hand** · → `scripts/dumps/<event>_events.json`
 
 Paste the prompt from **`PROMPT_events_sidecar.md`** into ChatGPT, followed by the transcript.
-Save the returned JSON at `scripts/dumps/<event>_events.json`.
-
-Shape: `{"<a_name>|<opponent>|<year>": [{label, type, actor, ts, successful?}, ...]}`.
+Save the returned JSON at `scripts/dumps/<event>_events.json`. The enriched shape is
+`{"<bout key>": {events, scouting_observations, timing, adjudication}}`; the legacy
+`key -> [events]` shape remains accepted. Labels must come from the technique library.
+Actor ownership is defined in **`docs/match_event_model.md`** (§ Actor Ownership).
 `apply_events.py` also accepts a two-part `name|year` key as a fallback, but every one of the 388
 keys in this repo is three-part — prefer it.
 
@@ -75,9 +76,9 @@ uv run python -m scripts.apply_events --check     # round-trip self-test, writes
 ```
 
 Pass the module name **with** the `_data` suffix and **without** `.py`. Sets each matched bout's
-`events`, drops its `pbp`, normalizes any `"M:SS"` string `ts` to integer seconds, and rewrites the
-dump in the same greppable form. Only matched bouts lose their `pbp`, so a partial sidecar leaves
-the rest refinable in a later pass.
+`events` and optional scouting/timing/adjudication fields, drops its `pbp`, normalizes timestamp
+strings to video-absolute seconds, and rewrites the dump in the same greppable form. Only matched
+bouts lose their `pbp`, so a partial sidecar leaves the rest refinable in a later pass.
 
 > `apply_events.py`'s own docstring says the sidecar lives in `transcripts/deepseek/`. It does not —
 > every sidecar in the repo is in `scripts/dumps/`. The docstring is stale.

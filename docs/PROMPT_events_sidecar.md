@@ -1,209 +1,238 @@
-# The refiner prompt — transcript → events sidecar
+# The refiner prompt — transcript → enriched events sidecar
 
 Copy everything between the `=== PROMPT ===` markers into ChatGPT (or DeepSeek/Claude), then paste
-the transcript underneath it. What comes back is saved verbatim as
-`scripts/dumps/<event>_events.json` and spliced in with `scripts/apply_events.py` (step 4 of
-`ingestion_pipeline.md`).
+the transcript underneath it. Save the returned JSON as `scripts/dumps/<event>_events.json` and
+splice it with `scripts/apply_events.py` (step 4 of `ingestion_pipeline.md`).
 
-**This file is the spec, not a summary of one.** It replaces the event rules previously split
-across `docs/deepseek/E-refine-events.md` and `docs/deepseek/F-transcript-to-dump.md`, which
-disagreed with each other and with the code — see "Why this replaced two specs" at the bottom.
+**This file is the spec, not a summary.** It preserves the strict event rules that replaced
+`docs/deepseek/E-refine-events.md` and `docs/deepseek/F-transcript-to-dump.md`, and adds the
+ruleset-aware scouting envelope.
 
-Two things to fill in before pasting:
+Fill three inputs before pasting:
 
-1. `<BOUT KEYS>` — the exact keys the sidecar must use, one per bout you want refined.
+1. `<BOUT CONTEXT>` — exact bout keys plus externally verified context:
 
-   **They do not exist until step 2 has run.** `batch_queue.py` reads the transcript's Ref block
-   and writes the bouts into `scripts/dumps/<slug>_data.py`; the keys are built from what it found
-   there. So the order is always: drop the `.txt` in `transcripts/queue/`, run `batch_queue.py`,
-   then read the keys back out:
+   ```text
+   Name|Opponent|2026 | ruleset_id=cji-2025-women | uniform=no_gi | start=53:05
+   ```
+
+   The key comes from the preliminary dump. Run step 2 first, fix participant names in the dump,
+   then read keys back verbatim:
 
    ```bash
    uv run python -c "
    import scripts.dumps.<slug>_data as d
-   for k, v in d.RAW[0].items():
-       print(f'{k[0]}|{v[\"opponent\"]}|{k[1]}')
+   for block in d.RAW:
+       for k, v in block.items():
+           print(f'{k[0]}|{v[\"opponent\"]}|{k[1]}')
    "
    ```
-   (`RAW` is a list holding one dict — that is the shape `batch_queue` writes.)
 
-   Copy the output **verbatim**. `apply_events.py:72` rebuilds the candidate keys from the dump
-   (`f"{a_name}|{opp}|{year}"`) and compares by plain string equality — no normalization, no
-   fuzzy matching. A key you tidied up by hand simply matches nothing.
+   `apply_events.py` compares keys by plain string equality. Do not tidy or fuzzy-match them.
+   `ruleset_id`, `uniform`, and `start` are supplied facts. Never ask the model to infer them.
+2. `<TECHNIQUE LABELS>` — allowed vocabulary:
 
-   ⚠️ **Check the names before you refine.** The Ref block is often sloppy, and `batch_queue`
-   copies it faithfully — Polaris 37 currently yields `Ryan Mangan|Rory|2024`, with the opponent
-   truncated to a first name. That name becomes an **athlete row** in the DB on import, so
-   "Rory" and "Rory Kelly" become two different people and need a `dedupe_athletes` repair later.
-   Fix the `opponent` value in the dump FIRST, then re-read the keys from it. Fixing the sidecar
-   instead leaves the dump wrong, and the dump is what gets imported.
-
-   If a key is wrong you will hear about it: `apply_events` prints
-   `⚠ N sidecar key(s) matched no bout: [...]` rather than failing silently.
-2. `<TECHNIQUE LABELS>` — the allowed label vocabulary, so the model does not invent labels that
-   fall out of the shared graph:
    ```bash
    uv run python -c "import json;print(', '.join(sorted(e['en'] for e in json.load(open('analysis/data/technique_library.json')))))"
    ```
-   If that is too long for one message, paste the labels for the types the bout actually involves.
+3. The transcript, including its original timestamps.
 
 ---
 
-```
+```text
 === PROMPT ===
-You are refining a grappling match transcript into structured events. Return ONLY a JSON
-object. No prose, no markdown fences, no commentary.
+You are refining a grappling match transcript into a structured scouting sidecar. Return ONLY
+one valid JSON object. No prose, markdown fences, or commentary.
+
+## Input bout context
+
+Use these exact keys and supplied attributes. Do not infer or change ruleset_id, uniform, start,
+participants, year, or key spelling:
+
+<BOUT CONTEXT>
 
 ## Output shape
 
 {
-  "<bout key>": [
-    {"label": "Closed Guard", "type": "guard", "actor": "Full Name", "ts": 3185},
-    {"label": "Triangle Choke", "type": "submission", "actor": "Full Name", "ts": 3402,
-     "successful": false},
-    {"label": "Triangle Choke", "type": "submission", "actor": "Full Name", "ts": 3455,
-     "successful": true}
-  ]
+  "<bout key>": {
+    "events": [
+      {"label": "Closed Guard", "type": "guard", "actor": "Full Name", "ts": 3185},
+      {"label": "Triangle Choke", "type": "submission", "actor": "Full Name", "ts": 3402,
+       "successful": false,
+       "rule_evidence": {"position_final": "submission escaped"}}
+    ],
+    "scouting_observations": [
+      {"actor": "Full Name", "kind": "initiative", "value": "waits for the first attack",
+       "phase": "regular", "ts": 3210}
+    ],
+    "timing": {"end_ts": 3785, "overtime_start_ts": 3605},
+    "adjudication": {
+      "status": "verified",
+      "kind": "point_total",
+      "result": {
+        "positive": {"Full Name": 2, "Opponent Name": 0},
+        "negative": {"Full Name": 0, "Opponent Name": 1},
+        "advantages": {"Full Name": 0, "Opponent Name": 0},
+        "penalties": {"Full Name": 0, "Opponent Name": 1}
+      }
+    }
+  }
 }
 
-Use EXACTLY these bout keys, verbatim, including capitalisation and spacing:
+Every supplied bout key must appear exactly once. Never invent a key. Empty evidence is:
 
-<BOUT KEYS>
+{
+  "events": [],
+  "scouting_observations": [],
+  "timing": {},
+  "adjudication": {"status": "unknown", "kind": "none"}
+}
 
-A bout with nothing reliable to report gets an empty list. Never omit a key, never invent one.
+Allowed top-level bout fields are exactly `events`, `scouting_observations`, `timing`, and
+`adjudication`.
 
-## ts — the single most common mistake
+## Timestamps: video-absolute only
 
-`ts` is an INTEGER number of SECONDS, counted from the START OF THE VIDEO, not from the start
-of the bout. A bout that begins at 53:05 and sees a guard pull thirty seconds in gets
-ts = 3215, not 30.
+Every `ts`, `end_ts`, and `overtime_start_ts` is an INTEGER number of seconds counted from the
+START OF THE VIDEO, never from the bout start. A bout beginning at 53:05 with a guard pull thirty
+seconds later uses `ts = 3215`, not 30. Convert transcript timestamps directly:
+`53:05 -> 3185`, `1:12:44 -> 4364`.
 
-The site subtracts the bout's start offset when it renders, so a bout-relative value is
-subtracted twice and every video link lands in the wrong place.
+Do not subtract the supplied bout start. The deterministic consumer derives bout-relative timing
+only when a parseable start exists; otherwise it preserves the absolute value and marks relative
+timing unavailable.
 
-Convert every timestamp you read in the transcript directly: "53:05" -> 3185, "1:12:44" -> 4364.
+## Transcript noise and identity
 
-## Which lines may become events
+The transcript is a YouTube auto-caption dump: timestamp, duration line, commentary. Duration
+lines, interface text, music, applause, biography, ads, and navigation are noise. Auto-captions
+mangle names; map a clearly identifiable mention to one of the two bout-key names. Never invent a
+third athlete. An unresolved actor means omit the item.
 
-Ask of each line: is the commentator describing something visibly happening RIGHT NOW, between
-THESE two athletes, in THIS bout? Only then may it become an event.
+## Events: observed actions only
 
-Include on: gets, takes, passes, sweeps, pulls, recovers, escapes, locks, finishes, taps,
-enters, lands, secures, completes.
+Ask: is the commentator describing something visibly happening RIGHT NOW between THESE athletes
+in THIS bout? Include clear completed or materially attempted actions: gets, takes, passes, sweeps,
+pulls, recovers, escapes, locks, finishes, taps, enters, lands, secures, completes.
 
-Exclude entirely: predictions ("he may look for a double leg"), coaching ("he should stand"),
-hypotheticals ("if he posts, the triangle is there"), general instruction ("closed guard is
-strong for leg entries"), tendencies ("he's known for back attacks"), history ("he took his
-back in their last match"), biography, strategy talk, judging speculation, crowd and fatigue
-commentary, and hedged guesses ("it looks like he might be thinking about a kimura").
+Anticipated progressions are NOT events. Exclude:
 
-Exclude on: could, might, may, should, would, probably, likely, expect, needs to, wants to,
-looking to, thinking about, usually, normally, known for, likes to.
+- “can/could/might/may/should/would”, “looking to”, “hunting”, “setting up”, “working toward”;
+- coaching, conditional futures, teaching, tendencies, reputation, history, judging speculation;
+- isolated technique names, unresolved pronouns, crowd/fatigue commentary, or replay-only guesses.
 
-One sentence can hold both. "He's looking to take the back, and now he secures both hooks"
-yields ONE event: the completed back take.
+A named possible next position is not a reached position. “Looking to take the back, and now she
+secures both hooks” yields only the completed back-control event. Ambiguous landing means omit it.
+A missing event reduces coverage; an invented event corrupts the athlete graph.
 
-Emit only when a clear statement, several adjacent lines together, or an official announcement
-confirms it. Never from an isolated technique name, an unresolved pronoun, a replay of
-something you did not already catch live, or narration bleeding in from another bout.
+## Attempts and successful
 
-## Attempts
+An executed failed technique keeps its own type and has `successful: false`; never re-type it as
+`transition` and never put “Attempt” in the label. “Looking for” is not an attempt. Use
+`successful: true` only when completion is explicit. Omit `successful` when outcome is unknown.
 
-A technique that was executed and failed keeps ITS OWN type and carries "successful": false.
-It is never re-typed as "transition".
+Use `transition` only when no other category describes the result: arm drag, duck under, snap
+down, inversion, leg-entanglement entry, takedown defence.
 
-  {"label": "Guard Pass", "type": "pass", "successful": false, ...}
-  {"label": "Double Leg Takedown", "type": "takedown", "successful": false, ...}
+## actor: owner of the game node
 
-A failed guillotine is still part of that athlete's submission game. Re-typing it hides it,
-and a label whose type disagrees with the library entry is rejected on import and vanishes
-from the shared graph.
+The actor is the athlete whose GAME the node belongs to:
 
-Do not write "Attempt" into the label — the flag carries that.
+- guard → guard player (bottom)
+- sweep → sweeper
+- pass → passer
+- control → controller
+- escape → escaping athlete
+- takedown → athlete taking down
+- submission → attacker
 
-"Looking for" is not an attempt. It becomes one once materially established: one hook in is a
-Back Take attempt; both hooks in is Back Control.
+Use the exact full name from the bout key. Never nickname, pronoun, or “top fighter”.
 
-Use "transition" only when the action's result is genuinely no other category: arm drag, duck
-under, snap down, inversion, leg-entanglement entry, takedown defence.
+## type and label
 
-## actor — whose game is it
+`type` is exactly one of: guard, control, pass, sweep, takedown, submission, escape, transition.
 
-The actor is the athlete whose GAME the node belongs to, not whoever is winning the exchange:
-
-  guard      -> the guard player (bottom)
-  sweep      -> the sweeper (the one who was on the bottom)
-  pass       -> the passer
-  control    -> the one holding the control
-  escape     -> the one escaping
-  takedown   -> the one taking down
-  submission -> the one attacking
-
-Use the athlete's full name exactly as it appears in the bout key. Never a nickname, never
-"the top fighter", never a pronoun. If you cannot tell which athlete it was, drop the event —
-an unresolvable actor is silently discarded on import, so a guess is worse than a gap.
-
-## type
-
-Exactly one of: guard, control, pass, sweep, takedown, submission, escape, transition
-
-## label
-
-Use one of these strings verbatim where one fits:
+Use an exact label from this vocabulary where one fits:
 
 <TECHNIQUE LABELS>
 
-Prefer the short reusable label over the commentator's phrasing, and do not over-specify past
-what was actually said: "he passes the guard" is "Guard Pass", not a named variation. Normalise
-synonyms (RNC -> Rear Naked Choke, back mount -> Back Control, single-leg -> Single Leg
-Takedown). Never emit a placeholder like {"label": "Match"}.
+Prefer reusable labels. Do not over-specify beyond the evidence. Normalize clear synonyms
+(RNC → Rear Naked Choke, back mount → Back Control, single-leg → Single Leg Takedown). Never emit
+a placeholder such as `Match`.
 
 ## One event per occurrence
 
-A position held across several lines is ONE event, timestamped where it was first clearly
-established. Re-emit only if it was clearly lost and then regained. A replay refines an event
-you already caught live and keeps the LIVE timestamp; if you cannot place that live moment
-confidently, emit nothing.
+A position held across several lines is one event at the first clear establishment. Re-emit only
+after it was clearly lost and regained. A replay may refine an event already caught live but keeps
+the LIVE timestamp. If the live moment cannot be placed confidently, omit it.
 
-## Before you answer, check
+## scouting_observations
 
-- valid JSON, top level an object, every provided bout key present
-- every "actor" is one of that bout's two athletes, spelled as in the key
-- every "type" is from the eight allowed
-- every "ts" is an integer, in seconds, from the start of the VIDEO
-- events sorted by ts within each bout
-- no two events identical in (label, ts, type, actor, successful)
-- nothing hedged, predicted, remembered or coached made it in
+Allowed `kind`: `posture`, `initiative`, `feint_reaction`, `setup`. Add only direct, current-bout
+evidence. `value` must be short, factual, and non-evaluative. `phase` is `regular`, `overtime`, or
+an explicitly supplied ruleset phase. Never infer overtime from tension, commentary, or elapsed
+time. Do not turn reputation or advice into an observation.
+
+## rule_evidence
+
+Optional. Add only concrete visible or officially announced qualifiers relevant to later ruleset
+projection, such as `stabilized`, `position_final`, `initiative`, or
+`submission_danger_exit`. Describe evidence; never add points or eligibility. If unclear, omit the
+whole field. The downstream system, not this model, maps evidence onto a verified ruleset snapshot.
+
+## timing
+
+Add `end_ts` or `overtime_start_ts` only when clearly announced, displayed, or supplied. Both are
+video-absolute seconds. Omit unknown keys. Never derive them from a ruleset duration.
+
+## adjudication: official/native result only
+
+Record adjudication only from a clearly visible official scoreboard/card or explicit official
+announcement. Never infer points, advantages, penalties, negatives, cards, a winner, or a score
+from technique events.
+
+- `status`: `verified`, `partial`, or `unknown`.
+- `kind`: `point_total`, `round_cards`, or `none`.
+- `point_total.result`: keep `positive`, `negative`, `advantages`, and `penalties` as distinct
+  athlete-keyed maps. Do not net or total them.
+- `round_cards.result`: keep native `rounds`/cards. Do not convert 10–9 cards to points.
+- No reliable official evidence: `{ "status": "unknown", "kind": "none" }`, without `result`.
+
+Do not use the supplied ruleset_id to manufacture an official score. Potential ruleset eligibility
+belongs only in `rule_evidence`; official adjudication belongs only here.
+
+## Final check
+
+- valid JSON; every supplied key present; no invented fields or keys
+- every actor is one of that key's two athletes, exactly spelled
+- event types and observation kinds use the allowed sets
+- all timestamps are integer, sorted within each array, video-absolute
+- no duplicate `(label, ts, type, actor, successful)` event
+- no hedged, predicted, historical, remembered, or coached statement became evidence
+- no inferred ruleset, uniform, official points, cards, advantages, penalties, or timing
 === PROMPT ===
 ```
 
 ---
 
-## After you get the JSON back
+## After receiving JSON
 
 ```bash
-# save it, then splice it into the dump
 uv run python -m scripts.apply_events <slug>_data scripts/dumps/<event>_events.json
-uv run python -m scripts.apply_events --check          # round-trip self-test, writes nothing
+uv run python -m scripts.apply_events --check
 ```
 
-Then continue at step 5 of `ingestion_pipeline.md`.
+The splicer accepts the enriched contract above and the legacy `key -> [events]` shape. Enriched
+sidecars patch only the four allowed fields. Unknown fields fail closed. Only matched bouts lose
+their `pbp`; partial sidecars leave other bouts refinable.
 
-Read the dry-run log for `dropping event with unknown actor <name>` — that is an actor string
-that matched neither athlete, and the event was silently discarded. Fix the sidecar and re-splice;
-do not just re-import.
+Read unmatched-key and unknown-actor warnings. Fix the sidecar or preliminary dump, then re-splice.
+Do not repair identity after import.
 
-## Why this replaced two specs
+## Why this remains strict
 
-Both former specs were wrong in ways that broke real output, and they contradicted each other, so
-neither could be trusted alone. Resolved against the code and against the 6,367 events already in
-`scripts/dumps/*_events.json` (2026-08-13):
-
-| Question | Answer, and how it was settled |
-|---|---|
-| Are timestamps bout-relative or video-absolute? | **Video-absolute.** `export/site_data.py:852` does `max(0, ts - start)` under the comment "Convert broadcast-absolute ts → match-relative". `E-refine-events.md`'s "seconds from bout start" would double-subtract. The live sidecars agree: `leandro_lo_events.json` runs ts 3185–21686. |
-| Does a failed attempt get `transition`, or its own type? | **Its own type.** `F-transcript-to-dump.md`'s header claims it re-types to `transition`, but its own body (§6) says the opposite, and the data is unambiguous: `successful: false` appears on submission (310), control (283), takedown (138), guard (119), pass (84), escape (20) and sweep (14). `transition` is only 38 events total. |
-| Two-part or three-part sidecar keys? | **Three-part** (`name\|opponent\|year`). `apply_events.py` accepts a two-part key as a fallback, but all 388 keys in the repo are three-part. |
-
-`E-refine-events.md` and `F-transcript-to-dump.md` are kept for their worked examples and their
-history, both now carrying a header pointing here. Do not refine from them.
+- Timestamps are video-absolute because site export subtracts the bout start.
+- Failed attempts keep their native type because import validates type against the library.
+- Three-part keys (`name|opponent|year`) are canonical; two-part keys remain a legacy fallback.
+- Actor means node ownership, not who appears to be winning.
+- Ruleset projections are deterministic and separate from official native adjudication.

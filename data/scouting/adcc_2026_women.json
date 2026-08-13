@@ -1,0 +1,159 @@
+{
+  "event": "ADCC 2026",
+  "language": "pt-BR",
+  "target_uniform": "no_gi",
+  "target_ruleset_ids": [
+    "adcc-worlds-current-2026-08-13:qualifying",
+    "adcc-worlds-current-2026-08-13:final"
+  ],
+  "divisions": [
+    {
+      "name": "65 kg",
+      "slug": "ADCC-2026-65kg",
+      "own_athlete": "Livia Barasine",
+      "athletes": [
+        {
+          "name": "Livia Barasine",
+          "country": "Brasil",
+          "qualification": "Atleta do técnico",
+          "aliases": ["Lívia Barasine"],
+          "sources": []
+        },
+        {
+          "name": "Ana Carolina Vieira",
+          "country": "Brasil",
+          "qualification": "Atual campeã",
+          "aliases": ["Ana Carolina Viera", "Ana Vieira"],
+          "sources": [{"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"}]
+        },
+        {
+          "name": "Injana Goodman",
+          "country": "Reino Unido",
+          "qualification": "European, African & Middle East Trials",
+          "aliases": [],
+          "sources": [{"module": "scripts.dumps.polaris33_data", "ruleset_id": "other-unknown", "uniform": "no_gi"}]
+        },
+        {
+          "name": "Sarah Galvão",
+          "country": "Estados Unidos",
+          "qualification": "North American Trials",
+          "aliases": ["Sarah Galvao"],
+          "sources": [
+            {"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
+            {"module": "scripts.dumps.cji2day2_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"}
+          ]
+        },
+        {
+          "name": "Nadia Frankland",
+          "country": "Austrália",
+          "qualification": "Asia & Oceania Trials",
+          "aliases": [],
+          "sources": []
+        },
+        {
+          "name": "Morgan Black",
+          "country": "Estados Unidos",
+          "qualification": "Convidada",
+          "aliases": ["Mo Black"],
+          "sources": [
+            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2023_ec_semis_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2023_ec_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
+          ]
+        },
+        {
+          "name": "Ane Svendsen",
+          "country": "Noruega",
+          "qualification": "Convidada",
+          "aliases": [],
+          "sources": []
+        },
+        {
+          "name": "Joslyn Molina",
+          "country": "Estados Unidos",
+          "qualification": "Convidada",
+          "aliases": ["Jocelyn Molina"],
+          "sources": []
+        }
+      ]
+    },
+    {
+      "name": "+65 kg",
+      "slug": "ADCC-2026-mais-65kg",
+      "own_athlete": "Yara Soares",
+      "athletes": [
+        {
+          "name": "Yara Soares",
+          "country": "Brasil",
+          "qualification": "Atleta do técnico",
+          "aliases": [],
+          "sources": []
+        },
+        {
+          "name": "Rafaela Guedes",
+          "country": "Brasil",
+          "qualification": "Atual campeã",
+          "aliases": [],
+          "sources": [
+            {"module": "scripts.dumps.adcc2022_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
+          ]
+        },
+        {
+          "name": "Anabel Lopez",
+          "country": "Reino Unido",
+          "qualification": "European Trials",
+          "aliases": [],
+          "sources": []
+        },
+        {
+          "name": "Paige Ivette",
+          "country": "Estados Unidos",
+          "qualification": "East Coast Trials",
+          "aliases": ["Paige Ivette Climber", "Paige Climber"],
+          "sources": [
+            {"module": "scripts.dumps.ibjjf2025_top10_data", "ruleset_id": "ibjjf-unknown", "uniform": "unknown"}
+          ]
+        },
+        {
+          "name": "Matilda Reid",
+          "country": "Austrália",
+          "qualification": "Asian & Oceania Trials",
+          "aliases": [],
+          "sources": []
+        },
+        {
+          "name": "Gabi Garcia",
+          "country": "Brasil",
+          "qualification": "Convidada",
+          "aliases": ["Gabrielle Garcia"],
+          "sources": [{"module": "scripts.dumps.adcc2022_women_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}]
+        },
+        {
+          "name": "Helena Crevar",
+          "country": "Estados Unidos",
+          "qualification": "Convidada",
+          "aliases": ["Helena Cravar"],
+          "sources": [
+            {"module": "scripts.dumps.cji2day1_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
+            {"module": "scripts.dumps.cji2day2_data", "ruleset_id": "cji-2025-women", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2023_ec_semis_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.adcc_trials2023_ec_finals_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"}
+          ]
+        },
+        {
+          "name": "Elizabeth Mitrovic",
+          "country": "Estados Unidos",
+          "qualification": "Convidada",
+          "aliases": [],
+          "sources": [
+            {"module": "scripts.dumps.adcc_trials2024_wc_data", "ruleset_id": "adcc-historical-unknown", "uniform": "no_gi"},
+            {"module": "scripts.dumps.ibjjf2023_worlds_data", "ruleset_id": "ibjjf-unknown", "uniform": "unknown"}
+          ]
+        }
+      ]
+    }
+  ]
+}
