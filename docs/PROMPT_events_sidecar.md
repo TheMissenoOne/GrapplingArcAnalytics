@@ -11,8 +11,13 @@ disagreed with each other and with the code — see "Why this replaced two specs
 
 Two things to fill in before pasting:
 
-1. `<BOUT KEYS>` — the exact keys the sidecar must use, one per bout you want refined. Get them
-   from the dump `batch_queue` already wrote:
+1. `<BOUT KEYS>` — the exact keys the sidecar must use, one per bout you want refined.
+
+   **They do not exist until step 2 has run.** `batch_queue.py` reads the transcript's Ref block
+   and writes the bouts into `scripts/dumps/<slug>_data.py`; the keys are built from what it found
+   there. So the order is always: drop the `.txt` in `transcripts/queue/`, run `batch_queue.py`,
+   then read the keys back out:
+
    ```bash
    uv run python -c "
    import scripts.dumps.<slug>_data as d
@@ -21,6 +26,20 @@ Two things to fill in before pasting:
    "
    ```
    (`RAW` is a list holding one dict — that is the shape `batch_queue` writes.)
+
+   Copy the output **verbatim**. `apply_events.py:72` rebuilds the candidate keys from the dump
+   (`f"{a_name}|{opp}|{year}"`) and compares by plain string equality — no normalization, no
+   fuzzy matching. A key you tidied up by hand simply matches nothing.
+
+   ⚠️ **Check the names before you refine.** The Ref block is often sloppy, and `batch_queue`
+   copies it faithfully — Polaris 37 currently yields `Ryan Mangan|Rory|2024`, with the opponent
+   truncated to a first name. That name becomes an **athlete row** in the DB on import, so
+   "Rory" and "Rory Kelly" become two different people and need a `dedupe_athletes` repair later.
+   Fix the `opponent` value in the dump FIRST, then re-read the keys from it. Fixing the sidecar
+   instead leaves the dump wrong, and the dump is what gets imported.
+
+   If a key is wrong you will hear about it: `apply_events` prints
+   `⚠ N sidecar key(s) matched no bout: [...]` rather than failing silently.
 2. `<TECHNIQUE LABELS>` — the allowed label vocabulary, so the model does not invent labels that
    fall out of the shared graph:
    ```bash
