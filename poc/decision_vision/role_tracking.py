@@ -419,6 +419,14 @@ class PoseAssignment:
     identity_resolved: bool
     track_0: np.ndarray | None = None
     track_1: np.ndarray | None = None
+    # Where each track sits this frame, so a swap can be LOCATED IN TIME rather
+    # than only counted. An identity swap shows up as a discontinuous jump in a
+    # track's centre between consecutive frames; smooth motion does not. The
+    # aggregate `assignment_swaps` counter cannot distinguish the two.
+    track_0_xy: tuple[float, float] | None = None
+    track_1_xy: tuple[float, float] | None = None
+    # True on the frame where screen order (which track is upper) flipped.
+    order_flipped: bool = False
 
 
 class PoseIdentityTracker:
@@ -575,11 +583,21 @@ class PoseIdentityTracker:
             return PoseAssignment(identity_resolved=False)
 
         upper_is_track_0 = t0[1].y <= t1[1].y
-        if self._upper_is_track_0 is not None and self._upper_is_track_0 != upper_is_track_0:
+        flipped = (
+            self._upper_is_track_0 is not None and self._upper_is_track_0 != upper_is_track_0
+        )
+        if flipped:
             # Screen-position order flipped (e.g. an inversion or a sweep) but
             # track identity did not follow it — the exact behaviour this
             # tracker exists to guarantee. Counted, not corrected.
             self.assignment_swaps += 1
         self._upper_is_track_0 = upper_is_track_0
 
-        return PoseAssignment(identity_resolved=True, track_0=t0[0], track_1=t1[0])
+        return PoseAssignment(
+            identity_resolved=True,
+            track_0=t0[0],
+            track_1=t1[0],
+            track_0_xy=(round(t0[1].x, 1), round(t0[1].y, 1)),
+            track_1_xy=(round(t1[1].x, 1), round(t1[1].y, 1)),
+            order_flipped=flipped,
+        )

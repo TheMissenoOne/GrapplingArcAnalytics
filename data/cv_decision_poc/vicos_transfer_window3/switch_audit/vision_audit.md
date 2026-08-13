@@ -436,3 +436,50 @@ improvement.
 
 **Persistence-in-time still comes last.** Nothing here changes that: it would suppress 5326.0 and
 5368.5 while doing nothing for the lost 5336.0, and would make the remaining true switch later still.
+
+## Why 5336.0 was lost — root cause found (2026-08-12)
+
+Not what either earlier hypothesis said. The tracker did **not** swap the two athletes, and the
+probe did **not** misread a correctly ordered pair. **It captured a non-athlete.**
+
+Per-frame track positions were added (`t0_x/t0_y`, `t1_x/t1_y`, `order_flipped` on every raw row)
+precisely because the aggregate `assignment_swaps` counter says that swaps happen without saying
+*when*. Run: `..._identity3/`.
+
+```
+track_1 · y:  93.7  96.0  96.1  99.8  97.3  94.3  95.8 102.5  91.4  90.6  91.8
+track_1 · x: 160.8 162.1 157.6 152.2 143.4 150.6 167.3 173.4 208.7 228.5 252.7
+track_0 · y:  168 – 181   (the two athletes, on the mat)
+```
+
+From 5334.5 onward `track_1` is pinned in a narrow horizontal band near the top of the frame while
+sliding steadily right — someone **walking across the background**. Independently confirmed at 640px
+from the audit frames by bounding-box shape: `track_1`'s height/width runs 1.76, 2.13, 2.15, **5.20**,
+2.16 (tall and narrow, a standing person) against `track_0`'s 0.73–1.30 (wide and low, grappling
+bodies). Nothing in a grapple is five times taller than wide.
+
+So for the whole 5336 window the pair handed to `pair_to_features` was **one athlete and the
+referee**. No role exchange could be detected because the second athlete was not in the pair. The
+role reads `athlete1` at 0.99–1.00 confidence because the probe is confidently describing the
+relationship between an athlete and a bystander.
+
+### What this exposes
+
+`third_person_rejections` (235 frames in this run) **counts** extra people; it does not **prevent**
+one being selected. Association is purely geometric cost, and after a camera cut every cost is large
+at once, so a bystander can legitimately win. The plan asserted "the referee can be larger than an
+athlete and still not steal the track" — the code counts that case rather than preventing it.
+
+It very likely explains 5461.5 too: the bout ends, the athletes separate and stand up, and more
+upright people are in frame.
+
+### Direction (not a threshold)
+
+1. **Candidate plausibility.** A candidate must look like a grappler before it can compete for a
+   track. Aspect ratio is the cheapest signal and separates well here (5.20 vs ~1.0) but is fragile
+   alone — an athlete standing at the start of a bout is also tall. A composite test, including that
+   the two bodies must be near each other, is more honest.
+2. **Camera-cut handling.** When *every* association cost jumps at once, that is a global
+   discontinuity, not motion. Associating on that frame is guessing; it should re-seed under the
+   plausibility filter instead.
+3. **Bout-boundary guard**, as already noted for 5461.5.

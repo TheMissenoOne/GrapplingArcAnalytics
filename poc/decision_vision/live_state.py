@@ -475,6 +475,12 @@ def main() -> None:
                 "state": pred["state"][0],
                 "state_conf": pred["state"][1],
                 "identity_resolved": True,
+                # Track positions, so an identity swap can be located in time.
+                "t0_x": assignment.track_0_xy[0] if assignment.track_0_xy else None,
+                "t0_y": assignment.track_0_xy[1] if assignment.track_0_xy else None,
+                "t1_x": assignment.track_1_xy[0] if assignment.track_1_xy else None,
+                "t1_y": assignment.track_1_xy[1] if assignment.track_1_xy else None,
+                "order_flipped": assignment.order_flipped,
                 "pose_pair": True,
             }
         )
