@@ -23,6 +23,31 @@
   gap: 12px;
 }
 
+.batch-row { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 14px; align-items: stretch; }
+.batch-input { min-height: 126px; height: auto; padding: 14px 15px; resize: vertical; line-height: 1.5; }
+.batch-actions { display: flex; flex-direction: column; gap: 10px; }
+.batch-hint { color: var(--ink-3); font: 10px var(--mono); line-height: 1.45; }
+.batch-queue { display: grid; gap: 6px; margin-top: 14px; }
+.queue-row { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; background: #101014; font-size: 12px; }
+.queue-index, .queue-state { font: 10px var(--mono); color: var(--ink-3); }
+.queue-url { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.queue-row.processing { border-color: var(--blue); background: var(--blue-wash); }
+.queue-row.done { border-color: #245c4d; }
+.queue-row.done .queue-state { color: var(--good); }
+.queue-row.error { border-color: #5f2929; }
+.queue-row.error .queue-state { color: #ffaaa8; }
+.queue-links, .report-links { display: flex; gap: 10px; font: 10px var(--mono); white-space: nowrap; }
+.queue-links a, .report-links a { color: var(--blue-ink); }
+.reports-card { margin: 28px 0 20px; border-top: 1px solid var(--line); padding-top: 22px; }
+.reports-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 12px; }
+.reports-head h2 { font-size: 22px; margin-top: 6px; }
+.report-count { display: grid; place-items: center; min-width: 32px; height: 32px; border-radius: 9px; background: var(--panel-2); color: var(--blue-ink); font: 12px var(--mono); }
+.report-list { display: grid; gap: 6px; }
+.report-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.report-row > div:first-child { min-width: 0; display: grid; gap: 2px; }
+.report-row strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.report-row span, .empty-reports { color: var(--ink-3); font: 10px var(--mono); }
+
 .url-input {
   height: 50px;
   border: 1px solid var(--line-2);
@@ -553,6 +578,8 @@
 }
 
 @media (max-width: 900px) {
+  .batch-row { grid-template-columns: 1fr; }
+  .batch-actions { flex-direction: row; align-items: center; }
   .layout {
     grid-template-columns: 1fr;
   }
@@ -583,6 +610,11 @@
   .primary {
     width: 100%;
   }
+
+  .batch-actions { flex-direction: column; align-items: stretch; }
+  .report-row { align-items: flex-start; flex-direction: column; gap: 8px; }
+  .queue-row { grid-template-columns: 28px minmax(0, 1fr); }
+  .queue-state, .queue-links { grid-column: 2; }
 
   .steps {
     grid-template-columns: repeat(2, 1fr);

@@ -1,5 +1,5 @@
 /**
- * Study orchestrator — calls Edge Function, runs client-side RAG, renders results.
+ * Study orchestrator — calls the local Python endpoint, runs client-side RAG, renders results.
  * Requires: window.GA_CONFIG, window.GA_STUDY_KNOWLEDGE, GAStudyRag, GAGraph
  */
 (function () {
@@ -39,7 +39,7 @@
 
   const resetStages = () => {
     $$(".step").forEach((x) => x.classList.remove("active", "done"));
-    $("#progressBar").style.width = "0%";
+    $("#progressBar").style.transform = "scaleX(0)";
   };
 
   const showError = (msg) => {
@@ -49,6 +49,53 @@
 
   const clearError = () => {
     $("#errorBox").classList.remove("show");
+  };
+
+  const urlsFromInput = () => [...new Set($("#videoUrls").value.split(/\r?\n/).map((u) => u.trim()).filter(Boolean))];
+
+  const renderQueue = (items) => {
+    const queue = $("#batchQueue");
+    queue.replaceChildren();
+    items.forEach((item, i) => {
+      const row = document.createElement("div");
+      row.className = `queue-row ${item.state}`;
+      row.innerHTML = `<span class="queue-index"></span><span class="queue-url"></span><span class="queue-state"></span>`;
+      row.querySelector(".queue-index").textContent = String(i + 1).padStart(2, "0");
+      row.querySelector(".queue-url").textContent = item.title || item.url;
+      row.querySelector(".queue-state").textContent = item.stateLabel || item.state;
+      if (item.links) {
+        const links = document.createElement("span");
+        links.className = "queue-links";
+        links.innerHTML = `<a target="_blank">HTML</a> <a download>JSON</a>`;
+        links.querySelector("a").href = item.links.html;
+        links.querySelectorAll("a")[1].href = item.links.json;
+        row.append(links);
+      }
+      queue.append(row);
+    });
+  };
+
+  const addSavedReport = (report) => {
+    const list = $("#reportList");
+    list.querySelector(".empty-reports")?.remove();
+    const row = document.createElement("div");
+    row.className = "report-row";
+    row.innerHTML = `<div><strong></strong><span></span></div><div class="report-links"><a target="_blank">Open HTML</a><a download>Download JSON</a></div>`;
+    row.querySelector("strong").textContent = report.title;
+    row.querySelector("span").textContent = report.video_id;
+    row.querySelectorAll("a")[0].href = `/admin/study/reports/${report.id}.html`;
+    row.querySelectorAll("a")[1].href = `/admin/study/reports/${report.id}.json`;
+    list.prepend(row);
+    $("#reportCount").textContent = String(Number($("#reportCount").textContent || 0) + 1);
+  };
+
+  const saveReport = async (payload) => {
+    const response = await fetch("/admin/study/reports", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error?.message || `Report save failed (HTTP ${response.status})`);
+    return result;
   };
 
   function renderVideo(sec = 0) {
@@ -229,60 +276,41 @@
     resetStages();
     $("#study").classList.remove("show");
 
-    ytId = getYoutubeId($("#videoUrl").value.trim());
-    if (!ytId) {
-      showError("Paste a valid YouTube URL.");
+    const urls = urlsFromInput();
+    if (!urls.length) {
+      showError("Paste at least one YouTube URL.");
       return;
     }
+    const items = urls.map((url) => ({ url, state: "queued", stateLabel: "queued" }));
+    renderQueue(items);
 
     $("#analyzeBtn").disabled = true;
-    const stages = ["metadata", "transcript", "rag", "rendering"];
-    for (const s of stages) setStage(s, "active");
-
-    try {
-      const endpoint = window.GA_CONFIG?.transcriptEndpoint;
-      if (!endpoint) throw new Error("Transcript endpoint not configured");
-
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 20000);
-
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: $("#videoUrl").value.trim(), languages: ["en", "pt-BR", "pt"] }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timer);
-
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({ error: { message: `HTTP ${response.status}` } }));
-        throw new Error(err.error?.message || `HTTP ${response.status}`);
+    $("#pipeline").classList.add("show");
+    for (let i = 0; i < items.length; i += 1) {
+      const item = items[i];
+      item.state = "processing"; item.stateLabel = `processing ${i + 1}/${items.length}`; renderQueue(items);
+      try {
+        ytId = getYoutubeId(item.url);
+        if (!ytId) throw new Error("Invalid YouTube URL");
+        const endpoint = window.GA_CONFIG?.transcriptEndpoint;
+        if (!endpoint) throw new Error("Local transcript endpoint not configured");
+        const response = await fetch(endpoint, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: item.url, languages: ["en", "pt-BR", "pt"] }),
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error?.message || `HTTP ${response.status}`);
+        if (rag) payload.segments?.forEach((seg) => { seg.rag = rag.search(seg.text, { limit: 6 }); });
+        const report = await saveReport(payload);
+        item.title = payload.video?.title || item.url; item.state = "done"; item.stateLabel = "complete";
+        item.links = { html: `/admin/study/reports/${report.id}.html`, json: `/admin/study/reports/${report.id}.json` };
+        addSavedReport(report); renderStudy(payload); $("#study").classList.add("show");
+      } catch (e) {
+        item.state = "error"; item.stateLabel = e.message || String(e);
       }
-
-      const payload = await response.json();
-      setStage("metadata", "done");
-      setStage("transcript", "done");
-
-      // Run RAG
-      if (rag) {
-        for (const seg of payload.segments) {
-          const hits = rag.search(seg.text, { limit: 6 });
-          seg.rag = hits;
-        }
-      }
-      setStage("rag", "done");
-
-      renderStudy(payload);
-      setStage("rendering", "done");
-      $("#study").classList.add("show");
-      setTimeout(() => $("#study").scrollIntoView({ behavior: "smooth", block: "start" }), 100);
-    } catch (e) {
-      showError(e.message || String(e));
-    } finally {
-      $("#analyzeBtn").disabled = false;
+      $("#progressBar").style.transform = `scaleX(${(i + 1) / items.length})`;
+      renderQueue(items);
     }
+    $("#analyzeBtn").disabled = false;
   });
 })();
