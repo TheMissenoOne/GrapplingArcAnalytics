@@ -1,0 +1,24 @@
+{
+  "run_id": "transfer-7dc97750",
+  "pipeline": "vicos_transfer",
+  "status": "completed",
+  "phase": "done",
+  "current": 601,
+  "total": 601,
+  "percent": 100.0,
+  "message": "Transfer complete: 600 frames, role_observed_rate_raw=0.3529, identity_resolved_rate=0.6517",
+  "started_at": "2026-08-13T01:27:04.926753+00:00",
+  "updated_at": "2026-08-13T01:29:46.646780+00:00",
+  "finished_at": "2026-08-13T01:29:46.646780+00:00",
+  "metrics": {
+    "pose_pair_rate": 0.6517,
+    "role_observed_rate": 0.3529,
+    "role_flips_per_min": 4.0067,
+    "segments": 33,
+    "identity_resolved_rate": 0.6517,
+    "tracker_reinitializations": 55,
+    "assignment_swaps": 72,
+    "third_person_rejections": 208
+  },
+  "error": null
+}

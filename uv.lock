@@ -1062,6 +1062,7 @@ dev = [
     { name = "python-multipart" },
     { name = "qdrant-client" },
     { name = "ruff" },
+    { name = "uvicorn", extra = ["standard"] },
 ]
 postgres = [
     { name = "alembic" },
@@ -1135,6 +1136,7 @@ requires-dist = [
     { name = "torch", marker = "extra == 'cv'", specifier = ">=2.3" },
     { name = "torchvision", marker = "extra == 'cv'", specifier = ">=0.18" },
     { name = "ultralytics", marker = "extra == 'cv'", specifier = ">=8.2" },
+    { name = "uvicorn", extras = ["standard"], marker = "extra == 'dev'", specifier = ">=0.30" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'realtime'", specifier = ">=0.30" },
     { name = "uvicorn", extras = ["standard"], marker = "extra == 'web'", specifier = ">=0.30" },
     { name = "xgboost", specifier = ">=2.1" },

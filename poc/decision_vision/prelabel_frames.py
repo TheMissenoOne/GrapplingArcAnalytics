@@ -293,6 +293,7 @@ def main() -> None:
     models, classes = load_probes(args.probe_dir)
     done_matches = 0
     written = missed = 0
+    failed: list[tuple[str, str]] = []
 
     for match_id, match_targets in by_match.items():
         if args.limit_matches and done_matches >= args.limit_matches:
@@ -309,7 +310,12 @@ def main() -> None:
         try:
             predictions = predict_match(match_id, todo, models, classes)
         except Exception as exc:  # noqa: BLE001 - one bad video must not stop the run
+            # Signed video URLs expire, and over 204 matches that WILL happen
+            # repeatedly (seen twice on 2026-08-12 as a 403). Skipping is right,
+            # but a warning scrolling past in a log leaves nobody knowing which
+            # matches to redo — so they are collected and printed at the end.
             logger.warning("match %s failed, skipping: %s", match_id[:8], exc)
+            failed.append((match_id, str(exc).splitlines()[0][:120]))
             continue
         for t in todo:
             pred = nearest_prediction(predictions, t.ts)
@@ -323,6 +329,10 @@ def main() -> None:
         "done: %d written, %d with no frame close enough to their event",
         written, missed,
     )
+    if failed:
+        logger.warning("%d match(es) failed and need a re-run:", len(failed))
+        for match_id, reason in failed:
+            logger.warning("   %s  %s", match_id, reason)
 
 
 if __name__ == "__main__":
