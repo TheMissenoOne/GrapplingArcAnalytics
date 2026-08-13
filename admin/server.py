@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import re
 from datetime import datetime
@@ -85,6 +86,7 @@ from harvest.harvester import (
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 STATIC_DIR = Path(__file__).parent / "static"
+logger = logging.getLogger(__name__)
 
 
 def _csrf_context(request: Request) -> dict[str, Any]:
@@ -822,8 +824,10 @@ def create_admin_app() -> FastAPI:
         try:
             payload = build_analysis(url, languages)
         except StudyError as exc:
+            logger.warning("study analysis rejected url=%s: %s", url, exc)
             return JSONResponse({"error": {"message": str(exc)}}, status_code=400)
         except Exception as exc:
+            logger.exception("study analysis failed url=%s", url)
             return JSONResponse({"error": {"message": f"Analysis failed: {exc}"}}, status_code=500)
         return JSONResponse(payload)
 
