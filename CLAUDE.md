@@ -118,7 +118,8 @@ A bout's `sequence` = events `{label, type, actor, successful?, ts?}` → transi
 entry path (DeepSeek refiner, `convert_dump.py`, `insert_*.py`, admin paste) must follow one
 convention — **`actor` = the fighter whose game the node belongs to**, not who's winning: a `guard`
 node is owned by the **guard player** (bottom), the `pass` by the passer. Full model + the per-type
-ownership table: **`docs/match_event_model.md`** (refiner-facing copy in `docs/deepseek/E-refine-events.md`).
+ownership table: **`docs/match_event_model.md`**. The refiner prompt + rules: **`docs/PROMPT_events_sidecar.md`**
+(replaced `docs/deepseek/E-refine-events.md`, which teaches a wrong bout-relative timestamp).
 
 **End-to-end ingestion** (transcript → dump → refine → import → embeddings → site → validate),
 with the command + owner for each step: **`docs/ingestion_pipeline.md`**. QA a fresh batch with

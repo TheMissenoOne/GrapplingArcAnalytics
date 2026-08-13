@@ -1,122 +1,201 @@
 # Match ingestion pipeline — transcript → DB → embeddings → site
 
 End-to-end, how one grappling/MMA event goes from a raw YouTube page to live interactive
-breakdowns. Ownership is marked per step: **YOU** (manual), **DeepSeek** (refiner LLM),
-**maintainer** (the deterministic scripts — me or you running them).
+breakdowns. **This is the single authority for the pipeline.** The event/label rules the refiner
+follows live in `PROMPT_events_sidecar.md`, which is also the prompt you paste into ChatGPT.
+
+Ownership is marked per step: **YOU** (manual), **LLM** (the refiner, run by hand in a chat window
+— nothing calls an API), **maintainer** (the deterministic scripts).
 
 ```
- YOU            batch_queue        DeepSeek           apply_events      reprocess_all      embeddings        site_data
+ YOU            batch_queue        LLM (chat)         apply_events      reprocess_all      embeddings        site_data
 transcript ─▶ preliminary dump ─▶ events sidecar ─▶ spliced dump ─▶ matches in DB ─▶ pgvector ─▶ site/  ─▶ validate
  (.txt)        (pbp + [])          (_events.json)     (events)        (+ELO replay)    (768-d)     (pages)   (deviance)
 ```
 
 ---
 
-## 1. Grab the transcript  ·  **YOU**  ·  → `transcripts/queue/<Event>.txt`
+## 1. Grab the transcript · **YOU** · → `transcripts/queue/<Event>.txt`
 
 From the YouTube video page, save one `.txt` with three parts:
 
-- **Ref block** (top) — the match card = **source of truth for the bout list + start times**.
-  One line per bout: `Name vs Name: (M:SS)` or `Name vs Name: (M:SS - M:SS)`. Copy it from the
-  video description / pinned comment. Wrap it as `Ref:"…"`.
-- **Link** — `Link: https://www.youtube.com/watch?v=<id>` (the video; used for per-event seek).
-- **Transcript body** — the full auto-caption dump (the `timestamp / duration / text` blocks).
-  This is the source of truth for the **event sequence**.
+- **Ref block** (top) — the match card, the source of truth for the **bout list + start times**.
+  One line per bout. Write either `Name vs Name (M:SS)` / `Name vs Name (M:SS - M:SS)` or
+  `M:SS Name vs Name` — `batch_queue.parse_match_card()` tries a chain of regexes and takes the
+  first that matches each line.
+- **Link** — `Link: https://www.youtube.com/watch?v=<id>`.
+- **Transcript body** — the full auto-caption dump. Source of truth for the **event sequence**.
 
-Drop the file in `transcripts/queue/`. The filename stem is the event handle (e.g. `Polaris31.txt`);
-map a nicer display name in `batch_queue.STUB_EVENTS` if the stem is ugly.
+The filename stem is the event handle (e.g. `Polaris31.txt`) and is used everywhere downstream —
+keep it short and stable. Map a nicer display name in `batch_queue.STUB_EVENTS` if the stem is ugly.
 
-## 2. Preliminary dump  ·  **maintainer**  ·  `scripts/batch_queue.py`
+> There is no `fmt=colon/finals/nowcolon` flag. The root `TRANSCRIPT_PROCESSING.md` documents one;
+> it exists in no current script.
+
+## 2. Preliminary dump · **maintainer** · `scripts/batch_queue.py`
 
 ```bash
 uv run python scripts/batch_queue.py
 ```
 
-Parses every queued transcript → `scripts/dumps/<event>_data.py`: one bout per `("Name", year)`
-key, each carrying preliminary `winner`/`method` guesses and a **`pbp`** window (cleaned,
-timestamped commentary) with an **empty `events`** list. Output is pretty-printed (greppable) and
-still a valid importable module. It never invents events — that's step 3.
+No flags — it scans every `transcripts/queue/*.txt` on each run. For each it writes
+`scripts/dumps/<slug>_data.py`: a module-level `RAW` list holding one dict, keyed
+`("Name", year)` per bout, each with preliminary `winner`/`method` guesses, a **`pbp`** window of
+cleaned timestamped commentary, and an **empty `events`** list. Dumps already refined (containing
+`"label":`) are skipped, so re-running is safe. It never invents events — that is step 3.
 
-## 3. Refine pbp → events  ·  **DeepSeek**  ·  → `scripts/dumps/<event>_events.json`
+## 3. Refine pbp → events · **LLM, by hand** · → `scripts/dumps/<event>_events.json`
 
-DeepSeek walks each dump with grep + a python bout-reader, checks labels against the technique
-library, and emits a sidecar `{ "<a_name>|<year>": [ {label,type,actor,successful?,ts} ] }`.
-Spec: **`docs/deepseek/E-refine-events.md`**. The rule that governs *which fighter* owns each node
-(guard → the guard player, not the passer) is **`docs/match_event_model.md`** (§ Actor Ownership).
+Paste the prompt from **`PROMPT_events_sidecar.md`** into ChatGPT, followed by the transcript.
+Save the returned JSON at `scripts/dumps/<event>_events.json`.
 
-## 4. Splice events into the dump  ·  **maintainer**  ·  `scripts/apply_events.py`
+Shape: `{"<a_name>|<opponent>|<year>": [{label, type, actor, ts, successful?}, ...]}`.
+`apply_events.py` also accepts a two-part `name|year` key as a fallback, but every one of the 388
+keys in this repo is three-part — prefer it.
+
+Three rules cause every recurring failure, and all three are in the prompt:
+
+- **`ts` is seconds from the start of the VIDEO**, never from the start of the bout.
+  `export/site_data.py:852` subtracts the bout start when rendering, so a bout-relative value is
+  subtracted twice and every video link lands in the wrong place.
+- **A failed attempt keeps its own type** plus `successful: false`; it is not re-typed
+  `transition`. `clean_label` rejects a label whose type disagrees with its library entry, and the
+  event drops out of the shared graph.
+- **`actor` is the athlete whose game the node belongs to** — `guard` to the guard player,
+  `pass` to the passer. Full model: `match_event_model.md`.
+
+`scripts/refine_pbp.py` exists as a keyword-extraction first pass but is noisy; it is not a
+substitute for reading the transcript.
+
+## 4. Splice events into the dump · **maintainer** · `scripts/apply_events.py`
 
 ```bash
-uv run python -m scripts.apply_events <module> transcripts/deepseek/<event>_events.json
-uv run python -m scripts.apply_events --check     # round-trip self-test
+uv run python -m scripts.apply_events <slug>_data scripts/dumps/<event>_events.json
+uv run python -m scripts.apply_events --check     # round-trip self-test, writes nothing
 ```
 
-Sets each matched bout's `events`, drops its `pbp`, normalizes `ts` "M:SS"→seconds, rewrites the
-dump. Only matched bouts lose their pbp, so a partial sidecar leaves the rest refinable.
+Pass the module name **with** the `_data` suffix and **without** `.py`. Sets each matched bout's
+`events`, drops its `pbp`, normalizes any `"M:SS"` string `ts` to integer seconds, and rewrites the
+dump in the same greppable form. Only matched bouts lose their `pbp`, so a partial sidecar leaves
+the rest refinable in a later pass.
 
-## 5. Register + import to the DB  ·  **maintainer**  ·  `scripts/reprocess_all.py`
+> `apply_events.py`'s own docstring says the sidecar lives in `transcripts/deepseek/`. It does not —
+> every sidecar in the repo is in `scripts/dumps/`. The docstring is stale.
 
-Add each refined dump to the `DUMPS` list: `("scripts.dumps.<mod>_data", "<Event tag>", "<Label>")`
-(the *Event tag* is the card-page grouping, e.g. `"Polaris 31"`). Then:
+## 5. Register the dump · **maintainer** · `scripts/reprocess_all.py`
+
+Add one tuple to the **`DATASETS`** list (61 entries as of 2026-08-13):
+
+```python
+("scripts.dumps.<slug>_data", "<Event tag or None>", "<Label>"),
+```
+
+`<Event tag>` groups bouts into one card page in `export.site_data` (all four ADCC-2022 weight
+dumps share `"ADCC 2022"`); use `None` for career compilations with no card page. `<Label>` is what
+you pass to `--only` and must be unique.
+
+## 6. Import to the DB · **HUMAN / ORCHESTRATOR ONLY**
 
 ```bash
-uv run python -m scripts.reprocess_all --only <Label> --dry-run   # parse + report, no writes
-uv run python -m scripts.reprocess_all --only <Label>             # import this event
-uv run python -m scripts.reprocess_all                            # re-import the whole corpus
+uv run python -m scripts.reprocess_all --only <Label> --dry-run --no-export   # parse + report, NO writes
+uv run python -m scripts.reprocess_all --only <Label> --no-export             # WRITES to prod
 ```
 
-`run_dump` de-dupes bouts (`frozenset(participants)+year`), idempotently replaces them, and
-**double-pass replays both athletes' ELO**. Labels are canonicalized to the technique library and
-actors resolved to sides on the way in (`_clean_events` drops any event whose actor ≠ either
-athlete — see `docs/match_event_model.md`).
+> Writing to the shared prod Supabase DB is an orchestrator/human action. A subagent runs the
+> dry-run, reports, and hands off.
 
-## 6. Embeddings → pgvector  ·  **maintainer**  ·  `analysis/embeddings.py`
+**Always pass `--no-export`.** A bare run auto-calls `export.match_breakdown.run()`, which
+regenerates `GrapplingArc/assets/matches/*.json` — the legacy Jekyll-era tree, removed from the
+live site in 2026-06. It costs 10+ minutes and serves nothing. The real export is step 8.
 
-Run after any import (new nodes/graphs need vectors). This **propagates the 768-d embeddings into
-the DB** (`technique_nodes`, `graph_edges`, `graphs`, `archetypes` pgvector columns):
+Read the dry-run log for `dropping event with unknown actor <name>`: an `actor` that matched
+neither athlete, silently discarded. Fix the sidecar and re-splice — do not just re-import.
+
+`run_dump` resolves both athletes by normalized `athlete_key` (creating rows if unseen), de-dupes
+on `frozenset(participants) + year` in both orientations (idempotent, safe to re-run),
+canonicalizes every label against the 208-entry technique library, skips striking-heavy MMA bouts
+with too little grappling, and sets `Match.video_url` from `url_mapping.json` (step 7).
+
+**ELO replay is not a separate command.** Every non-dry-run import replays in full — the graph and
+ELO are path-dependent, so each touched athlete is rebuilt from all their `status == "final"`
+matches. `reprocess_all` collects the athletes across all dumps and replays each once at the end.
+
+## 7. Video URLs · `url_mapping.json` · generator is broken
+
+Linkage happens at **import** time, not export: `dump_import.video_index()` keys mapped bouts by
+`(frozenset(athlete_key(a), athlete_key(b)), year)` and sets `Match.video_url` + `&t=<start>s`. The
+exporter only reads the column.
+
+`scripts/yt/build_url_mapping.py` is **broken for new events** — it hardcodes a root path and looks
+for `<stem>.py` files that have not lived there since dumps moved. `url_mapping.json` holds 28
+entries, all legacy.
+
+Practical fix: hand-edit `url_mapping.json`, adding a top-level key shaped like an existing entry
+(`event_title`, `video_url`, `file`, `matches[]` with `athlete`/`year`/`opponent`/`seconds`), then
+re-run step 6 — `video_index()` re-reads the file every run.
+
+**Never hand-edit `GrapplingArc/assets/matches/*.json`.** It is generated output; the edit is a
+no-op overwritten on the next export.
+
+## 8. Embeddings → pgvector · **maintainer**
 
 ```bash
 uv run python -m analysis.embeddings all      # nodes, then edges + graphs + archetype centroids
-# (or: `backfill` = nodes only · `graphs` = edges+graphs+archetypes only)
 ```
 
-Powers the semantic grappling-map / "related positions" / stylistic nearest-graphs.
+Run after any import — new nodes and graphs have no vectors, and the map/ocean pages need them.
 
-## 7. Export the site  ·  **maintainer**  ·  `export/site_data.py`
-
-Regenerates the **entire** `GrapplingArc/site/` bundle from the DB (all `*-data.js` globals +
-`breakdown-*`/`grapple-*`/`event-*`/`the-ocean.html`). Run it **after** embeddings so the
-map/ocean pages reflect fresh vectors:
+## 9. Export the site · **maintainer**
 
 ```bash
-cd ../GrapplingArcAnalytics && uv run python -m export.site_data   # ~10-12 min (N+1 over remote DB)
+uv run python -m export.site_data             # ~7 min warm, ~10-12 min cold
 ```
 
-Then commit + push `GrapplingArc/site/` (main → GitHub Pages deploys). Per-phase timing prints to
-the log; it is slow, not hung (see [[queue-refiner-and-export-perf]]).
+Regenerates the entire `GrapplingArc/site/` bundle from the DB. Run **after** embeddings. It is
+slow, not hung. Then commit and push `GrapplingArc/site/` on `main`; GitHub Pages deploys.
 
-## 8. Validate  ·  **maintainer**
+## 10. Validate · **maintainer**
 
-- **Recheck list — did any bout come out unlike the athlete's usual game?**
-  ```bash
-  uv run python -m analysis.match_deviance          # per (athlete, bout) deviance, most-deviant first
-  ```
-  High deviance + a stark `shift` (e.g. `guard 32%→0%`) on a low-event bout = likely mis-refined
-  (wrong actor ownership / wrong athlete / noisy labels). Recheck those transcripts.
-- **Import warnings** — `reprocess_all --dry-run` output: any "dropping event with unknown actor"
-  means an actor didn't resolve to a fighter (fix the name in the sidecar).
-- **Site invariants** — the `site-checker` agent: no dup/self slugs, dead links, missing globals.
+```bash
+uv run python -m analysis.match_deviance      # per (athlete, bout) deviance, most deviant first
+```
+
+High deviance plus a stark shift (`guard 32% → 0%`) on a low-event bout usually means a
+mis-refined transcript: wrong actor ownership, wrong athlete, or noisy labels. Recheck those.
+
+Site invariants (dup/self slugs, dead links, missing globals) are the `site-checker` agent's job.
 
 ---
 
-### Quick full refresh (after a batch of imports)
+## Quick full refresh
 
 ```bash
-uv run python -m scripts.reprocess_all         # import all registered dumps + ELO replay
-uv run python -m analysis.embeddings all       # re-embed → pgvector (propagate to DB)
-uv run python -m export.site_data              # regenerate site/
-uv run python -m analysis.match_deviance       # QA: what to recheck
+uv run python -m scripts.reprocess_all --no-export
+uv run python -m analysis.embeddings all
+uv run python -m export.site_data
+uv run python -m analysis.match_deviance
 ```
 
-Sub-specs: refiner = `docs/deepseek/E-refine-events.md` · event/actor model =
-`docs/match_event_model.md` · public-site contract = `../GrapplingArc/CLAUDE.md`.
+## Pre-flight
+
+- Stem does not collide with an existing `DATASETS` label or queue entry —
+  `uv run python -m scripts.transcript_status`.
+- Ref-block times match `\d{1,2}:\d{2}(:\d{2})?`, or the bout window silently fails to parse.
+- Sidecar `actor` strings are exact full names from the bout key.
+- After a batch of imports, check for name-variant duplicates:
+  `uv run python -m scripts.dedupe_athletes --dry-run` (destructive for real — read the report).
+
+## Where the docs stand
+
+| Doc | Status |
+|---|---|
+| **`ingestion_pipeline.md`** (this file) | The pipeline. Authoritative. |
+| **`PROMPT_events_sidecar.md`** | The refiner rules AND the copy-paste prompt. Authoritative. |
+| `match_event_model.md` | The event/actor model. Authoritative, referenced above. |
+| `deepseek/E-refine-events.md` | Superseded — its bout-relative timestamp rule is wrong. |
+| `deepseek/F-transcript-to-dump.md` | Superseded — documents the legacy whole-dump output, and its header contradicts its own §6. |
+| root `TRANSCRIPT_PROCESSING.md` | Historical — describes the legacy `convert_dump` path. |
+
+The legacy path still exists for old events: a hand-authored `transcripts/<stem>.py` dict literal
+converted by `scripts/convert_dump.py <stem>.py <slug>` into the same `scripts/dumps/<slug>_data.py`
+shape, with `events` already filled and no splice step. New events do not use it.

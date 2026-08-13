@@ -1,3 +1,10 @@
+> **SUPERSEDED — do not refine from this file.**
+> The rules and the copy-paste prompt now live in `docs/PROMPT_events_sidecar.md`.
+> One rule here is actively wrong: this doc says event `ts` is "integer seconds from bout start".
+> It is seconds from the start of the **video**. `export/site_data.py:852` subtracts the bout
+> start when rendering, so a bout-relative value is subtracted twice and every video link breaks.
+> Kept for its worked examples and its history.
+
 # E — Refine events: pbp → structured [{label, type, actor, successful, timestamp}]
 
 **Goal**: Convert play-by-play (pbp) commentary into **structured events** that survive the import pipeline.

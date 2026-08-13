@@ -1,3 +1,11 @@
+> **SUPERSEDED — do not refine from this file.**
+> The rules and the copy-paste prompt now live in `docs/PROMPT_events_sidecar.md`.
+> Two cautions if you read on: its output shape is the **legacy** whole-dump dict literal that
+> `scripts/convert_dump.py` consumes, not the events sidecar new events use; and its
+> Reconciliation header claims it types a failed attempt as `transition`, which its own §6
+> contradicts. §6 is right, and matches the data — `successful: false` appears across every type.
+> Its timestamp rule (video-absolute) is correct and is the one that survived.
+
 # Transcript TXT → structured Python dump
 
 Authoritative spec for turning a noisy timestamped match transcript into the dict literal
