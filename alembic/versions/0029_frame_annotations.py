@@ -28,8 +28,9 @@ Revises: 0028
 from __future__ import annotations
 
 import sqlalchemy as sa
-from alembic import op
 from sqlalchemy.dialects.postgresql import JSONB, UUID
+
+from alembic import op
 
 revision = "0029"
 down_revision = "0028"

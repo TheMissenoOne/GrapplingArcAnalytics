@@ -10,6 +10,7 @@ DUMPS = Path(__file__).resolve().parent / "dumps"
 HEADER = '''"""%s — auto-generated from transcript."""
 # ruff: noqa: E501
 from __future__ import annotations
+
 from typing import Any
 
 RAW: list[dict[tuple[str, int], dict[str, Any]]] = %s
@@ -23,10 +24,36 @@ def snake(name: str) -> str:
     s = re.sub(r'_+', '_', s)
     return s
 
+# Bout labels that prefix a name on the card ("Final Match: Zoe Lundy vs ..."). Stripping
+# them matters beyond tidiness: whatever survives here becomes an ATHLETE ROW on import, so
+# a leaked prefix invents a person and needs a dedupe_athletes repair later.
+_BOUT_LABEL = re.compile(
+    r'^(?:(?:grand\s+)?final(?:\s+match)?|semi[\s-]?finals?|quarter[\s-]?finals?|'
+    r'(?:match|bout|fight|luta)\s*\d*|round\s*\d+|\d+(?:st|nd|rd|th)\s+place)\s*:\s*',
+    re.IGNORECASE,
+)
+
+
 def clean_name(name: str) -> str:
-    """Strip Ref:" prefixes and trailing colons/symbols from parsed names."""
-    name = re.sub(r'^Ref:\s*["\']?\s*', '', name)
-    name = re.sub(r'["\':;.]+$', '', name)
+    """Strip ref-block scaffolding from a parsed name.
+
+    `ref:` is matched case-insensitively — it was not, and a transcript writing the block
+    lowercase produced the athlete `ref:"Libby Geng`.
+    """
+    name = re.sub(r'^ref\s*[:=]\s*["\']?\s*', '', name, flags=re.IGNORECASE)
+    name = _BOUT_LABEL.sub('', name)
+    name = re.sub(r'^["\']+', '', name)
+    # Trailing punctuation comes off FIRST: the card writes "Selma Vic (Sudden Death): (1:15:19)"
+    # and the parser hands over the name with that colon still attached, which would anchor the
+    # condition strip below out of reach.
+    name = re.sub(r'["\':;.]+$', '', name.strip())
+    # Bout CONDITIONS trail the name on some cards. Only these named ones are stripped — a bare
+    # parenthetical is left alone, because it is sometimes part of the identity ("Felipe (Cesar)"
+    # disambiguates two Felipes in an existing dump).
+    name = re.sub(
+        r'\s*\((?:sudden\s+death|overtime|ot|golden\s+score|ex(?:tra)?\s*time)\)\s*$',
+        '', name, flags=re.IGNORECASE,
+    )
     return name.strip()
 
 
@@ -150,6 +177,8 @@ STUB_EVENTS = {
     "Polaris 25 Prelims LIVE Full No-Gi BJJ Grappling Undercard": "Polaris 25",
     "POLARIS 26 LIVE PRELIMS NINE free matches LIVE": "Polaris 26",
     "POLARIS BJJ SQUADS TEAM USA vs TEAM UK & IRELAND Grappling Full Event": "Polaris BJJ Squads",
+    "WWFI1": "Women Who Fight Invitational",
+    "WWFI2": "Women Who Fight Invitational 2",
     "Polaris28Prelims": "Polaris 28",
     "Polaris29": "Polaris 29",
     "Polaris30": "Polaris 30",
