@@ -112,6 +112,34 @@ kagglehub → data/raw/{key}/ → Pipeline.clean() → Pipeline.normalize() → 
                                                               export/*.py (produce app JSON)
 ```
 
+## Public vs Private Data (ethics + LGPD — read before writing any query)
+
+**Dados alimentados diretamente pelo App como usuário são PRIVADOS, anonimizados para
+processamento, e NUNCA usados diretamente para análises competitivas.**
+
+- **Public** — competition footage this module ingests: `matches`, `athletes`, athlete
+  graphs (`owner_kind='athlete'`). Feeds the site, ELO, archetypes, the map, scouting.
+- **Private** — anything the App user fed in: `user_sessions`, user graphs
+  (`owner_kind='user'`) and their `graph_edges`, `profiles`, gyms, classes. Serves that
+  user only.
+
+One-way: public may inform a user's own dossier; **private never flows into a public or
+competitive artefact** — not as an average, centroid, embedding, ranking or export.
+
+**Vectorising app data is allowed** (LGPD permitting) when the output goes back to that
+same user — their own dossier, their grapple-like / archetype match. The line is purpose,
+not technique: the same user embedding is legitimate for the owner's dossier and forbidden
+inside an archetype centroid or anything the public site renders.
+
+Every query building a public/competitive artefact **filters `owner_kind` explicitly**.
+An unfiltered `select(Graph)` is a defect. `export/*` (`site_data`, `match_breakdown`,
+`ontology`, `athlete_graph_export`) and `analysis/archetype.py` already filter; the guards
+in `analysis/embeddings.py` are `backfill_archetype_embeddings` (athlete-only centroids —
+`scripts/assign_user_archetypes` stamps `archetype_id` on user graphs too, so the filter is
+load-bearing) and `nearest_graphs` (athlete-only by default). `backfill_graph_embeddings`
+deliberately covers user graphs — a user needs a vector to be placed against the archetypes,
+and that result is shown only to them.
+
 ## Match Event Model
 
 A bout's `sequence` = events `{label, type, actor, successful?, ts?}` → transition graph. **Any**

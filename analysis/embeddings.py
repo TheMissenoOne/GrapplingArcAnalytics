@@ -106,6 +106,12 @@ def backfill_graph_embeddings(session: Session) -> int:
 
     Requires ``technique_nodes.embedding`` to be backfilled first. Graphs with no embedded
     nodes are skipped (stay NULL). Returns the number of graphs updated.
+
+    Deliberately covers user graphs as well as athlete graphs: a user graph needs its own
+    vector to be placed against the athlete-derived archetypes, which is processing that
+    serves that user. The vector is derived from technique labels and carries no identity.
+    The one-way rule is enforced downstream — nothing built from user graphs may flow back
+    into a competitive or public artefact.
     """
     from db.models import Graph, GraphEdge
     from db.repository import incident_edge_elos
@@ -149,10 +155,15 @@ def backfill_archetype_embeddings(session: Session) -> int:
     """
     from db.models import Archetype, Graph
 
+    # Athlete graphs only. ``scripts.assign_user_archetypes`` stamps ``archetype_id`` on
+    # USER graphs too, so without this filter a private, app-fed graph would be averaged
+    # into a centroid that competitive analysis and the public site both read. Private
+    # data never feeds a competitive artefact — see the data-boundary rule in root CLAUDE.md.
     groups: dict[int, list[np.ndarray]] = {}
     for aid, emb in session.execute(
         select(Graph.archetype_id, Graph.embedding).where(
-            Graph.archetype_id.isnot(None), Graph.embedding.isnot(None)
+            Graph.owner_kind == "athlete",
+            Graph.archetype_id.isnot(None), Graph.embedding.isnot(None),
         )
     ).all():
         groups.setdefault(int(aid), []).append(np.asarray(emb, dtype=np.float64))
@@ -170,8 +181,15 @@ def backfill_archetype_embeddings(session: Session) -> int:
     return n
 
 
-def nearest_graphs(session: Session, graph_id: str, k: int = 6) -> list[tuple[str, float]]:
-    """DB-side: top-``k`` most stylistically similar graphs (cosine over graph embeddings)."""
+def nearest_graphs(
+    session: Session, graph_id: str, k: int = 6, *, owner_kind: str | None = "athlete"
+) -> list[tuple[str, float]]:
+    """DB-side: top-``k`` most stylistically similar graphs (cosine over graph embeddings).
+
+    Searches athlete graphs only by default: a private, app-fed user graph must never
+    surface as somebody else's "similar athlete". Pass ``owner_kind=None`` to search every
+    graph — only legitimate when the result is shown to that graph's own owner.
+    """
     from db.models import Graph
 
     target = session.execute(
@@ -180,12 +198,10 @@ def nearest_graphs(session: Session, graph_id: str, k: int = 6) -> list[tuple[st
     if target is None:
         return []
     dist = Graph.embedding.cosine_distance(target)
-    rows = session.execute(
-        select(Graph.id, dist)
-        .where(Graph.embedding.isnot(None), Graph.id != graph_id)
-        .order_by(dist)
-        .limit(k)
-    )
+    query = select(Graph.id, dist).where(Graph.embedding.isnot(None), Graph.id != graph_id)
+    if owner_kind is not None:
+        query = query.where(Graph.owner_kind == owner_kind)
+    rows = session.execute(query.order_by(dist).limit(k))
     return [(gid, round(1.0 - float(d), 3)) for gid, d in rows]
 
 
