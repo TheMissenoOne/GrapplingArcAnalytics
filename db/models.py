@@ -125,15 +125,16 @@ class Graph(Base):
 class UserSession(Base):
     """Raw per-device training session synced from the app (``SessionState``, media
     stripped) — the true source data ``graphs``/``graph_edges`` are derived from.
-    ``id`` is device-generated (``s-{timestamp}-{random}``); the app merges across
-    devices by ``id`` + ``updated_at``. RLS lives in alembic 0023 (schema in 0017)."""
+    ``id`` is device-generated (``s-{timestamp}-{random}``) and scoped by ``owner_id``;
+    the app merges across devices by that pair + ``updated_at``. RLS lives in alembic
+    0023 (schema in 0017, composite identity in 0030)."""
 
     __tablename__ = "user_sessions"
 
-    id: Mapped[str] = mapped_column(Text, primary_key=True)
     owner_id: Mapped[str] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), primary_key=True
     )
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
     # Nullable (alembic 0019): a tombstone (deleted_at set) for a session that was never
     # pushed live has nothing to strip-and-upload, so data is NULL on those rows.
     data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)

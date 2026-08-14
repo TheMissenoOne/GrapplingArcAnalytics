@@ -388,34 +388,39 @@ def test_fixture_bundle_round_trip():
 # ── user_sessions / user_sync_meta (alembic 0017/0018) ──────────────────────────
 
 
-def test_user_session_upsert_insert_and_update(session):
+def test_user_session_upsert_is_owner_scoped_and_last_write_wins(session):
     from datetime import UTC, datetime
 
     from db.models import Profile, UserSession
     from db.repository import upsert_user_session
 
     owner_id = str(uuid.uuid4())
-    session.add(Profile(id=owner_id))
+    other_owner_id = str(uuid.uuid4())
+    session.add_all([Profile(id=owner_id), Profile(id=other_owner_id)])
     session.flush()
 
     t1 = datetime(2026, 7, 1, tzinfo=UTC)
     upsert_user_session(owner_id, "s-1-abc", {"exercises": []}, t1, session)
+    upsert_user_session(other_owner_id, "s-1-abc", {"exercises": ["other"]}, t1, session)
     session.commit()
 
-    row = session.get(UserSession, "s-1-abc")
+    row = session.get(UserSession, (owner_id, "s-1-abc"))
     assert row is not None
     assert row.owner_id == owner_id
     assert row.updated_at.replace(tzinfo=UTC) == t1
+    other_row = session.get(UserSession, (other_owner_id, "s-1-abc"))
+    assert other_row is not None
+    assert other_row.data == {"exercises": ["other"]}
 
     # Update-on-conflict: same id, new data/updated_at overwrites in place.
     t2 = datetime(2026, 7, 2, tzinfo=UTC)
     upsert_user_session(owner_id, "s-1-abc", {"exercises": ["squat"]}, t2, session)
     session.commit()
 
-    row = session.get(UserSession, "s-1-abc")
+    row = session.get(UserSession, (owner_id, "s-1-abc"))
     assert row.data == {"exercises": ["squat"]}
     assert row.updated_at.replace(tzinfo=UTC) == t2
-    assert len(list(session.execute(select(UserSession)).scalars())) == 1
+    assert len(list(session.execute(select(UserSession)).scalars())) == 2
 
 
 def test_get_user_sessions_since_filters_by_updated_at(session):
@@ -474,7 +479,7 @@ def test_sync_meta_create_and_update(session):
 # shape + that the incremental read does not filter tombstones out.
 
 
-def test_user_session_deleted_at_roundtrips(session):
+def test_user_session_tombstone_replaces_live_row_for_its_owner(session):
     from datetime import UTC, datetime
 
     from db.models import Profile, UserSession
@@ -484,13 +489,16 @@ def test_user_session_deleted_at_roundtrips(session):
     session.add(Profile(id=owner_id))
     session.flush()
 
-    t = datetime(2026, 7, 3, tzinfo=UTC)
-    upsert_user_session(owner_id, "s-del", {}, t, session, deleted_at=t)
+    live_at = datetime(2026, 7, 2, tzinfo=UTC)
+    deleted_at = datetime(2026, 7, 3, tzinfo=UTC)
+    upsert_user_session(owner_id, "s-del", {"exercises": []}, live_at, session)
+    upsert_user_session(owner_id, "s-del", None, deleted_at, session, deleted_at=deleted_at)
     session.commit()
 
-    row = session.get(UserSession, "s-del")
+    row = session.get(UserSession, (owner_id, "s-del"))
+    assert row.data is None
     assert row.deleted_at is not None
-    assert row.deleted_at.replace(tzinfo=UTC) == t
+    assert row.deleted_at.replace(tzinfo=UTC) == deleted_at
 
 
 # ── groups / group_members / group_invites (alembic 0024) ───────────────────────
@@ -546,11 +554,11 @@ def test_class_session_round_trips_and_links_to_user_session(session):
     t = datetime(2026, 8, 11, tzinfo=UTC)
     upsert_user_session(student.id, "s-class", {}, t, session)
     session.commit()
-    row = session.get(UserSession, "s-class")
+    row = session.get(UserSession, (student.id, "s-class"))
     row.class_session_id = klass.id
     session.commit()
 
-    row = session.get(UserSession, "s-class")
+    row = session.get(UserSession, (student.id, "s-class"))
     assert row.class_session_id == klass.id
 
 
@@ -573,3 +581,26 @@ def test_get_user_sessions_since_includes_tombstones(session):
     assert {r.id for r in rows} == {"s-live", "s-tomb"}  # tombstone not filtered out
     tomb = next(r for r in rows if r.id == "s-tomb")
     assert tomb.deleted_at is not None
+
+
+def test_user_sessions_identity_migration_source_does_not_edit_access_contracts() -> None:
+    root = Path(__file__).parent.parent
+    migration = (root / "alembic/versions/0030_user_sessions_composite_identity.py").read_text()
+    upgrade = migration.split("def upgrade()", 1)[1].split("def downgrade()", 1)[0].lower()
+
+    assert "primary key (owner_id, id)" in upgrade
+    assert "policy" not in upgrade
+    assert "view" not in upgrade
+    assert "grant" not in upgrade
+    assert "trigger" not in upgrade
+
+    rls = (root / "alembic/versions/0023_adopt_auth_setup.py").read_text()
+    assert "for all using (owner_id = auth.uid())" in rls
+    assert "with check (owner_id = auth.uid())" in rls
+
+    view = (root / "alembic/versions/0026_class_sessions.py").read_text()
+    assert "us.data - 'reflection'" in view
+    assert "jsonb_agg(r - 'notes')" in view
+
+    stale_write_guard = (root / "alembic/versions/0019_user_sessions_delete_guard.py").read_text()
+    assert "if NEW.updated_at < OLD.updated_at then" in stale_write_guard

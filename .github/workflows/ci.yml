@@ -76,3 +76,7 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
         run: uv run alembic upgrade head
+      - name: verify user_sessions identity on PostgreSQL
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
+        run: uv run python ci/verify_user_sessions_identity.py
