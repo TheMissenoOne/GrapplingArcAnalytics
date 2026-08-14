@@ -19,6 +19,8 @@ from __future__ import annotations
 import json
 import math
 import re
+import subprocess
+import tempfile
 import time
 from html import escape
 from pathlib import Path
@@ -170,12 +172,29 @@ def fetch_transcript(
     except requests.RequestException as exc:
         raise StudyError(f"Could not reach YouTube metadata: {exc}") from exc
 
+    metadata = {
+        "id": vid,
+        "url": f"https://www.youtube.com/watch?v={vid}",
+        "title": str(meta.get("title") or "YouTube video"),
+        "channel": str(meta.get("author_name") or "YouTube"),
+        "thumbnail": str(meta.get("thumbnail_url") or ""),
+        "duration": None,
+    }
+
     try:
         from youtube_transcript_api import YouTubeTranscriptApi
         chunks = YouTubeTranscriptApi.get_transcript(vid, languages=list(languages))
     except ImportError as exc:
         raise StudyError("youtube-transcript-api not installed (run uv sync)") from exc
     except Exception as exc:
+        if "429" in str(exc) or "too many requests" in str(exc).lower():
+            fallback = _fetch_transcript_with_ytdlp(vid, languages)
+            if fallback:
+                return metadata, fallback
+            raise StudyError(
+                "YouTube blocked the captions request (429). "
+                "yt-dlp fallback also found no accessible captions; wait and retry."
+            ) from exc
         # Include the actual error message (e.g., ParseError details) for debugging
         raise StudyError(f"Caption fetch failed: {exc}") from exc
 
@@ -188,15 +207,55 @@ def fetch_transcript(
     if not captions:
         raise StudyError("No captions found for this video.")
 
-    metadata = {
-        "id": vid,
-        "url": f"https://www.youtube.com/watch?v={vid}",
-        "title": str(meta.get("title") or "YouTube video"),
-        "channel": str(meta.get("author_name") or "YouTube"),
-        "thumbnail": str(meta.get("thumbnail_url") or ""),
-        "duration": None,
-    }
     return metadata, captions
+
+
+def _fetch_transcript_with_ytdlp(
+    video_id: str, languages: list[str] | tuple[str, ...]
+) -> list[dict[str, Any]]:
+    """Fallback caption fetch through the locally installed yt-dlp executable."""
+    try:
+        with tempfile.TemporaryDirectory(prefix="grapplingarc-study-") as tmp:
+            output = str(Path(tmp) / "caption.%(ext)s")
+            subprocess.run(
+                [
+                    "yt-dlp", "--skip-download", "--write-auto-subs", "--write-subs",
+                    "--sub-langs", ",".join(languages), "--sub-format", "vtt",
+                    "--output", output, f"https://www.youtube.com/watch?v={video_id}",
+                ],
+                capture_output=True, text=True, timeout=45, check=False,
+            )
+            files = sorted(Path(tmp).glob("caption*.vtt"))
+            if not files:
+                return []
+            return _parse_vtt(files[0].read_text(encoding="utf-8", errors="replace"))
+    except (OSError, subprocess.TimeoutExpired):
+        return []
+
+
+def _parse_vtt(text: str) -> list[dict[str, Any]]:
+    captions = []
+    pattern = re.compile(
+        r"(?m)^(\d{2}:\d{2}(?::\d{2})?\.\d{3})\s+-->\s+"
+        r"(\d{2}:\d{2}(?::\d{2})?\.\d{3})\s*\n(.+?)(?=\n\s*\n|\Z)",
+        re.DOTALL,
+    )
+
+    def seconds(value: str) -> float:
+        parts = value.split(":")
+        if len(parts) == 2:
+            minutes, rest = parts
+            return float(minutes) * 60 + float(rest)
+        hours, minutes, rest = parts
+        return float(hours) * 3600 + float(minutes) * 60 + float(rest)
+
+    for start, end, raw in pattern.findall(text):
+        clean = re.sub(r"<[^>]+>|\{[^}]+\}", "", raw.replace("\n", " ")).strip()
+        clean = re.sub(r"\s+", " ", clean)
+        if clean and clean.lower() not in {c["text"].lower() for c in captions[-1:]}:
+            captions.append({"text": clean, "start": seconds(start),
+                             "duration": max(0.0, seconds(end) - seconds(start))})
+    return captions
 
 
 # ── segment grouping (port of grouping.ts) ────────────────────────────────────

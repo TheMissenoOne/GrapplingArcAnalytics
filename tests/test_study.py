@@ -7,10 +7,22 @@ import pytest
 from admin.study import (
     RagIndex,
     StudyError,
+    _parse_vtt,
     build_analysis,
     fetch_transcript,
     group_captions,
 )
+
+
+def test_parse_vtt_captions():
+    captions = _parse_vtt(
+        "WEBVTT\n\n00:00.000 --> 00:02.500\nOpen guard\n\n"
+        "00:02.500 --> 00:04.000\nSweep <b>now</b>\n"
+    )
+    assert captions == [
+        {"text": "Open guard", "start": 0.0, "duration": 2.5},
+        {"text": "Sweep now", "start": 2.5, "duration": 1.5},
+    ]
 
 
 def _cap(text: str, start: float, duration: float = 3.5) -> dict:
