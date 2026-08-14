@@ -432,7 +432,7 @@ def upsert_user_session(
     *,
     deleted_at: datetime | None = None,
 ) -> None:
-    """Upsert one raw ``SessionState`` row by ``id`` (device-generated). Pass
+    """Upsert one raw ``SessionState`` row by owner-scoped device ``id``. Pass
     ``deleted_at`` to write a tombstone (delete propagation, alembic 0019); ``data`` may be
     None for a tombstone whose session was never pushed live. The ON CONFLICT arm relies on
     the DB ``trg_user_sessions_stale_write`` guard to drop a write whose ``updated_at`` is
@@ -445,7 +445,7 @@ def upsert_user_session(
             updated_at=updated_at, deleted_at=deleted_at,
         )
         .on_conflict_do_update(
-            index_elements=["id"],
+            index_elements=["owner_id", "id"],
             set_={"data": data, "updated_at": updated_at, "deleted_at": deleted_at},
         )
     )
