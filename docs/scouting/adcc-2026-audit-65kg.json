@@ -1,0 +1,349 @@
+{
+  "athletes": [
+    {
+      "athlete": "Livia Barasine",
+      "coverage_matrix": [],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 0,
+      "missing": [
+        "3 lutas com sequência",
+        "15 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 0,
+        "phase": 0,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.0,
+      "own_events": 0,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 0,
+      "selected_bouts_with_sequence": 0,
+      "sources": [],
+      "type_counts": {},
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Ana Carolina Vieira",
+      "coverage_matrix": [
+        {
+          "bouts": 1,
+          "own_events": 4,
+          "ruleset_id": "cji-2025-women",
+          "uniform": "no_gi"
+        },
+        {
+          "bouts": 1,
+          "own_events": 1,
+          "ruleset_id": "ibjjf-unknown",
+          "uniform": "gi"
+        }
+      ],
+      "excluded_uniform_counts": {
+        "gi": 1
+      },
+      "explicit_outcomes": 4,
+      "missing": [
+        "2 lutas com sequência",
+        "11 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 4,
+        "phase": 4,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 1.0,
+      "own_events": 4,
+      "section_counts": {
+        "back_and_finishing": 2,
+        "guard": 0,
+        "passing": 1,
+        "standing": 0
+      },
+      "selected_bouts": 2,
+      "selected_bouts_with_sequence": 1,
+      "sources": [
+        {
+          "module": "scripts.dumps.cji2day1_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.yara_soares_data",
+          "selected_participant_rows": 1
+        }
+      ],
+      "type_counts": {
+        "pass": 1,
+        "submission": 2,
+        "transition": 1
+      },
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Injana Goodman",
+      "coverage_matrix": [
+        {
+          "bouts": 4,
+          "own_events": 4,
+          "ruleset_id": "other-unknown",
+          "uniform": "no_gi"
+        }
+      ],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 3,
+      "missing": [
+        "11 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 4,
+        "phase": 4,
+        "setup": 1,
+        "successful": 1,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.75,
+      "own_events": 4,
+      "section_counts": {
+        "back_and_finishing": 1,
+        "guard": 0,
+        "passing": 1,
+        "standing": 1
+      },
+      "selected_bouts": 4,
+      "selected_bouts_with_sequence": 4,
+      "sources": [
+        {
+          "module": "scripts.dumps.polaris33_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.wwfi2_data",
+          "selected_participant_rows": 3
+        }
+      ],
+      "type_counts": {
+        "control": 1,
+        "pass": 1,
+        "submission": 1,
+        "takedown": 1
+      },
+      "unknown_outcomes": 1
+    },
+    {
+      "athlete": "Sarah Galvão",
+      "coverage_matrix": [
+        {
+          "bouts": 2,
+          "own_events": 22,
+          "ruleset_id": "cji-2025-women",
+          "uniform": "no_gi"
+        }
+      ],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 8,
+      "missing": [
+        "1 lutas com sequência"
+      ],
+      "missing_fields": {
+        "period": 22,
+        "phase": 22,
+        "setup": 4,
+        "successful": 14,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.364,
+      "own_events": 22,
+      "section_counts": {
+        "back_and_finishing": 10,
+        "guard": 2,
+        "passing": 2,
+        "standing": 4
+      },
+      "selected_bouts": 2,
+      "selected_bouts_with_sequence": 2,
+      "sources": [
+        {
+          "module": "scripts.dumps.cji2day1_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.cji2day2_data",
+          "selected_participant_rows": 1
+        }
+      ],
+      "type_counts": {
+        "control": 7,
+        "guard": 2,
+        "pass": 2,
+        "submission": 6,
+        "sweep": 1,
+        "takedown": 4
+      },
+      "unknown_outcomes": 14
+    },
+    {
+      "athlete": "Nadia Frankland",
+      "coverage_matrix": [],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 0,
+      "missing": [
+        "3 lutas com sequência",
+        "15 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 0,
+        "phase": 0,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.0,
+      "own_events": 0,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 0,
+      "selected_bouts_with_sequence": 0,
+      "sources": [],
+      "type_counts": {},
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Morgan Black",
+      "coverage_matrix": [
+        {
+          "bouts": 4,
+          "own_events": 8,
+          "ruleset_id": "adcc-historical-unknown",
+          "uniform": "no_gi"
+        }
+      ],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 6,
+      "missing": [
+        "7 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 8,
+        "phase": 8,
+        "setup": 1,
+        "successful": 2,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.75,
+      "own_events": 8,
+      "section_counts": {
+        "back_and_finishing": 6,
+        "guard": 0,
+        "passing": 0,
+        "standing": 1
+      },
+      "selected_bouts": 4,
+      "selected_bouts_with_sequence": 4,
+      "sources": [
+        {
+          "module": "scripts.dumps.adcc_trials2024_wc_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.adcc_trials2023_ec_semis_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.adcc_trials2023_ec_finals_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data",
+          "selected_participant_rows": 1
+        }
+      ],
+      "type_counts": {
+        "control": 3,
+        "escape": 1,
+        "submission": 3,
+        "takedown": 1
+      },
+      "unknown_outcomes": 2
+    },
+    {
+      "athlete": "Ane Svendsen",
+      "coverage_matrix": [],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 0,
+      "missing": [
+        "3 lutas com sequência",
+        "15 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 0,
+        "phase": 0,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.0,
+      "own_events": 0,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 0,
+      "selected_bouts_with_sequence": 0,
+      "sources": [],
+      "type_counts": {},
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Joslyn Molina",
+      "coverage_matrix": [],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 0,
+      "missing": [
+        "3 lutas com sequência",
+        "15 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 0,
+        "phase": 0,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.0,
+      "own_events": 0,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 0,
+      "selected_bouts_with_sequence": 0,
+      "sources": [],
+      "type_counts": {},
+      "unknown_outcomes": 0
+    }
+  ],
+  "event": "ADCC 2026",
+  "issues": [],
+  "ready": false,
+  "thresholds": {
+    "own_events": 15,
+    "selected_bouts_with_sequence": 3
+  }
+}

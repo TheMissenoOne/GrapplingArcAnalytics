@@ -1,0 +1,428 @@
+{
+  "athletes": [
+    {
+      "athlete": "Yara Soares",
+      "coverage_matrix": [
+        {
+          "bouts": 2,
+          "own_events": 8,
+          "ruleset_id": "ibjjf-unknown",
+          "uniform": "gi"
+        }
+      ],
+      "excluded_uniform_counts": {
+        "gi": 2
+      },
+      "explicit_outcomes": 0,
+      "missing": [
+        "3 lutas com sequência",
+        "15 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 0,
+        "phase": 0,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.0,
+      "own_events": 0,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 2,
+      "selected_bouts_with_sequence": 0,
+      "sources": [
+        {
+          "module": "scripts.dumps.yara_soares_data",
+          "selected_participant_rows": 2
+        }
+      ],
+      "type_counts": {},
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Rafaela Guedes",
+      "coverage_matrix": [
+        {
+          "bouts": 1,
+          "own_events": 0,
+          "ruleset_id": "adcc-historical-unknown",
+          "uniform": "no_gi"
+        },
+        {
+          "bouts": 2,
+          "own_events": 5,
+          "ruleset_id": "ibjjf-unknown",
+          "uniform": "no_gi"
+        }
+      ],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 5,
+      "missing": [
+        "10 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 5,
+        "phase": 5,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 1.0,
+      "own_events": 5,
+      "section_counts": {
+        "back_and_finishing": 1,
+        "guard": 0,
+        "passing": 4,
+        "standing": 0
+      },
+      "selected_bouts": 3,
+      "selected_bouts_with_sequence": 3,
+      "sources": [
+        {
+          "module": "scripts.dumps.adcc2022_finals_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.ibjjf2021_nogi_worlds_data",
+          "selected_participant_rows": 2
+        }
+      ],
+      "type_counts": {
+        "pass": 4,
+        "submission": 1
+      },
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Anabel Lopez",
+      "coverage_matrix": [
+        {
+          "bouts": 1,
+          "own_events": 2,
+          "ruleset_id": "other-unknown",
+          "uniform": "no_gi"
+        }
+      ],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 2,
+      "missing": [
+        "2 lutas com sequência",
+        "13 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 2,
+        "phase": 2,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 1.0,
+      "own_events": 2,
+      "section_counts": {
+        "back_and_finishing": 2,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 1,
+      "selected_bouts_with_sequence": 1,
+      "sources": [
+        {
+          "module": "scripts.dumps.crevar_singles_data",
+          "selected_participant_rows": 1
+        }
+      ],
+      "type_counts": {
+        "submission": 2
+      },
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Paige Ivette",
+      "coverage_matrix": [
+        {
+          "bouts": 1,
+          "own_events": 0,
+          "ruleset_id": "ibjjf-unknown",
+          "uniform": "unknown"
+        }
+      ],
+      "excluded_uniform_counts": {
+        "unknown": 1
+      },
+      "explicit_outcomes": 0,
+      "missing": [
+        "3 lutas com sequência",
+        "15 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 0,
+        "phase": 0,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.0,
+      "own_events": 0,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 1,
+      "selected_bouts_with_sequence": 0,
+      "sources": [
+        {
+          "module": "scripts.dumps.ibjjf2025_top10_data",
+          "selected_participant_rows": 1
+        }
+      ],
+      "type_counts": {},
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Matilda Reid",
+      "coverage_matrix": [],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 0,
+      "missing": [
+        "3 lutas com sequência",
+        "15 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 0,
+        "phase": 0,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.0,
+      "own_events": 0,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 0,
+      "selected_bouts_with_sequence": 0,
+      "sources": [],
+      "type_counts": {},
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Gabi Garcia",
+      "coverage_matrix": [
+        {
+          "bouts": 1,
+          "own_events": 1,
+          "ruleset_id": "adcc-historical-unknown",
+          "uniform": "no_gi"
+        },
+        {
+          "bouts": 1,
+          "own_events": 0,
+          "ruleset_id": "ibjjf-unknown",
+          "uniform": "gi"
+        }
+      ],
+      "excluded_uniform_counts": {
+        "gi": 1
+      },
+      "explicit_outcomes": 1,
+      "missing": [
+        "2 lutas com sequência",
+        "14 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 1,
+        "phase": 1,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 1.0,
+      "own_events": 1,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 1,
+        "standing": 0
+      },
+      "selected_bouts": 2,
+      "selected_bouts_with_sequence": 1,
+      "sources": [
+        {
+          "module": "scripts.dumps.adcc2022_women_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.yara_soares_data",
+          "selected_participant_rows": 1
+        }
+      ],
+      "type_counts": {
+        "pass": 1
+      },
+      "unknown_outcomes": 0
+    },
+    {
+      "athlete": "Helena Crevar",
+      "coverage_matrix": [
+        {
+          "bouts": 6,
+          "own_events": 65,
+          "ruleset_id": "adcc-historical-unknown",
+          "uniform": "no_gi"
+        },
+        {
+          "bouts": 2,
+          "own_events": 43,
+          "ruleset_id": "cji-2025-women",
+          "uniform": "no_gi"
+        },
+        {
+          "bouts": 1,
+          "own_events": 13,
+          "ruleset_id": "ibjjf-v6-no-gi",
+          "uniform": "no_gi"
+        },
+        {
+          "bouts": 1,
+          "own_events": 12,
+          "ruleset_id": "other-unknown",
+          "uniform": "no_gi"
+        }
+      ],
+      "excluded_uniform_counts": {},
+      "explicit_outcomes": 44,
+      "missing": [],
+      "missing_fields": {
+        "period": 133,
+        "phase": 133,
+        "setup": 21,
+        "successful": 89,
+        "timestamp": 1
+      },
+      "outcome_coverage": 0.331,
+      "own_events": 133,
+      "section_counts": {
+        "back_and_finishing": 68,
+        "guard": 9,
+        "passing": 11,
+        "standing": 24
+      },
+      "selected_bouts": 10,
+      "selected_bouts_with_sequence": 10,
+      "sources": [
+        {
+          "module": "scripts.dumps.cji2day1_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.cji2day2_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.adcc_trials2024_wc_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.supercut_the_entire_2024_adcc_worlds_65kg_bracket_data",
+          "selected_participant_rows": 2
+        },
+        {
+          "module": "scripts.dumps.adcc_trials2023_ec_semis_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.adcc_trials2023_ec_finals_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.crevar_singles_data",
+          "selected_participant_rows": 3
+        }
+      ],
+      "type_counts": {
+        "control": 47,
+        "escape": 3,
+        "guard": 9,
+        "match": 1,
+        "pass": 11,
+        "submission": 38,
+        "sweep": 1,
+        "takedown": 21,
+        "transition": 2
+      },
+      "unknown_outcomes": 89
+    },
+    {
+      "athlete": "Elizabeth Mitrovic",
+      "coverage_matrix": [
+        {
+          "bouts": 1,
+          "own_events": 0,
+          "ruleset_id": "adcc-historical-unknown",
+          "uniform": "no_gi"
+        },
+        {
+          "bouts": 1,
+          "own_events": 0,
+          "ruleset_id": "ibjjf-unknown",
+          "uniform": "unknown"
+        }
+      ],
+      "excluded_uniform_counts": {
+        "unknown": 1
+      },
+      "explicit_outcomes": 0,
+      "missing": [
+        "2 lutas com sequência",
+        "15 eventos próprios"
+      ],
+      "missing_fields": {
+        "period": 0,
+        "phase": 0,
+        "setup": 0,
+        "successful": 0,
+        "timestamp": 0
+      },
+      "outcome_coverage": 0.0,
+      "own_events": 0,
+      "section_counts": {
+        "back_and_finishing": 0,
+        "guard": 0,
+        "passing": 0,
+        "standing": 0
+      },
+      "selected_bouts": 2,
+      "selected_bouts_with_sequence": 1,
+      "sources": [
+        {
+          "module": "scripts.dumps.adcc_trials2024_wc_data",
+          "selected_participant_rows": 1
+        },
+        {
+          "module": "scripts.dumps.ibjjf2023_worlds_data",
+          "selected_participant_rows": 1
+        }
+      ],
+      "type_counts": {},
+      "unknown_outcomes": 0
+    }
+  ],
+  "event": "ADCC 2026",
+  "issues": [],
+  "ready": false,
+  "thresholds": {
+    "own_events": 15,
+    "selected_bouts_with_sequence": 3
+  }
+}
