@@ -37,7 +37,11 @@ from analysis.scouting_rulesets import (
     validate_target_rulesets,
 )
 from analysis.scouting_tables import build_tables
-from analysis.style_profile import MIN_DOSSIER_EVENTS, MIN_SEQUENCE_BOUTS, reduce_style_events
+from analysis.style_profile_core import (
+    MIN_DOSSIER_EVENTS,
+    MIN_SEQUENCE_BOUTS,
+    reduce_style_events,
+)
 
 ModuleLoader = Callable[[str], Any]
 SECTIONS = ("standing", "guard", "passing", "back_and_finishing")
