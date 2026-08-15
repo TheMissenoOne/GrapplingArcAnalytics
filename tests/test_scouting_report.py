@@ -541,6 +541,30 @@ def test_current_manifest_has_two_divisions_and_cli_audits_but_blocks_generation
     assert "geração bloqueada" in capsys.readouterr().err
 
 
+def test_division_flag_scopes_audit_to_one_division(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    path = Path("data/scouting/adcc_2026_women.json")
+    data = load_manifest(path)
+    by_slug = {division["slug"]: division for division in data["divisions"]}
+
+    assert main(["--manifest", str(path), "--division", "ADCC-2026-65kg", "--audit"]) == 0
+    audited = {item["athlete"] for item in json.loads(capsys.readouterr().out)["athletes"]}
+    assert audited == {entry["name"] for entry in by_slug["ADCC-2026-65kg"]["athletes"]}
+
+    assert main(["--manifest", str(path), "--division", "ADCC-2026-mais-65kg", "--audit"]) == 0
+    audited = {item["athlete"] for item in json.loads(capsys.readouterr().out)["athletes"]}
+    assert audited == {entry["name"] for entry in by_slug["ADCC-2026-mais-65kg"]["athletes"]}
+
+
+def test_division_flag_rejects_unknown_slug(capsys: pytest.CaptureFixture[str]) -> None:
+    path = Path("data/scouting/adcc_2026_women.json")
+    assert main(["--manifest", str(path), "--division", "nope", "--audit"]) == 2
+    err = capsys.readouterr().err
+    assert "nope" in err
+    assert "ADCC-2026-65kg" in err
+
+
 def test_ready_profile_has_coverage_fact_and_source_evidence() -> None:
     bouts = [
         {

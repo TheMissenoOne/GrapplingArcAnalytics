@@ -1154,6 +1154,23 @@ def tables_manifest(
     return {"event": manifest.get("event"), "issues": issues, "atletas": atletas}
 
 
+def scope_to_division(manifest: Mapping[str, Any], slug: str) -> dict[str, Any]:
+    """Return a copy of ``manifest`` restricted to the division ``slug``.
+
+    Never mutates the input. All three CLI branches (``--audit``, ``--tabelas``,
+    report generation) route through ``manifest["divisions"]`` / ``_athletes``, so
+    filtering it once here scopes them all consistently.
+    """
+    divisions = manifest.get("divisions") or []
+    valid = [str(d.get("slug")) for d in divisions if isinstance(d, dict)]
+    if slug not in valid:
+        raise ManifestError(
+            f"divisão desconhecida: {slug!r}; válidas: {', '.join(sorted(valid))}"
+        )
+    scoped = [d for d in divisions if isinstance(d, dict) and d.get("slug") == slug]
+    return {**manifest, "divisions": scoped}
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--manifest", type=Path, required=True)
@@ -1161,9 +1178,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--audit", action="store_true")
     parser.add_argument("--tabelas", action="store_true",
                         help="cross-tabs da planilha de scout (log, luta em pé, efetividade, tempo)")
+    parser.add_argument("--division", type=str, default=None,
+                        help="restringe a uma divisão (slug); default = todas")
     args = parser.parse_args(argv)
     try:
         manifest = load_manifest(args.manifest)
+        if args.division:
+            manifest = scope_to_division(manifest, args.division)
         if args.audit:
             print(json.dumps(audit_manifest(manifest), ensure_ascii=False, indent=2,
                              sort_keys=True))
