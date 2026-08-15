@@ -153,6 +153,66 @@ class UserSession(Base):
     )
 
 
+class UserProject(Base):
+    """A user's training project, synced across their devices (alembic 0030).
+
+    Same shape as UserSession on purpose — device-generated ``id``, whole-record ``data``
+    JSONB, ``updated_at`` as the conflict clock, ``deleted_at`` as a tombstone — so the App
+    reuses one sync code path instead of growing a second idiom. PK is ``id`` alone; that is
+    the App's ``on_conflict`` target and it must keep matching a real constraint.
+
+    Private, owner-scoped, app-fed data: readable only by its owner, never an input to any
+    aggregate, export or competitive artefact. RLS lives in alembic 0030.
+    """
+
+    __tablename__ = "user_projects"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    # Nullable for the same reason as UserSession.data (0019): a project created and deleted
+    # before it was ever pushed arrives as a tombstone with nothing to upload.
+    data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class UserNodeName(Base):
+    """What one user prefers to call one canonical node (alembic 0031).
+
+    Presentation only. ``node_key`` is the canonical normalized key (``names._normalize_name``,
+    mirrored by the App's ``normalizeLabel``) and stays the join key for every graph, ELO and
+    transition metric — a preferred name never becomes an identity, so two sessions logged
+    under two names still collapse onto one node. Deliberately no FK to ``technique_nodes``: a
+    preference may name a node that only exists in the App's bundled library or that the user
+    created, and a dangling preference must stay inert rather than fail a sync.
+
+    Never modifies the canonical library; one user's choice is invisible to every other user
+    and to the public site. RLS lives in alembic 0031.
+    """
+
+    __tablename__ = "user_node_names"
+
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), primary_key=True
+    )
+    node_key: Mapped[str] = mapped_column(Text, primary_key=True)
+    preferred_name: Mapped[str | None] = mapped_column(Text)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 class UserSyncMeta(Base):
     """Per-user session-sync progress (alembic 0018). One row per owner. RLS lives in
     alembic 0023."""
