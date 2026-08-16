@@ -13,7 +13,7 @@ from analysis.network_metrics import (
     weighted_pagerank_ranking,
 )
 from analysis.path_to_victory import path_to_victory
-from analysis.style_profile import reduce_style_events
+from analysis.style_profile_core import reduce_style_events
 
 SCHEMA_VERSION = 1
 STYLE_MIX_AXES = ("pass", "control", "submission", "escape", "guard", "sweep", "takedown")
