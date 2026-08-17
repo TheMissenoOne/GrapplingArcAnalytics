@@ -19,6 +19,23 @@ def _g(phi: float) -> float:
     return 1.0 / math.sqrt(1.0 + 3.0 * phi * phi / math.pi**2)
 
 
+def expected_score(
+    rating: float, deviation: float, opponent_rating: float, opponent_deviation: float
+) -> float:
+    """Glicko-2 expected win probability for ``rating`` vs ``opponent_rating``.
+
+    Same functional form as the inner-loop ``e`` in ``update_period`` — the ``center``
+    constant cancels in the rating difference, so it is omitted here. Exposed for
+    prediction/log-loss evaluation (wave 5, ADR-03 criterion 1), not used by the update
+    itself.
+    """
+    mu = rating / SCALE
+    muj = opponent_rating / SCALE
+    phij = opponent_deviation / SCALE
+    gj = _g(phij)
+    return 1.0 / (1.0 + math.exp(-gj * (mu - muj)))
+
+
 def update_period(
     state: RatingState,
     observations: list[Observation],

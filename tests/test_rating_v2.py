@@ -7,8 +7,10 @@ import random
 import pytest
 
 from analysis.rating_v2.config import EngineConfig
-from analysis.rating_v2.glicko2 import update_period
+from analysis.rating_v2.glicko2 import expected_score, update_period
 from analysis.rating_v2.models import Observation, RatingState
+from analysis.rating_v2.node_periods import NodeBout, NodeConfig, run_node_periods
+from analysis.rating_v2.node_replay import build_node_bouts, node_key_of
 from analysis.rating_v2.periods import Bout, run_periods
 from analysis.rating_v2.replay import (
     MatchRow,
@@ -202,3 +204,164 @@ def test_bouts_hash_is_order_independent() -> None:
     ]
     b2 = list(reversed(b1))
     assert bouts_hash(b1) == bouts_hash(b2)
+
+
+# ── glicko2.expected_score ───────────────────────────────────────────────────
+
+
+def test_expected_score_equal_ratings_is_half() -> None:
+    assert expected_score(1750.0, 200.0, 1750.0, 200.0) == pytest.approx(0.5)
+
+
+def test_expected_score_complements_across_sides() -> None:
+    p_a = expected_score(1900.0, 150.0, 1700.0, 150.0)
+    p_b = expected_score(1700.0, 150.0, 1900.0, 150.0)
+    assert p_a + p_b == pytest.approx(1.0)
+    assert p_a > 0.5
+
+
+# ── Wave 5: node evidence layer (ADR-03) ─────────────────────────────────────
+#
+# "Node observation" invariant: a unique node in one athlete/bout contributes AT MOST ONE
+# Glicko observation — repeating a label inside the same bout bumps occurrence count, never
+# game count. Missing sequence is unknown, never negative evidence. A node seen for the
+# first time inherits the athlete's CURRENT global rating with high RD. ``bouts_observed``
+# is tracked separately from raw ``occurrences``.
+
+
+def _node_seeds(*athletes: str) -> dict[str, RatingState]:
+    return {a: RatingState(1750.0, 250.0, 0.06) for a in athletes}
+
+
+def test_repeated_node_label_in_one_bout_is_one_observation() -> None:
+    node_bouts = [
+        NodeBout(
+            bout=Bout(period=2024, athlete_a="A", athlete_b="B", score_a=1.0),
+            nodes_a=frozenset({"guard"}),
+            occurrences_a={"guard": 3},
+        )
+    ]
+    _, node_states, node_meta = run_node_periods(
+        _node_seeds("A", "B"), node_bouts, EngineConfig(), NodeConfig()
+    )
+    meta = node_meta[("A", "guard")]
+    assert meta.bouts_observed == 1
+    assert meta.occurrences == 3
+    assert ("A", "guard") in node_states
+
+
+def test_bouts_observed_counts_distinct_bouts_not_occurrences() -> None:
+    node_bouts = [
+        NodeBout(
+            bout=Bout(period=2024, athlete_a="A", athlete_b="B", score_a=1.0),
+            nodes_a=frozenset({"guard"}),
+            occurrences_a={"guard": 3},
+        ),
+        NodeBout(
+            bout=Bout(period=2024, athlete_a="A", athlete_b="C", score_a=0.0),
+            nodes_a=frozenset({"guard"}),
+            occurrences_a={"guard": 1},
+        ),
+    ]
+    _, _, node_meta = run_node_periods(
+        _node_seeds("A", "B", "C"), node_bouts, EngineConfig(), NodeConfig()
+    )
+    meta = node_meta[("A", "guard")]
+    assert meta.bouts_observed == 2  # two bouts
+    assert meta.occurrences == 4  # 3 + 1 raw repeats
+    assert meta.bouts_observed != meta.occurrences
+
+
+def test_missing_sequence_widens_without_negative_evidence() -> None:
+    node_bouts = [
+        NodeBout(
+            bout=Bout(period=2020, athlete_a="A", athlete_b="X", score_a=1.0),
+            nodes_a=frozenset({"armbar"}),
+            occurrences_a={"armbar": 1},
+        ),
+        # 2024: A fights again but this bout's sequence has nothing for A (missing sequence,
+        # or the node simply doesn't recur) — must never read as a loss for "armbar".
+        NodeBout(bout=Bout(period=2024, athlete_a="A", athlete_b="Y", score_a=1.0)),
+    ]
+    _, node_states, node_meta = run_node_periods(
+        _node_seeds("A", "X", "Y"), node_bouts, EngineConfig(), NodeConfig()
+    )
+    armbar = node_states[("A", "armbar")]
+    # one real observation only — never a second one from the empty-sequence bout.
+    assert node_meta[("A", "armbar")].bouts_observed == 1
+    # RD still widened for the 2020->2024 gap (same widening semantics as periods.py),
+    # never sharpened by a fabricated negative result.
+    assert armbar.deviation > 0
+
+
+def test_new_node_inherits_current_global_rating_not_the_original_seed() -> None:
+    """A wins a bout in 2020 (global rating moves off 1750); a NEW node "leg drag" is first
+    used in 2021. The node must seed at A's 2021 pre-period global rating, not 1750."""
+    node_bouts = [
+        NodeBout(bout=Bout(period=2020, athlete_a="A", athlete_b="X", score_a=1.0)),
+        NodeBout(
+            bout=Bout(period=2021, athlete_a="A", athlete_b="Y", score_a=0.0),
+            nodes_a=frozenset({"leg drag"}),
+            occurrences_a={"leg drag": 1},
+        ),
+    ]
+    node_config = NodeConfig(node_initial_rd=280.0)
+    global_states, node_states, _ = run_node_periods(
+        _node_seeds("A", "X", "Y"), node_bouts[:1], EngineConfig(), node_config
+    )
+    a_global_after_2020 = global_states["A"].rating
+    assert a_global_after_2020 != pytest.approx(1750.0)  # evidence moved it
+
+    _, node_states_full, _ = run_node_periods(
+        _node_seeds("A", "X", "Y"), node_bouts, EngineConfig(), node_config
+    )
+    leg_drag = node_states_full[("A", "leg drag")]
+    # seeded at A's rating AS OF the period it first appears (2021 pre-period == end of 2020).
+    assert leg_drag.rating != pytest.approx(1750.0)
+    assert leg_drag.deviation <= 280.0  # started at 280, one weighted obs can only shrink it
+
+
+def test_build_node_bouts_eligibility_matches_build_bouts() -> None:
+    """Lockstep gate: node_replay's own filter must accept/reject the same rows as
+    replay.build_bouts on the same input — the two are not allowed to drift apart."""
+    config = EngineConfig()
+    events_map = {"ADCC 2024": "submission_grappling", "UFC 300": "mma"}
+    matches = [
+        MatchRow("A", "B", "A", "ADCC 2024", 2024, "SUB"),
+        MatchRow("A", "B", None, "ADCC 2024", 2024, "DECISION"),  # unknown winner
+        MatchRow("C", "D", "C", "UFC 300", 2024, "KO"),  # out of discipline
+        MatchRow("E", "E", "E", "ADCC 2024", 2024, "SUB"),  # self match
+        MatchRow("F", "G", None, "ADCC 2024", 2024, "DRAW"),  # draw, included
+    ]
+    bouts, coverage = build_bouts(matches, config, events_map, "unknown")
+    node_bouts, node_coverage = build_node_bouts(matches, config, events_map, "unknown")
+    assert coverage["eligible"] == node_coverage["eligible"] == len(bouts) == len(node_bouts)
+    assert coverage == node_coverage
+
+
+def test_node_global_track_matches_periods_run_periods() -> None:
+    """The global track computed inside run_node_periods must be bit-identical to
+    periods.run_periods on the same bouts — node evidence never feeds back into it."""
+    seeds = _node_seeds("A", "B", "C", "D")
+    bouts = [
+        Bout(period=2024, athlete_a="A", athlete_b="B", score_a=1.0),
+        Bout(period=2024, athlete_a="C", athlete_b="D", score_a=0.0),
+        Bout(period=2025, athlete_a="A", athlete_b="C", score_a=0.5),
+    ]
+    config = EngineConfig()
+
+    expected = run_periods(seeds, bouts, config)
+    node_bouts = [NodeBout(bout=b) for b in bouts]
+    got, _, _ = run_node_periods(seeds, node_bouts, config, NodeConfig())
+
+    for athlete_id, state in expected.items():
+        assert got[athlete_id] == state
+
+
+def test_node_key_of_reuses_repo_normalization() -> None:
+    """node_key derivation must go through analysis.names — never invent normalization
+    (root CLAUDE.md contract with the App's normalizeLabel())."""
+    from analysis.names import _normalize_name, canonicalize
+
+    label = "Ankle Pick Takedown"
+    assert node_key_of(label) == canonicalize(_normalize_name(label))

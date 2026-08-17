@@ -95,6 +95,48 @@ Spread de rating **não** é critério, em nenhuma posição.
 que o rating por nó ainda não é sustentado pelo corpus, e a camada de nó fica em shadow por mais
 tempo. Não invente evidência para justificar a feature.
 
+> **Medido na wave 5, em 2026-08-17. Sweep 4×3×3 = 36 combinações, split temporal treina ≤2024 /
+> prediz 2025 (191 lutas de holdout).**
+>
+> | Critério | Resultado |
+> |---|---|
+> | 1. Log loss OOS | baseline 0,6920 → **todas as 36 melhoram** (0,6780–0,6879, ~2% relativo). Melhor: `peso 0.50 / rd0 220` (0,6780), colado com `peso 1.00 / rd0 220` (0,6785) |
+> | 2. Calibração da incerteza | **não testável em 34 das 36 células** — nenhum nó atinge RD < 150. A única com amostra tem n=6 |
+> | 3. Estabilidade (Spearman, 20 bootstraps) | 0,71–0,86; `peso 1.00 / rd0 220` = 0,847 |
+> | 4. Fração ainda no prior | 4–25%; **mediana de 1 luta observada por nó em TODAS as combinações** |
+>
+> **Não foi o "nenhum peso melhora" do cenário pessimista** — a melhora é real, pequena e consistente
+> em toda a grade. Mas também não houve vencedor: a grade melhora quase igualmente, e o critério que
+> deveria desempatar não tem dado. O candidato menos mal (`peso 1.00 / rd0 220`) repousa em **seis**
+> observações de calibração, o que não é base para fixar parâmetro de produção.
+>
+> **`tau` é não-identificável neste corpus**: 0,3 / 0,5 / 0,8 dão resultado idêntico até a 4ª casa
+> decimal nas 36 linhas. Com 1 luta por nó, a suavização de volatilidade nunca é exercitada.
+> **Não varra tau de novo até o corpus crescer** — é computação sem informação.
+>
+> **Decisão: a camada de nó fica em sombra.** Reabrir quando a mediana de lutas por nó passar de 1 e
+> houver nós com RD < 150 em número suficiente para testar calibração de verdade.
+
+---
+
+## ADR-11 — A combinação global+nó é uma escolha nossa, não do bundle
+
+**Contexto.** Para medir o critério 1 do ADR-03 é preciso transformar (rating global + ratings de nó)
+em uma única probabilidade de vitória. O bundle descreve o fluxo de evidência do nó, mas **não**
+especifica essa fórmula de combinação. A wave 5 precisou formalizar uma.
+
+**Escolha.** Combinação ponderada por precisão (`1/RD²`) entre o rating global do atleta e os ratings
+dos seus nós conhecidos, todos na mesma escala — o que é coerente, já que um nó nasce do rating global
+do atleta no momento em que aparece.
+
+**Por quê.** É o mesmo idioma que o bundle já usa para agregar eixos do usuário (`1/RD²`), então não
+introduz um segundo conceito de combinação no produto. E precisão inversa da variância é a
+combinação ótima para estimativas independentes — a premissa de independência é frágil aqui (os nós
+de um atleta são correlacionados), o que é mais um motivo para tratar o resultado como shadow.
+
+**Consequência.** Documentado no docstring de `_blend()` como decisão própria. Trocar a fórmula é
+decisão de produto, não correção de defeito — e exige re-rodar o sweep, porque muda o critério 1.
+
 ---
 
 ## ADR-04 — Período de rating = ano, com data por luta como dívida declarada

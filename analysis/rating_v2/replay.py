@@ -56,6 +56,7 @@ class MatchRow:
 
     __slots__ = (
         "athlete_a_id", "athlete_b_id", "winner_id", "event", "year", "win_type", "status",
+        "sequence",
     )
 
     def __init__(
@@ -67,6 +68,7 @@ class MatchRow:
         year: int | None,
         win_type: str | None,
         status: str = "final",
+        sequence: list[dict[str, Any]] | None = None,
     ) -> None:
         self.athlete_a_id = athlete_a_id
         self.athlete_b_id = athlete_b_id
@@ -75,6 +77,10 @@ class MatchRow:
         self.year = year
         self.win_type = win_type
         self.status = status
+        # ``sequence`` unused by build_bouts (global replay never reads it) — carried through
+        # only so node_replay.py can build node observations off the same MatchRow, without a
+        # second DB read (wave 5, ADR-03).
+        self.sequence = sequence
 
 
 def build_bouts(
@@ -233,7 +239,7 @@ def run_replay(config: EngineConfig) -> dict[str, Any]:
         rows = session.execute(
             select(
                 Match.athlete_a_id, Match.athlete_b_id, Match.winner_id,
-                Match.event, Match.year, Match.win_type, Match.status,
+                Match.event, Match.year, Match.win_type, Match.status, Match.sequence,
             )
         ).all()
         matches = [MatchRow(*r) for r in rows]
