@@ -231,6 +231,17 @@ def _normalise_bout(
         "winner", "method", "event", "win_type", "submission", "stage", "weight_class"
     ) if field in raw}
     if result:
+        winner = result.get("winner")
+        if isinstance(winner, str) and winner.strip():
+            # identity.resolve() catches a manifest alias ("Mo Black" -> "Morgan Black")
+            # that never shares an athlete_key with the raw participant name; the
+            # participant_by_key fallback catches a winner that matches a participant's raw
+            # spelling but isn't itself alias-registered (e.g. an accent-only difference).
+            resolved_winner = identity.resolve(winner) or participant_by_key.get(athlete_key(winner))
+            if resolved_winner in bout["participants"]:
+                result["winner"] = resolved_winner
+            else:
+                issues.append({"code": "unknown_winner", "bout_id": bout_id, "winner": winner})
         bout["result"] = result
     if isinstance(raw.get("adjudication"), dict):
         bout["adjudication"] = raw["adjudication"]
@@ -986,6 +997,29 @@ def _list(items: Sequence[Mapping[str, Any]]) -> str:
     ) + "</ul>"
 
 
+#: Base typography/paper tokens shared by every locally-rendered scouting report (this
+#: module's per-opponent HTML and ``scripts.scouting_division_report``'s per-category HTML).
+#: Extracted so a second renderer imports it instead of re-typing the same rules.
+REPORT_CSS = """
+:root { --paper: oklch(0.965 0.008 86); --ink: oklch(0.24 0.018 52); --muted: oklch(0.48 0.02 60); --rule: oklch(0.76 0.025 74); --accent: oklch(0.42 0.09 34); --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 48px; }
+@page { size: A4; margin: 18mm 16mm 20mm; }
+* { box-sizing: border-box; }
+body { margin: 0 auto; max-width: 74ch; padding: var(--space-xl) var(--space-lg); color: var(--ink); background: var(--paper); font: 10.5pt/1.55 "Avenir Next", "Liberation Sans", sans-serif; }
+h1, h2, h3 { font-family: Charter, "Bitstream Charter", serif; font-weight: 600; line-height: 1.12; }
+h1 { max-width: 16ch; font-size: clamp(2.5rem, 8vw, 5rem); margin: var(--space-sm) 0 var(--space-lg); letter-spacing: -0.035em; }
+h2 { font-size: 2.2rem; margin: var(--space-xs) 0; } h3 { font-size: 1.12rem; margin: 0 0 var(--space-sm); }
+p, ul { margin: 0; } ul { padding-inline-start: 1.25rem; display: grid; gap: var(--space-sm); } li::marker { color: var(--accent); }
+small { display: block; color: var(--muted); font-size: 0.78rem; }
+.cover { min-height: 88vh; display: grid; align-content: end; border-block: 1px solid var(--rule); padding-block: var(--space-xl); }
+.eyebrow { color: var(--accent); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }
+.dek { max-width: 52ch; color: var(--muted); font-size: 1.05rem; }
+.opponent { break-before: page; display: grid; gap: var(--space-lg); } .opponent > header { border-bottom: 1px solid var(--rule); padding-bottom: var(--space-lg); }
+.opponent section { display: grid; grid-template-columns: minmax(9rem, 0.38fr) 1fr; gap: var(--space-lg); align-items: start; }
+.empty, .sources { color: var(--muted); } @media print { body { padding: 0; } .cover { min-height: 240mm; } }
+@media (max-width: 640px) { body { padding: var(--space-lg) var(--space-md); } .opponent section { grid-template-columns: 1fr; gap: var(--space-sm); } }
+"""
+
+
 def render_html(report: Mapping[str, Any]) -> str:
     target_rules = report.get("target_rulesets", [])
     target_text = ", ".join(
@@ -1035,24 +1069,7 @@ def render_html(report: Mapping[str, Any]) -> str:
     return f"""<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{html.escape(report['event'])} · {html.escape(report['division'])}</title>
-<style>
-:root {{ --paper: oklch(0.965 0.008 86); --ink: oklch(0.24 0.018 52); --muted: oklch(0.48 0.02 60); --rule: oklch(0.76 0.025 74); --accent: oklch(0.42 0.09 34); --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 48px; }}
-@page {{ size: A4; margin: 18mm 16mm 20mm; }}
-* {{ box-sizing: border-box; }}
-body {{ margin: 0 auto; max-width: 74ch; padding: var(--space-xl) var(--space-lg); color: var(--ink); background: var(--paper); font: 10.5pt/1.55 "Avenir Next", "Liberation Sans", sans-serif; }}
-h1, h2, h3 {{ font-family: Charter, "Bitstream Charter", serif; font-weight: 600; line-height: 1.12; }}
-h1 {{ max-width: 16ch; font-size: clamp(2.5rem, 8vw, 5rem); margin: var(--space-sm) 0 var(--space-lg); letter-spacing: -0.035em; }}
-h2 {{ font-size: 2.2rem; margin: var(--space-xs) 0; }} h3 {{ font-size: 1.12rem; margin: 0 0 var(--space-sm); }}
-p, ul {{ margin: 0; }} ul {{ padding-inline-start: 1.25rem; display: grid; gap: var(--space-sm); }} li::marker {{ color: var(--accent); }}
-small {{ display: block; color: var(--muted); font-size: 0.78rem; }}
-.cover {{ min-height: 88vh; display: grid; align-content: end; border-block: 1px solid var(--rule); padding-block: var(--space-xl); }}
-.eyebrow {{ color: var(--accent); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; }}
-.dek {{ max-width: 52ch; color: var(--muted); font-size: 1.05rem; }}
-.opponent {{ break-before: page; display: grid; gap: var(--space-lg); }} .opponent > header {{ border-bottom: 1px solid var(--rule); padding-bottom: var(--space-lg); }}
-.opponent section {{ display: grid; grid-template-columns: minmax(9rem, 0.38fr) 1fr; gap: var(--space-lg); align-items: start; }}
-.empty, .sources {{ color: var(--muted); }} @media print {{ body {{ padding: 0; }} .cover {{ min-height: 240mm; }} }}
-@media (max-width: 640px) {{ body {{ padding: var(--space-lg) var(--space-md); }} .opponent section {{ grid-template-columns: 1fr; gap: var(--space-sm); }} }}
-</style></head><body><main>
+<style>{REPORT_CSS}</style></head><body><main>
 <section class="cover"><p class="eyebrow">Relatório local de scouting</p><h1>{html.escape(report['event'])}<br>{html.escape(report['division'])}</h1>
 <p class="dek">Visão do professor para {html.escape(report['own_athlete'])}. Afirmações separadas por nível de derivação e vinculadas às lutas-fonte.</p></section>
 <section class="opponent"><header><p class="eyebrow">Regra-alvo</p><h2>Regra-alvo</h2></header>

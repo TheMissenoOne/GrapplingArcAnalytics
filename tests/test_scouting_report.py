@@ -159,6 +159,31 @@ def test_unknown_actor_is_reported_and_never_attributed() -> None:
     assert issues[0]["actor"] == "Narrator"
 
 
+def test_normalise_bout_resolves_winner_alias() -> None:
+    source = "scripts.dumps.synthetic"
+    raw = [row("Morgan Black", "Sophia Delgado", 2024,
+               [event("Guard Pass", "Morgan Black")], winner="Mo Black")]
+    data = manifest([athlete("Morgan Black", ["Mo Black"], [{"module": source}])])
+
+    corpus, issues = collect_bouts(data, loader({source: raw}))
+
+    assert issues == []
+    assert corpus["Morgan Black"][0]["result"]["winner"] == "Morgan Black"
+
+
+def test_normalise_bout_reports_unknown_winner_and_keeps_raw_value() -> None:
+    source = "scripts.dumps.synthetic"
+    raw = [row("Morgan Black", "Sophia Delgado", 2024,
+               [event("Guard Pass", "Morgan Black")], winner="Someone Else")]
+    data = manifest([athlete("Morgan Black", [], [{"module": source}])])
+
+    corpus, issues = collect_bouts(data, loader({source: raw}))
+
+    assert corpus["Morgan Black"][0]["result"]["winner"] == "Someone Else"
+    assert any(issue["code"] == "unknown_winner" and issue["winner"] == "Someone Else"
+               for issue in issues)
+
+
 def test_outcomes_are_tristate_and_gates_suppress_weak_claims() -> None:
     bouts = [
         {

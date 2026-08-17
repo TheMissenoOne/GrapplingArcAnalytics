@@ -174,6 +174,34 @@ def test_resumo_separa_vitoria_derrota_e_sem_resultado() -> None:
     }
 
 
+def test_resultado_ignora_diferenca_de_acento() -> None:
+    # _normalize_name (label normalizer) *strips* accents instead of deaccenting: "Galvão"
+    # and "Galvao" used to land on different strings and this scored a loss. athlete_key
+    # deaccents both to the same identity.
+    b = bout(participants=["Sarah Galvão", "Libby Genge"], result={"winner": "Sarah Galvao"})
+    assert build_tables("Sarah Galvão", [b])["resumo"] == {
+        "lutas": 1, "vitorias": 1, "derrotas": 0, "sem_resultado": 0,
+    }
+
+
+def test_resultado_terceiro_nome_fica_sem_resultado_e_conta_cobertura() -> None:
+    # A winner matching neither participant is never assumed to be a loss.
+    b = bout(participants=["A", "B"], result={"winner": "C"})
+    tabela = build_tables("A", [b])
+    assert tabela["resumo"] == {"lutas": 1, "vitorias": 0, "derrotas": 0, "sem_resultado": 1}
+    assert tabela["cobertura"]["resultado_indeterminado"] == 1
+
+
+def test_agente_usa_identidade_nao_grafia_exata() -> None:
+    # A bout sourced from the DB may carry the raw (accent-less) DB spelling as actor while
+    # the athlete parameter is the roster's accented canonical name — both must still land
+    # under PRÓPRIO, not ADVERSÁRIO.
+    b = bout(events=[ev("Armbar", "submission", "Sarah Galvao", successful=True)])
+    tabela = build_tables("Sarah Galvão", [b])
+    assert tabela["efetividade"]["PRÓPRIO"]["FINALIZAÇÃO"]["FINALIZAÇÃO"] == 1
+    assert tabela["efetividade"]["ADVERSÁRIO"]["FINALIZAÇÃO"]["FINALIZAÇÃO"] == 0
+
+
 def test_agente_separa_o_atleta_do_adversario() -> None:
     b = bout(events=[ev("Armbar", "submission", "A", successful=True),
                      ev("Guard Pass", "pass", "B", successful=False)])

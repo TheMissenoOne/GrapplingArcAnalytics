@@ -31,7 +31,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from analysis.names import _normalize_name
+from analysis.names import _normalize_name, athlete_key
 
 AGENTES = ("PRÓPRIO", "ADVERSÁRIO")
 
@@ -60,7 +60,16 @@ DOUBLE_PULL_WINDOW_S = 15
 
 
 def _norm(value: Any) -> str:
+    """Technique-label normalizer only. Never compare athlete names with this — it strips
+    accents instead of deaccenting ("Galvão" -> "galvo"), so "Sarah Galvão" != "Sarah Galvao".
+    Use ``_ident`` for names."""
     return _normalize_name(str(value or ""))
+
+
+def _ident(value: Any) -> str:
+    """Athlete-identity key: deaccents + resolves aliases, so "Sarah Galvão" == "Sarah Galvao"
+    and manifest/roster aliases ("Mo Black" == "Morgan Black") match."""
+    return athlete_key(str(value or ""))
 
 
 def acao_de(event: Mapping[str, Any]) -> str | None:
@@ -190,20 +199,26 @@ def _adversario(bout: Mapping[str, Any], athlete: str) -> str | None:
     keyed under the *opponent's* name it holds the athlete themselves."""
     participantes = bout.get("participants")
     if isinstance(participantes, list) and len(participantes) == 2:
-        outros = [p for p in participantes if _norm(p) != _norm(athlete)]
+        outros = [p for p in participantes if _ident(p) != _ident(athlete)]
         if len(outros) == 1:
             return str(outros[0])
     opponent = bout.get("opponent")
-    if isinstance(opponent, str) and _norm(opponent) != _norm(athlete):
+    if isinstance(opponent, str) and _ident(opponent) != _ident(athlete):
         return opponent
     return None
 
 
 def _resultado(bout: Mapping[str, Any], athlete: str) -> str:
+    """VITÓRIA/DERROTA/SEM RESULTADO. A winner that matches neither participant is never
+    silently scored as a loss — that would fabricate a result out of a bad name match."""
     vencedor = (bout.get("result") or {}).get("winner")
     if not isinstance(vencedor, str) or not vencedor.strip():
         return "SEM RESULTADO"
-    return "VITÓRIA" if _norm(vencedor) == _norm(athlete) else "DERROTA"
+    participantes = bout.get("participants")
+    if isinstance(participantes, list) and len(participantes) == 2:
+        if _ident(vencedor) not in {_ident(p) for p in participantes}:
+            return "SEM RESULTADO"
+    return "VITÓRIA" if _ident(vencedor) == _ident(athlete) else "DERROTA"
 
 
 def _vazio(linhas: Sequence[str], colunas: Sequence[str]) -> dict[str, dict[str, int]]:
@@ -229,7 +244,7 @@ def build_tables(athlete: str, bouts: Sequence[Mapping[str, Any]]) -> dict[str, 
         if comeco is not None:
             actor, tipo = comeco
             agente = "AMBOS" if actor == "AMBOS" else (
-                "PRÓPRIO" if _norm(actor) == _norm(athlete) else "ADVERSÁRIO"
+                "PRÓPRIO" if _ident(actor) == _ident(athlete) else "ADVERSÁRIO"
             )
             luta_em_pe[agente][tipo] += 1
 
@@ -239,7 +254,7 @@ def build_tables(athlete: str, bouts: Sequence[Mapping[str, Any]]) -> dict[str, 
         # position an action came from is the last guard/control established before it.
         posicao_corrente: str | None = None
         for index, event in enumerate(bout.get("events", [])):
-            agente = "PRÓPRIO" if _norm(event.get("actor")) == _norm(athlete) else "ADVERSÁRIO"
+            agente = "PRÓPRIO" if _ident(event.get("actor")) == _ident(athlete) else "ADVERSÁRIO"
             acao = acao_de(event)
             efet = efetividade_de(event, pontos_por_evento.get(index))
             bucket = tempo_bucket(event, bout)
@@ -283,6 +298,7 @@ def build_tables(athlete: str, bouts: Sequence[Mapping[str, Any]]) -> dict[str, 
             "eventos_fora_das_acoes": dict(fora_das_acoes),
             "eventos_sem_tempo": sum(1 for linha in linhas if linha["tempo"] == SEM_TEMPO),
             "lutas_com_placar": sum(1 for bout in bouts if bout.get("score_events")),
+            "resultado_indeterminado": resumo["SEM RESULTADO"],
         },
     }
 
