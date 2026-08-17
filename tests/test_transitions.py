@@ -1,0 +1,71 @@
+"""Tests for the shared transitions layer (wave 4, docs/rating_v2/)."""
+
+from __future__ import annotations
+
+from typing import Any
+
+from analysis.network_metrics import network_from_sequences as network_metrics_builder
+from analysis.transitions.build_graph import network_from_sequences
+from analysis.transitions.normalize import (
+    athlete_balanced_category_graph,
+    category_graph_raw,
+    normalize_athlete_graph,
+)
+
+BC, RNC, CG, TRI = "Back Control", "Rear Naked Choke", "Closed Guard", "Triangle Choke"
+
+
+def _e(label: str, typ: str, actor: str, ok: bool = False) -> dict[str, Any]:
+    return {"label": label, "type": typ, "actor_id": actor, "successful": ok}
+
+
+def _sequences() -> list[list[dict[str, Any]]]:
+    back_to_sub = [_e(BC, "control", "A"), _e(RNC, "submission", "A", True)]
+    return [
+        back_to_sub, back_to_sub, back_to_sub,
+        [_e(CG, "guard", "B"), _e(BC, "control", "A"), _e(RNC, "submission", "A", True)],
+        [_e(CG, "guard", "B"), _e(TRI, "submission", "B", True)],
+    ]
+
+
+def test_network_metrics_reexports_the_extracted_builder() -> None:
+    # Proves the network_metrics extraction didn't change behaviour: same object.
+    assert network_metrics_builder is network_from_sequences
+
+
+def test_build_graph_matches_original_shape() -> None:
+    g = network_from_sequences(_sequences())
+    assert {BC, RNC, CG, TRI} <= set(g.nodes)
+    assert g.nodes[BC]["occ"] == 4
+    assert g[BC][RNC]["weight"] == 4
+    assert g[BC][RNC]["ok"] == 4
+
+
+def test_normalize_athlete_graph_sums_to_one() -> None:
+    g = network_from_sequences(_sequences())
+    norm = normalize_athlete_graph(g)
+    total = sum(d["weight"] for _, _, d in norm.edges(data=True))
+    assert abs(total - 1.0) < 1e-9
+    assert norm[BC][RNC]["weight"] > 0
+
+
+def test_athlete_balanced_vs_raw_diverge_when_one_athlete_dominates() -> None:
+    # Athlete "whale" fought 10x more than "minnow"; whale always does BC->RNC,
+    # minnow always does CG->TRI. Raw pooling lets whale's edge dominate;
+    # balanced aggregation gives each athlete equal total weight.
+    whale_seq = [_e(BC, "control", "A"), _e(RNC, "submission", "A", True)]
+    minnow_seq = [_e(CG, "guard", "B"), _e(TRI, "submission", "B", True)]
+    athlete_sequences = {
+        "whale": [whale_seq] * 20,
+        "minnow": [minnow_seq] * 2,
+    }
+    raw = category_graph_raw(athlete_sequences)
+    balanced = athlete_balanced_category_graph(athlete_sequences)
+
+    assert raw[BC][RNC]["weight"] == 20
+    assert raw[CG][TRI]["weight"] == 2
+
+    # Balanced: each athlete's own graph is normalized to sum-1 before summing, so
+    # both athletes' sole edge contributes weight 1.0 regardless of match volume.
+    assert abs(balanced[BC][RNC]["weight"] - 1.0) < 1e-9
+    assert abs(balanced[CG][TRI]["weight"] - 1.0) < 1e-9

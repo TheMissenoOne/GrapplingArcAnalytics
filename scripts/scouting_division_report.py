@@ -38,6 +38,7 @@ try:
 except ImportError:
     pass
 
+from analysis import category_constellations as ccon
 from analysis import category_profile as cp
 from analysis import report_charts as rc
 from analysis.names import athlete_key
@@ -414,6 +415,9 @@ def _division_trend(
         "distribuicao": cp.distribution(own_events),
         "desvio_primary": desvio_primary,
         "desvio_secondary": desvio_secondary,
+        # Seção 5 recebe o MESMO per_athlete_bouts das outras seções. Resolver o roster de novo
+        # contra o banco daria outro corpus e o relatório se contradiria entre as seções 1 e 5.
+        "constelacoes": ccon.division_constellations(per_athlete_bouts, roster_baseline_bouts),
         "rede": _division_network(unique_bouts, roster_baseline_bouts),
         "efetividade": cp.effectiveness(own_events),
         "tempo_disponivel": cp.time_available(cobertura_eventos),
@@ -571,6 +575,21 @@ def _rows_rede(divisao: str, escopo: str, rede: Mapping[str, Any] | None) -> lis
     return rows
 
 
+def _rows_constelacoes(
+    divisao: str, escopo: str, dados: Mapping[str, Any] | None
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for c in (dados or {}).get("constelacoes") or []:
+        for coluna in ("prevalencia_categoria", "prevalencia_baseline", "log2_lift",
+                       "mean_jaccard", "classification", "support_athletes", "driver_athlete",
+                       "passa_gate", "internal_edges", "support"):
+            rows.append({"divisao": divisao, "escopo": escopo, "tabela": "constelacoes",
+                         "agente": "", "linha": c["hub"], "coluna": coluna, "valor": c[coluna]})
+        rows.append({"divisao": divisao, "escopo": escopo, "tabela": "constelacoes", "agente": "",
+                     "linha": c["hub"], "coluna": "membros", "valor": " | ".join(c["members"])})
+    return rows
+
+
 def _rows_valor_marginal(divisao: str, escopo: str, valor_marginal: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
     return [
         {"divisao": divisao, "escopo": escopo, "tabela": "valor_marginal", "agente": "",
@@ -597,6 +616,7 @@ def write_division_csv(report: Mapping[str, Any], path: Path) -> None:
             rows += _rows_distribuicao(slug, escopo, tendencias["distribuicao"])
             rows += _rows_desvio(slug, escopo, "primary", tendencias["desvio_primary"])
             rows += _rows_desvio(slug, escopo, "secondary", tendencias["desvio_secondary"])
+            rows += _rows_constelacoes(slug, escopo, tendencias.get("constelacoes"))
             rows += _rows_rede(slug, escopo, tendencias["rede"])
             rows += _rows_valor_marginal(slug, escopo, tendencias["valor_marginal"])
     with path.open("w", newline="", encoding="utf-8") as fh:
@@ -709,11 +729,54 @@ def _html_desvio(primary: Mapping[str, Any] | None, secondary: Mapping[str, Any]
 </section>"""
 
 
-_CONSTELACOES_PLACEHOLDER = """<section class="section"><h3>5. Constelações e estrutura do metagame</h3>
-<p class="empty">Aguardando camada de constelações compartilhada (wave 4). O relatório de
-categoria e a Rating Engine V2 leem o mesmo detector (<code>analysis/constellations/detect.py</code>,
-ainda não implementado) — ver <code>docs/rating_v2/</code>. Nada aqui é derivado localmente.</p>
-</section>"""
+_CLASSIF_ROTULO = {
+    "STABLE": "estável",
+    "PARTIALLY_STABLE": "parcialmente estável",
+    "ATHLETE_DRIVEN": "sustentada por uma atleta",
+}
+
+
+def _html_constelacoes(dados: Mapping[str, Any] | None) -> str:
+    """Seção 5. Detector compartilhado com a Rating Engine V2 — rating não participa da
+    membership, só topologia e frequência (ver docs/rating_v2/README.md)."""
+    constelacoes = (dados or {}).get("constelacoes") or []
+    if not constelacoes:
+        corpo = ('<p class="empty">Nenhuma constelação com mais de um nó foi detectada neste '
+                 'escopo.</p>')
+    else:
+        max_prev = max(c["prevalencia_categoria"] for c in constelacoes) or 1.0
+        blocos = []
+        for c in constelacoes:
+            lift = "—" if c["log2_lift"] is None else f"{c['log2_lift']:+.2f}"
+            if c["inedito_no_baseline"]:
+                lift = "inédito no baseline"
+            transicoes = " · ".join(
+                f"{escape(t['de'])} → {escape(t['para'])}"
+                for t in c["transicoes_caracteristicas"]
+            ) or "—"
+            marca = "" if c["passa_gate"] else ' <span class="flag">fora do gate</span>'
+            blocos.append(
+                f'<tr><td>{escape(c["hub"])}{marca}<br><small>{escape(transicoes)}</small></td>'
+                f'<td>{rc.inline_bar(c["prevalencia_categoria"], max_prev)}'
+                f'{c["prevalencia_categoria"]*100:.1f}%</td>'
+                f'<td>{lift}</td>'
+                f'<td>{_CLASSIF_ROTULO.get(c["classification"], c["classification"])}'
+                f'<br><small>Jaccard {c["mean_jaccard"]:.2f} · {c["support_athletes"]} atleta(s)</small></td>'
+                f'</tr><tr class="nota"><td colspan="4"><small>{escape(c["texto"])}</small></td></tr>'
+            )
+        corpo = (
+            '<table><thead><tr><th>Constelação / transições características</th>'
+            '<th>Prevalência na categoria</th><th>log2 lift vs elite no-gi</th>'
+            '<th>Robustez</th></tr></thead><tbody>' + "".join(blocos) + "</tbody></table>"
+        )
+    rodape = ""
+    if dados:
+        rodape = (f'<p class="nota-metodo"><small>Modularidade {dados.get("modularity", 0):.3f} · '
+                  f'comunidades quebradas pelo gate de conectividade: '
+                  f'{dados.get("rejected_rate", 0):.1%}. Detector compartilhado com a Rating '
+                  f'Engine V2; rating não participa da formação das comunidades.</small></p>')
+    return (f'<section class="section"><h3>5. Constelações e estrutura do metagame</h3>'
+            f'{corpo}{rodape}</section>')
 
 
 def _html_rede(rede: Mapping[str, Any] | None) -> str:
@@ -778,7 +841,7 @@ def _html_trend(tendencias: Mapping[str, Any]) -> str:
         _html_perfil(tendencias["perfil"], tendencias["perfil_baseline"], tendencias["perfil_diverge"]),
         _html_distribuicao(tendencias["distribuicao"]),
         _html_desvio(tendencias["desvio_primary"], tendencias["desvio_secondary"]),
-        _CONSTELACOES_PLACEHOLDER,
+        _html_constelacoes(tendencias.get("constelacoes")),
         _html_rede(tendencias["rede"]),
         _html_efetividade_trend(tendencias["efetividade"]),
         _html_tempo_trend(tendencias["tempo_disponivel"], tendencias["tempo_pct"]),

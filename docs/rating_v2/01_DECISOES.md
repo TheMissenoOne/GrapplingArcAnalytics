@@ -184,6 +184,26 @@ comunidades falham, e só troque para Leiden se o número for material.**
 **Consequência.** `analysis/constellations/detect.py` expõe o detector com o gate embutido, e
 `stability.py` reporta a taxa de rejeição por conectividade como métrica de primeira classe.
 
+> **Medido na wave 4, em 2026-08-17: taxa de rejeição = 0.**
+> O gate rodou sobre os cinco atletas com mais lutas (Gordon Ryan 114, Craig Jones 31, Leandro Lo 25,
+> Kade Ruotolo 18, Nick Rodriguez 15) e sobre as duas divisões do roster ADCC 2026, nas resoluções
+> 0.8 / 1.0 / 1.2 / 1.4. **Nenhuma comunidade internamente desconexa foi produzida em nenhum caso.**
+>
+> Portanto **Leiden não se justifica hoje**, e a decisão é fechada: fica Louvain + gate. O corpus é
+> denso, com vocabulário pequeno de posições e arestas muito sobrepostas — condição em que o defeito
+> que Traag et al. descrevem simplesmente não se manifesta. O gate permanece no código como sentinela
+> barata: se a taxa subir quando o corpus crescer ou ficar mais esparso, o número reabre a decisão
+> sozinho.
+>
+> Na mesma varredura: **resolução 1.0 confirmada como default**, por modularidade praticamente plana
+> entre 0.8 e 1.4 (variação ≤ 0.06 dentro de cada entidade) e Jaccard de bootstrap sem melhora
+> monotônica. Nenhum failure gate do plano de validação disparou — sem megacluster (maior
+> `top_share` por atleta = 0.57, num grafo de 14 nós) e sem inversão de partição sob bootstrap
+> (pior Jaccard médio = 0.42).
+>
+> Constante ainda não calibrada: `classify_stability(stability_threshold=0.7)` é primeiro corte,
+> documentado como tal no próprio docstring. Calibrar exige mais corpus que o de hoje.
+
 ---
 
 ## ADR-08 — Constelações substituem `athlete_systems.py` por migração medida, não por decreto
