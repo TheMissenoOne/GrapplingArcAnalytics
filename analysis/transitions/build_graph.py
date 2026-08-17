@@ -9,6 +9,7 @@ instead of diverging. Behaviour unchanged from the original — see
 from __future__ import annotations
 
 from collections import Counter, defaultdict
+from collections.abc import Callable
 from typing import Any
 
 import networkx as nx
@@ -34,7 +35,10 @@ def _events(sequence: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return out
 
 
-def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
+def network_from_sequences(
+    sequences: list[list[dict[str, Any]]],
+    weight_fn: Callable[[Any], float] | None = None,
+) -> nx.DiGraph:
     """Pure builder: actor-tagged sequences → aggregate transition ``DiGraph``.
 
     **Edges are within-actor** — one fighter's own ordered flow (their next *own* action),
@@ -50,6 +54,14 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
       - **risk**: the very next event (either fighter) is the *opponent* finishing a submission
         — only when both actors are known (unknown attribution is left neutral, never charged).
     Node attrs: ``type``, ``occ`` (total appearances), ``reward``/``risk``, ``reward_risk``.
+
+    ``weight_fn`` (optional): per-event multiplier keyed by the raw ``actor`` id — every
+    count this function produces (node ``occ``/``ok_count``/``denom``/``reward``/``risk``,
+    edge ``weight``/``ok``) is attributed to the actor who owns the *appearance* being
+    counted, so confidence-weighting the corpus by athlete (``analysis/confidence_weight.py``,
+    ``docs/rating_v2/07_PONDERACAO_POR_CONFIANCA.md``) is exactly "pass a ``weight_fn``" —
+    no separate builder needed. Default (``None``) is unweighted and produces byte-identical
+    output to before this parameter existed (int counts, not float).
     """
     g = nx.DiGraph()
     occ: Counter[str] = Counter()
@@ -62,10 +74,11 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
     for seq in sequences:
         events = _events(seq)
         n = len(events)
-        for e in events:
-            occ[e["label"]] += 1
+        wts = [weight_fn(e["actor"]) if weight_fn is not None else 1 for e in events]
+        for e, wt in zip(events, wts, strict=True):
+            occ[e["label"]] += wt
             if e["ok"]:
-                ok_count[e["label"]] += 1
+                ok_count[e["label"]] += wt
             node_type.setdefault(e["label"], e["type"])
 
         # index of each event's next *own*-actor event (None actor = no attributable flow)
@@ -77,30 +90,33 @@ def network_from_sequences(sequences: list[list[dict[str, Any]]]) -> nx.DiGraph:
         for idxs in by_actor.values():
             for k in range(len(idxs) - 1):
                 next_own[idxs[k]] = idxs[k + 1]
-            # within-actor flow edges (ok = target event's own success flag)
+            # within-actor flow edges (ok = target event's own success flag); both ends
+            # share one actor, so wts[idxs[k]] == wts[idxs[k + 1]] whenever weight_fn is set.
             for k in range(len(idxs) - 1):
                 a, b = events[idxs[k]]["label"], events[idxs[k + 1]]["label"]
                 if a != b:
-                    b_ok = 1 if events[idxs[k + 1]]["ok"] else 0
+                    edge_wt = wts[idxs[k]]
+                    b_ok = edge_wt if events[idxs[k + 1]]["ok"] else 0
                     if g.has_edge(a, b):
-                        g[a][b]["weight"] += 1
+                        g[a][b]["weight"] += edge_wt
                         g[a][b]["ok"] += b_ok
                     else:
-                        g.add_edge(a, b, weight=1, ok=b_ok)
+                        g.add_edge(a, b, weight=edge_wt, ok=b_ok)
 
         for i, e in enumerate(events):
             if i + 1 >= n:
                 continue  # terminal appearance (no successor) — not in the denominator
             label = e["label"]
-            denom[label] += 1
+            wt = wts[i]
+            denom[label] += wt
             own = next_own.get(i)
             nxt = events[i + 1]
             if own is not None and events[own]["type"] == _SUBMISSION and events[own]["ok"]:
-                reward[label] += 1
+                reward[label] += wt
             elif (nxt["type"] == _SUBMISSION and nxt["ok"]
                   and e["actor"] is not None and nxt["actor"] is not None
                   and nxt["actor"] != e["actor"]):
-                risk[label] += 1
+                risk[label] += wt
 
     for label, c in occ.items():
         g.add_node(label)

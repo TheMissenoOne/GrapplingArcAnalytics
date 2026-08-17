@@ -69,3 +69,21 @@ def test_athlete_balanced_vs_raw_diverge_when_one_athlete_dominates() -> None:
     # both athletes' sole edge contributes weight 1.0 regardless of match volume.
     assert abs(balanced[BC][RNC]["weight"] - 1.0) < 1e-9
     assert abs(balanced[CG][TRI]["weight"] - 1.0) < 1e-9
+
+
+def test_weight_fn_none_is_byte_identical_to_unweighted() -> None:
+    g_default = network_from_sequences(_sequences())
+    g_explicit_none = network_from_sequences(_sequences(), weight_fn=None)
+    assert g_default.nodes(data=True) == g_explicit_none.nodes(data=True)
+    assert list(g_default.edges(data=True)) == list(g_explicit_none.edges(data=True))
+
+
+def test_weight_fn_scales_node_and_edge_counts_by_actor() -> None:
+    # actor "A" weighted 0.5, actor "B" weighted 1.0 — confidence-weighting scenario.
+    weights = {"A": 0.5, "B": 1.0}
+    g = network_from_sequences(_sequences(), weight_fn=weights.get)
+    assert g.nodes[BC]["occ"] == 4 * 0.5  # BC only ever appears under actor A
+    assert g[BC][RNC]["weight"] == 4 * 0.5
+    assert g[BC][RNC]["ok"] == 4 * 0.5
+    assert g.nodes[CG]["occ"] == 2 * 1.0  # CG only ever appears under actor B
+    assert g[CG][TRI]["weight"] == 1 * 1.0
