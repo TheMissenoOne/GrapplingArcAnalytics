@@ -149,6 +149,21 @@ def build_seeds(
     return seeds
 
 
+def athlete_bout_stats(bouts: list[Bout]) -> dict[str, dict[str, int]]:
+    """Per-athlete ``bout_count`` (eligible bouts) + ``periods`` (distinct years with >=1
+    bout) — feeds the columns of the same names on ``athlete_rating_states_v2`` (wave 7,
+    ``persist.py``)."""
+    bout_count: dict[str, int] = {}
+    periods_seen: dict[str, set[int]] = {}
+    for b in bouts:
+        for aid in (b.athlete_a, b.athlete_b):
+            bout_count[aid] = bout_count.get(aid, 0) + 1
+            periods_seen.setdefault(aid, set()).add(b.period)
+    return {
+        aid: {"bout_count": n, "periods": len(periods_seen[aid])} for aid, n in bout_count.items()
+    }
+
+
 def bouts_hash(bouts: list[Bout]) -> str:
     """Deterministic hash of the replay input — independent of DB row order."""
     canonical = sorted(
@@ -266,6 +281,7 @@ def run_replay(config: EngineConfig) -> dict[str, Any]:
             aid: {"rating": s.rating, "deviation": s.deviation, "volatility": s.volatility}
             for aid, s in final_states.items()
         },
+        "athlete_bout_stats": athlete_bout_stats(bouts),
     }
 
 
@@ -277,6 +293,14 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Rating V2 global shadow replay (read-only).")
     parser.add_argument("--seed-from-rank-elo", action="store_true")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT_DIR)
+    parser.add_argument(
+        "--persist",
+        action="store_true",
+        help=(
+            "write the run to rating_engine_runs/athlete_rating_states_v2 (service-role "
+            "DB write; everything above this flag stays read-only)"
+        ),
+    )
     args = parser.parse_args()
 
     config = EngineConfig(seed_from_rank_elo=args.seed_from_rank_elo)
@@ -290,6 +314,14 @@ def main() -> None:
     print(f"wrote {out_path}")
     print(json.dumps(result["coverage"], indent=2))
     print(json.dumps(result["summary"], indent=2, default=str))
+
+    if args.persist:
+        from analysis.rating_v2.persist import persist_replay_result
+        from db.base import db_session
+
+        with db_session() as session:
+            run_id = persist_replay_result(session, config, result)
+        print(f"persisted run_id={run_id}")
 
 
 if __name__ == "__main__":

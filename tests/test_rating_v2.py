@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import inspect
 import random
 
 import pytest
@@ -15,6 +16,7 @@ from analysis.rating_v2.periods import Bout, run_periods
 from analysis.rating_v2.replay import (
     MatchRow,
     _score_a,
+    athlete_bout_stats,
     bouts_hash,
     build_bouts,
     build_seeds,
@@ -365,3 +367,169 @@ def test_node_key_of_reuses_repo_normalization() -> None:
 
     label = "Ankle Pick Takedown"
     assert node_key_of(label) == canonicalize(_normalize_name(label))
+
+
+# ── Wave 7: bout stats + DB persistence (SQLite, no Postgres) ───────────────
+
+
+def test_athlete_bout_stats_counts_bouts_and_distinct_periods() -> None:
+    bouts = [
+        Bout(period=2020, athlete_a="A", athlete_b="B", score_a=1.0),
+        Bout(period=2020, athlete_a="A", athlete_b="C", score_a=0.0),
+        Bout(period=2021, athlete_a="A", athlete_b="B", score_a=1.0),
+    ]
+    stats = athlete_bout_stats(bouts)
+    assert stats["A"] == {"bout_count": 3, "periods": 2}  # 2020 twice + 2021, 2 distinct years
+    assert stats["B"] == {"bout_count": 2, "periods": 2}
+    assert stats["C"] == {"bout_count": 1, "periods": 1}
+
+
+ATHLETE_A = "11111111-1111-1111-1111-111111111111"
+ATHLETE_B = "22222222-2222-2222-2222-222222222222"
+
+
+@pytest.fixture()
+def db_session_factory():
+    """In-memory SQLite with all ORM tables — same pattern as tests/test_db.py."""
+    from sqlalchemy import create_engine
+    from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
+    from sqlalchemy.orm import Session
+
+    import db.models  # noqa: F401 — registers all ORM models with Base.metadata
+    from db.base import Base
+    from db.models import Athlete
+
+    SQLiteTypeCompiler.visit_JSONB = SQLiteTypeCompiler.visit_JSON  # type: ignore[attr-defined]
+    SQLiteTypeCompiler.visit_UUID = lambda self, type_, **kw: "VARCHAR(36)"  # type: ignore[attr-defined]
+
+    eng = create_engine("sqlite:///:memory:", connect_args={"check_same_thread": False})
+    Base.metadata.create_all(eng, checkfirst=True)
+    with Session(eng) as s:
+        s.add_all([Athlete(id=ATHLETE_A, name="A"), Athlete(id=ATHLETE_B, name="B")])
+        s.commit()
+        yield lambda: s
+    Base.metadata.drop_all(eng)
+
+
+def _replay_result(rating_a: float = 1800.0) -> dict:
+    return {
+        "config": EngineConfig().to_dict(),
+        "input_hash": "deadbeef",
+        "coverage": {"eligible": 1},
+        "summary": {},
+        "states": {
+            ATHLETE_A: {"rating": rating_a, "deviation": 200.0, "volatility": 0.06},
+            ATHLETE_B: {"rating": 1700.0, "deviation": 210.0, "volatility": 0.06},
+        },
+        "athlete_bout_stats": {
+            ATHLETE_A: {"bout_count": 1, "periods": 1},
+            ATHLETE_B: {"bout_count": 1, "periods": 1},
+        },
+    }
+
+
+def test_persist_run_starts_running_and_ends_completed(db_session_factory) -> None:
+    from analysis.rating_v2.persist import persist_replay_result
+    from db.models import RatingEngineRun
+
+    session = db_session_factory()
+    run_id = persist_replay_result(session, EngineConfig(), _replay_result())
+
+    run = session.get(RatingEngineRun, run_id)
+    assert run.status == "completed"
+    assert run.completed_at is not None
+    assert run.engine_version == EngineConfig().engine_version
+    assert run.source_hash == "deadbeef"
+
+
+def test_persist_run_writes_one_state_row_per_athlete(db_session_factory) -> None:
+    from analysis.rating_v2.persist import persist_replay_result
+    from db.models import AthleteRatingStateV2
+
+    session = db_session_factory()
+    run_id = persist_replay_result(session, EngineConfig(), _replay_result())
+
+    states = (
+        session.query(AthleteRatingStateV2)
+        .filter(AthleteRatingStateV2.run_id == run_id)
+        .all()
+    )
+    assert {s.athlete_id for s in states} == {ATHLETE_A, ATHLETE_B}
+    a_state = next(s for s in states if s.athlete_id == ATHLETE_A)
+    assert a_state.rating == 1800.0
+    assert a_state.bout_count == 1
+    assert a_state.periods == 1
+
+
+def test_persist_run_marks_failed_on_exception_not_left_running(db_session_factory) -> None:
+    from analysis.rating_v2.persist import persist_replay_result
+    from db.models import RatingEngineRun
+
+    session = db_session_factory()
+    broken_result = _replay_result()
+    broken_result["states"] = {
+        ATHLETE_A: {"rating": 1800.0, "deviation": 200.0}
+    }  # missing volatility
+
+    with pytest.raises(KeyError):
+        persist_replay_result(session, EngineConfig(), broken_result)
+
+    run = session.query(RatingEngineRun).one()
+    assert run.status == "failed"
+    assert run.completed_at is None
+
+
+def test_persist_run_twice_with_same_input_produces_identical_states(db_session_factory) -> None:
+    from analysis.rating_v2.persist import persist_replay_result
+    from db.models import AthleteRatingStateV2
+
+    session = db_session_factory()
+    result = _replay_result()
+    run_id_1 = persist_replay_result(session, EngineConfig(), result)
+    run_id_2 = persist_replay_result(session, EngineConfig(), result)
+
+    def _by_athlete(run_id: str) -> dict[str, tuple[float, float, float]]:
+        rows = (
+            session.query(AthleteRatingStateV2)
+            .filter(AthleteRatingStateV2.run_id == run_id)
+            .all()
+        )
+        return {r.athlete_id: (r.rating, r.rating_deviation, r.volatility) for r in rows}
+
+    assert _by_athlete(run_id_1) == _by_athlete(run_id_2)
+
+
+def test_verify_determinism_compare_states_flags_divergence_and_coverage_gap() -> None:
+    from scripts.verify_rating_v2_determinism import compare_states
+
+    run1 = {
+        "A": {"rating": 1800.0, "rating_deviation": 200.0, "volatility": 0.06},
+        "B": {"rating": 1700.0, "rating_deviation": 210.0, "volatility": 0.06},
+    }
+    run2 = {
+        "A": {"rating": 1800.0, "rating_deviation": 200.0, "volatility": 0.06},  # identical
+        "C": {"rating": 1650.0, "rating_deviation": 220.0, "volatility": 0.06},  # only in run2
+    }
+    report = compare_states(run1, run2)
+    assert report["only_in_run1"] == ["B"]
+    assert report["only_in_run2"] == ["C"]
+    assert report["divergences"] == []  # A agrees, and only shared athletes are compared
+
+    run2_diverged = dict(run2)
+    run2_diverged["A"] = {"rating": 1801.0, "rating_deviation": 200.0, "volatility": 0.06}
+    diverged_report = compare_states(run1, run2_diverged)
+    assert len(diverged_report["divergences"]) == 1
+    assert diverged_report["divergences"][0]["field"] == "rating"
+
+
+def test_persist_module_exposes_no_run_id_free_read_helper() -> None:
+    """ADR-02: any read of athlete_rating_states_v2 needs an explicit run_id. Guard
+    against a later helper that quietly returns "the current state" without one."""
+    from analysis.rating_v2 import persist
+
+    public_funcs = [
+        name
+        for name, obj in vars(persist).items()
+        if inspect.isfunction(obj) and obj.__module__ == persist.__name__
+    ]
+    assert public_funcs == ["persist_replay_result"]
