@@ -675,3 +675,51 @@ class SystemDilemma(Base):
     dilemma_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), ForeignKey("dilemmas.id", ondelete="CASCADE"), primary_key=True
     )
+
+
+class RatingEngineRun(Base):
+    """One Glicko-2 (rating_v2) replay invocation — alembic 0035.
+
+    Identifies exactly which ``engine_version`` + config produced a snapshot in
+    ``athlete_rating_states_v2``. ``engine_version`` is a required read key (ADR-02,
+    ``docs/rating_v2/01_DECISOES.md``), not audit decoration. Written by the replay
+    job (service role); not touched by the App."""
+
+    __tablename__ = "rating_engine_runs"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    engine_version: Mapped[str] = mapped_column(Text, nullable=False)
+    config_json: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, server_default="{}")
+    source_hash: Mapped[str | None] = mapped_column(Text)
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="running")
+    notes: Mapped[str | None] = mapped_column(Text)
+
+
+class AthleteRatingStateV2(Base):
+    """One athlete's Glicko-2 state at the end of one run — alembic 0035.
+
+    Athlete (public) data only — rating_v2 replays ``matches``/``athletes``, never a
+    user session or graph. PK ``(run_id, athlete_id)``: a run's full leaderboard and an
+    athlete's history across runs are both the expected query shapes."""
+
+    __tablename__ = "athlete_rating_states_v2"
+    # Só athlete_id: a PK já indexa run_id como coluna líder (ver alembic 0035).
+    __table_args__ = (Index("ix_athlete_rating_states_v2_athlete_id", "athlete_id"),)
+
+    run_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("rating_engine_runs.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    athlete_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("athletes.id", ondelete="CASCADE"), primary_key=True
+    )
+    rating: Mapped[float] = mapped_column(Float, nullable=False)
+    rating_deviation: Mapped[float] = mapped_column(Float, nullable=False)
+    volatility: Mapped[float] = mapped_column(Float, nullable=False)
+    periods: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    bout_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    last_active_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
