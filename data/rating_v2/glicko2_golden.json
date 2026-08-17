@@ -1,0 +1,308 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "deviation": 151.51652412385727,
+        "rating": 1464.0506705393013,
+        "volatility": 0.059995984286488495
+      },
+      "input": {
+        "observations": [
+          {
+            "opponent_deviation": 30.0,
+            "opponent_rating": 1400.0,
+            "score": 1.0,
+            "weight": 1.0
+          },
+          {
+            "opponent_deviation": 100.0,
+            "opponent_rating": 1550.0,
+            "score": 0.0,
+            "weight": 1.0
+          },
+          {
+            "opponent_deviation": 300.0,
+            "opponent_rating": 1700.0,
+            "score": 0.0,
+            "weight": 1.0
+          }
+        ],
+        "state": {
+          "deviation": 200.0,
+          "rating": 1500.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "published_example"
+    },
+    {
+      "expected": {
+        "deviation": 250.2171863532412,
+        "rating": 1750.0,
+        "volatility": 0.06
+      },
+      "input": {
+        "observations": [],
+        "state": {
+          "deviation": 250.0,
+          "rating": 1750.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "inactive_period"
+    },
+    {
+      "expected": {
+        "deviation": 217.92720754173664,
+        "rating": 1857.082399995158,
+        "volatility": 0.05999962067713265
+      },
+      "input": {
+        "observations": [
+          {
+            "opponent_deviation": 250.0,
+            "opponent_rating": 1750.0,
+            "score": 1.0,
+            "weight": 1.0
+          }
+        ],
+        "state": {
+          "deviation": 250.0,
+          "rating": 1750.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "single_win"
+    },
+    {
+      "expected": {
+        "deviation": 217.92720754173664,
+        "rating": 1642.917600004842,
+        "volatility": 0.05999962067713265
+      },
+      "input": {
+        "observations": [
+          {
+            "opponent_deviation": 250.0,
+            "opponent_rating": 1750.0,
+            "score": 0.0,
+            "weight": 1.0
+          }
+        ],
+        "state": {
+          "deviation": 250.0,
+          "rating": 1750.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "single_loss"
+    },
+    {
+      "expected": {
+        "deviation": 217.92720184456263,
+        "rating": 1750.0,
+        "volatility": 0.059998428993975214
+      },
+      "input": {
+        "observations": [
+          {
+            "opponent_deviation": 250.0,
+            "opponent_rating": 1750.0,
+            "score": 0.5,
+            "weight": 1.0
+          }
+        ],
+        "state": {
+          "deviation": 250.0,
+          "rating": 1750.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "single_draw"
+    },
+    {
+      "expected": {
+        "deviation": 237.36551756972116,
+        "rating": 1792.951855488063,
+        "volatility": 0.059999540478744964
+      },
+      "input": {
+        "observations": [
+          {
+            "opponent_deviation": 120.0,
+            "opponent_rating": 1800.0,
+            "score": 1.0,
+            "weight": 0.25
+          }
+        ],
+        "state": {
+          "deviation": 250.0,
+          "rating": 1750.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "weighted_observation"
+    },
+    {
+      "expected": {
+        "deviation": 58.536215464770514,
+        "rating": 2203.0944110597393,
+        "volatility": 0.05999876452562552
+      },
+      "input": {
+        "observations": [
+          {
+            "opponent_deviation": 150.0,
+            "opponent_rating": 1900.0,
+            "score": 1.0,
+            "weight": 1.0
+          }
+        ],
+        "state": {
+          "deviation": 58.0,
+          "rating": 2200.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "low_rd_state"
+    },
+    {
+      "expected": {
+        "deviation": 169.45603919525982,
+        "rating": 1749.658958102402,
+        "volatility": 0.059996477806352734
+      },
+      "input": {
+        "observations": [
+          {
+            "opponent_deviation": 100.0,
+            "opponent_rating": 1600.0,
+            "score": 1.0,
+            "weight": 1.0
+          },
+          {
+            "opponent_deviation": 80.0,
+            "opponent_rating": 1900.0,
+            "score": 0.0,
+            "weight": 1.0
+          },
+          {
+            "opponent_deviation": 200.0,
+            "opponent_rating": 1750.0,
+            "score": 0.5,
+            "weight": 1.0
+          }
+        ],
+        "state": {
+          "deviation": 250.0,
+          "rating": 1750.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "order_a"
+    },
+    {
+      "expected": {
+        "deviation": 169.45603919525982,
+        "rating": 1749.658958102402,
+        "volatility": 0.059996477806352734
+      },
+      "input": {
+        "observations": [
+          {
+            "opponent_deviation": 200.0,
+            "opponent_rating": 1750.0,
+            "score": 0.5,
+            "weight": 1.0
+          },
+          {
+            "opponent_deviation": 80.0,
+            "opponent_rating": 1900.0,
+            "score": 0.0,
+            "weight": 1.0
+          },
+          {
+            "opponent_deviation": 100.0,
+            "opponent_rating": 1600.0,
+            "score": 1.0,
+            "weight": 1.0
+          }
+        ],
+        "state": {
+          "deviation": 250.0,
+          "rating": 1750.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "order_b"
+    },
+    {
+      "expected_per_period": [
+        {
+          "deviation": 208.16266764846594,
+          "rating": 1850.9711259917217,
+          "volatility": 0.05999905613396151
+        },
+        {
+          "deviation": 208.42344669211462,
+          "rating": 1850.9711259917217,
+          "volatility": 0.05999905613396151
+        },
+        {
+          "deviation": 166.85795001802177,
+          "rating": 1811.4751403477444,
+          "volatility": 0.059996017496340905
+        },
+        {
+          "deviation": 154.64557380783035,
+          "rating": 1844.0753011720399,
+          "volatility": 0.05999446790613567
+        }
+      ],
+      "input": {
+        "periods": [
+          [
+            {
+              "opponent_deviation": 120.0,
+              "opponent_rating": 1700.0,
+              "score": 1.0,
+              "weight": 1.0
+            }
+          ],
+          [],
+          [
+            {
+              "opponent_deviation": 90.0,
+              "opponent_rating": 1850.0,
+              "score": 0.0,
+              "weight": 1.0
+            },
+            {
+              "opponent_deviation": 140.0,
+              "opponent_rating": 1650.0,
+              "score": 1.0,
+              "weight": 1.0
+            }
+          ],
+          [
+            {
+              "opponent_deviation": 70.0,
+              "opponent_rating": 2000.0,
+              "score": 0.5,
+              "weight": 1.0
+            }
+          ]
+        ],
+        "state": {
+          "deviation": 250.0,
+          "rating": 1750.0,
+          "volatility": 0.06
+        }
+      },
+      "name": "chained_periods"
+    }
+  ],
+  "engine_version": "glicko2-v1-shadow",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_glicko2_fixtures.py",
+  "tau": 0.5
+}
