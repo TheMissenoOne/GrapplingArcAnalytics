@@ -81,6 +81,7 @@ def build_event_profile(event_name: str, session: Session) -> dict[str, Any]:
 
         bouts.append({
             "slug": match_slug(a, b, m.year),
+            "match_id": str(m.id),
             "a": a.name, "b": b.name,
             "winner": winner.name if winner else None,
             "method": _method(wt, m.submission),

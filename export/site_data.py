@@ -46,6 +46,7 @@ from analysis.event_profile import build_event_profile, event_names
 from analysis.names import _normalize_name, canonical_label, canonicalize
 from analysis.network_metrics import edge_arrow, edge_dashed, network_from_sequences
 from analysis.path_to_victory import dilemmas, path_to_victory
+from analysis.rating_v2.config import EngineConfig
 from analysis.style_profile import (
     MIN_DOSSIER_EVENTS,
     PROFILE_VERSION,
@@ -79,6 +80,132 @@ _CATS = {"guard", "pass", "sweep", "takedown", "control", "submission", "escape"
 # clockwise from the top), so the site and the app read the same fingerprint.
 _RADAR_AXES = ["pass", "control", "submission", "escape", "guard", "sweep", "takedown"]
 _RADAR_LABELS = ["Pass", "Control", "Submission", "Escape", "Guard", "Sweep", "Takedown"]
+
+# ── Wave 8: publish-confidence gate ─────────────────────────────────────────────
+# rating_v2 ADR-02 (docs/rating_v2/01_DECISOES.md): every V2 state read is keyed by an
+# explicit run_id — there is no "current" state, reading without one is a defect. Pin the
+# run this site's confidence gate reads. engine_version="glicko2-v1-shadow", persisted
+# 2026-08-17 (rating_v2 wave 7 replay). Swapping this value changes what the site
+# publishes and requires a full `export.site_data --full` regeneration afterward.
+SITE_RATING_RUN_ID: str | None = "210a5ba7-7f88-4b54-b5a5-1dbadfdab4b2"
+
+# Publish-confidence cut. An editorial decision calibrated against measured impact
+# (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87
+# trusted / 354 hidden, after seeing the impact table) — not a property of Glicko-2
+# math. Expect this to move again; never inline the number, read the constant.
+SITE_MIN_CONFIDENCE_RD = 200.0
+
+# Floor uncertainty for an athlete with no row in the pinned run — the same seed RD a
+# fresh Glicko-2 state carries (ADR-02), never a bare "unconfident"/zero-weight default.
+_SEED_RD = EngineConfig().initial_rd
+
+# This gate controls ONLY whether a breakdown-/grapple- page gets written (and whether a
+# bout counts as "confident enough to link"). It must NEVER thin the data any other part
+# of the export reads: GA_OCEAN, GA_ELO, GA_EVENTS counts, and every network/PageRank/
+# community/technique-frequency aggregate are built from the full corpus regardless of
+# this gate (see export_site — none of those builders take a `trusted` argument).
+
+
+def _load_rating_deviations(session: Session, run_id: str | None) -> dict[str, float] | None:
+    """athlete_id -> rating_deviation for one persisted rating_v2 run. The only place in
+    the site exporter allowed to read AthleteRatingStateV2, and it never queries without
+    an explicit run_id (ADR-02). Returns None (not {}) when no run is pinned, so callers
+    can tell "no run configured" from "run has nobody in it" and fall back to
+    content-only confidence instead of silently trusting nobody."""
+    if not run_id:
+        logger.warning(
+            "SITE_RATING_RUN_ID is unset -- the publish-confidence gate falls back to "
+            "content-only (qualifies() + MIN_DOSSIER_EVENTS); rating_v2 confidence is "
+            "NOT applied to this export.")
+        return None
+    from db.models import AthleteRatingStateV2
+
+    rows = session.execute(
+        select(AthleteRatingStateV2.athlete_id, AthleteRatingStateV2.rating_deviation)
+        .where(AthleteRatingStateV2.run_id == run_id)
+    ).all()
+    return dict(rows)
+
+
+def is_confident(content_ok: bool, athlete_id: str, rd_by_athlete: dict[str, float] | None) -> bool:
+    """Wave 8 publish-confidence gate — both legs, logical AND:
+
+    1. ``content_ok`` (caller-computed): >=MIN_SEQUENCE_BOUTS sequence bouts AND
+       >=MIN_DOSSIER_EVENTS own events — the gate that already decided dossier
+       eligibility (``analysis.style_profile.qualifies`` + the grappling_events check).
+    2. confidence: rating_deviation <= SITE_MIN_CONFIDENCE_RD on the pinned run.
+       ``rd_by_athlete is None`` means no run is pinned (see ``_load_rating_deviations``)
+       — the confidence leg is skipped and content alone decides, so a missing run
+       degrades the site instead of breaking it. An athlete simply absent from a real
+       run's dict gets the engine's seed RD (``_SEED_RD``) as a floor, never a bare
+       "no" — today that floor is > SITE_MIN_CONFIDENCE_RD so it reads as unconfident
+       in practice, but the semantics stay correct if this ever backs a weighted
+       aggregate instead of a yes/no gate.
+    """
+    if not content_ok:
+        return False
+    if rd_by_athlete is None:
+        return True
+    rd = rd_by_athlete.get(athlete_id, _SEED_RD)
+    return rd <= SITE_MIN_CONFIDENCE_RD
+
+
+def _bout_href(match_id: str, slug_by_match: dict[str, str]) -> str | None:
+    """href to a bout's breakdown- page, or None if the confidence gate didn't publish
+    one (Wave 8: neither competitor was confident enough for an individual reading).
+    The one place allowed to decide this — every caller renders a link by calling this,
+    never by formatting ``f"breakdown-{slug}.html"`` itself, so a hidden bout can never
+    end up linked from somewhere else on the site (dossier "recent bouts", event card,
+    footage credit)."""
+    slug = slug_by_match.get(match_id)
+    return f"breakdown-{slug}.html" if slug else None
+
+
+def _dossier_href(slug: str, dossier_slugs: frozenset[str]) -> str | None:
+    """href to a fighter's grapple- dossier, or None if the confidence gate didn't
+    publish one (Wave 8). The one place allowed to decide this — see ``_bout_href``."""
+    return f"grapple-{slug}.html" if slug in dossier_slugs else None
+
+
+def _compute_trusted_athletes(session: Session) -> set[str]:
+    """Wave 8: athlete_ids allowed a dossier page, and whose presence in a bout is
+    enough to publish that bout's breakdown page. Same two-condition AND as
+    ``is_confident`` — content (qualifies() + MIN_DOSSIER_EVENTS own events) AND
+    rating_deviation <= SITE_MIN_CONFIDENCE_RD on the pinned run.
+
+    Runs once, up front (before build_breakdowns needs the answer), over every athlete
+    who appears in a final sequence bout. The content leg is a light re-walk of each
+    candidate's own event count — NOT the full style profile (build_fighters builds
+    that separately, cached, only for athletes that pass here) — so paying for it twice
+    (once here, once in build_fighters for the trusted subset) is cheaper than making
+    build_breakdowns wait on build_fighters's heavy per-fighter analytics.
+    """
+    from db.repository import _perspective_view
+
+    rd_by_athlete = _load_rating_deviations(session, SITE_RATING_RUN_ID)
+    candidate_ids = {aid for m in _final_matches(session)
+                      for aid in (m.athlete_a_id, m.athlete_b_id)}
+    trusted: set[str] = set()
+    for aid in candidate_ids:
+        if not qualifies(aid, session):
+            continue
+        own_events = 0
+        for m in get_matches_for_athlete(aid, session):
+            if m.status != "final" or not m.sequence:
+                continue
+            pv = _perspective_view(m, aid)
+            # `str(e.get("label", ""))` truthiness, not a bare `e.get("label")` — matches
+            # build_style_profile's own_events counter char-for-char (analysis/style_profile.py)
+            # so this precomputed decision and the profile it gates never disagree.
+            own_events += sum(
+                1 for e in pv.sequence
+                if e.get("actor") == "you" and str(e.get("label", "")))
+            if own_events >= MIN_DOSSIER_EVENTS:
+                break
+        content_ok = own_events >= MIN_DOSSIER_EVENTS
+        if is_confident(content_ok, aid, rd_by_athlete):
+            trusted.add(aid)
+    return trusted
 
 
 # ── small helpers ────────────────────────────────────────────────────────────
@@ -280,8 +407,14 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
 def build_breakdowns(
     session: Session,
     cache: ItemCache | None = None,
-) -> tuple[list[dict[str, Any]], list[tuple[str, dict[str, Any]]], dict[str, Any] | None]:
-    """Returns (GA_BREAKDOWNS rows, [(slug, full breakdown)], GA_FEATURED) for sequence bouts.
+    trusted: frozenset[str] = frozenset(),
+) -> tuple[list[dict[str, Any]], list[tuple[str, dict[str, Any]]], dict[str, Any] | None, int]:
+    """Returns (GA_BREAKDOWNS rows, [(slug, full breakdown)], GA_FEATURED, omitted_count)
+    for sequence bouts where at least one side is in ``trusted`` (Wave 8 publish-
+    confidence gate — see ``_compute_trusted_athletes``). A bout with neither side
+    trusted contributes no row/page/href, but ``corpus_g``/``ptv_v`` below are still
+    built from the FULL corpus — the gate never thins what feeds momentum/PageRank/
+    the transition network for the bouts that DO publish.
 
     The featured bout = the decided match with the highest combined opponent rank_elo, so the
     homepage spotlight is real (names, method, mini-stats) and auto-updates with the data.
@@ -291,8 +424,10 @@ def build_breakdowns(
     full: list[tuple[str, dict[str, Any]]] = []
     featured: dict[str, Any] | None = None
     best_score = -1.0
+    omitted = 0
 
     # Build corpus PtV once for all breakdowns (pass through to each for momentum calculation).
+    # Full corpus, unfiltered by `trusted` — see the docstring above.
     from analysis.network_metrics import build_transition_network
     corpus_g = build_transition_network(session)
     ptv_v = path_to_victory(corpus_g)
@@ -313,6 +448,13 @@ def build_breakdowns(
         a = athletes_by_id.get(match.athlete_a_id)
         b = athletes_by_id.get(match.athlete_b_id)
         if a is None or b is None:
+            continue
+        if a.id not in trusted and b.id not in trusted:
+            # Wave 8: neither side confident enough for an individual reading — no
+            # breakdown page/row/href for THIS bout. It's still counted upstream (this
+            # loop is the only thing skipping it: corpus_g/ptv_v above, GA_OCEAN,
+            # GA_ELO and GA_EVENTS are all built independently of this loop).
+            omitted += 1
             continue
         slug = match_slug(a, b, match.year)
         if slug in slug_taken:
@@ -368,23 +510,31 @@ def build_breakdowns(
                 "headline": _headline(bd), "stats": _featured_stats(bd),
             }
     rows.sort(key=lambda r: r["date"], reverse=True)
-    return rows, full, featured
+    return rows, full, featured, omitted
 
 
 def _node_video_refs(
     aid: str, matches: list[Any], session: Session
 ) -> dict[str, dict[str, Any]]:
     """node_key → {vid, ts, slug}: the first timestamped use of each technique by this
-    athlete across their filmed bouts, so a career-graph node can play the actual footage."""
+    athlete across their filmed bouts, so a career-graph node can play the actual footage.
+
+    ``slug`` is only ever this athlete's OWN bout — since ``aid`` is trusted whenever this
+    runs (build_fighters only calls it for trusted fighters), every one of their bouts
+    trivially has >=1 confident side (themselves) and always has a page. Routed through
+    ``_bout_href`` anyway (never format the href by hand — Wave 8), and it doubles as the
+    fix for the pre-existing same-pair-twice-in-a-year slug collision (``_SLUG_BY_MATCH``
+    carries the disambiguated slug that was actually written; the un-disambiguated
+    ``match_slug(a, b, year)`` used here before could point at the wrong file)."""
     refs: dict[str, dict[str, Any]] = {}
     for m in matches:
         ref = _video_ref(getattr(m, "video_url", None))
         if ref is None:
             continue
         vid, _ = ref
-        a = session.get(Athlete, m.athlete_a_id)
-        b = session.get(Athlete, m.athlete_b_id)
-        slug = match_slug(a, b, m.year) if a and b else None
+        # _bout_href is the single source of truth for "does this bout's page exist";
+        # gate through it even though it's expected to always resolve here (see docstring).
+        slug = _SLUG_BY_MATCH.get(m.id) if _bout_href(m.id, _SLUG_BY_MATCH) else None
         for e in m.sequence or []:
             if not isinstance(e, dict) or e.get("actor_id") != aid:
                 continue
@@ -432,9 +582,13 @@ def _fighter_forks(aid: str, athlete_matches: list[Any], session: Session,
 def build_fighters(
     session: Session,
     cache: ItemCache | None = None,
+    trusted: frozenset[str] = frozenset(),
 ) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
-    """Returns (GA_FIGHTERS card rows, {slug: {athlete, profile, career}}) for ≥3-bout
-    fighters. The profile + career graph are computed once and reused for the dossier."""
+    """Returns (GA_FIGHTERS card rows, {slug: {athlete, profile, career}}) for fighters in
+    ``trusted`` (Wave 8 publish-confidence gate — see ``_compute_trusted_athletes``: same
+    content gate this function used to apply itself, now precomputed once up front, AND
+    rating_deviation <= SITE_MIN_CONFIDENCE_RD). The profile + career graph are computed
+    once and reused for the dossier."""
     seen: set[str] = set()
     cards: list[dict[str, Any]] = []
     details: dict[str, dict[str, Any]] = {}
@@ -457,7 +611,7 @@ def build_fighters(
                 continue
             seen.add(aid)
             athlete = athletes_by_id.get(aid)
-            if athlete is None or not qualifies(aid, session):
+            if athlete is None or aid not in trusted:
                 continue
             # Fighter cache key: everything the profile + career depend on — the athlete's own
             # fields and every one of their bouts, plus each opponent's rank_elo (defense_profile
@@ -478,9 +632,9 @@ def build_fighters(
                 profile = build_style_profile(athlete, session)
             # Surface the real emergent archetype (RF01, deviance v3) instead of "Grappler".
             profile["archetype"] = _archetype(athlete, session) or profile.get("archetype")
-            # Hide irrelevant dossiers: a striker with a couple of scrambles is noise.
-            if profile["grappling_events"] < MIN_DOSSIER_EVENTS:
-                continue
+            # NB: no MIN_DOSSIER_EVENTS check here — `aid in trusted` above already
+            # required it (Wave 8), computed the same way (own-event walk), so a second
+            # check here would just be the same formula run twice and risk drifting.
             # This fighter's own transition net — built once, shared by the career graph's
             # arrow/dash orientation AND _fighter_forks below (don't recompute). Lazy: the
             # cache thunks below only call it on a miss, so a cache HIT still skips the build.
@@ -787,8 +941,9 @@ def _train_this_style(
     btns = []
     for f in (a, b):
         fslug = slugify(f.get("name", "unknown"))
-        if fslug in dossier_slugs:
-            btns.append(f'<a class="btn" href="grapple-{fslug}.html">'
+        href = _dossier_href(fslug, dossier_slugs)
+        if href:
+            btns.append(f'<a class="btn" href="{href}">'
                         f'Grapple like {html.escape(f.get("name", "unknown"))} →</a>')
     btns.append('<a class="btn app" href="index.html#app">Start a Project in the app →</a>')
     return (
@@ -1025,9 +1180,14 @@ def render_profile_page(profile: dict[str, Any]) -> str:
             for sit, data in profile["responses"].items()
         ],
         # link each bout to the page that was actually written, not the slug the profile
-        # computed — they differ when a pair met twice in one year
-        "bouts": [{**b, "slug": _SLUG_BY_MATCH.get(b.get("match_id", ""), b["slug"])}
-                  for b in profile["bouts"]],
+        # computed — they differ when a pair met twice in one year. Every one of THIS
+        # (trusted, or this dossier wouldn't exist) athlete's own bouts trivially has
+        # >=1 confident side and so always has a page — but still routed through
+        # _bout_href/_SLUG_BY_MATCH (the one source of truth) instead of trusting that
+        # invariant blindly; a bout that somehow has none is dropped, not linked broken.
+        "bouts": [{**b, "slug": _SLUG_BY_MATCH[b["match_id"]]}
+                  for b in profile["bouts"]
+                  if _bout_href(b.get("match_id", ""), _SLUG_BY_MATCH)],
         "videos": profile.get("_videos") or {},
     }
     graph_hint = "Drag to pan, scroll to zoom · touch to swim · hover to isolate a pathway"
@@ -1347,7 +1507,10 @@ def build_events(
     return rows, details
 
 
-def render_event_page(slug: str, ep: dict[str, Any]) -> str:
+def render_event_page(
+    slug: str, ep: dict[str, Any], slug_by_match: dict[str, str] | None = None
+) -> str:
+    slug_by_match = slug_by_match or {}
     sections = event_narrative(ep)
     sections_pt = event_narrative(ep, lang="pt")
     name = ep["event"]
@@ -1364,13 +1527,30 @@ def render_event_page(slug: str, ep: dict[str, Any]) -> str:
                      ("Submissions", sub_finishes),
                      ("Athletes", ep["participant_count"])]
     )
+    # Wave 8 (render step only — ep["bouts"]/bout_count/stat_cards above stay computed
+    # from the FULL card): a bout only gets a card+link here if its breakdown page was
+    # actually published (_bout_href is the single source of truth for that).
+    visible_bouts = [b for b in ep["bouts"] if _bout_href(b.get("match_id", ""), slug_by_match)]
+    omitted = len(ep["bouts"]) - len(visible_bouts)
     bout_cards = "".join(
-        f'<a class="mcard" href="breakdown-{b["slug"]}.html">'
+        f'<a class="mcard" href="{_bout_href(b["match_id"], slug_by_match)}">'
         f'<div class="ev">{html.escape(str(b["year"] or ""))}</div>'
         f'<div class="op">{html.escape(b["a"] + " vs " + b["b"])}</div>'
         f'<div class="rs">{html.escape((b["winner"] or "—") + " · " + b["method"])}</div></a>'
-        for b in ep["bouts"]
+        for b in visible_bouts
     )
+    omitted_note = ""
+    if omitted:
+        n = omitted
+        en = (f"{n} bout{'s' if n != 1 else ''} from this card {'are' if n != 1 else 'is'} "
+              "already counted in the numbers above and in the site's aggregate stats, "
+              "but don't get a card here — there isn't yet enough evidence about either "
+              "competitor for an individual reading.")
+        pt = (f"{n} luta{'s' if n != 1 else ''} deste evento já {'estão' if n != 1 else 'está'} "
+              "contadas nos números acima e nas estatísticas agregadas do site, mas não "
+              "aparecem como card aqui — ainda não há evidência suficiente sobre nenhum dos "
+              "dois competidores para uma leitura individual.")
+        omitted_note = f'<p class="graph-hint">{_bi(en, pt)}</p>'
     body = f"""{_nav('events')}
 <section class="art-hero"><div class="wrap">
   <div class="center"><a href="events.html" class="tag" style="text-decoration:none">← Events</a></div>
@@ -1384,7 +1564,7 @@ def render_event_page(slug: str, ep: dict[str, Any]) -> str:
   <section class="block"><div class="wrap prose">{_prose_html(sections[1:], sections_pt[1:])}</div></section>
   <div class="divider"></div>
   <section class="block"><div class="wrap prose"><h2 class="sec-label">Every bout</h2></div>
-    <div class="wrap viz"><div class="mgrid">{bout_cards}</div></div></section>
+    <div class="wrap viz"><div class="mgrid">{bout_cards}</div>{omitted_note}</div></section>
 </article>
 {_FOOTER}
 <script src="i18n.js"></script></body></html>"""
@@ -1597,10 +1777,16 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
     ft_cache = ItemCache(cache_dir / "fighters.json", full=full)
     ev_cache = ItemCache(cache_dir / "events.json", full=full)
     _t = _pc()
-    rows, full_bds, featured = build_breakdowns(session, cache=bd_cache)
+    # Wave 8 publish-confidence gate — computed once, before any page-list build, off the
+    # FULL corpus (see _compute_trusted_athletes). Everything this touches downstream is
+    # page/href emission only; GA_OCEAN/GA_ELO/GA_EVENTS counts and the corpus-wide
+    # transition network stay unfiltered (see build_breakdowns/build_fighters docstrings).
+    trusted = frozenset(_compute_trusted_athletes(session))
+    _t = _phase(f"compute_trusted_athletes ({len(trusted)} trusted)", _t)
+    rows, full_bds, featured, omitted_bouts = build_breakdowns(session, cache=bd_cache, trusted=trusted)
     bd_cache.save()
     _t = _phase(f"build_breakdowns ({bd_cache.hits} cached, {bd_cache.misses} rebuilt)", _t)
-    fighters, details = build_fighters(session, cache=ft_cache)
+    fighters, details = build_fighters(session, cache=ft_cache, trusted=trusted)
     ft_cache.save()
     _t = _phase(f"build_fighters ({ft_cache.hits} cached, {ft_cache.misses} rebuilt)", _t)
     events, event_details = build_events(session, cache=ev_cache)
@@ -1611,6 +1797,25 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
 
     bd_js = _js_file("GA_BREAKDOWNS", rows)
     bd_js += f"window.GA_FEATURED = {json.dumps(featured, ensure_ascii=False)};\n"
+    bouts_total = len(full_bds) + omitted_bouts
+    transparency = {
+        "bouts_total": bouts_total, "bouts_published": len(full_bds),
+        "bouts_hidden": omitted_bouts, "trusted_athletes": len(trusted),
+        "min_confidence_rd": SITE_MIN_CONFIDENCE_RD,
+        "note_en": (
+            f"{omitted_bouts} of {bouts_total} bouts in the corpus don't have their own "
+            "breakdown page — not because the data is missing, but because there isn't "
+            "yet enough evidence about either competitor for an individual reading. "
+            "They're still counted in every aggregate stat, chart and rating on this site."
+        ),
+        "note_pt": (
+            f"{omitted_bouts} das {bouts_total} lutas do acervo não têm página própria — "
+            "não porque falte o dado, mas porque ainda não há evidência suficiente sobre "
+            "nenhum dos dois competidores para uma leitura individual. Elas continuam "
+            "contadas em toda estatística, gráfico e rating agregado deste site."
+        ),
+    }
+    bd_js += f"window.GA_TRANSPARENCY = {json.dumps(transparency, ensure_ascii=False)};\n"
     (out / "breakdowns-data.js").write_text(bd_js, encoding="utf-8")
     (out / "fighters-data.js").write_text(_js_file("GA_FIGHTERS", fighters), encoding="utf-8")
     (out / "events-data.js").write_text(_js_file("GA_EVENTS", events), encoding="utf-8")
@@ -1659,7 +1864,7 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
     # per-event card pages
     for slug, ep in event_details:
         (out / f"event-{slug}.html").write_text(
-            render_event_page(slug, ep), encoding="utf-8")
+            render_event_page(slug, ep, _SLUG_BY_MATCH), encoding="utf-8")
     _t = _phase("render events", _t)
 
     # robots.txt + sitemap.xml (acquisition baseline — the site was invisible to crawlers).

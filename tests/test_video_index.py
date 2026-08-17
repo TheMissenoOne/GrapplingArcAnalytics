@@ -5,7 +5,7 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import scripts.dump_import as dump_import
-from export.site_data import _node_video_refs, _video_ref
+from export.site_data import _SLUG_BY_MATCH, _node_video_refs, _video_ref
 
 _MAPPING = {
     "EVT": {
@@ -74,7 +74,7 @@ class TestNodeVideoRefs:
         b = SimpleNamespace(id="B", name="Felipe Pena")
         session = SimpleNamespace(get=lambda _cls, aid: a if aid == "A" else b)
         m = SimpleNamespace(
-            athlete_a_id="A", athlete_b_id="B", year=2022,
+            id="m1", athlete_a_id="A", athlete_b_id="B", year=2022,
             video_url="https://www.youtube.com/watch?v=AAAAAAAAAAA&t=100s",
             sequence=[
                 {"label": "Back Take", "type": "control", "actor_id": "A", "ts": 120},
@@ -83,6 +83,14 @@ class TestNodeVideoRefs:
                 {"label": "Armbar", "type": "submission", "actor_id": "A"},  # no ts
             ],
         )
-        refs = _node_video_refs("A", [m], session)
+        # Wave 8: slug now routes through _SLUG_BY_MATCH/_bout_href (the published-page
+        # authority), not a bare match_slug() recompute — populate it like build_breakdowns
+        # would for a bout that got a page.
+        _SLUG_BY_MATCH.clear()
+        _SLUG_BY_MATCH["m1"] = "gordon-ryan-vs-felipe-pena-2022"
+        try:
+            refs = _node_video_refs("A", [m], session)
+        finally:
+            _SLUG_BY_MATCH.clear()
         assert refs == {"back take": {
             "vid": "AAAAAAAAAAA", "ts": 120, "slug": "gordon-ryan-vs-felipe-pena-2022"}}
