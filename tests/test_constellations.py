@@ -60,6 +60,17 @@ def test_detect_empty_graph() -> None:
     assert result.rejected_rate == 0.0
 
 
+def test_detect_multiple_isolated_nodes_no_zero_division() -> None:
+    # >=2 nodes, zero edges: Louvain hands back one singleton community per node
+    # (len(raw) > 1), but nx.community.modularity divides by total degree — 0 here.
+    # Found while running the wave-6 detector comparison against real athlete graphs.
+    g = nx.DiGraph()
+    g.add_nodes_from(["A", "B", "C"])
+    result = detect(g)
+    assert result.modularity == 0.0
+    assert sorted(c.members for c in result.constellations) == [["A"], ["B"], ["C"]]
+
+
 def test_disconnected_community_is_broken_and_counted() -> None:
     # Force Louvain to hand back one community spanning two disconnected components —
     # the exact ADR-07 failure mode — and check the gate splits + counts it.

@@ -67,7 +67,11 @@ def detect(g: nx.DiGraph, resolution: float = 1.0, seed: int = 42) -> DetectionR
 
     und = _undirected_weighted(g)
     raw = nx.community.louvain_communities(und, weight="weight", resolution=resolution, seed=seed)
-    modularity = nx.community.modularity(und, raw, weight="weight") if len(raw) > 1 else 0.0
+    # A graph with >=2 nodes and zero edges (all isolated) still yields len(raw) > 1 (one
+    # singleton community per node) — nx.community.modularity divides by total degree, which
+    # is 0 there. Guard on und actually having edges, not just >1 communities.
+    has_modularity = len(raw) > 1 and und.number_of_edges() > 0
+    modularity = nx.community.modularity(und, raw, weight="weight") if has_modularity else 0.0
 
     raw_sorted = sorted((sorted(c) for c in raw), key=lambda c: (-len(c), c[0] if c else ""))
 

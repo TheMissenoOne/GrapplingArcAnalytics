@@ -224,6 +224,31 @@ constelação agrupa *nós dentro do jogo de um atleta*. São eixos diferentes e
 **Consequência.** Uma wave dedicada só à comparação de detectores, com relatório publicado, antes de
 qualquer remoção.
 
+> **Medido na wave 6, em 2026-08-17: NÃO substituir. Coexistir.**
+> Relatório completo em [`05_COMPARACAO_DETECTORES.md`](05_COMPARACAO_DETECTORES.md). Os dois
+> detectores receberam o **mesmo** grafo derivado de sequências de luta, para isolar o algoritmo como
+> única variável. Resultado contra o critério declarado:
+>
+> | Condição do ADR-08 | Medido |
+> |---|---|
+> | Ganhar em estabilidade | **Empate**: Jaccard médio 0,5848 (novo) × 0,5797 (antigo); 8 × 7 vitórias em 15 atletas |
+> | Não perder cobertura | **Perde**: 86,6% dos nós em comunidade não-trivial × **96,3%** do antigo |
+>
+> Causa identificada: **Louvain com resolução 1.0 isola mais nós de baixo grau como singleton**
+> (até 40% em alguns atletas); o greedy-modularity antigo os absorve. As partições concordam
+> bastante (Jaccard agregado 0,773) — acham a mesma estrutura —, mas concordância não era o critério.
+>
+> **Consequência honesta para a wave 4:** a camada compartilhada continua justificada para o
+> relatório de categoria, que precisa de agregação athlete-balanced que o `athlete_systems` não faz.
+> Mas a meta de "uma definição de constelação no produto" **não se cumpriu por mérito técnico**. Os
+> dois coexistem porque fazem trabalhos diferentes, não porque um venceu. Qualquer tentativa futura
+> de unificar tem de passar pelo problema dos singletons primeiro.
+>
+> **Medição que ficou faltando:** a comparação usou grafo derivado de sequências, enquanto em produção
+> o `athlete_systems` consome o `graphs`/`graph_edges` persistido (peso uniforme 1, sem proveniência
+> por luta) via `export/ontology.py`. Comparar o detector antigo na entrada real dele é uma segunda
+> medição, não feita.
+
 ---
 
 ## ADR-09 — RD alarga até o fim do dataset, não até a última luta do atleta
