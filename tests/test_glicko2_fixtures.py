@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from scripts.export_glicko2_fixtures import ANALYTICS_OUT, APP_OUT, build_fixture, render
 
 
@@ -15,18 +17,28 @@ def test_regeneracao_e_byte_identica() -> None:
 def test_arquivos_em_disco_batem_com_o_gerador() -> None:
     """Se falhar: rode `uv run python -m scripts.export_glicko2_fixtures`.
 
-    Falha aqui significa que o core Python mudou sem a fixture ser regerada — e o
-    teste de paridade do App ainda está checando contra o esperado antigo.
+    Analytics always owns/validates its checked-in copy. When the sibling App
+    repo is present (local workspace), validate that copy too; a single-repo CI
+    checkout cannot assert a file it never fetched.
     """
     esperado = render(build_fixture())
-    for path in (ANALYTICS_OUT, APP_OUT):
-        assert Path(path).is_file(), f"fixture ausente: {path}"
-        assert Path(path).read_text(encoding="utf-8") == esperado, f"desatualizada: {path}"
+    analytics_path = Path(ANALYTICS_OUT)
+    assert analytics_path.is_file(), f"fixture ausente: {analytics_path}"
+    assert analytics_path.read_text(encoding="utf-8") == esperado, (
+        f"desatualizada: {analytics_path}"
+    )
+
+    app_path = Path(APP_OUT)
+    if app_path.is_file():
+        assert app_path.read_text(encoding="utf-8") == esperado, f"desatualizada: {app_path}"
 
 
 def test_as_duas_copias_sao_identicas() -> None:
-    """O contrato mora nos dois repos; cópias divergentes não são contrato."""
-    assert Path(ANALYTICS_OUT).read_text(encoding="utf-8") == Path(APP_OUT).read_text(
+    """O contrato mora nos dois repos; compare quando ambos estão no workspace."""
+    app_path = Path(APP_OUT)
+    if not app_path.is_file():
+        pytest.skip("GrapplingArcApp sibling repo is not part of this CI checkout")
+    assert Path(ANALYTICS_OUT).read_text(encoding="utf-8") == app_path.read_text(
         encoding="utf-8"
     )
 

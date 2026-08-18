@@ -81,4 +81,6 @@ def match_lineage(
             chosen_by_old[old_fp].append(fp)
     splits = {old_fp: sorted(news) for old_fp, news in chosen_by_old.items() if len(news) > 1}
 
-    return LineageResult(matches=matches, births=births, deaths=deaths, merges=merges, splits=splits)
+    return LineageResult(
+        matches=matches, births=births, deaths=deaths, merges=merges, splits=splits
+    )

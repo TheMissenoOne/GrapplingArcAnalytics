@@ -93,7 +93,9 @@ def test_disconnected_community_is_broken_and_counted() -> None:
 
 
 def test_fingerprint_stable_under_member_reorder() -> None:
-    assert constellation_fingerprint(["A1", "A2", "A3"]) == constellation_fingerprint(["A3", "A1", "A2"])
+    assert constellation_fingerprint(["A1", "A2", "A3"]) == constellation_fingerprint(
+        ["A3", "A1", "A2"]
+    )
 
 
 def test_fingerprint_stable_across_reexecution() -> None:

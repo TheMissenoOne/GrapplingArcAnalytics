@@ -32,7 +32,13 @@ from typing import Any
 
 import networkx as nx
 
-from analysis.constellations import Stability, bootstrap_jaccard, classify_stability, detect, leave_one_out_athlete_driven
+from analysis.constellations import (
+    Stability,
+    bootstrap_jaccard,
+    classify_stability,
+    detect,
+    leave_one_out_athlete_driven,
+)
 from analysis.transitions import athlete_balanced_category_graph, network_from_sequences
 
 #: Wave 4 measured flat modularity between 0.8 and 1.4 — 1.0 is not a guess.
@@ -86,8 +92,10 @@ def sequences_by_actor(bouts: Sequence[Mapping[str, Any]]) -> dict[str, list[lis
             actor = e.get("actor")
             if not actor:
                 continue
-            by_actor[str(actor)].append({"label": e.get("label"), "type": e.get("type"),
-                                          "actor_id": str(actor), "successful": e.get("successful")})
+            by_actor[str(actor)].append(
+                {"label": e.get("label"), "type": e.get("type"),
+                 "actor_id": str(actor), "successful": e.get("successful")}
+            )
         for actor, events in by_actor.items():
             out[actor].append(events)
     return dict(out)
@@ -98,7 +106,10 @@ def athlete_node_sets(
 ) -> dict[str, set[str]]:
     """Each athlete's own node set (labels her sequences touch) — the ``support()`` gate's
     "how many distinct athletes contribute to this constellation" input."""
-    return {a: set(network_from_sequences(list(seqs)).nodes) for a, seqs in athlete_sequences.items()}
+    return {
+        a: set(network_from_sequences(list(seqs)).nodes)
+        for a, seqs in athlete_sequences.items()
+    }
 
 
 # ── bootstrap/leave-one-out units: one per (athlete, bout) ──────────────────────────────────
@@ -116,7 +127,9 @@ def _bout_units(
     return units, lookup
 
 
-def _units_by_athlete(units: Sequence[str], lookup: Mapping[str, tuple[str, Any]]) -> dict[str, list[str]]:
+def _units_by_athlete(
+    units: Sequence[str], lookup: Mapping[str, tuple[str, Any]]
+) -> dict[str, list[str]]:
     out: dict[str, list[str]] = defaultdict(list)
     for u in units:
         out[lookup[u][0]].append(u)
@@ -147,7 +160,9 @@ def _internal_weight(graph: nx.DiGraph, members: Sequence[str]) -> float:
     return sum(d.get("weight", 0.0) for u, v, d in graph.edges(data=True) if u in m and v in m)
 
 
-def _central_nodes(graph: nx.DiGraph, members: Sequence[str], top: int = TOP_CENTRAL_NODES) -> list[str]:
+def _central_nodes(
+    graph: nx.DiGraph, members: Sequence[str], top: int = TOP_CENTRAL_NODES
+) -> list[str]:
     deg = {n: graph.in_degree(n, weight="weight") + graph.out_degree(n, weight="weight")
            for n in members if n in graph}
     return sorted(deg, key=lambda n: (-deg[n], n))[:top]
@@ -239,13 +254,16 @@ def division_constellations(
         st = stability_by_key[key]
         driver = driver_by_key.get(key)
 
-        prevalencia_categoria = _internal_weight(category_graph, c.members) / category_total if category_total else 0.0
+        prevalencia_categoria = (
+            _internal_weight(category_graph, c.members) / category_total if category_total else 0.0
+        )
         prevalencia_baseline: float | None = None
         log2_lift: float | None = None
         inedito_no_baseline = False
         if baseline_graph is not None:
             prevalencia_baseline = (
-                _internal_weight(baseline_graph, c.members) / baseline_total if baseline_total else 0.0
+                _internal_weight(baseline_graph, c.members) / baseline_total
+                if baseline_total else 0.0
             )
             if prevalencia_categoria > 0 and prevalencia_baseline > 0:
                 log2_lift = round(math.log2(prevalencia_categoria / prevalencia_baseline), 3)
@@ -257,7 +275,9 @@ def division_constellations(
             "members": list(c.members), "hub": c.hub, "internal_edges": c.internal_edges,
             "support": c.support, "fingerprint": c.fingerprint,
             "prevalencia_categoria": round(prevalencia_categoria, 4),
-            "prevalencia_baseline": round(prevalencia_baseline, 4) if prevalencia_baseline is not None else None,
+            "prevalencia_baseline": (
+                round(prevalencia_baseline, 4) if prevalencia_baseline is not None else None
+            ),
             "log2_lift": log2_lift, "inedito_no_baseline": inedito_no_baseline,
             "nos_centrais": _central_nodes(category_graph, c.members),
             "transicoes_caracteristicas": _characteristic_transitions(category_graph, c.members),
