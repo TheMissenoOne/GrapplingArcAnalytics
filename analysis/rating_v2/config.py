@@ -23,3 +23,26 @@ class EngineConfig:
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+
+# ── Wave 8/9: pinned public run ─────────────────────────────────────────────────
+# rating_v2 ADR-02 (docs/rating_v2/01_DECISOES.md): every V2 state read is keyed by an
+# explicit run_id -- there is no "current" state, reading without one is a defect. This is
+# the run every public rating surface (dossier elo_rank/elo_percentile, breakdown elo_pct,
+# GA_ELO board) pins itself to. Lives here (not in export/) because analysis/ must not
+# import from export/ -- export/site_data.py re-imports this name so its existing uses
+# keep working unchanged.
+#
+# engine_version="glicko2-v1-shadow", persisted 2026-08-18 (replay after the 2026-08-17
+# identity corrections: 5 winners resolved, the Musumeci merge, 1 bout deleted). The
+# earlier run 210a5ba7 read a corpus that no longer exists -- its input_hash 8a803053
+# does not reproduce, and it rated 639 athletes where the corrected corpus rates 646.
+# Swapping this value changes what the site publishes and requires a full
+# `export.site_data --full` regeneration afterward.
+SITE_RATING_RUN_ID: str | None = "2645cce4-ca61-4756-9433-848baba9e297"
+
+# Publish-confidence cut. An editorial decision calibrated against measured impact
+# (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87
+# trusted / 354 hidden, after seeing the impact table) -- not a property of Glicko-2
+# math. Expect this to move again; never inline the number, read the constant.
+SITE_MIN_CONFIDENCE_RD = 200.0

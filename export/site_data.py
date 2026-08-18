@@ -46,14 +46,18 @@ from analysis.event_profile import build_event_profile, event_names
 from analysis.names import _normalize_name, canonical_label, canonicalize
 from analysis.network_metrics import edge_arrow, edge_dashed, network_from_sequences
 from analysis.path_to_victory import dilemmas, path_to_victory
-from analysis.rating_v2.config import EngineConfig
+from analysis.rating_v2.config import (
+    SITE_MIN_CONFIDENCE_RD,
+    SITE_RATING_RUN_ID,
+    EngineConfig,
+)
 from analysis.style_profile import (
     MIN_DOSSIER_EVENTS,
     PROFILE_VERSION,
     build_style_profile,
     qualifies,
 )
-from db.models import Archetype, Athlete
+from db.models import Archetype, Athlete, Match
 from db.repository import get_matches_for_athlete
 from export.incremental import ItemCache, item_hash
 from export.match_breakdown import (
@@ -84,19 +88,22 @@ _RADAR_LABELS = ["Pass", "Control", "Submission", "Escape", "Guard", "Sweep", "T
 # ── Wave 8: publish-confidence gate ─────────────────────────────────────────────
 # rating_v2 ADR-02 (docs/rating_v2/01_DECISOES.md): every V2 state read is keyed by an
 # explicit run_id — there is no "current" state, reading without one is a defect. Pin the
-# run this site's confidence gate reads. engine_version="glicko2-v1-shadow", persisted
-# 2026-08-18 (replay after the 2026-08-17 identity corrections: 5 winners resolved, the
-# Musumeci merge, 1 bout deleted). The earlier run 210a5ba7 read a corpus that no longer
-# exists -- its input_hash 8a803053 does not reproduce, and it rated 639 athletes where
-# the corrected corpus rates 646. Swapping this value changes what the site publishes and
-# requires a full `export.site_data --full` regeneration afterward.
-SITE_RATING_RUN_ID: str | None = "2645cce4-ca61-4756-9433-848baba9e297"
+# run this site's confidence gate reads (and, since wave 9, the same run `ranked_pools`
+# reads for the grappling pool -- one pinned run for the whole site).
+#
+# SITE_RATING_RUN_ID / SITE_MIN_CONFIDENCE_RD live in analysis/rating_v2/config.py (wave
+# 9): analysis/ must not import from export/, and analysis.discipline.ranked_pools needs
+# this same run_id as its default. Imported above (with EngineConfig) so every existing
+# use in this module keeps working unchanged — see that module for the full pinning
+# comment.
 
-# Publish-confidence cut. An editorial decision calibrated against measured impact
-# (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87
-# trusted / 354 hidden, after seeing the impact table) — not a property of Glicko-2
-# math. Expect this to move again; never inline the number, read the constant.
-SITE_MIN_CONFIDENCE_RD = 200.0
+# Minimum bouts in the corpus before an athlete may appear on a PUBLISHED leaderboard.
+# Editorial, like SITE_MIN_CONFIDENCE_RD, and deliberately separate from it: RD answers
+# "how sure are we of this rating", this answers "is there enough record to rank them at
+# all". Chosen against the measured board (RD<=200 alone seated 3- and 4-bout athletes at
+# #5-#8); 10 leaves 21 eligible athletes. Ranking-only — it must never gate a dossier
+# page, a percentile denominator, or an analysis weight.
+MIN_BOARD_BOUTS = 10
 
 # Floor uncertainty for an athlete with no row in the pinned run — the same seed RD a
 # fresh Glicko-2 state carries (ADR-02), never a bare "unconfident"/zero-weight default.
@@ -731,13 +738,60 @@ def _elo_standings(session: Session) -> dict[str, int]:
     return out
 
 
-def build_elo(session: Session, limit: int = 8) -> dict[str, list[list[Any]]]:
+def _bout_counts(session: Session) -> dict[str, int]:
+    """athlete_id -> how many bouts they appear in, either side.
+
+    Counts the RAW corpus, deliberately not the publishable subset: the question this
+    answers is "is there enough record to rank this person at all", which is about the
+    evidence the rating saw, not how much of it the site chose to publish. Used only by
+    ``build_elo``'s board floor.
+
+    Counted through the ORM columns rather than raw SQL on purpose — ``Athlete.id`` goes
+    through a type decorator, so a ``text()`` aggregate returns keys that don't compare
+    equal to the ids ``ranked_pools`` yields and every lookup silently misses. Two
+    columns over the match table is cheap enough that avoiding that trap costs nothing.
+    """
+    counts: Counter[str] = Counter()
+    for a_id, b_id in session.execute(select(Match.athlete_a_id, Match.athlete_b_id)):
+        if a_id:
+            counts[a_id] += 1
+        if b_id:
+            counts[b_id] += 1
+    return dict(counts)
+
+
+def build_elo(session: Session, limit: int = 8,
+              min_bouts: int = MIN_BOARD_BOUTS) -> dict[str, list[list[Any]]]:
     """Per-discipline leaderboards, rows as RELATIVE values (% of that board's #1
-    rating) — never the raw number. Shape: {discipline: [[rank, name, "NN%", NN], …]}."""
+    rating) — never the raw number. Shape: {discipline: [[rank, name, "NN%", NN], …]}.
+
+    Wave 9: the confidence filter lives HERE, not inside ``ranked_pools`` — the pool is
+    the percentile denominator, and thinning it by confidence would inflate everyone
+    else's percentile (see ``ranked_pools`` docstring). But publishing a ranked name on
+    this board that the site refuses to give a dossier page to (Wave 8's
+    ``SITE_MIN_CONFIDENCE_RD`` gate) is the site contradicting its own gate, so the
+    published top N — and only the top N — is filtered before it's cut.
+
+    The grappling board carries a SECOND cut the page gate doesn't have: a floor on how
+    many bouts an athlete has in the corpus (``MIN_BOARD_BOUTS``). RD alone cannot do
+    this job, because RD conflates "few bouts" with "many bouts but inactive lately" —
+    measured on the pinned run, RD<=200 alone put athletes with 3, 4 and 4 bouts at #5-#8
+    while #1 had 114. A dossier is a statement about one athlete with its confidence
+    attached; a top-8 board is a ranking, the single most rating-sensitive artefact on
+    the site, and 3 bouts cannot support a #7 claim. The floor leaves 21 eligible
+    athletes, so the board still fills with room to spare."""
     from analysis.discipline import ranked_pools
 
+    rd_by_athlete = _load_rating_deviations(session, SITE_RATING_RUN_ID)
+    bouts_by_athlete = _bout_counts(session) if rd_by_athlete is not None and min_bouts else {}
     boards: dict[str, list[list[Any]]] = {}
     for d, rows in ranked_pools(session).items():
+        if d == "grappling" and rd_by_athlete is not None:
+            rows = [
+                r for r in rows
+                if rd_by_athlete.get(r[0], _SEED_RD) <= SITE_MIN_CONFIDENCE_RD
+                and bouts_by_athlete.get(r[0], 0) >= min_bouts
+            ]
         rows = rows[:limit]
         out: list[list[Any]] = []
         if rows:

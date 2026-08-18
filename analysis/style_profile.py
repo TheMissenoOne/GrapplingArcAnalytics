@@ -66,12 +66,16 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
     ]
 
     # Standings scoped to the fighter's own DISCIPLINE pool (mma / grappling /
-    # wrestling) — grappling ranks by rank_elo, MMA by UFC Elo, wrestling by grown
-    # graph elo. See analysis.discipline.ranked_pools for the rating sources.
+    # wrestling) — grappling ranks by rating_v2 (pinned run, wave 9), MMA by UFC Elo,
+    # wrestling by grown graph elo. See analysis.discipline.ranked_pools for sources.
     from analysis.discipline import athlete_disciplines, ranked_pools
 
     disc = athlete_disciplines(session).get(athlete.id, "grappling")
     ranked = ranked_pools(session)[disc]  # [(athlete_id, name, rating)] desc
+    # Wave 9: for grappling this pool now orders by rating_v2, not rank_elo -- who counts
+    # as "elite" for the elite-wins/elite-losses narrative below changes with it. Intended
+    # (the migration is meant to move every consumer funneling through ranked_pools), but
+    # flagged here because it's easy to read this line and assume nothing moved.
     elite_ids = {row[0] for row in ranked[:_ELITE_TOP_N]}
     weight_classes = {
         aid: wc for aid, wc in session.execute(select(Athlete.id, Athlete.weight_class))
