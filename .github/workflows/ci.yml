@@ -76,3 +76,11 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
         run: uv run alembic upgrade head
+      # The pytest suite runs on SQLite and cannot execute a policy, a view or a
+      # plpgsql function. The invariant that a user's own label never reaches the
+      # world-readable technique library lives entirely in those, so it is checked
+      # here, where a real Postgres with the whole chain applied already exists.
+      - name: No private graph label can reach the public library
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
+        run: uv run python ci/verify_private_graph_nodes.py

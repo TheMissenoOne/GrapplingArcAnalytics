@@ -111,3 +111,45 @@ def test_busca_de_similares_e_athlete_only_por_padrao() -> None:
     # e o opt-out continua disponível para mostrar ao próprio dono
     nearest_graphs(sessao, "algum-id", owner_kind=None)        # type: ignore[arg-type]
     assert "owner_kind" not in str(capturado[-1].compile(compile_kwargs={"literal_binds": False}))
+
+
+def test_grafo_privado_guarda_o_rotulo_do_usuario_fora_da_biblioteca(session) -> None:
+    """O rótulo que o usuário digitou vive em ``graph_nodes``, não em ``technique_nodes``.
+
+    ``technique_nodes`` é lido por ``anon`` com ``using (true)``. Até a alembic 0037 a FK de
+    ponta de aresta apontava para lá, então o app **precisava** publicar cada rótulo privado na
+    biblioteca compartilhada para conseguir gravar uma aresta. Este teste trava a forma nova:
+    identidade privada por grafo, com um ponteiro OPCIONAL para o vocabulário curado.
+
+    A direção é o ponto — privado pode referenciar público; público nunca aprende nada sobre o
+    privado. Por isso ``canonical_node_key`` é anulável e fica no lado privado da relação.
+    """
+    from db.models import Graph, GraphNode, TechniqueNode
+
+    curado = TechniqueNode(
+        id=str(uuid.uuid4()), node_key="closed guard", label="Closed Guard",
+        type="guard", node_type="", source="library",
+    )
+    grafo = Graph(id=str(uuid.uuid4()), owner_kind="user", owner_id=str(uuid.uuid4()))
+    session.add_all([curado, grafo])
+    session.flush()
+
+    session.add_all([
+        GraphNode(graph_id=grafo.id, node_key="closed guard", label="Guarda Fechada",
+                  type="guard", canonical_node_key="closed guard"),
+        # Um nó que o atleta inventou. Não tem equivalente curado, e ainda assim sincroniza.
+        GraphNode(graph_id=grafo.id, node_key="meu chokezinho", label="Meu Chokezinho",
+                  type="submission", canonical_node_key=None),
+    ])
+    session.flush()
+
+    rotulos_publicos = {n.label for n in session.query(TechniqueNode).all()}
+    assert "Meu Chokezinho" not in rotulos_publicos, "rótulo privado vazou para a biblioteca"
+    assert "Guarda Fechada" not in rotulos_publicos, (
+        "o nome preferido do usuário não substitui o rótulo curado"
+    )
+    assert rotulos_publicos == {"Closed Guard"}
+
+    privados = {n.node_key: n.canonical_node_key
+                for n in session.query(GraphNode).filter_by(graph_id=grafo.id).all()}
+    assert privados == {"closed guard": "closed guard", "meu chokezinho": None}
