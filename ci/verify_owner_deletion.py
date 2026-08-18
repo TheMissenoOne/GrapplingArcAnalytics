@@ -5,7 +5,8 @@ Three `public` tables carry a uuid owner column with no foreign key, and they ar
   - ``graphs.owner_id`` is polymorphic, so a column FK is impossible; 0023's
     ``handle_user_delete`` trigger covers it.
   - ``matches.created_by`` is curation provenance, not user data.
-  - ``bundle_imports.owner_id`` was genuinely unhandled until 0038.
+  - ``bundle_imports.owner_id`` — the audit trail of admin-side ingestion — was genuinely
+    unhandled until 0038.
 
 Two of those three are mechanisms the SQLite test suite cannot execute — a trigger and a
 cascade — so "the account is really gone" is asserted here, where the database is real. The
@@ -16,7 +17,6 @@ true when someone deletes a user from the dashboard instead.
 
 from __future__ import annotations
 
-import json
 import os
 import uuid
 
@@ -39,8 +39,8 @@ def main() -> None:
             (graph_id, owner),
         )
         cur.execute(
-            "insert into bundle_imports (id, owner_id, raw) values (%s, %s, %s::jsonb)",
-            (str(uuid.uuid4()), owner, json.dumps({"sessions": ["private"]})),
+            "insert into bundle_imports (id, owner_id) values (%s, %s)",
+            (str(uuid.uuid4()), owner),
         )
 
         # Deleting the identity is the ONLY thing done here — no application code, no function.
