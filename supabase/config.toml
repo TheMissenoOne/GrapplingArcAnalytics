@@ -2,3 +2,9 @@ project_id = "local"
 
 [functions.youtube-transcript]
 verify_jwt = false
+
+[functions.delete-account]
+# The gateway rejects an unauthenticated call before this function ever runs. The function
+# verifies the token again anyway — "the gateway checked it" is a configuration fact, and
+# configuration drifts.
+verify_jwt = true
