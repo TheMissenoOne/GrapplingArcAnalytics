@@ -67,8 +67,11 @@ DATASETS: list[tuple[str, str | None, str]] = [
     ("scripts.dumps.polaris4_data", "Polaris 4", "Polaris4"),
     ("scripts.dumps.polarispro1_data", "Polaris Pro 1", "PolarisPro1"),
     ("scripts.dumps.ethan_crelinsten_data", None, "EthanCrelinsten"),
-    ("scripts.dumps.cji2day1_data", "CJI 2, Day 1", "CJI2Day1"),
-    ("scripts.dumps.cji2day2_data", "CJI 2, Day 2", "CJI2Day2"),
+    # Dash form, not comma: the site's slug normaliser maps both spellings to one slug, so having
+    # two of them in `matches` made the exporter overwrite one CJI 2 event page with the other and
+    # silently drop 11 bouts from the listing. Prod was collapsed onto the dash form 2026-08-18.
+    ("scripts.dumps.cji2day1_data", "CJI 2 - Day 1", "CJI2Day1"),
+    ("scripts.dumps.cji2day2_data", "CJI 2 - Day 2", "CJI2Day2"),
     ("scripts.dumps.craigjones_data", None, "CraigJones"),
     ("scripts.dumps.pgf_world_2026_week_1_opening_day_data", "PGF World 2026", "PGF2026-W1"),
     ("scripts.dumps.pgf_world_2026_week_2_things_are_heating_up_data", "PGF World 2026", "PGF2026-W2"),
