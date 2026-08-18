@@ -127,14 +127,11 @@ python_version = "3.12"
 strict = true
 warn_unused_ignores = true
 ignore_missing_imports = true
-# ponytail: `scripts/` excluded from mypy entirely — mypy resolves `scripts/*.py` under two module
-# names (once via `scripts.foo`, once bare `foo`) because the dir has no package `__init__.py`
-# structure matching its ad-hoc one-off scripts, and errors out with "Source file found twice
-# under different module names" before checking anything. `--explicit-package-bases`/`MYPYPATH`
-# fixes the resolution but scripts/ isn't meant to be a typed package — simplest real fix is to
-# not typecheck it. Upgrade path: if scripts/ ever needs typing, add __init__.py files + drop this
-# exclude, or split truly reusable helpers out of scripts/ into a typed package.
-exclude = ["notebooks/", "scripts/"]
+# ponytail: scripts/notebooks are not typed packages; decision_vision is explicitly a PoC and
+# currently resolves as loose modules rather than `poc.decision_vision.*`, so module overrides do
+# not reliably match it. Keep exploratory code out of the repo-wide strict gate until issue #4
+# types/packages it deliberately; production analysis/realtime/db code remains strict-gated.
+exclude = ["notebooks/", "scripts/", "poc/decision_vision/"]
 
 # ponytail: measured 2026-07-27 (re-confirmed against this worktree, not copied blind) — with
 # `scripts/` excluded above, `uv run mypy .` still finds 320 errors across 48 modules (31 tests/,
@@ -196,10 +193,10 @@ module = [
 ]
 ignore_errors = true
 
-# ponytail: measured 2026-08-18 after the repo-wide CI gate was enabled. These 63 modules were
-# added after the July baseline and expose 492 strict-mypy errors once Ruff stops failing first.
-# Keep the debt explicit rather than disabling strict mode or ignoring the whole repo. Issue #4
-# tracks typing each module for real and removing it from this temporary list.
+# ponytail: measured 2026-08-18 after the repo-wide CI gate was enabled. These non-PoC modules were
+# added after the July baseline and expose strict-mypy debt once Ruff stops failing first. Keep the
+# debt explicit rather than disabling strict mode or ignoring the whole repo. Issue #4 tracks
+# typing each module for real and removing it from this temporary list.
 [[tool.mypy.overrides]]
 module = [
     "admin.study",
@@ -211,19 +208,6 @@ module = [
     "analysis.scouting_rulesets",
     "analysis.transitions.build_graph",
     "cv.pose_estimate",
-    "poc.decision_vision.audit_overlay",
-    "poc.decision_vision.dashboard",
-    "poc.decision_vision.extract_frames",
-    "poc.decision_vision.live_state",
-    "poc.decision_vision.predict",
-    "poc.decision_vision.prelabel_frames",
-    "poc.decision_vision.remote_frame_sequence",
-    "poc.decision_vision.role_tracking",
-    "poc.decision_vision.temporal_features",
-    "poc.decision_vision.train",
-    "poc.decision_vision.train_temporal",
-    "poc.decision_vision.vicos_state",
-    "poc.decision_vision.visual_labels",
     "scripts.apply_decision_results",
     "scripts.compare_athlete_system_detectors",
     "scripts.group_admin",
