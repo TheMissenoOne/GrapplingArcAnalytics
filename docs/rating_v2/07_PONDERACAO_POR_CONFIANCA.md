@@ -115,19 +115,69 @@ exatamente o esquema que reproduz a armadilha que motivou a medição — descar
 próprio enunciado do problema, confirmado pelo número (top-1 share 7,4× o controle).
 
 **Se/quando isso for revisitado:** `bounded` é a escolha certa entre os dois testados —
-nunca `precision`. Mas o gatilho para revisitar não é "o RD ficou mais preciso" — é o
-Rating V2 fazer cutover (deixar de ser shadow) E alguém rodar o bootstrap de
-`analysis/constellations/stability.py` sob os pesos `bounded` para separar "mudança real
-de comunidade por confiança" de "ruído normal do Louvain neste corpus" antes de tratar os
-20% como um efeito real.
+nunca `precision`. O gatilho para revisitar não é "o RD ficou mais preciso" — é o
+Rating V2 fazer cutover (deixar de ser shadow). O segundo pré-requisito — separar "mudança
+real de comunidade por confiança" de "ruído normal do Louvain neste corpus" — **já foi
+medido** (ver "Dívida fechada" abaixo): é ruído, não efeito. Isso não muda a recomendação
+de hoje (o motor ainda está em shadow), mas remove essa incerteza específica do caminho de
+uma futura revisão.
 
 ## O que ficou de fora (dívida declarada, não escondida)
 
-- **Bootstrap de estabilidade sob peso**: `stability.py` já existe e faz exatamente esse
-  teste para o detector sem peso; rodá-lo com `weight_fn=bounded` responderia se os 20% de
-  mudança de comunidade são sinal ou ruído. Não rodado aqui — está fora do escopo de
-  "medir o efeito", é a próxima pergunta se este relatório for revisitado.
+- ~~**Bootstrap de estabilidade sob peso**~~ — **medido em 2026-08-17, ver seção abaixo.**
+  Veredito: ruído do detector, não efeito do esquema de peso.
 - **Efeito no `grappling_map.py`/Ocean além de reward-risk e betweenness** (ex.: as
   arestas sugeridas por similaridade semântica em `attach_neighbors`) não foi medido —
   esse pipeline não depende de `occ`/`weight` do jeito que PageRank depende, e o
   enunciado não pediu.
+
+## Dívida fechada — bootstrap de estabilidade sob peso (2026-08-17)
+
+**Pergunta.** Os 20,19%–27,23% de nós que mudam de comunidade (`bounded`/`precision`
+vs. controle, tabela acima) são efeito real da ponderação, ou ruído normal do Louvain
+neste corpus (ADR-07/08 já mediram 0,58–0,85 de Jaccard de bootstrap **sem peso nenhum**)?
+
+**Teste.** `analysis/constellations/stability.py` (`detect` + `compare_partitions`,
+mesmo detector, mesmo corpus — 576 lutas, 213 nós) sobre os três esquemas
+(`uniform`/`precision`/`bounded`, `analysis/confidence_weight.py`). Para cada esquema:
+30 resamples independentes com reposição sobre as 576 lutas, redetectando comunidade a
+cada resample; comparados dois a dois, não-sobrepostos (15 pares), via
+`compare_partitions(...).mean_jaccard` — **essa é literalmente "a distância entre
+partições de dois bootstraps do MESMO esquema"** pedida no enunciado. Comparado contra a
+distância entre as partições-base (sem resample) de esquemas diferentes — o mesmo número
+0,689/0,711 já publicado acima. Script read-only, sem escrita no banco, sem
+`export.site_data`: `scripts/measure_community_stability_under_weight.py` → `uv run
+python -m scripts.measure_community_stability_under_weight` →
+`reports/rating_v2/community_stability_under_weight.json` (gitignored). Determinístico
+(`seed=42`).
+
+**Resultado.**
+
+| | `uniform` | `precision` | `bounded` |
+|---|---|---|---|
+| Jaccard entre 2 bootstraps do MESMO esquema — média (15 pares) | 0,4331 | 0,4321 | 0,4148 |
+| — mínimo / máximo | 0,2345 / 0,6091 | 0,2165 / 0,5437 | 0,2203 / 0,5412 |
+| Jaccard base-vs-esquema-diferente (vs. `uniform`) | — | **0,6892** | **0,7110** |
+| Posição do nº entre-esquemas vs. a faixa de ruído do próprio esquema | — | **acima da faixa** | **acima da faixa** |
+
+O ruído de bootstrap **do mesmo esquema** (0,22–0,61, média ~0,43) é **pior** — produz
+partições mais divergentes entre si — do que a distância entre trocar de esquema de peso
+(0,69/0,71). Ou seja: reamostrar as mesmas 576 lutas duas vezes já desagrega mais
+comunidade do que ligar `bounded` ou `precision` desagrega. O número 0,69/0,71 não está
+apenas dentro da faixa de ruído — está **acima** do teto observado de ruído em todas as
+15 comparações de cada esquema.
+
+**Veredito: a mudança de 20–27% de comunidade é ruído do Louvain neste corpus, não efeito
+mensurável da ponderação.** Não dá para atribuir a reorganização de comunidade ao esquema
+de peso — o próprio detector, sem qualquer mudança de peso, já reorganiza comunidade nessa
+magnitude ou mais só por reamostrar. A recomendação "não ligar por ora" **não muda** —
+ela nunca dependeu deste número, dependia de o motor V2 estar em shadow e do ganho nas
+métricas que o site publica ser marginal. O que muda é que a dívida que o relatório
+declarou está paga: o número solto de 20–27% não é mais um sinal ambíguo, é ruído
+identificado e explicado.
+
+**De graça, na mesma execução:** `bounded` (média 0,5417, baseline-vs-resample, n=30) é a
+única variante mais estável que o controle `uniform` (0,5125) sob esse mesmo bootstrap;
+`precision` é **menos** estável (0,4887). A diferença é modesta (~6% relativo) e não é
+forçada como argumento — é um dado a favor de `bounded`, não decisivo, e não muda a
+recomendação de "não ligar agora" sozinho.

@@ -291,6 +291,37 @@ qualquer remoção.
 > por luta) via `export/ontology.py`. Comparar o detector antigo na entrada real dele é uma segunda
 > medição, não feita.
 
+> **Wave 6b, 2026-08-17 — a medição faltante foi feita, e ela REABRE este ADR.**
+> Detalhe em [`05_COMPARACAO_DETECTORES.md`](05_COMPARACAO_DETECTORES.md), seção Wave 6b.
+>
+> | | entrada de sequências (wave 6) | entrada de produção (6b) |
+> |---|---:|---:|
+> | Cobertura, antigo | 96,3% | **100%** |
+> | Cobertura, novo | 86,6% | **100%** |
+> | Novo vence em estabilidade | 8/15 (Δ0,005) | **13/15 (Δ0,017)** |
+>
+> **A vantagem de cobertura que fechou a wave 6 era propriedade da ENTRADA, não do algoritmo.** Só o
+> grafo de sequências pode gerar nós de grau zero; `graphs_for_clustering` deriva os nós dos extremos
+> das arestas, então a entrada de produção não produz singleton por construção. Na entrada real os
+> dois empatam em 100% e a estabilidade pende para o detector novo.
+>
+> **Status: REABERTO, não invertido.** A evidência nova é mais forte num eixo (entrada real) e mais
+> fraca em outro: o bootstrap de 6b reamostra **arestas**, porque `graph_edges` não tem proveniência
+> por luta — rigor menor que o teste controlado da wave 6, que reamostrava lutas. Trocar o detector
+> de produção com base num bootstrap de aresta seria repetir o erro que 6b acabou de expor: decidir
+> por um número que depende do formato da entrada.
+>
+> **Condições para fechar:** (a) dar proveniência por luta a `graph_edges`, para bootstrapar no mesmo
+> rigor da wave 6; (b) estender além dos 15 atletas medidos. Até lá, coexistência **por precaução**,
+> não por resultado — a diferença importa e está escrita aqui para ninguém citar a wave 6 como
+> decisão encerrada.
+>
+> Achado colateral que vale por si: comparar partições exige que os dois lados estejam no mesmo espaço
+> de chave. Os grafos usavam `"Closed Guard"` (rótulo de exibição) e `"closed guard"`
+> (`canonicalize(_normalize_name(...))`), o que dava Jaccard 0,0 em todos os 15 atletas — artefato de
+> medição que passaria por "os detectores não concordam em nada" se ninguém tivesse desconfiado de um
+> zero perfeito.
+
 ---
 
 ## ADR-09 — RD alarga até o fim do dataset, não até a última luta do atleta
