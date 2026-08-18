@@ -6,10 +6,11 @@ here lives entirely in those three: ``replace_user_graph`` must write a user's o
 ``graph_nodes`` and never into ``technique_nodes``. So it is checked where it is real — the
 migrations-smoke job, which already has a Postgres with the whole chain applied.
 
-``auth.uid()`` is a NULL-returning stub in the CI scaffold (there is no request to derive a JWT
-from), so this replaces it with a fixed uuid for the duration, then restores it. That is the
-only way to exercise a ``security definer`` function whose entire authority model is
-``auth.uid()``.
+Becoming a user is done the way PostgREST does it — ``set local request.jwt.claims`` plus
+``set local role`` — because the scaffold's ``auth.uid()`` is Supabase's real definition and
+reads that claim. An earlier version of this script redefined ``auth.uid()`` itself and restored
+a NULL stub afterwards, which silently disabled every policy for whatever ran next against the
+same database. The claim is transaction-scoped and leaves nothing behind.
 """
 
 from __future__ import annotations
@@ -60,11 +61,11 @@ def main() -> None:
             (str(uuid.uuid4()),),
         )
 
-        cur.execute(
-            f"create or replace function auth.uid() returns uuid language sql stable"
-            f" as $$ select '{OWNER}'::uuid $$;"
-        )
-        try:
+        # One transaction, as the owner: the claim and the role both revert on commit.
+        with conn.transaction():
+            claims = f'{{"sub":"{OWNER}"}}'
+            cur.execute("select set_config('request.jwt.claims', %s, true)", (claims,))
+            cur.execute("set local role authenticated")
             cur.execute(
                 "select public.replace_user_graph(%s, %s::jsonb, %s::jsonb)",
                 (1234.5, json.dumps(PRIVATE_NODES), json.dumps(PRIVATE_EDGES)),
@@ -102,22 +103,18 @@ def main() -> None:
             remaining = cur.fetchone()
             assert remaining is not None and remaining[0] == 0, "stale edges were not pruned"
 
-            # Authority comes from the session, so a caller without one gets nothing.
-            cur.execute(
-                "create or replace function auth.uid() returns uuid language sql stable"
-                " as $$ select null::uuid $$;"
-            )
-            try:
+        # Authority comes from the session, so a caller without one gets nothing. Separate
+        # transaction: the refusal aborts whichever one it happens in.
+        try:
+            with conn.transaction():
+                cur = conn.cursor()
+                cur.execute("select set_config('request.jwt.claims', '', true)")
+                cur.execute("set local role authenticated")
                 cur.execute("select public.replace_user_graph(1.0, '[]'::jsonb, '[]'::jsonb)")
-            except psycopg.errors.InsufficientPrivilege:
-                pass
-            else:  # pragma: no cover - only reached when the guard regresses
-                raise AssertionError("an unauthenticated caller was allowed to replace a graph")
-        finally:
-            cur.execute(
-                "create or replace function auth.uid() returns uuid language sql stable"
-                " as $$ select null::uuid $$;"
-            )
+        except psycopg.errors.InsufficientPrivilege:
+            pass
+        else:  # pragma: no cover - only reached when the guard regresses
+            raise AssertionError("an unauthenticated caller was allowed to replace a graph")
 
     print("private graph nodes: OK — no private label reached technique_nodes")
 
