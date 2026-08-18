@@ -9,7 +9,13 @@ reviews:
       - main
   path_instructions:
     - path: "alembic/versions/**"
-      instructions: "Alembic migrations must keep the single linear chain (down_revision = previous head, no branches). Never destroy existing rows. Every new table/column with user data needs an RLS policy in the same migration. Public artifacts must filter owner_kind explicitly — private user data never feeds public/competitive views."
+      instructions: >
+        Keep the Alembic chain linear. Avoid unintended destructive data loss.
+        Destructive cleanup is allowed only when explicitly required by a
+        reviewed migration, with prerequisite migration/backfill and tests.
+        User-data schema changes require matching RLS. Public artifacts must
+        filter owner_kind explicitly — private user data never feeds
+        public/competitive views.
     - path: "export/**"
       instructions: "Export formats are cross-module contracts with the App (storage keys, bundle shape). Changing the shape of site/ output or app-facing JSON requires the paired App PR."
     - path: "db/repository.py"
