@@ -1,0 +1,451 @@
+{
+  "cases": [
+    {
+      "expect_parity": true,
+      "expected": {
+        "constellations": [],
+        "modularity": 0.0,
+        "rejected_count": 0,
+        "rejected_rate": 0.0
+      },
+      "input": {
+        "edges": [],
+        "nodes": []
+      },
+      "name": "empty_graph",
+      "note": ""
+    },
+    {
+      "expect_parity": true,
+      "expected": {
+        "constellations": [
+          {
+            "fingerprint": "a6db480094950db2",
+            "hub": "Solo",
+            "internal_edges": 0,
+            "members": [
+              "Solo"
+            ],
+            "support": 0
+          }
+        ],
+        "modularity": 0.0,
+        "rejected_count": 0,
+        "rejected_rate": 0.0
+      },
+      "input": {
+        "edges": [],
+        "nodes": [
+          "Solo"
+        ]
+      },
+      "name": "single_node",
+      "note": ""
+    },
+    {
+      "expect_parity": true,
+      "expected": {
+        "constellations": [
+          {
+            "fingerprint": "559aead08264d579",
+            "hub": "A",
+            "internal_edges": 0,
+            "members": [
+              "A"
+            ],
+            "support": 0
+          },
+          {
+            "fingerprint": "df7e70e5021544f4",
+            "hub": "B",
+            "internal_edges": 0,
+            "members": [
+              "B"
+            ],
+            "support": 0
+          },
+          {
+            "fingerprint": "6b23c0d5f35d1b11",
+            "hub": "C",
+            "internal_edges": 0,
+            "members": [
+              "C"
+            ],
+            "support": 0
+          }
+        ],
+        "modularity": 0.0,
+        "rejected_count": 0,
+        "rejected_rate": 0.0
+      },
+      "input": {
+        "edges": [],
+        "nodes": [
+          "A",
+          "B",
+          "C"
+        ]
+      },
+      "name": "multiple_isolated_nodes",
+      "note": ""
+    },
+    {
+      "expect_parity": true,
+      "expected": {
+        "constellations": [
+          {
+            "fingerprint": "7c7db652fb181175",
+            "hub": "A1",
+            "internal_edges": 3,
+            "members": [
+              "A1",
+              "A2",
+              "A3"
+            ],
+            "support": 15.0
+          },
+          {
+            "fingerprint": "8c33fadaa49cd77f",
+            "hub": "B1",
+            "internal_edges": 3,
+            "members": [
+              "B1",
+              "B2",
+              "B3"
+            ],
+            "support": 15.0
+          }
+        ],
+        "modularity": 0.5,
+        "rejected_count": 0,
+        "rejected_rate": 0.0
+      },
+      "input": {
+        "edges": [
+          {
+            "source": "A1",
+            "target": "A2",
+            "weight": 5.0
+          },
+          {
+            "source": "A2",
+            "target": "A3",
+            "weight": 5.0
+          },
+          {
+            "source": "A3",
+            "target": "A1",
+            "weight": 5.0
+          },
+          {
+            "source": "B1",
+            "target": "B2",
+            "weight": 5.0
+          },
+          {
+            "source": "B2",
+            "target": "B3",
+            "weight": 5.0
+          },
+          {
+            "source": "B3",
+            "target": "B1",
+            "weight": 5.0
+          }
+        ],
+        "nodes": [
+          "A1",
+          "A2",
+          "A3",
+          "B1",
+          "B2",
+          "B3"
+        ]
+      },
+      "name": "two_disconnected_clusters",
+      "note": "Two disjoint triangles — the modularity optimum is unambiguous."
+    },
+    {
+      "expect_parity": true,
+      "expected": {
+        "constellations": [
+          {
+            "fingerprint": "0127f1577ba61607",
+            "hub": "Guard Pass",
+            "internal_edges": 1,
+            "members": [
+              "Guard Pass",
+              "Mount"
+            ],
+            "support": 20.0
+          },
+          {
+            "fingerprint": "615ab08b96ed37f1",
+            "hub": "Takedown",
+            "internal_edges": 1,
+            "members": [
+              "Standing",
+              "Takedown"
+            ],
+            "support": 20.0
+          }
+        ],
+        "modularity": 0.47561,
+        "rejected_count": 0,
+        "rejected_rate": 0.0
+      },
+      "input": {
+        "edges": [
+          {
+            "source": "Standing",
+            "target": "Takedown",
+            "weight": 10.0
+          },
+          {
+            "source": "Takedown",
+            "target": "Standing",
+            "weight": 10.0
+          },
+          {
+            "source": "Takedown",
+            "target": "Guard Pass",
+            "weight": 1.0
+          },
+          {
+            "source": "Guard Pass",
+            "target": "Mount",
+            "weight": 10.0
+          },
+          {
+            "source": "Mount",
+            "target": "Guard Pass",
+            "weight": 10.0
+          }
+        ],
+        "nodes": [
+          "Guard Pass",
+          "Mount",
+          "Standing",
+          "Takedown"
+        ]
+      },
+      "name": "chain_with_a_weak_link",
+      "note": "A 4-node chain with one clearly weak link (weight 1 vs weight 10 elsewhere) — Louvain should cut the weak link regardless of node-visitation order."
+    },
+    {
+      "expect_parity": false,
+      "expected": {
+        "constellations": [
+          {
+            "fingerprint": "7c7db652fb181175",
+            "hub": "A1",
+            "internal_edges": 3,
+            "members": [
+              "A1",
+              "A2",
+              "A3"
+            ],
+            "support": 15.0
+          },
+          {
+            "fingerprint": "8c33fadaa49cd77f",
+            "hub": "B1",
+            "internal_edges": 3,
+            "members": [
+              "B1",
+              "B2",
+              "B3"
+            ],
+            "support": 15.0
+          }
+        ],
+        "modularity": 0.0,
+        "rejected_count": 1,
+        "rejected_rate": 1.0
+      },
+      "input": {
+        "edges": [
+          {
+            "source": "A1",
+            "target": "A2",
+            "weight": 5.0
+          },
+          {
+            "source": "A2",
+            "target": "A3",
+            "weight": 5.0
+          },
+          {
+            "source": "A3",
+            "target": "A1",
+            "weight": 5.0
+          },
+          {
+            "source": "B1",
+            "target": "B2",
+            "weight": 5.0
+          },
+          {
+            "source": "B2",
+            "target": "B3",
+            "weight": 5.0
+          },
+          {
+            "source": "B3",
+            "target": "B1",
+            "weight": 5.0
+          }
+        ],
+        "forced_raw_partition": [
+          [
+            "A1",
+            "A2",
+            "A3",
+            "B1",
+            "B2",
+            "B3"
+          ]
+        ],
+        "nodes": [
+          "A1",
+          "A2",
+          "A3",
+          "B1",
+          "B2",
+          "B3"
+        ]
+      },
+      "name": "forced_disconnected_community",
+      "note": "Python's raw Louvain result is FORCED via mock (real Louvain never returns this union for two disjoint cliques) to exercise the ADR-07 connectivity gate. The TS test replays the same forced raw partition against its own gate function directly, not through its detect()/Louvain — so this case is not a detect()-to-detect() parity check, only a reference for what the gate itself must produce."
+    },
+    {
+      "expect_parity": false,
+      "expected": {
+        "constellations": [
+          {
+            "fingerprint": "e5ba6ad0adc4d532",
+            "hub": "A1",
+            "internal_edges": 4,
+            "members": [
+              "A1",
+              "A2",
+              "A3",
+              "X"
+            ],
+            "support": 34.0
+          },
+          {
+            "fingerprint": "8c33fadaa49cd77f",
+            "hub": "B1",
+            "internal_edges": 3,
+            "members": [
+              "B1",
+              "B2",
+              "B3"
+            ],
+            "support": 30.0
+          }
+        ],
+        "modularity": 0.43945,
+        "rejected_count": 0,
+        "rejected_rate": 0.0
+      },
+      "input": {
+        "edges": [
+          {
+            "source": "A1",
+            "target": "A2",
+            "weight": 5.0
+          },
+          {
+            "source": "A1",
+            "target": "A3",
+            "weight": 5.0
+          },
+          {
+            "source": "A1",
+            "target": "X",
+            "weight": 2.0
+          },
+          {
+            "source": "A2",
+            "target": "A1",
+            "weight": 5.0
+          },
+          {
+            "source": "A2",
+            "target": "A3",
+            "weight": 5.0
+          },
+          {
+            "source": "A3",
+            "target": "A2",
+            "weight": 5.0
+          },
+          {
+            "source": "A3",
+            "target": "A1",
+            "weight": 5.0
+          },
+          {
+            "source": "B1",
+            "target": "B2",
+            "weight": 5.0
+          },
+          {
+            "source": "B1",
+            "target": "B3",
+            "weight": 5.0
+          },
+          {
+            "source": "B1",
+            "target": "X",
+            "weight": 2.0
+          },
+          {
+            "source": "B2",
+            "target": "B1",
+            "weight": 5.0
+          },
+          {
+            "source": "B2",
+            "target": "B3",
+            "weight": 5.0
+          },
+          {
+            "source": "B3",
+            "target": "B2",
+            "weight": 5.0
+          },
+          {
+            "source": "B3",
+            "target": "B1",
+            "weight": 5.0
+          },
+          {
+            "source": "X",
+            "target": "A1",
+            "weight": 2.0
+          },
+          {
+            "source": "X",
+            "target": "B1",
+            "weight": 2.0
+          }
+        ],
+        "nodes": [
+          "A1",
+          "A2",
+          "A3",
+          "B1",
+          "B2",
+          "B3",
+          "X"
+        ]
+      },
+      "name": "bridge_node_tie",
+      "note": "Two triangles bridged by X, connected with EQUAL weight to one node in each — moving X into A's community or B's community has identical modularity gain, a genuine tie. Empirically confirmed order-dependent: sweeping seed=0..9 through networkx's own louvain_communities on this graph gives X->A for every seed except seed=3, which gives X->B — proof the tie is real, not hypothetical, on the Python side alone. At the pinned default (seed=42) Python currently agrees with this port's fixed sorted-order result (X->A), so this case does not show two DIFFERENT stored answers today — but the agreement is not guaranteed to survive graph edits the way an unambiguous case's does, which is why it is still `expect_parity: false` and checked for TS-internal determinism only, never asserted equal to the Python side by construction."
+    }
+  ],
+  "generated_from": "GrapplingArcAnalytics/scripts/export_constellation_fixtures.py"
+}
