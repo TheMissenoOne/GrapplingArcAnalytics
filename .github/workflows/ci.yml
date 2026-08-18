@@ -91,6 +91,13 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
         run: uv run python ci/verify_owner_deletion.py
+      # RLS is not one layer of several — Supabase grants every new table to anon and
+      # authenticated by default, so the policies are the only thing between one athlete's
+      # training data and another's. Two users and an anonymous caller, evaluated for real.
+      - name: Two users cannot see each other under RLS
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
+        run: uv run python ci/verify_rls_isolation.py
 
   edge-functions:
     # The Edge Functions are Deno, not Python, so nothing in the job above sees them. The
