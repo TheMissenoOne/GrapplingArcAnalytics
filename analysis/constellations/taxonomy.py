@@ -33,7 +33,7 @@ class TaxonomyThresholds:
     from any measured corpus."""
 
     min_community_size: int = 2
-    min_internal_support: float = 0.0  # community's Constellation.support (sum of internal edge weight)
+    min_internal_support: float = 0.0  # Constellation.support (sum of internal edge weight)
 
 
 def classify_nodes(
@@ -51,7 +51,10 @@ def classify_nodes(
     for c in result.constellations:
         if len(c.members) == 1:
             state = NodeState.SINGLETON
-        elif len(c.members) < thresholds.min_community_size or c.support < thresholds.min_internal_support:
+        elif (
+            len(c.members) < thresholds.min_community_size
+            or c.support < thresholds.min_internal_support
+        ):
             state = NodeState.LOW_SUPPORT
         else:
             state = NodeState.DETECTED

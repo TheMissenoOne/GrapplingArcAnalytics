@@ -22,8 +22,8 @@ reviews:
       instructions: "Public data paths only. Never write owner_kind='user' content into public tables (technique_nodes, athlete graphs). Curated vocabulary goes in with source='library'."
     - path: "supabase/functions/**"
       instructions: "Trusted backend code. Never accept a userId from the request body as authority — derive identity from the verified JWT. Deleting accounts must be idempotent."
-tools:
-  ruff:
-    enabled: true
-  squawk:
-    enabled: true
+  tools:
+    ruff:
+      enabled: true
+    squawk:
+      enabled: true

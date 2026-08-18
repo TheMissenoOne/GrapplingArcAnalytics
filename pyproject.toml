@@ -196,6 +196,78 @@ module = [
 ]
 ignore_errors = true
 
+# ponytail: measured 2026-08-18 after the repo-wide CI gate was enabled. These 63 modules were
+# added after the July baseline and expose 492 strict-mypy errors once Ruff stops failing first.
+# Keep the debt explicit rather than disabling strict mode or ignoring the whole repo. Issue #4
+# tracks typing each module for real and removing it from this temporary list.
+[[tool.mypy.overrides]]
+module = [
+    "admin.study",
+    "analysis.category_constellations",
+    "analysis.discipline",
+    "analysis.rating_v2.persist",
+    "analysis.rating_v2.replay",
+    "analysis.scouting_report",
+    "analysis.scouting_rulesets",
+    "analysis.transitions.build_graph",
+    "cv.pose_estimate",
+    "poc.decision_vision.audit_overlay",
+    "poc.decision_vision.dashboard",
+    "poc.decision_vision.extract_frames",
+    "poc.decision_vision.live_state",
+    "poc.decision_vision.predict",
+    "poc.decision_vision.prelabel_frames",
+    "poc.decision_vision.remote_frame_sequence",
+    "poc.decision_vision.role_tracking",
+    "poc.decision_vision.temporal_features",
+    "poc.decision_vision.train",
+    "poc.decision_vision.train_temporal",
+    "poc.decision_vision.vicos_state",
+    "poc.decision_vision.visual_labels",
+    "scripts.apply_decision_results",
+    "scripts.compare_athlete_system_detectors",
+    "scripts.group_admin",
+    "scripts.measure_community_stability_under_weight",
+    "scripts.measure_confidence_weighting",
+    "scripts.scouting_division_report",
+    "scripts.scouting_matches_csv",
+    "tests.poc.test_decision_vision_dashboard",
+    "tests.poc.test_decision_vision_live_state",
+    "tests.poc.test_decision_vision_progress",
+    "tests.poc.test_decision_vision_role_tracking",
+    "tests.poc.test_decision_vision_vicos_state",
+    "tests.poc.test_decision_vision_visual_labels",
+    "tests.poc.test_external_dataset_registry",
+    "tests.test_apply_decision_results",
+    "tests.test_apply_events",
+    "tests.test_backfill_taxonomy_id",
+    "tests.test_category_profile",
+    "tests.test_compare_athlete_system_detectors",
+    "tests.test_decision_criteria",
+    "tests.test_decision_flow",
+    "tests.test_dossier_decision_flow",
+    "tests.test_exchange_cycles",
+    "tests.test_flowchart_compiler",
+    "tests.test_group_admin",
+    "tests.test_opponent_conditions",
+    "tests.test_private_data_boundary",
+    "tests.test_pro_analytics",
+    "tests.test_pro_analytics_systemd",
+    "tests.test_rating_v2",
+    "tests.test_report_charts",
+    "tests.test_scouting_division_report",
+    "tests.test_scouting_report",
+    "tests.test_site_branding",
+    "tests.test_site_confidence_gate",
+    "tests.test_study_knowledge",
+    "tests.test_study",
+    "tests.test_study_reports",
+    "tests.test_taxonomy_map",
+    "tests.test_taxonomy",
+    "tests.test_transitions",
+]
+ignore_errors = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]

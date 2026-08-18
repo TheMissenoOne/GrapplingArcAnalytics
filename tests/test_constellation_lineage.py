@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import networkx as nx
+
 from analysis.constellations.detect import detect
 from analysis.constellations.lineage import match_lineage
-
-import networkx as nx
 
 
 def _clique(members: list[str], weight: float = 5) -> nx.DiGraph:

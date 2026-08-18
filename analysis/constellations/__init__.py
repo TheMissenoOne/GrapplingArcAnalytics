@@ -11,7 +11,12 @@ BOTH the Rating Engine V2 report and the category trend report from this same
 detector — nobody reimplements it.
 """
 
-from analysis.constellations.detect import Constellation, DetectionResult, constellation_fingerprint, detect
+from analysis.constellations.detect import (
+    Constellation,
+    DetectionResult,
+    constellation_fingerprint,
+    detect,
+)
 from analysis.constellations.lineage import LineageMatch, LineageResult, match_lineage
 from analysis.constellations.stability import (
     ConstellationStability,
