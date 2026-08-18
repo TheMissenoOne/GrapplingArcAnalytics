@@ -1,13 +1,14 @@
-"""Study backend — local port of the site Study page's data path.
+"""Study backend — the whole Study data path, in Python.
 
-The public site's Study (``site/study.html`` + study.js) talks to the Supabase edge
-function ``youtube-transcript`` and renders whatever it returns. The edge function
-returns metadata + grouped segments + snippets but NO concept nodes, so the public
-concept map is always empty. This module rebuilds the same pipeline in Python so the
-personal admin dashboard gets:
+This began as a local port of the public site's Study page, which called a Supabase edge
+function (``youtube-transcript``) for metadata and grouped segments. That page and that
+function are both gone: the site no longer has a Study, nothing called the function, and it
+was deleted rather than left deployed. This module is now the only implementation, and it
+does more than the edge function ever did — the edge function returned no concept nodes, so
+the public map it fed was always empty.
 
   - metadata via oEmbed + timed captions via ``youtube-transcript-api`` (keyless),
-  - segment grouping ported from ``supabase/functions/youtube-transcript/grouping.ts``,
+  - segment grouping (originally ported from the edge function's ``grouping.ts``),
   - TF-IDF grounding over the local technique library (port of ``site/study-rag.js``)
     → neighbour concept nodes/relationships/quality so the study renders a real map.
 
@@ -267,7 +268,8 @@ _MAX_SECONDS = 120
 def group_captions(captions: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Coalesce caption lines into ~1-min study segments (``seg-N``).
 
-    Behavioral port of ``supabase/functions/youtube-transcript/grouping.ts``
+    Originally a behavioral port of the deleted ``youtube-transcript`` edge function's
+    ``grouping.ts``; that function is gone, so this is the definition now
     (TARGET_CHARS=1100, MAX_SECONDS=120)."""
     if not captions:
         return []

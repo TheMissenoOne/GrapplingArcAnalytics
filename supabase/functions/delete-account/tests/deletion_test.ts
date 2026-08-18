@@ -27,10 +27,11 @@ Deno.test('deletes storage, then the graph, then the identity — in that order'
   assertEquals(report.graphsRemoved, 1);
 });
 
-Deno.test('deletes the graph explicitly, because nothing cascades to it', async () => {
-  // `graphs.owner_id` is polymorphic (athlete id OR profile id), so there is no FK to
-  // `profiles`. Without this stage the graph, its edges and its private nodes would survive
-  // the account, attributed to a uuid that no longer resolves.
+Deno.test('deletes the graph before the identity, not after', async () => {
+  // `graphs.owner_id` is polymorphic (athlete id OR profile id), so a column FK is impossible
+  // and there is no cascade. Alembic 0023's `handle_user_delete` trigger already covers the
+  // normal path — but it fires on the auth delete, which is the LAST stage. Doing it here means
+  // a failure to delete the identity does not leave the graph behind.
   let deletedFor: string | null = null;
   const { effects } = recorder({
     deleteOwnedGraphs: async (ownerId) => { deletedFor = ownerId; return 1; },
