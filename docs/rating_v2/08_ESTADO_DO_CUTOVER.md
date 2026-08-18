@@ -1,68 +1,72 @@
-# Estado do cutover — 2026-08-17, fim da sessão
+# Estado do cutover — atualizado 2026-08-18
 
-Retomada rápida. O usuário autorizou o **cutover completo** dos dois lados (ADR-13). Isto registra o
-que ficou pronto, o que ficou pela metade e o que exige cuidado ao retomar.
+Substitui o registro de 2026-08-17 (fim de sessão com dois agentes mortos pela metade). Aquele
+documento pedia três verificações antes de qualquer coisa; as três foram feitas e passaram.
 
-## ⚠️ Ao retomar, verifique nesta ordem
+## Verificações que o documento anterior exigia
 
-1. **`uv run pytest -q` está VERDE?** No fim da sessão havia **2 testes falhando** em
-   `tests/test_constellations.py`, causados por uma edição em voo de `analysis/constellations/`
-   (agente interrompido). **Não aplique migration nem regenere o site com a suíte vermelha.**
-2. **Migration `0036` foi redigida mas NÃO aplicada.** `alembic_version` em produção deve estar em
-   `0035`. Confirme antes de qualquer coisa.
-3. **O site público está DESATUALIZADO.** Foi gerado antes das correções de identidade da tarde
-   (5 vencedores resolvidos, mesclagem Musumeci, 1 luta apagada, 34 atletas replayados). Regenerar é
-   obrigatório — hoje o site mostra uma luta que não existe mais.
+1. **Suíte verde.** Os 2 testes que falhavam em `tests/test_constellations.py` eram edição em voo de
+   um agente interrompido — o próprio agente fechou antes de morrer. `uv run pytest -q`: **1137
+   passed**.
+2. **`alembic_version` em `0035`** — confirmado, e a `0036` foi aplicada. Prod em **`0036`**, com as
+   três tabelas novas com RLS **ligada e zero policies** (nega por padrão), verificado no banco.
+3. **Site regenerado.** A luta apagada (Musumeci × Musumeci) não existe mais em nenhum lugar do
+   bundle.
 
-## Pronto e em produção
+## A pergunta que estava aberta: fronteira de `sequenceId`
 
-- Corpus corrigido: 139 vencedores + 51 empates + 103 anos + 89 eventos (manhã), mais 5 grafias e a
-  mesclagem `Musumeci`→`Mikey Musumeci` (tarde). Vencedores de grappling não resolvidos: **6**.
-- `athletes` sem auto-luta (era 1).
-- Migration `0035` aplicada: `rating_engine_runs` + `athlete_rating_states_v2`, RLS negando por padrão.
-- Dois runs V2 persistidos com determinismo provado (`source_hash` idêntico, 0 divergências).
-- Site com gate de confiança (RD ≤ 200): 399 breakdowns, 83 dossiês — **mas gerado antes das
-  correções da tarde**.
-- Core Glicko-2 em TypeScript com paridade provada, **desligado**, no App (`848efb4`).
+**Respondida, e o comportamento está correto.** `analysis/transitions/build_graph.py` constrói toda
+aresta a partir de índices dentro de UM elemento de `sequences` — o laço externo reinicia
+`events`/`by_actor` por luta. Travado por `tests/test_transitions.py::test_no_cross_sequence_edge`.
+Não houve transição fantasma entre lutas em nada do que foi medido.
 
-## Redigido, não aplicado
+## No ar
 
-- **`alembic/versions/0036_*.py`** — `athlete_node_rating_states_v2`, `athlete_constellations_v2`,
-  `athlete_constellation_members_v2`. Modelos espelhados em `db/models.py`. Revisei o docstring, a
-  idempotência e o `downgrade()`; falta rodar.
-- **`analysis/rating_v2/persist.py`** ganhou `persist_node_states` / `persist_constellations`.
-  ⚠️ `build_constellation_rows_from_detection` é um **stub que levanta `NotImplementedError`** — é a
-  costura para a camada de constelações. Preencher quando `fingerprint`/`stability_p10` existirem.
+- **Prod em `0036`.** Tabelas de nó e constelação criadas, sem consumidor (ADR-03/ADR-08 continuam
+  valendo: nenhuma das duas camadas tem metodologia fechada).
+- **Run V2 novo persistido: `2645cce4-ca61-4756-9433-848baba9e297`**, 646 atletas,
+  `input_hash 05301d58`. O run anterior (`210a5ba7`, 639 atletas, hash `8a803053`) lia um corpus que
+  **não existe mais** — não reproduz. O site aponta para o novo.
+- **Camada de constelações completa** conforme doc 04 do bundle: `fingerprint`, Jaccard média **e
+  p10**, linhagem entre snapshots, taxonomia de nó esparso, metadado de reação nas arestas. Rating
+  continua fora da formação de comunidade.
+- **`build_constellation_rows_from_detection`** preenchido — o stub existia só porque
+  `fingerprint`/`stability_p10` ainda não existiam. Existem.
+- **ADR-14 — contrato de apresentação** nos dois lados: `analysis/rating_v2/presentation.py` e
+  `GrapplingArcApp/src/services/rating/ratingV2Presentation.ts`, com teste de paridade.
+- **App: engine V2 do usuário** (`5c10112`) — evidência por entrada própria, `no_attempt` não gera
+  evidência nenhuma, semente por faixa, nó novo semeado no rating global corrente, rating global
+  derivado dos nós (precisão dentro do eixo, peso igual entre eixos). **Desligada**: nenhuma tela
+  consome. 2040 testes verdes, `tsc` limpo.
+- **Reprocessamento de sessões** (ADR-12): o estado carrega `engineVersion` **e**
+  `sourceFingerprint`. Versão velha **ou** corpus movido (sessão criada, editada, apagada) dispara
+  replay da fonte. Checar só a versão deixaria o rating congelado no dia da última troca de versão.
+- **Evento CJI 2 desduplicado** — duas grafias do mesmo evento faziam o exportador sobrescrever uma
+  página de evento com a outra e 11 lutas sumiam da listagem. Corrigido no banco e no registry dos
+  dumps, `disciplines.json` regenerado na mesma passada (ADR-10).
 
-## Em voo quando a sessão acabou (podem ter morrido pela metade)
+## Falta
 
-- **Constelações completas** (doc 04 do bundle): `fingerprint`, Jaccard **p10**, linhagem entre
-  snapshots, taxonomia de nó esparso, e — o item mais importante — **verificar se
-  `analysis/transitions/build_graph.py` respeita a fronteira de `sequenceId`**. Se não respeitar,
-  transições fantasma entre lutas diferentes entraram em tudo que foi medido até aqui.
-- **App: engine V2 do usuário + reprocessamento de sessões** (ADR-12). Escopo: modelo de evidência
-  (`round.outcome` NÃO é vitória/derrota), semente por faixa, rating global por eixo, replay das
-  sessões quando a versão da engine muda.
-
-## Não começado
-
-- **Contrato de apresentação** — `rating + confiança` ("1420 · alta confiança", "1420 ± 90") no lugar
-  de RD cru. **Precondição do cutover público**: sem isso, migrar consumidor expõe incerteza sem
-  vocabulário para lê-la.
-- **Migração dos consumidores** (dossiê → site `GA_ELO` → export do App), atrás de `engine_version`.
+- **Migração dos consumidores, um a um** (ADR-02), agora que ADR-14 existe: dossiê → `GA_ELO` do
+  site → export do App. **Nenhum foi migrado.** `GA_ELO` ainda é V1. Trocar a fonte do `GA_ELO`
+  reordena um ranking público — é decisão de produto, não consequência técnica desta wave.
 - **UI do App**: radar/insights/share ainda leem a V1.
-- **Relatórios de scouting** em `reports/adcc-2026-categoria/` — gerados antes das correções da tarde.
+- **Calibração dos parâmetros de usuário** (ADR-13): peso 0,10 por tentativa, 70 Elo por grau de
+  dificuldade, RD 220, RD 350 de nó novo. Todos candidatos não medidos, num bloco só. Critério para
+  recalibrar: ADR-03 (log loss fora da amostra antes de spread).
+- **ADR-08** continua aberto: fechar exige proveniência por luta em `graph_edges`.
 
-## Cicatrizes desta sessão que valem lembrar
+## Cicatrizes que valem lembrar
 
-- **`pgrep -f <padrão>` casa com a própria linha do watcher.** Aconteceu 4× e travou um shell por
-  horas. Watcher que espera processo tem de excluir a si mesmo ou observar um artefato.
-- **Renomear evento invalida `data/rating_v2/disciplines.json`** — o mapa é indexado por nome
-  (ADR-10). Regenerar na mesma passada.
-- **`scripts.reprocess_all` re-importa os dumps** e sobrescreveria correções feitas direto no banco;
-  pior, deduplica por `(participantes, ano)` e 103 anos mudaram. Para replay pós-correção use
-  `replay_and_persist_athlete` por atleta.
+- **`pgrep -f <padrão>` casa com a própria linha do watcher.** Travou um shell por horas.
+- **Renomear evento invalida `data/rating_v2/disciplines.json`** — mapa indexado por nome (ADR-10).
+  Regenerar na mesma passada, sempre.
+- **`scripts.reprocess_all` re-importa os dumps** e sobrescreveria correções feitas direto no banco.
+  Para replay pós-correção, `replay_and_persist_athlete` por atleta.
 - **Comparar partições exige o mesmo espaço de chave** — `"Closed Guard"` vs `"closed guard"` deu
-  Jaccard 0,0 perfeito em 15 atletas. Zero perfeito é cheiro de artefato, não achado.
-- **`Tammi Musumeci` existe** e é pessoa diferente de `Mikey Musumeci`. Mesclagem por sobrenome teria
-  fundido as duas.
+  Jaccard 0,0 perfeito em 15 atletas. Zero perfeito é cheiro de artefato.
+- **`Tammi Musumeci` é pessoa diferente de `Mikey Musumeci`.** Mesclagem por sobrenome fundiria as duas.
+- **`as any` num fixture de teste esconde defeito de tipo real** — dois fixtures do App passavam
+  `RoundEntry` sem `assoc`; o cast é que estava errado, não o tipo.
+- **`site/grapple-like.html` casa com o glob `grapple-*.html`.** Contar arquivos por glob dá 85
+  quando há 84 dossiês; não é órfão.
