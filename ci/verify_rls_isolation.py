@@ -322,6 +322,12 @@ def main() -> None:
         # REFERENCES and TRIGGER are not row-level concepts, so no policy can restrain them —
         # 0039 revokes all three schema-wide and fixes the default. This catches the next table
         # that arrives through some path the default does not cover.
+        #
+        # `PUBLIC` is checked as well as the two named roles: a privilege held by PUBLIC is held
+        # by every role, so looking only at anon/authenticated would report success while the
+        # privilege was still effective. Partitioned tables ('p') are included for the same
+        # reason — there are none today, and a check that silently skips a table shape is worth
+        # less than no check.
         cur = conn.cursor()
         cur.execute(
             """
@@ -330,8 +336,8 @@ def main() -> None:
               join pg_namespace n on n.oid = c.relnamespace and n.nspname = 'public'
               join information_schema.role_table_grants g
                 on g.table_name = c.relname and g.table_schema = 'public'
-             where c.relkind = 'r'
-               and g.grantee in ('anon', 'authenticated')
+             where c.relkind in ('r', 'p')
+               and g.grantee in ('anon', 'authenticated', 'PUBLIC')
                and g.privilege_type in ('TRUNCATE', 'REFERENCES', 'TRIGGER')
              order by 1, 2, 3
             """

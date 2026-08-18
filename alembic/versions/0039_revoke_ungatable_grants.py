@@ -27,6 +27,12 @@ SELECT/INSERT/UPDATE/DELETE are left exactly as they are on every table, because
 ones RLS governs and re-deriving the correct verb set per table is how a working app gets broken
 by a hardening change. Nothing about what any client can read or write changes here.
 
+``PUBLIC`` is included in the revoke as well as ``anon`` and ``authenticated``. A privilege held
+by ``PUBLIC`` is held by every role, so hardening the two named ones while leaving a ``PUBLIC``
+grant in place would be a check that reports success and protects nothing. Production has no
+such grant today (verified) — this is so it cannot arrive later unnoticed. The table owner keeps
+everything regardless of ``PUBLIC``, so nothing operational depends on it.
+
 The default is fixed too, so a table added next month does not quietly reintroduce all three.
 That only covers objects created by the role running this migration, which is the role the
 migrations run as — the platform's own defaults for other roles are outside a migration's reach,
@@ -48,19 +54,28 @@ depends_on = None
 
 _UNGATABLE = "truncate, references, trigger"
 _ROLES = "anon, authenticated"
+_REVOKE_FROM = "anon, authenticated, public"
 
 
 def upgrade() -> None:
-    op.execute(f"revoke {_UNGATABLE} on all tables in schema public from {_ROLES};")
+    op.execute(f"revoke {_UNGATABLE} on all tables in schema public from {_REVOKE_FROM};")
     op.execute(
         f"alter default privileges in schema public revoke {_UNGATABLE} on tables from {_ROLES};"
     )
 
 
 def downgrade() -> None:
-    # Restoring a privilege that nothing needs would be an odd thing to want, but a downgrade
-    # that does not reverse its upgrade is worse than one that does.
+    # Only the DEFAULT is restored, deliberately.
+    #
+    # A schema-wide `grant` here would not reverse this revision — it would overshoot it. 0030
+    # and 0031 had already revoked these privileges from `user_projects` and `user_node_names`
+    # before 0039 existed, so granting to "all tables" would hand them back privileges they did
+    # not have at the moment this revision ran, and a downgrade that opens something the upgrade
+    # never closed is worse than one that leaves the hardening in place.
+    #
+    # Restoring the exact prior state would mean recording every table's grants in the upgrade
+    # and replaying them, which is a lot of machinery to un-do a change with no operational
+    # effect. The tables stay hardened; new ones go back to inheriting the platform default.
     op.execute(
         f"alter default privileges in schema public grant {_UNGATABLE} on tables to {_ROLES};"
     )
-    op.execute(f"grant {_UNGATABLE} on all tables in schema public to {_ROLES};")
