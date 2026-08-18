@@ -377,3 +377,49 @@ decidir — falha para o lado de excluir, não de contaminar.
 > — resolveria de vez, ao custo de perder a legibilidade que torna o mapa revisável por humano.
 > Fica registrado como opção, não como pendência: 112 linhas revisáveis valem mais que imunidade a
 > renomeação, enquanto renomear for raro.
+
+---
+
+## ADR-12 — Derivado se reprocessa da fonte; número nunca semeia número
+
+**Contexto.** Decisão do usuário em 2026-08-17, ao autorizar o cutover: "as sessões devem ser
+reprocessadas na atualização".
+
+**Escolha.** Toda mudança de engine ou de config que altere a saída dispara **replay a partir da
+fonte de verdade** — matches no Analytics, sessões no AsyncStorage do App. O estado derivado anterior
+é descartado, nunca usado como semente.
+
+**Por quê.** Semear a engine nova com o número da engine antiga carrega o erro dela para dentro da
+nova e o torna permanente: a partir daí ninguém consegue distinguir o que a V2 mediu do que ela
+herdou. O bundle já dizia isso para o App ("never seed from old `computedElo`"); a decisão o eleva a
+regra dos dois lados. É também o que torna o replay auditável — dada a mesma fonte e a mesma
+`engine_version`, a saída é reproduzível, que é a propriedade que a wave 7 provou com dois runs de
+hash idêntico.
+
+**Consequência.** O App precisa de uma versão de engine persistida para saber quando reprocessar, e
+o reprocessamento tem de ser idempotente e não destrutivo — a sessão é o dado original e permanece
+intocada. No Analytics isso já era prática (`replay_and_persist_athlete` sobre o corpus inteiro), mas
+agora está escrito.
+
+---
+
+## ADR-13 — Cutover autorizado com parâmetros de usuário não calibrados
+
+**Contexto.** Em 2026-08-17 o usuário autorizou o cutover completo: V2 como rating do usuário no App
+(com reprocessamento de sessões) e migração dos consumidores públicos no Analytics, um a um.
+
+**O risco foi levantado antes da decisão e é registrado aqui para não se perder.** Os parâmetros do
+modelo de usuário são **candidatos, não medidos**: peso 0,10 por tentativa registrada e 70 pontos por
+grau de dificuldade vêm do bundle como valores de calibração. E a wave 5 mostrou o que acontece ao
+tentar calibrar sem corpus suficiente — no corpus de **competição**, que é maior e mais limpo que o de
+sessões de treino, `tau` saiu não-identificável e a calibração de incerteza ficou não-testável em 34
+de 36 células do sweep.
+
+Portanto: o rating de usuário que o cutover liga é **estruturalmente melhor** que a V1 (separa
+autoavaliação de resultado, expõe incerteza, não premia frequência) e ao mesmo tempo **numericamente
+não validado**. As duas coisas são verdade ao mesmo tempo.
+
+**Consequência.** As constantes de calibração ficam nomeadas e comentadas como não validadas, num só
+lugar, para serem recalibráveis quando houver corpus de sessão suficiente. Nenhuma delas deve ser
+espalhada pelo código nem tratada como propriedade da matemática do Glicko. Quando houver dado para
+calibrar, o critério é o do ADR-03 — pré-registrado, e log loss antes de spread.
