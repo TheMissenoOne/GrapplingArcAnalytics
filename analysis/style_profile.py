@@ -15,7 +15,6 @@ from collections import Counter
 from dataclasses import asdict
 from typing import Any
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from analysis.decision_flow import aggregate_patterns, extract_chain_patterns
@@ -77,19 +76,22 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
     # (the migration is meant to move every consumer funneling through ranked_pools), but
     # flagged here because it's easy to read this line and assume nothing moved.
     elite_ids = {row[0] for row in ranked[:_ELITE_TOP_N]}
-    weight_classes = {
-        aid: wc for aid, wc in session.execute(select(Athlete.id, Athlete.weight_class))
-    }
-    same_class = [
-        row for row in ranked if weight_classes.get(row[0]) == athlete.weight_class
-    ]
-    elo_rank = next(
-        (i + 1 for i, row in enumerate(same_class) if row[0] == athlete.id), None
-    )
-    # Relative standing (top X%) within the discipline pool — shown instead of the raw
-    # rating, which is never surfaced. See [[grappling-elo-presentation]]. Pools too
-    # small to rank honestly (<5) leave the fighter unranked.
+    # Rank is the fighter's position in the WHOLE discipline pool, the same ordering the
+    # published leaderboard uses, so the site cannot contradict itself.
+    #
+    # It used to be their rank inside their own weight class, and that was quietly broken:
+    # `Athlete.weight_class` is NULL for 883 of 1327 athletes and, where set, holds opaque
+    # codes ("1".."4") rather than real divisions. So the "class" was a meaningless bucket
+    # — three different athletes rendered as "#1 Grappling ELO" while the site's own board
+    # ranked them #1, #3 and #8, and everyone in the NULL bucket got a rank out of 883
+    # (one dossier read "#532"). The bug was invisible until the wave-10 discipline fix
+    # restored ranks for 11 athletes who had been silently unranked; before that only one
+    # athlete displayed the number at all, and he genuinely was #1.
+    #
+    # `elo_percentile` below was ALREADY overall, and the two render side by side, so the
+    # weight-class rank was also disagreeing with the number next to it.
     overall = next((i + 1 for i, row in enumerate(ranked) if row[0] == athlete.id), None)
+    elo_rank = overall
     elo_percentile = (max(1, round(overall / len(ranked) * 100))
                       if overall and len(ranked) >= 5 else None)
 
