@@ -423,3 +423,33 @@ não validado**. As duas coisas são verdade ao mesmo tempo.
 lugar, para serem recalibráveis quando houver corpus de sessão suficiente. Nenhuma delas deve ser
 espalhada pelo código nem tratada como propriedade da matemática do Glicko. Quando houver dado para
 calibrar, o critério é o do ADR-03 — pré-registrado, e log loss antes de spread.
+
+---
+
+## ADR-14 — Contrato de apresentação: três níveis herdados, e a banda é o intervalo de 95%
+
+**Contexto.** Doc 07 do bundle pede `rating + confiança` no lugar de RD cru, e lista
+`1420 · alta confiança` e `1420 ± 90` como formas. Migrar qualquer consumidor sem isso expõe
+incerteza sem vocabulário para lê-la — era a precondição registrada do cutover público.
+
+**Escolha.** `analysis/rating_v2/presentation.py` é o **único** lugar onde um RD vira palavra.
+Três níveis, cortados em números que o repositório **já tinha assumido**, não em números novos:
+`alta` RD ≤ 100, `média` 100 < RD ≤ 200, `baixa` RD > 200. O 200 é o `SITE_MIN_CONFIDENCE_RD` da
+wave 8; o 100 é metade dele.
+
+**Por quê o corte herdado.** Se este módulo escolhesse o próprio corte, um atleta poderia ser
+publicado e ao mesmo tempo rotulado "baixa confiança" — o site contradizendo o próprio portão. Com
+200 como borda superior de `média`, tudo que o site publica é `alta` ou `média` por construção.
+
+**Recusa deliberada: a banda não é `± RD`.** `interval_95` devolve `± 1,96·RD`, a convenção do
+próprio Glickman. `± RD` é um intervalo de ~68% e lê-lo como faixa de ratings plausíveis afirma mais
+precisão do que o modelo tem. A consequência é honesta e incômoda: com RD 150 a banda é ±294. É por
+isso que o **site público não mostra banda nenhuma** — ele mostra posição relativa + percentil sob o
+rótulo "Grappling ELO" e nunca o rating cru (regra de produto já vigente), então o rótulo de nível é
+tudo que ele precisa daqui. A banda existe para o App, onde o usuário olha o **próprio** número e a
+incerteza é justamente o ponto.
+
+**Consequência.** O lado TypeScript precisa espelhar `confidence_tier` char-for-char, como
+`normalizeLabel`/`_normalize_name` já fazem — dois cortes divergentes fariam "alta confiança"
+significar coisas diferentes no site e no App. A migração de consumidores (dossiê → `GA_ELO` →
+export do App) passa a ter contra o que implementar.

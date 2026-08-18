@@ -11,7 +11,8 @@ BOTH the Rating Engine V2 report and the category trend report from this same
 detector — nobody reimplements it.
 """
 
-from analysis.constellations.detect import Constellation, DetectionResult, detect
+from analysis.constellations.detect import Constellation, DetectionResult, constellation_fingerprint, detect
+from analysis.constellations.lineage import LineageMatch, LineageResult, match_lineage
 from analysis.constellations.stability import (
     ConstellationStability,
     Stability,
@@ -20,10 +21,12 @@ from analysis.constellations.stability import (
     leave_one_out_athlete_driven,
     support,
 )
+from analysis.constellations.taxonomy import NodeState, TaxonomyThresholds, classify_nodes
 
 __all__ = [
     "Constellation",
     "DetectionResult",
+    "constellation_fingerprint",
     "detect",
     "ConstellationStability",
     "Stability",
@@ -31,4 +34,10 @@ __all__ = [
     "classify_stability",
     "leave_one_out_athlete_driven",
     "support",
+    "LineageMatch",
+    "LineageResult",
+    "match_lineage",
+    "NodeState",
+    "TaxonomyThresholds",
+    "classify_nodes",
 ]

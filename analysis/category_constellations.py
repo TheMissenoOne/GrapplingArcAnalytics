@@ -216,7 +216,7 @@ def division_constellations(
     def build_graph(sample_units: list[str]) -> nx.DiGraph:
         return _build_graph_from_units(sample_units, lookup)
 
-    _, mean_jaccard = bootstrap_jaccard(
+    _, mean_jaccard, p10_jaccard = bootstrap_jaccard(
         units, build_graph, baseline=detection, n_resamples=n_resamples,
         resolution=resolution, detect_seed=seed, rng_seed=seed,
     )
@@ -225,7 +225,9 @@ def division_constellations(
     )
     stability_by_key = {
         frozenset(r.members): r
-        for r in classify_stability(detection, mean_jaccard, driver_by_key, athlete_nodes)
+        for r in classify_stability(
+            detection, mean_jaccard, driver_by_key, athlete_nodes, p10_by_key=p10_jaccard,
+        )
     }
 
     category_total = _total_weight(category_graph)
@@ -253,13 +255,14 @@ def division_constellations(
         passa_gate, texto = gate_text(c.hub, st.classification, st.support_athletes, driver)
         rows.append({
             "members": list(c.members), "hub": c.hub, "internal_edges": c.internal_edges,
-            "support": c.support,
+            "support": c.support, "fingerprint": c.fingerprint,
             "prevalencia_categoria": round(prevalencia_categoria, 4),
             "prevalencia_baseline": round(prevalencia_baseline, 4) if prevalencia_baseline is not None else None,
             "log2_lift": log2_lift, "inedito_no_baseline": inedito_no_baseline,
             "nos_centrais": _central_nodes(category_graph, c.members),
             "transicoes_caracteristicas": _characteristic_transitions(category_graph, c.members),
-            "mean_jaccard": st.mean_jaccard, "classification": st.classification.value,
+            "mean_jaccard": st.mean_jaccard, "p10_jaccard": st.p10_jaccard,
+            "classification": st.classification.value,
             "driver_athlete": driver, "support_athletes": st.support_athletes,
             "passa_gate": passa_gate, "texto": texto,
         })

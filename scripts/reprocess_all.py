@@ -113,6 +113,14 @@ DATASETS: list[tuple[str, str | None, str]] = [
     ("scripts.dumps.wwfi1_data", "Women Who Fight Invitational", "WWFI1"),
     ("scripts.dumps.wwfi2_data", "Women Who Fight Invitational 2", "WWFI2"),
     ("scripts.dumps.yara_soares_data", None, "YaraSoares"),
+    # ADCC 2026 women's scouting batch — one module per event tag, since ``run_dump`` tags
+    # every bout with the DATASETS tag and ignores each bout's own ``event`` field.
+    ("scripts.dumps.polaris36_women_data", "Polaris 36", "Polaris36-Women"),
+    ("scripts.dumps.polaris37_crevar_data", "Polaris 37", "Polaris37-Crevar"),
+    ("scripts.dumps.polaris38_data", "Polaris 38", "Polaris38"),
+    ("scripts.dumps.wno25_data", "WNO 25", "WNO25"),
+    ("scripts.dumps.wno27_data", "WNO 27", "WNO27"),
+    ("scripts.dumps.pan_nogi2025_data", "Pan No-Gi 2025", "PanNoGi2025"),
 ]
 
 

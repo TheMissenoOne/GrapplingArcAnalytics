@@ -55,6 +55,19 @@ def network_from_sequences(
         — only when both actors are known (unknown attribution is left neutral, never charged).
     Node attrs: ``type``, ``occ`` (total appearances), ``reward``/``risk``, ``reward_risk``.
 
+    Sequence boundary (doc 04, ``docs/rating_v2/``): every edge is built from indices
+    inside ONE element of ``sequences`` — the outer ``for seq in sequences`` loop resets
+    ``events``/``by_actor`` per bout, so no edge ever spans two different sequences.
+    Locked by ``tests/test_transitions.py::test_no_cross_sequence_edge``.
+
+    Edge metadata, "where available" (doc 04): when a fighter's own two consecutive
+    actions have the OPPONENT'S event(s) recorded between them, those labels are the
+    reaction/opponent context the doc asks to preserve — stashed on the edge as
+    ``reactions`` (``{opponent_label: raw occurrence count}``, unweighted, additive
+    only — never touches ``weight``/``ok``/topology). Omitted on edges that never had
+    an in-between opponent event, so an edge dict with no ``reactions`` key means
+    "never observed", not "checked and empty".
+
     ``weight_fn`` (optional): per-event multiplier keyed by the raw ``actor`` id — every
     count this function produces (node ``occ``/``ok_count``/``denom``/``reward``/``risk``,
     edge ``weight``/``ok``) is attributed to the actor who owns the *appearance* being
@@ -70,6 +83,7 @@ def network_from_sequences(
     risk: Counter[str] = Counter()
     ok_count: Counter[str] = Counter()  # successful appearances (PtV terminal rates)
     node_type: dict[str, str] = {}
+    reaction_counts: dict[tuple[str, str], Counter[str]] = defaultdict(Counter)
 
     for seq in sequences:
         events = _events(seq)
@@ -102,6 +116,9 @@ def network_from_sequences(
                         g[a][b]["ok"] += b_ok
                     else:
                         g.add_edge(a, b, weight=edge_wt, ok=b_ok)
+                    between = events[idxs[k] + 1 : idxs[k + 1]]
+                    if between:
+                        reaction_counts[(a, b)].update(e2["label"] for e2 in between)
 
         for i, e in enumerate(events):
             if i + 1 >= n:
@@ -128,6 +145,9 @@ def network_from_sequences(
         g.nodes[label]["ok_count"] = ok_count[label]
         d = denom[label]
         g.nodes[label]["reward_risk"] = round((reward[label] - risk[label]) / d, 3) if d else 0.0
+    for (a, b), counter in reaction_counts.items():
+        if g.has_edge(a, b):
+            g[a][b]["reactions"] = dict(sorted(counter.items(), key=lambda kv: (-kv[1], kv[0])))
     # distance = inverse weight, for shortest-path-based betweenness
     for _, _, ed in g.edges(data=True):
         ed["dist"] = 1.0 / ed["weight"]

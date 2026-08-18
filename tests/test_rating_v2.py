@@ -523,13 +523,279 @@ def test_verify_determinism_compare_states_flags_divergence_and_coverage_gap() -
 
 
 def test_persist_module_exposes_no_run_id_free_read_helper() -> None:
-    """ADR-02: any read of athlete_rating_states_v2 needs an explicit run_id. Guard
-    against a later helper that quietly returns "the current state" without one."""
+    """ADR-02: any read of *_v2 state needs an explicit run_id. Guard against a later
+    helper that quietly returns "the current state" without one. Every public function
+    in this module is a write path that takes ``run_id`` explicitly; the underscore-
+    prefixed adapter stub is excluded — it builds rows, it doesn't read state."""
     from analysis.rating_v2 import persist
 
-    public_funcs = [
+    public_funcs = sorted(
         name
         for name, obj in vars(persist).items()
-        if inspect.isfunction(obj) and obj.__module__ == persist.__name__
+        if inspect.isfunction(obj)
+        and obj.__module__ == persist.__name__
+        and not name.startswith("_")
+    )
+    assert public_funcs == [
+        "build_constellation_rows_from_detection",
+        "persist_constellations",
+        "persist_node_states",
+        "persist_replay_result",
     ]
-    assert public_funcs == ["persist_replay_result"]
+
+
+def test_persist_node_states_writes_one_row_per_athlete_node(db_session_factory) -> None:
+    from analysis.rating_v2.persist import persist_node_states, persist_replay_result
+    from db.models import AthleteNodeRatingStateV2
+
+    session = db_session_factory()
+    run_id = persist_replay_result(session, EngineConfig(), _replay_result())
+    node_states = [
+        {
+            "athlete_id": ATHLETE_A,
+            "node_key": "closed_guard",
+            "rating": 1750.0,
+            "deviation": 300.0,
+            "volatility": 0.06,
+            "bouts_observed": 3,
+            "occurrences": 7,
+        },
+        {
+            "athlete_id": ATHLETE_A,
+            "node_key": "armbar",
+            "rating": 1720.0,
+            "deviation": 310.0,
+            "volatility": 0.06,
+            "bouts_observed": 1,
+            "occurrences": 1,
+        },
+    ]
+    persist_node_states(session, run_id, node_states)
+    session.commit()
+
+    rows = (
+        session.query(AthleteNodeRatingStateV2)
+        .filter(AthleteNodeRatingStateV2.run_id == run_id)
+        .all()
+    )
+    assert {r.node_key for r in rows} == {"closed_guard", "armbar"}
+    closed_guard = next(r for r in rows if r.node_key == "closed_guard")
+    # bouts_observed != occurrences preserved, not collapsed into one count.
+    assert closed_guard.bouts_observed == 3
+    assert closed_guard.occurrences == 7
+    assert closed_guard.bouts_observed != closed_guard.occurrences
+
+
+def test_persist_constellations_writes_summary_and_members_under_same_run(
+    db_session_factory,
+) -> None:
+    from analysis.rating_v2.persist import persist_constellations, persist_replay_result
+    from db.models import AthleteConstellationMemberV2, AthleteConstellationV2
+
+    session = db_session_factory()
+    run_id = persist_replay_result(session, EngineConfig(), _replay_result())
+    constellations = [
+        {
+            "athlete_id": ATHLETE_A,
+            "fingerprint": "fp-1",
+            "hub_node_key": "closed_guard",
+            "member_count": 2,
+            "internal_edge_count": 1,
+            "support_bouts": 3,
+            "modularity": 0.42,
+            "stability_mean": 0.8,
+            "stability_p10": 0.6,
+            "members": [
+                {
+                    "node_key": "closed_guard",
+                    "pagerank": 0.6,
+                    "weighted_pagerank": 0.55,
+                    "degree": 2,
+                },
+                {
+                    "node_key": "armbar",
+                    "pagerank": 0.4,
+                    "weighted_pagerank": 0.45,
+                    "degree": 1,
+                },
+            ],
+        },
+    ]
+    persist_constellations(session, run_id, constellations)
+    session.commit()
+
+    summaries = (
+        session.query(AthleteConstellationV2)
+        .filter(AthleteConstellationV2.run_id == run_id)
+        .all()
+    )
+    assert len(summaries) == 1
+    assert summaries[0].fingerprint == "fp-1"
+    assert summaries[0].stability_p10 == 0.6
+
+    members = (
+        session.query(AthleteConstellationMemberV2)
+        .filter(AthleteConstellationMemberV2.run_id == run_id)
+        .all()
+    )
+    assert {m.node_key for m in members} == {"closed_guard", "armbar"}
+    assert all(m.fingerprint == "fp-1" for m in members)
+
+
+def test_persist_node_states_two_runs_do_not_collide(db_session_factory) -> None:
+    from analysis.rating_v2.persist import persist_node_states, persist_replay_result
+    from db.models import AthleteNodeRatingStateV2
+
+    session = db_session_factory()
+    run_id_1 = persist_replay_result(session, EngineConfig(), _replay_result())
+    run_id_2 = persist_replay_result(session, EngineConfig(), _replay_result())
+
+    node_state = {
+        "athlete_id": ATHLETE_A,
+        "node_key": "closed_guard",
+        "rating": 1750.0,
+        "deviation": 300.0,
+        "volatility": 0.06,
+        "bouts_observed": 1,
+        "occurrences": 1,
+    }
+    persist_node_states(session, run_id_1, [node_state])
+    persist_node_states(session, run_id_2, [{**node_state, "rating": 1690.0}])
+    session.commit()
+
+    run_1_rows = (
+        session.query(AthleteNodeRatingStateV2)
+        .filter(AthleteNodeRatingStateV2.run_id == run_id_1)
+        .all()
+    )
+    run_2_rows = (
+        session.query(AthleteNodeRatingStateV2)
+        .filter(AthleteNodeRatingStateV2.run_id == run_id_2)
+        .all()
+    )
+    assert len(run_1_rows) == 1
+    assert len(run_2_rows) == 1
+    assert run_1_rows[0].rating == 1750.0
+    assert run_2_rows[0].rating == 1690.0
+
+
+def test_persist_replay_result_writes_node_states_and_constellations_when_present(
+    db_session_factory,
+) -> None:
+    """The same-transaction path through persist_replay_result itself (not calling the
+    two helpers directly), so a caller that shapes result["node_states"]/
+    result["constellations"] gets it all written under the one run it returns."""
+    from analysis.rating_v2.persist import persist_replay_result
+    from db.models import AthleteConstellationV2, AthleteNodeRatingStateV2
+
+    session = db_session_factory()
+    result = _replay_result()
+    result["node_states"] = [
+        {
+            "athlete_id": ATHLETE_A,
+            "node_key": "closed_guard",
+            "rating": 1750.0,
+            "deviation": 300.0,
+            "volatility": 0.06,
+            "bouts_observed": 2,
+            "occurrences": 4,
+        }
+    ]
+    result["constellations"] = [
+        {
+            "athlete_id": ATHLETE_A,
+            "fingerprint": "fp-2",
+            "hub_node_key": "closed_guard",
+            "member_count": 1,
+            "internal_edge_count": 0,
+            "modularity": 0.0,
+            "stability_mean": 0.5,
+            "stability_p10": 0.3,
+            "members": [
+                {"node_key": "closed_guard", "pagerank": 1.0, "weighted_pagerank": 1.0, "degree": 0}
+            ],
+        }
+    ]
+
+    run_id = persist_replay_result(session, EngineConfig(), result)
+
+    node_rows = (
+        session.query(AthleteNodeRatingStateV2)
+        .filter(AthleteNodeRatingStateV2.run_id == run_id)
+        .all()
+    )
+    constellation_rows = (
+        session.query(AthleteConstellationV2)
+        .filter(AthleteConstellationV2.run_id == run_id)
+        .all()
+    )
+    assert len(node_rows) == 1
+    assert len(constellation_rows) == 1
+
+
+def test_build_constellation_rows_from_detection_round_trips_through_persist(
+    db_session_factory,
+) -> None:
+    """Real detect() + bootstrap_jaccard()/classify_stability() output, fed through the
+    adapter, must satisfy persist_constellations's own shape — same in-memory SQLite
+    session the rest of this file uses, not a mock."""
+    import networkx as nx
+
+    from analysis.constellations.detect import detect
+    from analysis.constellations.stability import bootstrap_jaccard, classify_stability
+    from analysis.rating_v2.persist import (
+        build_constellation_rows_from_detection,
+        persist_constellations,
+        persist_replay_result,
+    )
+    from db.models import AthleteConstellationMemberV2, AthleteConstellationV2
+
+    # Two disjoint two-node cliques — clean, deterministic Louvain split.
+    g = nx.DiGraph()
+    g.add_edge("closed_guard", "armbar", weight=5)
+    g.add_edge("armbar", "closed_guard", weight=5)
+    g.add_edge("mount", "back_take", weight=3)
+    g.add_edge("back_take", "mount", weight=3)
+
+    def build_graph(_units: list[str]) -> nx.DiGraph:
+        return g
+
+    detection = detect(g, seed=42)
+    assert len(detection.constellations) == 2  # sanity: the split we set up
+
+    baseline, mean_by_key, p10_by_key = bootstrap_jaccard(
+        units=["u1"], build_graph=build_graph, baseline=detection, n_resamples=5,
+    )
+    stability_rows = classify_stability(
+        baseline, mean_by_key, driver_by_key={}, p10_by_key=p10_by_key,
+    )
+
+    rows = build_constellation_rows_from_detection(ATHLETE_A, g, detection, stability_rows)
+    assert len(rows) == 2
+    assert rows == sorted(rows, key=lambda r: r["fingerprint"])  # deterministic ordering
+
+    session = db_session_factory()
+    run_id = persist_replay_result(session, EngineConfig(), _replay_result())
+    persist_constellations(session, run_id, rows)
+    session.commit()
+
+    summaries = (
+        session.query(AthleteConstellationV2)
+        .filter(AthleteConstellationV2.run_id == run_id)
+        .all()
+    )
+    assert {s.fingerprint for s in summaries} == {c.fingerprint for c in detection.constellations}
+    for s in summaries:
+        assert s.stability_mean == 1.0  # identical resamples of the same fixed graph
+        assert s.stability_p10 == 1.0
+        assert s.support_bouts == 0  # no source-bout provenance yet — documented default
+
+    members = (
+        session.query(AthleteConstellationMemberV2)
+        .filter(AthleteConstellationMemberV2.run_id == run_id)
+        .all()
+    )
+    assert {m.node_key for m in members} == {"closed_guard", "armbar", "mount", "back_take"}
+    for m in members:
+        assert m.degree == 2  # directed in+out degree, one mutual neighbour each way
+        assert m.pagerank > 0

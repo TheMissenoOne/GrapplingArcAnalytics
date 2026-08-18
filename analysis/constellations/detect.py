@@ -12,9 +12,26 @@ measured case for switching to Leiden — not a guess.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+import hashlib
+from dataclasses import dataclass, field
 
 import networkx as nx
+
+
+def constellation_fingerprint(members: list[str]) -> str:
+    """Deterministic id for a member set — doc 04: ``fingerprint =
+    hash(sorted(member_keys))``. Uses ``hashlib.sha256`` rather than builtin
+    ``hash()``: Python randomizes ``hash()`` of strings per process
+    (``PYTHONHASHSEED``), so it is NOT stable across runs — the one property a
+    fingerprint needs. Sorting first makes it order-independent.
+
+    NOT eternal identity. One member joining or leaving changes it completely — it
+    is a snapshot key, not a primary key for "the same constellation over time".
+    That question is ``lineage.match_lineage`` (Jaccard-matched, stored separately,
+    per doc 04's explicit warning not to conflate the two).
+    """
+    joined = "\x1f".join(sorted(members))
+    return hashlib.sha256(joined.encode("utf-8")).hexdigest()[:16]
 
 
 @dataclass
@@ -25,6 +42,10 @@ class Constellation:
     hub: str                 # highest weighted-degree member, ties broken by label
     internal_edges: int
     support: float            # sum of internal edge weight
+    fingerprint: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.fingerprint = constellation_fingerprint(self.members)
 
 
 @dataclass

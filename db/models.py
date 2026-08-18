@@ -723,3 +723,99 @@ class AthleteRatingStateV2(Base):
     bout_count: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
     last_active_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AthleteNodeRatingStateV2(Base):
+    """One athlete's Glicko-2 state for one technique node at the end of one run —
+    alembic 0036. ``node_key`` is the canonical identity (``analysis/names.py:
+    _normalize_name``, == ``technique_nodes.node_key``), never a display label — same
+    char-for-char contract the App's ``normalizeLabel()`` depends on elsewhere in this
+    schema, even though this table isn't App-read today. No DB FK to
+    ``technique_nodes.node_key``, matching the existing ``GraphEdge.source_key``/
+    ``target_key`` convention (commented, not enforced).
+
+    ``bouts_observed`` and ``occurrences`` are deliberately separate: a node can fire more
+    than once within a single bout's event sequence. ``constellation_fingerprint`` is
+    nullable and carries no FK — the constellation layer that produces it is a parallel,
+    still-landing change; wiring the real value is a follow-up, not invented here.
+    ``first_seen_at``/``last_seen_at`` stay nullable for the same reason
+    ``AthleteRatingStateV2.last_active_at`` does: ``matches`` has no per-bout date yet
+    (ADR-04 debt, only ``year``)."""
+
+    __tablename__ = "athlete_node_rating_states_v2"
+    __table_args__ = (
+        Index("ix_athlete_node_rating_states_v2_athlete_id", "athlete_id"),
+        Index("ix_athlete_node_rating_states_v2_node_key", "node_key"),
+    )
+
+    run_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("rating_engine_runs.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    athlete_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("athletes.id", ondelete="CASCADE"), primary_key=True
+    )
+    node_key: Mapped[str] = mapped_column(Text, nullable=False, primary_key=True)
+    rating: Mapped[float] = mapped_column(Float, nullable=False)
+    rating_deviation: Mapped[float] = mapped_column(Float, nullable=False)
+    volatility: Mapped[float] = mapped_column(Float, nullable=False)
+    bouts_observed: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    occurrences: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    first_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    constellation_fingerprint: Mapped[str | None] = mapped_column(Text)
+
+
+class AthleteConstellationV2(Base):
+    """One detected, guaranteed-connected constellation (``analysis/constellations/
+    detect.py``) plus its bootstrap-stability summary (``analysis/constellations/
+    stability.py``), for one athlete at the end of one run — alembic 0036.
+    ``fingerprint`` is opaque to this model; deriving a stable identifier for "this same
+    cluster of nodes" across runs is the constellation layer's decision."""
+
+    __tablename__ = "athlete_constellations_v2"
+    __table_args__ = (Index("ix_athlete_constellations_v2_athlete_id", "athlete_id"),)
+
+    run_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("rating_engine_runs.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    athlete_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("athletes.id", ondelete="CASCADE"), primary_key=True
+    )
+    fingerprint: Mapped[str] = mapped_column(Text, nullable=False, primary_key=True)
+    hub_node_key: Mapped[str] = mapped_column(Text, nullable=False)
+    member_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    internal_edge_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    support_bouts: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    modularity: Mapped[float] = mapped_column(Float, nullable=False)
+    stability_mean: Mapped[float] = mapped_column(Float, nullable=False)
+    stability_p10: Mapped[float] = mapped_column(Float, nullable=False)
+    summary_json: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, server_default="{}")
+
+
+class AthleteConstellationMemberV2(Base):
+    """One member node of one constellation, with its in-constellation PageRank —
+    alembic 0036. No DB FK to ``AthleteConstellationV2``: this schema's existing
+    convention (see ``GraphEdge.source_key``/``target_key``) is application-enforced
+    referential integrity for cross-table node/composite identity, not a Postgres
+    constraint — a composite FK here would be a pattern found nowhere else in this file."""
+
+    __tablename__ = "athlete_constellation_members_v2"
+    __table_args__ = (Index("ix_athlete_constellation_members_v2_node_key", "node_key"),)
+
+    run_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("rating_engine_runs.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    athlete_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("athletes.id", ondelete="CASCADE"), primary_key=True
+    )
+    fingerprint: Mapped[str] = mapped_column(Text, nullable=False, primary_key=True)
+    node_key: Mapped[str] = mapped_column(Text, nullable=False, primary_key=True)
+    pagerank: Mapped[float] = mapped_column(Float, nullable=False)
+    weighted_pagerank: Mapped[float] = mapped_column(Float, nullable=False)
+    degree: Mapped[int] = mapped_column(Integer, nullable=False)

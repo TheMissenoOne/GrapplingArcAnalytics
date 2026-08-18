@@ -7,7 +7,7 @@ from unittest.mock import patch
 import networkx as nx
 
 from analysis.constellations.compare import compare_partitions, jaccard
-from analysis.constellations.detect import detect
+from analysis.constellations.detect import constellation_fingerprint, detect
 from analysis.constellations.stability import (
     bootstrap_jaccard,
     classify_stability,
@@ -92,6 +92,31 @@ def test_disconnected_community_is_broken_and_counted() -> None:
     assert {"B1", "B2", "B3"} in member_sets
 
 
+def test_fingerprint_stable_under_member_reorder() -> None:
+    assert constellation_fingerprint(["A1", "A2", "A3"]) == constellation_fingerprint(["A3", "A1", "A2"])
+
+
+def test_fingerprint_stable_across_reexecution() -> None:
+    # Two independent calls, same process, same input -> same fingerprint (the
+    # determinism a hash(sorted(...)) built on Python's randomized string hash()
+    # could NOT give across separate process runs; sha256 does).
+    assert constellation_fingerprint(["closed guard", "armbar"]) == constellation_fingerprint(
+        ["closed guard", "armbar"]
+    )
+
+
+def test_fingerprint_changes_when_membership_changes() -> None:
+    fp_before = constellation_fingerprint(["A1", "A2", "A3"])
+    fp_after = constellation_fingerprint(["A1", "A2", "A3", "A4"])
+    assert fp_before != fp_after
+
+
+def test_detect_attaches_fingerprint_to_every_constellation() -> None:
+    result = detect(_two_cliques())
+    for c in result.constellations:
+        assert c.fingerprint == constellation_fingerprint(c.members)
+
+
 def test_jaccard() -> None:
     assert jaccard({"a", "b"}, {"a", "b"}) == 1.0
     assert jaccard({"a"}, {"b"}) == 0.0
@@ -141,11 +166,36 @@ def _build_graph(units: list[str]) -> nx.DiGraph:
 def test_bootstrap_jaccard_identical_topology_is_stable() -> None:
     units = _units_by_athlete()
     all_units = [u for us in units.values() for u in us]
-    baseline, mean_jaccard = bootstrap_jaccard(all_units, _build_graph, n_resamples=20)
+    baseline, mean_jaccard, p10_jaccard = bootstrap_jaccard(all_units, _build_graph, n_resamples=20)
     assert baseline.constellations
     # every resample has the same two-clique topology (every unit adds the same edges
-    # for its clique) so agreement should be very high, near 1.0.
+    # for its clique) so agreement should be very high, near 1.0 — mean AND p10.
     assert all(v > 0.8 for v in mean_jaccard.values())
+    assert all(v > 0.8 for v in p10_jaccard.values())
+
+
+def test_bootstrap_jaccard_p10_below_mean_for_fragile_corpus() -> None:
+    # A community that survives most resamples intact but vanishes in a worst-case
+    # slice (support concentrated in a couple of units) should show p10 well below
+    # its mean — that's the whole reason to track p10 separately (doc 04).
+    def fragile_graph(units: list[str]) -> nx.DiGraph:
+        g = nx.DiGraph()
+        # A1-A2-A3 clique only exists if "trigger" unit is present in the sample.
+        if "trigger" in units:
+            for a, b in [("A1", "A2"), ("A2", "A3"), ("A3", "A1")]:
+                g.add_edge(a, b, weight=5)
+        else:
+            g.add_nodes_from(["A1", "A2", "A3"])
+        return g
+
+    units = ["trigger"] + [f"filler{i}" for i in range(9)]
+    baseline, mean_jaccard, p10_jaccard = bootstrap_jaccard(units, fragile_graph, n_resamples=100)
+    key = frozenset({"A1", "A2", "A3"})
+    assert key in mean_jaccard
+    # "trigger" survives most (not all) bootstrap resamples with replacement from 10
+    # units, so mean stays high while the worst 10% of resamples (missing "trigger")
+    # drag p10 down toward 0 — the fragility a mean alone would hide.
+    assert p10_jaccard[key] < mean_jaccard[key]
 
 
 def test_leave_one_out_flags_athlete_driven_constellation() -> None:
@@ -162,11 +212,23 @@ def test_leave_one_out_flags_athlete_driven_constellation() -> None:
 def test_classify_stability_stable_and_athlete_driven() -> None:
     units = _units_by_athlete()
     all_units = [u for us in units.values() for u in us]
-    baseline, mean_jaccard = bootstrap_jaccard(all_units, _build_graph, n_resamples=10)
+    baseline, mean_jaccard, p10_jaccard = bootstrap_jaccard(all_units, _build_graph, n_resamples=10)
     a_key = frozenset({"A1", "A2", "A3"})
     b_key = frozenset({"B1", "B2", "B3"})
     driver = {a_key: "gordon", b_key: None}
-    rows = classify_stability(baseline, mean_jaccard, driver)
+    rows = classify_stability(baseline, mean_jaccard, driver, p10_by_key=p10_jaccard)
     by_key = {frozenset(r.members): r for r in rows}
     assert by_key[a_key].classification.value == "ATHLETE_DRIVEN"
     assert by_key[b_key].classification.value == "STABLE"
+
+
+def test_classify_stability_downgrades_high_mean_low_p10() -> None:
+    # doc 04's own example: mean 0.7, p10 0.2 is fragile and must NOT read as STABLE
+    # even though the mean alone clears the default stable_threshold.
+    baseline_result = detect(_two_cliques())
+    key = frozenset({"A1", "A2", "A3"})
+    mean_jaccard = {key: 0.7}
+    p10_jaccard = {key: 0.2}
+    rows = classify_stability(baseline_result, mean_jaccard, {key: None}, p10_by_key=p10_jaccard)
+    assert rows[0].classification.value == "PARTIALLY_STABLE"
+    assert rows[0].p10_jaccard == 0.2

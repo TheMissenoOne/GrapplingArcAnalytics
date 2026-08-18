@@ -78,6 +78,38 @@ def test_weight_fn_none_is_byte_identical_to_unweighted() -> None:
     assert list(g_default.edges(data=True)) == list(g_explicit_none.edges(data=True))
 
 
+def test_no_cross_sequence_edge() -> None:
+    # Doc 04: "never connect across independent sequenceId boundaries." Fighter A's
+    # last action in bout 1 is BC; her first action in bout 2 is CG. If the builder
+    # ever treated the two bouts as one continuous stream, A1->A2 would spuriously
+    # appear as an edge from bout 1 into bout 2.
+    bout_1 = [_e(BC, "control", "A"), _e(RNC, "submission", "A", True)]
+    bout_2 = [_e(CG, "guard", "A"), _e(TRI, "submission", "A", True)]
+    g = network_from_sequences([bout_1, bout_2])
+    assert not g.has_edge(BC, CG)
+    assert not g.has_edge(RNC, CG)
+    # within-bout edges still there
+    assert g.has_edge(BC, RNC)
+    assert g.has_edge(CG, TRI)
+
+
+def test_reaction_metadata_preserved_between_own_actions() -> None:
+    # A's own consecutive actions (BC -> RNC) with B's "sprawls" event recorded
+    # between them: that's the opponent-reaction context doc 04 asks to preserve.
+    seq = [_e(BC, "control", "A"), _e("Sprawl", "escape", "B"), _e(RNC, "submission", "A", True)]
+    g = network_from_sequences([seq])
+    assert g[BC][RNC]["reactions"] == {"Sprawl": 1}
+    assert g[BC][RNC]["weight"] == 1  # metadata addition doesn't touch weight
+    assert g[BC][RNC]["ok"] == 1
+
+
+def test_reaction_metadata_absent_when_no_gap() -> None:
+    # Same actor, back-to-back with nothing recorded in between -> no "reactions" key
+    # at all (absent means "never observed", not "checked, found nothing").
+    g = network_from_sequences(_sequences())
+    assert "reactions" not in g[BC][RNC]
+
+
 def test_weight_fn_scales_node_and_edge_counts_by_actor() -> None:
     # actor "A" weighted 0.5, actor "B" weighted 1.0 — confidence-weighting scenario.
     weights = {"A": 0.5, "B": 1.0}
