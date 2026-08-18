@@ -1,4 +1,11 @@
-"""Build per-athlete edge-centric graphs from exported SessionPayload dicts."""
+"""Build per-athlete edge-centric graphs from exported SessionPayload dicts.
+
+PROVENANCE: session-shaped graphs are PRIVATE data. They may serve only the
+owning user (realtime priors / local store) — never persist them into public
+athlete graphs (``graphs.owner_kind='athlete'``). Public athlete graphs are
+built exclusively from public matches via ``repository.replay_and_persist_athlete``
+(which shapes matches into this same session form for ELO replay).
+"""
 
 from __future__ import annotations
 
