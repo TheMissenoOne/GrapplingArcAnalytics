@@ -91,6 +91,13 @@ depends_on = None
 # Derive one row per (graph, endpoint) from the edges that already exist. `label` and `type`
 # come from the curated library when the key is known there; when it is not, the key is its own
 # label, which is exactly what the App's own defensive branch already does.
+#
+# Deliberately UNFILTERED. An earlier draft skipped empty keys, which is worse than useless: an
+# excluded endpoint is not a row that goes away, it is a row the new foreign key then rejects,
+# so the filter turns a piece of odd data into a migration that cannot apply. Production has
+# none today (verified: 0 empty, 0 null across 6,654 edges) and neither writer can produce one,
+# but a backfill whose completeness depends on that staying true is a trap. Giving an empty key
+# its own inert `graph_nodes` row costs nothing and always upgrades.
 _BACKFILL = """
 insert into public.graph_nodes (graph_id, node_key, label, type, node_type, canonical_node_key)
 select
@@ -106,7 +113,6 @@ from (
     select graph_id, target_key from public.graph_edges
 ) e
 left join public.technique_nodes tn on tn.node_key = e.node_key
-where e.node_key <> ''
 on conflict (graph_id, node_key) do nothing;
 """
 
@@ -161,7 +167,12 @@ begin
     on conflict (owner_kind, owner_id) do update
         set user_elo = excluded.user_elo,
             schema_version = excluded.schema_version,
-            synced_at = excluded.synced_at
+            synced_at = excluded.synced_at,
+            -- `graphs.updated_at` is a SQLAlchemy `onupdate`, which is applied by the ORM and
+            -- not by the database. Plain SQL like this would leave it at the row's original
+            -- value while `synced_at` advanced, and anything ordering by it would see a graph
+            -- that had just been rewritten as the stalest one.
+            updated_at = now()
     returning id into v_graph_id;
 
     -- Nodes first: the edge constraints point at them.
