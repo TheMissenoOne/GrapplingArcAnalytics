@@ -453,3 +453,50 @@ incerteza é justamente o ponto.
 `normalizeLabel`/`_normalize_name` já fazem — dois cortes divergentes fariam "alta confiança"
 significar coisas diferentes no site e no App. A migração de consumidores (dossiê → `GA_ELO` →
 export do App) passa a ter contra o que implementar.
+
+---
+
+## ADR-15 — O run V2 desempata a disciplina que a tag de evento não sabe dizer
+
+**Contexto.** A migração dos consumidores (wave 10) expôs que **11 atletas de grappling estavam
+classificados como MMA** — Kade Ruotolo, Craig Jones, Nicholas Meregali, Leandro Lo, Tye Ruotolo
+entre eles. Não era defeito da migração; ela só tornou visível.
+
+**A causa.** `analysis/discipline.py:match_discipline` mapeia evento `None` para `mma`, de quando
+dump de carreira era dump de carreira de MMA. Das 124 lutas finais sem tag, umas são a carreira do
+Georges St-Pierre e do Khabib e outras são a carreira de **grappling** do Craig Jones (21) e do
+Leandro Lo (22). **A tag não carrega informação de disciplina nenhuma.**
+
+**Por que não basta inverter o padrão.** Medido: trocar `None → grappling` moveria **76 lutadores
+puros de MMA** para o board de grappling — exatamente a falha que o ADR-05 existe para impedir.
+
+**Escolha.** Desempatar com informação que já existia: **um atleta com estado no run V2 fixado é
+grappler**, porque o corpus V2 é grappling-only por construção (mapa de eventos próprio, ADR-10).
+A ausência protege o board — St-Pierre, Khabib, Oliveira e Usman não têm linha nenhuma no run.
+Uma tag explícita `UFC*`/`NCAA*` **vence** o override: evidência positiva ganha de inferência tirada
+de ausência.
+
+**Medido:** 635 atletas já eram grappling, 11 estavam errados, **zero** wrestlers são tocados.
+
+**Consequência.** Não era só problema de leaderboard. `analysis/style_profile.py` escolhe o **pool de
+percentil** do atleta por esse mesmo mapa, então um grappler mal classificado caía no pool de MMA,
+cuja fonte de rating é um CSV do UFC onde ele não aparece — e o **dossiê dele perdia rank e
+percentil por inteiro**. Um mapa de disciplina errado é silencioso: não quebra, só apaga.
+
+---
+
+## Adendo ao ADR-14 — o nível `alta confiança` está praticamente vazio
+
+Medido no run `2645cce4`, sobre 646 atletas: **RD ≤ 100 classifica exatamente 1 atleta** (Gordon
+Ryan, RD 59). RD ≤ 150 pega 34; RD ≤ 200 (o portão de publicação) pega 222. O RD médio do run é 205.
+
+O corte de 100 foi herdado como "metade do portão", não medido. Ele está honesto — só diz que quase
+ninguém neste corpus tem registro denso o bastante — mas um rótulo que se aplica a uma pessoa não
+serve de vocabulário de produto. Recalibrar quando o corpus crescer; até lá, praticamente tudo que o
+site publica é `confiança média`.
+
+**E o RD não substitui contagem de lutas.** Ele confunde "poucas lutas" com "muitas lutas, inativo há
+tempo": com RD ≤ 200 sozinho, o board publicado sentava atletas de 3, 4 e 4 lutas em #5-#8 enquanto o
+#1 tinha 114. Daí `MIN_BOARD_BOUTS` em `export/site_data.py` — um piso de registro, editorial e
+separado do RD, que vale **só para ranking publicado**: nunca para página de dossiê, nunca para
+denominador de percentil, nunca para peso de análise.
