@@ -1,0 +1,208 @@
+{
+ "gerado_em": "2026-08-17T21:14:06.065029",
+ "motivo": "revisao_humana: 7 grafias + mesclagem Musumeci",
+ "athletes": [
+  {
+   "id": "d0582b42-0a0a-4b52-a1c0-b818638e0770",
+   "name": "Musumeci",
+   "elo": 1000.0
+  },
+  {
+   "id": "40a5bac8-060b-416d-89f7-87de5c0ca5c1",
+   "name": "Mikey Musumeci",
+   "elo": 800.0
+  }
+ ],
+ "matches": [
+  {
+   "id": "47663b3a-881e-4b5f-8eea-1d92ba8dd1df",
+   "a": "b9934062-125d-4f60-ac88-de3315735bfe",
+   "b": "6f713810-6d47-485d-85fa-23c8abe73826",
+   "winner": null,
+   "event": "Team BJJ Stars vs Polaris",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "045b3194-52c5-41d8-b5df-b0e5d052e38f",
+   "a": "b3337f4d-8114-4b18-89ca-e1cf3baf9ff3",
+   "b": "c13d5804-fada-4f84-9041-d38a33e8fe79",
+   "winner": "c13d5804-fada-4f84-9041-d38a33e8fe79",
+   "event": "PGF World Season 9",
+   "year": 2026,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "a473e8be-4636-4761-bb92-0fd97fb880e7",
+   "a": "6137e629-97f8-416f-abae-72b29083d30d",
+   "b": "ec1620df-47c9-4be8-8893-dea8879b444d",
+   "winner": "6137e629-97f8-416f-abae-72b29083d30d",
+   "event": "EBI 14",
+   "year": 2017,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "e4eae932-34b3-4d88-8143-68d816576b51",
+   "a": "39b9efe2-4884-47de-9de7-23c0b62640b8",
+   "b": "ff8f8171-2f03-434f-b74d-d8c5a09e193a",
+   "winner": null,
+   "event": "WNO 30",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "3cf830cd-52b7-44c6-b55d-897995e64590",
+   "a": "70932686-74bc-4d7b-b74b-56cf0110af3a",
+   "b": "8bee5aae-8af1-4d94-8997-38cca14f7464",
+   "winner": null,
+   "event": "PGF World 2026",
+   "year": 2026,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "ab4077f3-d74e-4298-a335-c5354140ef86",
+   "a": "95498ae5-ec7e-44e2-9dbc-dd8905c85127",
+   "b": "ecc51738-531d-41e0-a35d-4fc4fe8adfac",
+   "winner": null,
+   "event": "PGF World 2026",
+   "year": 2026,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "614ff037-08dd-4178-a236-ce249b4a3503",
+   "a": "a2093bd4-198f-41cd-8894-e0c6e4d02970",
+   "b": "c6b1128b-1b9d-4ae5-9e8a-9155e628556a",
+   "winner": null,
+   "event": "Team BJJ Stars vs Polaris",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "8db6610d-4fc1-49c2-9368-db6e5bc3d526",
+   "a": "a2093bd4-198f-41cd-8894-e0c6e4d02970",
+   "b": "b452c910-1d56-4fcb-afe4-cd1ff1c7256c",
+   "winner": null,
+   "event": "Team BJJ Stars vs Polaris",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "0f1596f0-5687-479f-abeb-dc5382899b68",
+   "a": "f48a59c5-f4e6-4ad2-b71a-1fe388b24fa3",
+   "b": "a4d5b48e-18e1-4708-a4c3-819ed666a5ff",
+   "winner": null,
+   "event": "Polaris 29",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "5f218cf2-47f5-4412-8bc5-9f9897d78acb",
+   "a": "dc891f53-0225-41ab-b1e0-fd0093cd045a",
+   "b": "75be799e-1f02-4820-9abc-ab947cf8c356",
+   "winner": null,
+   "event": "Polaris 29",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "f3fbccdb-5c51-449f-9759-40ed482daeea",
+   "a": "d0582b42-0a0a-4b52-a1c0-b818638e0770",
+   "b": "2cda742e-eba0-4b73-97b7-44694962f636",
+   "winner": null,
+   "event": "Musumeci",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "ae85a325-122f-446d-b0c5-9a246adcf295",
+   "a": "d0582b42-0a0a-4b52-a1c0-b818638e0770",
+   "b": "40a5bac8-060b-416d-89f7-87de5c0ca5c1",
+   "winner": null,
+   "event": "Musumeci",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "b91e485a-4367-4d6c-b53f-254604c93365",
+   "a": "d0582b42-0a0a-4b52-a1c0-b818638e0770",
+   "b": "b6e41a8e-843b-4f32-b99a-9081fb1aec3a",
+   "winner": null,
+   "event": "Musumeci",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "a8432744-d522-4e07-9726-2d162099d022",
+   "a": "ed43c12f-4f50-4dec-834e-305f0cca92e6",
+   "b": "e2d2bf97-dfce-4078-9070-938baf6af314",
+   "winner": null,
+   "event": "Polaris 31",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "0b0d591c-55df-4f60-b045-d9a10aefbcb6",
+   "a": "ae3f696c-5662-4a3f-9b08-80f673f4846a",
+   "b": "77f5599c-1481-4f61-a835-3b96162d82bf",
+   "winner": null,
+   "event": "Team BJJ Stars vs Polaris",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "65e1f329-a3f2-44ae-90bd-3384cd72b289",
+   "a": "81a8af16-57c8-4285-b48e-df3655f757a5",
+   "b": "7a91e727-6f88-4a88-9f20-daf7b8f66429",
+   "winner": null,
+   "event": "Polaris 35",
+   "year": 2025,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "722c2015-59c9-47c3-ace2-8638fa8fc50a",
+   "a": "5f0f600d-03ef-4edb-aa5b-05f1be1dfd2d",
+   "b": "a3891402-afbd-43cb-84b5-7b6512aef85c",
+   "winner": "5f0f600d-03ef-4edb-aa5b-05f1be1dfd2d",
+   "event": "Polaris 16: Squads 3",
+   "year": 2021,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "7cb96013-82a6-402b-ab95-92b0f8f58a1d",
+   "a": "3d2a23e5-8883-40c9-aafc-10ffd7aa7ad4",
+   "b": "8c7b929c-d0f1-43e5-9da7-2f0c9616e7ef",
+   "winner": "3d2a23e5-8883-40c9-aafc-10ffd7aa7ad4",
+   "event": "EBI 14",
+   "year": 2017,
+   "win_type": "DECISION",
+   "status": "final"
+  },
+  {
+   "id": "9d365e9b-d561-4008-87de-62f214ea0c25",
+   "a": "10097208-fb1d-4bbf-a8e1-a7ae1ccae566",
+   "b": "07ff6c8f-25a1-493f-a0ce-496378ad94e7",
+   "winner": "10097208-fb1d-4bbf-a8e1-a7ae1ccae566",
+   "event": "EBI 14",
+   "year": 2017,
+   "win_type": "DECISION",
+   "status": "final"
+  }
+ ]
+}

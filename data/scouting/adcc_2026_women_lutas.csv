@@ -1,0 +1,56 @@
+divisao,atleta,nome_no_banco,adversario,evento,ano,fase,resultado,metodo,finalizacao,n_eventos,n_timeline,tem_video,status,adversario_em_foco,identidade,match_id
++65 kg,Anabel Lopez,Anabel Lopez Beard,Helena Crevar,,2025,,D,DECISION,,14,14,sim,final,sim,confirmada,300a2142-bccc-490c-9822-9cc4ba15e428
++65 kg,Anabel Lopez,Anabel Lopez Beard,Kendall Reusing,Polaris 36,2026,,D,SUBMISSION,Armbar,4,4,nao,final,nao,confirmada,48ed7fc4-eb18-4c0a-8db3-1e375bfa1298
++65 kg,Elizabeth Mitrovic,Elizabeth Mitrovic,Salli Simola,IBJJF Worlds 2023,2023,,V,DECISION,,0,0,sim,final,nao,confirmada,5335a75c-5056-49f1-9fd9-5221ba42a4a8
++65 kg,Elizabeth Mitrovic,Elizabeth Mitrovic,Amanda Levy,ADCC Trials 2024 West Coast,2024,,V,SUBMISSION,,4,4,sim,final,nao,confirmada,38dd458c-9d7d-4fa2-82c0-f934d5eef559
++65 kg,Gabi Garcia,Gabi Garcia,Yara Soares,,2021,,D,SUBMISSION,Choke,2,2,sim,final,sim,confirmada,72602ba0-9635-48da-99e0-40be20fd6fa6
++65 kg,Gabi Garcia,Gabi Garcia,Amy Campo,ADCC 2022,2022,,D,DECISION,,2,2,sim,final,nao,confirmada,9afb70f9-0221-49b5-9368-c5ab8b6fccaa
++65 kg,Gabi Garcia,Gabby Garcia,Craig Jones,CJI,2024,,D,SUBMISSION,Rear Naked Choke,10,11,sim,final,nao,variante_suspeita,6649899a-12bb-483c-9a73-375f6f8de624
++65 kg,Helena Crevar,Helena Crevar,Mo Black,ADCC Trials 2023 East Coast,2023,,D,DECISION,,1,1,sim,final,sim,confirmada,ee80b192-d859-4fd7-9fb0-84b948ac1fba
++65 kg,Helena Crevar,Helena Crevar,Alen O'Connell,ADCC Trials 2023 East Coast,2023,,V,SUBMISSION,,1,1,sim,final,nao,confirmada,04064856-f2b9-45e3-a463-4b39f775bd9c
++65 kg,Helena Crevar,Helena Crevar,Aurelie Le Vern,,2024,,V,SUBMISSION,Heel Hook,7,7,sim,final,nao,confirmada,4dc68a8c-74ec-4870-97c2-3b9395147dbc
++65 kg,Helena Crevar,Helena Crevar,Brianna Ste-Marie,ADCC 2024,2024,,EMPATE/NULO,DECISION,,18,18,nao,final,nao,confirmada,c2992229-7c00-417b-8236-e7544e215e71
++65 kg,Helena Crevar,Helena Crevar,Anna Karolina Vieira,ADCC 2024,2024,,V,SUBMISSION,Guillotine Choke,56,56,nao,final,sim,confirmada,7577f162-0372-4aa6-be2e-640349e272da
++65 kg,Helena Crevar,Helena Crevar,Mo Black,ADCC Trials 2024 West Coast,2024,,V,DECISION,,2,2,sim,final,sim,confirmada,371bcade-d835-4903-84e1-fbad03315847
++65 kg,Helena Crevar,Helena Crevar,Leilani Bernales,WNO 25,2024,,V,DECISION,,10,10,nao,final,nao,confirmada,54d7e3f7-0936-4194-9874-a22b496ccc4b
++65 kg,Helena Crevar,Helena Crevar,Anabel Lopez Beard,,2025,,V,DECISION,,14,14,sim,final,sim,confirmada,300a2142-bccc-490c-9822-9cc4ba15e428
++65 kg,Helena Crevar,Helena Crevar,Ane Svendsen,,2025,,V,SUBMISSION,Rear Naked Choke,14,14,sim,final,sim,confirmada,6eb67ae5-0759-433a-ad96-cd4c60574848
++65 kg,Helena Crevar,Helena Crevar,Adele Fornarino,"CJI 2, Day 1",2025,,V,DECISION,,9,9,nao,final,nao,confirmada,f131fdb5-f0e3-4871-8ee3-e432077ea0af
++65 kg,Helena Crevar,Helena Crevar,Sarah Galvao,"CJI 2, Day 2",2025,,EMPATE/NULO,DECISION,,49,49,nao,final,sim,confirmada,60f52ce4-f915-46cb-86da-449a7ee6927a
++65 kg,Helena Crevar,Helena Crevar,Elisabeth Clay,WNO 27,2025,,V,SUBMISSION,Rear Naked Choke,8,8,nao,final,nao,confirmada,53c68b77-369c-4828-a0ee-f899ea9b218b
++65 kg,Helena Crevar,Helena Cravar,Julia Boscher,WNO 31,2025,,V,SUBMISSION,Straight Foot Lock,4,4,nao,final,nao,confirmada,dba15e69-ba4b-4e34-b37b-12044533126d
++65 kg,Helena Crevar,Helena Crevar,Amanda Pamela Nicole,Polaris 37,2026,,V,SUBMISSION,Rear Naked Choke,8,8,nao,final,nao,confirmada,2371a19b-96e9-4d7f-84cc-67471d7a02f1
++65 kg,Paige Ivette,Paige Ivette,Raphaela Guedes,IBJJF 2025 Top 10,2025,,D,DECISION,,1,1,sim,final,sim,confirmada,0fdd85f9-eb9f-4495-9cf0-c32d93df2fa8
++65 kg,Paige Ivette,Paige Ivette Climber,Gabby Pagana,WNO 31,2025,,D,DECISION,,15,17,nao,final,nao,confirmada,c4edcb27-fc4a-40b3-abe0-1adc70d054f7
++65 kg,Rafaela Guedes,Rafaela Guedes,Maria Malyjasiak,IBJJF No-Gi Worlds 2021,2021,,V,DECISION,,5,5,sim,final,nao,confirmada,1aafd56f-06f4-413c-a1b5-c594f8709fd7
++65 kg,Rafaela Guedes,Rafaela Guedes,Elisabeth Clay,IBJJF No-Gi Worlds 2021,2021,,V,DECISION,,8,8,sim,final,nao,confirmada,81b0d605-b3b3-4c24-a0d9-dba161ca2914
++65 kg,Rafaela Guedes,Raphaela Guedes,Althea,ADCC 2022,2022,,V,DECISION,,3,3,sim,final,nao,variante_suspeita,288402d0-f943-420d-b71a-a9b41bc4288e
++65 kg,Rafaela Guedes,Raphaela Guedes Final,Amy Campo,ADCC 2022,2022,,D,DECISION,,0,3,nao,final,nao,variante_suspeita,466f9fe4-d30b-4193-8443-5fe967171791
++65 kg,Rafaela Guedes,Rafaela Guedes,Amy Campo,ADCC 2022,2022,,D,DECISION,,18,18,sim,final,nao,confirmada,3d13023d-030f-4841-bea9-41599ff4ae36
++65 kg,Rafaela Guedes,Rafaela Guedes,Hailey Gettys,ADCC 2024,2024,,V,DECISION,,0,0,nao,final,nao,confirmada,e1f2dbeb-158f-44a6-8390-a3b2c079d3c2
++65 kg,Rafaela Guedes,Raphaela Guedes,Paige Ivette,IBJJF 2025 Top 10,2025,,V,DECISION,,1,1,sim,final,sim,variante_suspeita,0fdd85f9-eb9f-4495-9cf0-c32d93df2fa8
++65 kg,Rafaela Guedes,R. Guedes,Nathiely de Jesus,WNO 20,2025,,D,DECISION,,36,38,nao,final,nao,variante_suspeita,9bb7462c-5b8f-4e4a-8fdd-e8403259a3c0
++65 kg,Yara Soares,Yara Soares,Gabi Garcia,,2021,,V,SUBMISSION,Choke,2,2,sim,final,sim,confirmada,72602ba0-9635-48da-99e0-40be20fd6fa6
++65 kg,Yara Soares,Yara Soares,Ana Carolina Vieira,,2021,,V,DECISION,,7,7,sim,final,sim,confirmada,d5ea4e26-34a1-4729-8075-6937124202dc
+65 kg,Ana Carolina Vieira,Ana Carolina Vieira,Yara Soares,,2021,,D,DECISION,,7,7,sim,final,sim,confirmada,d5ea4e26-34a1-4729-8075-6937124202dc
+65 kg,Ana Carolina Vieira,Ana Carolina Vieira,Amanda Loewen,WNO Championship,2021,,V,SUBMISSION,Arm Triangle Choke,13,13,sim,final,nao,confirmada,71a45925-133b-462c-b965-d5e9eb4ab7b6
+65 kg,Ana Carolina Vieira,Anna Karolina Vieira,Amanda Levy,ADCC 2024,2024,,EMPATE/NULO,DECISION,,51,51,nao,final,nao,variante_suspeita,6d7d92c5-290d-4663-af30-f517a06f19bf
+65 kg,Ana Carolina Vieira,Anna Karolina Vieira,Bia Mesquita,ADCC 2024,2024,,EMPATE/NULO,DECISION,,27,27,nao,final,nao,variante_suspeita,db27bea3-4f23-4c14-9dc0-c41f68f6c590
+65 kg,Ana Carolina Vieira,Anna Karolina Vieira,Helena Crevar,ADCC 2024,2024,,D,SUBMISSION,Guillotine Choke,56,56,nao,final,sim,variante_suspeita,7577f162-0372-4aa6-be2e-640349e272da
+65 kg,Ana Carolina Vieira,Ana Carolina Vieira,Sarah Galvao,"CJI 2, Day 1",2025,,D,DECISION,,16,16,nao,final,sim,confirmada,59cf5e73-c771-433c-90a1-80b8fdb92877
+65 kg,Ane Svendsen,Ane Svendsen,Helena Crevar,,2025,,D,SUBMISSION,Rear Naked Choke,14,14,sim,final,sim,confirmada,6eb67ae5-0759-433a-ad96-cd4c60574848
+65 kg,Injana Goodman,Injana Goodman,Sarah Galvao,Pan No-Gi 2025,2025,,D,DECISION,,9,9,nao,final,sim,confirmada,ea41c387-e930-49b9-bd47-59c207ed3f45
+65 kg,Injana Goodman,Injana Goodman,Gami Kanew,Polaris 33,2025,,EMPATE/NULO,DECISION,,3,3,nao,final,nao,confirmada,5dea6915-0293-410a-bc55-952f5f961583
+65 kg,Injana Goodman,Injana Goodman,Annie Senson,Women Who Fight Invitational 2,2025,,D,DECISION,,9,9,sim,final,nao,confirmada,ebffe696-52e0-4795-b9e1-d99044cadbc2
+65 kg,Injana Goodman,Injana Goodman,Jackie Almeida,Women Who Fight Invitational 2,2025,,V,SUBMISSION,Choke,5,5,sim,final,nao,confirmada,64557d50-46eb-426c-a7c4-4a7b083a0838
+65 kg,Injana Goodman,Injana Goodman,Martina Kinska,Women Who Fight Invitational 2,2025,,D,DECISION,,3,3,sim,final,nao,confirmada,2955352c-9468-4009-b710-2a0d33552de3
+65 kg,Joslyn Molina,Jocelyn Molina,Katie Bohan,WNO 31,2025,,V,SUBMISSION,D'Arce Choke,8,8,nao,final,nao,confirmada,3e4175f4-d632-458b-8056-31032c35efe6
+65 kg,Morgan Black,Mo Black,Helena Crevar,ADCC Trials 2023 East Coast,2023,,V,DECISION,,1,1,sim,final,sim,confirmada,ee80b192-d859-4fd7-9fb0-84b948ac1fba
+65 kg,Morgan Black,Mo Black,Sophia Delgado,ADCC Trials 2023 East Coast,2023,,V,SUBMISSION,,3,3,sim,final,nao,confirmada,88dda390-364c-470d-95f8-4ace354fa963
+65 kg,Morgan Black,Morgan Black,Brianna Ste-Marie,ADCC 2024,2024,,EMPATE/NULO,DECISION,,36,36,nao,final,nao,confirmada,1a5d8201-1c0b-4cd8-8233-af7f9bbf8e83
+65 kg,Morgan Black,Mo Black,Helena Crevar,ADCC Trials 2024 West Coast,2024,,D,DECISION,,2,2,sim,final,sim,confirmada,371bcade-d835-4903-84e1-fbad03315847
+65 kg,Sarah Galvão,Sarah Galvao,Ana Carolina Vieira,"CJI 2, Day 1",2025,,V,DECISION,,16,16,nao,final,sim,confirmada,59cf5e73-c771-433c-90a1-80b8fdb92877
+65 kg,Sarah Galvão,Sarah Galvao,Helena Crevar,"CJI 2, Day 2",2025,,EMPATE/NULO,DECISION,,49,49,nao,final,sim,confirmada,60f52ce4-f915-46cb-86da-449a7ee6927a
+65 kg,Sarah Galvão,Sarah Galvao,Injana Goodman,Pan No-Gi 2025,2025,,V,DECISION,,9,9,nao,final,sim,confirmada,ea41c387-e930-49b9-bd47-59c207ed3f45
+65 kg,Sarah Galvão,Sarah Galvao,Libby Genge,Polaris 36,2026,,V,SUBMISSION,Kimura,10,10,nao,final,nao,confirmada,04f0e490-d0e1-4ee6-95e3-801db4a8efef
+65 kg,Sarah Galvão,Sarah Galvao,Zara Di Tofano,Polaris 38,2026,,V,SUBMISSION,D'Arce Choke,6,6,nao,final,nao,confirmada,d717f8e5-6226-4ee5-8a30-aa2b16c157ef
