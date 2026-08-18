@@ -182,6 +182,41 @@ def test_priors_unknown_athlete_empty(index: dict) -> None:
     assert r.json() == []
 
 
+def test_export_never_persists_private_graph(index: dict, monkeypatch) -> None:
+    """PRIVACY GUARD: a user's /export session is private — it must never reach a
+    public athlete graph (owner_kind='athlete'). With a DATABASE_URL configured and
+    the old bridge shape faked in, /export must complete without a single write
+    through the db.repository / db.base boundaries."""
+    import inspect
+    import re
+    from unittest.mock import Mock
+
+    import db.repository as repo
+
+    # The repository write boundary must stay untouched by /export.
+    persist = Mock(side_effect=AssertionError("private graph persisted"))
+    monkeypatch.setattr(repo, "upsert_graph_from_athlete_graph", persist)
+    monkeypatch.setenv("DATABASE_URL", "postgresql://fake:fake@localhost/fake")
+
+    client = TestClient(create_app(vocab_index=index, nodes=NODES))
+    # Simulate the pre-fix bridge shape: even if some future wiring populates
+    # _athlete_ids, /export must never act on it.
+    client.app.state._athlete_ids = {"me": "athlete-1"}  # type: ignore[attr-defined]
+
+    export_body = {
+        "events": [{"label": "Montada", "type": "control", "role": "top"}],
+        "athlete": "me",
+    }
+    assert client.post("/export", json=export_body).status_code == 200
+    persist.assert_not_called()
+
+    # Defense-in-depth: the module itself must carry no bridge code at all.
+    src = inspect.getsource(app_module)
+    assert not re.search(r"upsert_graph_from_athlete_graph|_athlete_ids", src), (
+        "realtime must not bridge private sessions into public athlete graphs"
+    )
+
+
 def test_classify_roboflow_backend(index: dict) -> None:
     dets = [
         {"raw_class": "mount1", "confidence": 0.9, "x": 30, "y": 50, "width": 20, "height": 20},

@@ -1,5 +1,15 @@
 """FastAPI app for the realtime CV backend.
 
+PRIVACY CONTRACT — SINGLE-USER SERVICE:
+``app.state.athlete_sessions`` / ``athlete_graphs`` and the optional Qdrant
+``store`` are keyed by the bare ``athlete`` name the client sends, and
+``/export`` ingests the client's PRIVATE session data into them. There is no
+auth owner namespace here, so this service must run per-user (local dev /
+self-hosted, one user per instance) and must NEVER be deployed as a shared
+multi-user backend — otherwise user A's sessions would become visible to any
+request naming the same athlete. Graphs built here serve only their owner's
+next-move priors; they are never persisted to Postgres.
+
 Routes (Phase 4):
 - ``GET  /health``   — liveness.
 - ``POST /segment``  — a per-frame classification stream → discrete position events,
@@ -443,18 +453,10 @@ def create_app(
             app.state.athlete_graphs[req.athlete] = graph
             if app.state.store is not None:
                 app.state.store.upsert_athlete(graph)
-            # Optional: persist to Postgres when DATABASE_URL is configured.
-            import os
-            if os.getenv("DATABASE_URL") and hasattr(app.state, "_athlete_ids"):
-                athlete_id = app.state._athlete_ids.get(req.athlete)
-                if athlete_id:
-                    try:
-                        from db.base import db_session
-                        from db.repository import upsert_graph_from_athlete_graph
-                        with db_session() as db:
-                            upsert_graph_from_athlete_graph(graph, athlete_id, db)
-                    except Exception as _exc:
-                        logger.warning("DB persist failed: %s", _exc)
+            # NEVER persist this graph into a public athlete row (owner_kind='athlete'):
+            # the sessions are the user's private data and must not feed public/competitive
+            # artifacts. Public athlete graphs are built ONLY from public matches, via
+            # db.repository.replay_and_persist_athlete.
         return payload
 
     @app.post("/priors", response_model=list[RankedItem])
