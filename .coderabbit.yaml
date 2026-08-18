@@ -1,0 +1,23 @@
+language: en-US
+
+reviews:
+  profile: chill
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+  path_instructions:
+    - path: "alembic/versions/**"
+      instructions: "Alembic migrations must keep the single linear chain (down_revision = previous head, no branches). Never destroy existing rows. Every new table/column with user data needs an RLS policy in the same migration. Public artifacts must filter owner_kind explicitly — private user data never feeds public/competitive views."
+    - path: "export/**"
+      instructions: "Export formats are cross-module contracts with the App (storage keys, bundle shape). Changing the shape of site/ output or app-facing JSON requires the paired App PR."
+    - path: "db/repository.py"
+      instructions: "Public data paths only. Never write owner_kind='user' content into public tables (technique_nodes, athlete graphs). Curated vocabulary goes in with source='library'."
+    - path: "supabase/functions/**"
+      instructions: "Trusted backend code. Never accept a userId from the request body as authority — derive identity from the verified JWT. Deleting accounts must be idempotent."
+tools:
+  ruff:
+    enabled: true
+  squawk:
+    enabled: true
