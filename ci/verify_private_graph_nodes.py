@@ -116,6 +116,32 @@ def main() -> None:
         else:  # pragma: no cover - only reached when the guard regresses
             raise AssertionError("an unauthenticated caller was allowed to replace a graph")
 
+        # The release gate, as a query rather than a promise: no row in the world-readable
+        # library may be named ONLY by a user graph. 0040 cleaned the 48 that were; this is
+        # what catches the forty-ninth, whichever writer produces it.
+        cur.execute(
+            """
+            select tn.node_key, tn.label
+              from technique_nodes tn
+             where exists (
+                     select 1 from graph_nodes gn join graphs g on g.id = gn.graph_id
+                      where gn.node_key = tn.node_key and g.owner_kind = 'user'
+                   )
+               and not exists (
+                     select 1 from graph_nodes gn join graphs g on g.id = gn.graph_id
+                      where gn.node_key = tn.node_key and g.owner_kind = 'athlete'
+                   )
+               -- Curated vocabulary that no athlete graph happens to reference yet is not
+               -- a private label. "Nobody published it" is not "a user invented it".
+               and tn.source <> 'library'
+            """
+        )
+        private_in_library = cur.fetchall()
+        assert not private_in_library, (
+            "labels named only by a user graph are sitting in the public library: "
+            f"{[label for _key, label in private_in_library]}"
+        )
+
     print("private graph nodes: OK — no private label reached technique_nodes")
 
 

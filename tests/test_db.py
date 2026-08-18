@@ -79,69 +79,17 @@ def _make_bundle(user_id: str | None = None) -> dict:
     }
 
 
-def test_upsert_graph_from_bundle_creates_rows(session):
-    from db.repository import upsert_graph_from_bundle
-    from schemas.app_types import UserBundle
+def test_node_key_is_normalized() -> None:
+    """The node-key contract, asserted where it lives.
 
-    data = _make_bundle()
-    bundle = UserBundle.from_json(data)
-    graph_id = upsert_graph_from_bundle(bundle, session)
-    session.commit()
+    This used to go through ``upsert_graph_from_bundle`` — the offline file-import path,
+    removed with ``db.ingest``. The contract it was really checking is
+    ``_normalize_name``'s, which the App mirrors char-for-char in ``normalizeLabel``, so
+    it is checked directly instead of through a writer that happened to call it.
+    """
+    from analysis.names import _normalize_name
 
-    from db.models import Graph, GraphEdge, TechniqueNode
-
-    graph = session.get(Graph, graph_id)
-    assert graph is not None
-    assert graph.owner_kind == "user"
-    assert graph.user_elo == 850.0
-
-    # Node identity lives in the shared technique library now (not per-graph rows).
-    nodes = list(session.execute(select(TechniqueNode)).scalars())
-    node_keys = {n.node_key for n in nodes}
-    assert "closed guard" in node_keys
-    assert "armbar" in node_keys
-
-    edges = list(session.execute(select(GraphEdge).where(GraphEdge.graph_id == graph_id)).scalars())
-    assert len(edges) == 1
-    assert edges[0].source_key == "closed guard"
-    assert edges[0].target_key == "armbar"
-    assert edges[0].elo == 820.0
-
-
-def test_upsert_idempotent(session):
-    from db.repository import upsert_graph_from_bundle
-    from schemas.app_types import UserBundle
-
-    user_id = str(uuid.uuid4())
-    data = _make_bundle(user_id)
-    bundle = UserBundle.from_json(data)
-    id1 = upsert_graph_from_bundle(bundle, session)
-    session.commit()
-    id2 = upsert_graph_from_bundle(bundle, session)
-    session.commit()
-
-    from db.models import Graph
-
-    graphs = list(session.execute(select(Graph).where(Graph.owner_id == user_id)).scalars())
-    assert len(graphs) == 1
-    assert id1 == id2
-
-
-def test_node_key_is_normalized(session):
-    from db.repository import upsert_graph_from_bundle
-    from schemas.app_types import UserBundle
-
-    data = _make_bundle()
-    data["graph"]["nodes"][0]["label"] = "  Closed Guard!!  "
-    bundle = UserBundle.from_json(data)
-    upsert_graph_from_bundle(bundle, session)
-    session.commit()
-
-    from db.models import TechniqueNode
-
-    nodes = list(session.execute(select(TechniqueNode)).scalars())
-    keys = {n.node_key for n in nodes}
-    assert "closed guard" in keys
+    assert _normalize_name("  Closed Guard!!  ") == "closed guard"
 
 
 def test_athlete_graph_upsert(session):
@@ -351,21 +299,6 @@ def test_run_dump_batched_delete_insert_is_idempotent(session, monkeypatch):
 
     matches = list(session.execute(select(Match)).scalars())
     assert len(matches) == 1
-
-
-def test_bundle_import_provenance(session):
-    from db.models import BundleImport
-    from db.repository import upsert_graph_from_bundle
-    from schemas.app_types import UserBundle
-
-    data = _make_bundle()
-    bundle = UserBundle.from_json(data)
-    upsert_graph_from_bundle(bundle, session)
-    session.commit()
-
-    imports = list(session.execute(select(BundleImport)).scalars())
-    assert len(imports) == 1
-    assert imports[0].owner_id == bundle.user.id
 
 
 def test_fixture_bundle_round_trip():

@@ -6,7 +6,9 @@ Three `public` tables carry a uuid owner column with no foreign key, and they ar
     ``handle_user_delete`` trigger covers it.
   - ``matches.created_by`` is curation provenance, not user data.
   - ``bundle_imports.owner_id`` — the audit trail of admin-side ingestion — was genuinely
-    unhandled until 0038.
+    unhandled, and is gone: 0040 removed the table with ``db.ingest``, the offline
+    file-import path it audited. A private-data writer that bypassed the consent gate and
+    served no user is better deleted than given a foreign key.
 
 Two of those three are mechanisms the SQLite test suite cannot execute — a trigger and a
 cascade — so "the account is really gone" is asserted here, where the database is real. The
@@ -38,18 +40,12 @@ def main() -> None:
             "insert into graphs (id, owner_kind, owner_id, schema_version) values (%s,'user',%s,3)",
             (graph_id, owner),
         )
-        cur.execute(
-            "insert into bundle_imports (id, owner_id) values (%s, %s)",
-            (str(uuid.uuid4()), owner),
-        )
-
         # Deleting the identity is the ONLY thing done here — no application code, no function.
         cur.execute("delete from auth.users where id = %s", (owner,))
 
         checks = {
             "profiles": ("select count(*) from profiles where id = %s", (owner,)),
             "graphs": ("select count(*) from graphs where id = %s", (graph_id,)),
-            "bundle_imports": ("select count(*) from bundle_imports where owner_id = %s", (owner,)),
         }
         for table, (sql, params) in checks.items():
             cur.execute(sql, params)
@@ -58,7 +54,7 @@ def main() -> None:
                 f"{table} still holds rows for a deleted identity"
             )
 
-    print("owner deletion: OK — profile, graph and bundle all went with the identity")
+    print("owner deletion: OK — profile and graph both went with the identity")
 
 
 if __name__ == "__main__":
