@@ -84,3 +84,23 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
         run: uv run python ci/verify_private_graph_nodes.py
+
+  edge-functions:
+    # The Edge Functions are Deno, not Python, so nothing in the job above sees them. Their
+    # tests existed and were never run by anything; the account-deletion one in particular
+    # encodes an ordering (files, then graph, then identity) whose whole point is that a
+    # partial deletion is never reported as success.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: deno check
+        run: |
+          deno check supabase/functions/delete-account/index.ts
+          deno check supabase/functions/youtube-transcript/index.ts
+      # No permission flags: these are pure-logic tests and must stay that way. A test that
+      # needs the network is testing the network.
+      - name: deno test
+        run: deno test supabase/functions/
