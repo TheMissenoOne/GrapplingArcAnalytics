@@ -13,6 +13,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    ForeignKeyConstraint,
     Index,
     Integer,
     String,
@@ -420,6 +421,41 @@ class TechniqueNode(Base):
     )
 
 
+class GraphNode(Base):
+    """One graph's own name for one of its nodes — private by construction.
+
+    Re-created in alembic 0037, and NOT the table 0007 dropped. That one was a per-user copy of
+    the shared library and was rightly deleted for it. This one holds identity the shared library
+    must never hold: whatever the athlete actually typed. ``technique_nodes`` is world-readable
+    (``using (true)`` for ``anon``), which is right for a curated vocabulary and wrong for a
+    user's own words, and the App had been writing the latter into the former for want of
+    anywhere else to point.
+
+    ``canonical_node_key`` links a private node to curated vocabulary when the match is known.
+    The direction is the point: private may reference public, public never learns about private.
+    Nullable, because a node the user invented has nothing to point at and must still sync.
+
+    Privacy class **C** for ``owner_kind='user'`` rows. Athlete rows in this same table are
+    public-by-publication and are exposed through ``published_athlete_graph_nodes``.
+    """
+
+    __tablename__ = "graph_nodes"
+
+    graph_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("graphs.id", ondelete="CASCADE"), primary_key=True
+    )
+    node_key: Mapped[str] = mapped_column(Text, primary_key=True)  # == _normalize_name(label)
+    label: Mapped[str] = mapped_column(Text, nullable=False)
+    type: Mapped[str] = mapped_column(Text, nullable=False, server_default="technique")
+    node_type: Mapped[str | None] = mapped_column(Text, nullable=True)
+    canonical_node_key: Mapped[str | None] = mapped_column(
+        Text, ForeignKey("technique_nodes.node_key", ondelete="SET NULL"), nullable=True
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 class MapEdge(Base):
     """Global aggregate transition for the general grappling map — one row per
     ``source_key → target_key`` over the whole corpus (``analysis.grappling_map``).
@@ -440,15 +476,33 @@ class MapEdge(Base):
 
 class GraphEdge(Base):
     __tablename__ = "graph_edges"
-    __table_args__ = (UniqueConstraint("graph_id", "edge_key"),)
+    __table_args__ = (
+        UniqueConstraint("graph_id", "edge_key"),
+        ForeignKeyConstraint(
+            ["graph_id", "source_key"],
+            ["graph_nodes.graph_id", "graph_nodes.node_key"],
+            name="graph_edges_source_node_fk",
+            ondelete="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["graph_id", "target_key"],
+            ["graph_nodes.graph_id", "graph_nodes.node_key"],
+            name="graph_edges_target_node_fk",
+            ondelete="CASCADE",
+        ),
+    )
 
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
     graph_id: Mapped[str] = mapped_column(
         UUID(as_uuid=False), ForeignKey("graphs.id"), nullable=False
     )
     edge_key: Mapped[str] = mapped_column(Text, nullable=False)  # "{source_key}→{target_key}"
-    source_key: Mapped[str] = mapped_column(Text, nullable=False)  # FK → technique_nodes.node_key
-    target_key: Mapped[str] = mapped_column(Text, nullable=False)  # FK → technique_nodes.node_key
+    # Composite FKs → graph_nodes(graph_id, node_key), declared in __table_args__ because they
+    # span two columns. Until alembic 0037 these pointed at technique_nodes(node_key), which is
+    # what forced every user label into the shared public library; the comment here said "FK"
+    # while no ForeignKey was declared, so model and schema were out of step since 0005.
+    source_key: Mapped[str] = mapped_column(Text, nullable=False)
+    target_key: Mapped[str] = mapped_column(Text, nullable=False)
     # Denormalized from the owning graph so athlete vs user edge vector spaces can
     # be split by a partial index (see alembic 0005). 'user' | 'athlete'.
     owner_kind: Mapped[str | None] = mapped_column(String(10))
