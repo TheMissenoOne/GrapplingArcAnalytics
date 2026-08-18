@@ -45,12 +45,31 @@ Não houve transição fantasma entre lutas em nada do que foi medido.
   página de evento com a outra e 11 lutas sumiam da listagem. Corrigido no banco e no registry dos
   dumps, `disciplines.json` regenerado na mesma passada (ADR-10).
 
+## Consumidores públicos: migrados (wave 10)
+
+Os três — dossiê (`elo_rank`/`elo_percentile`), `elo_pct` do breakdown e o board `GA_ELO` — passam
+todos por `analysis/discipline.py:ranked_pools`. É **uma costura só**; escaloná-los exigiria duplicar
+o pool. MMA (Elo do UFC) e wrestling (elo do grafo) intocados.
+
+O board publicado ganhou um **piso de lutas** (`MIN_BOARD_BOUTS = 10`) além do portão de RD. RD
+sozinho confunde "poucas lutas" com "muitas lutas, inativo": com RD ≤ 200 só, o board sentava atletas
+de 3, 4 e 4 lutas em #5-#8 enquanto o #1 tinha 114. Piso vale **só para ranking publicado** — nunca
+para página, denominador de percentil ou peso de análise.
+
+Três defeitos que a migração revelou (não causou), todos corrigidos:
+- 11 grapplers classificados como MMA e apagados dos dois boards **e do próprio dossiê** (ADR-15);
+- `_bout_counts` com SQL cru não casava chave nenhuma — `Athlete.id` passa por type decorator;
+- o "#N Grappling ELO" do dossiê era rank dentro da categoria de peso, e `weight_class` é NULL em
+  883 de 1327 atletas (e código opaco no resto). Três atletas exibiam "#1" ao mesmo tempo. Agora é o
+  rank do pool inteiro, igual ao board — o percentil ao lado já era geral.
+
 ## Falta
 
-- **Migração dos consumidores, um a um** (ADR-02), agora que ADR-14 existe: dossiê → `GA_ELO` do
-  site → export do App. **Nenhum foi migrado.** `GA_ELO` ainda é V1. Trocar a fonte do `GA_ELO`
-  reordena um ranking público — é decisão de produto, não consequência técnica desta wave.
-- **UI do App**: radar/insights/share ainda leem a V1.
+- **UI do App**: radar/insights/share ainda leem a V1 (`graphSlice.userElo`, `node.computedElo`).
+- **Board de wrestling mostra 100% nas oito linhas** — pré-existente, não é da migração: os ratings
+  são quase planos (807,5 repetido) e 807,5/811,0 arredonda para 100%. Um ranking onde toda linha diz
+  o mesmo não informa nada. Corrigir é decisão de apresentação (mais casas? só posição? esconder o
+  board?), não de rating.
 - **Calibração dos parâmetros de usuário** (ADR-13): peso 0,10 por tentativa, 70 Elo por grau de
   dificuldade, RD 220, RD 350 de nó novo. Todos candidatos não medidos, num bloco só. Critério para
   recalibrar: ADR-03 (log loss fora da amostra antes de spread).
@@ -70,3 +89,11 @@ Não houve transição fantasma entre lutas em nada do que foi medido.
   `RoundEntry` sem `assoc`; o cast é que estava errado, não o tipo.
 - **`site/grapple-like.html` casa com o glob `grapple-*.html`.** Contar arquivos por glob dá 85
   quando há 84 dossiês; não é órfão.
+- **SQL cru (`text()`) contorna o type decorator de `Athlete.id`.** As chaves voltam noutra forma e
+  toda busca erra em silêncio — sem exceção, sem linha faltando, só um dicionário que nunca casa.
+  Aconteceu duas vezes na mesma tarde: no código e no meu próprio probe de diagnóstico, que quase me
+  fez reportar um defeito inexistente. Para juntar com resultado de ORM, consulte pelo ORM.
+- **Defeito latente só aparece quando o dado volta.** O "#1 Grappling ELO" triplicado existia havia
+  tempo; era invisível porque um único atleta exibia o número, e ele era #1 de verdade. Consertar o
+  mapa de disciplina devolveu 11 ranks e a contradição ficou visível na mesma hora. Ao restaurar
+  dado que estava sumindo, revise o que passa a exibi-lo.

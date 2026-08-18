@@ -196,10 +196,18 @@ uv run jupyter lab       # start notebooks
 
 ## App Integration
 
-Export layer produces JSON that matches GrapplingArc AsyncStorage keys:
+Export layer produces JSON the App consumes:
 - `export/tech_library.py` → matches `@grapplingarch:nodes_library` format
-- `export/adcc_elo_table.py` → matches `@grapplingarch:elo_stats` format
-- `export/benchmark_results.py` → new importable format
+- `export/benchmark_results.py:export_pro_baseline_db` → `src/data/pro_baseline.json`
+  (`ProBaselineV1`, bundled with the App) — style-mix + submission-family p25/median/p75.
+  This is the real App-facing data export.
+
+⚠️ `export/adcc_elo_table.py` is **not** an App export, despite what this file used to claim.
+It computes ELO from the Kaggle ADCC historical corpus (not the `matches` table) and writes
+`data/processed/adcc_elo_table.json`, which **nothing consumes** — not the App, not the site.
+And `@grapplingarch:elo_stats` is the App's own on-device `StoredEloStats` (mean/stdDev/
+signatures/weakLinks off the user's graph), never imported from here. The two were never
+connected; verified 2026-08-18.
 
 User bundle import: `schemas/app_types.UserBundle.from_json()` parses GrapplingArc `mock_user_bundle.json`.
 
