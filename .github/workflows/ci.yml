@@ -84,6 +84,13 @@ jobs:
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
         run: uv run python ci/verify_private_graph_nodes.py
+      # A trigger and a cascade, neither of which SQLite can execute. This is what the schema
+      # does on its own — the part that has to stay true when someone deletes a user from the
+      # dashboard rather than through the Edge Function.
+      - name: Deleting an identity leaves nothing owner-scoped behind
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grapplingarc_ci
+        run: uv run python ci/verify_owner_deletion.py
 
   edge-functions:
     # The Edge Functions are Deno, not Python, so nothing in the job above sees them. Their

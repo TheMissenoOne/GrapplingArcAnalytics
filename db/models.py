@@ -558,10 +558,20 @@ class Match(Base):
 
 
 class BundleImport(Base):
+    """A whole user bundle, as uploaded.
+
+    ``raw`` is the most complete dump of one person's app data in this schema, so the owner FK
+    (alembic 0038) is load-bearing: without it an account deletion left the bundle behind.
+    Currently empty, with no writer in any repo and RLS on with no policies — see 0038 for the
+    open question of whether this table should exist at all.
+    """
+
     __tablename__ = "bundle_imports"
 
     id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
-    owner_id: Mapped[str | None] = mapped_column(UUID(as_uuid=False))
+    owner_id: Mapped[str | None] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE")
+    )
     raw: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 

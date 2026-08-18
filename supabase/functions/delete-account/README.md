@@ -5,7 +5,7 @@
 | # | Stage | Why here |
 |---|---|---|
 | 1 | Every object under `session-videos/{uid}/` | A database `CASCADE` never touches Storage, and once the auth row is gone there is no owner left to attribute the orphans to. |
-| 2 | `graphs where owner_kind='user' and owner_id = uid` | `graphs.owner_id` is **polymorphic** — it holds an athlete id or a profile id depending on `owner_kind` — so it has no foreign key to `profiles` and **nothing cascades to it**. Without this stage the graph, its edges and its private `graph_nodes` survive the account, attributed to a uuid that no longer resolves. |
+| 2 | `graphs where owner_kind='user' and owner_id = uid` | `graphs.owner_id` is **polymorphic** — an athlete id or a profile id depending on `owner_kind` — so a column foreign key is impossible and there is no cascade. Alembic 0023 already covers this with a `before delete on auth.users` trigger (`handle_user_delete`), which is live in production. This stage stays because that trigger fires on the auth delete, i.e. stage 3: if stage 3 fails the trigger never runs, and the graph would sit there after a deletion the caller was told had failed. Idempotent against the trigger. |
 | 3 | `auth.admin.deleteUser(uid)` | Last. Cascades `profiles`, which cascades `user_sessions`, `user_projects`, `user_node_names`, `user_sync_meta`, `groups`, `group_members`, `group_invites`, `class_sessions`, `user_performance_snapshots`. |
 
 Every stage is idempotent, so a retry after a network drop finishes the job instead of erroring on the parts that already succeeded.

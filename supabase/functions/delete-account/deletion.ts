@@ -8,11 +8,17 @@
  *
  *   1. Storage objects under the owner's prefix. A database CASCADE does not touch Storage, and
  *      once the auth row is gone there is no owner left to attribute the orphans to. Files first.
- *   2. The user's graph. `graphs.owner_id` is polymorphic — it holds an athlete id or a profile
- *      id depending on `owner_kind` — so there is no foreign key to `profiles` and therefore NO
- *      cascade. Deleting the auth user would leave the graph, its edges and its private nodes in
- *      the database forever, attributed to a uuid that no longer resolves. This is the stage the
- *      cascade audit exists to catch.
+ *   2. The user's graph. `graphs.owner_id` is polymorphic — an athlete id or a profile id
+ *      depending on `owner_kind` — so a column foreign key is impossible and there is no
+ *      cascade. It is NOT unhandled, though: alembic 0023 put a `before delete on auth.users`
+ *      trigger (`handle_user_delete`) in place that does exactly this delete, and it is live.
+ *
+ *      This stage stays anyway, for one specific reason: the trigger only fires when the auth
+ *      user is deleted, which is stage 3. If stage 3 fails, the trigger never runs, and without
+ *      this stage the graph would still be sitting there after a partial deletion the caller was
+ *      told had failed. Doing it here makes each stage's outcome independent of the next one's.
+ *      It is also idempotent against the trigger — by the time the trigger fires there is
+ *      nothing left to delete.
  *   3. The auth user, last. That cascades `profiles`, which cascades the nine owner-scoped
  *      tables (`user_sessions`, `user_projects`, `user_node_names`, `user_sync_meta`, `groups`,
  *      `group_members`, `group_invites`, `class_sessions`, `user_performance_snapshots`).
