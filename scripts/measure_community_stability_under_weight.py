@@ -54,7 +54,10 @@ def _graph_for(
 ) -> nx.DiGraph:
     if scheme == "uniform":
         return network_from_sequences(sequences)
-    return network_from_sequences(sequences, weight_fn=weights_by_scheme[scheme].get)
+    # `dict.get` is overloaded; bind it to the single signature `network_from_sequences`
+    # declares rather than passing the overload set.
+    weights = weights_by_scheme[scheme]
+    return network_from_sequences(sequences, weight_fn=lambda key: weights.get(key, 0.0))
 
 
 def resample_partitions(

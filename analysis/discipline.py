@@ -126,7 +126,7 @@ def _v2_grappling_ratings(session: Session, run_id: str) -> dict[str, float]:
         select(AthleteRatingStateV2.athlete_id, AthleteRatingStateV2.rating)
         .where(AthleteRatingStateV2.run_id == run_id)
     ).all()
-    return dict(rows)
+    return {athlete_id: rating for athlete_id, rating in rows}
 
 
 def ranked_pools(

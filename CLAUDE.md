@@ -187,12 +187,20 @@ From `felixgnwn/adcc_elo_engine/elo_engine.py`:
 
 ```bash
 uv venv                  # create virtualenv
-uv sync                  # install deps
+uv sync --all-extras     # install deps — SEE BELOW, plain `uv sync` is not enough for mypy
 uv run pytest            # run tests
 uv run ruff check .      # lint
 uv run mypy .            # typecheck
 uv run jupyter lab       # start notebooks
 ```
+
+⚠️ **`uv run mypy .` is only equivalent to CI's after `uv sync --all-extras`.** CI installs every
+extra (`.github/workflows/ci.yml`); a plain `uv sync` leaves optional deps like `ultralytics` out,
+and mypy then resolves those imports to `Any` instead of checking them. A local run can be green
+while CI fails on a module that touches an optional dep — and can also report a needed
+`type: ignore` as unused, which is how one got deleted and turned CI red (see the docstring on
+`cv/pose_estimate._ultralytics_runtime`). Ignores that only apply with an extra installed carry
+`unused-ignore` alongside the real code so both environments agree.
 
 ## App Integration
 

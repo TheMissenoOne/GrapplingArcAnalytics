@@ -97,3 +97,16 @@ Três defeitos que a migração revelou (não causou), todos corrigidos:
   tempo; era invisível porque um único atleta exibia o número, e ele era #1 de verdade. Consertar o
   mapa de disciplina devolveu 11 ranks e a contradição ficou visível na mesma hora. Ao restaurar
   dado que estava sumindo, revise o que passa a exibi-lo.
+
+---
+
+## Fase 7 — estado em 2026-08-19
+
+| Item | Estado |
+|---|---|
+| Cutover da UI (App) | **FEITO.** O replay V2 produz `GraphNode.data.computedElo` nos dois produtores (`sessionSaveService`, `reprocessService.replaySessionHistory`); ~70 leitores migraram sem mudança de call site. Churn medido e travado em `ratingV2Churn.test.ts` |
+| Rótulo de confiança | **NÃO exposto, por decisão.** Bandas do ADR-14 intactas (100/200); nada no site nem no app desenha o nível. Com a distribuição de RD medida, `alta` classifica 1 atleta em 646 |
+| Tabelas do `0036` | **Esquema reservado, e agora com guarda.** ADR-03 mantém a camada de nó em sombra: critério 2 sem dado (nenhum nó com RD < 150 em 34 das 36 células), mediana de 1 luta por nó. `tests/test_rating_v2_node_layer_shadow.py` falha se um produtor for ligado sem reabrir o ADR |
+| Scouting ADCC 2026 | **Já estava atual.** Regenerado em 2026-08-19: byte-a-byte idêntico ao commitado, timestamp incluído (o relatório é determinístico). A premissa de que era anterior à desduplicação do CJI 2 estava errada. `--out` passou a ser diretório — antes era prefixo, e o comando documentado escrevia ao LADO da pasta dos artefatos |
+| ADR-08 | **REABERTO, e continua.** Fecha só com proveniência por luta em `graph_edges` (condição a). A condição (b) sozinha é medição sem rigor — ver a nota de 2026-08-19 no ADR |
+| Dívida de mypy (issue #4) | **8 dos 16 módulos não-teste aposentados** com anotação/narrowing de verdade, sem relaxar strict. Restam 8, com 4-8 erros cada |

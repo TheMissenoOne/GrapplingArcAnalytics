@@ -145,8 +145,13 @@ def project_adcc_events(
     if preset.get("family") != "adcc" or preset.get("verification_status") != "verified":
         raise RulesetError("projeção exige preset ADCC verificado")
     relative = bout.get("timing_basis") == "bout_relative"
-    absolute_start = (
-        bout.get("bout_start_s") if bout.get("timing_basis") == "video_absolute" else None
+    raw_start = bout.get("bout_start_s") if bout.get("timing_basis") == "video_absolute" else None
+    # Narrowed here rather than inside the loop: a non-numeric bout start is the same as no bout
+    # start, and saying so once keeps the per-event branch about the event.
+    absolute_start: float | None = (
+        float(raw_start)
+        if isinstance(raw_start, int | float) and not isinstance(raw_start, bool)
+        else None
     )
     projected: list[dict[str, Any]] = []
     for index, event in enumerate(bout.get("events", [])):
@@ -155,12 +160,12 @@ def project_adcc_events(
         if event.get("officially_awarded") is True:
             status = "officially_awarded"
         elif (
-            (not relative and not isinstance(absolute_start, int | float))
+            (not relative and absolute_start is None)
             or not isinstance(ts, int | float) or isinstance(ts, bool)
         ):
             status = "unknown"
         else:
-            relative_ts = float(ts) if relative else float(ts) - float(absolute_start)
+            relative_ts = float(ts) if relative else float(ts) - (absolute_start or 0.0)
             if profile_id == "overtime":
                 overtime_start = bout.get("overtime_start_s")
                 if not isinstance(overtime_start, int | float) or isinstance(overtime_start, bool):

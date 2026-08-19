@@ -322,6 +322,18 @@ qualquer remoção.
 > medição que passaria por "os detectores não concordam em nada" se ninguém tivesse desconfiado de um
 > zero perfeito.
 
+> **Nota de 2026-08-19 — a condição (b) sozinha não fecha nada, e é a barata.**
+> Estender de 15 para todos os atletas elegíveis é uma execução de script. Mas a 6b já disse que o
+> bootstrap dela reamostra **arestas**, não lutas, e que decidir por esse número é repetir o erro
+> que a própria 6b expôs. Aumentar o n de uma medição cujo eixo de rigor está quebrado produz um
+> número mais apertado em volta da mesma dúvida — computação sem informação, o mesmo motivo pelo
+> qual o ADR-03 mandou parar de varrer `tau`.
+>
+> A ordem é **(a) primeiro**: proveniência por luta em `graph_edges`. Isso é migração de schema numa
+> tabela compartilhada mais backfill mais re-medição — workstream próprio, não item de limpeza. Até
+> lá a coexistência continua, e quem for tentado a rodar só o (b) deve ler esta nota como o motivo
+> de não rodar.
+
 ---
 
 ## ADR-09 — RD alarga até o fim do dataset, não até a última luta do atleta

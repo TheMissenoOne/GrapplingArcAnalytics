@@ -24,6 +24,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 import networkx as nx
+from sqlalchemy import update as sa_update
 from sqlalchemy.orm import Session
 
 from analysis.constellations.detect import DetectionResult
@@ -230,7 +231,7 @@ def persist_replay_result(session: Session, config: EngineConfig, result: dict[s
         if result.get("constellations"):
             persist_constellations(session, run_id, result["constellations"])
         session.execute(
-            RatingEngineRun.__table__.update()
+            sa_update(RatingEngineRun)
             .where(RatingEngineRun.id == run_id)
             .values(status="completed", completed_at=datetime.now(UTC))
         )
@@ -238,7 +239,7 @@ def persist_replay_result(session: Session, config: EngineConfig, result: dict[s
     except Exception:
         session.rollback()
         session.execute(
-            RatingEngineRun.__table__.update().where(RatingEngineRun.id == run_id).values(
+            sa_update(RatingEngineRun).where(RatingEngineRun.id == run_id).values(
                 status="failed"
             )
         )

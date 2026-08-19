@@ -36,6 +36,7 @@ from typing import Any
 
 import networkx as nx
 from sqlalchemy import func, or_, select
+from sqlalchemy.orm import Session
 
 from analysis.athlete_graph import AthleteEdge, AthleteGraph, AthleteNode
 from analysis.athlete_systems import detect_athlete_systems
@@ -58,7 +59,7 @@ OLD_PROD_MIN_SYSTEM_SIZE = 2  # analysis.athlete_systems.detect_athlete_systems'
 
 # ── DB read (read-only) ──────────────────────────────────────────────────
 
-def _athlete_by_name(session: Any, name: str) -> Athlete | None:
+def _athlete_by_name(session: Session, name: str) -> Athlete | None:
     return session.execute(
         select(Athlete).where(func.lower(Athlete.name) == name.lower())
     ).scalars().first()
