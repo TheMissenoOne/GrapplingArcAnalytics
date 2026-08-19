@@ -16,6 +16,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Integer,
+    PrimaryKeyConstraint,
     String,
     Text,
     UniqueConstraint,
@@ -511,10 +512,56 @@ class MapEdge(Base):
     )
 
 
+class GraphEdgeBout(Base):
+    """Which published bouts an athlete's edge was observed in (alembic 0046).
+
+    ``graph_edges`` is deduplicated to one row per edge and carries a count, so a bootstrap over
+    it can only resample EDGES. That is the gap ADR-08 is blocked on: wave 6b compared two
+    community detectors on an edge bootstrap and said plainly that deciding on it would repeat
+    the error it had just exposed — reading a number that depends on the input's shape as if it
+    described the algorithm. One row per (edge, bout) is what lets a resample draw bouts and
+    rebuild the edge set from what it drew.
+
+    Athlete graphs only, and that is structural rather than conventional: the FK points at
+    ``matches``, and a user's private sessions have no match to reference.
+
+    Privacy class: **A, public competition data.** It records which already-published match an
+    already-derived public edge came from, and asserts no new fact about anyone.
+    """
+
+    __tablename__ = "graph_edge_bouts"
+    __table_args__ = (
+        PrimaryKeyConstraint("graph_id", "source_key", "target_key", "match_id"),
+        # Cascades from the EDGE, not merely from the graph: an edge pruned by a replay must
+        # not leave provenance behind claiming a transition nobody makes any more.
+        ForeignKeyConstraint(
+            ["graph_id", "source_key", "target_key"],
+            ["graph_edges.graph_id", "graph_edges.source_key", "graph_edges.target_key"],
+            name="graph_edge_bouts_edge_fk",
+            ondelete="CASCADE",
+        ),
+    )
+
+    graph_id: Mapped[str] = mapped_column(UUID(as_uuid=False), nullable=False)
+    source_key: Mapped[str] = mapped_column(Text, nullable=False)
+    target_key: Mapped[str] = mapped_column(Text, nullable=False)
+    match_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("matches.id", ondelete="CASCADE"), nullable=False
+    )
+
+
 class GraphEdge(Base):
     __tablename__ = "graph_edges"
     __table_args__ = (
         UniqueConstraint("graph_id", "edge_key"),
+        # A second unique on the SAME row identity, spelled the other way. `edge_key` is
+        # `f"{source}→{target}"`, so the triple determines the row either way — but Postgres
+        # requires a unique index on exactly the referenced columns, and `graph_edge_bouts`
+        # references the triple. Added by alembic 0046.
+        UniqueConstraint(
+            "graph_id", "source_key", "target_key",
+            name="graph_edges_graph_source_target_key",
+        ),
         ForeignKeyConstraint(
             ["graph_id", "source_key"],
             ["graph_nodes.graph_id", "graph_nodes.node_key"],
