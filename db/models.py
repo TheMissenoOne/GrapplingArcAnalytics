@@ -184,6 +184,43 @@ class UserProject(Base):
     )
 
 
+class UserStudyNote(Base):
+    """One study note the athlete wrote, synced across their devices (alembic 0043).
+
+    Notes used to live nested inside ``UserProject.data`` as ``Project.notes``, which made a
+    note the property of exactly one study. A note is usually about a technique or a detail,
+    not about a project, so it is a row now, and what it is about travels with it as a list of
+    references (technique node key, directed edge key, session id, video id, study id).
+
+    Same shape as UserProject/UserSession — device-generated ``id``, whole-record ``data``
+    JSONB, ``updated_at`` as the conflict clock, ``deleted_at`` as a tombstone. PK is ``id``
+    alone; that is the App's ``on_conflict`` target and it must keep matching a real constraint.
+
+    The most purely app-fed data in the product: free prose about the athlete's own training.
+    Private, owner-scoped, readable only by its owner, and never an input to any aggregate,
+    embedding used outside that owner, ranking, export or competitive artefact. Not visible to
+    a professor either — ``group_member_sessions`` already strips notes from what a professor
+    reads, and this table has no RPC of its own by design. RLS lives in alembic 0043.
+    """
+
+    __tablename__ = "user_study_notes"
+
+    id: Mapped[str] = mapped_column(Text, primary_key=True)
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    # Nullable for the same reason as UserProject.data (0030): a note written and deleted
+    # before it was ever pushed arrives as a tombstone with nothing to upload.
+    data: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 class UserNodeName(Base):
     """What one user prefers to call one canonical node (alembic 0031).
 
