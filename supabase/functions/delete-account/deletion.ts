@@ -31,10 +31,21 @@
  * part that is actually easy to get wrong — can be tested without a live project.
  */
 
+/**
+ * One object to delete. The bucket travels WITH the path because there is more than one
+ * private bucket (`session-videos` and `user-media`, alembic 0024/0042) and a bare path
+ * cannot say which. Deriving it back out of the path string later would be a parser standing
+ * between the user and their files being gone.
+ */
+export interface OwnedFile {
+  bucket: string;
+  path: string;
+}
+
 export interface DeletionEffects {
-  /** Object paths under the owner's prefix, or [] when there are none. */
-  listOwnedFiles: (ownerId: string) => Promise<string[]>;
-  removeFiles: (paths: string[]) => Promise<void>;
+  /** Every object under the owner's prefix, in EVERY private bucket, or [] when there are none. */
+  listOwnedFiles: (ownerId: string) => Promise<OwnedFile[]>;
+  removeFiles: (files: OwnedFile[]) => Promise<void>;
   /** Rows the CASCADE from `profiles` does not reach. Returns how many graphs went. */
   deleteOwnedGraphs: (ownerId: string) => Promise<number>;
   /** Last: cascades `profiles` and everything owner-scoped beneath it. */
