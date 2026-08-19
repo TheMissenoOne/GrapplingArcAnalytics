@@ -116,7 +116,60 @@ def main() -> None:
         else:  # pragma: no cover - only reached when the guard regresses
             raise AssertionError("an unauthenticated caller was allowed to replace a graph")
 
-    print("private graph nodes: OK — no private label reached technique_nodes")
+        # The release gate, as a query rather than a promise: no row in the world-readable
+        # library may be named ONLY by a user graph. 0040 cleaned the 48 that were; this is
+        # what catches the forty-ninth, whichever writer produces it.
+        cur.execute(
+            """
+            select tn.node_key, tn.label
+              from technique_nodes tn
+             where exists (
+                     select 1 from graph_nodes gn join graphs g on g.id = gn.graph_id
+                      where gn.node_key = tn.node_key and g.owner_kind = 'user'
+                   )
+               and not exists (
+                     select 1 from graph_nodes gn join graphs g on g.id = gn.graph_id
+                      where gn.node_key = tn.node_key and g.owner_kind = 'athlete'
+                   )
+               -- Curated vocabulary that no athlete graph happens to reference yet is not
+               -- a private label. "Nobody published it" is not "a user invented it".
+               and tn.source <> 'library'
+            """
+        )
+        private_in_library = cur.fetchall()
+        assert not private_in_library, (
+            "labels named only by a user graph are sitting in the public library: "
+            f"{[label for _key, label in private_in_library]}"
+        )
+
+        # The mirror of the check above, and the one that was missing.
+        #
+        # "No private label is in the public library" is one-directional: deleting too MUCH
+        # does not violate it. 0040 removed 18 keys of ordinary public vocabulary — Back
+        # Control, Mount, Single Leg Takedown — because they happened to be named by a user
+        # graph as well as by athlete graphs, and every existing assertion still passed.
+        #
+        # An athlete graph node is by definition public vocabulary, so it must resolve to a
+        # library row. A one-sided invariant is how a cleanup becomes a deletion.
+        cur.execute(
+            """
+            select distinct gn.node_key, gn.label
+              from graph_nodes gn
+              join graphs g on g.id = gn.graph_id
+             where g.owner_kind = 'athlete'
+               and gn.node_key <> ''
+               and not exists (
+                     select 1 from technique_nodes tn where tn.node_key = gn.node_key
+                   )
+            """
+        )
+        missing = cur.fetchall()
+        assert not missing, (
+            "athlete graph nodes with no row in the public library: "
+            f"{[label for _key, label in missing]}"
+        )
+
+    print("private graph nodes: OK — library holds the public vocabulary and none of the private")
 
 
 if __name__ == "__main__":

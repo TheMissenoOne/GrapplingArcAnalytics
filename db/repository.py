@@ -15,16 +15,14 @@ from analysis.names import _normalize_name
 from db.models import (
     Archetype,
     Athlete,
-    BundleImport,
     Graph,
     GraphEdge,
+    GraphNode,
     Match,
-    Profile,
     TechniqueNode,
     UserSession,
     UserSyncMeta,
 )
-from schemas.app_types import UserBundle
 
 
 @dataclass
@@ -44,13 +42,62 @@ def _register_techniques(techs: dict[str, dict[str, str]], session: Session) -> 
     """Batch insert-if-absent into the shared technique library (one statement).
 
     Empty node_keys are skipped (a punctuation/whitespace-only label normalizes to
-    '' and must not become a junk library row / FK target). ``source='user'``;
-    never clobbers a curated 'library' row (do-nothing on conflict)."""
+    '' and must not become a junk library row / FK target). Never clobbers an existing
+    row (do-nothing on conflict), so a curated entry keeps its provenance.
+
+    Callers set ``source`` themselves. It used to be hard-coded to ``'user'`` here, which
+    is why 215 rows of ordinary competition vocabulary — "Jab", "Riding Time", "Stalling
+    Warning" — carried user provenance in production: the ATHLETE ingestion path wrote
+    through this function too. ``source`` means "where this vocabulary came from", and
+    everything the athlete corpus produces came from published footage.
+    """
     rows = [t for key, t in techs.items() if key]
     if not rows:
         return
     session.execute(
         pg_insert(TechniqueNode).values(rows).on_conflict_do_nothing(index_elements=["node_key"])
+    )
+
+
+def _register_graph_nodes(
+    graph_id: str, nodes: dict[str, dict[str, str]], session: Session
+) -> None:
+    """Write a graph's OWN node identity (alembic 0037), before its edges.
+
+    ``graph_edges`` endpoints carry composite foreign keys into ``graph_nodes``, so an
+    edge cannot be written until its endpoints exist here. Nothing in this module wrote
+    this table when 0037 landed, which left every server-side graph writer unable to
+    persist an edge at all.
+
+    ``canonical_node_key`` points at the curated library when the key is known there. The
+    direction is the point: a graph node may name public vocabulary; public vocabulary
+    never learns anything about a private node.
+    """
+    rows = [
+        {
+            "graph_id": graph_id,
+            "node_key": key,
+            "label": node.get("label") or key,
+            "type": node.get("type") or "technique",
+            "node_type": node.get("node_type") or "",
+            "canonical_node_key": key,
+        }
+        for key, node in nodes.items()
+        if key
+    ]
+    if not rows:
+        return
+    stmt = pg_insert(GraphNode).values(rows)
+    session.execute(
+        stmt.on_conflict_do_update(
+            index_elements=["graph_id", "node_key"],
+            set_={
+                "label": stmt.excluded.label,
+                "type": stmt.excluded.type,
+                "node_type": stmt.excluded.node_type,
+                "canonical_node_key": stmt.excluded.canonical_node_key,
+            },
+        )
     )
 
 
@@ -63,120 +110,6 @@ def incident_edge_elos(edges: Iterable[GraphEdge]) -> dict[str, list[float]]:
         incident.setdefault(e.source_key, []).append(e.elo)
         incident.setdefault(e.target_key, []).append(e.elo)
     return incident
-
-
-def upsert_graph_from_bundle(bundle: UserBundle, session: Session) -> str:
-    """Persist a UserBundle's graph into the DB. Returns graph id."""
-    if bundle.user is None:
-        raise ValueError("Bundle has no user")
-    owner_id = bundle.user.id
-
-    # Upsert profile
-    profile = session.get(Profile, owner_id)
-    if profile is None:
-        profile = Profile(
-            id=owner_id,
-            full_name=bundle.user.full_name,
-            belt_rank=bundle.user.belt_rank,
-            belt_degrees=bundle.user.belt_degrees,
-            is_guest=bundle.user.is_guest,
-        )
-        session.add(profile)
-    else:
-        profile.full_name = bundle.user.full_name
-        profile.belt_rank = bundle.user.belt_rank
-        profile.belt_degrees = bundle.user.belt_degrees
-
-    # Upsert graph row
-    stmt = (
-        pg_insert(Graph)
-        .values(
-            owner_kind="user",
-            owner_id=owner_id,
-            user_elo=bundle.graph.user_elo if bundle.graph else None,
-            schema_version=bundle.schema_version,
-            synced_at=datetime.now(UTC),
-        )
-        .on_conflict_do_update(
-            index_elements=["owner_kind", "owner_id"],
-            set_={
-                "user_elo": bundle.graph.user_elo if bundle.graph else None,
-                "schema_version": bundle.schema_version,
-                "synced_at": datetime.now(UTC),
-            },
-        )
-        .returning(Graph.id)
-    )
-    graph_id: str = session.execute(stmt).scalar_one()
-
-    if bundle.graph is None:
-        return graph_id
-
-    # Collect techniques (nodes + edge endpoints) and register them in one batch
-    # BEFORE edges — the edge FK requires the endpoints to already exist. Per-user
-    # stats are not persisted (identity only; derived from edges at read time).
-    techs: dict[str, dict[str, str]] = {}
-    for node in bundle.graph.nodes:
-        key = _normalize_name(node.label)
-        if key:
-            techs.setdefault(
-                key,
-                {"node_key": key, "label": node.label, "type": node.type,
-                 "node_type": node.node_type, "source": "user"},
-            )
-    resolved_edges = []
-    for edge in bundle.graph.edges:
-        source_label = _label_for_id(edge.source, bundle) or edge.source
-        target_label = _label_for_id(edge.target, bundle) or edge.target
-        source_key = _normalize_name(source_label)
-        target_key = _normalize_name(target_label)
-        for key, label in ((source_key, source_label), (target_key, target_label)):
-            if key:
-                techs.setdefault(
-                    key,
-                    {"node_key": key, "label": label, "type": "technique",
-                     "node_type": "", "source": "user"},
-                )
-        resolved_edges.append((edge, source_key, target_key))
-
-    _register_techniques(techs, session)
-
-    # Upsert edges (skip any with an empty endpoint — no valid FK target).
-    for edge, source_key, target_key in resolved_edges:
-        if not source_key or not target_key:
-            continue
-        edge_key = f"{source_key}→{target_key}"
-        edge_stmt = (
-            pg_insert(GraphEdge)
-            .values(
-                graph_id=graph_id,
-                edge_key=edge_key,
-                source_key=source_key,
-                target_key=target_key,
-                elo=edge.elo,
-                setup=edge.setup or "",
-            )
-            .on_conflict_do_update(
-                index_elements=["graph_id", "edge_key"],
-                set_={"elo": edge.elo, "setup": edge.setup or ""},
-            )
-        )
-        session.execute(edge_stmt)
-
-    # Audit log
-    session.add(BundleImport(owner_id=owner_id))
-
-    return graph_id
-
-
-def _label_for_id(node_id: str, bundle: UserBundle) -> str | None:
-    """Resolve app-local node id → label using bundle's node list."""
-    if bundle.graph is None:
-        return None
-    for n in bundle.graph.nodes:
-        if n.id == node_id:
-            return n.label
-    return None
 
 
 def upsert_graph_from_athlete_graph(
@@ -207,7 +140,7 @@ def upsert_graph_from_athlete_graph(
             techs.setdefault(
                 node_key,
                 {"node_key": node_key, "label": node.label, "type": "technique",
-                 "node_type": node.type, "source": "user"},
+                 "node_type": node.type, "source": "library"},
             )
     for (src, tgt), _edge in athlete_graph.edges.items():
         for key in (src, tgt):
@@ -215,9 +148,11 @@ def upsert_graph_from_athlete_graph(
                 techs.setdefault(
                     key,
                     {"node_key": key, "label": key, "type": "technique",
-                     "node_type": "", "source": "user"},
+                     "node_type": "", "source": "library"},
                 )
     _register_techniques(techs, session)
+    # The graph's own nodes, before its edges — the endpoints are a composite FK target.
+    _register_graph_nodes(graph_id, techs, session)
 
     # One bulk upsert for ALL edges — a per-edge session.execute is a remote round-trip
     # each (~200 edges × ~130ms = the whole replay cost). edge_key is unique within a graph

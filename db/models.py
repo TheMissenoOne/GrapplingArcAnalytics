@@ -557,30 +557,6 @@ class Match(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
-class BundleImport(Base):
-    """Audit trail of admin-side bundle ingestion — one row per ``python -m db.ingest``.
-
-    Written in exactly one place (``upsert_graph_from_bundle``) and only ever with an owner id,
-    so a row says "a bundle was ingested for this owner, at this time" and nothing more. It is
-    an offline operator path; the app never reaches it.
-
-    The FK cascades (alembic 0038). This was the one owner column an account deletion left
-    behind, and an audit row that outlives its subject is a retention decision nobody has made —
-    especially one that has no operational value left once the graph it describes is also gone.
-
-    ``raw jsonb`` was dropped in 0038: never written, never read, and shaped to hold a whole
-    user bundle, which would have made it the most sensitive column in this schema the moment
-    anyone started filling it.
-    """
-
-    __tablename__ = "bundle_imports"
-
-    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
-    owner_id: Mapped[str | None] = mapped_column(
-        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE")
-    )
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-
 
 # ── Strategic ontology (RF04-06, RF20) + Decision Space (DS-*) ──────────────────
 # Canonical knowledge entities authored in the admin, exported to the bundled app seed
