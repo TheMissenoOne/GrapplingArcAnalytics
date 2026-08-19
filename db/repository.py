@@ -17,6 +17,7 @@ from db.models import (
     Athlete,
     Graph,
     GraphEdge,
+    GraphEdgeBout,
     GraphNode,
     Match,
     TechniqueNode,
@@ -182,6 +183,26 @@ def upsert_graph_from_athlete_graph(
     if keep_keys:
         stale_stmt = stale_stmt.where(GraphEdge.edge_key.notin_(keep_keys))
     session.execute(stale_stmt)
+
+    # Bout provenance (alembic 0046) — one row per (edge, bout), written AFTER the prune so it
+    # never references an edge the prune just removed.
+    #
+    # Replace rather than merge, for the same reason the prune exists: a replay derives the FULL
+    # current provenance, so a bout that no longer contributes to an edge (technique renamed,
+    # sequence corrected) has to lose the row that says it does. Merging would accumulate claims
+    # that were true once and are not now, and a bootstrap would resample them.
+    #
+    # Skipped entirely when no edge carries provenance, so a caller that builds a graph without
+    # walking matches (`build_athlete_graph`) leaves what is stored alone instead of erasing it.
+    bout_rows = [
+        {"graph_id": graph_id, "source_key": src, "target_key": tgt, "match_id": bout_id}
+        for (src, tgt), edge in athlete_graph.edges.items()
+        if src and tgt
+        for bout_id in sorted(edge.bout_ids)
+    ]
+    if bout_rows:
+        session.execute(delete(GraphEdgeBout).where(GraphEdgeBout.graph_id == graph_id))
+        session.execute(pg_insert(GraphEdgeBout).values(bout_rows).on_conflict_do_nothing())
 
     return graph_id
 

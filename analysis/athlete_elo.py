@@ -269,6 +269,13 @@ def replay_matches(
             participating.append(norm)
 
         # Consecutive-pair edges (skip self-loops), mirroring build_athlete_graph.
+        #
+        # This loop is also where bout provenance is recorded, and it has to be HERE rather
+        # than in a pass of its own: the match is in hand, and the keys are the same
+        # `canonicalize(_normalize_name(...))` the edge is stored under. Deriving provenance
+        # separately would mean two answers to "which edge is this", and the sequence-space and
+        # persisted-space keys already differ (wave 6b: `"Closed Guard"` vs `closed guard`).
+        match_id = str(getattr(match, "id", "") or "")
         for j in range(1, len(your)):
             src = canonicalize(_normalize_name(your[j - 1].get("label", "")))
             tgt = canonicalize(_normalize_name(your[j].get("label", "")))
@@ -279,6 +286,8 @@ def replay_matches(
                 edge = AthleteEdge(source=src, target=tgt, count=0)
                 graph.edges[(src, tgt)] = edge
             edge.count += 1
+            if match_id:
+                edge.bout_ids.add(match_id)
 
         # If this match contributed no nodes, there is nothing to grow — record
         # the current mean (or base) and continue.

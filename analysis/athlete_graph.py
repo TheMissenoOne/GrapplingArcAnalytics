@@ -32,6 +32,16 @@ class AthleteEdge:
     target: str
     count: int
     elo: float | None = None
+    #: Ids of the published bouts this transition was observed in (alembic 0046).
+    #:
+    #: Populated by the replay that walks matches (``analysis/athlete_elo.py``), where the bout
+    #: is already in hand — NOT by a second pass over ``matches.sequence``. A second walk would
+    #: be a second opinion about what an edge is, and the two would drift; wave 6b lost a round
+    #: to exactly that class of mismatch.
+    #:
+    #: Empty from ``build_athlete_graph``, which is fed session-shaped dicts with no bout to
+    #: name. Empty means "not recorded here", never "observed in no bout".
+    bout_ids: set[str] = field(default_factory=set)
 
 
 @dataclass
