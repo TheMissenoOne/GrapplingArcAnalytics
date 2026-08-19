@@ -75,9 +75,17 @@ class PoseEstimator:
         self._model: Any | None = None
 
     def _ultralytics_runtime(self) -> PoseRuntime:
-        """Lazily build a runtime backed by an Ultralytics YOLO model."""
+        """Lazily build a runtime backed by an Ultralytics YOLO model.
+
+        The import below carries TWO ignore codes and both are load-bearing. ``attr-defined``
+        because ultralytics does not re-export ``YOLO`` explicitly. ``unused-ignore`` because
+        ultralytics is an OPTIONAL extra: where it is not installed mypy resolves the import to
+        ``Any`` and reports the first code as unnecessary. A bare ``attr-defined`` therefore
+        passes a local run without the extra and fails CI, which is exactly how it got removed
+        once.
+        """
         if self._model is None:
-            from ultralytics import YOLO  # heavy, deferred
+            from ultralytics import YOLO  # type: ignore[attr-defined, unused-ignore]
 
             if not self.model_path.exists():
                 # Ultralytics auto-downloads known names (e.g. "yolov8n-pose.pt").
