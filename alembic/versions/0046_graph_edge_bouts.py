@@ -51,6 +51,20 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # `graph_edges` is unique on (graph_id, edge_key), which is a DIFFERENT key than the FK
+    # below needs. Postgres requires a unique index on exactly the referenced columns, so this
+    # is the constraint that makes the composite FK legal, and it has to exist BEFORE the table
+    # that references it — creating them the other way round fails with "there is no unique
+    # constraint matching given keys", which is what migrations-smoke caught.
+    #
+    # It is also true independently: `edge_key` is `f"{source}→{target}"`, so the triple
+    # determines the row either way.
+    op.create_unique_constraint(
+        "graph_edges_graph_source_target_key",
+        "graph_edges",
+        ["graph_id", "source_key", "target_key"],
+    )
+
     op.create_table(
         "graph_edge_bouts",
         sa.Column("graph_id", UUID(as_uuid=False), nullable=False),
@@ -77,16 +91,6 @@ def upgrade() -> None:
             name="graph_edge_bouts_edge_fk",
             ondelete="CASCADE",
         ),
-    )
-
-    # `graph_edges` is unique on (graph_id, edge_key), which is a DIFFERENT key than the FK
-    # above needs. Postgres requires a unique index on exactly the referenced columns, so this
-    # is the constraint that makes the composite FK legal. It is also true independently:
-    # `edge_key` is `f"{source}→{target}"`, so the triple determines the row.
-    op.create_unique_constraint(
-        "graph_edges_graph_source_target_key",
-        "graph_edges",
-        ["graph_id", "source_key", "target_key"],
     )
 
     # The bootstrap's read is "give me every edge observed in this set of bouts".
