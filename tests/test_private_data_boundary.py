@@ -153,3 +153,38 @@ def test_grafo_privado_guarda_o_rotulo_do_usuario_fora_da_biblioteca(session) ->
     privados = {n.node_key: n.canonical_node_key
                 for n in session.query(GraphNode).filter_by(graph_id=grafo.id).all()}
     assert privados == {"closed guard": "closed guard", "meu chokezinho": None}
+
+
+def test_nenhum_artefato_competitivo_le_notas_de_estudo() -> None:
+    """``user_study_notes`` (alembic 0043) não é lida por nada que produza artefato público.
+
+    A nota de estudo é a prosa livre que o atleta escreveu sobre o próprio treino — o dado mais
+    puramente alimentado pelo app que existe no produto. Ela referencia vocabulário canônico
+    (``node_key``, chave de aresta), e é justamente por isso que a tentação aparece: uma nota
+    já vem quase "estruturada", e transformá-la em sinal de mapa, centróide ou dossiê público
+    parece um passo pequeno. Não é. O propósito é a linha, não a técnica.
+
+    Hoje o vazamento é impossível porque nada aqui lê a tabela. Este teste é o que impede que
+    isso mude em silêncio: qualquer módulo de derivação que passar a tocá-la falha aqui e vira
+    uma decisão deliberada, documentada, com a classe de dado nomeada no PR — mesmo portão de
+    uma mudança de schema.
+    """
+    from pathlib import Path
+
+    raiz = Path(__file__).resolve().parents[1]
+    # Os três diretórios cujas saídas saem do escopo do dono: exports do site/app, derivações
+    # analíticas (ELO, embeddings, centróides, métricas de grafo) e o parser do grapplemap.
+    derivacao = ["export", "analysis", "grapplemap"]
+
+    ofensores = [
+        str(arquivo.relative_to(raiz))
+        for diretorio in derivacao
+        for arquivo in (raiz / diretorio).rglob("*.py")
+        if "user_study_notes" in arquivo.read_text(encoding="utf-8")
+        or "UserStudyNote" in arquivo.read_text(encoding="utf-8")
+    ]
+
+    assert ofensores == [], (
+        "nota de estudo é dado privado classe C: não pode alimentar export, análise "
+        f"competitiva nem o parser público. Encontrada em: {ofensores}"
+    )
