@@ -1,9 +1,15 @@
 """A camada de nó do rating V2 fica em sombra, e isso é decisão medida — não descuido.
 
 ADR-03 (``docs/rating_v2/01_DECISOES.md``) fixou o critério de aceitação ANTES do sweep e o
-sweep rodou em 2026-08-17 (``reports/rating_v2/node-sweep.json``, 36 combinações, split
-temporal treina ≤2024 / prediz 2025). O resultado não foi o pessimista "nenhum peso melhora":
-as 36 melhoram o log loss. Foi outra coisa, e pior de resolver — **o critério 2 não tem dado**.
+sweep rodou em 2026-08-17 (36 combinações, split temporal treina ≤2024 / prediz 2025). O
+resultado não foi o pessimista "nenhum peso melhora": as 36 melhoram o log loss. Foi outra
+coisa, e pior de resolver — **o critério 2 não tem dado**.
+
+O artefato bruto vive em ``reports/``, que está no ``.gitignore``. Uma decisão cuja evidência
+não está no repo é uma decisão que ninguém audita, e um teste que não roda em CI — então os
+campos em que ela se apoia ficam versionados em ``data/rating_v2/node_sweep_summary.json``
+(``scripts/distill_node_sweep.py`` regenera), ao lado do ``glicko2_golden.json``, que já existe
+pelo mesmo motivo.
 
 Nenhum nó atinge RD < 150 em 34 das 36 células; a única com amostra tem n=6. Fixar parâmetro de
 produção em seis observações de calibração é inventar evidência para justificar a feature, que é
@@ -55,11 +61,12 @@ def test_o_sweep_do_adr_03_continua_dizendo_o_que_a_decisao_afirma() -> None:
     Não trava os números exatos — trava as DUAS afirmações em que o ADR-03 se apoia: o log loss
     melhora em toda a grade, e a calibração continua sem amostra suficiente para desempatar.
     """
-    sweep = json.loads((RAIZ / "reports" / "rating_v2" / "node-sweep.json").read_text())["sweep"]
+    resumo = json.loads((RAIZ / "data" / "rating_v2" / "node_sweep_summary.json").read_text())
+    sweep = resumo["cells"]
 
     assert len(sweep) == 36, "a grade do ADR-03 é 4 pesos × 3 RD iniciais × 3 tau"
 
-    melhoram = [c for c in sweep if c["criterion_1_log_loss"]["improves"]]
+    melhoram = [c for c in sweep if c["improves_log_loss"]]
     assert len(melhoram) == len(sweep), (
         "o ADR-03 registra que TODAS as combinações melhoram o log loss; se isso deixou de valer, "
         "a decisão de manter a camada em sombra precisa ser reescrita, não só reconfirmada"
@@ -68,7 +75,7 @@ def test_o_sweep_do_adr_03_continua_dizendo_o_que_a_decisao_afirma() -> None:
     # Critério 2: o desempate que não existe. Enquanto nenhuma célula tiver amostra de verdade,
     # não há vencedor a fixar.
     com_amostra = [
-        c for c in sweep if c["criterion_2_calibration"]["low_rd_node_observations"] >= 30
+        c for c in sweep if c["low_rd_node_observations"] >= 30
     ]
     assert com_amostra == [], (
         "alguma célula passou a ter amostra de calibração utilizável — é a condição que o ADR-03 "
@@ -76,7 +83,7 @@ def test_o_sweep_do_adr_03_continua_dizendo_o_que_a_decisao_afirma() -> None:
     )
 
     # Critério 4: a razão de fundo. Um nó visto uma vez não sustenta rating próprio.
-    medianas = {c["criterion_4_fraction_at_prior"]["median_bouts_observed"] for c in sweep}
+    medianas = {c["median_bouts_observed"] for c in sweep}
     assert medianas == {1}, (
         "a mediana de lutas por nó saiu de 1 — a outra condição de reabertura do ADR-03"
     )
