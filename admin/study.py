@@ -235,7 +235,7 @@ def _fetch_transcript_with_ytdlp(
 
 
 def _parse_vtt(text: str) -> list[dict[str, Any]]:
-    captions = []
+    captions: list[dict[str, Any]] = []
     pattern = re.compile(
         r"(?m)^(\d{2}:\d{2}(?::\d{2})?\.\d{3})\s+-->\s+"
         r"(\d{2}:\d{2}(?::\d{2})?\.\d{3})\s*\n(.+?)(?=\n\s*\n|\Z)",
@@ -326,7 +326,10 @@ class RagIndex:
         self.doc_norms: list[float] = []
 
         for i, rec in enumerate(records or []):
-            norm = {
+            # Annotated because the literal infers `dict[str, Sequence[str]]` — four `str` values
+            # and one `list[str]` join to their common supertype, and then `norm["label"]` is no
+            # longer a `str` to anything reading it.
+            norm: dict[str, Any] = {
                 "key": str(rec.get("key") or rec.get("id") or f"node-{i}"),
                 "label": str(rec.get("label") or ""),
                 "type": str(rec.get("type") or "concept"),
@@ -353,10 +356,11 @@ class RagIndex:
             for token in tokens:
                 tf[token] = tf.get(token, 0) + 1
             self.doc_tf.append(tf)
-            norm = math.sqrt(sum(
+            # Named apart from the `norm` record above — one function, one name, one meaning.
+            magnitude = math.sqrt(sum(
                 (val * self.idf.get(term, 1.0)) ** 2 for term, val in tf.items()
             )) or 1.0
-            self.doc_norms.append(norm)
+            self.doc_norms.append(magnitude)
 
     @staticmethod
     def _tokens(text: str) -> list[str]:
