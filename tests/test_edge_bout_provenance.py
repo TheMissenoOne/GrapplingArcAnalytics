@@ -129,3 +129,26 @@ def test_o_movimento_do_oponente_nao_vira_aresta_nossa(replay: Replay) -> None:
     # contexto, não elo da cadeia.
     assert (_key("Guard Pass"), _key("Armbar")) not in graph.edges
     assert (_key("Closed Guard"), _key("Guard Pass")) not in graph.edges
+
+
+def test_a_forma_que_a_producao_passa_ao_replay_carrega_o_id() -> None:
+    """O buraco que os testes acima NÃO pegavam, e que custou um corpus inteiro.
+
+    Os testes desta suíte alimentam ``replay_matches`` com um ``_Match`` local que tem ``.id``.
+    A produção não passa esse objeto: ``db.repository._perspective_view`` constrói um
+    ``_PerspectiveMatch``, e a primeira versão dele **não tinha campo ``id``**. Como o replay lê
+    o id por ``getattr(match, "id", "")``, a ausência não levantou nada — ela simplesmente
+    gravava proveniência nenhuma, em silêncio, sobre 865 lutas.
+
+    Ou seja: os testes acima provavam que o LAÇO funciona, não que a produção chega nele. É essa
+    segunda coisa que este teste trava, e por isso ele olha a dataclass e não o replay.
+    """
+    from dataclasses import fields
+
+    from db.repository import _PerspectiveMatch
+
+    nomes = {f.name for f in fields(_PerspectiveMatch)}
+    assert "id" in nomes, (
+        "_PerspectiveMatch precisa carregar o id da luta — sem ele graph_edge_bouts fica vazia "
+        "e nada reclama"
+    )
