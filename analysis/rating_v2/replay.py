@@ -265,7 +265,7 @@ def run_replay(config: EngineConfig) -> dict[str, Any]:
         rank_elo_by_athlete = {aid: float(elo) for aid, elo in rank_elo_rows}
 
         names_rows = session.execute(select(Athlete.id, Athlete.name)).all()
-        names_by_id = dict(names_rows)
+        names_by_id = {athlete_id: name for athlete_id, name in names_rows}
 
     bouts, coverage = build_bouts(matches, config, events_map, null_discipline)
     seeds = build_seeds(bouts, config, rank_elo_by_athlete)

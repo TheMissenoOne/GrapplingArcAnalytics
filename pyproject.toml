@@ -197,21 +197,20 @@ ignore_errors = true
 # added after the July baseline and expose strict-mypy debt once Ruff stops failing first. Keep the
 # debt explicit rather than disabling strict mode or ignoring the whole repo. Issue #4 tracks
 # typing each module for real and removing it from this temporary list.
+#
+# 2026-08-19: eight non-test modules retired for real (annotations + narrowing, no relaxation) —
+# admin.study is NOT among them, see below. Retired: analysis.discipline,
+# analysis.rating_v2.persist, analysis.rating_v2.replay, analysis.scouting_rulesets,
+# cv.pose_estimate, scripts.compare_athlete_system_detectors, scripts.group_admin (already had
+# zero errors), scripts.measure_community_stability_under_weight. The eight that remain below
+# carry 4-8 errors each and are a separate pass.
 [[tool.mypy.overrides]]
 module = [
     "admin.study",
     "analysis.category_constellations",
-    "analysis.discipline",
-    "analysis.rating_v2.persist",
-    "analysis.rating_v2.replay",
     "analysis.scouting_report",
-    "analysis.scouting_rulesets",
     "analysis.transitions.build_graph",
-    "cv.pose_estimate",
     "scripts.apply_decision_results",
-    "scripts.compare_athlete_system_detectors",
-    "scripts.group_admin",
-    "scripts.measure_community_stability_under_weight",
     "scripts.measure_confidence_weighting",
     "scripts.scouting_division_report",
     "scripts.scouting_matches_csv",

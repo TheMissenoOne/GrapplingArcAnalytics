@@ -903,14 +903,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             baseline_bouts = _load_baseline_bouts(session)
 
     scopes = args.escopo or list(SCOPES)
-    args.out.parent.mkdir(parents=True, exist_ok=True)
+    # `--out` names a DIRECTORY, and the files inside are named after it. It used to be read as
+    # a path STEM, so the documented `--out reports/adcc-2026-categoria` wrote
+    # `reports/adcc-2026-categoria-gi.html` — a sibling of the directory the committed artefacts
+    # actually live in. Two copies of one report and no way to tell which is live is not a
+    # papercut worth keeping.
+    args.out.mkdir(parents=True, exist_ok=True)
     for scope in scopes:
         # The elite no-gi baseline only means something against a no-gi category corpus —
         # comparing it to a gi or mixed-uniform ("unificado") corpus would mix two games, the
         # exact mistake the baseline exists to avoid (see the spec's Decisões table).
         scope_baseline = baseline_bouts if scope == "no_gi" else []
         report = build_division_report(manifest, corpus, scope, db_stats, scope_baseline)
-        base = args.out.parent / f"{args.out.name}-{SCOPE_SUFFIX[scope]}"
+        base = args.out / f"{args.out.name}-{SCOPE_SUFFIX[scope]}"
         html_path, pdf_path, csv_path = (base.with_suffix(s) for s in (".html", ".pdf", ".csv"))
         html_path.write_text(render_division_html(report), encoding="utf-8")
         try:
