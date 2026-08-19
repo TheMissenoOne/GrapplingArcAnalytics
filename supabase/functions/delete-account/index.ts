@@ -23,9 +23,19 @@
  */
 
 import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { deleteAccount, type DeletionEffects } from './deletion.ts';
+import { deleteAccount, type DeletionEffects, type OwnedFile } from './deletion.ts';
 
-const VIDEO_BUCKET = 'session-videos';
+/**
+ * Every private bucket, not just the one this function was written for.
+ *
+ * `user-media` (alembic 0042) exists because `session-videos` carries a professor read policy
+ * that must not reach a study attachment. Two buckets means the sweep below has to visit both:
+ * a bucket the deletion path does not know about is files left on the server under a response
+ * that says the account is gone.
+ *
+ * Add a bucket to the schema, add it here in the same change.
+ */
+const PRIVATE_BUCKETS = ['session-videos', 'user-media'];
 const PAGE = 100;
 
 const ALLOWED_ORIGINS = [
@@ -44,15 +54,19 @@ function corsHeaders(origin: string): Record<string, string> {
 }
 
 /**
- * Every object under `{ownerId}/`, walking the per-session folders.
+ * Every object under `{ownerId}/` in one bucket, walking the per-record folders.
  *
  * Storage `list` is not recursive and is paged, so a user with many sessions needs both loops.
  * Missing the second one would leave files behind while reporting success, which is the failure
  * mode this whole function exists to avoid.
  */
-async function listOwnedFiles(client: SupabaseClient, ownerId: string): Promise<string[]> {
-  const storage = client.storage.from(VIDEO_BUCKET);
-  const paths: string[] = [];
+async function listOwnedInBucket(
+  client: SupabaseClient,
+  bucket: string,
+  ownerId: string,
+): Promise<OwnedFile[]> {
+  const storage = client.storage.from(bucket);
+  const paths: OwnedFile[] = [];
 
   const page = async (prefix: string): Promise<Array<{ name: string; id: string | null }>> => {
     const found: Array<{ name: string; id: string | null }> = [];
@@ -69,22 +83,37 @@ async function listOwnedFiles(client: SupabaseClient, ownerId: string): Promise<
     // Storage reports a folder as an entry with a null id; a file has one.
     if (entry.id === null) {
       for (const file of await page(`${ownerId}/${entry.name}`)) {
-        if (file.id !== null) paths.push(`${ownerId}/${entry.name}/${file.name}`);
+        if (file.id !== null) paths.push({ bucket, path: `${ownerId}/${entry.name}/${file.name}` });
       }
     } else {
-      paths.push(`${ownerId}/${entry.name}`);
+      paths.push({ bucket, path: `${ownerId}/${entry.name}` });
     }
   }
 
   return paths;
 }
 
+/** The same sweep across every private bucket. */
+async function listOwnedFiles(client: SupabaseClient, ownerId: string): Promise<OwnedFile[]> {
+  const found: OwnedFile[] = [];
+  for (const bucket of PRIVATE_BUCKETS) {
+    found.push(...(await listOwnedInBucket(client, bucket, ownerId)));
+  }
+  return found;
+}
+
 function effectsFor(admin: SupabaseClient): DeletionEffects {
   return {
     listOwnedFiles: (ownerId) => listOwnedFiles(admin, ownerId),
-    removeFiles: async (paths) => {
-      const { error } = await admin.storage.from(VIDEO_BUCKET).remove(paths);
-      if (error) throw new Error(`storage remove failed: ${error.message}`);
+    removeFiles: async (files) => {
+      // One `remove` per bucket rather than per file — the API takes a list, and a per-file
+      // round trip would turn a heavy account into a timeout.
+      for (const bucket of PRIVATE_BUCKETS) {
+        const paths = files.filter((f) => f.bucket === bucket).map((f) => f.path);
+        if (paths.length === 0) continue;
+        const { error } = await admin.storage.from(bucket).remove(paths);
+        if (error) throw new Error(`storage remove failed for ${bucket}: ${error.message}`);
+      }
     },
     deleteOwnedGraphs: async (ownerId) => {
       // `graphs.owner_id` is polymorphic (athlete id OR profile id), so it has no FK to
