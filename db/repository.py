@@ -483,9 +483,17 @@ def opponent_input_elo(match: Match, athlete_id: str, session: Session) -> float
 @dataclass
 class _PerspectiveMatch:
     """A global ``Match`` viewed from one athlete's side — the duck-typed shape
-    ``analysis.athlete_elo.replay_matches`` consumes (``.sequence`` with actor
-    'you'/'opponent', ``.won``, ``.win_type``, ``.year``, ``.created_at``)."""
+    ``analysis.athlete_elo.replay_matches`` consumes (``.id``, ``.sequence`` with actor
+    'you'/'opponent', ``.won``, ``.win_type``, ``.year``, ``.created_at``).
 
+    ``id`` is part of that shape and not decoration: ``replay_matches`` records it as the bout
+    each edge was observed in (alembic 0046), which is condition (a) of ADR-08. It was missing
+    here at first, and the failure was silent — the replay reads it through a ``getattr`` default
+    and simply recorded nothing, so ``graph_edge_bouts`` stayed empty across a corpus of 865
+    matches with no error anywhere. ``tests/test_edge_bout_provenance.py`` now pins the field.
+    """
+
+    id: str
     sequence: list[dict[str, Any]]
     won: bool
     win_type: str | None
@@ -521,6 +529,9 @@ def _perspective_view(match: Match, athlete_id: str) -> _PerspectiveMatch:
     if match.winner_id is None and (win_type or "").upper() != "DRAW":
         win_type = "DRAW"
     return _PerspectiveMatch(
+        # `str` because the column is a UUID and the provenance table keys on text; the edge and
+        # its bout have to join, and a `UUID` object and its string form do not.
+        id=str(match.id),
         sequence=seq,
         won=match.winner_id == athlete_id,
         win_type=win_type,
