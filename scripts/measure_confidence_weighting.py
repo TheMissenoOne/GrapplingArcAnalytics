@@ -83,6 +83,23 @@ def load_corpus(session: Any, run_id: str) -> dict[str, Any]:
 
 
 # ── pure measurement (unit-testable off a small fixture) ────────────────────
+def weight_lookup(weights: dict[str, float]) -> Callable[[Any], float]:
+    """A weight function over ``weights``, neutral for anyone it does not know.
+
+    Passing ``weights.get`` directly is what this replaces, and it was not merely a typing
+    nuisance: ``athlete_weights`` returns one entry per id in ``athlete_ids``, while the corpus
+    contains events whose actor is somebody OUTSIDE that set — an off-roster opponent. For those,
+    ``.get`` returns ``None``, which then reaches ``build_graph``'s ``wts`` list and the
+    contribution sum as a value neither can do arithmetic with.
+
+    1.0 is the neutral default because it is exactly what the ``uniform`` control uses, so an
+    athlete with no weight of their own counts once, the same as they would in the baseline.
+    """
+    def weight(actor: Any) -> float:
+        return weights.get(actor, 1.0)
+    return weight
+
+
 def athlete_contribution(
     sequences: list[list[dict[str, Any]]], weight_fn: Callable[[Any], float]
 ) -> dict[str, float]:
@@ -207,12 +224,14 @@ def run_measurement(
         scheme: (
             network_from_sequences(sequences)
             if scheme == "uniform"
-            else network_from_sequences(sequences, weight_fn=weights_by_scheme[scheme].get)
+            else network_from_sequences(
+                sequences, weight_fn=weight_lookup(weights_by_scheme[scheme])
+            )
         )
         for scheme in SCHEMES
     }
     contributions = {
-        scheme: athlete_contribution(sequences, weights_by_scheme[scheme].get)
+        scheme: athlete_contribution(sequences, weight_lookup(weights_by_scheme[scheme]))
         for scheme in SCHEMES
     }
 
@@ -224,14 +243,18 @@ def run_measurement(
         "bounded": compare_scheme(g_base, graphs["bounded"], contributions["bounded"]),
     }
 
-    top1_contributor = max(contrib_base, key=contrib_base.get) if contrib_base else None
+    top1_contributor = max(contrib_base, key=lambda a: contrib_base[a]) if contrib_base else None
     return {
         "run_id": DEFAULT_RUN_ID,
         "n_athletes": len(athlete_ids),
         "n_athletes_with_rd_state": sum(1 for a in athlete_ids if a in rd_by_athlete),
         "n_sequences": len(sequences),
         "n_nodes": g_base.number_of_nodes(),
-        "top1_contributor_name": names.get(top1_contributor, top1_contributor),
+        # No contributor at all means an empty corpus; there is no name to look up and none to
+        # fall back to either.
+        "top1_contributor_name": (
+            names.get(top1_contributor, top1_contributor) if top1_contributor else None
+        ),
         "comparisons": comparisons,
     }
 

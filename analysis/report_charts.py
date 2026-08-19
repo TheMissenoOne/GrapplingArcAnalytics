@@ -13,7 +13,7 @@ input to 0 before it reaches a coordinate.
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from html import escape
 
 INK = "oklch(0.24 0.018 52)"
@@ -71,8 +71,10 @@ def stacked_bar_single(
 
 def profile_bars(
     rows: Sequence[str],
-    category: dict[str, dict[str, float]],
-    baseline: dict[str, dict[str, float]] | None = None, *,
+    # `Mapping`, not `dict`: this only reads, and `dict` is invariant in its value type — a
+    # caller holding the same profile as a `Mapping[str, Any]` could not pass it otherwise.
+    category: Mapping[str, Mapping[str, float]],
+    baseline: Mapping[str, Mapping[str, float]] | None = None, *,
     width: int = 620, row_h: int = 46, label_w: int = 150,
 ) -> str:
     """One row per ``key`` (event type / label) in ``rows``, three thin bars — peso_igual

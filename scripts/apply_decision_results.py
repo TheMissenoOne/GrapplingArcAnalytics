@@ -37,6 +37,7 @@ import argparse
 import csv
 import logging
 import zipfile
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -143,14 +144,29 @@ def resolve_winner(
     return None, None, "nenhum", max(score_a, score_b)
 
 
-def resolve_row(row: dict[str, str], match: dict[str, object]) -> Resolution:
-    """Pure: one xlsx row + one DB match state -> proposed Resolution. No I/O."""
+def _opt_str(value: object) -> str | None:
+    """A DB column read out of an untyped mapping, as the string it is or nothing."""
+    return value if isinstance(value, str) else None
+
+
+def _opt_int(value: object) -> int | None:
+    # `bool` is an `int` in Python and would sail through an `isinstance` check; a year that is
+    # `True` is a bug worth turning into `None` rather than into 1.
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def resolve_row(row: dict[str, str], match: Mapping[str, object]) -> Resolution:
+    """Pure: one xlsx row + one DB match state -> proposed Resolution. No I/O.
+
+    `Mapping` rather than `dict` because the caller builds a narrower value type, and `dict` is
+    invariant — the alternative is making every caller widen a literal it just wrote.
+    """
     status = row["status_resultado"].strip()
     a_name, a_id = str(match["athlete_a_name"]), str(match["athlete_a_id"])
     b_name, b_id = str(match["athlete_b_name"]), str(match["athlete_b_id"])
-    db_year = match.get("year")
-    db_event = match.get("event")
-    db_win_type = match.get("win_type")
+    db_year = _opt_int(match.get("year"))
+    db_event = _opt_str(match.get("event"))
+    db_win_type = _opt_str(match.get("win_type"))
     db_submission = match.get("submission")
     db_winner_id = match.get("winner_id")
 
@@ -246,8 +262,14 @@ _NS = "{http://schemas.openxmlformats.org/spreadsheetml/2006/main}"
 _NSR = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}"
 
 
-def _col_letters(cell_ref: str) -> str:
-    return "".join(c for c in cell_ref if c.isalpha())
+def _col_letters(cell_ref: str | None) -> str:
+    """The column part of a cell reference like ``BC12``.
+
+    Takes ``None`` because that is what ``Element.get("r")`` returns for a cell that carries no
+    reference at all — rare, but legal OOXML. Such a cell belongs to no column, and an empty
+    string says so without the caller needing a guard at each of the three call sites.
+    """
+    return "".join(c for c in cell_ref if c.isalpha()) if cell_ref else ""
 
 
 def read_xlsx_sheet(path: Path, sheet_name: str) -> list[dict[str, str]]:
@@ -268,7 +290,10 @@ def read_xlsx_sheet(path: Path, sheet_name: str) -> list[dict[str, str]]:
         sheet_el = next(
             s for s in workbook.findall(f"{_NS}sheets/{_NS}sheet") if s.get("name") == sheet_name
         )
-        target = rid_to_target[sheet_el.get(f"{_NSR}id")].lstrip("/")
+        target = rid_to_target[sheet_el.get(f"{_NSR}id")]
+        if target is None:
+            raise ValueError(f"sheet {sheet_name!r} has no relationship target — corrupt workbook")
+        target = target.lstrip("/")
         if not target.startswith("xl/"):
             target = f"xl/{target}"
         sheet = ET.fromstring(zf.read(target))
@@ -354,7 +379,9 @@ def run(xlsx_path: Path, apply: bool) -> int:
         matches = {m.id: m for m in session.execute(
             select(Match).where(Match.id.in_([r["match_id"] for r in rows]))
         ).scalars()}
-        athlete_names = dict(session.execute(select(Athlete.id, Athlete.name)).all())
+        athlete_names: dict[str, str] = {
+            row[0]: row[1] for row in session.execute(select(Athlete.id, Athlete.name)).all()
+        }
 
         # "Invisible" today: status='final' match, and not one eligible match anywhere.
         final_matches = list(session.execute(select(Match).where(Match.status == "final")).scalars())
