@@ -107,7 +107,7 @@ def athlete_node_sets(
     """Each athlete's own node set (labels her sequences touch) — the ``support()`` gate's
     "how many distinct athletes contribute to this constellation" input."""
     return {
-        a: set(network_from_sequences(list(seqs)).nodes)
+        a: set(network_from_sequences([list(seq) for seq in seqs]).nodes)
         for a, seqs in athlete_sequences.items()
     }
 
@@ -123,7 +123,7 @@ def _bout_units(
         for i, seq in enumerate(athlete_sequences[athlete]):
             key = f"{athlete}::{i}"
             units.append(key)
-            lookup[key] = (athlete, seq)
+            lookup[key] = (athlete, list(seq))
     return units, lookup
 
 
@@ -152,12 +152,16 @@ def _build_graph_from_units(
 # ── 5.2: prevalence / lift / central nodes / characteristic transitions ─────────────────────
 
 def _total_weight(graph: nx.DiGraph) -> float:
-    return sum(d.get("weight", 0.0) for _, _, d in graph.edges(data=True))
+    # `float(...)` because networkx edge data is `Any`; the sum is a float by construction and
+    # saying so is cheaper than an ignore.
+    return float(sum(d.get("weight", 0.0) for _, _, d in graph.edges(data=True)))
 
 
 def _internal_weight(graph: nx.DiGraph, members: Sequence[str]) -> float:
     m = set(members)
-    return sum(d.get("weight", 0.0) for u, v, d in graph.edges(data=True) if u in m and v in m)
+    return float(
+        sum(d.get("weight", 0.0) for u, v, d in graph.edges(data=True) if u in m and v in m)
+    )
 
 
 def _central_nodes(

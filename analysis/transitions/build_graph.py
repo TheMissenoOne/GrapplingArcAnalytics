@@ -77,11 +77,15 @@ def network_from_sequences(
     output to before this parameter existed (int counts, not float).
     """
     g = nx.DiGraph()
-    occ: Counter[str] = Counter()
-    denom: Counter[str] = Counter()  # appearances that have a successor
-    reward: Counter[str] = Counter()
-    risk: Counter[str] = Counter()
-    ok_count: Counter[str] = Counter()  # successful appearances (PtV terminal rates)
+    # `float`, not `Counter[str]`. These accumulate WEIGHTS, and `weight_fn` returns a float —
+    # a Counter's values are ints, so every `+= wt` here was a type error waiting on a caller
+    # that passes a real weighting scheme. None of them uses a Counter method; `defaultdict`
+    # says what they are.
+    occ: defaultdict[str, float] = defaultdict(float)
+    denom: defaultdict[str, float] = defaultdict(float)  # appearances that have a successor
+    reward: defaultdict[str, float] = defaultdict(float)
+    risk: defaultdict[str, float] = defaultdict(float)
+    ok_count: defaultdict[str, float] = defaultdict(float)  # successful appearances (PtV rates)
     node_type: dict[str, str] = {}
     reaction_counts: dict[tuple[str, str], Counter[str]] = defaultdict(Counter)
 

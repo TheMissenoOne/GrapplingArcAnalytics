@@ -238,7 +238,8 @@ def _normalise_bout(
             # participant_by_key fallback catches a winner that matches a participant's raw
             # spelling but isn't itself alias-registered (e.g. an accent-only difference).
             resolved_winner = identity.resolve(winner) or participant_by_key.get(athlete_key(winner))
-            if resolved_winner in bout["participants"]:
+            participants: Any = bout["participants"]
+            if resolved_winner in participants:
                 result["winner"] = resolved_winner
             else:
                 issues.append({"code": "unknown_winner", "bout_id": bout_id, "winner": winner})
@@ -303,7 +304,9 @@ def collect_bouts(
     _source_stats: dict[tuple[str, str], int] | None = None,
 ) -> tuple[dict[str, list[dict[str, Any]]], list[dict[str, Any]]]:
     identity = build_identity(manifest)
-    corpus = {str(entry["name"]): [] for entry in _athletes(manifest)}
+    corpus: dict[str, list[dict[str, Any]]] = {
+        str(entry["name"]): [] for entry in _athletes(manifest)
+    }
     issues: list[dict[str, Any]] = []
     modules: dict[str, list[tuple[str, int, dict[str, Any]]]] = {}
     registry = load_rulesets()
@@ -379,8 +382,10 @@ def collect_bouts(
                 if name in (identity.resolve(selected_first), identity.resolve(selected_second)):
                     participant_rows += 1
             if _source_stats is not None:
-                key = (name, module)
-                _source_stats[key] = _source_stats.get(key, 0) + participant_rows
+                # Named apart from the 3-tuple `key` bound earlier in this function — reusing
+                # the name is what made the index type wrong, and it read as one thing.
+                stat_key = (name, module)
+                _source_stats[stat_key] = _source_stats.get(stat_key, 0) + participant_rows
             if participant_rows == 0:
                 issues.append({"code": "source_no_participant_bouts", "athlete": name,
                                "module": module})
@@ -758,6 +763,7 @@ def build_matchup(
                          f"contra {threat['label']}, há resposta recorrente documentada: "
                          f"{response['label']}.")
             own_ids = [response["id"]]
+            comparison_fact = response
         else:
             if not own_coverage:
                 continue
@@ -765,6 +771,7 @@ def build_matchup(
             if not grade:
                 continue
             source_bouts.update(own_coverage["source_bouts"])
+            comparison_fact = own_coverage
             kind = "evidence_gap"
             statement = ("Transferência técnica entre regras: "
                          f"{threat['label']} é ameaça recorrente; a resposta da atleta é uma "
@@ -774,7 +781,7 @@ def build_matchup(
             "kind": kind, "statement": statement, "evidence_grade": grade,
             "opponent_fact_ids": [threat["id"]], "own_athlete_fact_ids": own_ids,
             "counterevidence": [], "source_bouts": sorted(source_bouts),
-            "scope": _technical_comparison_scope(threat, response or own_coverage),
+            "scope": _technical_comparison_scope(threat, comparison_fact),
         })
         if response:
             opponent_rate = next(
@@ -1133,7 +1140,7 @@ def write_reports(reports: Sequence[Mapping[str, Any]], out_dir: Path) -> list[P
             raise ManifestError(f"slug de relatório escapa do diretório de saída: {slug!r}")
         bases.append((report, base))
     out_dir.mkdir(parents=True, exist_ok=True)
-    written = []
+    written: list[Path] = []
     for report, base in bases:
         json_path, html_path, pdf_path = (base.with_suffix(suffix)
                                          for suffix in (".json", ".html", ".pdf"))

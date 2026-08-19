@@ -198,18 +198,24 @@ ignore_errors = true
 # debt explicit rather than disabling strict mode or ignoring the whole repo. Issue #4 tracks
 # typing each module for real and removing it from this temporary list.
 #
-# 2026-08-19: eight non-test modules retired for real (annotations + narrowing, no relaxation) —
-# admin.study is NOT among them, see below. Retired: analysis.discipline,
-# analysis.rating_v2.persist, analysis.rating_v2.replay, analysis.scouting_rulesets,
-# cv.pose_estimate, scripts.compare_athlete_system_detectors, scripts.group_admin (already had
-# zero errors), scripts.measure_community_stability_under_weight. The eight that remain below
-# carry 4-8 errors each and are a separate pass.
+# 2026-08-19: EVERY non-test module retired, in two passes. The first took
+# analysis.discipline, analysis.rating_v2.persist, analysis.rating_v2.replay,
+# analysis.scouting_rulesets, cv.pose_estimate, scripts.compare_athlete_system_detectors,
+# scripts.group_admin and scripts.measure_community_stability_under_weight. The second took the
+# four that carried real errors — admin.study, analysis.category_constellations,
+# analysis.scouting_report, analysis.transitions.build_graph — with annotations and narrowing,
+# no relaxation and no new ignore. Two of those were genuine defects wearing a type error: one
+# name bound to two different shapes inside one function, twice.
+#
+# The four remaining `scripts.*` entries below are REDUNDANT and kept only until someone decides
+# about them: `scripts/` is already in `[tool.mypy] exclude` (see above), so these lines do
+# nothing today. Whether `scripts/` should leave that exclude list is its own decision — the
+# module count there is real work, and mixing it into this list is what made "eight remaining"
+# read as twice the debt it was.
+#
+# Everything else below is test modules. Issue #4 is closed for production code.
 [[tool.mypy.overrides]]
 module = [
-    "admin.study",
-    "analysis.category_constellations",
-    "analysis.scouting_report",
-    "analysis.transitions.build_graph",
     "scripts.apply_decision_results",
     "scripts.measure_confidence_weighting",
     "scripts.scouting_division_report",
