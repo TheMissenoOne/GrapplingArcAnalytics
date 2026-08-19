@@ -207,19 +207,19 @@ ignore_errors = true
 # no relaxation and no new ignore. Two of those were genuine defects wearing a type error: one
 # name bound to two different shapes inside one function, twice.
 #
-# The four remaining `scripts.*` entries below are REDUNDANT and kept only until someone decides
-# about them: `scripts/` is already in `[tool.mypy] exclude` (see above), so these lines do
-# nothing today. Whether `scripts/` should leave that exclude list is its own decision — the
-# module count there is real work, and mixing it into this list is what made "eight remaining"
-# read as twice the debt it was.
+# 2026-08-19, second decision: the four `scripts.*` entries that used to sit at the top of this
+# list are GONE. They were inert — `scripts/` is already in `[tool.mypy] exclude` above, so those
+# lines silenced nothing — and keeping them made the debt read as twice its size, which is what
+# turned "eight modules" into a number nobody could act on.
 #
-# Everything else below is test modules. Issue #4 is closed for production code.
+# Whether `scripts/` should leave that exclude list is a SEPARATE decision, still open. It is real
+# work (those modules have real errors), and mixing it into this list is exactly the confusion the
+# removal above is undoing. Deciding it means deleting one entry from `exclude` and typing what
+# falls out — not adding names back here.
+#
+# Everything left below is test modules. Issue #4 is closed for production code.
 [[tool.mypy.overrides]]
 module = [
-    "scripts.apply_decision_results",
-    "scripts.measure_confidence_weighting",
-    "scripts.scouting_division_report",
-    "scripts.scouting_matches_csv",
     "tests.poc.test_decision_vision_dashboard",
     "tests.poc.test_decision_vision_live_state",
     "tests.poc.test_decision_vision_progress",

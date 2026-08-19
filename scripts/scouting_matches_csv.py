@@ -16,9 +16,12 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+from collections.abc import Mapping
 from pathlib import Path
+from typing import Any
 
 from sqlalchemy import or_, select
+from sqlalchemy.orm import Session
 
 try:
     from dotenv import load_dotenv
@@ -53,8 +56,12 @@ COLUMNS = [
     "match_id",
 ]
 
+#: One output row, keyed by the columns above. Values are whatever `csv.DictWriter` will render:
+#: text for the labels, integers for the two counts, and `""` for a column the DB left null.
+Row = dict[str, str | int]
 
-def _roster_keys(roster: dict) -> dict[str, tuple[str, str]]:
+
+def _roster_keys(roster: Mapping[str, Any]) -> dict[str, tuple[str, str]]:
     """athlete_key → (canonical roster name, division). Aliases map to the same pair."""
     out: dict[str, tuple[str, str]] = {}
     for div in roster["divisions"]:
@@ -80,7 +87,7 @@ def _suspect(roster_key: str, db_key: str) -> bool:
     return any(t[:2] == want[0][:2] or want[0].startswith(t) for t in rest)
 
 
-def build_rows(session, roster: dict) -> tuple[list[dict], list[str]]:
+def build_rows(session: Session, roster: Mapping[str, Any]) -> tuple[list[Row], list[str]]:
     keys = _roster_keys(roster)
     # id → (roster name, division); several DB rows can point at the same roster athlete.
     focus: dict[str, tuple[str, str]] = {}
@@ -107,11 +114,12 @@ def build_rows(session, roster: dict) -> tuple[list[dict], list[str]]:
     matches = session.execute(
         select(Match).where(or_(Match.athlete_a_id.in_(ids), Match.athlete_b_id.in_(ids)))
     ).scalars().all()
-    names = dict(
-        session.execute(select(Athlete.id, Athlete.name)).all()  # opponents may be off-roster
-    )
+    # opponents may be off-roster, so this covers every athlete rather than the roster
+    names: dict[str, str] = {
+        row[0]: row[1] for row in session.execute(select(Athlete.id, Athlete.name)).all()
+    }
 
-    rows: list[dict] = []
+    rows: list[Row] = []
     for m in matches:
         for side, other in ((m.athlete_a_id, m.athlete_b_id), (m.athlete_b_id, m.athlete_a_id)):
             if side not in focus:

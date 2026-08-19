@@ -182,9 +182,12 @@ def _augment_with_db(
             select(Match).where(or_(Match.athlete_a_id.in_(ids), Match.athlete_b_id.in_(ids)))
         ).scalars().all()
         all_ids = {m.athlete_a_id for m in matches} | {m.athlete_b_id for m in matches}
-        names = dict(
-            session.execute(select(Athlete.id, Athlete.name).where(Athlete.id.in_(all_ids))).all()
-        )
+        names: dict[str, str] = {
+            row[0]: row[1]
+            for row in session.execute(
+                select(Athlete.id, Athlete.name).where(Athlete.id.in_(all_ids))
+            ).all()
+        }
     # Roster athletes (id in focus) get their canonical manifest name — the raw DB name can
     # diverge on accent or be a manifest alias ("Sarah Galvao" vs "Sarah Galvão", "Jocelyn
     # Molina" vs roster "Joslyn Molina"). A non-roster opponent keeps the DB name as-is.
@@ -781,7 +784,7 @@ def _html_constelacoes(dados: Mapping[str, Any] | None) -> str:
 
 def _html_rede(rede: Mapping[str, Any] | None) -> str:
     transicoes = rede["transicoes"] if rede else []
-    if not transicoes:
+    if rede is None or not transicoes:
         corpo = '<p class="empty">Sem dados de transição suficientes.</p>'
     else:
         max_weight = max(item["weight"] for item in transicoes)
