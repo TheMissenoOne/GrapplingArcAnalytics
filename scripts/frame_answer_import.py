@@ -67,9 +67,15 @@ def check(bout: dict[str, Any], folder: Path | None, labels: dict[str, str]) -> 
 
     for i, e in enumerate(bout.get("events", [])):
         at = f"events[{i}] {e.get('label')!r}"
-        key = fold(e.get("label", ""))
+        from analysis.names import _normalize_name as _nn
+        from analysis.names import canonicalize as _cn
+        raw = _nn(e.get("label", ""))
+        key = _cn(raw)
         if key not in labels:
-            out.append(f"{at}: not a library label")
+            out.append(f"{at}: normalises to {key!r}, which is not a library node")
+        elif key != raw:
+            out.append(f"{at}: folds to {labels[key]!r} via the synonym map (not an error, "
+                       "recorded so the rewrite is visible)")
         if e.get("type") not in TYPES:
             out.append(f"{at}: type {e.get('type')!r} is not one of the eight")
         if fold(e.get("actor", "")) not in people:
@@ -143,8 +149,17 @@ def main() -> int:
 
     data = json.loads(a.answers.read_text(encoding="utf-8"))
     bouts = data if isinstance(data, list) else [data]
-    labels = {fold(n["label"]): n["key"]
-              for n in json.loads(LIBRARY.read_text(encoding="utf-8"))["nodes"]}
+    # Keyed by node_key, not by display string. The identity contract is the KEY -- comparing
+    # rendered labels rejected 'Reset/Stalemate' against a library holding 'Reset / Stalemate',
+    # which is the same node with different whitespace around a slash.
+    from analysis.names import canonicalize
+    nodes = json.loads(LIBRARY.read_text(encoding="utf-8"))["nodes"]
+    # Keyed by the node's OWN key. Folding the alias node's canonicalized key in here would
+    # overwrite the canonical entry with the alias's display label — "guard pull" would read
+    # back as "Pull Guard", the exact thing the synonym exists to stop.
+    labels = {n["key"]: n["label"] for n in nodes}
+    for n in nodes:
+        labels.setdefault(canonicalize(n["key"]), n["label"])
     findings = json.loads(a.frame_findings.read_text(encoding="utf-8")) \
         if a.frame_findings else {}
 

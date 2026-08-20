@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import json
 import sys
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -46,7 +47,7 @@ CONFIDENCE = {"high", "low"}
 BOUT_REQUIRED = ("athlete_a", "athlete_b")
 BOUT_OPTIONAL = ("event", "year", "winner", "win_type", "bout_start_seconds", "bout_end_seconds",
                  "identity_discriminator", "identity_verified_by",
-                 "final_score", "notes",
+                 "final_score", "advantages", "notes",
                  # Penalties are scoreboard facts, readable off footage for the first time --
                  # and deliberately NOT events. `events` feed the technique transition graph,
                  # where every entry becomes a node in an athlete's game; a penalty is not a
@@ -74,6 +75,32 @@ def frame_times(folder: Path) -> list[int]:
             if line.strip()]
 
 
+def _check_score(bout: Mapping[str, Any], where: str) -> list[str]:
+    """`final_score` must be a name→points map, never a bare string.
+
+    "9-5" against competitors [Lopez, Ste-Marie] has no declared orientation, and the buzzer
+    board proved it was winner-first — the positional reading handed the loser the 9. Four
+    bouts in one batch had a scoreline whose positional reading contradicted the winner, so
+    this is a systematic ambiguity, not an edge case. A map cannot be read the wrong way round.
+    """
+    score = bout.get(where)
+    if score is None:
+        return []
+    if isinstance(score, str):
+        return [f"bout.{where} is a string ({score!r}); use a name→points map so the "
+                "orientation is declared and cannot be read backwards"]
+    if not isinstance(score, dict):
+        return [f"bout.{where} must be a name→points map"]
+    people = {str(bout.get("athlete_a") or ""), str(bout.get("athlete_b") or "")} - {""}
+    problems = []
+    for name, pts in score.items():
+        if people and name not in people:
+            problems.append(f"bout.{where} names {name!r}, who is neither competitor")
+        if isinstance(pts, bool) or not isinstance(pts, int) or pts < 0:
+            problems.append(f"bout.{where}[{name!r}] must be a non-negative integer")
+    return problems
+
+
 def validate(answer: dict[str, Any], labels: set[str], times: list[int]) -> list[str]:
     """Every problem, not the first one. A reader fixing an answer wants the whole list."""
     problems: list[str] = []
@@ -86,6 +113,9 @@ def validate(answer: dict[str, Any], labels: set[str], times: list[int]) -> list
     for k in bout:
         if k not in BOUT_REQUIRED + BOUT_OPTIONAL:
             problems.append(f"bout.{k} is not a field of this schema")
+
+    problems += _check_score(bout, "final_score")
+    problems += _check_score(bout, "advantages")
 
     events = answer.get("events")
     if not isinstance(events, list):

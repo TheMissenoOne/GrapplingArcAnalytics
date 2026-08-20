@@ -58,6 +58,11 @@ SYNONYMS: dict[str, str] = {
     "leg entry 5050": "5050 guard",  # DB node_key is "5050 guard" (en "50/50 Guard"), not "5050"
     "armbar choi bar": "choi bar",  # choi bar is a distinct technique, not an armbar variant
     "half guard control": "top control half guard",
+    # 2026-08-20, from a returned frame reading that used BOTH spellings in one batch. Neither
+    # errored, because both were already real nodes -- which is exactly how one action arrives
+    # split in two with nothing to catch it. Corpus counts settle which way each folds:
+    "pull guard": "guard pull",   # 4 raw events vs 170
+    "pass": "guard pass",         # 23 raw events vs 120
 }
 
 
@@ -72,6 +77,7 @@ def canonicalize(key: str) -> str:
 # `technique_nodes.label` rows (2026-07-14 check) so this never fights the DB-persisted graphs.
 # Extend alongside SYNONYMS when a new pair is added.
 CANONICAL_LABELS: dict[str, str] = {
+    "guard pull": "Guard Pull",
     "ankle pick": "Ankle Pick",
     "trip": "Trip",
     "escape to turtle": "Escape to Turtle",
