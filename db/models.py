@@ -628,6 +628,15 @@ class Match(Base):
     stage: Mapped[str | None] = mapped_column(String(10))
     submission: Mapped[str | None] = mapped_column(Text)
     video_url: Mapped[str | None] = mapped_column(Text)  # optional YouTube link (hidden if null)
+    # Where this bout starts inside ``video_url`` (alembic 0047, applied 2026-08-19).
+    # Backfilled from the ``t=`` already in the URL; also settable when the offset is known
+    # but the link is not — `url_mapping.json` carries one for 307 bouts.
+    video_start_seconds: Mapped[int | None] = mapped_column(Integer)
+    # Which clock ``sequence[].ts`` is on: 'video_absolute' (offsets into the whole video) or
+    # 'bout_relative' (offsets from the bout's own start). The corpus mixes both and NULL means
+    # nobody has established which — a reader must treat NULL as "cannot locate", never as a
+    # default of either. Guessing wrong silently places frames in a different fight (AA-010).
+    ts_origin: Mapped[str | None] = mapped_column(String(16))
     # Events: [{label, type, actor_id, successful?}], actor_id ∈ {athlete_a_id, athlete_b_id}.
     sequence: Mapped[list[Any] | None] = mapped_column(JSONB)
     # Full raw event timeline (superset of ``sequence``): every event incl. strikes / resets /
