@@ -18,7 +18,11 @@ Privacy class: **A, public competition data.** Every graph query filters
 construction, never by luck -- an unfiltered `select(Graph)` here would put a user's private
 game into a public category centroid.
 
-    uv run python -m scripts.bracket_export --out ../BracketAnalysis/data.json
+    uv run python -m scripts.bracket_export
+
+Inputs and output all default to their tracked locations, so the published report rebuilds from
+a clean checkout with no arguments. Needs DATABASE_URL for the embedding, video, correlation,
+rating and radar layers; the method layer is pure Python over the records file.
 """
 from __future__ import annotations
 
@@ -57,7 +61,15 @@ from analysis.stats_rigor import (  # noqa: E402
 )
 from db.base import get_engine  # noqa: E402
 
-MANIFEST = REPO / "data" / "scouting" / "adcc_2026_women.json"
+SCOUTING = REPO / "data" / "scouting"
+MANIFEST = SCOUTING / "adcc_2026_women.json"
+# The three inputs, tracked beside the manifest. They lived in a scratch directory for a while,
+# which meant the published data.json was not reproducible from this repo at all -- delete the
+# scratch and the report could never be rebuilt. They are defaults rather than a line in the
+# docstring because a default runs and a docstring drifts.
+RECORDS = SCOUTING / "adcc_2026_women_records.json"
+SEQUENCES = SCOUTING / "adcc_2026_women_sequences.json"
+DERIVED = SCOUTING / "adcc_2026_women_derived.json"
 LINKS = REPO / "data" / "frame_pdf" / "women_65_links.json"
 FRAMES = REPO / "data" / "frame_pdf" / "out"
 
@@ -1101,11 +1113,12 @@ def data_quality(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--records", type=Path, required=True,
+    ap.add_argument("--records", type=Path, default=RECORDS,
                     help="BJJ Heroes records JSON (division + rows per athlete)")
-    ap.add_argument("--sequences", type=Path, required=True, help="corpus bouts JSON")
-    ap.add_argument("--derived", type=Path, required=True, help="opponent-derived records JSON")
-    ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--sequences", type=Path, default=SEQUENCES, help="corpus bouts JSON")
+    ap.add_argument("--derived", type=Path, default=DERIVED,
+                    help="opponent-derived records JSON")
+    ap.add_argument("--out", type=Path, default=REPO.parent / "BracketAnalysis" / "data.json")
     a = ap.parse_args()
 
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))

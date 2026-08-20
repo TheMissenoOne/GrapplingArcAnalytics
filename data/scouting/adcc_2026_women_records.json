@@ -1,0 +1,5502 @@
+{
+ "Livia Barasine": {
+  "division": "65 kg",
+  "rows": null
+ },
+ "Ana Carolina Vieira": {
+  "division": "65 kg",
+  "url": "https://www.bjjheroes.com/?p=6979",
+  "rows": []
+ },
+ "Injana Goodman": {
+  "division": "65 kg",
+  "rows": null
+ },
+ "Sarah Galvão": {
+  "division": "65 kg",
+  "rows": null
+ },
+ "Nadia Frankland": {
+  "division": "65 kg",
+  "url": "https://www.bjjheroes.com/?p=14186",
+  "rows": [
+   {
+    "opp": "Adele Fornarino",
+    "wl": "L",
+    "method": "Pts: 3x1",
+    "comp": "ADCC AUS Trials",
+    "weight": "60KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Sula Loewenthal",
+    "wl": "L",
+    "method": "Triangle armlock",
+    "comp": "ADCC AOT 2",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Brianna Ste-Marie",
+    "wl": "L",
+    "method": "Katagatame",
+    "comp": "Euro NoGi",
+    "weight": "67KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "L",
+    "method": "Kneebar",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Maria Ruffatto",
+    "wl": "L",
+    "method": "Kimura",
+    "comp": "NoGi Pan",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "RNC",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "World NoGi",
+    "weight": "68KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Thaynara Victoria",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Sacramento O",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "L",
+    "method": "Points",
+    "comp": "LA W Open",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Amanda Nicole",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan Champ.",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "Pan Champ.",
+    "weight": "74KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Kauane Silva",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "SDiego SPO",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Toe hold",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2025
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "American NGN",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Injana Goodman",
+    "wl": "L",
+    "method": "Pts: 4x0",
+    "comp": "Pan NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Injana Goodman",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan NoGi",
+    "weight": "67KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Kimura",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Injana Goodman",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Euro NoGi",
+    "weight": "67KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Rebeca Lima",
+    "wl": "L",
+    "method": "Pts: 2x2, Adv",
+    "comp": "World NoGi",
+    "weight": "67KG",
+    "stage": "8F",
+    "year": 2025
+   },
+   {
+    "opp": "Ane Svendsen",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "ADCC EU",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2026
+   },
+   {
+    "opp": "Amanda Bruse",
+    "wl": "L",
+    "method": "Submission",
+    "comp": "ADCC PNX",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Healy Poked",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC AUS Trials",
+    "weight": "60KG",
+    "stage": "R1",
+    "year": 2022
+   },
+   {
+    "opp": "Hope Douglass",
+    "wl": "W",
+    "method": "Pts: 0x0, Pen",
+    "comp": "ADCC AUS Trials",
+    "weight": "60KG",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Margot Ciccarelli",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC AUS Trials",
+    "weight": "60KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Ju Shih",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC AOT 2",
+    "weight": "65KG",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Healy Poked",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC AOT 2",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Hillary Loh",
+    "wl": "W",
+    "method": "Pts: 9x0",
+    "comp": "ADCC AOT 2",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Vannessa Griffin",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Hannah Harjo",
+    "wl": "W",
+    "method": "Anaconda choke",
+    "comp": "NoGi Pan",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "NoGi Pan",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Morgan Black",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "NoGi Pan",
+    "weight": "67KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Amanda Pamela",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "NoGi Pan",
+    "weight": "67KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Gabriele Schuck",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "NoGi Pan",
+    "weight": "67KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Paige Ivette",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2024
+   },
+   {
+    "opp": "Gamila Kanew",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "World NoGi",
+    "weight": "68KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Julia Boscher",
+    "wl": "W",
+    "method": "Triangle",
+    "comp": "World NoGi",
+    "weight": "68KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Joy Pendell",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Sacramento O",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Sacramento O",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Luciane Santos",
+    "wl": "W",
+    "method": "Smother tap",
+    "comp": "LA W Open",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Fernanda Cristo",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "Denver Open",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Yasmyn Castro",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "Denver Open",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Nikki Griffiths",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "Katrina Schmale",
+    "wl": "W",
+    "method": "Inside heel hook",
+    "comp": "American NGN",
+    "weight": "72KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Michelle Dunchus",
+    "wl": "W",
+    "method": "Inside heel hook",
+    "comp": "American NGN",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Rosa Walsh",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "R2",
+    "year": 2025
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Jaqueline Almeida",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "Euro NoGi",
+    "weight": "67KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Sula Lowenthal",
+    "wl": "W",
+    "method": "Footlock",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2025
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Alyson Cholez",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC EU",
+    "weight": "65KG",
+    "stage": "R1",
+    "year": 2026
+   },
+   {
+    "opp": "Heidi Saren",
+    "wl": "W",
+    "method": "Kimura",
+    "comp": "ADCC EU",
+    "weight": "65KG",
+    "stage": "8F",
+    "year": 2026
+   },
+   {
+    "opp": "Shye Lilly",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADCC PNX",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2026
+   },
+   {
+    "opp": "Jasmine Rocha",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "ADCC PNX",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Kelly McKay",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "ADCC PNX",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Nichelle Johnson",
+    "wl": "W",
+    "method": "Pts: 8x0",
+    "comp": "ADCC PNX",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Jaime Meredith",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADCC AUS Trials",
+    "weight": "65KG",
+    "stage": "R1",
+    "year": 2026
+   },
+   {
+    "opp": "Iosha Clements",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "ADCC AUS Trials",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2026
+   },
+   {
+    "opp": "Edie Broughton",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC AUS Trials",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Gase Sanita",
+    "wl": "W",
+    "method": "Pts: 11x0",
+    "comp": "ADCC AUS Trials",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2026
+   }
+  ]
+ },
+ "Morgan Black": {
+  "division": "65 kg",
+  "url": "https://www.bjjheroes.com/?p=13594",
+  "rows": [
+   {
+    "opp": "Janine Mutton",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "NoGi Worlds",
+    "weight": "61KG",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Sheliah Lindsey",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "ADCC OC",
+    "weight": "60KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Bridget McEliece",
+    "wl": "L",
+    "method": "Pts: 3x0",
+    "comp": "ADCC OC",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Ffion Davies",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "ADXC 4",
+    "weight": "61KG",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Nadia Frankland",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "NoGi Pan",
+    "weight": "67KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Brianna Ste-Marie",
+    "wl": "L",
+    "method": "Guillotine",
+    "comp": "World NoGi",
+    "weight": "61KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Raquel Canuto",
+    "wl": "L",
+    "method": "Kneebar",
+    "comp": "UFC BJJ 2",
+    "weight": "61KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Beatrice Jin",
+    "wl": "L",
+    "method": "N/A",
+    "comp": "JJ Con NG",
+    "weight": "67KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Zara Tofano",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "World NoGi",
+    "weight": "62KG",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "Juliana Gassaway",
+    "wl": "W",
+    "method": "Katagatame",
+    "comp": "Houston FNGO",
+    "weight": "61KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Gabriella Gulfin",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "ADCC OC",
+    "weight": "60KG",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Daveena Banda",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC OC",
+    "weight": "60KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Michelle Dunchus",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADCC OC",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Nicole Johnson",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "ADCC OC",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Maria Ruffato",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Denver NGO",
+    "weight": "NA",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Rose Namajunas",
+    "wl": "W",
+    "method": "Pts: 6x2",
+    "comp": "ADCC Denver",
+    "weight": "60KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Jasmine Rocha",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "ADCC Denver",
+    "weight": "60KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Carina Damm",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "JJ Con NG",
+    "weight": "61KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Fernanda Figueira",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "JJ Con NG",
+    "weight": "61KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Holly Martin",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "R1",
+    "year": 2023
+   },
+   {
+    "opp": "Sheliah Lindsey",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "8F",
+    "year": 2023
+   },
+   {
+    "opp": "Leilani Bernales",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Sofia Delgado",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Maggy Meier",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Main Character",
+    "weight": "NA",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Sarah Pyles",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Main Character",
+    "weight": "NA",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Trinity Pun",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Main Character",
+    "weight": "NA",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Nicole Matthew",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Main Character",
+    "weight": "NA",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Caitlin Huggins",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Steph Cline",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "R2",
+    "year": 2024
+   },
+   {
+    "opp": "Laylah Watkins",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Leilani Bernales",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Ana Mayordomo",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "MCharacter 5",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Julia Maele",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "World NoGi",
+    "weight": "61KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Amanda Bruse",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "World NoGi",
+    "weight": "61KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Natasha Druggan",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "MCharacter",
+    "weight": "59KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "C. Downes",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADCC EC Trials",
+    "weight": "65KG",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "A. Gutowska",
+    "wl": "W",
+    "method": "Pts: 9x0",
+    "comp": "ADCC EC Trials",
+    "weight": "65KG",
+    "stage": "8F",
+    "year": 2025
+   },
+   {
+    "opp": "C. Horne",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADCC EC Trials",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Maka Vickers",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADCC EC Trials",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Taylor Ellis",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "ADCC EC Trials",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2025
+   }
+  ]
+ },
+ "Ane Svendsen": {
+  "division": "65 kg",
+  "rows": null
+ },
+ "Joslyn Molina": {
+  "division": "65 kg",
+  "rows": null
+ },
+ "Yara Soares": {
+  "division": "+65 kg",
+  "url": "https://www.bjjheroes.com/?p=10897",
+  "rows": [
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "Grand Slam RJ",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2019
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 10x7",
+    "comp": "Grand Slam AD",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2020
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 4x3",
+    "comp": "Grand Slam LDN",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2020
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 12x10",
+    "comp": "BJJ Bet",
+    "weight": "85KG",
+    "stage": "SPF",
+    "year": 2020
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 1x0",
+    "comp": "Grand Slam RJ",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2020
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 3x3",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "Pan American",
+    "weight": "84KG",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 3x2",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Points",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "Grand Slam LDN",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 4x0",
+    "comp": "Pan American",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "BJJ Stars",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Kauane Silva",
+    "wl": "L",
+    "method": "Pts: 3x3",
+    "comp": "ADGS Miami",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2023
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "European Open",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Tayane Porfirio",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "European Open",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Isabely Lemos",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "ADGS ABD",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "European Open",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "European Open",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Tayane Porfirio",
+    "wl": "L",
+    "method": "Pts: 4x0",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Larissa Dias",
+    "wl": "L",
+    "method": "Pts: 8x6",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Anabel Lopez",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Pan NoGi",
+    "weight": "77KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Larissa Dias",
+    "wl": "L",
+    "method": "Toe hold",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Ericka Cunha",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "Grand Slam RJ",
+    "weight": "95KG",
+    "stage": "R1",
+    "year": 2019
+   },
+   {
+    "opp": "Mayara Oishi",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "Grand Slam RJ",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2019
+   },
+   {
+    "opp": "Nathiely Jesus",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Grand Slam AD",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2020
+   },
+   {
+    "opp": "Kendall Reusing",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "Grand Slam AD",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2020
+   },
+   {
+    "opp": "Claire Thevenon",
+    "wl": "W",
+    "method": "Pts: 3x2",
+    "comp": "Grand Slam LDN",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2020
+   },
+   {
+    "opp": "Ane Svendsen",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "Grand Slam LDN",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2020
+   },
+   {
+    "opp": "Thaynara Dias",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "Grand Slam RJ",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2020
+   },
+   {
+    "opp": "Ingridd Sousa",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "Grand Slam RJ",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2020
+   },
+   {
+    "opp": "Thayara Dias",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "Grand Slam AD",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Michele Xavier",
+    "wl": "W",
+    "method": "Pts: 3x1",
+    "comp": "Grand Slam AD",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Michele Xavier",
+    "wl": "W",
+    "method": "Pts: 7x0",
+    "comp": "WP BR Qualifier",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Thaynara Dias",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "WP BR Qualifier",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Kendall Reusing",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Eleftheria Christodoulou",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Adriane Alves",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "SA Cont. Pro",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Ingridd Alves",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "SA Cont. Pro",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "SA Cont. Pro",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Sarah Rice",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Grand Slam MIA",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Tara White",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Grand Slam MIA",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2021
+   },
+   {
+    "opp": "Sarah Rice",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2021
+   },
+   {
+    "opp": "Nathalie Ribeiro",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Bianca Basilio",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Ana Vieira",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Y. Poznyakova",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "Grand Slam MSK",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Y. Poznyakova",
+    "wl": "W",
+    "method": "Clock choke",
+    "comp": "Grand Slam MSK",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Joaquina Bonfim",
+    "wl": "W",
+    "method": "Reverse triangle",
+    "comp": "Brasileiro",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "W",
+    "method": "Pts: 6x4",
+    "comp": "Brasileiro",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Juliana Araujo",
+    "wl": "W",
+    "method": "Kneebar",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Graciele Fava",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "W",
+    "method": "Injury",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Graciele Carvalho",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "ADGS RJ",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADGS RJ",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Claire Thevenon",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Yasmira Dias",
+    "wl": "W",
+    "method": "Pts: 1x0",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Lama Qubbaj",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2021
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "N/A",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrielle Garcia",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Mayara Custodio",
+    "wl": "W",
+    "method": "Verbal tap",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Juliana Araujo",
+    "wl": "W",
+    "method": "Pts: 8x2",
+    "comp": "Guarapari Pro",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Cintia Honorato",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "Gramado Pro",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Yasmira Dias",
+    "wl": "W",
+    "method": "Kneebar",
+    "comp": "Grand Slam LDN",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Elizabeth Mitrov",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Mayara Custodio",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "Pan American",
+    "weight": "O79KG",
+    "stage": "RR",
+    "year": 2022
+   },
+   {
+    "opp": "Rebeca Lima",
+    "wl": "W",
+    "method": "Pts: 7x6",
+    "comp": "Queen of Mats",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2022
+   },
+   {
+    "opp": "Thalyta Lima",
+    "wl": "W",
+    "method": "Pts: 2x1",
+    "comp": "Queen of Mats",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2022
+   },
+   {
+    "opp": "Ingridd Alves",
+    "wl": "W",
+    "method": "Pts: 3x2",
+    "comp": "Queen of Mats",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Rafaela Bertolot",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Queen of Mats",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "M. Cantanhede",
+    "wl": "W",
+    "method": "Pts: 10x0",
+    "comp": "ADGS ABDB",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Silvia Scomparin",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "ADGS ABDB",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Claire Thevenon",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Patricia Ferreira",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "Floripa WO",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Mica Lima",
+    "wl": "W",
+    "method": "Pts: 2x2, Adv",
+    "comp": "BJJ Stars",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Tayane Porfirio",
+    "wl": "W",
+    "method": "Points",
+    "comp": "BJJ Stars",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Raiane Santos",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "ADGS Miami",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Tammy Griego",
+    "wl": "W",
+    "method": "Pts: 8x1",
+    "comp": "ADGS Miami",
+    "weight": "95KG",
+    "stage": "RPC",
+    "year": 2023
+   },
+   {
+    "opp": "Tamiris Silva",
+    "wl": "W",
+    "method": "Pts: 2x1",
+    "comp": "ADWP Qualifier",
+    "weight": "120KG",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Stephany Helen",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "ADWP Qualifier",
+    "weight": "120KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "L. dos Santos",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "ADWP Qualifier",
+    "weight": "120KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Yasmira Dias",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2023
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "European Open",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "European Open",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Isabely Lemos",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "SA Cont. Pro",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Isabely Lemos",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "SA Cont. Pro",
+    "weight": "HWA",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Amanda Vikingsson",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "ADGS Rome",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "ADGS Rome",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Kauani Queiroz",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "Brasileiro",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Gabriela Matos",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Melissa Cueto",
+    "wl": "W",
+    "method": "Points",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Marcelle Cantanhede",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADGS ABD",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Victoria Bladh",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS ABD",
+    "weight": "95KG",
+    "stage": "RPC",
+    "year": 2024
+   },
+   {
+    "opp": "Magdalena Loska",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS ABD",
+    "weight": "95KG",
+    "stage": "3RD",
+    "year": 2024
+   },
+   {
+    "opp": "Mayara Custodio",
+    "wl": "W",
+    "method": "Canto choke",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Deise Leonanjo",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2024
+   },
+   {
+    "opp": "Mayara Custodio",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "W",
+    "method": "Pts: 6x4",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Marwa Alhosani",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS IST",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Marwa Alhosani",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "ADGS IST",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Mikaela Lima",
+    "wl": "W",
+    "method": "Clock choke",
+    "comp": "Curitiba Pro",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Amanda Magda",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "Curitiba Pro",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Mikaela Lima",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "Curitiba Pro",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Natacha Silva",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "ADGS RJ",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Isabely Lemos",
+    "wl": "W",
+    "method": "Verbal tap",
+    "comp": "ADGS RJ",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Tamiris Silva",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADGS RJ",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Mayara Moreira",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADGS DLS",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Isabely Lemos",
+    "wl": "W",
+    "method": "Pts: 2x2",
+    "comp": "ADGS DLS",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Meng Xiang",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS XIAN",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Meng Xiang",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS XIAN",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Anabel Lopez",
+    "wl": "W",
+    "method": "Pts: 5x1",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Leticia Santos",
+    "wl": "W",
+    "method": "Pts: 7x2",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Camille Coue",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "European Open",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Melissa Cueto",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "European Open",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Maryanna Cardoso",
+    "wl": "W",
+    "method": "Canto choke",
+    "comp": "European Open",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Leticia Santos",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS Rome",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Isabely Lemos",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS Rome",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "M. Rowland",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "ADGS LDN",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Magdalena Loska",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "ADGS LDN",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Suellen Desterro",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "Mikaela Lima",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Melissa Cueto",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Izadora Cristina",
+    "wl": "W",
+    "method": "Pts: 8x8, Adv",
+    "comp": "Brasileiro",
+    "weight": "79KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Melissa Cueto",
+    "wl": "W",
+    "method": "Pts: 12x10",
+    "comp": "Brasileiro",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Tamiris Silva",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "Brasileiro",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Stefhanie Costa",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "ADGS ABD",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Gabriela Barreto",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2025
+   },
+   {
+    "opp": "Tamiris Silva",
+    "wl": "W",
+    "method": "Toe hold",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Katiane Rodrigues",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "ADGS - RJN",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Luane Carvalho",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "ADGS - RJN",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Angelina Leonidova",
+    "wl": "W",
+    "method": "Pts: 13x0",
+    "comp": "ADGS - MSK",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Ekaterina Veryatina",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS - MSK",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Olha Chaliuk",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "Asia Cont. Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2025
+   },
+   {
+    "opp": "Olha Chaliuk",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "Asia Cont. Pro",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Yunlu Fang",
+    "wl": "W",
+    "method": "Pts: 17x0",
+    "comp": "ADGS CNU",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Qianchu Wang",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS CNU",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Stefania Carvalho",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "AJP SA Cont.",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Vitoria Pires",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "AJP SA Cont.",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Natacha Ribeiro",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "BJJClubes 7",
+    "weight": "ABS",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Cassia Pinto",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "AJP World Pro",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Luana Carvalho",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "AJP World Pro",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Katharine Marques",
+    "wl": "W",
+    "method": "Pts: 11x0",
+    "comp": "Rio SM NGO",
+    "weight": "O77KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Isabely Sanches",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "European Champ",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Anabel Lopez",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "European Champ",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Mairead Rowland",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS Rome",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "L. Barasine",
+    "wl": "W",
+    "method": "Kneebar",
+    "comp": "ADGS Rome",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Maria Julia",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADCC BR2",
+    "weight": "O65KG",
+    "stage": "R1",
+    "year": 2026
+   },
+   {
+    "opp": "Maria Ruffatto",
+    "wl": "W",
+    "method": "Pts: 6x2",
+    "comp": "ADCC BR2",
+    "weight": "O65KG",
+    "stage": "4F",
+    "year": 2026
+   },
+   {
+    "opp": "Maria Abreu",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADCC BR2",
+    "weight": "O65KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Ingridd Alves",
+    "wl": "W",
+    "method": "Kneebar",
+    "comp": "ADCC BR2",
+    "weight": "O65KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Natacha Ribeiro",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Brasileiro",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Tamiris Silva",
+    "wl": "W",
+    "method": "Pts: 11x0",
+    "comp": "Brasileiro",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Karoline Caramori",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "4F",
+    "year": 2026
+   },
+   {
+    "opp": "Denise Krahn",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADGS - IST",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Geovana Malta",
+    "wl": "W",
+    "method": "Bow and arrow",
+    "comp": "ADGS - IST",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2026
+   }
+  ]
+ },
+ "Rafaela Guedes": {
+  "division": "+65 kg",
+  "url": "https://www.bjjheroes.com/?p=11656",
+  "rows": [
+   {
+    "opp": "Amanda Leve",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Subversiv 4",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2020
+   },
+   {
+    "opp": "Erin Harpe",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "WNO 10",
+    "weight": "O65KG",
+    "stage": "SPF",
+    "year": 2021
+   },
+   {
+    "opp": "Larissa Dias",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Ffion Davies",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "SUBVERSIV 7",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "Pts: 3x2",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Nathiely Jesus",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "WNO 20",
+    "weight": "ABS",
+    "stage": "SPF",
+    "year": 2023
+   },
+   {
+    "opp": "Andressa Cintra",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "NoGi World",
+    "weight": "77KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Adele Fornarino",
+    "wl": "L",
+    "method": "Kneebar",
+    "comp": "ADCC",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Vannessa Griffin",
+    "wl": "W",
+    "method": "Pts: 11x0",
+    "comp": "Pan American",
+    "weight": "69KG",
+    "stage": "SF",
+    "year": 2020
+   },
+   {
+    "opp": "Claire North",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan American",
+    "weight": "69KG",
+    "stage": "F",
+    "year": 2020
+   },
+   {
+    "opp": "Jessica Flowers",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2020
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "Pts: 2x2, Adv",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2020
+   },
+   {
+    "opp": "Cristina Briggs",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Subversiv 4",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2020
+   },
+   {
+    "opp": "Fatima Kleine",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Subversiv 4",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2020
+   },
+   {
+    "opp": "Tara While",
+    "wl": "W",
+    "method": "Omoplata",
+    "comp": "No Gi Pan Am.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2020
+   },
+   {
+    "opp": "Gabi McComb",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "No Gi Pan Am.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2020
+   },
+   {
+    "opp": "Vannessa Griffin",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "No Gi Pan Am.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2020
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "F2W 158",
+    "weight": "70KG",
+    "stage": "SPF",
+    "year": 2020
+   },
+   {
+    "opp": "Ana Vieira",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "F2W 162",
+    "weight": "N/A",
+    "stage": "SPF",
+    "year": 2021
+   },
+   {
+    "opp": "Maggie Grindatti",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "WNO 7",
+    "weight": "O65KG",
+    "stage": "SPF",
+    "year": 2021
+   },
+   {
+    "opp": "Juliana Fortuna",
+    "wl": "W",
+    "method": "Anaconda choke",
+    "comp": "SUBVERSIV 5",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Maggie Grindatti",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "SUBVERSIV 5",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Nathalie Ribeiro",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "SUBVERSIV 5",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "WNO Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Amanda Leve",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "WNO Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Kendall Reusing",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "WNO Champ.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "NoGi Worlds",
+    "weight": "76KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "NoGi Worlds",
+    "weight": "76KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Maggie Grindatti",
+    "wl": "W",
+    "method": "Triangle armbar",
+    "comp": "NoGi Worlds",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "NoGi Worlds",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "Pts: 10x0",
+    "comp": "NoGi Worlds",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2021
+   },
+   {
+    "opp": "Tara White",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Melissa Cueto",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Kristin Mikkelson",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2022
+   },
+   {
+    "opp": "Luciane Santos",
+    "wl": "W",
+    "method": "Amassa pao choke",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Michelle Lopez",
+    "wl": "W",
+    "method": "Inside heel hook",
+    "comp": "SUBVERSIV 7",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Brittany Elkin",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "SUBVERSIV 7",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Eleftheria Christodoulou",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Kendall Reusing",
+    "wl": "W",
+    "method": "Injury",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "Inside heel hook",
+    "comp": "NoGi World",
+    "weight": "77KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC",
+    "weight": "O65KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Kendall Reusing",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "ADCC",
+    "weight": "O65KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Nathiely Jesus",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC",
+    "weight": "O65KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Bianca Basilio",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "ADCC",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Paige Ivette",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "WNO 26",
+    "weight": "79KG",
+    "stage": "SPF",
+    "year": 2025
+   }
+  ]
+ },
+ "Anabel Lopez": {
+  "division": "+65 kg",
+  "url": "https://www.bjjheroes.com/?p=13920",
+  "rows": [
+   {
+    "opp": "Melissa Cueto",
+    "wl": "L",
+    "method": "Bow and arrow",
+    "comp": "JJ CON",
+    "weight": "79KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Isabely Lemos",
+    "wl": "L",
+    "method": "Kimura",
+    "comp": "ADGS DLS",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Aurelie Vern",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Pts: 5x1",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Yasmira Dias",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "World Pro",
+    "weight": "95KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Brianna Ste-Marie",
+    "wl": "L",
+    "method": "Pts: 9x5",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Polaris 31",
+    "weight": "70KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Magdalena Loska",
+    "wl": "L",
+    "method": "Pts: 1x0",
+    "comp": "ADGS LDN",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Larissa Dias",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "The Crown",
+    "weight": "O79KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "European Champ",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Kendall Reusing",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "Polaris 36",
+    "weight": "ABS",
+    "stage": "SPF",
+    "year": 2026
+   },
+   {
+    "opp": "Maria Rosenthal",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "American NGN",
+    "weight": "77KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Yasmyn Castro",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "OC SMO",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "JJ CON",
+    "weight": "79KG",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Denise Krahn",
+    "wl": "W",
+    "method": "Inside heel hook",
+    "comp": "JJ CON NG",
+    "weight": "77KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Mayara Moreira",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADGS DLS",
+    "weight": "95KG",
+    "stage": "3RD",
+    "year": 2024
+   },
+   {
+    "opp": "Bridget Mceliece",
+    "wl": "W",
+    "method": "Inside heel hook",
+    "comp": "Euro NoGi",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Euro NoGi",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Gamila Kanew",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Ane Svendsen",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Beatrice Jin",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2024
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "W",
+    "method": "Inside heel hook",
+    "comp": "World NoGi",
+    "weight": "77KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Maria Ruffatto",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "World NoGi",
+    "weight": "77KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Paige Ivette",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "World NoGi",
+    "weight": "77KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "M. Rowland",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADGS LDN",
+    "weight": "95KG",
+    "stage": "3RD",
+    "year": 2025
+   },
+   {
+    "opp": "Andreyna Rocha",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "AJP WGC",
+    "weight": "95KG",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "Anna Remneva",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "AJP WGC",
+    "weight": "95KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Jamile Lima",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "AJP WGC",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Eleftheria Christodoulou",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "AJP WGC",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Yara Soares",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Pan NoGi",
+    "weight": "77KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Sula Loewenthal",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "Pan NoGi",
+    "weight": "77KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Erin Harpe",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "Pan NoGi",
+    "weight": "77KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Sara Lehto",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "European Champ",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Sara Ghaffari",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "ADCC EU",
+    "weight": "O65KG",
+    "stage": "8F",
+    "year": 2026
+   },
+   {
+    "opp": "Violet Bennett",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADCC EU",
+    "weight": "O65KG",
+    "stage": "4F",
+    "year": 2026
+   },
+   {
+    "opp": "Jessika Torttila",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "ADCC EU",
+    "weight": "O65KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "ADCC EU",
+    "weight": "O65KG",
+    "stage": "F",
+    "year": 2026
+   }
+  ]
+ },
+ "Paige Ivette": {
+  "division": "+65 kg",
+  "rows": null
+ },
+ "Matilda Reid": {
+  "division": "+65 kg",
+  "rows": null
+ },
+ "Gabi Garcia": {
+  "division": "+65 kg",
+  "url": "https://www.bjjheroes.com/?p=595",
+  "bjjh_name": "Gabrielle Garcia",
+  "rows": [
+   {
+    "opp": "Ana Cordeiro",
+    "wl": "L",
+    "method": "Points",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2009
+   },
+   {
+    "opp": "Lana Stefanac",
+    "wl": "L",
+    "method": "Pts: 16x0",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2009
+   },
+   {
+    "opp": "Mackenzie Dern",
+    "wl": "L",
+    "method": "Pts: 0x0, Pen",
+    "comp": "World Pro",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2015
+   },
+   {
+    "opp": "Jessica Oliveira",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "SF",
+    "year": 2015
+   },
+   {
+    "opp": "Nathiely Jesus",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "F2W 121",
+    "weight": "ABS",
+    "stage": "SPF",
+    "year": 2019
+   },
+   {
+    "opp": "Nathiely Jesus",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "WNO 6",
+    "weight": "ABS",
+    "stage": "SPF",
+    "year": 2021
+   },
+   {
+    "opp": "Amanda Leve",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "WNO Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Choke",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Choke from back",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Craig Jones",
+    "wl": "L",
+    "method": "RNC",
+    "comp": "CJI",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Maria do Carmo",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2008
+   },
+   {
+    "opp": "Luzia Fernandes",
+    "wl": "W",
+    "method": "Pts: 8x2",
+    "comp": "World Pro.",
+    "weight": "O63KG",
+    "stage": "F",
+    "year": 2010
+   },
+   {
+    "opp": "Luzia Fernandes",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "World Pro.",
+    "weight": "O72KG",
+    "stage": "F",
+    "year": 2010
+   },
+   {
+    "opp": "Talita Nogueira",
+    "wl": "W",
+    "method": "Clock choke",
+    "comp": "WLPJJ",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2010
+   },
+   {
+    "opp": "Katrina Weilbacher",
+    "wl": "W",
+    "method": "Pts: 7x0",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2010
+   },
+   {
+    "opp": "Beatriz Mesquita",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "European",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2011
+   },
+   {
+    "opp": "Fabiana Borges",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2011
+   },
+   {
+    "opp": "Tammy Griego",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "Pan American",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2011
+   },
+   {
+    "opp": "Unknown",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "World Pro.",
+    "weight": "O72KG",
+    "stage": "RDS",
+    "year": 2011
+   },
+   {
+    "opp": "Penny Thomas",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "World Pro.",
+    "weight": "O72KG",
+    "stage": "F",
+    "year": 2011
+   },
+   {
+    "opp": "Penny Thomas",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2011
+   },
+   {
+    "opp": "Emily Wetzel",
+    "wl": "W",
+    "method": "Shoulder Pressure",
+    "comp": "World Champ.",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2011
+   },
+   {
+    "opp": "Bia Mesquita",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2011
+   },
+   {
+    "opp": "Hanette Staack",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "F",
+    "year": 2011
+   },
+   {
+    "opp": "Penny Thomas",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "SF",
+    "year": 2011
+   },
+   {
+    "opp": "Hannette Staack",
+    "wl": "W",
+    "method": "Points",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "F",
+    "year": 2011
+   },
+   {
+    "opp": "M. Dern",
+    "wl": "W",
+    "method": "Clock choke",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2012
+   },
+   {
+    "opp": "Emely Wetzel",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Pan American",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2012
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "Pts: 7x0",
+    "comp": "World Pro.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2012
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "Points",
+    "comp": "World Pro.",
+    "weight": "O72KG",
+    "stage": "F",
+    "year": 2012
+   },
+   {
+    "opp": "Beatriz Mesquita",
+    "wl": "W",
+    "method": "Pts: 3x2",
+    "comp": "World Pro.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2012
+   },
+   {
+    "opp": "Talita Nogueira",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2012
+   },
+   {
+    "opp": "Beatriz Mesquita",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2012
+   },
+   {
+    "opp": "Luiza Monteiro",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2012
+   },
+   {
+    "opp": "Fabiana Borges",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2013
+   },
+   {
+    "opp": "Mackenzie Dern",
+    "wl": "W",
+    "method": "Clock choke",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2013
+   },
+   {
+    "opp": "Beatriz Mesquita",
+    "wl": "W",
+    "method": "N/A",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2013
+   },
+   {
+    "opp": "Beatriz Mesquita",
+    "wl": "W",
+    "method": "Pts: 9x0",
+    "comp": "World Pro.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2013
+   },
+   {
+    "opp": "Yurika Nakakura",
+    "wl": "W",
+    "method": "Darce choke",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "4F",
+    "year": 2013
+   },
+   {
+    "opp": "Tammy Griego",
+    "wl": "W",
+    "method": "Points",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "SF",
+    "year": 2013
+   },
+   {
+    "opp": "Fernanda Mazelli",
+    "wl": "W",
+    "method": "N/A",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "F",
+    "year": 2013
+   },
+   {
+    "opp": "Janni Larsson",
+    "wl": "W",
+    "method": "Kimura",
+    "comp": "World Pro.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2014
+   },
+   {
+    "opp": "D. Obelenyte",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "World Pro.",
+    "weight": "O72KG",
+    "stage": "F",
+    "year": 2014
+   },
+   {
+    "opp": "Beatriz Mesquita",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "World Pro.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2014
+   },
+   {
+    "opp": "Talita Nogueira",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "SP Open",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2014
+   },
+   {
+    "opp": "Luiza Monteiro",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "SP Open",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2014
+   },
+   {
+    "opp": "Luiza Monteiro",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "NoGi Worlds",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2014
+   },
+   {
+    "opp": "Mackenzie Dern",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "NoGi Worlds",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2014
+   },
+   {
+    "opp": "Anna Louise Mayne",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "European",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2015
+   },
+   {
+    "opp": "Shanti Abelha",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "European",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2015
+   },
+   {
+    "opp": "Mackenzie Dern",
+    "wl": "W",
+    "method": "Clock choke",
+    "comp": "European",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2015
+   },
+   {
+    "opp": "Samuela Leite",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "European",
+    "weight": "O79KG",
+    "stage": "SF",
+    "year": 2015
+   },
+   {
+    "opp": "Venla Luukkonen",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "European",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2015
+   },
+   {
+    "opp": "Leanna Dittrich",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2015
+   },
+   {
+    "opp": "Luiza Monteiro",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2015
+   },
+   {
+    "opp": "Mackenzie Dern",
+    "wl": "W",
+    "method": "Bread cutter",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2015
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "W",
+    "method": "Pts: 8x0",
+    "comp": "World Pro",
+    "weight": "O75KG",
+    "stage": "4F",
+    "year": 2015
+   },
+   {
+    "opp": "Unknown",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "World Pro",
+    "weight": "O75KG",
+    "stage": "SF",
+    "year": 2015
+   },
+   {
+    "opp": "Vanessa Oliveira",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "World Pro",
+    "weight": "O75KG",
+    "stage": "F",
+    "year": 2015
+   },
+   {
+    "opp": "n/a",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "World Pro",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2015
+   },
+   {
+    "opp": "Ana Cordeiro",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "World Pro",
+    "weight": "ABS",
+    "stage": "R2",
+    "year": 2015
+   },
+   {
+    "opp": "Luanna Alzuguir",
+    "wl": "W",
+    "method": "Points",
+    "comp": "World Pro",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2015
+   },
+   {
+    "opp": "Beatriz Mesquita",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "World Pro",
+    "weight": "ABS",
+    "stage": "3RD",
+    "year": 2015
+   },
+   {
+    "opp": "Alison Tremblay",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "4F",
+    "year": 2015
+   },
+   {
+    "opp": "Amanda Santana",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "3RD",
+    "year": 2015
+   },
+   {
+    "opp": "Amanda Alequin",
+    "wl": "W",
+    "method": "Toe hold",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "4F",
+    "year": 2017
+   },
+   {
+    "opp": "Jessica Flowers",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "SF",
+    "year": 2017
+   },
+   {
+    "opp": "Talita Treta",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "F",
+    "year": 2017
+   },
+   {
+    "opp": "Jessica Flowers",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan American",
+    "weight": "O70KG",
+    "stage": "SF",
+    "year": 2019
+   },
+   {
+    "opp": "Carina Santi",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Pan American",
+    "weight": "O70KG",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Ana Vieira",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2019
+   },
+   {
+    "opp": "Luiza Monteiro",
+    "wl": "W",
+    "method": "Shoulder pressure",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2019
+   },
+   {
+    "opp": "Nathiely Jesus",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Hillary Ornum",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "F2W 114",
+    "weight": "N/A",
+    "stage": "SPF",
+    "year": 2019
+   },
+   {
+    "opp": "Stefanie Egger",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "4F",
+    "year": 2019
+   },
+   {
+    "opp": "Ana Carolina",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "SF",
+    "year": 2019
+   },
+   {
+    "opp": "Carina Santi",
+    "wl": "W",
+    "method": "Kimura",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Kendall Reusing",
+    "wl": "W",
+    "method": "Americana",
+    "comp": "F2W 142",
+    "weight": "124KG",
+    "stage": "SPF",
+    "year": 2020
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "WNO 4",
+    "weight": "ABS",
+    "stage": "SPF",
+    "year": 2020
+   },
+   {
+    "opp": "Claudia Doval",
+    "wl": "W",
+    "method": "Points",
+    "comp": "BJJ Stars 4",
+    "weight": "ABS",
+    "stage": "SPF",
+    "year": 2020
+   },
+   {
+    "opp": "Ana Vieira",
+    "wl": "W",
+    "method": "Pts: 0x0, Pen",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   }
+  ]
+ },
+ "Helena Crevar": {
+  "division": "+65 kg",
+  "url": "https://www.bjjheroes.com/?p=14004",
+  "rows": [
+   {
+    "opp": "Morgan Black",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Ana Vieira",
+    "wl": "L",
+    "method": "Pts: 5x0",
+    "comp": "ADCC",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Sula Lowenthal",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025
+   },
+   {
+    "opp": "Thalyta Silva",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "BJJ Stars 16",
+    "weight": "69KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Emily Fernandez",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "UFC FPI 4",
+    "weight": "65KG",
+    "stage": "SPF",
+    "year": 2023
+   },
+   {
+    "opp": "Maka Vickers",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "R1",
+    "year": 2023
+   },
+   {
+    "opp": "Rebecca Kirian",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "8F",
+    "year": 2023
+   },
+   {
+    "opp": "April Parks",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Aislinn Oconnell",
+    "wl": "W",
+    "method": "Straight ankle lock",
+    "comp": "ADCC ECTrials",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Julia Maele",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "WNO 21",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2023
+   },
+   {
+    "opp": "I. Goodman",
+    "wl": "W",
+    "method": "Outside heel hook",
+    "comp": "GrappleFest 18",
+    "weight": "60KG",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Alyssa Luna",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Brethany Wright",
+    "wl": "W",
+    "method": "Straight ankle lock",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "R2",
+    "year": 2024
+   },
+   {
+    "opp": "Maka Vickers",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Nicole Mathew",
+    "wl": "W",
+    "method": "Straight ankle lock",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Morgan Black",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC WC Trials",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Aurelie Vern",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "UFC FP7",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Maryia Agapova",
+    "wl": "W",
+    "method": "Outside heel hook",
+    "comp": "Pit Series 5",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Jessika Torttila",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Polaris 28",
+    "weight": "70KG",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Aurelie Vern",
+    "wl": "W",
+    "method": "Outside heel hook",
+    "comp": "ADCC",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Brianna Ste-Marie",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADCC",
+    "weight": "65KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Sarah Paul",
+    "wl": "W",
+    "method": "Aoki lock",
+    "comp": "Spokane Subs",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Polaris 30",
+    "weight": "70KG",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Sabrina D. Sousa",
+    "wl": "W",
+    "method": "Inside heel hook",
+    "comp": "ADXC 7",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "L. Bernales",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "WNO 25",
+    "weight": "65KG",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Anabel Lopez",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Polaris 31",
+    "weight": "70KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Maggie Grindatti",
+    "wl": "W",
+    "method": "Calf slicer",
+    "comp": "UFC FP10",
+    "weight": "65KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "WNO 27",
+    "weight": "64KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Margot Ciccarelli",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025
+   },
+   {
+    "opp": "Ane Svendsen",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025
+   },
+   {
+    "opp": "Natasha Druggan",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "Austin SNGO",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Adele Fornarino",
+    "wl": "D",
+    "method": "---",
+    "comp": "CJI 2",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Sarah Galvao",
+    "wl": "W",
+    "method": "Aoki lock",
+    "comp": "CJI 2",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Ashley Greer",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Pit Fighting",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Sula Lowenthal",
+    "wl": "W",
+    "method": "Katagatame",
+    "comp": "Polaris 34",
+    "weight": "65KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "ADXC 11",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Julia Boscher",
+    "wl": "W",
+    "method": "Aoki lock",
+    "comp": "WNO 31",
+    "weight": "65KG",
+    "stage": "SPF",
+    "year": 2025
+   },
+   {
+    "opp": "Bethany Wright",
+    "wl": "W",
+    "method": "Triangle armlock",
+    "comp": "World NoGi",
+    "weight": "71KG",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "World NoGi",
+    "weight": "71KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Gabriela Miranda",
+    "wl": "W",
+    "method": "Katagatame",
+    "comp": "World NoGi",
+    "weight": "71KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Ane Svendsen",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "World NoGi",
+    "weight": "71KG",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Aghata Fernandes",
+    "wl": "W",
+    "method": "Darce choke",
+    "comp": "IBJJF NGGP",
+    "weight": "71KG",
+    "stage": "SPF",
+    "year": 2026
+   },
+   {
+    "opp": "Kennedy Franklin",
+    "wl": "W",
+    "method": "Triangle",
+    "comp": "MCharacter 9",
+    "weight": "70KG",
+    "stage": "SPF",
+    "year": 2026
+   },
+   {
+    "opp": "Jessica Bochenek",
+    "wl": "W",
+    "method": "Triangle armlock",
+    "comp": "ThugTrials 3",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2026
+   },
+   {
+    "opp": "Amanda Nicole",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "Polaris 37",
+    "weight": "70KG",
+    "stage": "SPF",
+    "year": 2026
+   },
+   {
+    "opp": "Ryleigh Pirraglia",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC Dallas",
+    "weight": "70KG",
+    "stage": "RDS",
+    "year": 2026
+   },
+   {
+    "opp": "Ryleigh Pirraglia",
+    "wl": "W",
+    "method": "Submission",
+    "comp": "ADCC Dallas",
+    "weight": "70KG",
+    "stage": "RDS",
+    "year": 2026
+   }
+  ]
+ },
+ "Elizabeth Mitrovic": {
+  "division": "+65 kg",
+  "url": "https://www.bjjheroes.com/?p=13968",
+  "rows": [
+   {
+    "opp": "Gabrielle McComb",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "San Jose Open",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Jessica Flowers",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "NA",
+    "year": 2019
+   },
+   {
+    "opp": "Nikki Sullivan",
+    "wl": "L",
+    "method": "Kneebar",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "NA",
+    "year": 2019
+   },
+   {
+    "opp": "Amanda Lowen",
+    "wl": "L",
+    "method": "Triangle",
+    "comp": "F2W 114",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2019
+   },
+   {
+    "opp": "Talita Nogueira",
+    "wl": "L",
+    "method": "Pts: 6x0",
+    "comp": "American NG Nats",
+    "weight": "O76KG",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Talita Nogueira",
+    "wl": "L",
+    "method": "Points",
+    "comp": "American Nats",
+    "weight": "O79KG",
+    "stage": "RR",
+    "year": 2019
+   },
+   {
+    "opp": "Claudia Doval",
+    "wl": "L",
+    "method": "Points",
+    "comp": "American Nats",
+    "weight": "O79KG",
+    "stage": "RR",
+    "year": 2019
+   },
+   {
+    "opp": "Talita Nogueira",
+    "wl": "L",
+    "method": "Pts: 24x2",
+    "comp": "Las Vegas Open",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Danielle Alvarez",
+    "wl": "L",
+    "method": "Points",
+    "comp": "Mexico City Open",
+    "weight": "O79KG",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Danielle Alvarez",
+    "wl": "L",
+    "method": "Points",
+    "comp": "Mexico City Open",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Talita Nogueira",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "NoGi Worlds",
+    "weight": "76KG",
+    "stage": "F",
+    "year": 2019
+   },
+   {
+    "opp": "Karen Antunes",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "Fresno Open",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2020
+   },
+   {
+    "opp": "Nathalie Ribeiro",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "San Jose Open",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2020
+   },
+   {
+    "opp": "Maggie Grindatti",
+    "wl": "L",
+    "method": "Pts: 6x0",
+    "comp": "NoGi Pan Am.",
+    "weight": "76KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Mayara Custodio",
+    "wl": "L",
+    "method": "Pts: 7x0",
+    "comp": "NoGi Pan Am.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "Pan American",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Choke from back",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2021
+   },
+   {
+    "opp": "Rafaela Guedes",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "NoGi Worlds",
+    "weight": "76KG",
+    "stage": "SF",
+    "year": 2021
+   },
+   {
+    "opp": "Elisabeth Bravo",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "F2W199",
+    "weight": "N/A",
+    "stage": "SPF",
+    "year": 2022
+   },
+   {
+    "opp": "Fernanda Cristo",
+    "wl": "L",
+    "method": "Pts: 23x0",
+    "comp": "Houston Open",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2022
+   },
+   {
+    "opp": "Fernanda Cristo",
+    "wl": "L",
+    "method": "Pts: 9x0",
+    "comp": "Houston Open",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Fernanda Cristo",
+    "wl": "L",
+    "method": "Pts: 5x0",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Gabrielle McComb",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2022
+   },
+   {
+    "opp": "Thamires Monteiro",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "Sta Cruz NGO",
+    "weight": "ABS",
+    "stage": "RR",
+    "year": 2022
+   },
+   {
+    "opp": "Mayara Custodio",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Sta Cruz NGO",
+    "weight": "ABS",
+    "stage": "RR",
+    "year": 2022
+   },
+   {
+    "opp": "Fernanda Mazzelli",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "NoGi Worlds",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "Pts: 7x0",
+    "comp": "NoGi Worlds",
+    "weight": "71KG",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Nathalie Ribeiro",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "European Open",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2023
+   },
+   {
+    "opp": "Amanda Magda",
+    "wl": "L",
+    "method": "Toe hold",
+    "comp": "European Open",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Melissa Cueto",
+    "wl": "L",
+    "method": "Pts: 15x0",
+    "comp": "LA Open",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Bow and arrow",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Aurelie Vern",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "Pan American",
+    "weight": "74KG",
+    "stage": "R1",
+    "year": 2023
+   },
+   {
+    "opp": "Mayara Custodio",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Santa Cruz O",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Maria Malyjasiak",
+    "wl": "L",
+    "method": "Pts: 3x0",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Leticia Cardozo",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "American Nats",
+    "weight": "69KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Thamara Ferreira",
+    "wl": "L",
+    "method": "Terra lock",
+    "comp": "American NNG",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Roberta Ribeiro",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "NoGi Pan",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "L",
+    "method": "Pts: 6x0",
+    "comp": "European NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Jaine Fragoso",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Sacramento NGO",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Ffion Davies",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "NoGi World",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "H. Crevar",
+    "wl": "L",
+    "method": "Pts: 3x0",
+    "comp": "ADCC LB",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Mayara Custodio",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Sacramento Open",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Ingridd Alves",
+    "wl": "L",
+    "method": "Pts: 4x0",
+    "comp": "Pan American",
+    "weight": "74KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 23x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Nathiely Jesus",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "ADXC 4",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2024
+   },
+   {
+    "opp": "Amanda Magda",
+    "wl": "L",
+    "method": "Toe hold",
+    "comp": "World Champ.",
+    "weight": "79KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Maria Malijasiak",
+    "wl": "L",
+    "method": "Armlock",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Nathiely Jesus",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "ADCC",
+    "weight": "O65KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Maria Ruffatto",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Portland NGO",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Melissa Cueto",
+    "wl": "L",
+    "method": "N/A",
+    "comp": "Sacramento Op",
+    "weight": "79KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Euro NoGi",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Anabel Lopez",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Jaine Fragoso",
+    "wl": "L",
+    "method": "Inside heel hook",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2024
+   },
+   {
+    "opp": "Paige Ivette",
+    "wl": "L",
+    "method": "Pts: 3x0",
+    "comp": "World NoGi",
+    "weight": "77KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Nadia Frankland",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "Sacramento O",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Ingridd Alves",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "SF",
+    "year": 2025
+   },
+   {
+    "opp": "Ane Svendsen",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025
+   },
+   {
+    "opp": "Margot Ciccarelli",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025
+   },
+   {
+    "opp": "Aghata Fernandes",
+    "wl": "L",
+    "method": "Points",
+    "comp": "Sacramento WO",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Paige Ivette",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "ADCC WC TR",
+    "weight": "O65KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Giovanna Carneiro",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "R1",
+    "year": 2026
+   },
+   {
+    "opp": "Sara Fearon",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "F2W 58",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2018
+   },
+   {
+    "opp": "Rita Lynn",
+    "wl": "W",
+    "method": "Kneebar",
+    "comp": "Mexico City NGO",
+    "weight": "NA",
+    "stage": "NA",
+    "year": 2019
+   },
+   {
+    "opp": "Veronica Macedo",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "NoGi Worlds",
+    "weight": "76KG",
+    "stage": "4F",
+    "year": 2019
+   },
+   {
+    "opp": "Jessica Guedry",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "NoGi Worlds",
+    "weight": "76KG",
+    "stage": "SF",
+    "year": 2019
+   },
+   {
+    "opp": "Talita Nogueira",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "F2W 135",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2020
+   },
+   {
+    "opp": "Tara White",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "F2W 162",
+    "weight": "N/A",
+    "stage": "SPF",
+    "year": 2021
+   },
+   {
+    "opp": "Silvia Silva",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "F2W 168",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2021
+   },
+   {
+    "opp": "Melissa Cueto",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Art Suave E4",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2021
+   },
+   {
+    "opp": "Kylie Villicano",
+    "wl": "W",
+    "method": "Cross Choke",
+    "comp": "Pan American",
+    "weight": "79KG",
+    "stage": "4F",
+    "year": 2021
+   },
+   {
+    "opp": "Laura Heiman",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Houston Open",
+    "weight": "74KG",
+    "stage": "SF",
+    "year": 2022
+   },
+   {
+    "opp": "Hannah Rauch",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Houston Open",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2022
+   },
+   {
+    "opp": "Marcia Ramos",
+    "wl": "W",
+    "method": "Triangle",
+    "comp": "NoGi Worlds",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2022
+   },
+   {
+    "opp": "Rana Qubbaj",
+    "wl": "W",
+    "method": "Triangle",
+    "comp": "European Open",
+    "weight": "79KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Vannessa Griffin",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2023
+   },
+   {
+    "opp": "Isa Reiber",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Santa Cruz O",
+    "weight": "74KG",
+    "stage": "RR",
+    "year": 2023
+   },
+   {
+    "opp": "Isa Reiber",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Santa Cruz O",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Silvia Silva",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "R1",
+    "year": 2023
+   },
+   {
+    "opp": "Emilly Vasconcelos",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Arte Suave E25",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2023
+   },
+   {
+    "opp": "Deise Leonanjo",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "American Nats",
+    "weight": "69KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Leticia Cardozo",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "American NNG",
+    "weight": "O77KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Amanda Bruse",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "NoGi Pan",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Jordan Patrick",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "NoGi Pan",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Maggie Grindatti",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "NoGi Pan",
+    "weight": "71KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Jordan Patrick",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "NoGi Pan",
+    "weight": "71KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "European NoGi",
+    "weight": "71KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Ane Svendsen",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "European NoGi",
+    "weight": "71KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Lunna Silva",
+    "wl": "W",
+    "method": "Points",
+    "comp": "Sacramento Open",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "Amanda Bruse",
+    "wl": "W",
+    "method": "Points",
+    "comp": "Sacramento NGO",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Maggie Grindatti",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "NoGi World",
+    "weight": "72KG",
+    "stage": "4F",
+    "year": 2023
+   },
+   {
+    "opp": "Graciele Fava",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "NoGi World",
+    "weight": "72KG",
+    "stage": "SF",
+    "year": 2023
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 6x2",
+    "comp": "NoGi World",
+    "weight": "72KG",
+    "stage": "F",
+    "year": 2023
+   },
+   {
+    "opp": "C. Behm",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC LB",
+    "weight": "70KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "N. Dillon",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADCC LB",
+    "weight": "70KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "S. Blochowsky",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC LB",
+    "weight": "70KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "C. Behm",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC LB",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "P. Letcher",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "ADCC LB",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Leticia Cardozo",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Sacramento Open",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Lavinia Barbosa",
+    "wl": "W",
+    "method": "Adv",
+    "comp": "Sacramento Open",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Karen Terra",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "Sacramento NGO",
+    "weight": "ABS",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Kyssa Silva",
+    "wl": "W",
+    "method": "Guillotine",
+    "comp": "Sacramento NGO",
+    "weight": "ABS",
+    "stage": "RR",
+    "year": 2024
+   },
+   {
+    "opp": "Fernanda Cristo",
+    "wl": "W",
+    "method": "Pts: 2x2, Adv",
+    "comp": "Pan American",
+    "weight": "74KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Maria Barboza",
+    "wl": "W",
+    "method": "Pts: 13x2",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Sonja Tsiouris",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC WC Trials",
+    "weight": "O65KG",
+    "stage": "R1",
+    "year": 2024
+   },
+   {
+    "opp": "Ashley Green",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC WC Trials",
+    "weight": "O65KG",
+    "stage": "8F",
+    "year": 2024
+   },
+   {
+    "opp": "Brittney Elkin",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC WC Trials",
+    "weight": "O65KG",
+    "stage": "4F",
+    "year": 2024
+   },
+   {
+    "opp": "Bridget McEliece",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "ADCC WC Trials",
+    "weight": "O65KG",
+    "stage": "SF",
+    "year": 2024
+   },
+   {
+    "opp": "Amanda Leve",
+    "wl": "W",
+    "method": "Injury",
+    "comp": "ADCC WC Trials",
+    "weight": "O65KG",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Maryanna Cardoso",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2024
+   },
+   {
+    "opp": "Breanna Stikkelman",
+    "wl": "W",
+    "method": "Shoulder pressure",
+    "comp": "Sacramento NGO",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2024
+   },
+   {
+    "opp": "Iasmim Casser",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "SJose SPO",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025
+   },
+   {
+    "opp": "Magdalena Loska",
+    "wl": "W",
+    "method": "DQ",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "R1",
+    "year": 2025
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "W",
+    "method": "Pts: 6x2",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "4F",
+    "year": 2025
+   },
+   {
+    "opp": "Karen Terra",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "Sacramento WO",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2026
+   },
+   {
+    "opp": "Elizabeth Bonani",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "Sacramento WO",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Denise Krahn",
+    "wl": "W",
+    "method": "Pts: 6x2",
+    "comp": "Pan American",
+    "weight": "74KG",
+    "stage": "SF",
+    "year": 2026
+   },
+   {
+    "opp": "Maria Vicentini",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "Pan American",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2026
+   },
+   {
+    "opp": "Christina Hansen",
+    "wl": "W",
+    "method": "Triangle",
+    "comp": "ADCC WC TR",
+    "weight": "O65KG",
+    "stage": "R1",
+    "year": 2026
+   },
+   {
+    "opp": "Melissa Sheppey",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC WC TR",
+    "weight": "O65KG",
+    "stage": "4F",
+    "year": 2026
+   },
+   {
+    "opp": "Joslyn Molina",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "ADCC WC TR",
+    "weight": "O65KG",
+    "stage": "SF",
+    "year": 2026
+   }
+  ]
+ }
+}
