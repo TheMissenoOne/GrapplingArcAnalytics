@@ -75,12 +75,14 @@ class EngineConfig:
 #   Raphaela Guedes, R. Guedes, "Raphaela Guedes Final" -> Rafaela Guedes
 #   Mo Black             -> Morgan Black    (nickname; Trials 2023/24 then ADCC 2024)
 #   Gabby Garcia, Gabrielle Garcia -> Gabi Garcia (the CJI 2024 Craig Jones superfight)
-# NOT merged: "Anna Karolina Vieira" vs "Ana Carolina Vieira" -- two substitutions rather
-# than a typo, no shared event either way, and both plausible real names.
+# Fifth pass, same day: "Anna Karolina Vieira" -> "Ana Carolina Vieira", confirmed by the
+# project owner. The bouts never settled it -- three each, no shared event, a double variation
+# -- and corroboration from outside the string is exactly what the rule asks for. 1870/RD175 on
+# three rated bouts becomes 1840/RD154 on five.
 # Measured effect on the roster: Rafaela Guedes 1642/RD220 on one rated bout -> 1883/RD144 on
 # seven; Morgan Black 1615/RD215 -> 1717/RD169; Gabi Garcia 1661/RD213 -> 1590/RD197. Athletes
 # clearing the gate went from 6 to 9. 865 -> 864 matches (one pairing became a duplicate).
-SITE_RATING_RUN_ID: str | None = "99503191-a2b3-470e-898f-c27c303e00b5"
+SITE_RATING_RUN_ID: str | None = "b0def998-6c7c-4011-b9ea-d0ea01e7b6bc"
 
 # Publish-confidence cut. An editorial decision calibrated against measured impact
 # (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87

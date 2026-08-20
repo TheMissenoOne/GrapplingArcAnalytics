@@ -36,6 +36,11 @@ class _Row:
     ("I. Goodman", "Injana Goodman"),
     ("Sula Lowenthal", "Sula Mae Lowenthal"),  # dropped middle name
     ("Anabel Lopez", "Anabel Lopez"),
+    # Reaches the canonical spelling through ATHLETE_ALIASES first, then the dropped-middle-name
+    # rule. This pair used to sit in the "must not merge" list below on the strength of
+    # Ana/Anna; the alias settled the identity on 2026-08-20, so what is left is an ordinary
+    # abbreviated form and the matcher should say so.
+    ("Ana Vieira", "Anna Karolina Vieira"),
 ])
 def test_abbreviated_opponent_is_the_same_person(a: str, b: str) -> None:
     assert _same_person(a, b)
@@ -44,9 +49,9 @@ def test_abbreviated_opponent_is_the_same_person(a: str, b: str) -> None:
 @pytest.mark.parametrize(("a", "b"), [
     # These are open duplicate questions in the corpus. A contact sheet must not answer them:
     # merging two athletes is a reviewed, twice-corroborated decision, not a string ratio.
-    ("Jon Hansen", "John Hansen"),
-    ("Ana Vieira", "Anna Karolina Vieira"),
+    ("Jon Hansen", "John Hansen"),            # a first-name spelling variation, still open
     ("G. Vasconcelos", "F. Vasconcelos"),     # different initials = different people
+    ("Tye Ruotolo", "Kade Ruotolo"),          # brothers; reviewed and confirmed distinct
     ("Morgan Black", "Brianna Ste-Marie"),
 ])
 def test_different_spellings_are_not_merged(a: str, b: str) -> None:

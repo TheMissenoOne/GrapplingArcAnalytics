@@ -47,7 +47,11 @@ load_dotenv(REPO / ".env")
 
 from sqlalchemy import text  # noqa: E402
 
-from analysis.names import athlete_key  # noqa: E402
+from analysis.names import (  # noqa: E402
+    athlete_key,
+    reviewed_verdict,
+    roster_aliases,
+)
 from analysis.stats_rigor import (  # noqa: E402
     MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE,
     MIN_EFFECTIVE_N_FOR_CATEGORY_ESTIMATE,
@@ -87,6 +91,10 @@ VOID = r"^dq|disqualif|injur|withdraw|n/a|^-+$|walkover|forfeit"
 DIVISIONS = ("65 kg", "+65 kg")
 # Nested recency windows, newest last. Fixed years rather than "N years back from today" so a
 # rebuild in six months does not silently re-slice the report.
+# Similarity floor for surfacing a spelling pair. Editorial: high enough that unrelated
+# names do not crowd the panel, low enough to catch a nickname ("Mo" for "Morgan"), which
+# lands almost exactly on it.
+MIN_DUPLICATE_RATIO = 0.80
 RECENCY_WINDOWS = (2019, 2022, 2024)
 # What the page opens on. Recent no-gi is the question the bracket asks; the full career is a
 # secondary view, one selection away.
@@ -1113,7 +1121,8 @@ def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
 
 
 # ── layer 8: data quality ───────────────────────────────────────────────────────
-def data_quality(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
+def data_quality(conn: Any, roster: Mapping[str, str],
+                 display: Mapping[str, str]) -> dict[str, Any]:
     """Roster athletes who appear in the corpus under more than one spelling.
 
     Reported as CANDIDATES, never merged here. Merging two athlete rows is a decision that
@@ -1124,6 +1133,12 @@ def data_quality(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
     It costs something specific and checkable: a split athlete's rating is computed from only
     the bouts filed under one of her spellings, which inflates her RD and can push her past
     the publish gate for no reason but a typo.
+
+    Each candidate carries its VERDICT where one exists, because "nobody has looked at this"
+    and "this was looked at and cannot be settled" are different findings and used to render
+    identically. And the count of splits already CLOSED ships alongside, so the panel reports
+    a state of the data rather than an open-ended worry: a page that only ever lists what is
+    left reads the same the day before the work is done and the day after.
     """
     import difflib
 
@@ -1145,15 +1160,23 @@ def data_quality(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
                 continue
             if not (k1 in roster_keys or k2 in roster_keys):
                 continue
-            if difflib.SequenceMatcher(None, k1, k2).ratio() >= 0.80:
+            ratio = difflib.SequenceMatcher(None, k1, k2).ratio()
+            if ratio >= MIN_DUPLICATE_RATIO:
+                verdict = reviewed_verdict(k1, k2)
                 pairs.append({"a": n1, "a_bouts": c1, "b": n2, "b_bouts": c2,
-                              "ratio": round(difflib.SequenceMatcher(None, k1, k2).ratio(), 3)})
+                              "ratio": round(ratio, 3),
+                              "verdict": verdict[0] if verdict else None,
+                              "note": verdict[1] if verdict else None})
+    resolved = roster_aliases(roster_keys)
     return {"duplicate_candidates": sorted(pairs, key=lambda p: -(p["a_bouts"] + p["b_bouts"])),
-            "rule": "difflib ratio >= 0.80 on the canonical key, at least one side on the "
-                    "roster, both sides carrying bouts",
-            "not_merged": "candidates only — merging athlete rows needs corroboration from "
-                          "outside the string, and a wrong merge collapses a real bout into "
-                          "a self-match"}
+            # Structured, so the page states the rule in its own language instead of printing
+            # an English sentence it was handed.
+            "rule": {"min_ratio": MIN_DUPLICATE_RATIO, "basis": "canonical_key",
+                     "requires_roster_side": True, "requires_bouts_both_sides": True},
+            "resolved": {"spellings": len(resolved),
+                         "athletes": len(set(resolved.values())),
+                         "into": sorted({display[k] for k in set(resolved.values())
+                                         if k in display})}}
 
 
 def main() -> int:
@@ -1189,7 +1212,7 @@ def main() -> int:
         corr = correlation_layer(conn, bouts)
         rating = rating_layer(conn, roster)
         radar = radar_layer(conn, bouts, roster)
-        dq_ = data_quality(conn, roster)
+        dq_ = data_quality(conn, roster, display)
 
     doc = {
         "generated": datetime.now(UTC).isoformat(timespec="seconds"),

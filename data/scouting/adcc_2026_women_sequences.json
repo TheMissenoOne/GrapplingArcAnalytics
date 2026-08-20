@@ -58,8 +58,8 @@
   "div_b": null,
   "event": "WNO Championship",
   "year": 2021,
-  "winner": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
-  "a_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+  "winner": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "a_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
   "b_id": "60508a85-fa8e-40a2-90fe-d2919dccf783",
   "win_type": "SUBMISSION",
   "seq": [
@@ -79,14 +79,14 @@
     "ts": 241,
     "type": "submission",
     "label": "Guillotine Choke",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": false
    },
    {
     "ts": 257,
     "type": "control",
     "label": "Mount",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17"
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
    },
    {
     "ts": 352,
@@ -98,7 +98,7 @@
     "ts": 435,
     "type": "takedown",
     "label": "Foot Sweep",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": false
    },
    {
@@ -117,33 +117,33 @@
     "ts": 532,
     "type": "pass",
     "label": "Knee Cut Pass",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": true
    },
    {
     "ts": 541,
     "type": "control",
     "label": "Knee on Belly",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17"
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
    },
    {
     "ts": 583,
     "type": "submission",
     "label": "Ezekiel Choke",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": false
    },
    {
     "ts": 622,
     "type": "control",
     "label": "Mount",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17"
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
    },
    {
     "ts": 687,
     "type": "submission",
     "label": "Arm Triangle Choke",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": true
    }
   ]
@@ -259,14 +259,14 @@
   "year": 2021,
   "winner": "1eaf5409-4818-4b9a-a93f-bc45ac6a4e25",
   "a_id": "1eaf5409-4818-4b9a-a93f-bc45ac6a4e25",
-  "b_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+  "b_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
   "win_type": "DECISION",
   "seq": [
    {
     "ts": 39,
     "type": "pass",
     "label": "Guard Pass",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": false
    },
    {
@@ -1390,13 +1390,350 @@
   ]
  },
  {
+  "id": "6d7d92c5-290d-4663-af30-f517a06f19bf",
+  "a": "Ana Carolina Vieira",
+  "b": "Amanda Levy",
+  "a_key": "ana carolina vieira",
+  "b_key": "amanda levy",
+  "div_a": "65 kg",
+  "div_b": null,
+  "event": "ADCC 2024",
+  "year": 2024,
+  "winner": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "a_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "b_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 44,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 61,
+    "type": "guard",
+    "label": "Shin to Shin Guard",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 61,
+    "type": "submission",
+    "label": "Loop Choke",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 76,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 109,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 109,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 109,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 117,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 177,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+    "successful": false
+   },
+   {
+    "ts": 185,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 185,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 185,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 191,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 196,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 201,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 201,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 201,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 209,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 232,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+    "successful": false
+   },
+   {
+    "ts": 262,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+    "successful": false
+   },
+   {
+    "ts": 340,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 340,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 340,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 406,
+    "type": "escape",
+    "label": "Bridge (Upa Escape)",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 406,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 428,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 428,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 428,
+    "type": "guard",
+    "label": "Deep Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 428,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 428,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 436,
+    "type": "control",
+    "label": "Mount",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 452,
+    "type": "escape",
+    "label": "Bridge (Upa Escape)",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 452,
+    "type": "control",
+    "label": "Mount",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 500,
+    "type": "control",
+    "label": "Mount",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 531,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 581,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 617,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 711,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 729,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 729,
+    "type": "takedown",
+    "label": "Arm Drag",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 729,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 773,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 781,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 807,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 825,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 869,
+    "type": "takedown",
+    "label": "Arm Drag",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 869,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 915,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 964,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 986,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+   },
+   {
+    "ts": 1121,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+    "successful": false
+   }
+  ]
+ },
+ {
   "id": "7577f162-0372-4aa6-be2e-640349e272da",
   "a": "Helena Crevar",
-  "b": "Anna Karolina Vieira",
+  "b": "Ana Carolina Vieira",
   "a_key": "helena crevar",
-  "b_key": "anna karolina vieira",
+  "b_key": "ana carolina vieira",
   "div_a": "+65 kg",
-  "div_b": null,
+  "div_b": "65 kg",
   "event": "ADCC 2024",
   "year": 2024,
   "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
@@ -1883,6 +2220,190 @@
   ]
  },
  {
+  "id": "db27bea3-4f23-4c14-9dc0-c41f68f6c590",
+  "a": "Bia Mesquita",
+  "b": "Ana Carolina Vieira",
+  "a_key": "bia mesquita",
+  "b_key": "ana carolina vieira",
+  "div_a": null,
+  "div_b": "65 kg",
+  "event": "ADCC 2024",
+  "year": 2024,
+  "winner": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "a_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+  "b_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 0,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 63,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 145,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 171,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 255,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 315,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 382,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 525,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+    "successful": false
+   },
+   {
+    "ts": 578,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 594,
+    "type": "escape",
+    "label": "Turtle Position",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 663,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 687,
+    "type": "sweep",
+    "label": "Sweep",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 687,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 721,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 721,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 747,
+    "type": "escape",
+    "label": "Turtle Position",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 747,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 766,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 826,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 838,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+    "successful": false
+   },
+   {
+    "ts": 870,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+    "successful": false
+   },
+   {
+    "ts": 928,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 957,
+    "type": "takedown",
+    "label": "Arm Drag",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+    "successful": false
+   },
+   {
+    "ts": 1007,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 1053,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 1270,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 1366,
+    "type": "guard",
+    "label": "Lasso Guard",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+    "successful": false
+   }
+  ]
+ },
+ {
   "id": "e1f2dbeb-158f-44a6-8390-a3b2c079d3c2",
   "a": "Hailey Gettys",
   "b": "Rafaela Guedes",
@@ -2145,7 +2666,7 @@
   "event": "CJI 2 - Day 1",
   "year": 2025,
   "winner": "ecd7d0d1-f04b-4aff-af6b-ac8131a26021",
-  "a_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+  "a_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
   "b_id": "ecd7d0d1-f04b-4aff-af6b-ac8131a26021",
   "win_type": "DECISION",
   "seq": [
@@ -2153,14 +2674,14 @@
     "ts": 25644,
     "type": "pass",
     "label": "Guard Pass",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": true
    },
    {
     "ts": 25810,
     "type": "submission",
     "label": "Calf Slicer",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": false
    },
    {
@@ -2187,7 +2708,7 @@
     "ts": 26102,
     "type": "transition",
     "label": "Imanari Roll",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": false
    },
    {
@@ -2221,7 +2742,7 @@
     "ts": 26495,
     "type": "submission",
     "label": "Straight Ankle Lock",
-    "actor_id": "e2750d04-d246-49b6-9c57-0e04bcbd9b17",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
     "successful": false
    },
    {

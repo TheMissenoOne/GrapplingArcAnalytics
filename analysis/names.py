@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from collections.abc import Iterable
 
 # Known name aliases for cross-referencing (norm → canonical)
 # NOTE: "guillotine" intentionally omitted — would change existing ADCC behavior
@@ -205,13 +206,51 @@ ATHLETE_ALIASES: dict[str, str] = {
                                                # the publicised superfight, which is hers
     "gabrielle garcia": "gabi garcia",         # full name, no bouts; aliased so a future
                                                # import cannot open a third row
-    # NOT aliased, deliberately: "Anna Karolina Vieira" (3 bouts, all ADCC 2024) and
-    # "Ana Carolina Vieira" (3 bouts, WNO 2021 / CJI 2025). Two substitutions rather than a
-    # typo, no shared event to corroborate either way, and both are plausible real Brazilian
-    # names. Merging on resemblance alone is how two people become one.
+    # Confirmed by the project owner, 2026-08-20, which is corroboration from outside the
+    # string -- the thing the rule asks for and the thing the data could not supply. The bouts
+    # alone never settled it: three each, no shared event, and a double variation.
+    "anna karolina vieira": "ana carolina vieira",
     # NOTE: Junny vs Edwin Ocasio, Maia vs Mayssa Bastos, George vs Jorge Santos are
     # DISTINCT people (real bouts) — do not alias.
 }
+
+
+# Pairs that LOOK like one person and are not, or that were examined and left unresolved.
+#
+# Until now this knowledge lived in comments, which no consumer can read: a report showing a
+# near-identical pair had no way to say whether anyone had already looked at it, so a decided
+# case and an unexamined one appeared identically on the page. `kind` separates the two answers
+# that matter -- "these are two people" from "we looked and cannot tell" -- and `note` carries
+# the evidence in Portuguese, because the only thing that renders it is a Portuguese report.
+#
+# ``distinct``   -- corroborated as different humans. Never alias these.
+# ``unresolved`` -- examined, evidence does not settle it either way. Not a to-do; a finding.
+REVIEWED_NOT_MERGED: tuple[tuple[str, str, str, str], ...] = (
+    ("junny ocasio", "edwin ocasio", "distinct",
+     "Lutas reais de ambos no corpus; são dois atletas."),
+    ("maia bastos", "mayssa bastos", "distinct", "Duas atletas distintas."),
+    ("george santos", "jorge santos", "distinct", "Dois atletas distintos."),
+    ("andrew tackett", "william tackett", "distinct", "Irmãos."),
+    ("tye ruotolo", "kade ruotolo", "distinct", "Irmãos gêmeos."),
+    ("mica galvao", "mike galvao", "distinct", "Ambíguo o bastante para nunca fundir."),
+    ("d johnson", "tex johnson", "distinct", "Forma de inicial ambígua; não fundir."),
+)
+
+
+def reviewed_verdict(key_a: str, key_b: str) -> tuple[str, str] | None:
+    """``(kind, note)`` when this pair has already been judged, else None. Order-independent."""
+    pair = {key_a, key_b}
+    for a, b, kind, note in REVIEWED_NOT_MERGED:
+        if {a, b} == pair:
+            return kind, note
+    return None
+
+
+def roster_aliases(keys: Iterable[str]) -> dict[str, str]:
+    """Alias entries whose canonical target is one of ``keys`` -- i.e. the splits already
+    closed for that roster. Lets a report say how many it resolved, not just what is left."""
+    wanted = set(keys)
+    return {src: dst for src, dst in ATHLETE_ALIASES.items() if dst in wanted}
 
 
 def raw_athlete_key(name: str) -> str:
