@@ -16,6 +16,8 @@ from pathlib import Path
 
 import pytest
 
+from analysis.stats_rigor import MIN_N_FOR_ANY_GRADE
+
 _SPEC = importlib.util.spec_from_file_location(
     "bracket_export", Path(__file__).resolve().parent.parent / "scripts" / "bracket_export.py")
 assert _SPEC and _SPEC.loader
@@ -325,3 +327,70 @@ def test_the_cross_product_covers_every_combination_present() -> None:
     assert len(keys[bx.ALL_CUT]) == 2
     assert len(keys["u:gi|r:ibjjf|y:2019"]) == 1
     assert "u:gi|r:adcc|y:all" not in keys
+
+
+# ── an athlete's own page ───────────────────────────────────────────────────────
+def _rec(name: str, rows: list[dict[str, object]], **kw: object) -> dict[str, object]:
+    return {name: {"key": bx.athlete_key(name), "display": name, "division": "+65 kg",
+                   "rows": rows, **kw}}
+
+
+def _rrow(year: int, wl: str, method: str, comp: str = "ADCC",
+          source: str = "own_record") -> dict[str, object]:
+    return {"opp": f"Opponent {year}", "wl": wl, "method": method, "comp": comp,
+            "year": year, "source": source}
+
+
+NO_RATING: dict[str, object] = {"athletes": {}}
+
+
+def test_a_reconstructed_record_is_not_a_second_class_page() -> None:
+    """Same axes, same interval, same grade. The only thing a two-row record gets that a
+    forty-row one does not is the `insufficient` grade its own n earns."""
+    recs = _rec("Joslyn Molina", [_rrow(2024, "W", "Armbar", source="corpus"),
+                                  _rrow(2023, "L", "Heel Hook", source="opponent_record")],
+                provenance={"total": 2, "by_source": {"corpus": 1, "opponent_record": 1},
+                            "has_own_table": False, "reconstructed_share": 1.0})
+    out = bx.athlete_layer(recs, NO_RATING, [])
+    a = out["joslyn molina"]
+    cut = a["cuts"][bx.ALL_CUT]
+    assert cut["n"] == 2 and cut["w"] == 1 and cut["l"] == 1
+    # n < 5 -> insufficient, whatever the interval arithmetic says.
+    assert cut["win_rate"]["grade"] == "insufficient"
+    assert cut["finish_rate"]["grade"] == "insufficient"
+    assert a["provenance"]["has_own_table"] is False
+    # And the axes are the same ones the category uses, not a reduced set.
+    assert bx.cut_key(uniform_="no_gi") in a["cuts"]
+
+
+def test_an_athlete_page_states_that_the_cluster_gate_does_not_apply() -> None:
+    """It cannot apply — there is one athlete on her own page by construction — and leaving
+    that implicit would read as the gate having been quietly dropped."""
+    out = bx.athlete_layer(_rec("Gabi Garcia", [_rrow(2024, "W", "Armbar")]), NO_RATING, [])
+    gate = out["gabi garcia"]["gate"]
+    assert gate["cluster_coverage_applies"] is False
+    assert gate["why_code"] == "single_athlete_by_construction"
+    assert gate["min_n_for_grade"] == MIN_N_FOR_ANY_GRADE
+
+
+def test_an_athlete_page_carries_no_cut_the_record_does_not_reach() -> None:
+    """A cut with no bouts must be ABSENT, so the page can say "nenhuma luta neste corte"
+    instead of drawing an empty table that looks like a zero."""
+    out = bx.athlete_layer(_rec("Helena Crevar", [_rrow(2024, "W", "Armbar", "ADCC")]),
+                           NO_RATING, [])
+    cuts = out["helena crevar"]["cuts"]
+    assert bx.cut_key(uniform_="gi") not in cuts
+    assert bx.cut_key(uniform_="no_gi", ruleset_="adcc", since="2024") in cuts
+
+
+def test_a_later_own_table_lands_on_the_same_identity() -> None:
+    """The record is one object with a mix, not an own record beside a reconstructed one."""
+    recs = _rec("Ane Svendsen",
+                [_rrow(2024, "W", "Armbar"),
+                 _rrow(2023, "L", "Heel Hook", source="opponent_record")],
+                provenance={"total": 2, "by_source": {"own_record": 1, "opponent_record": 1},
+                            "has_own_table": True, "reconstructed_share": 0.5})
+    a = bx.athlete_layer(recs, NO_RATING, [])["ane svendsen"]
+    assert a["provenance"]["has_own_table"] is True
+    assert a["provenance"]["reconstructed_share"] == 0.5
+    assert a["cuts"][bx.ALL_CUT]["by_source"] == {"own_record": 1, "opponent_record": 1}
