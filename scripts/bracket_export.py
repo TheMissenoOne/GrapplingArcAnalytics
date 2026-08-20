@@ -45,6 +45,7 @@ from sqlalchemy import text  # noqa: E402
 
 from analysis.names import athlete_key  # noqa: E402
 from analysis.stats_rigor import (  # noqa: E402
+    MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE,
     Coverage,
     benjamini_hochberg,
     compare_proportions,
@@ -211,7 +212,10 @@ def gated(k: int, n: int, cov: Coverage) -> dict[str, Any]:
         return {**d, "estimable": True, "coverage": cov.grade}
     return {**d, "lo": None, "hi": None, "half": None, "grade": "none",
             "estimable": False, "coverage": cov.grade, "reason": cov.reason,
-            "clusters": cov.clusters, "effective_n": round(cov.effective_n, 3)}
+            "reason_code": cov.reason_code, "clusters": cov.clusters,
+            "min_clusters": MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE,
+            "top_share": round(cov.top_share, 3),
+            "effective_n": round(cov.effective_n, 3)}
 
 
 # ── layer 0: rating confidence ──────────────────────────────────────────────────
@@ -374,12 +378,14 @@ def _leg_contrast(w: Sequence[Mapping[str, Any]], loss: Sequence[Mapping[str, An
     """Leg locks conceded against leg locks applied, refused when it cannot be earned."""
     shared = len(subset) - len(bouts)
     blocked = []
-    if not cov_w.estimable:
-        blocked.append(f"win side: {cov_w.reason}")
-    if not cov_l.estimable:
-        blocked.append(f"loss side: {cov_l.reason}")
+    for side, c in (("win", cov_w), ("loss", cov_l)):
+        if not c.estimable:
+            blocked.append({"side": side, "code": c.reason_code, "clusters": c.clusters,
+                            "effective_n": round(c.effective_n, 3),
+                            "top_share": round(c.top_share, 3),
+                            "min_clusters": MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE})
     if blocked:
-        return {"available": False, "why": "; ".join(blocked),
+        return {"available": False, "blocked": blocked,
                 "observed": {"applied": fw["leg"], "of_wins": len(w),
                              "conceded": fl["leg"], "of_losses": len(loss)}}
     out = compare_proportions(fl["leg"], len(loss), fw["leg"], len(w)).to_dict()
@@ -602,7 +608,14 @@ def _type_contrast(by: Mapping[str, Counter[str]],
     blocked = [k for k in ("win", "loss") if not cov[k].estimable]
     if blocked:
         return {"available": False,
-                "why": "; ".join(f"{k} side: {cov[k].reason}" for k in blocked),
+                # Structured, not a sentence: the page renders in Portuguese and cannot
+                # translate prose it was handed.
+                "blocked": [{"side": k, "code": cov[k].reason_code,
+                             "clusters": cov[k].clusters,
+                             "effective_n": round(cov[k].effective_n, 3),
+                             "top_share": round(cov[k].top_share, 3),
+                             "min_clusters": MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE}
+                            for k in blocked],
                 "observed": [{"type": t, "win": w[t], "loss": loss[t]}
                              for t in sorted(set(w) | set(loss))],
                 "n_win": nw, "n_loss": nl}
@@ -875,11 +888,19 @@ def baseline_layer(bouts: Sequence[Mapping[str, Any]], roster_ids: set[str],
         own_cov = seq.get("coverage", {}).get("all", {})
         blocked = []
         if not own_cov.get("estimable"):
-            blocked.append(f"category side: {own_cov.get('reason')}")
+            blocked.append({"side": "category", "code": own_cov.get("reason_code"),
+                            "clusters": own_cov.get("clusters"),
+                            "effective_n": own_cov.get("effective_n"),
+                            "top_share": own_cov.get("top_share"),
+                            "min_clusters": MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE})
         if not cov.estimable:
-            blocked.append(f"baseline pool: {cov.reason}")
+            blocked.append({"side": "baseline", "code": cov.reason_code,
+                            "clusters": cov.clusters,
+                            "effective_n": round(cov.effective_n, 3),
+                            "top_share": round(cov.top_share, 3),
+                            "min_clusters": MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE})
         if blocked:
-            out[div] = {"n_own": n_own, "available": False, "why": "; ".join(blocked),
+            out[div] = {"n_own": n_own, "available": False, "blocked": blocked,
                         "observed": [{"type": t, "own": own[t], "pool": pool[t]}
                                      for t in sorted(set(own) | set(pool))]}
             continue
@@ -1222,10 +1243,10 @@ def correlation_layer(conn: Any, bouts: Sequence[Mapping[str, Any]]) -> dict[str
         "node_elo": {
             "available": bool(node_rows),
             "rows": int(node_rows or 0),
-            "why": "athlete_node_rating_states_v2 exists but holds no rows; the constellation "
-                   "work that fills it is open (rating_v2 ADR-03/ADR-08). Node-level rating "
-                   "against method of victory is therefore not computable, and no substitute "
-                   "is presented under its name.",
+            "why": "A tabela athlete_node_rating_states_v2 existe mas não tem nenhuma linha; "
+                   "o trabalho de constelações que a preenche está em aberto (rating_v2 "
+                   "ADR-03/ADR-08). Rating por nó contra tipo de vitória é, portanto, não "
+                   "computável — e nada é apresentado no lugar sob esse nome.",
         },
         "rating_vs_method": {
             "substitute_for": "node-level ELO",
@@ -1236,22 +1257,24 @@ def correlation_layer(conn: Any, bouts: Sequence[Mapping[str, Any]]) -> dict[str
             "gap_spearman": gap_corr.to_dict() if gap_corr else None,
             "n": len(rows),
             "caveats": [
-                "Conditioned on winning: every row is a bout someone won, so this describes "
-                "HOW winners win, not who wins.",
-                "Athlete-level rating, not node-level — the question asked was about a node.",
-                "Opponent strength is only partly controlled: the rating gap is reported "
-                "separately, and a bout whose loser is unrated drops out of that cut.",
-                "Corpus-wide, not roster-only: restricting to these 16 athletes leaves too "
-                "few rated bouts to band at all.",
+                "Condicionado a vencer: toda linha é uma luta que alguém venceu, então isto "
+                "descreve COMO se vence, não quem vence.",
+                "Rating de atleta, não de nó — a pergunta era sobre um nó.",
+                "Força da adversária só parcialmente controlada: o gap de rating é reportado "
+                "à parte, e a luta cuja derrotada não tem rating sai desse corte.",
+                "Corpus inteiro, não só o roster: restringir às 16 atletas deixa lutas "
+                "ranqueadas de menos para formar qualquer banda.",
+                "Bandas de rating escolhidas à mão. O padrão alto-baixo-baixo-alto é o que a "
+                "tabela mostra; ele não estabelece que a relação seja um U.",
             ],
         },
         "score_vs_outcome": {
             "available": False,
-            "why": "matches has no score column and zero sequence events carry `points`. The "
-                   "only scores that exist are final ones inside published method strings, and "
-                   "they exist only for bouts decided ON points — the complement of the "
-                   "question. What is shown instead is share of observed events, which is a "
-                   "proxy for positional volume, not a score.",
+            "why": "A tabela matches não tem coluna de placar e nenhum evento de sequência "
+                   "carrega `points`. Os únicos placares existentes são os finais, dentro das "
+                   "strings de método publicadas, e só existem para lutas decididas NO "
+                   "placar — exatamente o complemento da pergunta. O que aparece no lugar é a "
+                   "fatia de eventos observados, que é proxy de volume posicional, não placar.",
             "event_share_auc": share_sep.to_dict() if share_sep else None,
             "n_bouts": len(shares),
         },

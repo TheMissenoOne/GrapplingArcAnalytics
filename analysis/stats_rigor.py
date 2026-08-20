@@ -376,7 +376,12 @@ class Coverage:
     top_share: float
     grade: str
     estimable: bool
+    # `reason` is developer-facing English for logs and tests. `reason_code` is what a UI
+    # renders from, together with the numbers already on this object -- a report in another
+    # language cannot translate a sentence it was handed, and printing this one raw is how
+    # English ended up on a Portuguese page.
     reason: str | None
+    reason_code: str | None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -387,12 +392,14 @@ def coverage(counts: Sequence[int]) -> Coverage:
     conc = inverse_hhi_concentration(counts)
     clusters, eff = int(conc["sources"]), float(conc["effective_n"])
     if clusters == 0:
-        return Coverage(0, 0.0, 0.0, "none", False, "no sources")
-    reason = None
+        return Coverage(0, 0.0, 0.0, "none", False, "no sources", "no_sources")
+    reason = code = None
     if clusters < MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE:
+        code = "few_clusters"
         reason = (f"{clusters} source(s) contribute; a category estimate needs "
                   f"{MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE}")
     elif eff < MIN_EFFECTIVE_N_FOR_CATEGORY_ESTIMATE:
+        code = "dominated"
         reason = (f"evidence is worth {eff:.2f} equally-weighted sources; the largest single "
                   f"source is {conc['top1']:.0%} of it")
     for cut, name in COVERAGE_CUTS:
@@ -400,7 +407,7 @@ def coverage(counts: Sequence[int]) -> Coverage:
             break
     else:
         name = "low"
-    return Coverage(clusters, eff, float(conc["top1"]), name, reason is None, reason)
+    return Coverage(clusters, eff, float(conc["top1"]), name, reason is None, reason, code)
 
 
 @dataclass(frozen=True)
