@@ -14,9 +14,10 @@ from analysis.stats_rigor import (
     benjamini_hochberg,
     bootstrap_ci,
     compare_proportions,
+    coverage,
     grade,
     heterogeneity,
-    shannon_concentration,
+    inverse_hhi_concentration,
     spearman,
     wilson,
 )
@@ -144,12 +145,12 @@ def test_bootstrap_is_deterministic_and_brackets_the_estimate() -> None:
 
 
 def test_concentration_says_how_many_sources_the_evidence_is_worth() -> None:
-    one = shannon_concentration([100, 1, 1])
+    one = inverse_hhi_concentration([100, 1, 1])
     assert one["top1"] > 0.97
     assert one["effective_n"] < 1.1, "one dominant source is worth about one source"
-    even = shannon_concentration([25, 25, 25, 25])
+    even = inverse_hhi_concentration([25, 25, 25, 25])
     assert even["effective_n"] == pytest.approx(4.0, abs=0.01)
-    assert shannon_concentration([])["sources"] == 0
+    assert inverse_hhi_concentration([])["sources"] == 0
 
 
 def test_spearman_finds_a_monotonic_relationship_that_is_not_linear() -> None:
@@ -195,3 +196,110 @@ def test_auc_handles_ties_as_half_credit_and_an_empty_class() -> None:
     assert tied.auc == pytest.approx(0.5)
     empty = auc([1.0, 2, 3], [True, True, True], n_boot=200)
     assert empty.grade == "none" and empty.n_neg == 0
+
+
+# ── coverage: the gate that precision cannot answer ─────────────────────────────
+def test_coverage_refuses_a_category_estimate_from_too_few_sources() -> None:
+    c = coverage([61, 42])
+    assert c.clusters == 2
+    assert c.estimable is False
+    assert c.reason and "2 source(s)" in c.reason
+
+
+def test_coverage_refuses_when_one_source_dominates_despite_enough_of_them() -> None:
+    """Counting sources is not enough. Five athletes where one produced 92% of the events is
+    one athlete's profile with four witnesses."""
+    c = coverage([158, 5, 4, 3, 2])
+    assert c.clusters == 5
+    assert c.effective_n < 2.0
+    assert c.estimable is False
+    assert c.reason and "equally-weighted" in c.reason
+
+
+def test_coverage_passes_when_the_evidence_is_actually_spread() -> None:
+    c = coverage([20, 18, 22, 19, 21, 20])
+    assert c.estimable is True
+    assert c.reason is None
+    assert c.grade == "adequate"
+
+
+def test_coverage_of_nothing_is_not_an_estimate() -> None:
+    c = coverage([])
+    assert (c.clusters, c.estimable, c.grade) == (0, False, "none")
+
+
+def test_precision_and_coverage_disagree_and_that_is_the_point() -> None:
+    """The failure this whole gate exists for: a narrow interval on evidence from one source.
+    171 events, 54 of them control, is precise arithmetic about an unrepresentative sample."""
+    est = wilson(54, 171)
+    assert est.grade == "adequate"          # precision: the interval is narrow
+    assert coverage([158, 8, 3, 2]).estimable is False   # coverage: it is one athlete
+
+
+# ── cluster bootstrap ───────────────────────────────────────────────────────────
+def _mean(xs: list[float]) -> float:
+    return sum(xs) / len(xs) if xs else 0.0
+
+
+def test_cluster_bootstrap_resamples_athletes_not_rows() -> None:
+    """Two athletes who disagree completely. Resampling rows averages them away; resampling
+    athletes keeps the disagreement, which is the uncertainty that actually exists."""
+    values = [1.0] * 50 + [0.0] * 50
+    groups = ["a"] * 50 + ["b"] * 50
+    _, naive_lo, naive_hi = bootstrap_ci(values, _mean, n_boot=500)
+    _, clus_lo, clus_hi = bootstrap_ci(values, _mean, n_boot=500, groups=groups)
+    assert naive_hi - naive_lo < 0.3
+    assert (clus_hi - clus_lo) > (naive_hi - naive_lo)
+    assert clus_lo == 0.0 and clus_hi == 1.0
+
+
+def test_cluster_bootstrap_can_return_a_narrower_interval_and_that_is_not_a_bug() -> None:
+    """The real -65 kg `no_gi+adcc` cut: 36 wins, 17 finishes, two contributing athletes at
+    9/16 and 8/20. Because a cluster draw can only ever produce one of three mixtures, the
+    interval is BOUNDED BY THE TWO ATHLETES' OWN RATES -- it comes out at [0.400, 0.562],
+    roughly half the width of the naive one, and cannot reach a value neither athlete showed.
+
+    That is the whole reason `coverage` gates publication rather than the bootstrap fixing it
+    by itself. If this assertion ever fails, the fix is not to widen the bootstrap; it is to
+    check that the gate still refuses this cut.
+    """
+    frankland = [1.0] * 9 + [0.0] * 7
+    black = [1.0] * 8 + [0.0] * 12
+    values = frankland + black
+    groups = ["frankland"] * 16 + ["black"] * 20
+
+    _, nlo, nhi = bootstrap_ci(values, _mean, n_boot=2000)
+    _, clo, chi = bootstrap_ci(values, _mean, n_boot=2000, groups=groups)
+
+    assert (chi - clo) < (nhi - nlo) / 1.5
+    assert clo == pytest.approx(8 / 20, abs=0.01)   # cannot go below the worse athlete
+    assert chi == pytest.approx(9 / 16, abs=0.01)   # nor above the better one
+    assert coverage([16, 20]).estimable is False
+
+
+def test_the_gate_admits_the_cut_where_clustering_actually_helps() -> None:
+    """The +65 kg counterpart, six athletes, same cut. Here the clustered interval is properly
+    WIDER than the naive one, and the gate lets it through -- which is what makes the refusal
+    above a judgement about the evidence rather than a blanket distrust of the method.
+    """
+    per = {"soares": (3, 4), "guedes": (1, 6), "lopez": (1, 4),
+           "garcia": (6, 14), "crevar": (11, 13), "mitrovic": (9, 13)}
+    values = [x for k, n in per.values() for x in ([1.0] * k + [0.0] * (n - k))]
+    groups = [name for name, (_, n) in per.items() for _ in range(n)]
+
+    _, nlo, nhi = bootstrap_ci(values, _mean, n_boot=2000)
+    _, clo, chi = bootstrap_ci(values, _mean, n_boot=2000, groups=groups)
+
+    assert (chi - clo) > (nhi - nlo)
+    assert coverage([n for _, n in per.values()]).estimable is True
+
+
+def test_cluster_bootstrap_rejects_a_label_per_row_mismatch() -> None:
+    with pytest.raises(ValueError, match="groups has 2 labels for 3 values"):
+        bootstrap_ci([1.0, 2.0, 3.0], _mean, groups=["a", "b"])
+
+
+def test_cluster_bootstrap_is_deterministic() -> None:
+    values, groups = [1.0, 0.0, 1.0, 1.0, 0.0, 1.0], ["a", "a", "b", "b", "c", "c"]
+    first = bootstrap_ci(values, _mean, n_boot=300, groups=groups)
+    assert first == bootstrap_ci(values, _mean, n_boot=300, groups=groups)

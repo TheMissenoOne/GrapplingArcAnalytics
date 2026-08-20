@@ -40,6 +40,21 @@ Z95 = 1.959963984540054
 GRADE_CUTS = ((0.08, "adequate"), (0.15, "moderate"))
 MIN_N_FOR_ANY_GRADE = 5
 
+# PRECISION is not COVERAGE. The cuts above answer "how wide is this interval", which is a
+# question about arithmetic. They say nothing about how many independent sources the rows came
+# from, and a hundred events from one athlete will earn a narrow interval and an "adequate"
+# badge while describing one person wearing the category's name.
+#
+# So a category-level claim is gated separately, on the number of independent clusters and on
+# how evenly the evidence is spread across them. Below the gate the honest output is no
+# interval at all -- not a wider one. Measured on this corpus: with two contributing athletes a
+# cluster bootstrap returns an interval NARROWER than the naive one, because it is resampling
+# two things. Clustering rescues an estimate that has enough sources; it cannot manufacture
+# sources that are not there.
+MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE = 5
+MIN_EFFECTIVE_N_FOR_CATEGORY_ESTIMATE = 2.0
+COVERAGE_CUTS = ((5.0, "adequate"), (3.0, "moderate"))
+
 
 @dataclass(frozen=True)
 class Estimate:
@@ -213,11 +228,22 @@ def benjamini_hochberg(p_values: Sequence[float], alpha: float = 0.05) -> list[b
 
 
 def bootstrap_ci(values: Sequence[float], statistic: Any, n_boot: int = 5000,
-                 z: float = Z95, seed: int = 20260820) -> tuple[float, float, float]:
+                 z: float = Z95, seed: int = 20260820,
+                 groups: Sequence[Any] | None = None) -> tuple[float, float, float]:
     """Percentile bootstrap for a statistic with no closed-form interval.
 
     Deterministic by default: a report that renders a different interval on each run is not
     reproducible, and reproducibility matters more here than a fresh random draw.
+
+    ``groups`` gives one cluster label per value and switches this to a CLUSTER bootstrap:
+    whole clusters are drawn with replacement and their members carried along, so the
+    resampling unit becomes the athlete (or the bout) rather than the row. That is the right
+    unit whenever rows within a cluster are not independent -- a hundred events from one
+    athlete are not a hundred independent observations of a division.
+
+    It is not a rescue. With a handful of clusters the interval is unstable in both directions,
+    and on this corpus a two-athlete division returns a NARROWER interval clustered than naive.
+    Gate the estimate on ``coverage`` first; use this only once the gate passes.
     """
     import random
 
@@ -225,12 +251,27 @@ def bootstrap_ci(values: Sequence[float], statistic: Any, n_boot: int = 5000,
         return (float("nan"),) * 3
     rng = random.Random(seed)
     obs = float(statistic(values))
-    n = len(values)
-    draws = sorted(float(statistic([values[rng.randrange(n)] for _ in range(n)]))
-                   for _ in range(n_boot))
     tail = (1 - _two_sided_mass(z)) / 2
-    lo = draws[max(0, int(tail * n_boot))]
-    hi = draws[min(n_boot - 1, int((1 - tail) * n_boot))]
+
+    if groups is None:
+        n = len(values)
+        draw = lambda: [values[rng.randrange(n)] for _ in range(n)]  # noqa: E731
+    else:
+        if len(groups) != len(values):
+            raise ValueError(f"groups has {len(groups)} labels for {len(values)} values")
+        buckets: dict[Any, list[float]] = {}
+        for label, v in zip(groups, values, strict=True):
+            buckets.setdefault(label, []).append(v)
+        members = list(buckets.values())
+        g = len(members)
+        draw = lambda: [v for _ in range(g) for v in members[rng.randrange(g)]]  # noqa: E731
+
+    draws = sorted(float(statistic(sample)) for _ in range(n_boot)
+                   if (sample := draw()))
+    if not draws:
+        return obs, float("nan"), float("nan")
+    lo = draws[max(0, int(tail * len(draws)))]
+    hi = draws[min(len(draws) - 1, int((1 - tail) * len(draws)))]
     return obs, lo, hi
 
 
@@ -238,12 +279,15 @@ def _two_sided_mass(z: float) -> float:
     return float(stats.norm.cdf(z) - stats.norm.cdf(-z))
 
 
-def shannon_concentration(counts: Sequence[int]) -> dict[str, float]:
+def inverse_hhi_concentration(counts: Sequence[int]) -> dict[str, float]:
     """How much of a category's evidence comes from how few sources.
 
     HHI and top-1 share, because a category profile assembled mostly from one athlete is that
     athlete's profile wearing the category's name. ``effective_n`` is the inverse HHI: the
     number of equally-weighted contributors this evidence is actually worth.
+
+    This is the Hill number of order 2, not order 1 -- it was called ``shannon_concentration``
+    for a while, which named a different quantity than the one it returns.
     """
     total = sum(counts)
     if total <= 0:
@@ -252,6 +296,48 @@ def shannon_concentration(counts: Sequence[int]) -> dict[str, float]:
     hhi = sum(s * s for s in shares)
     return {"hhi": hhi, "top1": max(shares), "effective_n": 1 / hhi if hhi else 0.0,
             "sources": len(shares)}
+
+
+@dataclass(frozen=True)
+class Coverage:
+    """How many independent sources an estimate rests on, and whether that is enough to make a
+    claim about the population rather than about the rows.
+
+    ``estimable`` is the publication gate. When it is false the caller must emit ``reason``
+    and the observed counts INSTEAD OF an interval, because every interval available at that
+    point -- naive or clustered -- is measuring the wrong thing.
+    """
+
+    clusters: int
+    effective_n: float
+    top_share: float
+    grade: str
+    estimable: bool
+    reason: str | None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def coverage(counts: Sequence[int]) -> Coverage:
+    """Grade the source spread behind an estimate. ``counts`` is one entry per source."""
+    conc = inverse_hhi_concentration(counts)
+    clusters, eff = int(conc["sources"]), float(conc["effective_n"])
+    if clusters == 0:
+        return Coverage(0, 0.0, 0.0, "none", False, "no sources")
+    reason = None
+    if clusters < MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE:
+        reason = (f"{clusters} source(s) contribute; a category estimate needs "
+                  f"{MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE}")
+    elif eff < MIN_EFFECTIVE_N_FOR_CATEGORY_ESTIMATE:
+        reason = (f"evidence is worth {eff:.2f} equally-weighted sources; the largest single "
+                  f"source is {conc['top1']:.0%} of it")
+    for cut, name in COVERAGE_CUTS:
+        if eff >= cut:
+            break
+    else:
+        name = "low"
+    return Coverage(clusters, eff, float(conc["top1"]), name, reason is None, reason)
 
 
 @dataclass(frozen=True)

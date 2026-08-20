@@ -48,7 +48,7 @@ from analysis.stats_rigor import (  # noqa: E402
     benjamini_hochberg,
     compare_proportions,
     heterogeneity,
-    shannon_concentration,
+    inverse_hhi_concentration,
     wilson,
 )
 from db.base import get_engine  # noqa: E402
@@ -398,7 +398,7 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
                 finishers[outcome][chain[-1]] += 1
                 (won if outcome == "win" else lost).append(chain)
 
-    conc = shannon_concentration(list(per_athlete.values()))
+    conc = inverse_hhi_concentration(list(per_athlete.values()))
     return {
         "bouts": len(mine),
         "events_own": sum(per_athlete.values()),
@@ -536,7 +536,7 @@ def embedding_layer(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
             m["outlier"] = bool(
                 sd is not None and mu is not None and m["to_centroid"] is not None
                 and m["to_centroid"] < mu - sd)
-        conc = shannon_concentration([m["edges"] for m in members])
+        conc = inverse_hhi_concentration([m["edges"] for m in members])
         per_div[div] = {
             "members": [{k: v for k, v in m.items() if k != "vec"} for m in members],
             "usable": len(vecs), "with_graph": len(members),
