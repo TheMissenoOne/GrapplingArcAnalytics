@@ -97,3 +97,30 @@ def test_accented_and_non_latin1_names_survive() -> None:
 
     _register_fonts()
     assert _txt("Gabrieli Pessanha, São Paulo") == "Gabrieli Pessanha, São Paulo"
+
+
+def test_prose_says_where_the_timestamp_actually_is() -> None:
+    """The PDF prints the time above each frame; the folder puts it in the filename and
+    leaves the JPEG unmarked. An agent told to read a stamp off an unmarked image looks for
+    something that is not there, so the sentence is a parameter, not a constant."""
+    from scripts.frame_pdf import context_prose
+
+    sheet = " ".join(b for _, b in context_prose(5, True, 0.0, 120.0))
+    folder = " ".join(b for _, b in
+                      context_prose(5, False, 0.0, 120.0, ts_source="in its filename"))
+    assert "directly above it" in sheet and "in its filename" not in sheet
+    assert "in its filename" in folder and "directly above it" not in folder
+
+
+def test_prose_names_the_vocabulary_file_it_was_given() -> None:
+    """Both formats carry the label list, under different names. Naming the wrong one sends
+    the reader to a file that is not there, and the closed vocabulary becomes a rule with no
+    list attached."""
+    from scripts.frame_pdf import context_prose
+
+    md = [b for k, b in context_prose(5, False, 0.0, 1.0, lib_file="labels.md")
+          if k == "p" and "verbatim from" in b]
+    assert md and "labels.md" in md[0]
+    inline = [b for k, b in context_prose(5, True, 0.0, 1.0)
+              if k == "p" and "CLOSED VOCABULARY" in b]
+    assert inline and "pages immediately after" in inline[0]

@@ -404,25 +404,10 @@ def _break(c: Canvas, y: float, need: float = 46) -> float:
     return float(PH - PAD)
 
 
-def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbContext,
-                      n_frames: int, step: int, first_ts: float, last_ts: float,
-                      with_library: bool, bjjh: dict[str, Any] | None = None) -> None:
-    """The first page: which fight, which clock, and what the answer must look like.
-
-    It is written as a prompt because it IS the prompt -- the PDF is the whole message the
-    reader gets, so anything left implicit here comes back as a guess.
-    """
-    y = PH - PAD
-    title = _txt(entry.label or str(meta.get("title") or entry.vid))
-    c.setFont(FONT_B, 15)
-    for line in simpleSplit(title, FONT_B, 15, PW - 2 * PAD):
-        c.drawString(PAD, y, line)
-        y -= 19
-    y -= 4
-    c.setLineWidth(1)
-    c.line(PAD, y, PW - PAD, y)
-    y -= 20
-
+def context_facts(entry: Entry, meta: dict[str, Any], db: DbContext, n_frames: int,
+                  step: int, first_ts: float, last_ts: float,
+                  bjjh: dict[str, Any] | None) -> list[tuple[str, str]]:
+    """The header table: which fight, which video, which clock, what BJJ Heroes says."""
     known = db.bouts_for(entry.vid)
     # Word-boundary, never substring: a roster name that happens to sit inside an unrelated
     # title would label the sheet with a division the fight is not in, and a wrong division
@@ -436,7 +421,7 @@ def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbConte
         ("Channel", str(meta.get("uploader") or "-")),
         ("Uploaded", str(meta.get("upload_date") or "-")),
         ("Video length", hhmmss(meta["duration"]) if meta.get("duration") else "-"),
-        ("Frames in this PDF", f"{n_frames}, one every {step}s"),
+        ("Frames sampled", f"{n_frames}, one every {step}s"),
         ("Covers", f"{hhmmss(first_ts)} to {hhmmss(last_ts)} of the video"),
     ]
     if div:
@@ -456,46 +441,29 @@ def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbConte
         rows.append(("Already in the corpus",
                      "; ".join(f"{b['a']} vs {b['b']} ({b['event'] or 'no event'} {b['year']}), "
                                f"{b['events']} events" for b in known)))
-    for k, v in rows:
-        y = _break(c, y)
-        c.setFont(FONT_B, 9)
-        c.drawString(PAD, y, k)
-        y = _text_block(c, v, PAD + 130, y, PW - PAD - 130 - PAD, 9, 12) - 4
+    return rows
 
-    # Drawn by hand rather than as another row: the URL has to be a real annotation for a
-    # human clicking it AND plain text for a reader that only gets the extracted characters.
-    for i, (name, url) in enumerate((bjjh or {}).get("athletes", {}).items()):
-        y = _break(c, y)
-        c.setFont(FONT_B, 9)
-        c.drawString(PAD, y, "BJJ Heroes" if i == 0 else "")
-        c.setFont(FONT, 9)
-        c.setFillColorRGB(0.0, 0.0, 0.55)
-        text = _txt(f"{name} - {url}")
-        c.drawString(PAD + 130, y, text)
-        c.linkURL(url, (PAD + 130, y - 2, PAD + 130 + c.stringWidth(text, FONT, 9), y + 9),
-                  relative=0)
-        c.setFillColorRGB(0, 0, 0)
-        y -= 12
-    if (bjjh or {}).get("athletes"):
-        y -= 4
 
-    y -= 12
-    c.line(PAD, y, PW - PAD, y)
-    y -= 24
-    c.setFont(FONT_B, 14)
-    c.drawString(PAD, y, "How to read this")
-    y -= 22
+def context_prose(step: int, with_library: bool, first_ts: float, last_ts: float,
+                  lib_file: str = "", ts_source: str = "") -> list[tuple[str, str]]:
+    """What the reader is being asked for. ``("p", text)`` is a paragraph; ``("f", "name|desc")``
+    is one row of the field table.
 
+    Lives apart from the drawing because the PDF is no longer the only way this leaves the
+    building -- ``--format frames`` writes the same words as Markdown. Two copies of a prompt
+    is two prompts, and the one nobody edits is the one that stays wrong.
+    """
     lib = ("The pages immediately after this one list every technique the library knows, "
            "grouped by kind and most-used first; take each `label` from them verbatim."
            if with_library else
-           f"Take each `label` verbatim from {LIBRARY_PATH.name}, which lists every technique "
-           "the library knows, most-used first.")
+           f"Take each `label` verbatim from {lib_file or LIBRARY_PATH.name}, which lists every "
+           "technique the library knows, most-used first.")
 
     paras: list[tuple[str, str]] = [
-        ("p", f"Each frame below is stamped with its VIDEO-ABSOLUTE time: seconds from the "
-              f"start of the video at the URL above, NOT seconds from the start of the bout. "
-              f"Frame stamps run from {hhmmss(first_ts)} to {hhmmss(last_ts)}."),
+        ("p", f"Every frame carries a VIDEO-ABSOLUTE time -- seconds from the start of the "
+              f"video at the URL above, NOT seconds from the start of the bout -- "
+              f"{ts_source or 'printed as text directly above it'}. Those times run from "
+              f"{hhmmss(first_ts)} to {hhmmss(last_ts)}."),
         ("p", "Return every timestamp in that same video-absolute clock. If the bout starts "
               "partway into the video, say where it starts as a separate field -- do not "
               "rebase the event times to it. A bout-relative time reported as an absolute one "
@@ -503,7 +471,7 @@ def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbConte
               "looks plausible while being wrong."),
         ("p", "For each event you can see, give:"),
         ("f", "ts|integer seconds, video-absolute"),
-        ("f", "label|a technique name, taken verbatim from the vocabulary pages"),
+        ("f", "label|a technique name, taken verbatim from the label list"),
         ("f", "actor|which competitor did it, by name"),
         ("f", "successful|true if it landed, false if attempted and stopped"),
         ("f", "type|one of: control, submission, guard, takedown, pass, transition, "
@@ -559,6 +527,62 @@ def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbConte
               "athlete's graph and their rating and nothing downstream can tell it from an "
               "observed one. An omission is recoverable; an invented event is not."),
     ]
+    return paras
+
+
+def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbContext,
+                      n_frames: int, step: int, first_ts: float, last_ts: float,
+                      with_library: bool, bjjh: dict[str, Any] | None = None) -> None:
+    """The first page: which fight, which clock, and what the answer must look like.
+
+    It is written as a prompt because it IS the prompt -- the PDF is the whole message the
+    reader gets, so anything left implicit here comes back as a guess.
+    """
+    y = PH - PAD
+    title = _txt(entry.label or str(meta.get("title") or entry.vid))
+    c.setFont(FONT_B, 15)
+    for line in simpleSplit(title, FONT_B, 15, PW - 2 * PAD):
+        c.drawString(PAD, y, line)
+        y -= 19
+    y -= 4
+    c.setLineWidth(1)
+    c.line(PAD, y, PW - PAD, y)
+    y -= 20
+
+    rows = context_facts(entry, meta, db, n_frames, step, first_ts, last_ts, bjjh)
+
+    for k, v in rows:
+        y = _break(c, y)
+        c.setFont(FONT_B, 9)
+        c.drawString(PAD, y, k)
+        y = _text_block(c, v, PAD + 130, y, PW - PAD - 130 - PAD, 9, 12) - 4
+
+    # Drawn by hand rather than as another row: the URL has to be a real annotation for a
+    # human clicking it AND plain text for a reader that only gets the extracted characters.
+    for i, (name, url) in enumerate((bjjh or {}).get("athletes", {}).items()):
+        y = _break(c, y)
+        c.setFont(FONT_B, 9)
+        c.drawString(PAD, y, "BJJ Heroes" if i == 0 else "")
+        c.setFont(FONT, 9)
+        c.setFillColorRGB(0.0, 0.0, 0.55)
+        text = _txt(f"{name} - {url}")
+        c.drawString(PAD + 130, y, text)
+        c.linkURL(url, (PAD + 130, y - 2, PAD + 130 + c.stringWidth(text, FONT, 9), y + 9),
+                  relative=0)
+        c.setFillColorRGB(0, 0, 0)
+        y -= 12
+    if (bjjh or {}).get("athletes"):
+        y -= 4
+
+    y -= 12
+    c.line(PAD, y, PW - PAD, y)
+    y -= 24
+    c.setFont(FONT_B, 14)
+    c.drawString(PAD, y, "How to read this")
+    y -= 22
+
+    paras = context_prose(step, with_library, first_ts, last_ts)
+
     for kind, body in paras:
         y = _break(c, y)
         if kind == "f":
@@ -655,6 +679,81 @@ def draw_grid_pages(c: Canvas, frames: list[tuple[float, Path]], grid: tuple[int
                         width=cell_w - 8, height=cell_h - 22,
                         preserveAspectRatio=True, anchor="n")
         c.showPage()
+
+
+def write_frames_dir(entry: Entry, meta: dict[str, Any], db: DbContext,
+                     frames: list[tuple[float, Path]], step: int, out_dir: Path,
+                     library: dict[str, Any] | None, bjjh: dict[str, Any] | None) -> Path:
+    """The same sheet, unpacked: one JPEG per frame plus the context as Markdown.
+
+    For a reader that opens files rather than being handed one. The PDF exists because a chat
+    upload takes a single file and a page render is the only way frames reach a vision model
+    through it; neither constraint applies to an agent with a filesystem, and there the grid
+    only costs resolution -- six frames share one page's worth of pixels.
+
+    Nothing here is a second prompt. The words come from ``context_facts``/``context_prose``,
+    the same two functions the PDF draws, so the two formats cannot drift apart.
+    """
+    d = out_dir / entry.slug
+    d.mkdir(parents=True, exist_ok=True)
+    for old in d.glob("t*.jpg"):        # a re-run must not leave last run's frames behind
+        old.unlink()
+
+    index = []
+    for ts, src in frames:
+        name = f"t{int(ts):05d}.jpg"
+        shutil.copyfile(src, d / name)
+        index.append({"file": name, "ts": int(ts)})
+    (d / "frames.jsonl").write_text(
+        "".join(json.dumps(r) + "\n" for r in index), encoding="utf-8")
+
+    lines = [f"# {entry.label or meta.get('title') or entry.vid}", ""]
+    for k, v in context_facts(entry, meta, db, len(frames), step,
+                              frames[0][0], frames[-1][0], bjjh):
+        lines.append(f"- **{k}:** {v}")
+    for name, url in (bjjh or {}).get("athletes", {}).items():
+        lines.append(f"- **BJJ Heroes:** [{name}]({url})")
+    lines += ["",
+              f"`t*.jpg` — {len(frames)} frames, one every {step}s, named by their "
+              "VIDEO-ABSOLUTE second (`t00125.jpg` is 125s into the video). `frames.jsonl` "
+              "carries the same index as one JSON object per line, so the timestamp is a "
+              "field to read rather than a filename to parse.", "",
+              "## How to read this", ""]
+
+    fields: list[tuple[str, str]] = []
+    # never "the pages after this one" -- there are no pages here; the vocabulary is a file,
+    # and it is only named when it was actually written
+    for kind, bodytext in context_prose(
+            step, False, frames[0][0], frames[-1][0],
+            lib_file="labels.md" if library else "",
+            ts_source="in its filename and in `frames.jsonl` (the JPEG itself is unmarked)"):
+        if kind == "f":
+            fields.append(tuple(bodytext.split("|", 1)))    # type: ignore[arg-type]
+            continue
+        if fields:                                          # flush the table before the prose
+            lines += ["| field | what it means |", "|---|---|"]
+            lines += [f"| `{n}` | {desc} |" for n, desc in fields] + [""]
+            fields = []
+        lines += [bodytext, ""]
+    if fields:
+        lines += ["| field | what it means |", "|---|---|"]
+        lines += [f"| `{n}` | {desc} |" for n, desc in fields] + [""]
+    (d / "README.md").write_text("\n".join(lines), encoding="utf-8")
+
+    if library:
+        out = ["# Allowed labels — use one of these, verbatim", "",
+               f"{library['node_count']} techniques, grouped by kind, most-used first "
+               f"inside each group. Snapshot {library['generated']}.", ""]
+        groups: dict[str, list[dict[str, Any]]] = {}
+        for n in library["nodes"]:
+            groups.setdefault(str(n.get("node_type") or "other"), []).append(n)
+        for g in sorted(groups, key=lambda g: -sum(int(x["corpus_events"]) for x in groups[g])):
+            out += [f"## {g}", ""]
+            out += [f"- {n['label']}" for n in
+                    sorted(groups[g], key=lambda n: (-int(n["corpus_events"]), str(n["key"])))]
+            out.append("")
+        (d / "labels.md").write_text("\n".join(out), encoding="utf-8")
+    return d
 
 
 def build_pdf(entry: Entry, meta: dict[str, Any], db: DbContext,
@@ -876,7 +975,7 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
             grid: tuple[int, int], workdir: Path, force: bool,
             max_frames: int = DEFAULT_MAX_FRAMES,
             library: dict[str, Any] | None = None,
-            bjjh: dict[str, Any] | None = None) -> str:
+            bjjh: dict[str, Any] | None = None, fmt: str = "pdf") -> str:
     known = db.bouts_for(entry.vid)
     if known and not force:
         with_seq = [b for b in known if b["events"]]
@@ -884,7 +983,7 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
             return (f"skip {entry.vid}: already in the corpus with a reviewed sequence "
                     f"({with_seq[0]['a']} vs {with_seq[0]['b']}, {with_seq[0]['events']} events)")
 
-    out_path = out_dir / f"{entry.slug}.pdf"
+    out_path = out_dir / (entry.slug if fmt == "frames" else f"{entry.slug}.pdf")
     if out_path.exists() and not force:
         return f"skip {entry.vid}: {out_path.name} already built"
 
@@ -903,6 +1002,10 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
         video.unlink(missing_ok=True)          # the frames are the artefact; disk is tight
         if not frames:
             return f"FAIL {entry.vid}: ffmpeg produced no frames"
+        if fmt == "frames":
+            d = write_frames_dir(entry, meta, db, frames, step, out_dir, library, bjjh)
+            mb = sum(f.stat().st_size for f in d.iterdir()) / 1e6
+            return f"ok   {d.name}/  {len(frames)} frames, {mb:.1f} MB"
         build_pdf(entry, meta, db, frames, step, grid, out_path, library, bjjh)
     mb = out_path.stat().st_size / 1e6
     return f"ok   {out_path.name}  {len(frames)} frames, {mb:.1f} MB"
@@ -930,6 +1033,10 @@ def main() -> int:
                     help="rebuild even when the video already backs a reviewed sequence")
     ap.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES,
                     help="widen the step rather than exceed this many frames in one PDF")
+    ap.add_argument("--format", choices=("pdf", "frames"), default="pdf",
+                    help="pdf: one contact sheet per bout, for an upload that takes one file. "
+                         "frames: a directory per bout -- one JPEG per frame at full size, "
+                         "plus README.md and labels.md -- for an agent that reads a filesystem")
     ap.add_argument("--limit", type=int, help="stop after N videos (a smoke run)")
     ap.add_argument("--no-bjjh", action="store_true",
                     help="do not print the BJJ Heroes result line or profile links")
@@ -986,7 +1093,8 @@ def main() -> int:
     for e in entries:
         try:
             results.append(process(e, db, a.out, a.step, (cols, rows), a.workdir,
-                                   a.force, a.max_frames, library, bjjh.get(e.slug)))
+                                   a.force, a.max_frames, library, bjjh.get(e.slug),
+                                   a.format))
         except Exception as exc:                                  # noqa: BLE001
             # One dead link must not cost the other 27 downloads. The reason is printed
             # next to the id, so the manifest row can be fixed and only that row re-run.
