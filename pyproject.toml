@@ -49,6 +49,17 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# The base environment must not need OpenGL and a browser just because someone wants to
+# run the database tests. Renderers live behind this extra; the contract layer
+# (video_engine/contracts, facts, validate, storyboard, style) has no dependency at all and
+# is importable without it.
+# System deps this extra assumes: FFmpeg, an OpenGL runtime, Chromium, Pango. LaTeX is
+# deliberately NOT required.
+video = [
+    "moviepy>=2",
+    "manimgl>=1.7",
+    "playwright>=1.44",
+]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
