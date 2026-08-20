@@ -1,0 +1,65 @@
+{
+  "_comment": [
+    "Published sources per bout, keyed by the frames-folder slug.",
+    "",
+    "Separate from women_65.json on purpose: that manifest says which video was DOWNLOADED",
+    "and turned into a clip; this says where a human can WATCH the bout. They are often not",
+    "the same URL — several of these bouts are behind FloGrappling while the frames came",
+    "from an IBJJF YouTube upload.",
+    "",
+    "utm_source parameters were stripped: they are tracking added by whatever surfaced the",
+    "link, not part of the address."
+  ],
+  "generated": "2026-08-20",
+  "bouts": {
+    "anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=8xvq3lM6kQY"}],
+    "anabel-lopez-vs-brianna-ste-marie--world-no-gi-2024-9ThUSXSEf8w": [
+      {"host": "FloGrappling", "url": "https://www.flograppling.com/video/13219741-anabel-lopez-beard-vs-brianna-ste-marie-2024-world-ibjjf-jiu-jitsu-no-gi-championship"}],
+    "anabel-lopez-vs-erin-harpe--pan-no-gi-2025-YIJvzBtP3q4": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=YIJvzBtP3q4"}],
+    "anabel-lopez-vs-kendall-reusing--polaris-36-2026-2nfCwbxdvTY": [
+      {"host": "FloGrappling", "url": "https://www.flograppling.com/video/15596411-kendall-reusing-vs-anabel-lopez-beard-polaris-36"}],
+    "anabel-lopez-vs-maria-vicentini--world-no-gi-2024-HWNPuVZYB1Q": [
+      {"host": "FloGrappling", "url": "https://www.flograppling.com/video/13227054-maria-carolina-baron-vicentini-vs-anabel-lopez-beard-2024-world-ibjjf-jiu-jitsu-no-gi-championship"}],
+    "anabel-lopez-vs-nia-blackman--european-no-gi-2024-CLtvPkMGLGc": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=CLtvPkMGLGc"}],
+    "anabel-lopez-vs-paige-ivette--world-no-gi-2024-GHFT3RO4v_k": [
+      {"host": "IBJJF Database · resultado", "url": "https://www.ibjjfdb.com/ChampionshipResults/2538/PublicResults",
+       "note": "nenhum upload individual indexado; o resultado é oficial e o clipe local é a única imagem em mão"}],
+    "anabel-lopez-vs-salla-simola--world-no-gi-2024-U7ovaUg3y4U": [
+      {"host": "FloGrappling", "url": "https://www.flograppling.com/video/13219280-salla-mari-simola-vs-anabel-lopez-beard-2024-world-ibjjf-jiu-jitsu-no-gi-championship"}],
+    "ane-svendsen-vs-aurelie-le-vern--european-no-gi-2024-oIMgwDldvmA": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=oIMgwDldvmA"}],
+    "helena-crevar-vs-amanda-nicole--polaris-37-2026-NO62LWlUUNQ": [
+      {"host": "FloGrappling · replay", "url": "https://www.flograppling.com/events/15658816-2026-polaris-37/videos?playing=15970733"}],
+    "helena-crevar-vs-elisabeth-clay--wno-27-2025-jbalVAUFx2Y": [
+      {"host": "FloGrappling", "url": "https://www.flograppling.com/video/14097842-elisabeth-clay-vs-helena-crevar-wno-27-duarte-vs-rodriguez"}],
+    "helena-crevar-vs-gabriela-miranda--world-no-gi-2025-IGaL1pyNtuU": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=IGaL1pyNtuU"}],
+    "helena-crevar-vs-leilani-bernales--wno-25-2024-Vo7ymhLxDxo": [
+      {"host": "YouTube · FloGrappling", "url": "https://www.youtube.com/watch?v=Vo7ymhLxDxo"}],
+    "injana-goodman-vs-elisabeth-clay--world-no-gi-2025-C4ZeMLqnTDs": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=C4ZeMLqnTDs"}],
+    "injana-goodman-vs-julia-maele--european-no-gi-2025-vnYJGBVM78E": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=vnYJGBVM78E"}],
+    "injana-goodman-vs-sarah-galvao--pan-no-gi-2025-waNIGqJ3pTM": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=waNIGqJ3pTM"}],
+    "morgan-black-vs-brianna-ste-marie--world-no-gi-2024-BzwFZSrxJkM": [
+      {"host": "FloGrappling", "url": "https://www.flograppling.com/video/13244919-brianna-ste-marie-vs-mo-black-2024-world-ibjjf-jiu-jitsu-no-gi-championship"}],
+    "nadia-frankland-vs-elisabeth-clay--world-no-gi-2024-V0TNJTVVuwA": [
+      {"host": "FloGrappling", "url": "https://www.flograppling.com/video/13245641-elisabeth-ann-clay-vs-nadia-frankland-2024-world-ibjjf-jiu-jitsu-no-gi-championship"}],
+    "nadia-frankland-vs-gabriele-schuck--pan-no-gi-2024-wFqamBHsK3g": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=wFqamBHsK3g"}],
+    "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2024-7H1PhSukqZg": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=7H1PhSukqZg"}],
+    "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2025-LQUors-3gZM": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=LQUors-3gZM"}],
+    "nadia-frankland-vs-paige-ivette--world-no-gi-2024-ImqWcrhUF8w": [
+      {"host": "YouTube · IBJJF", "url": "https://www.youtube.com/watch?v=ImqWcrhUF8w"}],
+    "sarah-galvao-vs-libby-genge--polaris-36-2026-bhtda0EZYpU": [
+      {"host": "YouTube · FloGrappling", "url": "https://www.youtube.com/watch?v=bhtda0EZYpU"}],
+    "sarah-galvao-vs-zara-tofano--polaris-38-2026-IPgbC27xBQQ": [
+      {"host": "FloGrappling · replay", "url": "https://www.flograppling.com/events/15686389-2026-polaris-38/videos?playing=16062515"}]
+  }
+}

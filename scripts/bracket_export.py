@@ -54,6 +54,7 @@ from analysis.stats_rigor import (  # noqa: E402
 from db.base import get_engine  # noqa: E402
 
 MANIFEST = REPO / "data" / "scouting" / "adcc_2026_women.json"
+LINKS = REPO / "data" / "frame_pdf" / "women_65_links.json"
 FRAMES = REPO / "data" / "frame_pdf" / "out"
 
 # ── vocabulary ──────────────────────────────────────────────────────────────────
@@ -543,6 +544,7 @@ def _centroid_neighbours(conn: Any, centroid: Sequence[float] | None, k: int = 1
 # ── layer 4: footage we hold ────────────────────────────────────────────────────
 def video_layer(conn: Any, roster: Mapping[str, str]) -> list[dict[str, Any]]:
     """Every bout of these categories we can actually watch, local clip or published link."""
+    links = json.loads(LINKS.read_text(encoding="utf-8"))["bouts"] if LINKS.exists() else {}
     out = []
     for d in sorted(FRAMES.iterdir()) if FRAMES.exists() else []:
         if not (d / "frames.jsonl").exists():
@@ -550,6 +552,9 @@ def video_layer(conn: Any, roster: Mapping[str, str]) -> list[dict[str, Any]]:
         readme = (d / "README.md")
         title = readme.read_text(encoding="utf-8").splitlines()[0].lstrip("# ").strip() \
             if readme.exists() else d.name
+        # `events.json` is written only by a human at the registrar. Its absence is the honest
+        # state, not a pending job: no machine pass fills it, so "not registered" always means
+        # nobody has read this bout yet.
         events = 0
         if (d / "events.json").exists():
             try:
@@ -559,7 +564,9 @@ def video_layer(conn: Any, roster: Mapping[str, str]) -> list[dict[str, Any]]:
         out.append({"slug": d.name, "title": title, "source": "local clip",
                     "clip": (d / "clip.mp4").exists(),
                     "thumbs": sum(1 for _ in (d / "frames.jsonl").open()),
-                    "registered_events": events})
+                    "registered_events": events,
+                    "registered": events > 0,
+                    "links": links.get(d.name, [])})
     rows = conn.execute(text("""
         select a.name, b.name, m.event, m.year, m.video_url, m.video_start_seconds,
                jsonb_array_length(coalesce(m.sequence,'[]'::jsonb))
@@ -621,6 +628,116 @@ def baseline_layer(bouts: Sequence[Mapping[str, Any]], roster_ids: set[str],
     return out
 
 
+# ── layer 7: the division radar ─────────────────────────────────────────────────
+# Spokes and pooling ported from the App (`services/radarRings.ts`), so a division's shape and
+# an athlete's shape are read on the same axes. `sweep` pools into `guard` -- a sweep is how a
+# guard scores -- which is also what lets every ring sit on identical spokes.
+RADAR_AXES = ("pass", "control", "submission", "escape", "guard", "takedown")
+ELO_SCALE = 400.0
+
+
+def _axis_of(event_type: str | None) -> str | None:
+    t = (event_type or "").lower()
+    if t == "sweep":
+        return "guard"
+    return t if t in RADAR_AXES else None
+
+
+def _expected(rating: float, reference: float) -> float:
+    """Elo expected score: 0.5 means level with the reference.
+
+    The App scores each axis as a win probability against the athlete's own mean, so the
+    polygon has a SHAPE instead of every strong athlete reading full on every axis. The same
+    trick is what makes a division's radar informative: without it, a division of strong
+    athletes is a big circle and says nothing about which parts of its game lead.
+    """
+    return 1.0 / (1.0 + 10 ** ((reference - rating) / ELO_SCALE))
+
+
+def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
+                roster: Mapping[str, str]) -> dict[str, Any]:
+    """Three rings per division on one set of spokes: usage, rating, rating against the corpus.
+
+    **The rating ring is athlete-level, not node-level.** Node ratings would be the right
+    input and the table holding them is empty (see `correlation_layer`), so each axis is
+    weighted by the ratings of the athletes who actually produced its events. An axis whose
+    contributors are unrated has no rating ring at all, and says so rather than falling back
+    to the division mean and looking like a measurement.
+    """
+    from analysis.rating_v2.config import SITE_RATING_RUN_ID
+    from analysis.stats_rigor import wilson
+
+    rated = {athlete_key(r[0]): float(r[1]) for r in conn.execute(text("""
+        select a.name, s.rating from athlete_rating_states_v2 s
+          join athletes a on a.id = s.athlete_id where s.run_id = :run
+    """), {"run": SITE_RATING_RUN_ID}).fetchall()}
+    corpus_mean = sum(rated.values()) / len(rated) if rated else 1500.0
+
+    id_key = {}
+    for b in bouts:
+        id_key[b["a_id"]] = athlete_key(b["a"])
+        id_key[b["b_id"]] = athlete_key(b["b"])
+
+    out: dict[str, Any] = {}
+    for div in ("65 kg", "+65 kg"):
+        counts: Counter[str] = Counter()
+        weighted: dict[str, list[tuple[float, int]]] = defaultdict(list)
+        own_ids = set()
+        for b in bouts:
+            for side in ("a", "b"):
+                if (b["div_a"] if side == "a" else b["div_b"]) != div:
+                    continue
+                own_ids.add(b[f"{side}_id"])
+        per_axis_athletes: dict[str, set[str]] = defaultdict(set)
+        for b in bouts:
+            for e in b["seq"]:
+                aid = e.get("actor_id")
+                if aid not in own_ids:
+                    continue
+                axis = _axis_of(e.get("type"))
+                if not axis:
+                    continue
+                counts[axis] += 1
+                key = id_key.get(aid)
+                if key and key in rated:
+                    weighted[axis].append((rated[key], 1))
+                    per_axis_athletes[axis].add(key)
+        total = sum(counts.values())
+        div_ratings = [rated[k] for k in {id_key.get(i) for i in own_ids} if k and k in rated]
+        div_mean = sum(div_ratings) / len(div_ratings) if div_ratings else None
+
+        axes = []
+        for axis in RADAR_AXES:
+            n = counts[axis]
+            w = weighted[axis]
+            axis_rating = sum(r for r, _ in w) / len(w) if w else None
+            axes.append({
+                "axis": axis,
+                "usage": {**wilson(n, total).to_dict()},
+                "n_events": n,
+                "rated_events": len(w),
+                "contributors": len(per_axis_athletes[axis]),
+                "rating": round(axis_rating) if axis_rating else None,
+                # 0.5 = level with this division's own mean, so the polygon has a shape
+                "vs_self": round(_expected(axis_rating, div_mean), 4)
+                           if axis_rating and div_mean else None,
+                # 0.5 = level with the whole rated corpus
+                "vs_corpus": round(_expected(axis_rating, corpus_mean), 4)
+                             if axis_rating else None,
+            })
+        out[div] = {
+            "axes": axes, "events": total,
+            "division_mean_rating": round(div_mean) if div_mean else None,
+            "corpus_mean_rating": round(corpus_mean),
+            "rated_athletes_in_division": len(div_ratings),
+            "note": "usage is the share of this division's own events on that axis; the two "
+                    "rating rings are athlete-level (node-level ratings do not exist) and "
+                    "weight each axis by whoever produced its events.",
+        }
+    return {"axes": list(RADAR_AXES), "pools": {"sweep": "guard"},
+            "corpus_mean_rating": round(corpus_mean), "divisions": out}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--records", type=Path, required=True,
@@ -649,6 +766,7 @@ def main() -> int:
         vids = video_layer(conn, roster)
         corr = correlation_layer(conn, bouts)
         rating = rating_layer(conn, roster)
+        radar = radar_layer(conn, bouts, roster)
 
     doc = {
         "generated": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -664,6 +782,7 @@ def main() -> int:
         "baseline": baseline_layer(bouts, roster_ids, seq),
         "videos": vids,
         "correlations": corr,
+        "radar": radar,
         "rd": {**rating,
                "athletes": {display[k]: v for k, v in rating["athletes"].items()}},
         "derived": json.loads(a.derived.read_text(encoding="utf-8")),
