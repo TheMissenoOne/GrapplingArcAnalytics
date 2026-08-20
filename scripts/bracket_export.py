@@ -352,16 +352,23 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
                 "named_conceded": Counter(_fold(r["method"]) for r in loss
                                           if r["family"] in SUB_FAMILIES).most_common(14),
             }
-        # Where each athlete's record came from. Eight of the sixteen have no record of their
-        # own -- seven are absent from BJJ Heroes' A-Z list entirely and one has a profile with
-        # no match table -- so theirs is reconstructed from the pages of athletes they fought
-        # and from bouts already in the corpus. That reconstruction is biased in a knowable
-        # direction: it can only contain opponents notable enough to have their own page, so it
+        # Where each athlete's record came from. Seven of the sixteen have no table of their
+        # own -- six are absent from BJJ Heroes' A-Z list entirely and one has a profile with
+        # no match table -- so theirs is built from the pages of athletes they fought and from
+        # bouts already in the corpus. The other eight have BOTH: their own table plus rows no
+        # source of theirs carried. That reconstruction is biased in a knowable direction --
+        # it can only contain opponents notable enough to have their own page, so it
         # over-represents strong opposition. Publishing the mix beats implying every record was
         # gathered the same way.
         provenance = {
             nm: {"division": v.get("division"),
-                 "record_source": v.get("record_source", "own" if v.get("rows") else "none"),
+                 "key": v.get("key"),
+                 "aliases": v.get("aliases") or [],
+                 # One identity, with the mix visible on it. There is no longer an "own record"
+                 # entity beside a "reconstructed record" entity -- eight of these athletes
+                 # have a table of their own AND rows recovered from the pages of the athletes
+                 # they fought, and calling such a record either name was false both ways.
+                 "provenance": v.get("provenance") or {},
                  "rows": len(v.get("rows") or []),
                  "by_source": dict(Counter(r.get("source", "own_record")
                                            for r in (v.get("rows") or []))),
@@ -1262,7 +1269,13 @@ def main() -> int:
     display = {athlete_key(x if isinstance(x, str) else x["name"]):
                (x if isinstance(x, str) else x["name"])
                for d in manifest["divisions"] for x in d["athletes"]}
-    records = json.loads(a.records.read_text(encoding="utf-8"))
+    record_doc = json.loads(a.records.read_text(encoding="utf-8"))
+    # One identity per athlete, keyed for humans by display name and for code by `key`.
+    # `opponents` is the other half of that scope decision: every athlete who appears on the
+    # far side of a roster bout gets a canonical identity here, and NOT a reconstructed career
+    # -- see scripts/build_roster_records._opponent_index for why the line sits there.
+    records = record_doc["athletes"]
+    opponents = record_doc.get("opponents") or {}
     bouts = json.loads(a.sequences.read_text(encoding="utf-8"))
 
     seq = {d: sequence_layer(bouts, d) for d in ("65 kg", "+65 kg")}
@@ -1309,6 +1322,17 @@ def main() -> int:
         "correlations": corr,
         "radar": radar,
         "data_quality": dq_,
+        "identity": {
+            "scope": record_doc.get("scope"),
+            "basis": "analysis.names.athlete_key (acentos, caixa e apelidos resolvidos)",
+            "roster": {v["display"]: {"key": k, "division": v.get("division"),
+                                      "aliases": v.get("aliases") or [],
+                                      "provenance": v.get("provenance") or {}}
+                       for k, v in ((e.get("key") or athlete_key(nm), e)
+                                    for nm, e in records.items())},
+            "opponents": opponents,
+            "opponent_count": len(opponents),
+        },
         "rd": {**rating,
                "athletes": {display[k]: v for k, v in rating["athletes"].items()}},
     }

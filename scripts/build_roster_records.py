@@ -30,7 +30,10 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import re
 import sys
+from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +47,11 @@ load_dotenv(REPO / ".env")
 from sqlalchemy import text  # noqa: E402
 
 from analysis.date_reconcile import parse_match_history  # noqa: E402
-from analysis.names import athlete_key  # noqa: E402
+from analysis.names import (  # noqa: E402
+    _deaccent,
+    _resolve_aliases,
+    athlete_key,
+)
 from db.base import get_engine  # noqa: E402
 from scripts.frame_pdf import _same_person  # noqa: E402
 
@@ -57,6 +64,9 @@ MANUAL = SCOUTING / "adcc_2026_women_manual.json"
 CACHE = REPO / "data" / "raw" / "bjjheroes"
 
 FLIP = {"W": "L", "L": "W", "D": "D"}
+# Filled by `_roster`. The manifest is the authority on which bracket an athlete is in;
+# reading it off the previous records file lets a stale division outlive a re-seed.
+DIVISION: dict[str, str] = {}
 
 
 def _roster() -> tuple[dict[str, str], dict[str, list[str]]]:
@@ -76,6 +86,7 @@ def _roster() -> tuple[dict[str, str], dict[str, list[str]]]:
             key = athlete_key(name)
             roster[key] = name
             spellings[key] = [name, *((x.get("aliases") or []) if isinstance(x, dict) else [])]
+            DIVISION[key] = d["name"]
     return roster, spellings
 
 
@@ -197,51 +208,170 @@ def from_manual(roster: dict[str, str],
     return out
 
 
+# Method strings that name the same ending in two vocabularies. The corpus writes what the
+# transcript said and BJJ Heroes writes its own shorthand, so the SAME bout arrives as "RNC"
+# from one source and "Rear Naked Choke" from the other -- and the dedup key, which uses the
+# method to tell a rematch from a duplicate, then keeps both. `NAME_ALIASES` already collapses
+# the submission half of this vocabulary for the ADCC pipeline; only the outcome words below
+# are new here.
+_OUTCOME_ALIASES = {
+    "referee decision": "decision", "judges decision": "decision", "judge decision": "decision",
+    "ref decision": "decision", "points": "pts", "submission": "sub", "sub": "sub",
+}
+
+
+def _method_key(method: str | None) -> str:
+    """One spelling per ending, so a rematch stays two rows and a duplicate becomes one."""
+    m = _deaccent(method or "").casefold().strip().rstrip(".")
+    m = re.sub(r"[^a-z0-9x ]", " ", m)
+    m = re.sub(r"\s+", " ", m).strip()
+    return _OUTCOME_ALIASES.get(m) or _resolve_aliases(m) or m
+
+
 def _key(row: dict[str, Any]) -> tuple[Any, ...]:
-    """Bout identity across sources: opponent, year, and method.
+    """Bout identity across sources: opponent, year, and how it ended.
 
     The competition string is deliberately absent -- BJJ Heroes writes "Euro NoGi" where the
     corpus writes "IBJJF European No-Gi 2024", so keying on it would duplicate every bout that
     both sources hold. The METHOD carries the separation instead, and it can: it is identical
     from both sides of a bout (97.9% over 2768 cross-referenced bouts) and differs between two
     different bouts. Opponent+year alone is not enough -- Sarah Galvao met Yara Soares twice in
-    2021, and a first version of this key merged those two bouts into one."""
-    return (athlete_key(row.get("opp") or ""), row.get("year"),
-            (row.get("method") or "").casefold().strip())
+    2021, and a first version of this key merged those two bouts into one.
+
+    What it does need is ONE spelling per ending. Compared raw, "RNC" and "Rear Naked Choke"
+    are two bouts, and Ane Svendsen's record carried the same 2025 loss to Helena Crevar twice
+    for exactly that reason. `_method_key` folds the vocabularies together without touching the
+    scores, which are what separate a genuine rematch ("Pts: 5x0" against "Pts: 3x0")."""
+    return (athlete_key(row.get("opp") or ""), row.get("year"), _method_key(row.get("method")))
+
+
+def _load(path: Path, roster: dict[str, str]) -> dict[str, dict[str, Any]]:
+    """The records file, re-keyed onto ONE identity per athlete.
+
+    The file is written under display names because a human reads it, and a display name is
+    not an identity: "Sarah Galvão" and "Sarah Galvao" are the same person and two dict keys.
+    Everything here is keyed by `athlete_key` instead -- the same normalisation the rest of the
+    codebase uses -- so a re-spelling in the manifest merges into the athlete who is already
+    there rather than opening a second record beside her.
+
+    Reads the current shape and the flat legacy one (``{display: entry}``) with no ceremony,
+    because the legacy file is what is on disk until this script runs once.
+    """
+    raw = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    flat = raw.get("athletes") if isinstance(raw.get("athletes"), dict) else raw
+    out: dict[str, dict[str, Any]] = {}
+    for name, entry in flat.items():
+        if not isinstance(entry, dict):
+            continue
+        key = entry.get("key") or athlete_key(name)
+        prev = out.get(key)
+        if prev is None:
+            out[key] = {**entry, "key": key, "display": roster.get(key, name)}
+            continue
+        # Two spellings of one athlete already in the file. Merge rather than let the later one
+        # win: the earlier may hold her own table and the later only a reconstruction.
+        seen = {_key(r) for r in (prev.get("rows") or [])}
+        prev["rows"] = (prev.get("rows") or []) + [
+            r for r in (entry.get("rows") or []) if _key(r) not in seen]
+        prev["division"] = prev.get("division") or entry.get("division")
+        logger.warning("merged duplicate record spelling %r into %r", name, prev["display"])
+    return out
+
+
+def _provenance(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """What this record is made of. One identity, the mix visible on it.
+
+    There is no "own record" entity and no "reconstructed record" entity -- there is one
+    athlete, and some of her bouts came from her own table while others were read off the
+    pages of the athletes she fought. A later-arriving own table adds rows to the same record;
+    it does not replace it with a different kind of thing.
+    """
+    by = Counter(r.get("source", "own_record") for r in rows)
+    return {"total": len(rows), "by_source": dict(by),
+            "has_own_table": bool(by.get("own_record")),
+            # Kept because it is the honest headline: a record built only from opponents' pages
+            # can only contain opponents notable enough to have one, so it over-represents
+            # strong opposition and omits the rest in silence.
+            "reconstructed_share": round(1 - by.get("own_record", 0) / len(rows), 3)
+            if rows else None}
+
+
+def _opponent_index(records: dict[str, dict[str, Any]],
+                    roster: dict[str, str]) -> dict[str, dict[str, Any]]:
+    """One canonical identity for every athlete who appears on the OTHER side of a roster bout.
+
+    Scope, decided and stated: this is the roster plus its opponents, **not** the whole corpus.
+    The corpus holds ~1315 athletes; reconstructing a career record for each would ship about a
+    megabyte of derived personal history for hundreds of people who are not in this bracket and
+    whom no reader of this report can click on. The boundary is the report's own subject.
+
+    Within that boundary the identity rules are the same as the roster's: `athlete_key`
+    collapses accents, case and the alias table, so "Helena Cravar" cannot open a row beside
+    "Helena Crevar". What is NOT built here is a career record -- only what this report already
+    knows about her: how many times she met the roster, which spellings she was recorded under,
+    and whether a source for more exists.
+    """
+    out: dict[str, dict[str, Any]] = {}
+    for entry in records.values():
+        name = entry.get("display") or entry.get("key") or "?"
+        for r in entry.get("rows") or []:
+            raw = (r.get("opp") or "").strip()
+            if not raw:
+                continue
+            key = athlete_key(raw)
+            if key in roster:
+                continue                                  # she is on the roster; not an opponent
+            o = out.setdefault(key, {"key": key, "display": raw, "spellings": [],
+                                     "bouts_vs_roster": 0, "vs": [], "sources": []})
+            if raw not in o["spellings"]:
+                o["spellings"].append(raw)
+            o["bouts_vs_roster"] += 1
+            if name not in o["vs"]:
+                o["vs"].append(name)
+            src = r.get("source", "own_record")
+            if src not in o["sources"]:
+                o["sources"].append(src)
+    for o in out.values():
+        # Longest spelling as the display form: "Paige Ivette Climber" over "P. Ivette", because
+        # an initial is the abbreviation and never the name.
+        o["display"] = max(o["spellings"], key=len)
+        o["has_own_page"] = (CACHE / f"match__{o['key'].replace(' ', '_')}.html").exists()
+    return out
 
 
 def build(dry_run: bool) -> int:
     roster, spellings = _roster()
-    recs = json.loads(RECORDS.read_text(encoding="utf-8"))
+    recs = _load(RECORDS, roster)
+    legacy = {roster[k]: v for k, v in recs.items() if k in roster}
     manual = from_manual(roster, spellings)
     opp = from_opponents(roster, spellings)
-    from_recs = from_roster_records(recs, roster, spellings)
+    from_recs = from_roster_records(legacy, roster, spellings)
     corpus = from_corpus(roster, spellings)
 
     report: list[tuple[str, int, int, int, int, int]] = []
     for key, name in roster.items():
-        entry = recs.setdefault(name, {"division": None, "rows": []})
-        # Only rows that came from HER OWN table count as an own record. Reading back every
-        # row would make a second run treat the previous run's reconstruction as authoritative
-        # and stop rebuilding -- the builder has to be re-runnable, because the sources move.
+        entry = recs.setdefault(key, {"key": key, "division": None, "rows": []})
+        entry["display"] = name
+        entry["key"] = key
+        entry["division"] = DIVISION.get(key) or entry.get("division")
+        entry["aliases"] = [s for s in spellings[key] if s != name]
+        # Only rows that came from HER OWN table survive into the next run's base. Reading back
+        # every row would make a second run treat the previous run's reconstruction as
+        # authoritative and stop rebuilding -- the builder has to be re-runnable, because the
+        # sources move.
         rows = entry.get("rows") or []
         for r in rows:
             r.setdefault("source", "own_record")
         own = [r for r in rows if r.get("source") == "own_record"]
-        if own:
-            # Her own table wins for everything a scrape can see -- but a hand-confirmed bout
-            # exists precisely because no scrape sees it, so it is added even here.
-            seen_own = {_key(r) for r in own}
-            extra = [r for r in manual[key] if _key(r) not in seen_own]
-            entry["rows"] = own + extra
-            report.append((name, len(own), 0, 0, len(own) + len(extra), len(extra)))
-            continue
 
+        # ONE identity, whether or not she has a table of her own. This used to short-circuit:
+        # an athlete with an own record kept it and nothing was grafted, which made "own" and
+        # "reconstructed" two different kinds of record rather than one record with a visible
+        # mix. Her own table is still authoritative -- it is merged FIRST and the dedup key
+        # keeps the first of each bout -- but a bout it does not carry is still a bout.
         seen = {_key(r) for r in own}
         merged = list(own)
         added_opp = added_corpus = 0
-        # Roster records first (current parse), then the wider HTML cache, then the corpus:
-        # descending method-string richness, and the dedup key keeps the first of each bout.
         for row in manual[key] + from_recs[key] + opp[key] + corpus[key]:
             k = _key(row)
             if k in seen:
@@ -250,27 +380,37 @@ def build(dry_run: bool) -> int:
             merged.append(row)
             if row["source"] == "opponent_record":
                 added_opp += 1
-            else:
+            elif row["source"] != "manual":
                 added_corpus += 1
         merged.sort(key=lambda r: (r.get("year") or 0, r.get("comp") or ""))
         entry["rows"] = merged
-        entry["record_source"] = "reconstructed" if merged else "none"
-        report.append((name, 0, added_opp, added_corpus, len(merged),
+        entry["provenance"] = _provenance(merged)
+        entry.pop("record_source", None)        # the binary this replaces
+        report.append((name, len(own), added_opp, added_corpus, len(merged),
                        sum(1 for r in merged if r.get("source") == "manual")))
+
+    opponents = _opponent_index(recs, roster)
 
     print(f"{'atleta':24} {'própria':>8} {'advers.':>8} {'corpus':>7} {'manual':>7} {'total':>7}")
     for name, o, a, c, tot, man in sorted(report, key=lambda r: -r[4]):
         flag = "   <-- nenhuma fonte" if tot == 0 else ""
         print(f"{name:24} {o:8d} {a:8d} {c:7d} {man:7d} {tot:7d}{flag}")
-    built = sum(1 for _, o, _, _, t, _m in report if not o and t)
-    print(f"\n{built} fichas reconstruídas; "
-          f"{sum(1 for _, o, _, _, t, _m in report if not o and not t)} sem fonte alguma; "
+    mixed = sum(1 for _, o, a, c, t, _m in report if o and (a or c))
+    print(f"\n{sum(1 for _, o, _, _, t, _m in report if not o and t)} ficha(s) sem tabela "
+          f"própria; {mixed} com tabela própria E linhas recuperadas; "
+          f"{sum(1 for _, o, _, _, t, _m in report if not t)} sem fonte alguma; "
           f"{sum(m for *_, m in report)} linha(s) manual(is)")
+    print(f"{len(opponents)} adversárias com identidade canônica "
+          f"({sum(1 for o in opponents.values() if o['has_own_page'])} com página própria)")
 
     if dry_run:
         print("\n--dry-run: nada escrito")
         return 0
-    RECORDS.write_text(json.dumps(recs, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    doc = {"generated": datetime.now(UTC).isoformat(timespec="seconds"),
+           "scope": "roster + adversárias diretas; NÃO o corpus inteiro",
+           "athletes": {roster[k]: v for k, v in recs.items() if k in roster},
+           "opponents": opponents}
+    RECORDS.write_text(json.dumps(doc, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     print(f"\nescrito {RECORDS}")
     return 0
 
