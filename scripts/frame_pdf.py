@@ -527,6 +527,14 @@ def context_prose(step: int, with_library: bool, first_ts: float, last_ts: float
               "stops or disappears, the camera angle changes, the action repeats something "
               "you already saw. Skip those frames rather than logging them, and say in the "
               "note which range you treated as replay."),
+        ("p", "AND NOT EVERY FRAME IS THIS BOUT. A broadcast cuts away -- to another mat, to "
+              "a different match's scorecard, to a crowd shot or an ad -- and it may show two "
+              "bouts in sequence with a gap between rounds. A reader found exactly that in "
+              "this batch: a scorecard from an unrelated match sitting in the middle of the "
+              "sampled frames. Events read off a cutaway land on the wrong athletes entirely, "
+              "which is worse than missing them. Before logging any event, confirm the frame "
+              "shows the two competitors you identified, and say in the note which ranges you "
+              "excluded as not-this-bout."),
         ("p", "THE SCOREBOARD'S NAME ORDER IS NOT A MAT POSITION. A lower-third graphic puts "
               "one name left and one right by broadcast convention; which competitor stands "
               "where on the mat is unrelated and changes shot to shot. Binding a name to a "
