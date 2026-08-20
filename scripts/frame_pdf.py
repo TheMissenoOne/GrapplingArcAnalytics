@@ -44,11 +44,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from PIL import Image, ImageDraw, ImageFont
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.utils import ImageReader, simpleSplit
+from reportlab.pdfgen.canvas import Canvas
 
 logger = logging.getLogger("frame_pdf")
 
 REPO = Path(__file__).resolve().parent.parent
+# Run as a plain script (scripts/ is not a package on sys.path), so `analysis.*` and `db.*`
+# have to be made importable before any of them is touched -- module scope, not inside the
+# first function that happens to need one.
+sys.path.insert(0, str(REPO))
 
 # ── Sampling ────────────────────────────────────────────────────────────────────
 # One frame every 5s. Chosen against what the reader has to answer, not against what looks
@@ -68,6 +74,11 @@ DEFAULT_GRID = (2, 3)      # cols x rows -> 6 frames per page
 # answer to a video that needs both is two entries: this one to find the bouts, then one
 # per bout with a `start`/`end` and the normal step.
 DEFAULT_MAX_FRAMES = 400
+
+# Where --dump-library writes by default, and where the context page tells the reader the
+# vocabulary lives. Versioned next to the manifests: the manifest says which fights, this
+# says which words, and a sheet rendered against one vocabulary is read against the same one.
+LIBRARY_PATH = REPO / "data" / "frame_pdf" / "node_library.json"
 FRAME_WIDTH = 640          # px; readable body position without an unopenable file
 JPEG_QUALITY = 72
 
@@ -125,6 +136,8 @@ class Entry:
     label: str = ""              # human hint: "Ana Lopez vs Maca Vicentini, IBJJF 2025"
     note: str = ""               # provenance from whoever sourced the link
     step: int | None = None      # per-entry override of --step
+    kind: str = ""               # sourcing type: full_match / full_event / highlights
+    skip: str = ""               # non-empty = do not render, and this says why
 
     @property
     def vid(self) -> str:
@@ -151,6 +164,12 @@ def load_manifest(path: Path) -> list[Entry]:
         # The source lists repeat a url once per bout it contains. Without a start offset
         # those rows are the same PDF, so collapse them instead of rendering the same reel
         # five times; rows that DO carry distinct offsets stay distinct.
+        if e.skip:
+            # Kept in the file rather than deleted: a reel that exists and was deliberately
+            # not rendered is different from a fight nobody found footage for, and only the
+            # first of those is worth re-reading when the sourcing rule changes.
+            logger.info("manifest: skipping %s (%s)", e.vid, e.skip)
+            continue
         key = (e.vid, e.start)
         if key in seen:
             logger.info("manifest: collapsing duplicate row for %s", e.vid)
@@ -169,25 +188,29 @@ class DbContext:
         return self.processed.get(vid, [])
 
 
-def load_db_context() -> DbContext:
-    """Every final match that already carries a video link, keyed by video id, plus the
-    scouting roster used to say which division a fight belongs to.
-
-    Read-only, and deliberately NOT through ``db_session()``: that context manager commits on
-    a clean exit, and nothing here has any business writing.
-    """
-    sys.path.insert(0, str(REPO))
+def _engine() -> Any:
+    """Prod, read-only. Deliberately NOT ``db_session()``: that context manager commits on a
+    clean exit, and nothing in this module has any business writing."""
     try:
         from dotenv import load_dotenv
         load_dotenv(REPO / ".env")
     except ImportError:
         pass
-    from sqlalchemy import text
-
     from db.base import get_engine
 
+    return get_engine()
+
+
+def load_db_context() -> DbContext:
+    """Every final match that already carries a video link, keyed by video id, plus the
+    scouting roster used to say which division a fight belongs to.
+
+    Read-only -- see ``_engine``.
+    """
+    from sqlalchemy import text
+
     ctx = DbContext()
-    with get_engine().connect() as c:
+    with _engine().connect() as c:
         for r in c.execute(text("""
             select m.video_url, m.video_start_seconds, m.ts_origin, m.event, m.year,
                    a.name, b.name, coalesce(jsonb_array_length(m.sequence), 0)
@@ -266,34 +289,54 @@ def extract(video: Path, out: Path, step: int, offset: float) -> list[tuple[floa
 
 
 # ── PDF ─────────────────────────────────────────────────────────────────────────
-def _font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    for name in ("DejaVuSans.ttf", "LiberationSans-Regular.ttf", "Arial.ttf"):
-        try:
-            return ImageFont.truetype(name, size)
-        except OSError:
-            continue
-    return ImageFont.load_default()
+# reportlab, not Pillow. Pillow can only save a page as a *picture of* text: nothing in the
+# sheet is selectable, searchable, or extractable, and a reader that ingests text separately
+# from images sees an empty document. reportlab writes real text objects, and hands a JPEG
+# straight through as DCTDecode rather than re-encoding it -- so the sheet gains search and
+# does not gain weight. (matplotlib is already a dependency and was measured against: its PDF
+# backend re-compresses every frame losslessly, which turns a 6 MB sheet into ~40 MB.)
+
+FONT, FONT_B, FONT_M = "Helvetica", "Helvetica-Bold", "Courier"
+PAGE = A4
+PW, PH = PAGE
+PAD = 40
 
 
-def context_page(entry: Entry, meta: dict[str, Any], db: DbContext,
-                 n_frames: int, step: int, first_ts: float, last_ts: float) -> Image.Image:
+def _text_block(c: Canvas, text: str, x: float, y: float, width: float,
+                size: float, leading: float, font: str = FONT) -> float:
+    """Wrapped paragraph as real text. Returns the new y."""
+    c.setFont(font, size)
+    for line in simpleSplit(text, font, size, width):
+        c.drawString(x, y, line)
+        y -= leading
+    return y
+
+
+def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbContext,
+                      n_frames: int, step: int, first_ts: float, last_ts: float,
+                      with_library: bool) -> None:
     """The first page: which fight, which clock, and what the answer must look like.
 
     It is written as a prompt because it IS the prompt -- the PDF is the whole message the
     reader gets, so anything left implicit here comes back as a guess.
     """
-    img = Image.new("RGB", (PAGE_W, PAGE_H), "white")
-    d = ImageDraw.Draw(img)
-    h1, h2, body, mono = _font(52), _font(34), _font(28), _font(26)
-    y = MARGIN
-
-    d.text((MARGIN, y), entry.label or meta.get("title") or entry.vid, font=h1, fill="black")
-    y += 74
-    d.line([(MARGIN, y), (PAGE_W - MARGIN, y)], fill="black", width=3)
-    y += 30
+    y = PH - PAD
+    title = entry.label or str(meta.get("title") or entry.vid)
+    c.setFont(FONT_B, 15)
+    for line in simpleSplit(title, FONT_B, 15, PW - 2 * PAD):
+        c.drawString(PAD, y, line)
+        y -= 19
+    y -= 4
+    c.setLineWidth(1)
+    c.line(PAD, y, PW - PAD, y)
+    y -= 20
 
     known = db.bouts_for(entry.vid)
-    div = next((db.roster[k] for k in db.roster if k in _fold(entry.label or meta.get("title") or "")), None)
+    # Word-boundary, never substring: a roster name that happens to sit inside an unrelated
+    # title would label the sheet with a division the fight is not in, and a wrong division
+    # on the context page is a wrong premise the reader has no way to check.
+    hay = f" {_fold(entry.label or str(meta.get('title') or ''))} "
+    div = next((db.roster[k] for k in db.roster if f" {k} " in hay), None)
 
     rows: list[tuple[str, str]] = [
         ("Video", f"https://www.youtube.com/watch?v={entry.vid}"),
@@ -306,102 +349,260 @@ def context_page(entry: Entry, meta: dict[str, Any], db: DbContext,
     ]
     if div:
         rows.append(("Division", f"{div} (ADCC 2026 scouting roster)"))
+    if entry.kind:
+        rows.append(("Footage type", entry.kind.replace("_", " ")))
     if entry.note:
         rows.append(("Source note", entry.note))
     if known:
         rows.append(("Already in the corpus",
                      "; ".join(f"{b['a']} vs {b['b']} ({b['event'] or 'no event'} {b['year']}), "
                                f"{b['events']} events" for b in known)))
-
     for k, v in rows:
-        d.text((MARGIN, y), f"{k}", font=h2, fill="#444444")
-        for line in _wrap(v, 74):
-            d.text((MARGIN + 340, y), line, font=body, fill="black")
-            y += 36
-        y += 8
+        c.setFont(FONT_B, 9)
+        c.drawString(PAD, y, k)
+        y = _text_block(c, v, PAD + 130, y, PW - PAD - 130 - PAD, 9, 12) - 4
 
-    y += 24
-    d.line([(MARGIN, y), (PAGE_W - MARGIN, y)], fill="black", width=3)
-    y += 30
-    d.text((MARGIN, y), "How to read this", font=h1, fill="black")
-    y += 74
+    y -= 12
+    c.line(PAD, y, PW - PAD, y)
+    y -= 24
+    c.setFont(FONT_B, 14)
+    c.drawString(PAD, y, "How to read this")
+    y -= 22
 
-    instructions = f"""Each frame below is stamped with its VIDEO-ABSOLUTE time: seconds from \
-the start of the video at the URL above, NOT seconds from the start of the bout. Frame \
-stamps run from {hhmmss(first_ts)} to {hhmmss(last_ts)}.
+    lib = ("The pages immediately after this one list every technique the library knows, "
+           "grouped by kind and most-used first; take each `label` from them verbatim."
+           if with_library else
+           f"Take each `label` verbatim from {LIBRARY_PATH.name}, which lists every technique "
+           "the library knows, most-used first.")
 
-Return every timestamp in that same video-absolute clock. If the bout starts partway into \
-the video, say where it starts as a separate field -- do not rebase the event times to it. \
-A bout-relative time reported as an absolute one places the whole fight in a different part \
-of the broadcast, and the result looks plausible while being wrong.
-
-For each event you can see, give:
-  ts            integer seconds, video-absolute
-  label         what happened (e.g. "Guard Pass", "Back Take", "Heel Hook", "Sweep")
-  actor         which competitor did it, by name
-  successful    true if it landed, false if it was attempted and stopped
-  type          one of: takedown, pass, sweep, submission, escape, control, guard_pull
-
-Also return, once per bout: the two competitors' names, the event/card name, the year, who \
-won and how, and bout_start_seconds -- the video-absolute second the bout begins.
-
-If this video contains more than one bout, return one such object per bout.
-
-Only report what a frame actually shows. An event you infer from the scoreboard but never \
-see is worth less than an omission: a wrong label propagates into the athlete's graph and \
-their rating, and nothing downstream can tell it from an observed one."""
-
-    for para in instructions.split("\n\n"):
-        for line in _wrap(" ".join(para.split()), 92):
-            d.text((MARGIN, y), line, font=mono, fill="black")
-            y += 34
-        y += 16
-    return img
-
-
-def _wrap(text: str, width: int) -> list[str]:
-    words, lines, cur = text.split(), [], ""
-    for w in words:
-        if len(cur) + len(w) + 1 > width:
-            lines.append(cur)
-            cur = w
+    paras: list[tuple[str, str]] = [
+        ("p", f"Each frame below is stamped with its VIDEO-ABSOLUTE time: seconds from the "
+              f"start of the video at the URL above, NOT seconds from the start of the bout. "
+              f"Frame stamps run from {hhmmss(first_ts)} to {hhmmss(last_ts)}."),
+        ("p", "Return every timestamp in that same video-absolute clock. If the bout starts "
+              "partway into the video, say where it starts as a separate field -- do not "
+              "rebase the event times to it. A bout-relative time reported as an absolute one "
+              "places the whole fight in a different part of the broadcast, and the result "
+              "looks plausible while being wrong."),
+        ("p", "For each event you can see, give:"),
+        ("f", "ts|integer seconds, video-absolute"),
+        ("f", "label|a technique name, taken verbatim from the vocabulary pages"),
+        ("f", "actor|which competitor did it, by name"),
+        ("f", "successful|true if it landed, false if attempted and stopped"),
+        ("f", "type|one of: control, submission, guard, takedown, pass, transition, "
+              "sweep, escape"),
+        ("f", "points|points the scoreboard awarded for THIS action; omit if you cannot "
+              "read it"),
+        ("p", "Points are the one thing the scoreboard is authoritative for, and reading "
+              "footage is the first time they are visible at all -- a transcript only ever "
+              "carried what a commentator said aloud. So: report `points` only when you can "
+              "actually read the number change on the scoreboard between frames, attribute "
+              "it to the action that caused it, and OMIT the field otherwise. Never write 0 "
+              "to mean 'I could not tell' -- an action that scored nothing and an action "
+              "nobody could score are different facts, and only an absent field holds the "
+              "second. If the score jumps and you cannot see which action earned it, say so "
+              "in `note` on the nearest event rather than guessing an attribution."),
+        ("p", "Also return, once per bout: the two competitors' names, the event/card name, "
+              "the year, who won and how, bout_start_seconds -- the video-absolute second "
+              "the bout begins -- and final_score as \"a-b\" if the scoreboard shows one. "
+              "If this video contains more than one bout, return one such object per bout."),
+        ("p", f"LABELS ARE A CLOSED VOCABULARY. {lib} A label is normalised into a node key, "
+              "and that key IS the node in every graph it reaches -- so a spelling the library "
+              "does not have does not fail, it mints a second node, and one technique arrives "
+              "split in two with no error anywhere. Where two listed names could both fit, "
+              "take the one printed higher: that ordering is how often the corpus already "
+              "uses it. If a frame genuinely shows something the list does not cover, use "
+              "your own words and flag it as `new_label: true` rather than bending it into "
+              "the nearest listed name."),
+        ("p", "Only report what a frame actually shows. The scoreboard settles POINTS and "
+              "nothing else: a technique you infer from a score change but never see is "
+              "worth less than an omission, because a wrong label propagates into the "
+              "athlete's graph and their rating and nothing downstream can tell it from an "
+              "observed one. An omission is recoverable; an invented event is not."),
+    ]
+    for kind, body in paras:
+        if kind == "f":
+            # A field list is a table. Re-wrapping it as prose loses the one thing it
+            # carries: which name goes with which description.
+            name, desc = body.split("|", 1)
+            c.setFont(FONT_M, 8.5)
+            c.drawString(PAD + 14, y, name)
+            y = _text_block(c, desc, PAD + 110, y, PW - PAD - 110 - PAD, 8.5, 11) - 1
         else:
-            cur = f"{cur} {w}".strip()
-    if cur:
-        lines.append(cur)
-    return lines or [""]
+            y = _text_block(c, body, PAD, y, PW - 2 * PAD, 8.5, 11) - 8
+    c.showPage()
 
 
-def grid_pages(frames: list[tuple[float, Path]], grid: tuple[int, int]) -> list[Image.Image]:
+def draw_library_pages(c: Canvas, library: dict[str, Any]) -> None:
+    """The label vocabulary, printed into the PDF as real, searchable text.
+
+    A separate JSON file only helps a reader that was given the file. The sheet is the whole
+    message, so the words it is allowed to use travel inside it -- otherwise the closed
+    vocabulary the context page insists on is a rule with no list attached.
+
+    Grouped by node_type and ordered most-used-first inside each group, which is the
+    preference signal without a legend: where two names could fit, the one printed higher is
+    the one the corpus already uses, and picking it keeps a technique in one node instead of
+    splitting it across two spellings.
+    """
+    groups: dict[str, list[dict[str, Any]]] = {}
+    for n in library["nodes"]:
+        groups.setdefault(str(n.get("node_type") or "other"), []).append(n)
+    order = sorted(groups, key=lambda g: -sum(int(x["corpus_events"]) for x in groups[g]))
+
+    ncols, col_w = 3, (PW - 2 * PAD) / 3
+    line_h, size = 10.0, 7.5
+    top = PH - PAD - 34
+    bottom = PAD
+
+    def header() -> None:
+        c.setFont(FONT_B, 13)
+        c.drawString(PAD, PH - PAD, "Allowed labels — use one of these, verbatim")
+        c.setFont(FONT, 7.5)
+        c.drawString(PAD, PH - PAD - 15,
+                     f"{library['node_count']} techniques, grouped by kind, most-used first. "
+                     f"Snapshot {library['generated']}.")
+
+    header()
+    col, y = 0, top
+
+    def advance() -> tuple[int, float]:
+        nonlocal col
+        col += 1
+        if col >= ncols:
+            c.showPage()
+            header()
+            col = 0
+        return col, top
+
+    for g in order:
+        rows = sorted(groups[g], key=lambda n: (-int(n["corpus_events"]), str(n["key"])))
+        # A group header with no room for two of its entries belongs in the next column.
+        if y - 3 * line_h < bottom:
+            col, y = advance()
+        c.setFont(FONT_B, 8.5)
+        c.drawString(PAD + col * col_w, y, g.upper())
+        y -= line_h + 3
+        c.setFont(FONT, size)
+        for n in rows:
+            if y - line_h < bottom:
+                col, y = advance()
+                c.setFont(FONT, size)
+            c.drawString(PAD + col * col_w, y, str(n["label"])[:36])
+            y -= line_h
+        y -= 5
+    c.showPage()
+
+
+def draw_grid_pages(c: Canvas, frames: list[tuple[float, Path]], grid: tuple[int, int]) -> None:
+    """The frames, each with its video-absolute stamp as real text above it.
+
+    ``drawImage`` on a JPEG path embeds the original DCTDecode stream, so a frame costs what
+    ffmpeg already spent on it and nothing more.
+    """
     cols, rows = grid
     per = cols * rows
-    cell_w = (PAGE_W - 2 * MARGIN) // cols
-    cell_h = (PAGE_H - 2 * MARGIN) // rows
-    font = _font(30)
-    pages: list[Image.Image] = []
+    cell_w = (PW - 2 * PAD) / cols
+    cell_h = (PH - 2 * PAD) / rows
     for i in range(0, len(frames), per):
-        page = Image.new("RGB", (PAGE_W, PAGE_H), "white")
-        d = ImageDraw.Draw(page)
         for j, (ts, path) in enumerate(frames[i:i + per]):
-            with Image.open(path) as im:
-                im = im.convert("RGB")
-                im.thumbnail((cell_w - 16, cell_h - LABEL_H - 16))
-                x = MARGIN + (j % cols) * cell_w
-                y = MARGIN + (j // cols) * cell_h
-                page.paste(im, (x + 8, y + LABEL_H))
-                d.text((x + 8, y + 2), f"{hhmmss(ts)}   ({int(ts)}s)", font=font, fill="black")
-        pages.append(page)
-    return pages
+            x = PAD + (j % cols) * cell_w
+            # reportlab's origin is bottom-left; rows read top-down.
+            y_top = PH - PAD - (j // cols) * cell_h
+            c.setFont(FONT_B, 8)
+            c.drawString(x, y_top - 9, f"{hhmmss(ts)}   ({int(ts)}s)")
+            c.drawImage(ImageReader(str(path)), x, y_top - cell_h + 6,
+                        width=cell_w - 8, height=cell_h - 22,
+                        preserveAspectRatio=True, anchor="n")
+        c.showPage()
 
 
 def build_pdf(entry: Entry, meta: dict[str, Any], db: DbContext,
               frames: list[tuple[float, Path]], step: int, grid: tuple[int, int],
-              out_path: Path) -> None:
-    cover = context_page(entry, meta, db, len(frames), step,
-                         frames[0][0], frames[-1][0])
-    pages = grid_pages(frames, grid)
-    cover.save(out_path, "PDF", save_all=True, append_images=pages,
-               resolution=200.0, quality=JPEG_QUALITY)
+              out_path: Path, library: dict[str, Any] | None = None) -> None:
+    c = Canvas(str(out_path), pagesize=PAGE)
+    c.setTitle(entry.label or str(meta.get("title") or entry.vid))
+    c.setSubject(f"https://www.youtube.com/watch?v={entry.vid} — frames every {step}s, "
+                 "timestamps are video-absolute")
+    draw_context_page(c, entry, meta, db, len(frames), step,
+                      frames[0][0], frames[-1][0], with_library=library is not None)
+    if library:
+        draw_library_pages(c, library)
+    draw_grid_pages(c, frames, grid)
+    c.save()
+
+
+# ── Node library ────────────────────────────────────────────────────────────────
+def dump_node_library(out_path: Path) -> str:
+    """Every label a returned event is allowed to use, as JSON.
+
+    A sequence event's ``label`` is not free text: it is normalised
+    (``analysis.names._normalize_name`` then ``canonicalize``) into a ``node_key``, and that
+    key IS the node in every graph the label reaches -- the athlete's, the ocean, the
+    archetype centroids. A label that normalises to a key the library does not have does not
+    fail; it silently mints a new node, and the athlete's game arrives split between "Heel
+    Hook" and "Heelhook" with no error anywhere. Handing the reader the vocabulary up front
+    is what stops that, and it is cheaper than repairing it after (see the six spelling
+    merges in docs/analytics_audit).
+
+    The whole library ships, not just the attested part, because a new label can be correct:
+    an athlete really can do something no bout in the corpus has shown yet. ``corpus_events``
+    is there to break ties toward the established spelling, not to forbid the rest.
+
+    Read-only against prod, and a snapshot by design: it records the day it was taken, so a
+    stale copy is visible rather than merely old.
+    """
+    from datetime import date
+
+    from sqlalchemy import text
+
+    from analysis.names import SYNONYMS
+
+    with _engine().connect() as c:
+        nodes = [
+            {"key": r[0], "label": r[1], "type": r[2], "node_type": r[3] or None,
+             "taxonomy_id": r[4]}
+            for r in c.execute(text(
+                "select node_key, label, type, node_type, taxonomy_id "
+                "from technique_nodes order by node_key"))
+        ]
+        used = {r[0]: r[1] for r in c.execute(text(
+            "select e->>'label', count(*) from matches m, jsonb_array_elements(m.sequence) e "
+            "where m.status = 'final' and e->>'label' is not null group by 1"))}
+        types = [{"type": r[0], "corpus_events": r[1]} for r in c.execute(text(
+            "select e->>'type', count(*) from matches m, jsonb_array_elements(m.sequence) e "
+            "where m.status = 'final' and e->>'type' is not null group by 1 order by 2 desc"))]
+        alembic = c.execute(text("select version_num from alembic_version")).scalar()
+
+    from analysis.names import _normalize_name, canonicalize
+    counts: dict[str, int] = {}
+    for label, n in used.items():
+        counts[canonicalize(_normalize_name(label))] = counts.get(
+            canonicalize(_normalize_name(label)), 0) + n
+    for node in nodes:
+        node["corpus_events"] = counts.get(node["key"], 0)
+    nodes.sort(key=lambda n: (-n["corpus_events"], n["key"]))
+
+    payload = {
+        "generated": date.today().isoformat(),
+        "source": f"technique_nodes on prod, alembic {alembic}",
+        "node_count": len(nodes),
+        "attested_in_corpus": sum(1 for n in nodes if n["corpus_events"]),
+        "how_a_label_becomes_a_node": (
+            "label -> analysis.names._normalize_name (lowercase, strip punctuation and "
+            "accents, collapse whitespace) -> canonicalize (the `synonyms` map below) -> "
+            "node_key. Prefer a `label` from this file verbatim. A label that normalises to "
+            "a key not listed here mints a new node instead of failing, which is how one "
+            "technique ends up split across two spellings."
+        ),
+        "event_types": types,
+        "synonyms": SYNONYMS,
+        "nodes": nodes,
+    }
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
+    return (f"{len(nodes)} nodes ({payload['attested_in_corpus']} attested in the corpus), "
+            f"{len(types)} event types, {len(SYNONYMS)} synonyms -> {out_path}")
 
 
 # ── Driver ──────────────────────────────────────────────────────────────────────
@@ -416,7 +617,8 @@ def _span_seconds(entry: Entry, meta: dict[str, Any]) -> float | None:
 
 def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
             grid: tuple[int, int], workdir: Path, force: bool,
-            max_frames: int = DEFAULT_MAX_FRAMES) -> str:
+            max_frames: int = DEFAULT_MAX_FRAMES,
+            library: dict[str, Any] | None = None) -> str:
     known = db.bouts_for(entry.vid)
     if known and not force:
         with_seq = [b for b in known if b["events"]]
@@ -443,7 +645,7 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
         video.unlink(missing_ok=True)          # the frames are the artefact; disk is tight
         if not frames:
             return f"FAIL {entry.vid}: ffmpeg produced no frames"
-        build_pdf(entry, meta, db, frames, step, grid, out_path)
+        build_pdf(entry, meta, db, frames, step, grid, out_path, library)
     mb = out_path.stat().st_size / 1e6
     return f"ok   {out_path.name}  {len(frames)} frames, {mb:.1f} MB"
 
@@ -452,7 +654,10 @@ def main() -> int:
     global COOKIES_FROM_BROWSER
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--manifest", type=Path, required=True)
+    ap.add_argument("--manifest", type=Path,
+                    help="videos to render; not needed with --dump-library")
+    ap.add_argument("--dump-library", type=Path, nargs="?", const=LIBRARY_PATH,
+                    help="write the label vocabulary a returned event may use, and exit")
     ap.add_argument("--out", type=Path, default=REPO / "data" / "frame_pdf" / "out")
     ap.add_argument("--step", type=int, default=DEFAULT_STEP_SECONDS)
     ap.add_argument("--grid", default="2x3", help="cols x rows per page (default 2x3)")
@@ -461,6 +666,8 @@ def main() -> int:
     ap.add_argument("--cookies-from-browser", default=COOKIES_FROM_BROWSER,
                     help="browser profile yt-dlp reads cookies from; '' for anonymous "
                          "(anonymous currently gets HTTP 403 on these uploads)")
+    ap.add_argument("--no-library", action="store_true",
+                    help="do not print the label vocabulary into the sheet")
     ap.add_argument("--force", action="store_true",
                     help="rebuild even when the video already backs a reviewed sequence")
     ap.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES,
@@ -468,6 +675,12 @@ def main() -> int:
     ap.add_argument("--limit", type=int, help="stop after N videos (a smoke run)")
     ap.add_argument("--dry-run", action="store_true", help="report the plan, download nothing")
     a = ap.parse_args()
+
+    if a.dump_library:
+        print(dump_node_library(a.dump_library))
+        return 0
+    if not a.manifest:
+        ap.error("--manifest is required unless --dump-library is given")
 
     for tool in ("yt-dlp", "ffmpeg", "ffprobe"):
         if not shutil.which(tool):
@@ -480,6 +693,14 @@ def main() -> int:
     db = load_db_context()
     a.out.mkdir(parents=True, exist_ok=True)
     a.workdir.mkdir(parents=True, exist_ok=True)
+
+    library = None
+    if not a.no_library:
+        # Refresh rather than trust a copy on disk: the sheet asserts a closed vocabulary,
+        # and a stale list makes that assertion false for anything added since. It is one
+        # query and it is the difference between a rule and a wrong rule.
+        logger.info("%s", dump_node_library(LIBRARY_PATH))
+        library = json.loads(LIBRARY_PATH.read_text(encoding="utf-8"))
 
     if a.limit:
         entries = entries[:a.limit]
@@ -498,7 +719,7 @@ def main() -> int:
     for e in entries:
         try:
             results.append(process(e, db, a.out, a.step, (cols, rows), a.workdir,
-                                   a.force, a.max_frames))
+                                   a.force, a.max_frames, library))
         except Exception as exc:                                  # noqa: BLE001
             # One dead link must not cost the other 27 downloads. The reason is printed
             # next to the id, so the manifest row can be fixed and only that row re-run.

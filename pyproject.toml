@@ -29,6 +29,10 @@ dependencies = [
     # Stats — imported directly (network_metrics._beta_ci, metric_evaluation correlations).
     # Was only ever present transitively via scikit-learn; declare it so it cannot vanish.
     "scipy>=1.14",
+    # Text-searchable PDFs (scripts/frame_pdf.py). Pillow can only save a page as a picture
+    # of text; reportlab writes real text objects AND passes a JPEG through untouched, so a
+    # contact sheet stays ~6 MB instead of the ~40 MB matplotlib's raster backend produces.
+    "reportlab>=4.2",
     # Viz
     "matplotlib>=3.9",
     "seaborn>=0.13",

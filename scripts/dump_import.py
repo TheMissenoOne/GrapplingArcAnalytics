@@ -26,6 +26,7 @@ from scripts.insert_ufc_matches import (
     _clean_events,
     _derive_opponent,
     _parse_timestamp,
+    _points,
     _submission_from_method,
     _win_type_from_method,
 )
@@ -57,6 +58,8 @@ def _build_timeline(
             item["successful"] = bool(e["successful"])
         if isinstance(ts, int):
             item["ts"] = ts
+        if (pts := _points(e)) is not None:
+            item["points"] = pts
         out.append(item)
     return out
 

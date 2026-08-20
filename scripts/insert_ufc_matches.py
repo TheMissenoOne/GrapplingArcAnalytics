@@ -178,6 +178,36 @@ def _derive_opponent(
     return next(iter(others)) if len(others) == 1 else None
 
 
+def _points(e: dict[str, Any]) -> int | None:
+    """Points the scoreboard awarded for this action, or None when the source did not say.
+
+    Absent, never zero-by-default. A transcript that never mentioned the score and an action
+    that genuinely scored nothing are different facts, and only ``None`` can hold the first
+    one -- writing 0 would let "nobody looked" be summed as "no points", which is how an
+    athlete's scoring profile quietly becomes a claim nobody made.
+
+    Stored only. Nothing scores a match from these: the win_type/submission fields still
+    decide outcomes, and rating_v2 does not read them. Feeding points into a rating is an
+    ELO-affecting change requiring a full replay (change-control class (d)) and is a separate,
+    deliberate decision -- capturing the observation first is what makes that decision
+    possible at all.
+    """
+    raw = e.get("points")
+    if raw is None or isinstance(raw, bool):
+        return None
+    try:
+        pts = int(raw)
+    except (TypeError, ValueError):
+        logger.warning("  ignoring non-numeric points %r on %r", raw, e.get("label"))
+        return None
+    if pts < 0:
+        # Penalties exist, but they are negative on the SCORE, not on the action; a negative
+        # here is a sign error in the source, not a deduction to be trusted.
+        logger.warning("  ignoring negative points %r on %r", raw, e.get("label"))
+        return None
+    return pts
+
+
 def _clean_events(
     a_name: str, b_name: str, events: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
@@ -219,6 +249,8 @@ def _clean_events(
         ts = _parse_timestamp(raw_ts) if isinstance(raw_ts, str) else raw_ts
         if isinstance(ts, int):
             item["ts"] = ts
+        if (pts := _points(e)) is not None:
+            item["points"] = pts
         out.append(item)
     return out
 
