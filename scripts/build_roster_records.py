@@ -1,16 +1,30 @@
 #!/usr/bin/env python
-"""Build a competition record for every roster athlete, including the ones BJJ Heroes skips.
+"""One competition record per roster athlete, built from every source that has one.
 
-Eight of the sixteen ADCC 2026 women have no record of their own. Seven are absent from BJJ
-Heroes' A-Z list entirely (1435 fighters, none of them); the eighth, Ana Carolina Vieira, has a
-profile page that carries no match table at all. Their bouts are not missing from the world --
-they are recorded on the pages of the athletes they FOUGHT, and in our own corpus.
+**One identity, one record, with the mix visible on it.** There is no "own record" beside a
+"reconstructed record": there is an athlete, and some of her bouts came from her own table
+while others exist only on the pages of the athletes she fought. Seven of the sixteen ADCC 2026
+women have no table of their own -- six are absent from BJJ Heroes' A-Z list entirely (1435
+fighters, none of them) and Ana Carolina Vieira has a profile with no match table -- and eight
+of the other nine have BOTH, which is exactly what the old `own`/`reconstructed` label could
+not say. `provenance.by_source` says it instead.
 
-Three sources, in descending authority, each row stamped with which one it came from:
+Identity is `athlete_key`, not the display name the file is keyed by for a human to read.
+"Sarah Galvão" and "Sarah Galvao" are one person and two dict keys, so `_load` re-keys the file
+and MERGES a duplicate spelling rather than letting the later one win -- the earlier entry may
+hold her own table and the later only a reconstruction.
+
+Four sources, in descending authority, each row stamped with which one it came from:
 
   own_record       her own BJJ Heroes match table
   opponent_record  read off an opponent's table and turned around
   corpus           a bout already ingested into `matches`
+  manual           hand-confirmed, because no automated path carries it
+
+Scope, decided and stated: **the roster plus its direct opponents**, and not the whole
+~1315-athlete corpus. The opponents get a canonical IDENTITY -- key, every spelling seen, bouts
+against the roster, whether a source for more exists -- and not a reconstructed career.
+`_opponent_index` argues the line.
 
 Turning an opponent's row around is safe, and that was verified rather than assumed: across
 2768 bouts that appear on BOTH athletes' pages, `wl` inverts correctly 99.24% of the time and
