@@ -1,0 +1,378 @@
+{
+ "athletes": [
+  {
+   "id": "e6887735-3561-4baf-9d11-55b72acdc736",
+   "name": "Gabrielle Garcia",
+   "nickname": null,
+   "team": null,
+   "weight_class": "4",
+   "rank_elo": 1176.0,
+   "is_published": false
+  },
+  {
+   "id": "8cd9d9fe-eed6-45db-a978-ea7496c370fd",
+   "name": "Rafaela Guedes",
+   "nickname": null,
+   "team": null,
+   "weight_class": "4",
+   "rank_elo": 1019.0,
+   "is_published": false
+  },
+  {
+   "id": "5a5c4244-93bf-4ff8-b3cf-29b89f1bd994",
+   "name": "R. Guedes",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  },
+  {
+   "id": "452bd36f-522f-4040-ba67-5e216cc3b0ff",
+   "name": "Mo Black",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  },
+  {
+   "id": "929039e5-8e60-43fc-abb4-f6205d58280d",
+   "name": "Gabi Garcia",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  },
+  {
+   "id": "282d721e-c83d-4fb8-9be9-f5a18ed00e4e",
+   "name": "Raphaela Guedes Final",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  },
+  {
+   "id": "e91f82f2-f4eb-4f47-976e-cb89c962e241",
+   "name": "Raphaela Guedes",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  },
+  {
+   "id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "name": "Helena Crevar",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  },
+  {
+   "id": "bcea84b0-b9c6-4aee-b066-7d74061d1212",
+   "name": "Helena Cravar",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  },
+  {
+   "id": "621883db-7537-4f4e-a986-27708c84c07b",
+   "name": "Morgan Black",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  },
+  {
+   "id": "8af18b42-ada3-465d-ab81-615b8300a1c2",
+   "name": "Gabby Garcia",
+   "nickname": null,
+   "team": null,
+   "weight_class": null,
+   "rank_elo": null,
+   "is_published": false
+  }
+ ],
+ "matches": [
+  {
+   "id": "e1f2dbeb-158f-44a6-8390-a3b2c079d3c2",
+   "event": "ADCC 2024",
+   "year": 2024,
+   "a": "ab3b61f5-005b-4be3-b72e-0540899a9f68",
+   "b": "8cd9d9fe-eed6-45db-a978-ea7496c370fd",
+   "w": "8cd9d9fe-eed6-45db-a978-ea7496c370fd"
+  },
+  {
+   "id": "60f52ce4-f915-46cb-86da-449a7ee6927a",
+   "event": "CJI 2 - Day 2",
+   "year": 2025,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "ecd7d0d1-f04b-4aff-af6b-ac8131a26021",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "9bb7462c-5b8f-4e4a-8fdd-e8403259a3c0",
+   "event": "WNO 20",
+   "year": 2023,
+   "a": "5a5c4244-93bf-4ff8-b3cf-29b89f1bd994",
+   "b": "ea20cb89-81f1-4335-9ba8-25ad0806f902",
+   "w": "ea20cb89-81f1-4335-9ba8-25ad0806f902"
+  },
+  {
+   "id": "1a5d8201-1c0b-4cd8-8233-af7f9bbf8e83",
+   "event": "ADCC 2024",
+   "year": 2024,
+   "a": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+   "b": "621883db-7537-4f4e-a986-27708c84c07b",
+   "w": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+  },
+  {
+   "id": "dba15e69-ba4b-4e34-b37b-12044533126d",
+   "event": "WNO 31",
+   "year": 2025,
+   "a": "60047c34-37ad-4767-8f34-7795baba563b",
+   "b": "bcea84b0-b9c6-4aee-b066-7d74061d1212",
+   "w": "bcea84b0-b9c6-4aee-b066-7d74061d1212"
+  },
+  {
+   "id": "72602ba0-9635-48da-99e0-40be20fd6fa6",
+   "event": null,
+   "year": 2021,
+   "a": "1eaf5409-4818-4b9a-a93f-bc45ac6a4e25",
+   "b": "929039e5-8e60-43fc-abb4-f6205d58280d",
+   "w": "1eaf5409-4818-4b9a-a93f-bc45ac6a4e25"
+  },
+  {
+   "id": "7577f162-0372-4aa6-be2e-640349e272da",
+   "event": "ADCC 2024",
+   "year": 2024,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "466f9fe4-d30b-4193-8443-5fe967171791",
+   "event": "ADCC 2022",
+   "year": 2022,
+   "a": "3afab604-3f2f-40cc-b7ba-a798ec99e601",
+   "b": "282d721e-c83d-4fb8-9be9-f5a18ed00e4e",
+   "w": "3afab604-3f2f-40cc-b7ba-a798ec99e601"
+  },
+  {
+   "id": "288402d0-f943-420d-b71a-a9b41bc4288e",
+   "event": "ADCC 2022",
+   "year": 2022,
+   "a": "e91f82f2-f4eb-4f47-976e-cb89c962e241",
+   "b": "7df88eea-b4a9-4816-a629-736aa088d044",
+   "w": "e91f82f2-f4eb-4f47-976e-cb89c962e241"
+  },
+  {
+   "id": "ee80b192-d859-4fd7-9fb0-84b948ac1fba",
+   "event": "ADCC Trials 2023 East Coast",
+   "year": 2023,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "452bd36f-522f-4040-ba67-5e216cc3b0ff",
+   "w": "452bd36f-522f-4040-ba67-5e216cc3b0ff"
+  },
+  {
+   "id": "6649899a-12bb-483c-9a73-375f6f8de624",
+   "event": "CJI",
+   "year": 2024,
+   "a": "8af18b42-ada3-465d-ab81-615b8300a1c2",
+   "b": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+   "w": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6"
+  },
+  {
+   "id": "04064856-f2b9-45e3-a463-4b39f775bd9c",
+   "event": "ADCC Trials 2023 East Coast",
+   "year": 2023,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "af55e370-d9b1-458f-8089-26ef0bcd06b0",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "f131fdb5-f0e3-4871-8ee3-e432077ea0af",
+   "event": "CJI 2 - Day 1",
+   "year": 2025,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "d1ff5a76-098a-44bc-8e44-5b7df3b3f69a",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "9afb70f9-0221-49b5-9368-c5ab8b6fccaa",
+   "event": "ADCC 2022",
+   "year": 2022,
+   "a": "3afab604-3f2f-40cc-b7ba-a798ec99e601",
+   "b": "929039e5-8e60-43fc-abb4-f6205d58280d",
+   "w": "3afab604-3f2f-40cc-b7ba-a798ec99e601"
+  },
+  {
+   "id": "88dda390-364c-470d-95f8-4ace354fa963",
+   "event": "ADCC Trials 2023 East Coast",
+   "year": 2023,
+   "a": "452bd36f-522f-4040-ba67-5e216cc3b0ff",
+   "b": "aa8ba34c-61f2-471c-b916-3cac5cf5c2fa",
+   "w": "452bd36f-522f-4040-ba67-5e216cc3b0ff"
+  },
+  {
+   "id": "0fdd85f9-eb9f-4495-9cf0-c32d93df2fa8",
+   "event": "IBJJF 2025 Top 10",
+   "year": 2025,
+   "a": "e91f82f2-f4eb-4f47-976e-cb89c962e241",
+   "b": "3a898164-baa2-4b16-9f23-d607548c5928",
+   "w": "e91f82f2-f4eb-4f47-976e-cb89c962e241"
+  },
+  {
+   "id": "371bcade-d835-4903-84e1-fbad03315847",
+   "event": "ADCC Trials 2024 West Coast",
+   "year": 2024,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "452bd36f-522f-4040-ba67-5e216cc3b0ff",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "2371a19b-96e9-4d7f-84cc-67471d7a02f1",
+   "event": "Polaris 37",
+   "year": 2026,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "9588929f-6973-46be-9a4a-517aacc58daa",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "3d13023d-030f-4841-bea9-41599ff4ae36",
+   "event": "ADCC 2022",
+   "year": 2022,
+   "a": "3afab604-3f2f-40cc-b7ba-a798ec99e601",
+   "b": "8cd9d9fe-eed6-45db-a978-ea7496c370fd",
+   "w": "3afab604-3f2f-40cc-b7ba-a798ec99e601"
+  },
+  {
+   "id": "54d7e3f7-0936-4194-9874-a22b496ccc4b",
+   "event": "WNO 25",
+   "year": 2024,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "db55d83e-6374-4bac-a887-6739a987c91f",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "53c68b77-369c-4828-a0ee-f899ea9b218b",
+   "event": "WNO 27",
+   "year": 2025,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "2d2b0edf-c879-4860-932b-861499e1d435",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "4dc68a8c-74ec-4870-97c2-3b9395147dbc",
+   "event": null,
+   "year": 2024,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "300a2142-bccc-490c-9822-9cc4ba15e428",
+   "event": null,
+   "year": 2025,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "22c12e8b-8dff-43e8-920a-6f82e1e9b520",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "6eb67ae5-0759-433a-ad96-cd4c60574848",
+   "event": null,
+   "year": 2025,
+   "a": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "b": "a8a4d48e-80ca-4914-a34d-c276fd18522f",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  },
+  {
+   "id": "1aafd56f-06f4-413c-a1b5-c594f8709fd7",
+   "event": "IBJJF No-Gi Worlds 2021",
+   "year": 2021,
+   "a": "8cd9d9fe-eed6-45db-a978-ea7496c370fd",
+   "b": "290bb6b4-9c01-4676-871a-5165da9ec254",
+   "w": "8cd9d9fe-eed6-45db-a978-ea7496c370fd"
+  },
+  {
+   "id": "81b0d605-b3b3-4c24-a0d9-dba161ca2914",
+   "event": "IBJJF No-Gi Worlds 2021",
+   "year": 2021,
+   "a": "8cd9d9fe-eed6-45db-a978-ea7496c370fd",
+   "b": "2d2b0edf-c879-4860-932b-861499e1d435",
+   "w": "8cd9d9fe-eed6-45db-a978-ea7496c370fd"
+  },
+  {
+   "id": "c2992229-7c00-417b-8236-e7544e215e71",
+   "event": "ADCC 2024",
+   "year": 2024,
+   "a": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+   "b": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "w": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+  }
+ ],
+ "graphs": [
+  {
+   "id": "ee2d6266-1540-4baa-9176-12f2cd3df3c0",
+   "owner_id": "929039e5-8e60-43fc-abb4-f6205d58280d",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "7b502259-30b4-4eb8-b8a1-214f8e15ec6c",
+   "owner_id": "452bd36f-522f-4040-ba67-5e216cc3b0ff",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "26dbfd33-25d6-4845-8bae-7fe8cd7ffe71",
+   "owner_id": "e6887735-3561-4baf-9d11-55b72acdc736",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "e7bf5f26-d6bd-49cc-94c2-be4f385df746",
+   "owner_id": "621883db-7537-4f4e-a986-27708c84c07b",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "418e9800-ac66-4236-afe2-a420a84441fb",
+   "owner_id": "8af18b42-ada3-465d-ab81-615b8300a1c2",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "fcfe7100-7301-40b6-85ae-b03ea335d353",
+   "owner_id": "5a5c4244-93bf-4ff8-b3cf-29b89f1bd994",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "ba82c352-1eec-422e-b74d-b9f8eb36811d",
+   "owner_id": "bcea84b0-b9c6-4aee-b066-7d74061d1212",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "d820f90c-c457-41e3-898a-11fd892f2010",
+   "owner_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "a22843c2-c8c2-4268-b959-c4826d95a97b",
+   "owner_id": "8cd9d9fe-eed6-45db-a978-ea7496c370fd",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "42e14279-1864-4606-a780-72a6208b583b",
+   "owner_id": "282d721e-c83d-4fb8-9be9-f5a18ed00e4e",
+   "owner_kind": "athlete"
+  },
+  {
+   "id": "6b1736de-4556-4ff9-ab5b-081a401815b9",
+   "owner_id": "e91f82f2-f4eb-4f47-976e-cb89c962e241",
+   "owner_kind": "athlete"
+  }
+ ]
+}
