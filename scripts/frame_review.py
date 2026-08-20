@@ -183,6 +183,10 @@ font-variant-numeric:tabular-nums;font-size:12px}
 #strip img.ev{border-color:var(--fix)}
 #side{width:400px;flex:none;border-left:1px solid var(--line);display:flex;flex-direction:column}
 #evs{flex:1;overflow:auto}
+#ident{padding:8px 10px;border-bottom:1px solid var(--line);font-size:11px;color:var(--dim);
+background:#12161c}
+#ident b{color:var(--fg);font-weight:600}
+#ident button{margin-top:6px;font-size:11px;padding:3px 8px}
 .e{padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:8px}
 .e:hover{background:#1c2027}.e.on{background:#1f2937}
 .e .ts{color:var(--dim);font-variant-numeric:tabular-nums;flex:none;width:46px}
@@ -259,6 +263,15 @@ function render(){
      <div class="who">${e.actor} &middot; ${e.type}${e.confidence==='low'?' &middot; low confidence':''}</div>
      </span></div>`).join(''):'<div class="empty">No answer.json for this bout yet.</div>';
   [...document.querySelectorAll('.e')].forEach(el=>el.onclick=()=>{ei=+el.dataset.i;seek(B.events[ei].ts);render()});
+  // Identity is a BOUT-level claim that fails BOUT-level: bind the wrong name to the wrong
+  // body and every actor inverts together, staying internally consistent the whole way. Two
+  // of the first answers in this batch did exactly that. So it is shown before the events
+  // rather than buried in them, and the correction is one action rather than N edits.
+  const bo=B.answer?.bout||{};
+  $('ident').innerHTML=B.events.length?`<div><b>Identity:</b> ${bo.identity_discriminator||'— not stated —'}</div>
+    <div style="margin-top:3px"><b>Verified by:</b> ${bo.identity_verified_by||'— not stated —'}</div>
+    ${bo.winner?`<div style="margin-top:3px"><b>Winner claimed:</b> ${bo.winner}${bo.win_type?' by '+bo.win_type:''}</div>`:''}
+    <button onclick="swapAthletes()">Identity is inverted — swap every actor</button>`:'';
   const f=B.frames[fi];
   $('img').src='/frame?slug='+encodeURIComponent(B.slug)+'&file='+f.file;
   $('bigts').textContent=hhmm(f.ts)+'  ('+f.ts+'s)';
@@ -303,6 +316,18 @@ function commit(){
   if(e._verdict!=='added')e._verdict='fixed';
   dirty=true; B.events.sort((a,b)=>a.ts-b.ts); render();
 }
+function swapAthletes(){
+  const b=B.answer?.bout||{};
+  const a1=b.athlete_a, a2=b.athlete_b;
+  if(!a1||!a2){alert('This answer does not name both athletes.');return}
+  if(!confirm(`Swap ${a1} and ${a2} on all ${B.events.length} events?`))return;
+  B.events.forEach(e=>{
+    if(e.actor===a1)e.actor=a2; else if(e.actor===a2)e.actor=a1;
+    // marked fixed, not ok: the human changed it, and the file has to say the reader was wrong
+    if(e._verdict!=='added')e._verdict='fixed';
+  });
+  B.identity_swapped=true; dirty=true; render();
+}
 function verdict(v){
   if(!B.events[ei])return;
   B.events[ei]._verdict=v; dirty=true;
@@ -319,6 +344,7 @@ function addEvent(){
 }
 async function save(){
   const body={bout:B.answer?.bout||{},events:B.events};
+  if(B.identity_swapped)body.identity_swapped_by_reviewer=true;
   const r=await fetch('/api/bout?slug='+encodeURIComponent(B.slug),
     {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(r.ok){dirty=false;render();boot_progress()}else alert('save failed');

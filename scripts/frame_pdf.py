@@ -439,7 +439,13 @@ def context_facts(entry: Entry, meta: dict[str, Any], db: DbContext, n_frames: i
         ("Covers", f"{hhmmss(first_ts)} to {hhmmss(last_ts)} of the video"),
     ]
     if div:
-        rows.append(("Division", f"{div} (ADCC 2026 scouting roster)"))
+        # NOT "Division". The roster gives the athlete's ADCC 2026 CATEGORY; this bout may
+        # be in any bracket, and the first reader hit exactly that -- a sheet tagged "+65 kg"
+        # whose every frame reads OPEN CLASS. A wrong premise on the context page is the one
+        # kind of error the reader cannot check, so the row says what it actually knows.
+        rows.append(("Athlete's ADCC 2026 category",
+                     f"{div} — the athlete's bracket for ADCC 2026, NOT necessarily this "
+                     "bout's division; read the broadcast banner for that"))
     if entry.kind:
         rows.append(("Footage type", entry.kind.replace("_", " ")))
     if entry.note:
@@ -513,6 +519,16 @@ def context_prose(step: int, with_library: bool, first_ts: float, last_ts: float
               "uses it. If a frame genuinely shows something the list does not cover, use "
               "your own words and flag it as `new_label: true` rather than bending it into "
               "the nearest listed name."),
+        ("p", "THE SCOREBOARD'S NAME ORDER IS NOT A MAT POSITION. A lower-third graphic puts "
+              "one name left and one right by broadcast convention; which competitor stands "
+              "where on the mat is unrelated and changes shot to shot. Binding a name to a "
+              "body through that order is the single highest-cost error available here, "
+              "because `actor` is on every event -- get it backwards and the whole answer "
+              "inverts at once, while still looking internally consistent. Bind identity to "
+              "something carried ON the athlete instead: a name printed on the back of the "
+              "rashguard, kit colour, sleeve length, an ankle band, hair. Then check that "
+              "discriminator against a frame where the scoreboard and the bodies are visible "
+              "together, and say in `identity_verified_by` which frame did it."),
         ("p", "REPORT ONLY WHAT YOU ARE CONFIDENT OF -- but report uncertainty by getting "
               "COARSER, not by staying silent and not by guessing. If the frames show that "
               "something happened and you cannot tell exactly which technique it was, use the "

@@ -40,7 +40,14 @@ CONFIDENCE = {"high", "low"}
 # it is wrong, every actor in the answer flips together rather than being wrong one at a time.
 BOUT_REQUIRED = ("athlete_a", "athlete_b", "identity_discriminator", "identity_verified_by")
 BOUT_OPTIONAL = ("event", "year", "winner", "win_type", "bout_start_seconds", "bout_end_seconds",
-                 "final_score", "notes")
+                 "final_score", "notes",
+                 # Penalties are scoreboard facts, readable off footage for the first time --
+                 # and deliberately NOT events. `events` feed the technique transition graph,
+                 # where every entry becomes a node in an athlete's game; a penalty is not a
+                 # technique and would arrive as one. So it is recorded at bout level, where
+                 # it is preserved without being mistaken for something the athlete did.
+                 # Free text, e.g. "Svendsen ~t30 (1); Le Vern ~t550 (1)".
+                 "penalties")
 EVENT_REQUIRED = ("ts", "label", "actor", "successful", "type")
 EVENT_OPTIONAL = ("points", "confidence", "note", "new_label")
 
