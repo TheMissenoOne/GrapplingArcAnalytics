@@ -15,7 +15,10 @@ or you are re-fighting a settled battle.
 Two things get repointed, and both matter for the same reason scar #2 in `failure-archaeology`
 matters: an FK repointed without the denormalised copy leaves the merge half-done.
 
-  * `graph_edges.source_key` / `.target_key` -- the FK into technique_nodes.
+  * `graph_nodes(graph_id, node_key)` -- since 0037 the edge endpoints FK into THIS, per graph,
+    not into `technique_nodes`. A graph cannot hold an edge on the canonical key until it has a
+    node row for it, so one is created where missing.
+  * `graph_edges.source_key` / `.target_key` -- the endpoint keys themselves.
   * `graph_edges.edge_key` -- a denormalised "source→target" string (the separator is U+2192,
     NOT ">") that would otherwise still name the retired key. Rewritten only for rows this
     script actually repoints: a `like '%pass%'` match hits 811 rows, almost none of which
@@ -135,8 +138,27 @@ def main() -> int:
             c.execute(text("delete from graph_edge_bouts "
                            "where source_key=:a or target_key=:a"), {"a": alias})
 
-            # graph_nodes still exists on this DB with rows, despite 0007 being recorded as
-            # having dropped it. Its FK into technique_nodes has to move before the node goes.
+            # `graph_nodes` is NOT leftover from before 0007 — 0007 did drop it, and 0037
+            # brought it back with a different job: each graph's OWN node identity, private by
+            # construction, optionally linked to the curated library. `graph_edges` endpoints
+            # FK into it, which is the privacy fix itself (0005's FK into the world-readable
+            # `technique_nodes` was what forced the App to write private labels there).
+            #
+            # So an edge can only be repointed to the canonical key once THIS GRAPH has a node
+            # row for it. Create it where missing, carrying the library link.
+            # `label` is NOT NULL: a graph node exists to say what THIS graph calls the node,
+            # so it cannot be created without a name. The curated canonical label is the right
+            # one — copying the alias's display text would put "Pull Guard" on a "guard pull"
+            # node and undo the collapse at the only place a reader ever sees it.
+            c.execute(text("""
+                insert into graph_nodes (graph_id, node_key, label, canonical_node_key)
+                select distinct e.graph_id, :c, :lab, :c from graph_edges e
+                 where (e.source_key = :a or e.target_key = :a)
+                   and e.owner_kind = 'athlete'
+                   and not exists (select 1 from graph_nodes n
+                                    where n.graph_id = e.graph_id and n.node_key = :c)
+                on conflict do nothing"""),
+                {"a": alias, "c": canon, "lab": str(p["label"])})
             c.execute(text("update graph_nodes set canonical_node_key=:c "
                            "where canonical_node_key=:a"), {"a": alias, "c": canon})
 
@@ -153,6 +175,11 @@ def main() -> int:
                 c.execute(text("update graph_edges set edge_key = source_key || :sep || "
                                "target_key where id::text = any(:ids)"),
                           {"sep": SEP, "ids": touched})
+            # the per-graph alias node goes only once nothing points at it any more
+            c.execute(text("""
+                delete from graph_nodes n where n.node_key = :a
+                  and not exists (select 1 from graph_edges e where e.graph_id = n.graph_id
+                                  and (e.source_key = :a or e.target_key = :a))"""), {"a": alias})
             c.execute(text("delete from technique_nodes where node_key=:a"), {"a": alias})
             restored.extend(
                 {**r, "source_key": canon if r["source_key"] == alias else r["source_key"],
@@ -185,11 +212,16 @@ def main() -> int:
     with eng.connect() as c:
         left = c.execute(text("select count(*) from technique_nodes where node_key = any(:k)"),
                          {"k": [p["alias"] for p in plan]}).scalar()
+        # against graph_nodes, which is what the endpoints actually FK into since 0037.
+        # Checking technique_nodes reports every private user label as an orphan -- 177 of them
+        # here -- and none of those are broken.
         orphan = c.execute(text("""
             select count(*) from graph_edges e where not exists
-              (select 1 from technique_nodes n where n.node_key = e.source_key)
+              (select 1 from graph_nodes n
+                where n.graph_id = e.graph_id and n.node_key = e.source_key)
                or not exists
-              (select 1 from technique_nodes n where n.node_key = e.target_key)""")).scalar()
+              (select 1 from graph_nodes n
+                where n.graph_id = e.graph_id and n.node_key = e.target_key)""")).scalar()
     print(f"\nAPPLIED. alias nodes remaining = {left} (want 0); "
           f"duplicate edges collapsed = {dropped}; orphan edges = {orphan} (want 0); "
           f"provenance rows lifted {len(restored)} and re-attached {put_back}")
