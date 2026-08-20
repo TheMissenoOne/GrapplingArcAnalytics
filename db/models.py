@@ -90,6 +90,11 @@ class Athlete(Base):
     elo_series: Mapped[list[Any] | None] = mapped_column(JSONB)
     archetype_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("archetypes.id"))
     is_published: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Set when this athlete exercised a rights request (LGPD Art. 18) and their identity was
+    # removed IN PLACE (alembic 0048). The row survives so the graph keeps a valid owner — see
+    # `db.repository.delete_athlete`, and the invariant it protects: every athlete-owned graph
+    # has an athletes row, with no exceptions, so an orphan is always a defect.
+    anonymized_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -628,6 +633,15 @@ class Match(Base):
     stage: Mapped[str | None] = mapped_column(String(10))
     submission: Mapped[str | None] = mapped_column(Text)
     video_url: Mapped[str | None] = mapped_column(Text)  # optional YouTube link (hidden if null)
+    # Where this bout starts inside ``video_url`` (alembic 0047, applied 2026-08-19).
+    # Backfilled from the ``t=`` already in the URL; also settable when the offset is known
+    # but the link is not — `url_mapping.json` carries one for 307 bouts.
+    video_start_seconds: Mapped[int | None] = mapped_column(Integer)
+    # Which clock ``sequence[].ts`` is on: 'video_absolute' (offsets into the whole video) or
+    # 'bout_relative' (offsets from the bout's own start). The corpus mixes both and NULL means
+    # nobody has established which — a reader must treat NULL as "cannot locate", never as a
+    # default of either. Guessing wrong silently places frames in a different fight (AA-010).
+    ts_origin: Mapped[str | None] = mapped_column(String(16))
     # Events: [{label, type, actor_id, successful?}], actor_id ∈ {athlete_a_id, athlete_b_id}.
     sequence: Mapped[list[Any] | None] = mapped_column(JSONB)
     # Full raw event timeline (superset of ``sequence``): every event incl. strikes / resets /

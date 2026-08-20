@@ -36,8 +36,8 @@ def run(dry_run: bool) -> int:
     from sqlalchemy import delete, func, select, update
 
     from db.base import db_session
-    from db.models import Athlete, Graph, Match
-    from db.repository import replay_and_persist_athlete
+    from db.models import Athlete, Match
+    from db.repository import AthleteRemovalReason, remove_athlete, replay_and_persist_athlete
 
     with db_session() as session:
         athletes = list(session.execute(select(Athlete)).scalars())
@@ -82,9 +82,12 @@ def run(dry_run: bool) -> int:
                         update(Match).where(col == d.id).values({col.key: canon.id})
                     )
                     repoint += getattr(res, "rowcount", 0) or 0
-                session.execute(delete(Graph).where(Graph.owner_id == d.id,
-                                                     Graph.owner_kind == "athlete"))
-                session.execute(delete(Athlete).where(Athlete.id == d.id))
+                # A duplicate is the textbook invalid-data case: this row was never a separate
+                # person, so the graph derived from "their" bouts is not a separate game either.
+                # Routed through `remove_athlete` rather than deleting both by hand so there is
+                # ONE place that decides what a removal does to a graph — the hand-written
+                # version of this is what left seven orphans in production.
+                remove_athlete(d, session, reason=AthleteRemovalReason.INVALID_DATA)
             if not dry_run:
                 canon.name = canon_clean
                 # Preserve the ADCC leaderboard target: if the canonical row lost its rank_elo

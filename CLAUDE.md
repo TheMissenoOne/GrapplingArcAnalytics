@@ -131,6 +131,26 @@ same user — their own dossier, their grapple-like / archetype match. The line 
 not technique: the same user embedding is legitimate for the owner's dossier and forbidden
 inside an archetype centroid or anything the public site renders.
 
+### Removing an athlete — two paths, never one
+
+`db.repository.remove_athlete(athlete, session, reason=...)` is the ONLY way an athlete row
+should go away, because what happens to their graph depends on why:
+
+| reason | graph |
+|---|---|
+| `INVALID_DATA` — duplicate, phantom from a bad name mapping, audit finding | **deleted with them** (the graph derives from the same wrong data) |
+| `RIGHTS_REQUEST` — LGPD Art. 18; person and bouts are real | **anonymised and kept**; the athlete row is anonymised IN PLACE (`name`/`nickname`/`team`/`weight_class` cleared, `is_published=false`, `anonymized_at` stamped, `id` kept) |
+
+⚠️ **This cannot be a database cascade.** `graphs.owner_id` is polymorphic (`owner_kind` is
+`'athlete'` or `'user'`, pointing at different tables), so Postgres carries no FK on it — which
+is how orphans accumulated. And a cascade fires regardless of WHY, so it would destroy exactly
+the graph a rights request says to keep.
+
+**Invariant, absolute:** every `owner_kind='athlete'` graph has an `athletes` row. An orphan is
+always a defect — `scripts/prune_orphan_athlete_graphs.py` finds and removes them,
+`tests/test_athlete_removal.py` asserts it after both paths. Measured 2026-08-19: seven orphans
+in prod (four from the 06-29 dedupe, three from AA-011), holding 17 edges, all public-readable.
+
 Every query building a public/competitive artefact **filters `owner_kind` explicitly**.
 An unfiltered `select(Graph)` is a defect. `export/*` (`site_data`, `match_breakdown`,
 `ontology`, `athlete_graph_export`) and `analysis/archetype.py` already filter; the guards
