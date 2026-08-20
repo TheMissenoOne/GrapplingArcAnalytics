@@ -225,3 +225,12 @@ def test_a_symmetric_position_is_directional_and_stays_neutral() -> None:
     out = at.attribute(_ev(10, "guard", "50/50 Guard", "helena"), "helena", "ane", OK)
     assert out["subject_role"] == at.NEUTRAL
     assert at.directional(out) is True
+
+
+def test_bookkeeping_rows_are_not_events() -> None:
+    """Eight rows labelled "Match" survive from one import batch. Letting them inherit a
+    `transition` role put "Match" in a node list beside Back Control."""
+    assert at.is_event({"type": "match"}) is False
+    assert at.is_event({"type": "strike"}) is False
+    for t in at.EVENT_TYPES:
+        assert at.is_event({"type": t}) is True

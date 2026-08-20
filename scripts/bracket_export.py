@@ -47,6 +47,16 @@ load_dotenv(REPO / ".env")
 
 from sqlalchemy import text  # noqa: E402
 
+from analysis.attribution import (  # noqa: E402
+    CONTRADICTION_WINDOW,
+    MIN_EVENTS_FOR_ONE_SIDED,
+    RULES_VERSION,
+    attribute,
+    bout_flags,
+    is_event,
+    usable_perspective,
+    usable_role,
+)
 from analysis.names import (  # noqa: E402
     athlete_key,
     reviewed_verdict,
@@ -602,32 +612,80 @@ def _uniform_test(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
 
 
 # ── layer 2: event sequences ────────────────────────────────────────────────────
-def _own(bout: Mapping[str, Any], side: str) -> list[dict[str, Any]]:
-    aid = bout[f"{side}_id"]
-    return [e for e in bout["seq"] if e.get("actor_id") == aid]
+def _attributed(bout: Mapping[str, Any], side: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Every event of the bout, stamped from ONE athlete's corner, plus that bout's own flags.
+
+    This replaces `_own(bout, side)`, which kept the events where `actor_id == side_id` and
+    silently discarded everything else. Two things were wrong with that:
+
+    * it threw away the opponent's half of the bout, which is the half that answers "what is
+      done TO her" -- the CONTRA side of every number on this page;
+    * it trusted the actor field unconditionally, and `docs/match_event_model.md` now records
+      the measurement showing that 307 of 700 corpus bouts file every event under one athlete.
+
+    What comes back is the whole sequence with a perspective, a relation and both roles on each
+    event, and the bout-level verdict on whether any of that can be trusted.
+    """
+    me, other = bout[f"{side}_id"], bout["b_id" if side == "a" else "a_id"]
+    flags = bout_flags(bout["seq"], bout["a_id"], bout["b_id"])
+    return [attribute(e, me, other, flags) for e in bout["seq"]], flags
+
+
+def _node_rows(events: Sequence[Mapping[str, Any]], cov: Coverage,
+               total: int) -> dict[str, list[Any]]:
+    """The nodes of one perspective, split into positions, actions and transitions.
+
+    Grouped by (label, role) rather than by label alone, because `Half Guard · por baixo` and
+    `Half Guard · por cima` are two different findings about a category and collapsing them
+    into one bar is exactly the ambiguity this layer exists to remove.
+    """
+    out: dict[str, list[Any]] = {}
+    for cat in ("state", "action", "transition"):
+        c: Counter[tuple[str, str]] = Counter()
+        for e in events:
+            if e.get("category") != cat:
+                continue
+            c[(str(e.get("label") or "?"),
+               e.get("subject_role") if usable_role(e) else "unknown")] += 1
+        out[cat] = [{"label": lbl, "role": role, "k": k, "est": gated(k, total, cov)}
+                    for (lbl, role), k in c.most_common(14)]
+    return out
 
 
 def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, Any]:
-    """The path, not just the ending.
+    """The path, not just the ending -- and now from both corners rather than one.
 
-    ``path_to_victory`` and ``path_to_defeat`` are the transition distributions of the winner's
-    and loser's OWN events, kept apart. Averaging the two would describe a bout nobody fought:
-    the winner's chain and the loser's chain are different games happening at the same time.
+    Every number here is stamped **a favor** (the roster athlete is the one the event belongs
+    to) or **contra** (it belongs to her opponent, against her). They are not two views of one
+    distribution: a category that is passed on a lot and a category that passes a lot are
+    different findings, and pooling them describes neither.
+
+    ``path_to_victory`` and ``path_to_defeat`` stay a-favor-only and stay apart. Averaging the
+    winner's chain with the loser's would describe a bout nobody fought.
     """
     mine = [b for b in bouts if (b["div_a"] == div or b["div_b"] == div) and b["seq"]]
     bout_events = own_events = 0          # for the perspective block below
     gaps: Counter[int] = Counter()
     won: list[list[str]] = []
     lost: list[list[str]] = []
-    type_by_outcome: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
-    per_athlete: Counter[str] = Counter()
-    # Split by outcome as well as pooled: the win side and the loss side of a division are not
-    # backed by the same athletes, and in +65 kg the entire loss side is one event from one
-    # bout-side. A single pooled coverage number would have hidden that behind the win side.
-    per_athlete_outcome: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
-    nodes: Counter[str] = Counter()
+    # perspective -> outcome -> type counts. Four cells, because "control events in bouts she
+    # won" and "control events her opponent produced in bouts she won" are different claims and
+    # the page used to render only the first under a title that named neither.
+    type_by: dict[str, dict[str, Counter[str]]] = {
+        p: {"win": Counter(), "loss": Counter()} for p in ("favor", "contra")}
+    per_athlete: dict[str, Counter[str]] = {p: Counter() for p in ("favor", "contra")}
+    per_athlete_outcome: dict[str, dict[str, Counter[str]]] = {
+        p: {"win": Counter(), "loss": Counter()} for p in ("favor", "contra")}
+    kept: dict[str, list[dict[str, Any]]] = {"favor": [], "contra": []}
     openers: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
     finishers: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
+
+    # What the attribution model withheld, counted rather than hidden.
+    unattributed: Counter[str] = Counter()
+    role_unknown = 0
+    gated_bouts: list[dict[str, Any]] = []
+    by_reason: Counter[str] = Counter()
+    seen_bouts: set[str] = set()
 
     for b in mine:
         for side in ("a", "b"):
@@ -636,47 +694,82 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
             if not b.get("winner"):
                 continue
             outcome = "win" if b["winner"] == b[f"{side}_id"] else "loss"
-            ev = _own(b, side)
-            if not ev:
-                continue
-            per_athlete[b[f"{side}_id"]] += len(ev)
-            per_athlete_outcome[outcome][b[f"{side}_id"]] += len(ev)
-            # How much of the bout is hers, and how much the chain below jumps over. A
-            # transition A -> B means "her next OWN event after A was B", not that nothing
-            # happened in between -- and in one of these divisions a third of the arrows skip
-            # at least one opponent event.
+            evs, flags = _attributed(b, side)
+            if b["id"] not in seen_bouts:
+                seen_bouts.add(b["id"])
+                if not flags["role_reliable"]:
+                    by_reason[flags["reason_code"]] += 1
+                    gated_bouts.append({
+                        "a": b["a"], "b": b["b"], "event": b.get("event"),
+                        "year": b.get("year"), "events": flags["events"],
+                        "reason_code": flags["reason_code"],
+                        "contradictions": flags["contradictions"],
+                        "top_actor_share": round(
+                            max(Counter(e.get("actor_id") for e in b["seq"]).values())
+                            / len(b["seq"]), 3) if b["seq"] else None,
+                    })
             aid = b[f"{side}_id"]
             idx = [i for i, e in enumerate(b["seq"]) if e.get("actor_id") == aid]
             bout_events += len(b["seq"])
             own_events += len(idx)
             for i, j in zip(idx, idx[1:]):
                 gaps[j - i - 1] += 1
-            chain: list[str] = [str(e["label"]) for e in ev if e.get("label")]
-            for e in ev:
-                nodes[e.get("label") or "?"] += 1
-                type_by_outcome[outcome][e.get("type") or "?"] += 1
+
+            for e in evs:
+                # A row that is not a grappling event carries no perspective to claim. It is
+                # counted with the refusals rather than dropped in silence, so the arithmetic
+                # in the attribution block still accounts for every row in the bout.
+                if not is_event(e) or not usable_perspective(e):
+                    unattributed[str(e.get("label") or "?")] += 1
+                    continue
+                p = e["perspective"]
+                kept[p].append(e)
+                per_athlete[p][aid] += 1
+                per_athlete_outcome[p][outcome][aid] += 1
+                type_by[p][outcome][e.get("type") or "?"] += 1
+                if not usable_role(e):
+                    role_unknown += 1
+
+            # The chain stays A FAVOR: a transition tree mixing her move with her opponent's
+            # would draw a route neither of them took.
+            chain = [str(e["label"]) for e in evs
+                     if e["perspective"] == "favor" and usable_perspective(e) and e.get("label")]
             if chain:
                 openers[outcome][chain[0]] += 1
                 finishers[outcome][chain[-1]] += 1
                 (won if outcome == "win" else lost).append(chain)
 
-    conc = inverse_hhi_concentration(list(per_athlete.values()))
-    cov_all = coverage(list(per_athlete.values()))
-    cov = {k: coverage(list(c.values())) for k, c in per_athlete_outcome.items()}
+    cov_all = {p: coverage(list(per_athlete[p].values())) for p in ("favor", "contra")}
+    cov = {p: {k: coverage(list(c.values())) for k, c in per_athlete_outcome[p].items()}
+           for p in ("favor", "contra")}
+    conc = inverse_hhi_concentration(list(per_athlete["favor"].values()))
+    n_by = {p: sum(per_athlete[p].values()) for p in ("favor", "contra")}
     return {
         "bouts": len(mine),
-        "events_own": sum(per_athlete.values()),
-        "athletes_with_events": len(per_athlete),
+        "events_own": n_by["favor"],
+        "events_against": n_by["contra"],
+        "athletes_with_events": len(per_athlete["favor"]),
         "concentration": conc,
-        "coverage": {**{k: v.to_dict() for k, v in cov.items()}, "all": cov_all.to_dict()},
-        # WHOSE events these are. Every node, chain and transition in this layer is filtered to
-        # events where the rostered athlete is the ACTOR -- and `actor` here means the fighter
-        # whose game the node belongs to, not whoever is ahead: a guard node belongs to the
-        # player on the bottom, the pass to the one passing. Naming a node without naming its
-        # actor is the highest-cost ambiguity available in this data, because "back control"
-        # read from the wrong corner inverts the whole reading.
+        # WHOSE events these are, and whether that could be established at all. `favor` means
+        # the event is attributed to the roster athlete; `contra` means it is attributed to her
+        # opponent, against her. Nothing is inferred by elimination: both come from the named
+        # actor of a bout that has exactly two people in it.
+        "attribution": {
+            "rules_version": RULES_VERSION,
+            "events_in_bouts": bout_events,
+            "favor": n_by["favor"], "contra": n_by["contra"],
+            "unattributed": sum(unattributed.values()),
+            "unattributed_nodes": unattributed.most_common(12),
+            "role_unknown": role_unknown,
+            "role_known": n_by["favor"] + n_by["contra"] - role_unknown,
+            "gated_bouts": gated_bouts,
+            "by_reason": dict(by_reason),
+            "window": CONTRADICTION_WINDOW,
+            "min_events_for_one_sided": MIN_EVENTS_FOR_ONE_SIDED,
+        },
+        "coverage": {p: {**{k: v.to_dict() for k, v in cov[p].items()},
+                         "all": cov_all[p].to_dict()} for p in ("favor", "contra")},
         "perspective": {
-            "actor": "roster_athlete",
             "own_events": own_events,
             "bout_events": bout_events,
             "own_share": round(own_events / bout_events, 4) if bout_events else None,
@@ -687,13 +780,12 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
         "path_to_victory": _path(won),
         "path_to_defeat": _path(lost),
         "type_by_outcome": {
-            k: {t: gated(v, sum(c.values()), cov[k]) for t, v in c.most_common()}
-            for k, c in type_by_outcome.items()},
-        "type_contrast": _type_contrast(type_by_outcome, cov),
+            p: {k: {t: gated(v, sum(c.values()), cov[p][k]) for t, v in c.most_common()}
+                for k, c in type_by[p].items()} for p in ("favor", "contra")},
+        "type_contrast": {p: _type_contrast(type_by[p], cov[p]) for p in ("favor", "contra")},
         "openers": {k: c.most_common(8) for k, c in openers.items()},
         "finishers": {k: c.most_common(8) for k, c in finishers.items()},
-        "top_nodes": [[k, v, gated(v, sum(nodes.values()), cov_all)]
-                      for k, v in nodes.most_common(20)],
+        "nodes": {p: _node_rows(kept[p], cov_all[p], n_by[p]) for p in ("favor", "contra")},
         "heatmap": _heatmap(won + lost),
     }
 
@@ -999,9 +1091,16 @@ def baseline_layer(bouts: Sequence[Mapping[str, Any]], roster_ids: set[str],
     """
     pool: Counter[str] = Counter()
     per_athlete: Counter[str] = Counter()
-    n_bouts = 0
+    n_bouts = refused = 0
     for b in bouts:
         if not any(k in _fold(b.get("event")) for k in ELITE):
+            continue
+        # A bout that filed every event under one athlete says nothing about whose event is
+        # whose, so it cannot contribute to a pool whose whole construction is "everyone except
+        # the roster". Excluding it here and counting it in `bouts_refused` keeps the pool from
+        # quietly absorbing the roster's own events under an opponent's name.
+        if not bout_flags(b["seq"], b["a_id"], b["b_id"])["perspective_reliable"]:
+            refused += 1
             continue
         kept = 0
         for e in b["seq"]:
@@ -1017,16 +1116,20 @@ def baseline_layer(bouts: Sequence[Mapping[str, Any]], roster_ids: set[str],
     total = sum(pool.values())
     cov = coverage(list(per_athlete.values()))
     out: dict[str, Any] = {"bouts": n_bouts, "events": total,
+                           "bouts_refused": refused,
                            "coverage": cov.to_dict(),
                            "mix": {t: gated(v, total, cov) for t, v in pool.most_common()},
                            "roster_excluded": True}
     for div, seq in per_div.items():
+        # A FAVOR only. The comparison is "what this category DOES against what the elite
+        # no-gi pool does", and folding in the events her opponents produced against her would
+        # make the category's mix partly her opponents' mix.
         own: Counter[str] = Counter()
         for outcome in ("win", "loss"):
-            for t, e in seq["type_by_outcome"][outcome].items():
+            for t, e in seq["type_by_outcome"]["favor"][outcome].items():
                 own[t] += e["k"]
         n_own = sum(own.values())
-        own_cov = seq.get("coverage", {}).get("all", {})
+        own_cov = seq.get("coverage", {}).get("favor", {}).get("all", {})
         blocked = []
         if not own_cov.get("estimable"):
             blocked.append({"side": "category", "code": own_cov.get("reason_code"),

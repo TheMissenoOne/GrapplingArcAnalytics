@@ -53,6 +53,13 @@ from analysis.names import _normalize_name
 # Bump when a table below changes in a way that moves a published number.
 RULES_VERSION = 1
 
+# The eight types the model defines (docs/match_event_model.md). Everything else in the column
+# is bookkeeping that one import batch left behind -- eight rows labelled "Match" -- and it is
+# not a grappling event at all. Refusing it here rather than letting it inherit a `transition`
+# role is the difference between "we could not read this event" and "this is not an event".
+EVENT_TYPES = frozenset({"guard", "pass", "control", "takedown", "sweep", "submission",
+                         "escape", "transition"})
+
 # ── vocabulary ──────────────────────────────────────────────────────────────────
 # What kind of thing the node IS. Drives the semantic split the report renders:
 # positions/states, actions/techniques, transitions.
@@ -349,11 +356,32 @@ def attribute(event: Mapping[str, Any], subject_id: str, opponent_id: str,
     }
 
 
-def directional(ev: Mapping[str, Any]) -> bool:
-    """May this event enter a statistic that has a direction (a favor/contra or a top/bottom)?
+def is_event(ev: Mapping[str, Any]) -> bool:
+    """Is this row a grappling event at all, as opposed to import bookkeeping?"""
+    return (ev.get("type") or "").strip().lower() in EVENT_TYPES
 
-    The rule the whole module exists to enforce: an event whose attribution could not be
-    resolved is kept, shown and counted in the totals, and excluded here.
+
+def usable_perspective(ev: Mapping[str, Any]) -> bool:
+    """May this event be counted as A FAVOR or CONTRA at all?
+
+    No, when the bout filed every event under one athlete: there the actor field carries no
+    information, so "hers" and "her opponent's" are not two things the data distinguishes.
     """
-    return (ev.get("attribution_status") in ("resolved", "symmetric")
-            and ev.get("attribution_confidence") == "high")
+    return ev.get("attribution_confidence") == "high"
+
+
+def usable_role(ev: Mapping[str, Any]) -> bool:
+    """May this event carry a topology -- por cima / por baixo / controlando?
+
+    Separate from the question above, and deliberately: a bout that contradicts itself may
+    still name the right fighter on most rows while being unable to say which side of the
+    position she was on. Losing the role is not a reason to lose the event.
+    """
+    return ev.get("attribution_status") in ("resolved", "symmetric")
+
+
+def directional(ev: Mapping[str, Any]) -> bool:
+    """Both of the above. The rule the whole module exists to enforce: an event whose
+    attribution could not be resolved is kept, shown and counted in the totals, and excluded
+    from anything with a direction."""
+    return usable_perspective(ev) and usable_role(ev)

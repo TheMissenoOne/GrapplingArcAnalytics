@@ -198,3 +198,95 @@ def test_a_mirror_needs_each_side_to_name_the_other() -> None:
     a = _row("A", "C", "W", "Worlds", 2025, "F")
     b = _row("B", "A", "L", "Worlds", 2025, "F")
     assert bx._is_mirror(a, b) is False
+
+
+# ── the sequence layer, seen from both corners ──────────────────────────────────
+# `sequence_layer` used to keep only the events where the roster athlete was the actor and
+# throw the rest away, so the page could say what she DID and never what was done to her.
+# These fixtures are the shape of a real bout row from data/scouting/*_sequences.json.
+def _bout(bid: str, seq: list[dict[str, object]], winner: str = "A",
+          div_a: str = "65 kg", div_b: str | None = None) -> dict[str, object]:
+    return {"id": bid, "a": "Roster Athlete", "b": "Opponent", "a_id": "A", "b_id": "B",
+            "div_a": div_a, "div_b": div_b, "event": "Test Invitational", "year": 2025,
+            "winner": winner, "win_type": "SUBMISSION", "seq": seq}
+
+
+def _e(ts: int, ty: str, label: str, actor: str) -> dict[str, object]:
+    return {"ts": ts, "type": ty, "label": label, "actor_id": actor}
+
+
+TWO_SIDED = _bout("b1", [
+    _e(30, "guard", "Half Guard", "B"),          # the opponent is underneath
+    _e(45, "pass", "Knee Cut Pass", "A"),        # the roster athlete passes
+    _e(70, "control", "Back Control", "A"),      # ... and takes the back
+    _e(95, "submission", "Rear Naked Choke", "A"),
+])
+
+
+def test_a_named_actor_produces_both_a_favor_and_a_contra() -> None:
+    out = bx.sequence_layer([TWO_SIDED], "65 kg")
+    at = out["attribution"]
+    assert at["favor"] == 3 and at["contra"] == 1 and at["unattributed"] == 0
+    assert at["favor"] + at["contra"] + at["unattributed"] == at["events_in_bouts"]
+
+
+def test_back_control_is_controlling_a_favor_and_controlled_contra() -> None:
+    """The single highest-cost inversion available in this data. Read from the wrong corner,
+    `Back Control` says she lost the back when she took it."""
+    out = bx.sequence_layer([TWO_SIDED], "65 kg")
+    favor = {(n["label"], n["role"]) for n in out["nodes"]["favor"]["state"]}
+    contra = {(n["label"], n["role"]) for n in out["nodes"]["contra"]["state"]}
+    assert ("Back Control", "controlling") in favor
+    assert ("Back Control", "controlling") not in contra
+
+
+def test_half_guard_keeps_top_and_bottom_apart_across_the_two_corners() -> None:
+    out = bx.sequence_layer([TWO_SIDED], "65 kg")
+    contra = {(n["label"], n["role"]) for n in out["nodes"]["contra"]["state"]}
+    # The opponent played the half guard, so the roster athlete was the one on top of it.
+    assert ("Half Guard", "top") in contra
+
+
+def test_a_one_sided_bout_contributes_no_directional_events() -> None:
+    """The measured defect: 307 of 700 corpus bouts file every event under one athlete. Those
+    events survive in the total and are refused everywhere a direction is claimed."""
+    one = _bout("b2", [_e(10 + 10 * i, "control", "Back Control", "A") for i in range(7)])
+    out = bx.sequence_layer([one], "65 kg")
+    at = out["attribution"]
+    assert at["favor"] == 0 and at["contra"] == 0
+    assert at["unattributed"] == 7 == at["events_in_bouts"]
+    assert at["by_reason"] == {"one_sided": 1}
+    assert out["nodes"]["favor"]["state"] == []
+
+
+def test_a_bout_that_contradicts_itself_keeps_perspective_and_loses_topology() -> None:
+    """Nobody is mounted and in half guard at once. The actor field may still name the right
+    fighter, so a favor / contra survives; the side of the position does not."""
+    clash = _bout("b3", [
+        _e(100, "guard", "Half Guard", "A"), _e(105, "control", "Mount", "A"),
+        _e(200, "submission", "Armbar", "A"), _e(210, "takedown", "Single Leg Takedown", "B"),
+    ])
+    out = bx.sequence_layer([clash], "65 kg")
+    at = out["attribution"]
+    assert at["by_reason"] == {"self_contradictory": 1}
+    assert at["favor"] == 3 and at["contra"] == 1      # perspective survives
+    assert at["role_unknown"] == 4                     # topology does not
+    assert all(n["role"] == "unknown" for n in out["nodes"]["favor"]["state"])
+
+
+def test_a_bookkeeping_row_never_reaches_a_node_list() -> None:
+    junk = _bout("b4", [*TWO_SIDED["seq"], _e(120, "match", "Match", "A")])
+    out = bx.sequence_layer([junk], "65 kg")
+    labels = [n["label"] for cat in ("state", "action", "transition")
+              for p in ("favor", "contra") for n in out["nodes"][p][cat]]
+    assert "Match" not in labels
+
+
+def test_the_two_perspectives_are_not_two_views_of_one_distribution() -> None:
+    """Three of her events and one of her opponent's. Pooling them would report a category
+    that passes guards and gets passed at the same rate, which is not what happened."""
+    out = bx.sequence_layer([TWO_SIDED], "65 kg")
+    favor = out["type_by_outcome"]["favor"]["win"]
+    contra = out["type_by_outcome"]["contra"]["win"]
+    assert set(favor) == {"pass", "control", "submission"}
+    assert set(contra) == {"guard"}
