@@ -151,3 +151,50 @@ def test_every_method_family_override_earns_its_place() -> None:
         matched = [n for n, pat in _FAMILY_PATTERNS if re.search(pat, label)]
         assert len(matched) > 1, f"{label!r} matches only {matched}; the fallback handles it"
         assert family_name in bx.SUB_FAMILIES
+
+
+# ── bout identity ───────────────────────────────────────────────────────────────
+def _row(athlete: str, opp: str, wl: str, comp: str, year: int, stage: str,
+         method: str = "Pts: 2x0") -> dict[str, str | int]:
+    return {"athlete": athlete, "opp": opp, "wl": wl, "comp": comp, "year": year,
+            "stage": stage, "method": method}
+
+
+def test_a_mirror_pair_is_one_bout() -> None:
+    """The real one from -65 kg: both records describe the same quarter-final."""
+    rows = [_row("Nadia Frankland", "Morgan Black", "W", "NoGi Pan", 2024, "4F"),
+            _row("Morgan Black", "Nadia Frankland", "L", "NoGi Pan", 2024, "4F")]
+    kept = bx._distinct_bouts(rows)
+    assert len(kept) == 1
+    assert kept[0]["wl"] == "W", "the winner's row carries the method that decided the bout"
+
+
+def test_a_rematch_at_the_same_event_is_two_bouts() -> None:
+    """The regression that matters. Keying on (pair, competition, year) alone collapsed 25
+    pairs in +65 kg that were not duplicates: Yara Soares beat Isabely Lemos on points in the
+    semi-final and by submission in the final of the same event. Two bouts, two results.
+    """
+    rows = [_row("Yara Soares", "Isabely Lemos", "W", "SA Cont. Pro", 2024, "SF", "Pts: 4x0"),
+            _row("Yara Soares", "Isabely Lemos", "W", "SA Cont. Pro", 2024, "F", "Submission")]
+    assert len(bx._distinct_bouts(rows)) == 2
+
+
+def test_two_round_robin_meetings_are_two_bouts() -> None:
+    """A round robin produces repeat meetings by design, with the same stage label."""
+    rows = [_row("Yara Soares", "Meng Xiang", "W", "ADGS XIAN", 2024, "RR", "Submission"),
+            _row("Yara Soares", "Meng Xiang", "W", "ADGS XIAN", 2024, "RR", "Submission")]
+    assert len(bx._distinct_bouts(rows)) == 2
+
+
+def test_two_wins_are_never_a_mirror() -> None:
+    """A mirror has to be provable: each names the other, and one won while the other lost."""
+    a = _row("A", "B", "W", "Worlds", 2025, "F")
+    b = _row("B", "A", "W", "Worlds", 2025, "F")
+    assert bx._is_mirror(a, b) is False
+    assert len(bx._distinct_bouts([a, b])) == 2
+
+
+def test_a_mirror_needs_each_side_to_name_the_other() -> None:
+    a = _row("A", "C", "W", "Worlds", 2025, "F")
+    b = _row("B", "A", "L", "Worlds", 2025, "F")
+    assert bx._is_mirror(a, b) is False

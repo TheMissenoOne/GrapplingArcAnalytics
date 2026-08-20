@@ -45,8 +45,10 @@ from sqlalchemy import text  # noqa: E402
 
 from analysis.names import athlete_key  # noqa: E402
 from analysis.stats_rigor import (  # noqa: E402
+    Coverage,
     benjamini_hochberg,
     compare_proportions,
+    coverage,
     heterogeneity,
     inverse_hhi_concentration,
     wilson,
@@ -188,6 +190,25 @@ def est(k: int, n: int) -> dict[str, Any]:
     return wilson(k, n).to_dict()
 
 
+def gated(k: int, n: int, cov: Coverage) -> dict[str, Any]:
+    """A category estimate, or an explicit refusal to make one.
+
+    The observed proportion survives either way -- ``31% of the events we recorded were
+    control`` is a fact about the corpus and stays true. What the gate withholds is the
+    INTERVAL, because an interval is a claim about a population, and below the coverage gate
+    there is no population being sampled: there is one athlete being described.
+
+    `reason` is what the page renders in place of the bar, so the reader learns why the number
+    stopped rather than finding a blank.
+    """
+    d = est(k, n)
+    if cov.estimable:
+        return {**d, "estimable": True, "coverage": cov.grade}
+    return {**d, "lo": None, "hi": None, "half": None, "grade": "none",
+            "estimable": False, "coverage": cov.grade, "reason": cov.reason,
+            "clusters": cov.clusters, "effective_n": round(cov.effective_n, 3)}
+
+
 # ── layer 0: rating confidence ──────────────────────────────────────────────────
 def rating_layer(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
     """Glicko-2 rating and RD per rostered athlete, matched by CANONICAL KEY.
@@ -242,7 +263,7 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     for div in ("65 kg", "+65 kg"):
         rows = [
-            {**r, "uniform": uniform(r["comp"]), "ruleset": ruleset(r["comp"]),
+            {**r, "athlete": nm, "uniform": uniform(r["comp"]), "ruleset": ruleset(r["comp"]),
              "family": family(r["method"])}
             for nm, v in records.items() if v["division"] == div
             for r in (v.get("rows") or [])
@@ -254,14 +275,21 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
             fw, fl = Counter(r["family"] for r in w), Counter(r["family"] for r in loss)
             subs_w = sum(fw[f] for f in SUB_FAMILIES)
             subs_l = sum(fl[f] for f in SUB_FAMILIES)
+            cov_w = coverage(list(Counter(r["athlete"] for r in w).values()))
+            cov_l = coverage(list(Counter(r["athlete"] for r in loss).values()))
+            bouts = _distinct_bouts(subset)
             cuts[cut_name] = {
                 "n": len(subset), "w": len(w), "l": len(loss),
-                "win_by": {f: est(fw[f], len(w)) for f in FAMILIES},
-                "loss_by": {f: est(fl[f], len(loss)) for f in FAMILIES},
-                "finish_rate": est(subs_w, len(w)),
-                "conceded_finish_rate": est(subs_l, len(loss)),
-                "leg_contrast": compare_proportions(
-                    fl["leg"], len(loss), fw["leg"], len(w)).to_dict(),
+                # `n` counts athlete-perspective ROWS. A bout between two rostered athletes
+                # produces two of them, one W and one L, and there are 39 such rows across the
+                # roster. `bouts` is the count of distinct events that actually happened.
+                "bouts": len(bouts), "rows_from_shared_bouts": len(subset) - len(bouts),
+                "coverage": {"win": cov_w.to_dict(), "loss": cov_l.to_dict()},
+                "win_by": {f: gated(fw[f], len(w), cov_w) for f in FAMILIES},
+                "loss_by": {f: gated(fl[f], len(loss), cov_l) for f in FAMILIES},
+                "finish_rate": gated(subs_w, len(w), cov_w),
+                "conceded_finish_rate": gated(subs_l, len(loss), cov_l),
+                "leg_contrast": _leg_contrast(w, loss, fw, fl, cov_w, cov_l, subset, bouts),
                 "named_applied": Counter(_fold(r["method"]) for r in w
                                          if r["family"] in SUB_FAMILIES).most_common(14),
                 "named_conceded": Counter(_fold(r["method"]) for r in loss
@@ -276,11 +304,87 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _bout_key(r: Mapping[str, Any]) -> tuple[Any, ...]:
+    """Identity of the EVENT, not of one athlete's view of it."""
+    pair = tuple(sorted((athlete_key(r.get("athlete") or ""), athlete_key(r.get("opp") or ""))))
+    return (pair, _fold(r.get("comp")), r.get("year"), _fold(r.get("stage")))
+
+
+def _is_mirror(a: Mapping[str, Any], b: Mapping[str, Any]) -> bool:
+    """Are these two rows the same bout, seen from opposite corners?
+
+    Provable, not guessed: each names the other as the opponent, and one won while the other
+    lost. Nothing weaker will do -- a shared key alone is not evidence of a duplicate, because
+    the same two athletes routinely meet twice at one event.
+    """
+    return (athlete_key(a.get("athlete") or "") == athlete_key(b.get("opp") or "")
+            and athlete_key(b.get("athlete") or "") == athlete_key(a.get("opp") or "")
+            and {a.get("wl"), b.get("wl")} == {"W", "L"})
+
+
+def _distinct_bouts(rows: Sequence[Mapping[str, Any]]) -> list[Mapping[str, Any]]:
+    """Collapse the mirror pair, and ONLY the mirror pair.
+
+    The records are per athlete, so a bout between two rostered athletes appears twice -- once
+    as a W and once as a L. Both views are legitimate for the descriptive `win_by`/`loss_by`
+    tables, which have separate denominators. They are NOT two pieces of evidence about how
+    bouts end, which is what the contrasts and the ruleset tests ask, and the pair is
+    anti-correlated by construction: it deflates the variance of exactly the comparison whose
+    n it inflates.
+
+    A first version of this keyed on (pair, competition, year) and collapsed anything that
+    matched. On the real records that merged 25 pairs in +65 kg that were not mirrors at all --
+    Yara Soares beat Isabely Lemos on points in the semi-final and by submission in the final
+    of the same event, and round-robin formats produce two legitimate meetings by design.
+    Rematches are bouts. Only a mirror is a duplicate.
+    """
+    groups: dict[tuple[Any, ...], list[Mapping[str, Any]]] = defaultdict(list)
+    for r in rows:
+        groups[_bout_key(r)].append(r)
+
+    out: list[Mapping[str, Any]] = []
+    for group in groups.values():
+        paired: set[int] = set()
+        for i, r in enumerate(group):
+            if i in paired:
+                continue
+            keep = r
+            for j in range(i + 1, len(group)):
+                if j not in paired and _is_mirror(r, group[j]):
+                    paired.add(j)
+                    keep = r if r.get("wl") == "W" else group[j]
+                    break
+            out.append(keep)
+    return out
+
+
+def _leg_contrast(w: Sequence[Mapping[str, Any]], loss: Sequence[Mapping[str, Any]],
+                  fw: Counter[str], fl: Counter[str], cov_w: Coverage, cov_l: Coverage,
+                  subset: Sequence[Mapping[str, Any]],
+                  bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Leg locks conceded against leg locks applied, refused when it cannot be earned."""
+    shared = len(subset) - len(bouts)
+    blocked = []
+    if not cov_w.estimable:
+        blocked.append(f"win side: {cov_w.reason}")
+    if not cov_l.estimable:
+        blocked.append(f"loss side: {cov_l.reason}")
+    if blocked:
+        return {"available": False, "why": "; ".join(blocked),
+                "observed": {"applied": fw["leg"], "of_wins": len(w),
+                             "conceded": fl["leg"], "of_losses": len(loss)}}
+    out = compare_proportions(fl["leg"], len(loss), fw["leg"], len(w)).to_dict()
+    # The two arms are not disjoint when a rostered athlete beat another: that bout sits on
+    # both sides at once, so the comparison is partly against itself.
+    out["shared_bouts_between_arms"] = shared
+    return out
+
+
 def _cuts(rows: Sequence[Mapping[str, Any]]) -> list[tuple[str, list[Mapping[str, Any]]]]:
     cuts = [("all", list(rows))]
     for u in ("no_gi", "gi", "unknown"):
         cuts.append((f"uniform:{u}", [r for r in rows if r["uniform"] == u]))
-    for rs in ("adcc", "ibjjf", "superfight", "other"):
+    for rs in ("adcc", "ajp", "ibjjf", "superfight", "other"):
         cuts.append((f"ruleset:{rs}", [r for r in rows if r["ruleset"] == rs]))
     # the cut that actually matters: ruleset WITHIN no-gi, so uniform is not a confounder
     for rs in ("adcc", "ibjjf", "superfight"):
@@ -374,6 +478,10 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
     lost: list[list[str]] = []
     type_by_outcome: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
     per_athlete: Counter[str] = Counter()
+    # Split by outcome as well as pooled: the win side and the loss side of a division are not
+    # backed by the same athletes, and in +65 kg the entire loss side is one event from one
+    # bout-side. A single pooled coverage number would have hidden that behind the win side.
+    per_athlete_outcome: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
     nodes: Counter[str] = Counter()
     openers: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
     finishers: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
@@ -389,6 +497,7 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
             if not ev:
                 continue
             per_athlete[b[f"{side}_id"]] += len(ev)
+            per_athlete_outcome[outcome][b[f"{side}_id"]] += len(ev)
             chain: list[str] = [str(e["label"]) for e in ev if e.get("label")]
             for e in ev:
                 nodes[e.get("label") or "?"] += 1
@@ -399,20 +508,24 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
                 (won if outcome == "win" else lost).append(chain)
 
     conc = inverse_hhi_concentration(list(per_athlete.values()))
+    cov_all = coverage(list(per_athlete.values()))
+    cov = {k: coverage(list(c.values())) for k, c in per_athlete_outcome.items()}
     return {
         "bouts": len(mine),
         "events_own": sum(per_athlete.values()),
         "athletes_with_events": len(per_athlete),
         "concentration": conc,
+        "coverage": {**{k: v.to_dict() for k, v in cov.items()}, "all": cov_all.to_dict()},
         "path_to_victory": _path(won),
         "path_to_defeat": _path(lost),
         "type_by_outcome": {
-            k: {t: est(v, sum(c.values())) for t, v in c.most_common()}
+            k: {t: gated(v, sum(c.values()), cov[k]) for t, v in c.most_common()}
             for k, c in type_by_outcome.items()},
-        "type_contrast": _type_contrast(type_by_outcome),
+        "type_contrast": _type_contrast(type_by_outcome, cov),
         "openers": {k: c.most_common(8) for k, c in openers.items()},
         "finishers": {k: c.most_common(8) for k, c in finishers.items()},
-        "top_nodes": [[k, v, est(v, sum(nodes.values()))] for k, v in nodes.most_common(20)],
+        "top_nodes": [[k, v, gated(v, sum(nodes.values()), cov_all)]
+                      for k, v in nodes.most_common(20)],
         "heatmap": _heatmap(won + lost),
     }
 
@@ -451,10 +564,24 @@ def _path(chains: Sequence[Sequence[str]]) -> dict[str, Any]:
     }
 
 
-def _type_contrast(by: Mapping[str, Counter[str]]) -> list[dict[str, Any]]:
-    """Which event types separate winning from losing, with multiplicity controlled."""
+def _type_contrast(by: Mapping[str, Counter[str]],
+                   cov: Mapping[str, Coverage]) -> dict[str, Any]:
+    """Which event types separate winning from losing, with multiplicity controlled.
+
+    A contrast needs BOTH sides to be estimable, so this refuses as a block rather than row by
+    row. In +65 kg the loss side is a single event from a single bout-side, and comparing a
+    171-event win side against it produced a table of confident-looking rows built on n=1.
+    """
     w, loss = by["win"], by["loss"]
     nw, nl = sum(w.values()), sum(loss.values())
+    blocked = [k for k in ("win", "loss") if not cov[k].estimable]
+    if blocked:
+        return {"available": False,
+                "why": "; ".join(f"{k} side: {cov[k].reason}" for k in blocked),
+                "observed": [{"type": t, "win": w[t], "loss": loss[t]}
+                             for t in sorted(set(w) | set(loss))],
+                "n_win": nw, "n_loss": nl}
+
     rows: list[dict[str, Any]] = []
     for t in sorted(set(w) | set(loss)):
         c = compare_proportions(w[t], nw, loss[t], nl)
@@ -464,7 +591,8 @@ def _type_contrast(by: Mapping[str, Counter[str]]) -> list[dict[str, Any]]:
     it = iter(keep)
     for r in rows:
         r["survives_bh"] = next(it) if r["contrast"]["p_value"] is not None else False
-    return rows
+    return {"available": True, "rows": rows, "family": "sequence type contrast", "m": len(ps),
+            "n_win": nw, "n_loss": nl}
 
 
 def _heatmap(chains: Sequence[Sequence[str]], top: int = 12) -> dict[str, Any]:
