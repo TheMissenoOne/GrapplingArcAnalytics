@@ -583,6 +583,8 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
     the winner's chain and the loser's chain are different games happening at the same time.
     """
     mine = [b for b in bouts if (b["div_a"] == div or b["div_b"] == div) and b["seq"]]
+    bout_events = own_events = 0          # for the perspective block below
+    gaps: Counter[int] = Counter()
     won: list[list[str]] = []
     lost: list[list[str]] = []
     type_by_outcome: dict[str, Counter[str]] = {"win": Counter(), "loss": Counter()}
@@ -607,6 +609,16 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
                 continue
             per_athlete[b[f"{side}_id"]] += len(ev)
             per_athlete_outcome[outcome][b[f"{side}_id"]] += len(ev)
+            # How much of the bout is hers, and how much the chain below jumps over. A
+            # transition A -> B means "her next OWN event after A was B", not that nothing
+            # happened in between -- and in one of these divisions a third of the arrows skip
+            # at least one opponent event.
+            aid = b[f"{side}_id"]
+            idx = [i for i, e in enumerate(b["seq"]) if e.get("actor_id") == aid]
+            bout_events += len(b["seq"])
+            own_events += len(idx)
+            for i, j in zip(idx, idx[1:]):
+                gaps[j - i - 1] += 1
             chain: list[str] = [str(e["label"]) for e in ev if e.get("label")]
             for e in ev:
                 nodes[e.get("label") or "?"] += 1
@@ -625,6 +637,21 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
         "athletes_with_events": len(per_athlete),
         "concentration": conc,
         "coverage": {**{k: v.to_dict() for k, v in cov.items()}, "all": cov_all.to_dict()},
+        # WHOSE events these are. Every node, chain and transition in this layer is filtered to
+        # events where the rostered athlete is the ACTOR -- and `actor` here means the fighter
+        # whose game the node belongs to, not whoever is ahead: a guard node belongs to the
+        # player on the bottom, the pass to the one passing. Naming a node without naming its
+        # actor is the highest-cost ambiguity available in this data, because "back control"
+        # read from the wrong corner inverts the whole reading.
+        "perspective": {
+            "actor": "roster_athlete",
+            "own_events": own_events,
+            "bout_events": bout_events,
+            "own_share": round(own_events / bout_events, 4) if bout_events else None,
+            "transitions": sum(gaps.values()),
+            "transitions_adjacent": gaps.get(0, 0),
+            "opponent_events_skipped": sum(g * c for g, c in gaps.items()),
+        },
         "path_to_victory": _path(won),
         "path_to_defeat": _path(lost),
         "type_by_outcome": {
