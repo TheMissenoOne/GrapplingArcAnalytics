@@ -171,6 +171,56 @@ def _min_expected(table: Sequence[Sequence[int]]) -> float:
     return float(min(r * c / total for r in rows for c in cols))
 
 
+def _chi2(table: Sequence[Sequence[int]]) -> float:
+    """Pearson chi-square, no correction. Small tables only -- this is called tens of
+    thousands of times inside the permutation loop, where a scipy round-trip per draw would
+    dominate the runtime."""
+    rows = [sum(r) for r in table]
+    cols = [sum(c) for c in zip(*table, strict=True)]
+    n = sum(rows)
+    if not n:
+        return 0.0
+    total = 0.0
+    for i, r in enumerate(table):
+        for j, obs in enumerate(r):
+            exp = rows[i] * cols[j] / n
+            if exp:
+                total += (obs - exp) ** 2 / exp
+    return total
+
+
+def permutation_p(table: Sequence[Sequence[int]], n_draws: int = 10000,
+                  seed: int = 20260820) -> float | None:
+    """Monte-Carlo exact p for a contingency table, for when the chi-square approximation is
+    not usable.
+
+    The alternative in place was to print the chi-square p anyway with a red "approximation
+    unreliable" label beside it. If a number is known to be wrong, labelling it does not make
+    it readable -- the reader still has to decide how wrong, which is the part nobody can do
+    by eye. Shuffling the column labels across the observations preserves both margins and
+    answers the same question without the approximation.
+    """
+    import random
+
+    obs = [(i, j) for i, row in enumerate(table) for j, c in enumerate(row) for _ in range(c)]
+    if len(obs) < 2 or len(table) < 2 or len(table[0]) < 2:
+        return None
+    target = _chi2(table)
+    cols = [j for _, j in obs]
+    rng = random.Random(seed)
+    shape = (len(table), len(table[0]))
+    hits = 0
+    for _ in range(n_draws):
+        rng.shuffle(cols)
+        grid = [[0] * shape[1] for _ in range(shape[0])]
+        for (i, _), j in zip(obs, cols, strict=True):
+            grid[i][j] += 1
+        if _chi2(grid) >= target:
+            hits += 1
+    # +1 in both parts: a Monte-Carlo p of exactly zero claims more than the draws support.
+    return (hits + 1) / (n_draws + 1)
+
+
 @dataclass(frozen=True)
 class Heterogeneity:
     """Is a k x m contingency table anything other than one common distribution?"""
@@ -182,6 +232,7 @@ class Heterogeneity:
     min_expected: float
     reliable: bool
     n: int
+    p_permutation: float | None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -193,38 +244,50 @@ def heterogeneity(table: Sequence[Sequence[int]]) -> Heterogeneity:
     ``reliable`` is False when the smallest expected count drops below 5, which is where the
     chi-square approximation stops holding. It is reported rather than silently swallowed:
     an unreliable test on a sparse table is the normal case in this data, not an exception.
+
+    When it is unreliable, a Monte-Carlo permutation p is computed alongside so the reader has
+    a number that does not depend on the approximation, instead of a suspect one wearing a
+    warning label.
     """
     arr = [list(map(int, r)) for r in table]
     n = sum(sum(r) for r in arr)
     if n == 0 or len(arr) < 2 or len(arr[0]) < 2:
-        return Heterogeneity(0.0, 1.0, 0, 0.0, 0.0, False, n)
+        return Heterogeneity(0.0, 1.0, 0, 0.0, 0.0, False, n, None)
     chi2, p, dof, _ = stats.chi2_contingency(arr, correction=False)
     k = min(len(arr), len(arr[0]))
     v = math.sqrt(float(chi2) / (n * (k - 1))) if n and k > 1 else 0.0
     mexp = _min_expected(arr)
-    return Heterogeneity(float(chi2), float(p), int(dof), v, mexp, mexp >= 5, n)
+    perm = None if mexp >= 5 else permutation_p(arr)
+    return Heterogeneity(float(chi2), float(p), int(dof), v, mexp, mexp >= 5, n, perm)
 
 
-def benjamini_hochberg(p_values: Sequence[float], alpha: float = 0.05) -> list[bool]:
-    """Which of a family of tests survive at false-discovery rate ``alpha``.
+def benjamini_hochberg(p_values: Sequence[float], alpha: float = 0.05) -> list[float]:
+    """BH step-up FDR. Returns Q-VALUES in the caller's order, not a pass/fail flag.
 
-    Returned in the caller's order. Run this over every p-value a report prints, not over the
-    ones that looked interesting -- selecting first and correcting after is the same error the
-    correction exists to prevent.
+    A boolean answers "did this survive at the alpha I happened to pick", which forces the
+    reader to trust the pick. A q-value is the smallest FDR at which the finding survives, so
+    it can be read, compared across panels, and argued with. `alpha` is accepted only so
+    `survives_bh` can be derived at the same call site.
+
+    Monotonicity is enforced downward from the largest rank, which is what makes the q-values
+    a step-up procedure rather than a per-test rescaling.
     """
     m = len(p_values)
     if m == 0:
         return []
     order = sorted(range(m), key=lambda i: p_values[i])
-    keep = [False] * m
-    largest = -1
-    for rank, i in enumerate(order, start=1):
-        if p_values[i] <= alpha * rank / m:
-            largest = rank
-    for rank, i in enumerate(order, start=1):
-        if rank <= largest:
-            keep[i] = True
-    return keep
+    q = [0.0] * m
+    running = 1.0
+    for rank in range(m, 0, -1):
+        i = order[rank - 1]
+        running = min(running, p_values[i] * m / rank)
+        q[i] = min(1.0, max(0.0, running))
+    return q
+
+
+def survives(q_values: Sequence[float], alpha: float = 0.05) -> list[bool]:
+    """Which q-values clear the false-discovery rate the report declares."""
+    return [q <= alpha for q in q_values]
 
 
 def bootstrap_ci(values: Sequence[float], statistic: Any, n_boot: int = 5000,

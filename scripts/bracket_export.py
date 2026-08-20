@@ -51,6 +51,7 @@ from analysis.stats_rigor import (  # noqa: E402
     coverage,
     heterogeneity,
     inverse_hhi_concentration,
+    survives,
     wilson,
 )
 from db.base import get_engine  # noqa: E402
@@ -304,6 +305,10 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
                     "ruleset_split": Counter(r["ruleset"] for r in rows),
                     "by_year": _year_series(rows),
                     "ruleset_test": _ruleset_test(rows),
+                    # Only possible now that AJP is its own family. Filing it under ADCC made
+                    # the gi comparison meaningless: the two organisations score differently
+                    # and the whole question is whether that changes how bouts end.
+                    "ruleset_test_gi": _ruleset_test(rows, "gi", ("ajp", "ibjjf")),
                     "uniform_test": _uniform_test(rows)}
     return out
 
@@ -419,11 +424,19 @@ def _year_series(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
     return out
 
 
-def _ruleset_test(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    """Does the way a bout ends change with the ruleset? Restricted to no-gi so uniform is
-    not doing the work, and reported with the chi-square's own reliability flag."""
-    ng = [r for r in rows if r["uniform"] == "no_gi"]
-    groups = ["adcc", "ibjjf", "superfight"]
+def _ruleset_test(rows: Sequence[Mapping[str, Any]], uniform_cut: str = "no_gi",
+                  groups: Sequence[str] = ("adcc", "ibjjf", "superfight")) -> dict[str, Any]:
+    """Does the way a bout ends change with the ruleset?
+
+    Held within ONE uniform so gi/no-gi is not doing the work the ruleset is being credited
+    with, and run over distinct bouts rather than athlete-perspective rows: a bout between two
+    rostered athletes would otherwise enter the table twice, once from each corner.
+
+    Reported with the chi-square's own reliability flag, because these tables are small enough
+    that the approximation fails regularly and saying so is cheaper than pretending.
+    """
+    ng = [r for r in _distinct_bouts(rows) if r["uniform"] == uniform_cut]
+    groups = list(groups)
     table: list[list[int]] = []
     labels: list[dict[str, Any]] = []
     pairs: list[dict[str, Any]] = []
@@ -444,11 +457,15 @@ def _ruleset_test(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
                           "contrast": compare_proportions(
                               a["finish"]["k"], a["n"], b["finish"]["k"], b["n"]).to_dict()})
     ps = [p["contrast"]["p_value"] for p in pairs if p["contrast"]["p_value"] is not None]
-    keep = benjamini_hochberg(ps, 0.05)
-    it = iter(keep)
-    for p in pairs:
-        p["survives_bh"] = next(it) if p["contrast"]["p_value"] is not None else False
-    return {"groups": labels, "pairs": pairs,
+    qs = benjamini_hochberg(ps)
+    it = iter(zip(qs, survives(qs), strict=True))
+    for pr in pairs:
+        if pr["contrast"]["p_value"] is None:
+            pr["q_value"], pr["survives_bh"] = None, False
+            continue
+        pr["q_value"], pr["survives_bh"] = next(it)
+    return {"uniform": uniform_cut, "groups": labels, "pairs": pairs,
+            "family": f"{uniform_cut} ruleset finish-rate pairs", "m": len(ps), "alpha": 0.05,
             "heterogeneity": heterogeneity(table).to_dict() if len(table) > 1 else None}
 
 
@@ -595,12 +612,15 @@ def _type_contrast(by: Mapping[str, Counter[str]],
         c = compare_proportions(w[t], nw, loss[t], nl)
         rows.append({"type": t, "contrast": c.to_dict()})
     ps = [r["contrast"]["p_value"] for r in rows if r["contrast"]["p_value"] is not None]
-    keep = benjamini_hochberg(ps, 0.05)
-    it = iter(keep)
+    qs = benjamini_hochberg(ps)
+    it = iter(zip(qs, survives(qs), strict=True))
     for r in rows:
-        r["survives_bh"] = next(it) if r["contrast"]["p_value"] is not None else False
+        if r["contrast"]["p_value"] is None:
+            r["q_value"], r["survives_bh"] = None, False
+            continue
+        r["q_value"], r["survives_bh"] = next(it)
     return {"available": True, "rows": rows, "family": "sequence type contrast", "m": len(ps),
-            "n_win": nw, "n_loss": nl}
+            "alpha": 0.05, "n_win": nw, "n_loss": nl}
 
 
 def _heatmap(chains: Sequence[Sequence[str]], top: int = 12) -> dict[str, Any]:
@@ -868,11 +888,15 @@ def baseline_layer(bouts: Sequence[Mapping[str, Any]], roster_ids: set[str],
             rows2.append({"type": t,
                           "contrast": compare_proportions(own[t], n_own, pool[t], total).to_dict()})
         ps2 = [r["contrast"]["p_value"] for r in rows2 if r["contrast"]["p_value"] is not None]
-        it2 = iter(benjamini_hochberg(ps2, 0.05))
+        qs2 = benjamini_hochberg(ps2)
+        it2 = iter(zip(qs2, survives(qs2), strict=True))
         for r in rows2:
-            r["survives_bh"] = next(it2) if r["contrast"]["p_value"] is not None else False
+            if r["contrast"]["p_value"] is None:
+                r["q_value"], r["survives_bh"] = None, False
+                continue
+            r["q_value"], r["survives_bh"] = next(it2)
         out[div] = {"n_own": n_own, "available": True, "rows": rows2,
-                    "family": "baseline event mix", "m": len(ps2)}
+                    "family": "baseline event mix", "m": len(ps2), "alpha": 0.05}
     return out
 
 

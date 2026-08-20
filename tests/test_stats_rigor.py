@@ -18,7 +18,9 @@ from analysis.stats_rigor import (
     grade,
     heterogeneity,
     inverse_hhi_concentration,
+    permutation_p,
     spearman,
+    survives,
     wilson,
 )
 
@@ -120,19 +122,36 @@ def test_heterogeneity_of_one_common_distribution_is_not_significant() -> None:
 
 
 def test_benjamini_hochberg_controls_a_family() -> None:
-    """Twenty nulls at alpha .05 yield a 'finding' by construction; BH is what stops the
-    report from printing it as one."""
+    """Ten tests at alpha .05 yield a 'finding' by construction; BH is what stops the report
+    from printing it as one."""
     ps = [0.001, 0.008, 0.039, 0.041, 0.042, 0.6, 0.7, 0.8, 0.9, 0.95]
-    keep = benjamini_hochberg(ps, 0.05)
+    qs = benjamini_hochberg(ps)
+    keep = survives(qs, 0.05)
     assert keep[0] is True and keep[1] is True
     assert keep[-1] is False
     assert sum(keep) < sum(p < 0.05 for p in ps), "BH must reject fewer than raw alpha"
 
 
+def test_q_values_are_reported_not_just_a_verdict() -> None:
+    """A boolean makes the reader trust whichever alpha the report happened to pick. The
+    q-value is the smallest FDR at which the finding survives, so it can be argued with."""
+    qs = benjamini_hochberg([0.001, 0.008, 0.039, 0.041, 0.042, 0.6, 0.7, 0.8, 0.9, 0.95])
+    assert qs[0] == pytest.approx(0.01, abs=1e-9)     # 0.001 * 10 / 1
+    assert qs[1] == pytest.approx(0.04, abs=1e-9)     # 0.008 * 10 / 2
+    assert all(0.0 <= q <= 1.0 for q in qs)
+
+
+def test_q_values_are_monotone_in_p() -> None:
+    """The step-up enforcement: a larger p can never earn a smaller q."""
+    ps = [0.001, 0.008, 0.039, 0.041, 0.042, 0.6, 0.7, 0.8, 0.9, 0.95]
+    qs = benjamini_hochberg(ps)
+    ordered = [q for _, q in sorted(zip(ps, qs, strict=True))]
+    assert ordered == sorted(ordered)
+
+
 def test_benjamini_hochberg_keeps_caller_order_and_handles_empty() -> None:
     assert benjamini_hochberg([]) == []
-    keep = benjamini_hochberg([0.9, 0.0001])
-    assert keep == [False, True]
+    assert survives(benjamini_hochberg([0.9, 0.0001])) == [False, True]
 
 
 def test_bootstrap_is_deterministic_and_brackets_the_estimate() -> None:
@@ -303,3 +322,42 @@ def test_cluster_bootstrap_is_deterministic() -> None:
     values, groups = [1.0, 0.0, 1.0, 1.0, 0.0, 1.0], ["a", "a", "b", "b", "c", "c"]
     first = bootstrap_ci(values, _mean, n_boot=300, groups=groups)
     assert first == bootstrap_ci(values, _mean, n_boot=300, groups=groups)
+
+
+# ── permutation, for the tables the approximation cannot handle ─────────────────
+def test_a_sparse_table_gets_a_permutation_p_instead_of_only_a_warning() -> None:
+    h = heterogeneity([[5, 0], [0, 4]])
+    assert h.reliable is False
+    assert h.p_permutation is not None
+    assert 0.0 < h.p_permutation < 0.05
+
+
+def test_a_healthy_table_needs_no_permutation() -> None:
+    h = heterogeneity([[40, 60], [45, 55]])
+    assert h.reliable is True
+    assert h.p_permutation is None
+
+
+def test_permutation_p_matches_the_exact_test_it_stands_in_for() -> None:
+    """Validated against Fisher rather than against the chi-square, on purpose.
+
+    On [[40, 60], [45, 55]] -- a table with a smallest expected count of 47.5, comfortably
+    "reliable" -- the permutation converges on 0.569 and stays there as draws increase, while
+    the uncorrected chi-square says 0.474. The permutation is not drifting: Fisher's exact
+    two-sided gives 0.567 and Yates 0.567. The chi-square is the one that is off, by 0.09 on a
+    table nobody would flag, which is worth knowing before reading any p on this page too
+    closely.
+    """
+    from scipy import stats as _stats
+
+    table = [[40, 60], [45, 55]]
+    perm = permutation_p(table, n_draws=20000)
+    assert perm is not None
+    assert perm == pytest.approx(_stats.fisher_exact(table)[1], abs=0.01)
+
+
+def test_permutation_p_never_claims_more_than_the_draws_support() -> None:
+    """A Monte-Carlo p of exactly zero would assert certainty the sampling cannot deliver."""
+    p = permutation_p([[60, 0], [0, 60]], n_draws=500)
+    assert p is not None and p > 0.0
+    assert p == pytest.approx(1 / 501, abs=1e-9)
