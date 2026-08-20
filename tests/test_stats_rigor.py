@@ -10,12 +10,14 @@ import math
 import pytest
 
 from analysis.stats_rigor import (
+    auc,
     benjamini_hochberg,
     bootstrap_ci,
     compare_proportions,
     grade,
     heterogeneity,
     shannon_concentration,
+    spearman,
     wilson,
 )
 
@@ -148,3 +150,48 @@ def test_concentration_says_how_many_sources_the_evidence_is_worth() -> None:
     even = shannon_concentration([25, 25, 25, 25])
     assert even["effective_n"] == pytest.approx(4.0, abs=0.01)
     assert shannon_concentration([])["sources"] == 0
+
+
+def test_spearman_finds_a_monotonic_relationship_that_is_not_linear() -> None:
+    """The reason it is rank-based: y = x^3 is a perfect monotone relationship, and rank
+    correlation reports 1.0 where Pearson would report less."""
+    xs = [1.0, 2, 3, 4, 5, 6, 7, 8]
+    ys = [x ** 3 for x in xs]
+    r = spearman(xs, ys)
+    assert r.rho == pytest.approx(1.0)
+    assert r.lo > 0.5
+
+
+def test_spearman_on_noise_covers_zero() -> None:
+    xs = [3.0, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8]
+    ys = [2.0, 7, 1, 8, 2, 8, 1, 8, 2, 8, 4, 5]
+    r = spearman(xs, ys)
+    assert r.lo < 0 < r.hi, "an interval that excludes 0 on noise would be the bug"
+
+
+def test_spearman_refuses_a_sample_too_small_to_have_an_interval() -> None:
+    r = spearman([1.0, 2, 3], [1.0, 2, 3])
+    assert r.grade == "insufficient"
+    with pytest.raises(ValueError):
+        spearman([1.0, 2], [1.0])
+
+
+def test_auc_of_a_perfect_separator_is_one() -> None:
+    s = auc([1.0, 2, 3, 4, 90, 91, 92, 93], [False] * 4 + [True] * 4, n_boot=600)
+    assert s.auc == pytest.approx(1.0)
+    assert s.interpretation == "separates the classes"
+
+
+def test_auc_of_a_useless_measure_says_so() -> None:
+    """The case that matters: a measured 0.6 on a small sample is not evidence of anything,
+    and the interval is what says so instead of the point estimate flattering itself."""
+    s = auc([1.0, 2, 3, 4, 1.5, 2.5, 3.5, 4.5], [True, False] * 4, n_boot=600)
+    assert s.lo <= 0.5 <= s.hi
+    assert s.interpretation == "not distinguishable from chance"
+
+
+def test_auc_handles_ties_as_half_credit_and_an_empty_class() -> None:
+    tied = auc([5.0, 5, 5, 5], [True, True, False, False], n_boot=200)
+    assert tied.auc == pytest.approx(0.5)
+    empty = auc([1.0, 2, 3], [True, True, True], n_boot=200)
+    assert empty.grade == "none" and empty.n_neg == 0

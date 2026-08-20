@@ -252,3 +252,88 @@ def shannon_concentration(counts: Sequence[int]) -> dict[str, float]:
     hhi = sum(s * s for s in shares)
     return {"hhi": hhi, "top1": max(shares), "effective_n": 1 / hhi if hhi else 0.0,
             "sources": len(shares)}
+
+
+@dataclass(frozen=True)
+class RankCorrelation:
+    rho: float
+    p_value: float
+    n: int
+    lo: float
+    hi: float
+    grade: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def spearman(xs: Sequence[float], ys: Sequence[float]) -> RankCorrelation:
+    """Rank correlation with a Fisher-z interval.
+
+    Rank-based rather than Pearson because nothing here is plausibly linear or normal --
+    ratings, event counts and shares are all bounded or skewed, and a Pearson r on them
+    reports a relationship whose shape was assumed rather than observed.
+
+    The interval comes from Fisher's z with SE 1/sqrt(n-3), which is an approximation for
+    Spearman; it is reported because a rho with no interval is the same failure this module
+    exists to prevent, and it is graded off its own width so a thin sample says so.
+    """
+    n = len(xs)
+    if n != len(ys):
+        raise ValueError("spearman needs equal-length inputs")
+    if n < 4:
+        return RankCorrelation(float("nan"), 1.0, n, float("nan"), float("nan"), "insufficient")
+    rho, p = stats.spearmanr(xs, ys)
+    rho = float(rho)
+    z = 0.5 * math.log((1 + rho) / (1 - rho)) if abs(rho) < 1 else math.copysign(18.0, rho)
+    se = 1 / math.sqrt(n - 3)
+    lo, hi = (math.tanh(z - Z95 * se), math.tanh(z + Z95 * se))
+    return RankCorrelation(rho, float(p), n, lo, hi, grade(n, (hi - lo) / 2))
+
+
+@dataclass(frozen=True)
+class Separation:
+    """How well a continuous measure separates two outcomes."""
+
+    auc: float
+    lo: float
+    hi: float
+    n_pos: int
+    n_neg: int
+    grade: str
+    interpretation: str
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def auc(scores: Sequence[float], labels: Sequence[bool], n_boot: int = 4000,
+        seed: int = 20260820) -> Separation:
+    """Area under the ROC curve, with a percentile-bootstrap interval.
+
+    AUC is the probability that a randomly chosen positive scores above a randomly chosen
+    negative. 0.5 is a coin flip, and the interval is what says whether a measured 0.68 is
+    distinguishable from one -- with samples this size it usually is not, which is the point
+    of computing it rather than quoting the number alone.
+    """
+    import random
+
+    pos = [s for s, y in zip(scores, labels) if y]
+    neg = [s for s, y in zip(scores, labels) if not y]
+    if not pos or not neg:
+        return Separation(float("nan"), float("nan"), float("nan"), len(pos), len(neg),
+                          "none", "one class is empty")
+
+    def _a(p: Sequence[float], q: Sequence[float]) -> float:
+        wins = sum(1.0 if x > y else 0.5 if x == y else 0.0 for x in p for y in q)
+        return wins / (len(p) * len(q))
+
+    obs = _a(pos, neg)
+    rng = random.Random(seed)
+    draws = sorted(_a([pos[rng.randrange(len(pos))] for _ in pos],
+                      [neg[rng.randrange(len(neg))] for _ in neg]) for _ in range(n_boot))
+    lo, hi = draws[int(0.025 * n_boot)], draws[min(n_boot - 1, int(0.975 * n_boot))]
+    crosses = lo <= 0.5 <= hi
+    return Separation(obs, lo, hi, len(pos), len(neg),
+                      grade(len(pos) + len(neg), (hi - lo) / 2),
+                      "not distinguishable from chance" if crosses else "separates the classes")

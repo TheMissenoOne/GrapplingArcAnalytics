@@ -138,6 +138,49 @@ def est(k: int, n: int) -> dict[str, Any]:
     return wilson(k, n).to_dict()
 
 
+# ── layer 0: rating confidence ──────────────────────────────────────────────────
+def rating_layer(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
+    """Glicko-2 rating and RD per rostered athlete, matched by CANONICAL KEY.
+
+    Not by ``lower(name)``. The roster spells "Sarah Galvão" and the corpus spells "Sarah
+    Galvao", and a case-insensitive compare is still accent-sensitive -- so the first version
+    of this reported an athlete with a rating of 1965 at RD 157, the second most confident in
+    her division, as having no rating at all. `athlete_key` is the same normalisation the rest
+    of this codebase uses for identity, and using anything else here reintroduces exactly the
+    silent name-mismatch class this corpus has been repeatedly bitten by.
+
+    High RD does NOT mean a weak athlete. It means the rating exists and is not settled enough
+    to carry a comparison, which is a statement about evidence, not ability -- and the page
+    says so beside the number.
+    """
+    from analysis.rating_v2.config import SITE_MIN_CONFIDENCE_RD, SITE_RATING_RUN_ID
+
+    rows = conn.execute(text("""
+        select a.name, s.rating, s.rating_deviation, s.volatility, s.bout_count
+          from athlete_rating_states_v2 s join athletes a on a.id = s.athlete_id
+         where s.run_id = :run
+    """), {"run": SITE_RATING_RUN_ID}).fetchall()
+    by_key = {athlete_key(r[0]): r for r in rows}
+
+    out: dict[str, Any] = {}
+    unmatched: list[str] = []
+    for key, div in roster.items():
+        hit = by_key.get(key)
+        out[key] = {"division": div, "rated": bool(hit),
+                    "db_name": hit[0] if hit else None,
+                    "rating": round(float(hit[1])) if hit else None,
+                    "rd": round(float(hit[2])) if hit else None,
+                    "bouts": int(hit[4]) if hit else 0,
+                    "passes_gate": bool(hit and float(hit[2]) <= SITE_MIN_CONFIDENCE_RD)}
+        if not hit:
+            unmatched.append(key)
+    return {"gate": SITE_MIN_CONFIDENCE_RD, "run": SITE_RATING_RUN_ID,
+            "matched_on": "analysis.names.athlete_key (accent- and case-folded)",
+            "rated": sum(1 for v in out.values() if v["rated"]),
+            "passing_gate": sum(1 for v in out.values() if v["passes_gate"]),
+            "unmatched": unmatched, "athletes": out}
+
+
 # ── layer 1: published match records ────────────────────────────────────────────
 def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
     """Counts of how bouts ended, cut by division, uniform and ruleset.
@@ -583,7 +626,6 @@ def main() -> int:
     ap.add_argument("--records", type=Path, required=True,
                     help="BJJ Heroes records JSON (division + rows per athlete)")
     ap.add_argument("--sequences", type=Path, required=True, help="corpus bouts JSON")
-    ap.add_argument("--rd", type=Path, required=True, help="rating deviations JSON")
     ap.add_argument("--derived", type=Path, required=True, help="opponent-derived records JSON")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()
@@ -591,6 +633,9 @@ def main() -> int:
     manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
     roster = {athlete_key(x if isinstance(x, str) else x["name"]): d["name"]
               for d in manifest["divisions"] for x in d["athletes"]}
+    display = {athlete_key(x if isinstance(x, str) else x["name"]):
+               (x if isinstance(x, str) else x["name"])
+               for d in manifest["divisions"] for x in d["athletes"]}
     records = json.loads(a.records.read_text(encoding="utf-8"))
     bouts = json.loads(a.sequences.read_text(encoding="utf-8"))
 
@@ -602,6 +647,8 @@ def main() -> int:
     with eng.connect() as conn:
         emb = embedding_layer(conn, roster)
         vids = video_layer(conn, roster)
+        corr = correlation_layer(conn, bouts)
+        rating = rating_layer(conn, roster)
 
     doc = {
         "generated": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -616,7 +663,9 @@ def main() -> int:
         "embedding": emb,
         "baseline": baseline_layer(bouts, roster_ids, seq),
         "videos": vids,
-        "rd": json.loads(a.rd.read_text(encoding="utf-8")),
+        "correlations": corr,
+        "rd": {**rating,
+               "athletes": {display[k]: v for k, v in rating["athletes"].items()}},
         "derived": json.loads(a.derived.read_text(encoding="utf-8")),
         "roster": manifest["divisions"],
     }
@@ -630,6 +679,119 @@ def main() -> int:
     print(f"  videos: {len(vids)}   embedded graphs: "
           f"{sum(v['usable'] for v in emb['divisions'].values())}")
     return 0
+
+
+
+
+# ── layer 6: correlations ───────────────────────────────────────────────────────
+def correlation_layer(conn: Any, bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """The two correlations that are computable, and an explicit note on the two that are not.
+
+    **Node-level ELO does not exist.** ``athlete_node_rating_states_v2`` is created by a
+    migration and holds zero rows -- the constellation work that would fill it is still open
+    (rating_v2 ADR-03/ADR-08). So "does a high rating ON A NODE predict a kind of victory"
+    cannot be answered at all, and is reported as unavailable rather than approximated by
+    something else wearing its name.
+
+    **Running score does not exist either.** ``matches`` has no score column, and zero
+    sequence events carry the ``points`` field. The only scores in reach are the final ones
+    embedded in published method strings ("Pts: 4x2"), which exist ONLY for bouts decided on
+    points -- the exact complement of what a score-versus-outcome question needs.
+
+    What replaces them is stated as what it is: athlete-level rating instead of node-level,
+    and share of observed events instead of score.
+    """
+    from analysis.rating_v2.config import SITE_RATING_RUN_ID
+    from analysis.stats_rigor import auc, heterogeneity, spearman, wilson
+
+    node_rows = conn.execute(text(
+        "select count(*) from athlete_node_rating_states_v2")).scalar()
+
+    # ── rating of the winner against how they won ───────────────────────────────
+    rows = conn.execute(text("""
+        select w.rating, w.rating_deviation, l.rating, m.win_type
+          from matches m
+          join athlete_rating_states_v2 w
+            on w.athlete_id = m.winner_id and w.run_id = :run
+          left join athlete_rating_states_v2 l
+            on l.athlete_id = case when m.winner_id = m.athlete_a_id
+                                   then m.athlete_b_id else m.athlete_a_id end
+           and l.run_id = :run
+         where m.status = 'final' and m.win_type is not null
+           and w.rating_deviation <= 200
+    """), {"run": SITE_RATING_RUN_ID}).fetchall()
+
+    bands = [("<1700", 0, 1700), ("1700–1900", 1700, 1900),
+             ("1900–2100", 1900, 2100), ("≥2100", 2100, 10000)]
+    by_band, table = [], []
+    for label, lo, hi in bands:
+        sub = [r for r in rows if lo <= float(r[0]) < hi]
+        sub_n = sum(1 for r in sub if r[3] == "SUBMISSION")
+        other = len(sub) - sub_n
+        if sub:
+            by_band.append({"band": label, "n": len(sub),
+                            "submission": wilson(sub_n, len(sub)).to_dict()})
+            table.append([sub_n, other])
+    ratings = [float(r[0]) for r in rows]
+    is_sub = [r[3] == "SUBMISSION" for r in rows]
+    rating_vs_sub = spearman(ratings, [1.0 if s else 0.0 for s in is_sub])
+
+    gapped = [(float(r[0]) - float(r[2]), r[3] == "SUBMISSION") for r in rows if r[2] is not None]
+    gap_sep = auc([g for g, _ in gapped], [s for _, s in gapped]) if gapped else None
+    gap_corr = spearman([g for g, _ in gapped], [1.0 if s else 0.0 for _, s in gapped]) \
+        if len(gapped) > 3 else None
+
+    # ── event share against who won, for bouts NOT decided on points ────────────
+    shares, labels = [], []
+    for b in bouts:
+        if not b["seq"] or not b.get("winner") or b.get("win_type") == "POINTS":
+            continue
+        a_ev = sum(1 for e in b["seq"] if e.get("actor_id") == b["a_id"])
+        b_ev = sum(1 for e in b["seq"] if e.get("actor_id") == b["b_id"])
+        if a_ev + b_ev < 4:
+            continue
+        shares.append(a_ev / (a_ev + b_ev))
+        labels.append(b["winner"] == b["a_id"])
+    share_sep = auc(shares, labels) if shares else None
+
+    return {
+        "node_elo": {
+            "available": bool(node_rows),
+            "rows": int(node_rows or 0),
+            "why": "athlete_node_rating_states_v2 exists but holds no rows; the constellation "
+                   "work that fills it is open (rating_v2 ADR-03/ADR-08). Node-level rating "
+                   "against method of victory is therefore not computable, and no substitute "
+                   "is presented under its name.",
+        },
+        "rating_vs_method": {
+            "substitute_for": "node-level ELO",
+            "bands": by_band,
+            "heterogeneity": heterogeneity(table).to_dict() if len(table) > 1 else None,
+            "spearman": rating_vs_sub.to_dict(),
+            "gap_auc": gap_sep.to_dict() if gap_sep else None,
+            "gap_spearman": gap_corr.to_dict() if gap_corr else None,
+            "n": len(rows),
+            "caveats": [
+                "Conditioned on winning: every row is a bout someone won, so this describes "
+                "HOW winners win, not who wins.",
+                "Athlete-level rating, not node-level — the question asked was about a node.",
+                "Opponent strength is only partly controlled: the rating gap is reported "
+                "separately, and a bout whose loser is unrated drops out of that cut.",
+                "Corpus-wide, not roster-only: restricting to these 16 athletes leaves too "
+                "few rated bouts to band at all.",
+            ],
+        },
+        "score_vs_outcome": {
+            "available": False,
+            "why": "matches has no score column and zero sequence events carry `points`. The "
+                   "only scores that exist are final ones inside published method strings, and "
+                   "they exist only for bouts decided ON points — the complement of the "
+                   "question. What is shown instead is share of observed events, which is a "
+                   "proxy for positional volume, not a score.",
+            "event_share_auc": share_sep.to_dict() if share_sep else None,
+            "n_bouts": len(shares),
+        },
+    }
 
 
 if __name__ == "__main__":
