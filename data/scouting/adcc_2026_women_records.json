@@ -65,7 +65,7 @@
     "via": "Charles Negromonte"
    },
    {
-    "opp": "Gabi Garcia",
+    "opp": "Gabrielle Garcia",
     "wl": "L",
     "method": "Pts: 0x0, Adv",
     "comp": "Pan American",
@@ -73,7 +73,7 @@
     "stage": "4F",
     "year": 2019,
     "source": "opponent_record",
-    "via": "Gabi Garcia"
+    "via": "Gabrielle Garcia"
    },
    {
     "opp": "Yara Soares",
@@ -97,17 +97,6 @@
     "via": "Rafaela Guedes"
    },
    {
-    "opp": "Yara Soares",
-    "wl": "L",
-    "method": "Pts: 2x0",
-    "comp": "Pan American",
-    "weight": "ABS",
-    "stage": "F",
-    "year": 2021,
-    "source": "opponent_record",
-    "via": "Yara Soares"
-   },
-   {
     "opp": "Elisabeth Clay",
     "wl": "W",
     "method": "Pts: 6x0",
@@ -128,6 +117,17 @@
     "year": 2021,
     "source": "opponent_record",
     "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Yara Soares"
    },
    {
     "opp": "Elisabeth Clay",
@@ -162,17 +162,6 @@
     "source": "corpus"
    },
    {
-    "opp": "Gabi Garcia",
-    "wl": "L",
-    "method": "Pts: 0x0, Pen",
-    "comp": "World Champ.",
-    "weight": "ABS",
-    "stage": "4F",
-    "year": 2021,
-    "source": "opponent_record",
-    "via": "Gabi Garcia"
-   },
-   {
     "opp": "Elisabeth Clay",
     "wl": "W",
     "method": "Referee Decision",
@@ -182,6 +171,17 @@
     "year": 2021,
     "source": "opponent_record",
     "via": "Elisabeth Clay"
+   },
+   {
+    "opp": "Gabrielle Garcia",
+    "wl": "L",
+    "method": "Pts: 0x0, Pen",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Gabrielle Garcia"
    },
    {
     "opp": "Amy Campo",
@@ -272,17 +272,6 @@
     "via": "Gabrieli Pessanha"
    },
    {
-    "opp": "Helena Crevar",
-    "wl": "W",
-    "method": "Pts: 5x0",
-    "comp": "ADCC",
-    "weight": "65KG",
-    "stage": "F",
-    "year": 2024,
-    "source": "opponent_record",
-    "via": "Helena Crevar"
-   },
-   {
     "opp": "Amanda Leve",
     "wl": "W",
     "method": "Referee Decision",
@@ -292,6 +281,17 @@
     "year": 2024,
     "source": "opponent_record",
     "via": "Amanda Leve"
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "ADCC",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Helena Crevar"
    },
    {
     "opp": "Helena Crevar",
@@ -416,6 +416,17 @@
     "source": "corpus"
    },
    {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "Pan NoGi",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
     "opp": "Nadia Frankland",
     "wl": "W",
     "method": "Pts: 4x0",
@@ -436,17 +447,6 @@
     "year": 2025,
     "source": "opponent_record",
     "via": "Nadia Frankland"
-   },
-   {
-    "opp": "Gabrieli Pessanha",
-    "wl": "L",
-    "method": "Straight ankle lock",
-    "comp": "Pan NoGi",
-    "weight": "ABS",
-    "stage": "F",
-    "year": 2025,
-    "source": "opponent_record",
-    "via": "Gabrieli Pessanha"
    },
    {
     "opp": "Gami Kanew",
@@ -525,6 +525,17 @@
     "stage": "",
     "year": 2025,
     "source": "corpus"
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025,
+    "source": "manual",
+    "note": "IBJJF Pan Championship, March 2025, brown belt absolute quarter-final. Absent from every source: Helena Crevar's BJJ Heroes record carries 48 bouts of which 45 are no-gi and ZERO are IBJJF gi, so her gi results are missing wholesale rather than this one being skipped."
    },
    {
     "opp": "Injana Goodman",
@@ -1846,7 +1857,7 @@
     "via": "Salla Simola"
    },
    {
-    "opp": "Helena Crevar",
+    "opp": "Brianna Stemarie",
     "wl": "L",
     "method": "Referee Decision",
     "comp": "Polaris 32",
@@ -1854,7 +1865,7 @@
     "stage": "RDS",
     "year": 2025,
     "source": "opponent_record",
-    "via": "Helena Crevar"
+    "via": "Brianna Stemarie"
    },
    {
     "opp": "Elizabeth Mitrovic",
@@ -1868,7 +1879,7 @@
     "via": "Elizabeth Mitrovic"
    },
    {
-    "opp": "Brianna Stemarie",
+    "opp": "Helena Crevar",
     "wl": "L",
     "method": "Referee Decision",
     "comp": "Polaris 32",
@@ -1876,7 +1887,7 @@
     "stage": "RDS",
     "year": 2025,
     "source": "opponent_record",
-    "via": "Brianna Stemarie"
+    "via": "Helena Crevar"
    },
    {
     "opp": "Helena Crevar",
@@ -4475,17 +4486,6 @@
     "via": "Ffion Davies"
    },
    {
-    "opp": "Nadia Frankland",
-    "wl": "L",
-    "method": "Pts: 4x0",
-    "comp": "World NoGi",
-    "weight": "ABS",
-    "stage": "8F",
-    "year": 2024,
-    "source": "opponent_record",
-    "via": "Nadia Frankland"
-   },
-   {
     "opp": "Anabel Lopez",
     "wl": "L",
     "method": "Pts: 0x0, Adv",
@@ -4506,6 +4506,17 @@
     "year": 2024,
     "source": "opponent_record",
     "via": "Elizabeth Mitrovic"
+   },
+   {
+    "opp": "Nadia Frankland",
+    "wl": "L",
+    "method": "Pts: 4x0",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Nadia Frankland"
    },
    {
     "opp": "Rafaela Guedes",
@@ -5878,6 +5889,17 @@
     "stage": "RDS",
     "year": 2026,
     "source": "own_record"
+   },
+   {
+    "opp": "Sarah Galvão",
+    "wl": "L",
+    "method": "Pts: 6x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025,
+    "source": "manual",
+    "note": "IBJJF Pan Championship, March 2025, brown belt absolute quarter-final. Absent from every source: Helena Crevar's BJJ Heroes record carries 48 bouts of which 45 are no-gi and ZERO are IBJJF gi, so her gi results are missing wholesale rather than this one being skipped."
    }
   ]
  },

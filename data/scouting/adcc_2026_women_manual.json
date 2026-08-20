@@ -1,0 +1,17 @@
+{
+ "_comment": [
+  "Bouts confirmed by hand that no source in the pipeline carries.",
+  "Folded in by scripts/build_roster_records.py on every run, so a rebuild cannot wipe them.",
+  "Each row is written from BOTH corners: an athlete's record should contain her own bout, and",
+  "the mirror-pair dedup in bracket_export collapses the two views for any test that needs a",
+  "bout counted once. `source: manual` keeps them distinguishable from anything scraped."
+ ],
+ "bouts": [
+  {
+   "a": "Sarah Galvão", "b": "Helena Crevar", "winner": "Sarah Galvão",
+   "method": "Pts: 6x0", "comp": "Pan American", "year": 2025, "stage": "4F",
+   "weight": "ABS",
+   "note": "IBJJF Pan Championship, March 2025, brown belt absolute quarter-final. Absent from every source: Helena Crevar's BJJ Heroes record carries 48 bouts of which 45 are no-gi and ZERO are IBJJF gi, so her gi results are missing wholesale rather than this one being skipped."
+  }
+ ]
+}

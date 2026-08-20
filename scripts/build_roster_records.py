@@ -53,6 +53,7 @@ logger = logging.getLogger(__name__)
 SCOUTING = REPO / "data" / "scouting"
 MANIFEST = SCOUTING / "adcc_2026_women.json"
 RECORDS = SCOUTING / "adcc_2026_women_records.json"
+MANUAL = SCOUTING / "adcc_2026_women_manual.json"
 CACHE = REPO / "data" / "raw" / "bjjheroes"
 
 FLIP = {"W": "L", "L": "W", "D": "D"}
@@ -168,6 +169,34 @@ def from_corpus(roster: dict[str, str],
     return out
 
 
+def from_manual(roster: dict[str, str],
+                spellings: dict[str, list[str]]) -> dict[str, list[dict[str, Any]]]:
+    """Bouts confirmed by hand that no source carries, written from both corners.
+
+    These exist because a record can be missing a whole CLASS of results, not just a row.
+    Helena Crevar's BJJ Heroes page holds 48 bouts of which 45 are no-gi and none are IBJJF gi,
+    so her March 2025 Pan quarter-final against Sarah Galvao is absent from every automated
+    path -- and so is the rest of her gi career. Folded in on every run so a rebuild cannot
+    wipe them, and stamped `manual` so nothing mistakes them for a scrape."""
+    out: dict[str, list[dict[str, Any]]] = {k: [] for k in roster}
+    if not MANUAL.exists():
+        return out
+    for bout in json.loads(MANUAL.read_text(encoding="utf-8")).get("bouts", []):
+        for side, other in ((bout["a"], bout["b"]), (bout["b"], bout["a"])):
+            key = _match(side, spellings)
+            if key is None:
+                logger.warning("manual bout names %r, who is not on the roster", side)
+                continue
+            out[key].append({
+                "opp": other,
+                "wl": "W" if bout.get("winner") == side else "L",
+                "method": bout.get("method"), "comp": bout.get("comp"),
+                "weight": bout.get("weight", ""), "stage": bout.get("stage", ""),
+                "year": bout.get("year"), "source": "manual", "note": bout.get("note"),
+            })
+    return out
+
+
 def _key(row: dict[str, Any]) -> tuple[Any, ...]:
     """Bout identity across sources: opponent, year, and method.
 
@@ -184,26 +213,36 @@ def _key(row: dict[str, Any]) -> tuple[Any, ...]:
 def build(dry_run: bool) -> int:
     roster, spellings = _roster()
     recs = json.loads(RECORDS.read_text(encoding="utf-8"))
+    manual = from_manual(roster, spellings)
     opp = from_opponents(roster, spellings)
     from_recs = from_roster_records(recs, roster, spellings)
     corpus = from_corpus(roster, spellings)
 
-    report: list[tuple[str, int, int, int, int]] = []
+    report: list[tuple[str, int, int, int, int, int]] = []
     for key, name in roster.items():
         entry = recs.setdefault(name, {"division": None, "rows": []})
-        own = entry.get("rows") or []
-        for r in own:
+        # Only rows that came from HER OWN table count as an own record. Reading back every
+        # row would make a second run treat the previous run's reconstruction as authoritative
+        # and stop rebuilding -- the builder has to be re-runnable, because the sources move.
+        rows = entry.get("rows") or []
+        for r in rows:
             r.setdefault("source", "own_record")
+        own = [r for r in rows if r.get("source") == "own_record"]
         if own:
-            report.append((name, len(own), 0, 0, len(own)))
-            continue                                  # her own table wins; never mix
+            # Her own table wins for everything a scrape can see -- but a hand-confirmed bout
+            # exists precisely because no scrape sees it, so it is added even here.
+            seen_own = {_key(r) for r in own}
+            extra = [r for r in manual[key] if _key(r) not in seen_own]
+            entry["rows"] = own + extra
+            report.append((name, len(own), 0, 0, len(own) + len(extra), len(extra)))
+            continue
 
         seen = {_key(r) for r in own}
         merged = list(own)
         added_opp = added_corpus = 0
         # Roster records first (current parse), then the wider HTML cache, then the corpus:
         # descending method-string richness, and the dedup key keeps the first of each bout.
-        for row in from_recs[key] + opp[key] + corpus[key]:
+        for row in manual[key] + from_recs[key] + opp[key] + corpus[key]:
             k = _key(row)
             if k in seen:
                 continue
@@ -216,15 +255,17 @@ def build(dry_run: bool) -> int:
         merged.sort(key=lambda r: (r.get("year") or 0, r.get("comp") or ""))
         entry["rows"] = merged
         entry["record_source"] = "reconstructed" if merged else "none"
-        report.append((name, 0, added_opp, added_corpus, len(merged)))
+        report.append((name, 0, added_opp, added_corpus, len(merged),
+                       sum(1 for r in merged if r.get("source") == "manual")))
 
-    print(f"{'atleta':24} {'própria':>8} {'advers.':>8} {'corpus':>7} {'total':>7}")
-    for name, o, a, c, tot in sorted(report, key=lambda r: -r[4]):
+    print(f"{'atleta':24} {'própria':>8} {'advers.':>8} {'corpus':>7} {'manual':>7} {'total':>7}")
+    for name, o, a, c, tot, man in sorted(report, key=lambda r: -r[4]):
         flag = "   <-- nenhuma fonte" if tot == 0 else ""
-        print(f"{name:24} {o:8d} {a:8d} {c:7d} {tot:7d}{flag}")
-    built = sum(1 for _, o, _, _, t in report if not o and t)
+        print(f"{name:24} {o:8d} {a:8d} {c:7d} {man:7d} {tot:7d}{flag}")
+    built = sum(1 for _, o, _, _, t, _m in report if not o and t)
     print(f"\n{built} fichas reconstruídas; "
-          f"{sum(1 for _, o, _, _, t in report if not o and not t)} sem fonte alguma")
+          f"{sum(1 for _, o, _, _, t, _m in report if not o and not t)} sem fonte alguma; "
+          f"{sum(m for *_, m in report)} linha(s) manual(is)")
 
     if dry_run:
         print("\n--dry-run: nada escrito")

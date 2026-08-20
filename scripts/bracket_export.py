@@ -364,7 +364,13 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
                  "record_source": v.get("record_source", "own" if v.get("rows") else "none"),
                  "rows": len(v.get("rows") or []),
                  "by_source": dict(Counter(r.get("source", "own_record")
-                                           for r in (v.get("rows") or [])))}
+                                           for r in (v.get("rows") or []))),
+                 # A record can be missing a whole CLASS of results, not just rows. Helena
+                 # Crevar's carries 48 bouts of which 45 are no-gi and ZERO are IBJJF gi: her
+                 # gi career is absent wholesale. Any gi/no-gi cut inherits that, so the
+                 # per-athlete split ships alongside the classification it feeds.
+                 "by_uniform": dict(Counter(uniform(r.get("comp"))
+                                            for r in (v.get("rows") or [])))}
             for nm, v in records.items() if v.get("division") == div
         }
         out[div] = {"record_provenance": provenance,
