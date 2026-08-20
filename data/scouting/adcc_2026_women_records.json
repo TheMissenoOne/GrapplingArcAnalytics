@@ -1,20 +1,618 @@
 {
  "Livia Barasine": {
   "division": "65 kg",
-  "rows": null
+  "rows": [
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Kneebar",
+    "comp": "ADGS Rome",
+    "weight": "95KG",
+    "stage": "F",
+    "year": 2026,
+    "source": "opponent_record",
+    "via": "Yara Soares"
+   }
+  ],
+  "record_source": "reconstructed"
  },
  "Ana Carolina Vieira": {
   "division": "65 kg",
   "url": "https://www.bjjheroes.com/?p=6979",
-  "rows": []
+  "rows": [
+   {
+    "opp": "Tanner Rice",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "Copa Podio",
+    "weight": "77KG",
+    "stage": "SPF",
+    "year": 2014,
+    "source": "opponent_record",
+    "via": "Tanner Rice"
+   },
+   {
+    "opp": "Amanda Leve",
+    "wl": "W",
+    "method": "Short choke",
+    "comp": "ADCC",
+    "weight": "O60KG",
+    "stage": "4F",
+    "year": 2019,
+    "source": "opponent_record",
+    "via": "Amanda Leve"
+   },
+   {
+    "opp": "Henrique Cardoso",
+    "wl": "L",
+    "method": "Choke from back",
+    "comp": "Floripa Fall Open",
+    "weight": "88KG",
+    "stage": "4F",
+    "year": 2019,
+    "source": "opponent_record",
+    "via": "Henrique Cardoso"
+   },
+   {
+    "opp": "Charles Negromonte",
+    "wl": "L",
+    "method": "Ezekiel",
+    "comp": "Grand Slam RJ",
+    "weight": "85KG",
+    "stage": "R1",
+    "year": 2019,
+    "source": "opponent_record",
+    "via": "Charles Negromonte"
+   },
+   {
+    "opp": "Gabi Garcia",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2019,
+    "source": "opponent_record",
+    "via": "Gabi Garcia"
+   },
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Decision",
+    "comp": null,
+    "weight": "",
+    "stage": "",
+    "year": 2021,
+    "source": "corpus"
+   },
+   {
+    "opp": "Rafaela Guedes",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "F2W 162",
+    "weight": "N/A",
+    "stage": "SPF",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Rafaela Guedes"
+   },
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Yara Soares"
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "Pan American",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Elisabeth Clay"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "W",
+    "method": "Pts: 4x2",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "Road to ADCC",
+    "weight": "O60KG",
+    "stage": "SPF",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Elisabeth Clay"
+   },
+   {
+    "opp": "Kendall Reusing",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "WNO Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Kendall Reusing"
+   },
+   {
+    "opp": "Amanda Loewen",
+    "wl": "W",
+    "method": "Arm Triangle Choke",
+    "comp": "WNO Championship",
+    "weight": "",
+    "stage": "",
+    "year": 2021,
+    "source": "corpus"
+   },
+   {
+    "opp": "Gabi Garcia",
+    "wl": "L",
+    "method": "Pts: 0x0, Pen",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Gabi Garcia"
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Elisabeth Clay"
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "W",
+    "method": "Armbar",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "4F",
+    "year": 2022,
+    "source": "opponent_record",
+    "via": "Amy Campo"
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2022,
+    "source": "opponent_record",
+    "via": "Amy Campo"
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan American",
+    "weight": "74KG",
+    "stage": "F",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Amy Campo"
+   },
+   {
+    "opp": "Ffion Davies",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Ffion Davies"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "W",
+    "method": "Pts: 2x2, Adv",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Amy Campo"
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "World Champ.",
+    "weight": "74KG",
+    "stage": "SF",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Amy Campo"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Choke from back",
+    "comp": "World Champ.",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "W",
+    "method": "Pts: 5x0",
+    "comp": "ADCC",
+    "weight": "65KG",
+    "stage": "F",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Helena Crevar"
+   },
+   {
+    "opp": "Amanda Leve",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "ADCC",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Amanda Leve"
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "L",
+    "method": "Guillotine Choke",
+    "comp": "ADCC 2024",
+    "weight": "",
+    "stage": "",
+    "year": 2024,
+    "source": "corpus"
+   },
+   {
+    "opp": "Amanda Levy",
+    "wl": "W",
+    "method": "Decision",
+    "comp": "ADCC 2024",
+    "weight": "",
+    "stage": "",
+    "year": 2024,
+    "source": "corpus"
+   },
+   {
+    "opp": "Bia Mesquita",
+    "wl": "W",
+    "method": "Decision",
+    "comp": "ADCC 2024",
+    "weight": "",
+    "stage": "",
+    "year": 2024,
+    "source": "corpus"
+   },
+   {
+    "opp": "Aurelie Le Vern",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "ADXC 7",
+    "weight": "NA",
+    "stage": "SPF",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Aurelie Le Vern"
+   },
+   {
+    "opp": "Sarah Galvao",
+    "wl": "L",
+    "method": "Decision",
+    "comp": "CJI 2 - Day 1",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   }
+  ],
+  "record_source": "reconstructed"
  },
  "Injana Goodman": {
   "division": "65 kg",
-  "rows": null
+  "rows": [
+   {
+    "opp": "Aurelie Le Vern",
+    "wl": "L",
+    "method": "Triangle",
+    "comp": "ADCC EU Trials",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Aurelie Le Vern"
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "L",
+    "method": "Outside heel hook",
+    "comp": "GrappleFest 18",
+    "weight": "60KG",
+    "stage": "SPF",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Helena Crevar"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Smother tap",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Julia Maele",
+    "wl": "W",
+    "method": "RNC",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Julia Maele"
+   },
+   {
+    "opp": "Julia Maele",
+    "wl": "W",
+    "method": "Pts: 11x2",
+    "comp": "Euro NoGi",
+    "weight": "67KG",
+    "stage": "F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Julia Maele"
+   },
+   {
+    "opp": "Sarah Galvao",
+    "wl": "L",
+    "method": "Decision",
+    "comp": "Pan No-Gi 2025",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Nadia Frankland",
+    "wl": "W",
+    "method": "Pts: 4x0",
+    "comp": "Pan NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Nadia Frankland"
+   },
+   {
+    "opp": "Nadia Frankland",
+    "wl": "W",
+    "method": "Pts: 0x0, Adv",
+    "comp": "Pan NoGi",
+    "weight": "67KG",
+    "stage": "4F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Nadia Frankland"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Straight ankle lock",
+    "comp": "Pan NoGi",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Gami Kanew",
+    "wl": "W",
+    "method": "Heel hook",
+    "comp": "Polaris 33",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Martina Kinska",
+    "wl": "L",
+    "method": "Decision",
+    "comp": "Women Who Fight Invitational 2",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Annie Senson",
+    "wl": "L",
+    "method": "Decision",
+    "comp": "Women Who Fight Invitational 2",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Jackie Almeida",
+    "wl": "W",
+    "method": "Choke",
+    "comp": "Women Who Fight Invitational 2",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "L",
+    "method": "Guillotine",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Elisabeth Clay"
+   }
+  ],
+  "record_source": "reconstructed"
  },
  "Sarah Galvão": {
   "division": "65 kg",
-  "rows": null
+  "rows": [
+   {
+    "opp": "Helena Crevar",
+    "wl": "L",
+    "method": "Aoki lock",
+    "comp": "CJI 2",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Helena Crevar"
+   },
+   {
+    "opp": "Ana Carolina Vieira",
+    "wl": "W",
+    "method": "Decision",
+    "comp": "CJI 2 - Day 1",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Injana Goodman",
+    "wl": "W",
+    "method": "Decision",
+    "comp": "Pan No-Gi 2025",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Brianna Stemarie",
+    "wl": "W",
+    "method": "Choke from back",
+    "comp": "The Crown",
+    "weight": "64KG",
+    "stage": "4F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Brianna Stemarie"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 12x0",
+    "comp": "Brasileiro",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2026,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "European Champ",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2026,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2026,
+    "source": "opponent_record",
+    "via": "Elisabeth Clay"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "W",
+    "method": "Pts: 6x0",
+    "comp": "Pan American",
+    "weight": "ABS",
+    "stage": "F",
+    "year": 2026,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Libby Genge",
+    "wl": "W",
+    "method": "Kimura",
+    "comp": "Polaris 36",
+    "weight": "",
+    "stage": "",
+    "year": 2026,
+    "source": "corpus"
+   },
+   {
+    "opp": "Zara Di Tofano",
+    "wl": "W",
+    "method": "D'Arce Choke",
+    "comp": "Polaris 38",
+    "weight": "",
+    "stage": "",
+    "year": 2026,
+    "source": "corpus"
+   }
+  ],
+  "record_source": "reconstructed"
  },
  "Nadia Frankland": {
   "division": "65 kg",
@@ -27,7 +625,8 @@
     "comp": "ADCC AUS Trials",
     "weight": "60KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Sula Loewenthal",
@@ -36,7 +635,8 @@
     "comp": "ADCC AOT 2",
     "weight": "65KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Brianna Ste-Marie",
@@ -45,7 +645,8 @@
     "comp": "Euro NoGi",
     "weight": "67KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -54,7 +655,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria Ruffatto",
@@ -63,7 +665,8 @@
     "comp": "NoGi Pan",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -72,7 +675,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Elisabeth Clay",
@@ -81,7 +685,8 @@
     "comp": "World NoGi",
     "weight": "68KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Thaynara Victoria",
@@ -90,7 +695,8 @@
     "comp": "Sacramento O",
     "weight": "ABS",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -99,7 +705,8 @@
     "comp": "LA W Open",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Nicole",
@@ -108,7 +715,8 @@
     "comp": "Pan Champ.",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -117,7 +725,8 @@
     "comp": "Pan Champ.",
     "weight": "74KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Kauane Silva",
@@ -126,7 +735,8 @@
     "comp": "SDiego SPO",
     "weight": "74KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -135,7 +745,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "8F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -144,7 +755,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -153,7 +765,8 @@
     "comp": "American NGN",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Injana Goodman",
@@ -162,7 +775,8 @@
     "comp": "Pan NoGi",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Injana Goodman",
@@ -171,7 +785,8 @@
     "comp": "Pan NoGi",
     "weight": "67KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -180,7 +795,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Injana Goodman",
@@ -189,7 +805,8 @@
     "comp": "Euro NoGi",
     "weight": "67KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -198,7 +815,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Rebeca Lima",
@@ -207,7 +825,8 @@
     "comp": "World NoGi",
     "weight": "67KG",
     "stage": "8F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Ane Svendsen",
@@ -216,7 +835,8 @@
     "comp": "ADCC EU",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Bruse",
@@ -225,7 +845,8 @@
     "comp": "ADCC PNX",
     "weight": "ABS",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Healy Poked",
@@ -234,7 +855,8 @@
     "comp": "ADCC AUS Trials",
     "weight": "60KG",
     "stage": "R1",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Hope Douglass",
@@ -243,7 +865,8 @@
     "comp": "ADCC AUS Trials",
     "weight": "60KG",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Margot Ciccarelli",
@@ -252,7 +875,8 @@
     "comp": "ADCC AUS Trials",
     "weight": "60KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Ju Shih",
@@ -261,7 +885,8 @@
     "comp": "ADCC AOT 2",
     "weight": "65KG",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Healy Poked",
@@ -270,7 +895,8 @@
     "comp": "ADCC AOT 2",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Hillary Loh",
@@ -279,7 +905,8 @@
     "comp": "ADCC AOT 2",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Vannessa Griffin",
@@ -288,7 +915,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Hannah Harjo",
@@ -297,7 +925,8 @@
     "comp": "NoGi Pan",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -306,7 +935,8 @@
     "comp": "NoGi Pan",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Morgan Black",
@@ -315,7 +945,8 @@
     "comp": "NoGi Pan",
     "weight": "67KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Pamela",
@@ -324,7 +955,8 @@
     "comp": "NoGi Pan",
     "weight": "67KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gabriele Schuck",
@@ -333,7 +965,8 @@
     "comp": "NoGi Pan",
     "weight": "67KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Paige Ivette",
@@ -342,7 +975,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "8F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gamila Kanew",
@@ -351,7 +985,8 @@
     "comp": "World NoGi",
     "weight": "68KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Julia Boscher",
@@ -360,7 +995,8 @@
     "comp": "World NoGi",
     "weight": "68KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Joy Pendell",
@@ -369,7 +1005,8 @@
     "comp": "Sacramento O",
     "weight": "74KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Elizabeth Mitrovic",
@@ -378,7 +1015,8 @@
     "comp": "Sacramento O",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Luciane Santos",
@@ -387,7 +1025,8 @@
     "comp": "LA W Open",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Fernanda Cristo",
@@ -396,7 +1035,8 @@
     "comp": "Denver Open",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Yasmyn Castro",
@@ -405,7 +1045,8 @@
     "comp": "Denver Open",
     "weight": "ABS",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Nikki Griffiths",
@@ -414,7 +1055,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Katrina Schmale",
@@ -423,7 +1065,8 @@
     "comp": "American NGN",
     "weight": "72KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Michelle Dunchus",
@@ -432,7 +1075,8 @@
     "comp": "American NGN",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Rosa Walsh",
@@ -441,7 +1085,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "R2",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -450,7 +1095,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Jaqueline Almeida",
@@ -459,7 +1105,8 @@
     "comp": "Euro NoGi",
     "weight": "67KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Sula Lowenthal",
@@ -468,7 +1115,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "8F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -477,7 +1125,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Alyson Cholez",
@@ -486,7 +1135,8 @@
     "comp": "ADCC EU",
     "weight": "65KG",
     "stage": "R1",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Heidi Saren",
@@ -495,7 +1145,8 @@
     "comp": "ADCC EU",
     "weight": "65KG",
     "stage": "8F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Shye Lilly",
@@ -504,7 +1155,8 @@
     "comp": "ADCC PNX",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Jasmine Rocha",
@@ -513,7 +1165,8 @@
     "comp": "ADCC PNX",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Kelly McKay",
@@ -522,7 +1175,8 @@
     "comp": "ADCC PNX",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Nichelle Johnson",
@@ -531,7 +1185,8 @@
     "comp": "ADCC PNX",
     "weight": "65KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Jaime Meredith",
@@ -540,7 +1195,8 @@
     "comp": "ADCC AUS Trials",
     "weight": "65KG",
     "stage": "R1",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Iosha Clements",
@@ -549,7 +1205,8 @@
     "comp": "ADCC AUS Trials",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Edie Broughton",
@@ -558,7 +1215,8 @@
     "comp": "ADCC AUS Trials",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Gase Sanita",
@@ -567,7 +1225,8 @@
     "comp": "ADCC AUS Trials",
     "weight": "65KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    }
   ]
  },
@@ -582,7 +1241,8 @@
     "comp": "NoGi Worlds",
     "weight": "61KG",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Sheliah Lindsey",
@@ -591,7 +1251,8 @@
     "comp": "ADCC OC",
     "weight": "60KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Bridget McEliece",
@@ -600,7 +1261,8 @@
     "comp": "ADCC OC",
     "weight": "ABS",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Helena Crevar",
@@ -609,7 +1271,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Ffion Davies",
@@ -618,7 +1281,8 @@
     "comp": "ADXC 4",
     "weight": "61KG",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nadia Frankland",
@@ -627,7 +1291,8 @@
     "comp": "NoGi Pan",
     "weight": "67KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Brianna Ste-Marie",
@@ -636,7 +1301,8 @@
     "comp": "World NoGi",
     "weight": "61KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Raquel Canuto",
@@ -645,7 +1311,8 @@
     "comp": "UFC BJJ 2",
     "weight": "61KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Beatrice Jin",
@@ -654,7 +1321,8 @@
     "comp": "JJ Con NG",
     "weight": "67KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Zara Tofano",
@@ -663,7 +1331,8 @@
     "comp": "World NoGi",
     "weight": "62KG",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Juliana Gassaway",
@@ -672,7 +1341,8 @@
     "comp": "Houston FNGO",
     "weight": "61KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Gabriella Gulfin",
@@ -681,7 +1351,8 @@
     "comp": "ADCC OC",
     "weight": "60KG",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Daveena Banda",
@@ -690,7 +1361,8 @@
     "comp": "ADCC OC",
     "weight": "60KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Michelle Dunchus",
@@ -699,7 +1371,8 @@
     "comp": "ADCC OC",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Nicole Johnson",
@@ -708,7 +1381,8 @@
     "comp": "ADCC OC",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Maria Ruffato",
@@ -717,7 +1391,8 @@
     "comp": "Denver NGO",
     "weight": "NA",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Rose Namajunas",
@@ -726,7 +1401,8 @@
     "comp": "ADCC Denver",
     "weight": "60KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Jasmine Rocha",
@@ -735,7 +1411,8 @@
     "comp": "ADCC Denver",
     "weight": "60KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Carina Damm",
@@ -744,7 +1421,8 @@
     "comp": "JJ Con NG",
     "weight": "61KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Fernanda Figueira",
@@ -753,7 +1431,8 @@
     "comp": "JJ Con NG",
     "weight": "61KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Holly Martin",
@@ -762,7 +1441,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "R1",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Sheliah Lindsey",
@@ -771,7 +1451,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "8F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Leilani Bernales",
@@ -780,7 +1461,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Sofia Delgado",
@@ -789,7 +1471,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Helena Crevar",
@@ -798,7 +1481,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Maggy Meier",
@@ -807,7 +1491,8 @@
     "comp": "Main Character",
     "weight": "NA",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Sarah Pyles",
@@ -816,7 +1501,8 @@
     "comp": "Main Character",
     "weight": "NA",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Trinity Pun",
@@ -825,7 +1511,8 @@
     "comp": "Main Character",
     "weight": "NA",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nicole Matthew",
@@ -834,7 +1521,8 @@
     "comp": "Main Character",
     "weight": "NA",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Caitlin Huggins",
@@ -843,7 +1531,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Steph Cline",
@@ -852,7 +1541,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "R2",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Laylah Watkins",
@@ -861,7 +1551,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Leilani Bernales",
@@ -870,7 +1561,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Ana Mayordomo",
@@ -879,7 +1571,8 @@
     "comp": "MCharacter 5",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Julia Maele",
@@ -888,7 +1581,8 @@
     "comp": "World NoGi",
     "weight": "61KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Bruse",
@@ -897,7 +1591,8 @@
     "comp": "World NoGi",
     "weight": "61KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Natasha Druggan",
@@ -906,7 +1601,8 @@
     "comp": "MCharacter",
     "weight": "59KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "C. Downes",
@@ -915,7 +1611,8 @@
     "comp": "ADCC EC Trials",
     "weight": "65KG",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "A. Gutowska",
@@ -924,7 +1621,8 @@
     "comp": "ADCC EC Trials",
     "weight": "65KG",
     "stage": "8F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "C. Horne",
@@ -933,7 +1631,8 @@
     "comp": "ADCC EC Trials",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Maka Vickers",
@@ -942,7 +1641,8 @@
     "comp": "ADCC EC Trials",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Taylor Ellis",
@@ -951,17 +1651,284 @@
     "comp": "ADCC EC Trials",
     "weight": "65KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    }
   ]
  },
  "Ane Svendsen": {
   "division": "65 kg",
-  "rows": null
+  "rows": [
+   {
+    "opp": "Yara Soares",
+    "wl": "L",
+    "method": "Submission",
+    "comp": "Grand Slam LDN",
+    "weight": "95KG",
+    "stage": "SF",
+    "year": 2020,
+    "source": "opponent_record",
+    "via": "Yara Soares"
+   },
+   {
+    "opp": "Eleftheria Christodoulou",
+    "wl": "L",
+    "method": "Pts: 2x0",
+    "comp": "ADCC EU Trials",
+    "weight": "O60KG",
+    "stage": "F",
+    "year": 2022,
+    "source": "opponent_record",
+    "via": "Eleftheria Christodoulou"
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "RNC",
+    "comp": "NoGi Worlds",
+    "weight": "71KG",
+    "stage": "SF",
+    "year": 2022,
+    "source": "opponent_record",
+    "via": "Amy Campo"
+   },
+   {
+    "opp": "Elisabeth Clay",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "NoGi Worlds",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2022,
+    "source": "opponent_record",
+    "via": "Elisabeth Clay"
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "ADCC EU Trials",
+    "weight": "O65KG",
+    "stage": "SF",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Salla Simola"
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "L",
+    "method": "Pts: 6x4",
+    "comp": "ADGS LDN",
+    "weight": "70KG",
+    "stage": "RPC",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Nia Blackman"
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "L",
+    "method": "Pts: 3x0",
+    "comp": "European NoGi",
+    "weight": "71KG",
+    "stage": "F",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Elizabeth Mitrovic"
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "European NoGi",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Salla Simola"
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Points",
+    "comp": "NoGi World",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2023,
+    "source": "opponent_record",
+    "via": "Salla Simola"
+   },
+   {
+    "opp": "Anabel Lopez",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Anabel Lopez"
+   },
+   {
+    "opp": "Aurelie Le Vern",
+    "wl": "L",
+    "method": "Pts: 4x2",
+    "comp": "Euro NoGi",
+    "weight": "71KG",
+    "stage": "F",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Aurelie Le Vern"
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "R1",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Nia Blackman"
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "W",
+    "method": "Pts: 2x0",
+    "comp": "Euro NoGi",
+    "weight": "71KG",
+    "stage": "SF",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Salla Simola"
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "L",
+    "method": "Rear Naked Choke",
+    "comp": null,
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Julia Maele",
+    "wl": "L",
+    "method": "Pts: 0x0, Pen",
+    "comp": "Euro NoGi",
+    "weight": "ABS",
+    "stage": "4F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Julia Maele"
+   },
+   {
+    "opp": "Nia Blackman",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "Euro NoGi",
+    "weight": "72KG",
+    "stage": "SF",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Nia Blackman"
+   },
+   {
+    "opp": "Salla Simola",
+    "wl": "L",
+    "method": "Points",
+    "comp": "Euro NoGi",
+    "weight": "72KG",
+    "stage": "F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Salla Simola"
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Helena Crevar"
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Elizabeth Mitrovic"
+   },
+   {
+    "opp": "Brianna Stemarie",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "Polaris 32",
+    "weight": "ABS",
+    "stage": "RDS",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Brianna Stemarie"
+   },
+   {
+    "opp": "Helena Crevar",
+    "wl": "L",
+    "method": "RNC",
+    "comp": "World NoGi",
+    "weight": "71KG",
+    "stage": "F",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Helena Crevar"
+   },
+   {
+    "opp": "Nadia Frankland",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "ADCC EU",
+    "weight": "65KG",
+    "stage": "4F",
+    "year": 2026,
+    "source": "opponent_record",
+    "via": "Nadia Frankland"
+   }
+  ],
+  "record_source": "reconstructed"
  },
  "Joslyn Molina": {
   "division": "65 kg",
-  "rows": null
+  "rows": [
+   {
+    "opp": "Katie Bohan",
+    "wl": "W",
+    "method": "D'Arce Choke",
+    "comp": "WNO 31",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "L",
+    "method": "Armbar",
+    "comp": "ADCC WC TR",
+    "weight": "O65KG",
+    "stage": "SF",
+    "year": 2026,
+    "source": "opponent_record",
+    "via": "Elizabeth Mitrovic"
+   }
+  ],
+  "record_source": "reconstructed"
  },
  "Yara Soares": {
   "division": "+65 kg",
@@ -974,7 +1941,8 @@
     "comp": "Grand Slam RJ",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -983,7 +1951,8 @@
     "comp": "Grand Slam AD",
     "weight": "95KG",
     "stage": "F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -992,7 +1961,8 @@
     "comp": "Grand Slam LDN",
     "weight": "95KG",
     "stage": "F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1001,7 +1971,8 @@
     "comp": "BJJ Bet",
     "weight": "85KG",
     "stage": "SPF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1010,7 +1981,8 @@
     "comp": "Grand Slam RJ",
     "weight": "95KG",
     "stage": "F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1019,7 +1991,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1028,7 +2001,8 @@
     "comp": "Pan American",
     "weight": "84KG",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1037,7 +2011,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1046,7 +2021,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1055,7 +2031,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1064,7 +2041,8 @@
     "comp": "Grand Slam LDN",
     "weight": "95KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1073,7 +2051,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1082,7 +2061,8 @@
     "comp": "Pan American",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Amy Campo",
@@ -1091,7 +2071,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1100,7 +2081,8 @@
     "comp": "BJJ Stars",
     "weight": "ABS",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Kauane Silva",
@@ -1109,7 +2091,8 @@
     "comp": "ADGS Miami",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1118,7 +2101,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1127,7 +2111,8 @@
     "comp": "European Open",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Tayane Porfirio",
@@ -1136,7 +2121,8 @@
     "comp": "European Open",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Isabely Lemos",
@@ -1145,7 +2131,8 @@
     "comp": "ADGS ABD",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1154,7 +2141,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1163,7 +2151,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1172,7 +2161,8 @@
     "comp": "European Open",
     "weight": "ABS",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1181,7 +2171,8 @@
     "comp": "European Open",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1190,7 +2181,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Tayane Porfirio",
@@ -1199,7 +2191,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Larissa Dias",
@@ -1208,7 +2201,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Anabel Lopez",
@@ -1217,7 +2211,8 @@
     "comp": "Pan NoGi",
     "weight": "77KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Larissa Dias",
@@ -1226,7 +2221,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Ericka Cunha",
@@ -1235,7 +2231,8 @@
     "comp": "Grand Slam RJ",
     "weight": "95KG",
     "stage": "R1",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Oishi",
@@ -1244,7 +2241,8 @@
     "comp": "Grand Slam RJ",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Nathiely Jesus",
@@ -1253,7 +2251,8 @@
     "comp": "Grand Slam AD",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Kendall Reusing",
@@ -1262,7 +2261,8 @@
     "comp": "Grand Slam AD",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Claire Thevenon",
@@ -1271,7 +2271,8 @@
     "comp": "Grand Slam LDN",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Ane Svendsen",
@@ -1280,7 +2281,8 @@
     "comp": "Grand Slam LDN",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Thaynara Dias",
@@ -1289,7 +2291,8 @@
     "comp": "Grand Slam RJ",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Ingridd Sousa",
@@ -1298,7 +2301,8 @@
     "comp": "Grand Slam RJ",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Thayara Dias",
@@ -1307,7 +2311,8 @@
     "comp": "Grand Slam AD",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Michele Xavier",
@@ -1316,7 +2321,8 @@
     "comp": "Grand Slam AD",
     "weight": "95KG",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Michele Xavier",
@@ -1325,7 +2331,8 @@
     "comp": "WP BR Qualifier",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Thaynara Dias",
@@ -1334,7 +2341,8 @@
     "comp": "WP BR Qualifier",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Kendall Reusing",
@@ -1343,7 +2351,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Eleftheria Christodoulou",
@@ -1352,7 +2361,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Adriane Alves",
@@ -1361,7 +2371,8 @@
     "comp": "SA Cont. Pro",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Ingridd Alves",
@@ -1370,7 +2381,8 @@
     "comp": "SA Cont. Pro",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1379,7 +2391,8 @@
     "comp": "SA Cont. Pro",
     "weight": "95KG",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Sarah Rice",
@@ -1388,7 +2401,8 @@
     "comp": "Grand Slam MIA",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Tara White",
@@ -1397,7 +2411,8 @@
     "comp": "Grand Slam MIA",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Elizabeth Mitrovic",
@@ -1406,7 +2421,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Sarah Rice",
@@ -1415,7 +2431,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "8F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Nathalie Ribeiro",
@@ -1424,7 +2441,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Bianca Basilio",
@@ -1433,7 +2451,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Ana Vieira",
@@ -1442,7 +2461,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Y. Poznyakova",
@@ -1451,7 +2471,8 @@
     "comp": "Grand Slam MSK",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Y. Poznyakova",
@@ -1460,7 +2481,8 @@
     "comp": "Grand Slam MSK",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Joaquina Bonfim",
@@ -1469,7 +2491,8 @@
     "comp": "Brasileiro",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1478,7 +2501,8 @@
     "comp": "Brasileiro",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Juliana Araujo",
@@ -1487,7 +2511,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Graciele Fava",
@@ -1496,7 +2521,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1505,7 +2531,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Graciele Carvalho",
@@ -1514,7 +2541,8 @@
     "comp": "ADGS RJ",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -1523,7 +2551,8 @@
     "comp": "ADGS RJ",
     "weight": "95KG",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Claire Thevenon",
@@ -1532,7 +2561,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Yasmira Dias",
@@ -1541,7 +2571,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Lama Qubbaj",
@@ -1550,7 +2581,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -1559,7 +2591,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrielle Garcia",
@@ -1568,7 +2601,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Custodio",
@@ -1577,7 +2611,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Juliana Araujo",
@@ -1586,7 +2621,8 @@
     "comp": "Guarapari Pro",
     "weight": "95KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Cintia Honorato",
@@ -1595,7 +2631,8 @@
     "comp": "Gramado Pro",
     "weight": "95KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Yasmira Dias",
@@ -1604,7 +2641,8 @@
     "comp": "Grand Slam LDN",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Elizabeth Mitrov",
@@ -1613,7 +2651,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -1622,7 +2661,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Custodio",
@@ -1631,7 +2671,8 @@
     "comp": "Pan American",
     "weight": "O79KG",
     "stage": "RR",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Rebeca Lima",
@@ -1640,7 +2681,8 @@
     "comp": "Queen of Mats",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Thalyta Lima",
@@ -1649,7 +2691,8 @@
     "comp": "Queen of Mats",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Ingridd Alves",
@@ -1658,7 +2701,8 @@
     "comp": "Queen of Mats",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Rafaela Bertolot",
@@ -1667,7 +2711,8 @@
     "comp": "Queen of Mats",
     "weight": "95KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "M. Cantanhede",
@@ -1676,7 +2721,8 @@
     "comp": "ADGS ABDB",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Silvia Scomparin",
@@ -1685,7 +2731,8 @@
     "comp": "ADGS ABDB",
     "weight": "95KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Claire Thevenon",
@@ -1694,7 +2741,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Patricia Ferreira",
@@ -1703,7 +2751,8 @@
     "comp": "Floripa WO",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Mica Lima",
@@ -1712,7 +2761,8 @@
     "comp": "BJJ Stars",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Tayane Porfirio",
@@ -1721,7 +2771,8 @@
     "comp": "BJJ Stars",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Raiane Santos",
@@ -1730,7 +2781,8 @@
     "comp": "ADGS Miami",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Tammy Griego",
@@ -1739,7 +2791,8 @@
     "comp": "ADGS Miami",
     "weight": "95KG",
     "stage": "RPC",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Tamiris Silva",
@@ -1748,7 +2801,8 @@
     "comp": "ADWP Qualifier",
     "weight": "120KG",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Stephany Helen",
@@ -1757,7 +2811,8 @@
     "comp": "ADWP Qualifier",
     "weight": "120KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "L. dos Santos",
@@ -1766,7 +2821,8 @@
     "comp": "ADWP Qualifier",
     "weight": "120KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Yasmira Dias",
@@ -1775,7 +2831,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -1784,7 +2841,8 @@
     "comp": "European Open",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -1793,7 +2851,8 @@
     "comp": "European Open",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Isabely Lemos",
@@ -1802,7 +2861,8 @@
     "comp": "SA Cont. Pro",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Isabely Lemos",
@@ -1811,7 +2871,8 @@
     "comp": "SA Cont. Pro",
     "weight": "HWA",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Vikingsson",
@@ -1820,7 +2881,8 @@
     "comp": "ADGS Rome",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -1829,7 +2891,8 @@
     "comp": "ADGS Rome",
     "weight": "95KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Kauani Queiroz",
@@ -1838,7 +2901,8 @@
     "comp": "Brasileiro",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gabriela Matos",
@@ -1847,7 +2911,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Cueto",
@@ -1856,7 +2921,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Marcelle Cantanhede",
@@ -1865,7 +2931,8 @@
     "comp": "ADGS ABD",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Victoria Bladh",
@@ -1874,7 +2941,8 @@
     "comp": "ADGS ABD",
     "weight": "95KG",
     "stage": "RPC",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Magdalena Loska",
@@ -1883,7 +2951,8 @@
     "comp": "ADGS ABD",
     "weight": "95KG",
     "stage": "3RD",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Custodio",
@@ -1892,7 +2961,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Deise Leonanjo",
@@ -1901,7 +2971,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "RDS",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Custodio",
@@ -1910,7 +2981,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Amy Campo",
@@ -1919,7 +2991,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Marwa Alhosani",
@@ -1928,7 +3001,8 @@
     "comp": "ADGS IST",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Marwa Alhosani",
@@ -1937,7 +3011,8 @@
     "comp": "ADGS IST",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Mikaela Lima",
@@ -1946,7 +3021,8 @@
     "comp": "Curitiba Pro",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Magda",
@@ -1955,7 +3031,8 @@
     "comp": "Curitiba Pro",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Mikaela Lima",
@@ -1964,7 +3041,8 @@
     "comp": "Curitiba Pro",
     "weight": "ABS",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Natacha Silva",
@@ -1973,7 +3051,8 @@
     "comp": "ADGS RJ",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Isabely Lemos",
@@ -1982,7 +3061,8 @@
     "comp": "ADGS RJ",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Tamiris Silva",
@@ -1991,7 +3071,8 @@
     "comp": "ADGS RJ",
     "weight": "95KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Moreira",
@@ -2000,7 +3081,8 @@
     "comp": "ADGS DLS",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Isabely Lemos",
@@ -2009,7 +3091,8 @@
     "comp": "ADGS DLS",
     "weight": "95KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Meng Xiang",
@@ -2018,7 +3101,8 @@
     "comp": "ADGS XIAN",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Meng Xiang",
@@ -2027,7 +3111,8 @@
     "comp": "ADGS XIAN",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Anabel Lopez",
@@ -2036,7 +3121,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Leticia Santos",
@@ -2045,7 +3131,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Camille Coue",
@@ -2054,7 +3141,8 @@
     "comp": "European Open",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Cueto",
@@ -2063,7 +3151,8 @@
     "comp": "European Open",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Maryanna Cardoso",
@@ -2072,7 +3161,8 @@
     "comp": "European Open",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Leticia Santos",
@@ -2081,7 +3171,8 @@
     "comp": "ADGS Rome",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Isabely Lemos",
@@ -2090,7 +3181,8 @@
     "comp": "ADGS Rome",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "M. Rowland",
@@ -2099,7 +3191,8 @@
     "comp": "ADGS LDN",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Magdalena Loska",
@@ -2108,7 +3201,8 @@
     "comp": "ADGS LDN",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Suellen Desterro",
@@ -2117,7 +3211,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Mikaela Lima",
@@ -2126,7 +3221,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Cueto",
@@ -2135,7 +3231,8 @@
     "comp": "Brasileiro",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Izadora Cristina",
@@ -2144,7 +3241,8 @@
     "comp": "Brasileiro",
     "weight": "79KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Cueto",
@@ -2153,7 +3251,8 @@
     "comp": "Brasileiro",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Tamiris Silva",
@@ -2162,7 +3261,8 @@
     "comp": "Brasileiro",
     "weight": "79KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Stefhanie Costa",
@@ -2171,7 +3271,8 @@
     "comp": "ADGS ABD",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Gabriela Barreto",
@@ -2180,7 +3281,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "8F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Tamiris Silva",
@@ -2189,7 +3291,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Katiane Rodrigues",
@@ -2198,7 +3301,8 @@
     "comp": "ADGS - RJN",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Luane Carvalho",
@@ -2207,7 +3311,8 @@
     "comp": "ADGS - RJN",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Angelina Leonidova",
@@ -2216,7 +3321,8 @@
     "comp": "ADGS - MSK",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Ekaterina Veryatina",
@@ -2225,7 +3331,8 @@
     "comp": "ADGS - MSK",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Olha Chaliuk",
@@ -2234,7 +3341,8 @@
     "comp": "Asia Cont. Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Olha Chaliuk",
@@ -2243,7 +3351,8 @@
     "comp": "Asia Cont. Pro",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Yunlu Fang",
@@ -2252,7 +3361,8 @@
     "comp": "ADGS CNU",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Qianchu Wang",
@@ -2261,7 +3371,8 @@
     "comp": "ADGS CNU",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Stefania Carvalho",
@@ -2270,7 +3381,8 @@
     "comp": "AJP SA Cont.",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Vitoria Pires",
@@ -2279,7 +3391,8 @@
     "comp": "AJP SA Cont.",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Natacha Ribeiro",
@@ -2288,7 +3401,8 @@
     "comp": "BJJClubes 7",
     "weight": "ABS",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Cassia Pinto",
@@ -2297,7 +3411,8 @@
     "comp": "AJP World Pro",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Luana Carvalho",
@@ -2306,7 +3421,8 @@
     "comp": "AJP World Pro",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Katharine Marques",
@@ -2315,7 +3431,8 @@
     "comp": "Rio SM NGO",
     "weight": "O77KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Isabely Sanches",
@@ -2324,7 +3441,8 @@
     "comp": "European Champ",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Anabel Lopez",
@@ -2333,7 +3451,8 @@
     "comp": "European Champ",
     "weight": "79KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Mairead Rowland",
@@ -2342,7 +3461,8 @@
     "comp": "ADGS Rome",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "L. Barasine",
@@ -2351,7 +3471,8 @@
     "comp": "ADGS Rome",
     "weight": "95KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Maria Julia",
@@ -2360,7 +3481,8 @@
     "comp": "ADCC BR2",
     "weight": "O65KG",
     "stage": "R1",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Maria Ruffatto",
@@ -2369,7 +3491,8 @@
     "comp": "ADCC BR2",
     "weight": "O65KG",
     "stage": "4F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Maria Abreu",
@@ -2378,7 +3501,8 @@
     "comp": "ADCC BR2",
     "weight": "O65KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Ingridd Alves",
@@ -2387,7 +3511,8 @@
     "comp": "ADCC BR2",
     "weight": "O65KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Natacha Ribeiro",
@@ -2396,7 +3521,8 @@
     "comp": "Brasileiro",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Tamiris Silva",
@@ -2405,7 +3531,8 @@
     "comp": "Brasileiro",
     "weight": "79KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Karoline Caramori",
@@ -2414,7 +3541,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "4F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Denise Krahn",
@@ -2423,7 +3551,8 @@
     "comp": "ADGS - IST",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Geovana Malta",
@@ -2432,7 +3561,8 @@
     "comp": "ADGS - IST",
     "weight": "95KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    }
   ]
  },
@@ -2447,7 +3577,8 @@
     "comp": "Subversiv 4",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Erin Harpe",
@@ -2456,7 +3587,8 @@
     "comp": "WNO 10",
     "weight": "O65KG",
     "stage": "SPF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Larissa Dias",
@@ -2465,7 +3597,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -2474,7 +3607,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Ffion Davies",
@@ -2483,7 +3617,8 @@
     "comp": "SUBVERSIV 7",
     "weight": "ABS",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Amy Campo",
@@ -2492,7 +3627,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Nathiely Jesus",
@@ -2501,7 +3637,8 @@
     "comp": "WNO 20",
     "weight": "ABS",
     "stage": "SPF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Andressa Cintra",
@@ -2510,7 +3647,8 @@
     "comp": "NoGi World",
     "weight": "77KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Adele Fornarino",
@@ -2519,7 +3657,8 @@
     "comp": "ADCC",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Vannessa Griffin",
@@ -2528,7 +3667,8 @@
     "comp": "Pan American",
     "weight": "69KG",
     "stage": "SF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Claire North",
@@ -2537,7 +3677,8 @@
     "comp": "Pan American",
     "weight": "69KG",
     "stage": "F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Jessica Flowers",
@@ -2546,7 +3687,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -2555,7 +3697,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Cristina Briggs",
@@ -2564,7 +3707,8 @@
     "comp": "Subversiv 4",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Fatima Kleine",
@@ -2573,7 +3717,8 @@
     "comp": "Subversiv 4",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Tara While",
@@ -2582,7 +3727,8 @@
     "comp": "No Gi Pan Am.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Gabi McComb",
@@ -2591,7 +3737,8 @@
     "comp": "No Gi Pan Am.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Vannessa Griffin",
@@ -2600,7 +3747,8 @@
     "comp": "No Gi Pan Am.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Elisabeth Clay",
@@ -2609,7 +3757,8 @@
     "comp": "F2W 158",
     "weight": "70KG",
     "stage": "SPF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Ana Vieira",
@@ -2618,7 +3767,8 @@
     "comp": "F2W 162",
     "weight": "N/A",
     "stage": "SPF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Maggie Grindatti",
@@ -2627,7 +3777,8 @@
     "comp": "WNO 7",
     "weight": "O65KG",
     "stage": "SPF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Juliana Fortuna",
@@ -2636,7 +3787,8 @@
     "comp": "SUBVERSIV 5",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Maggie Grindatti",
@@ -2645,7 +3797,8 @@
     "comp": "SUBVERSIV 5",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Nathalie Ribeiro",
@@ -2654,7 +3807,8 @@
     "comp": "SUBVERSIV 5",
     "weight": "ABS",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Elisabeth Clay",
@@ -2663,7 +3817,8 @@
     "comp": "WNO Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Leve",
@@ -2672,7 +3827,8 @@
     "comp": "WNO Champ.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Kendall Reusing",
@@ -2681,7 +3837,8 @@
     "comp": "WNO Champ.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Elizabeth Mitrovic",
@@ -2690,7 +3847,8 @@
     "comp": "NoGi Worlds",
     "weight": "76KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -2699,7 +3857,8 @@
     "comp": "NoGi Worlds",
     "weight": "76KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Maggie Grindatti",
@@ -2708,7 +3867,8 @@
     "comp": "NoGi Worlds",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -2717,7 +3877,8 @@
     "comp": "NoGi Worlds",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Elisabeth Clay",
@@ -2726,7 +3887,8 @@
     "comp": "NoGi Worlds",
     "weight": "ABS",
     "stage": "F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Tara White",
@@ -2735,7 +3897,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Cueto",
@@ -2744,7 +3907,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Kristin Mikkelson",
@@ -2753,7 +3917,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Luciane Santos",
@@ -2762,7 +3927,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Michelle Lopez",
@@ -2771,7 +3937,8 @@
     "comp": "SUBVERSIV 7",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Brittany Elkin",
@@ -2780,7 +3947,8 @@
     "comp": "SUBVERSIV 7",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Eleftheria Christodoulou",
@@ -2789,7 +3957,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Kendall Reusing",
@@ -2798,7 +3967,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -2807,7 +3977,8 @@
     "comp": "NoGi World",
     "weight": "77KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Nia Blackman",
@@ -2816,7 +3987,8 @@
     "comp": "ADCC",
     "weight": "O65KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Kendall Reusing",
@@ -2825,7 +3997,8 @@
     "comp": "ADCC",
     "weight": "O65KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nathiely Jesus",
@@ -2834,7 +4007,8 @@
     "comp": "ADCC",
     "weight": "O65KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Bianca Basilio",
@@ -2843,7 +4017,8 @@
     "comp": "ADCC",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Paige Ivette",
@@ -2852,7 +4027,8 @@
     "comp": "WNO 26",
     "weight": "79KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    }
   ]
  },
@@ -2867,7 +4043,8 @@
     "comp": "JJ CON",
     "weight": "79KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Isabely Lemos",
@@ -2876,7 +4053,8 @@
     "comp": "ADGS DLS",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Aurelie Vern",
@@ -2885,7 +4063,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Yara Soares",
@@ -2894,7 +4073,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Yasmira Dias",
@@ -2903,7 +4083,8 @@
     "comp": "World Pro",
     "weight": "95KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Brianna Ste-Marie",
@@ -2912,7 +4093,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Helena Crevar",
@@ -2921,7 +4103,8 @@
     "comp": "Polaris 31",
     "weight": "70KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Magdalena Loska",
@@ -2930,7 +4113,8 @@
     "comp": "ADGS LDN",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Larissa Dias",
@@ -2939,7 +4123,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -2948,7 +4133,8 @@
     "comp": "The Crown",
     "weight": "O79KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Yara Soares",
@@ -2957,7 +4143,8 @@
     "comp": "European Champ",
     "weight": "79KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Kendall Reusing",
@@ -2966,7 +4153,8 @@
     "comp": "Polaris 36",
     "weight": "ABS",
     "stage": "SPF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Maria Rosenthal",
@@ -2975,7 +4163,8 @@
     "comp": "American NGN",
     "weight": "77KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Yasmyn Castro",
@@ -2984,7 +4173,8 @@
     "comp": "OC SMO",
     "weight": "ABS",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -2993,7 +4183,8 @@
     "comp": "JJ CON",
     "weight": "79KG",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Denise Krahn",
@@ -3002,7 +4193,8 @@
     "comp": "JJ CON NG",
     "weight": "77KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Moreira",
@@ -3011,7 +4203,8 @@
     "comp": "ADGS DLS",
     "weight": "95KG",
     "stage": "3RD",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Bridget Mceliece",
@@ -3020,7 +4213,8 @@
     "comp": "Euro NoGi",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nia Blackman",
@@ -3029,7 +4223,8 @@
     "comp": "Euro NoGi",
     "weight": "79KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Elizabeth Mitrovic",
@@ -3038,7 +4233,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gamila Kanew",
@@ -3047,7 +4243,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Ane Svendsen",
@@ -3056,7 +4253,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Beatrice Jin",
@@ -3065,7 +4263,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "8F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -3074,7 +4273,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -3083,7 +4283,8 @@
     "comp": "World NoGi",
     "weight": "77KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria Ruffatto",
@@ -3092,7 +4293,8 @@
     "comp": "World NoGi",
     "weight": "77KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Paige Ivette",
@@ -3101,7 +4303,8 @@
     "comp": "World NoGi",
     "weight": "77KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "M. Rowland",
@@ -3110,7 +4313,8 @@
     "comp": "ADGS LDN",
     "weight": "95KG",
     "stage": "3RD",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Andreyna Rocha",
@@ -3119,7 +4323,8 @@
     "comp": "AJP WGC",
     "weight": "95KG",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Anna Remneva",
@@ -3128,7 +4333,8 @@
     "comp": "AJP WGC",
     "weight": "95KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Jamile Lima",
@@ -3137,7 +4343,8 @@
     "comp": "AJP WGC",
     "weight": "95KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Eleftheria Christodoulou",
@@ -3146,7 +4353,8 @@
     "comp": "AJP WGC",
     "weight": "95KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Yara Soares",
@@ -3155,7 +4363,8 @@
     "comp": "Pan NoGi",
     "weight": "77KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Sula Loewenthal",
@@ -3164,7 +4373,8 @@
     "comp": "Pan NoGi",
     "weight": "77KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Erin Harpe",
@@ -3173,7 +4383,8 @@
     "comp": "Pan NoGi",
     "weight": "77KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Sara Lehto",
@@ -3182,7 +4393,8 @@
     "comp": "European Champ",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Sara Ghaffari",
@@ -3191,7 +4403,8 @@
     "comp": "ADCC EU",
     "weight": "O65KG",
     "stage": "8F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Violet Bennett",
@@ -3200,7 +4413,8 @@
     "comp": "ADCC EU",
     "weight": "O65KG",
     "stage": "4F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Jessika Torttila",
@@ -3209,7 +4423,8 @@
     "comp": "ADCC EU",
     "weight": "O65KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Nia Blackman",
@@ -3218,17 +4433,140 @@
     "comp": "ADCC EU",
     "weight": "O65KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    }
   ]
  },
  "Paige Ivette": {
   "division": "+65 kg",
-  "rows": null
+  "rows": [
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "ADCC EC Trials",
+    "weight": "O60KG",
+    "stage": "R2",
+    "year": 2021,
+    "source": "opponent_record",
+    "via": "Amy Campo"
+   },
+   {
+    "opp": "Amy Campo",
+    "wl": "L",
+    "method": "Kneebar",
+    "comp": "ADCC WC Trials",
+    "weight": "O60KG",
+    "stage": "F",
+    "year": 2022,
+    "source": "opponent_record",
+    "via": "Amy Campo"
+   },
+   {
+    "opp": "Ffion Davies",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "SUBVERSIV 7",
+    "weight": "ABS",
+    "stage": "SF",
+    "year": 2022,
+    "source": "opponent_record",
+    "via": "Ffion Davies"
+   },
+   {
+    "opp": "Nadia Frankland",
+    "wl": "L",
+    "method": "Pts: 4x0",
+    "comp": "World NoGi",
+    "weight": "ABS",
+    "stage": "8F",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Nadia Frankland"
+   },
+   {
+    "opp": "Anabel Lopez",
+    "wl": "L",
+    "method": "Pts: 0x0, Adv",
+    "comp": "World NoGi",
+    "weight": "77KG",
+    "stage": "F",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Anabel Lopez"
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "W",
+    "method": "Pts: 3x0",
+    "comp": "World NoGi",
+    "weight": "77KG",
+    "stage": "SF",
+    "year": 2024,
+    "source": "opponent_record",
+    "via": "Elizabeth Mitrovic"
+   },
+   {
+    "opp": "Rafaela Guedes",
+    "wl": "L",
+    "method": "Decision",
+    "comp": "IBJJF 2025 Top 10",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Rafaela Guedes",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "WNO 26",
+    "weight": "79KG",
+    "stage": "SPF",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Rafaela Guedes"
+   },
+   {
+    "opp": "Gabrieli Pessanha",
+    "wl": "L",
+    "method": "Referee Decision",
+    "comp": "WNO 31",
+    "weight": "ABS",
+    "stage": "SPF",
+    "year": 2025,
+    "source": "opponent_record",
+    "via": "Gabrieli Pessanha"
+   },
+   {
+    "opp": "Gabby Pagana",
+    "wl": "L",
+    "method": "Decision",
+    "comp": "WNO 31",
+    "weight": "",
+    "stage": "",
+    "year": 2025,
+    "source": "corpus"
+   },
+   {
+    "opp": "Elizabeth Mitrovic",
+    "wl": "W",
+    "method": "Referee Decision",
+    "comp": "ADCC WC TR",
+    "weight": "O65KG",
+    "stage": "F",
+    "year": 2026,
+    "source": "opponent_record",
+    "via": "Elizabeth Mitrovic"
+   }
+  ],
+  "record_source": "reconstructed"
  },
  "Matilda Reid": {
   "division": "+65 kg",
-  "rows": null
+  "rows": [],
+  "record_source": "none"
  },
  "Gabi Garcia": {
   "division": "+65 kg",
@@ -3242,7 +4580,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2009
+    "year": 2009,
+    "source": "own_record"
    },
    {
     "opp": "Lana Stefanac",
@@ -3251,7 +4590,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2009
+    "year": 2009,
+    "source": "own_record"
    },
    {
     "opp": "Mackenzie Dern",
@@ -3260,7 +4600,8 @@
     "comp": "World Pro",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Jessica Oliveira",
@@ -3269,7 +4610,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "SF",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Nathiely Jesus",
@@ -3278,7 +4620,8 @@
     "comp": "F2W 121",
     "weight": "ABS",
     "stage": "SPF",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Nathiely Jesus",
@@ -3287,7 +4630,8 @@
     "comp": "WNO 6",
     "weight": "ABS",
     "stage": "SPF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Leve",
@@ -3296,7 +4640,8 @@
     "comp": "WNO Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Yara Soares",
@@ -3305,7 +4650,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -3314,7 +4660,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Amy Campo",
@@ -3323,7 +4670,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Craig Jones",
@@ -3332,7 +4680,8 @@
     "comp": "CJI",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria do Carmo",
@@ -3341,7 +4690,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2008
+    "year": 2008,
+    "source": "own_record"
    },
    {
     "opp": "Luzia Fernandes",
@@ -3350,7 +4700,8 @@
     "comp": "World Pro.",
     "weight": "O63KG",
     "stage": "F",
-    "year": 2010
+    "year": 2010,
+    "source": "own_record"
    },
    {
     "opp": "Luzia Fernandes",
@@ -3359,7 +4710,8 @@
     "comp": "World Pro.",
     "weight": "O72KG",
     "stage": "F",
-    "year": 2010
+    "year": 2010,
+    "source": "own_record"
    },
    {
     "opp": "Talita Nogueira",
@@ -3368,7 +4720,8 @@
     "comp": "WLPJJ",
     "weight": "ABS",
     "stage": "F",
-    "year": 2010
+    "year": 2010,
+    "source": "own_record"
    },
    {
     "opp": "Katrina Weilbacher",
@@ -3377,7 +4730,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2010
+    "year": 2010,
+    "source": "own_record"
    },
    {
     "opp": "Beatriz Mesquita",
@@ -3386,7 +4740,8 @@
     "comp": "European",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Fabiana Borges",
@@ -3395,7 +4750,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "F",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Tammy Griego",
@@ -3404,7 +4760,8 @@
     "comp": "Pan American",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Unknown",
@@ -3413,7 +4770,8 @@
     "comp": "World Pro.",
     "weight": "O72KG",
     "stage": "RDS",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Penny Thomas",
@@ -3422,7 +4780,8 @@
     "comp": "World Pro.",
     "weight": "O72KG",
     "stage": "F",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Penny Thomas",
@@ -3431,7 +4790,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Emily Wetzel",
@@ -3440,7 +4800,8 @@
     "comp": "World Champ.",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Bia Mesquita",
@@ -3449,7 +4810,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Hanette Staack",
@@ -3458,7 +4820,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "F",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Penny Thomas",
@@ -3467,7 +4830,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "SF",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "Hannette Staack",
@@ -3476,7 +4840,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "F",
-    "year": 2011
+    "year": 2011,
+    "source": "own_record"
    },
    {
     "opp": "M. Dern",
@@ -3485,7 +4850,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2012
+    "year": 2012,
+    "source": "own_record"
    },
    {
     "opp": "Emely Wetzel",
@@ -3494,7 +4860,8 @@
     "comp": "Pan American",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2012
+    "year": 2012,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -3503,7 +4870,8 @@
     "comp": "World Pro.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2012
+    "year": 2012,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -3512,7 +4880,8 @@
     "comp": "World Pro.",
     "weight": "O72KG",
     "stage": "F",
-    "year": 2012
+    "year": 2012,
+    "source": "own_record"
    },
    {
     "opp": "Beatriz Mesquita",
@@ -3521,7 +4890,8 @@
     "comp": "World Pro.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2012
+    "year": 2012,
+    "source": "own_record"
    },
    {
     "opp": "Talita Nogueira",
@@ -3530,7 +4900,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2012
+    "year": 2012,
+    "source": "own_record"
    },
    {
     "opp": "Beatriz Mesquita",
@@ -3539,7 +4910,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2012
+    "year": 2012,
+    "source": "own_record"
    },
    {
     "opp": "Luiza Monteiro",
@@ -3548,7 +4920,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2012
+    "year": 2012,
+    "source": "own_record"
    },
    {
     "opp": "Fabiana Borges",
@@ -3557,7 +4930,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2013
+    "year": 2013,
+    "source": "own_record"
    },
    {
     "opp": "Mackenzie Dern",
@@ -3566,7 +4940,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2013
+    "year": 2013,
+    "source": "own_record"
    },
    {
     "opp": "Beatriz Mesquita",
@@ -3575,7 +4950,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "F",
-    "year": 2013
+    "year": 2013,
+    "source": "own_record"
    },
    {
     "opp": "Beatriz Mesquita",
@@ -3584,7 +4960,8 @@
     "comp": "World Pro.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2013
+    "year": 2013,
+    "source": "own_record"
    },
    {
     "opp": "Yurika Nakakura",
@@ -3593,7 +4970,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "4F",
-    "year": 2013
+    "year": 2013,
+    "source": "own_record"
    },
    {
     "opp": "Tammy Griego",
@@ -3602,7 +4980,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "SF",
-    "year": 2013
+    "year": 2013,
+    "source": "own_record"
    },
    {
     "opp": "Fernanda Mazelli",
@@ -3611,7 +4990,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "F",
-    "year": 2013
+    "year": 2013,
+    "source": "own_record"
    },
    {
     "opp": "Janni Larsson",
@@ -3620,7 +5000,8 @@
     "comp": "World Pro.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2014
+    "year": 2014,
+    "source": "own_record"
    },
    {
     "opp": "D. Obelenyte",
@@ -3629,7 +5010,8 @@
     "comp": "World Pro.",
     "weight": "O72KG",
     "stage": "F",
-    "year": 2014
+    "year": 2014,
+    "source": "own_record"
    },
    {
     "opp": "Beatriz Mesquita",
@@ -3638,7 +5020,8 @@
     "comp": "World Pro.",
     "weight": "ABS",
     "stage": "F",
-    "year": 2014
+    "year": 2014,
+    "source": "own_record"
    },
    {
     "opp": "Talita Nogueira",
@@ -3647,7 +5030,8 @@
     "comp": "SP Open",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2014
+    "year": 2014,
+    "source": "own_record"
    },
    {
     "opp": "Luiza Monteiro",
@@ -3656,7 +5040,8 @@
     "comp": "SP Open",
     "weight": "ABS",
     "stage": "F",
-    "year": 2014
+    "year": 2014,
+    "source": "own_record"
    },
    {
     "opp": "Luiza Monteiro",
@@ -3665,7 +5050,8 @@
     "comp": "NoGi Worlds",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2014
+    "year": 2014,
+    "source": "own_record"
    },
    {
     "opp": "Mackenzie Dern",
@@ -3674,7 +5060,8 @@
     "comp": "NoGi Worlds",
     "weight": "ABS",
     "stage": "F",
-    "year": 2014
+    "year": 2014,
+    "source": "own_record"
    },
    {
     "opp": "Anna Louise Mayne",
@@ -3683,7 +5070,8 @@
     "comp": "European",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Shanti Abelha",
@@ -3692,7 +5080,8 @@
     "comp": "European",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Mackenzie Dern",
@@ -3701,7 +5090,8 @@
     "comp": "European",
     "weight": "ABS",
     "stage": "F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Samuela Leite",
@@ -3710,7 +5100,8 @@
     "comp": "European",
     "weight": "O79KG",
     "stage": "SF",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Venla Luukkonen",
@@ -3719,7 +5110,8 @@
     "comp": "European",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Leanna Dittrich",
@@ -3728,7 +5120,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Luiza Monteiro",
@@ -3737,7 +5130,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Mackenzie Dern",
@@ -3746,7 +5140,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -3755,7 +5150,8 @@
     "comp": "World Pro",
     "weight": "O75KG",
     "stage": "4F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Unknown",
@@ -3764,7 +5160,8 @@
     "comp": "World Pro",
     "weight": "O75KG",
     "stage": "SF",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Vanessa Oliveira",
@@ -3773,7 +5170,8 @@
     "comp": "World Pro",
     "weight": "O75KG",
     "stage": "F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "n/a",
@@ -3782,7 +5180,8 @@
     "comp": "World Pro",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Ana Cordeiro",
@@ -3791,7 +5190,8 @@
     "comp": "World Pro",
     "weight": "ABS",
     "stage": "R2",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Luanna Alzuguir",
@@ -3800,7 +5200,8 @@
     "comp": "World Pro",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Beatriz Mesquita",
@@ -3809,7 +5210,8 @@
     "comp": "World Pro",
     "weight": "ABS",
     "stage": "3RD",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Alison Tremblay",
@@ -3818,7 +5220,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "4F",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Santana",
@@ -3827,7 +5230,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "3RD",
-    "year": 2015
+    "year": 2015,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Alequin",
@@ -3836,7 +5240,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "4F",
-    "year": 2017
+    "year": 2017,
+    "source": "own_record"
    },
    {
     "opp": "Jessica Flowers",
@@ -3845,7 +5250,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "SF",
-    "year": 2017
+    "year": 2017,
+    "source": "own_record"
    },
    {
     "opp": "Talita Treta",
@@ -3854,7 +5260,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "F",
-    "year": 2017
+    "year": 2017,
+    "source": "own_record"
    },
    {
     "opp": "Jessica Flowers",
@@ -3863,7 +5270,8 @@
     "comp": "Pan American",
     "weight": "O70KG",
     "stage": "SF",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Carina Santi",
@@ -3872,7 +5280,8 @@
     "comp": "Pan American",
     "weight": "O70KG",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Ana Vieira",
@@ -3881,7 +5290,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Luiza Monteiro",
@@ -3890,7 +5300,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Nathiely Jesus",
@@ -3899,7 +5310,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Hillary Ornum",
@@ -3908,7 +5320,8 @@
     "comp": "F2W 114",
     "weight": "N/A",
     "stage": "SPF",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Stefanie Egger",
@@ -3917,7 +5330,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "4F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Ana Carolina",
@@ -3926,7 +5340,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "SF",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Carina Santi",
@@ -3935,7 +5350,8 @@
     "comp": "ADCC",
     "weight": "O60KG",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Kendall Reusing",
@@ -3944,7 +5360,8 @@
     "comp": "F2W 142",
     "weight": "124KG",
     "stage": "SPF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Elisabeth Clay",
@@ -3953,7 +5370,8 @@
     "comp": "WNO 4",
     "weight": "ABS",
     "stage": "SPF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Claudia Doval",
@@ -3962,7 +5380,8 @@
     "comp": "BJJ Stars 4",
     "weight": "ABS",
     "stage": "SPF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Ana Vieira",
@@ -3971,7 +5390,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    }
   ]
  },
@@ -3986,7 +5406,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Ana Vieira",
@@ -3995,7 +5416,8 @@
     "comp": "ADCC",
     "weight": "65KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Sula Lowenthal",
@@ -4004,7 +5426,8 @@
     "comp": "Polaris 32",
     "weight": "ABS",
     "stage": "RDS",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Thalyta Silva",
@@ -4013,7 +5436,8 @@
     "comp": "BJJ Stars 16",
     "weight": "69KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Emily Fernandez",
@@ -4022,7 +5446,8 @@
     "comp": "UFC FPI 4",
     "weight": "65KG",
     "stage": "SPF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Maka Vickers",
@@ -4031,7 +5456,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "R1",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Rebecca Kirian",
@@ -4040,7 +5466,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "8F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "April Parks",
@@ -4049,7 +5476,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Aislinn Oconnell",
@@ -4058,7 +5486,8 @@
     "comp": "ADCC ECTrials",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Julia Maele",
@@ -4067,7 +5496,8 @@
     "comp": "WNO 21",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "I. Goodman",
@@ -4076,7 +5506,8 @@
     "comp": "GrappleFest 18",
     "weight": "60KG",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Alyssa Luna",
@@ -4085,7 +5516,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Brethany Wright",
@@ -4094,7 +5526,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "R2",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maka Vickers",
@@ -4103,7 +5536,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nicole Mathew",
@@ -4112,7 +5546,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Morgan Black",
@@ -4121,7 +5556,8 @@
     "comp": "ADCC WC Trials",
     "weight": "65KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Aurelie Vern",
@@ -4130,7 +5566,8 @@
     "comp": "UFC FP7",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maryia Agapova",
@@ -4139,7 +5576,8 @@
     "comp": "Pit Series 5",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Jessika Torttila",
@@ -4148,7 +5586,8 @@
     "comp": "Polaris 28",
     "weight": "70KG",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Aurelie Vern",
@@ -4157,7 +5596,8 @@
     "comp": "ADCC",
     "weight": "65KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Brianna Ste-Marie",
@@ -4166,7 +5606,8 @@
     "comp": "ADCC",
     "weight": "65KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Sarah Paul",
@@ -4175,7 +5616,8 @@
     "comp": "Spokane Subs",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nia Blackman",
@@ -4184,7 +5626,8 @@
     "comp": "Polaris 30",
     "weight": "70KG",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Sabrina D. Sousa",
@@ -4193,7 +5636,8 @@
     "comp": "ADXC 7",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "L. Bernales",
@@ -4202,7 +5646,8 @@
     "comp": "WNO 25",
     "weight": "65KG",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Anabel Lopez",
@@ -4211,7 +5656,8 @@
     "comp": "Polaris 31",
     "weight": "70KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Maggie Grindatti",
@@ -4220,7 +5666,8 @@
     "comp": "UFC FP10",
     "weight": "65KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Elisabeth Clay",
@@ -4229,7 +5676,8 @@
     "comp": "WNO 27",
     "weight": "64KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Margot Ciccarelli",
@@ -4238,7 +5686,8 @@
     "comp": "Polaris 32",
     "weight": "ABS",
     "stage": "RDS",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Ane Svendsen",
@@ -4247,7 +5696,8 @@
     "comp": "Polaris 32",
     "weight": "ABS",
     "stage": "RDS",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Nia Blackman",
@@ -4256,7 +5706,8 @@
     "comp": "Polaris 32",
     "weight": "ABS",
     "stage": "RDS",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Natasha Druggan",
@@ -4265,7 +5716,8 @@
     "comp": "Austin SNGO",
     "weight": "ABS",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Adele Fornarino",
@@ -4274,7 +5726,8 @@
     "comp": "CJI 2",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Sarah Galvao",
@@ -4283,7 +5736,8 @@
     "comp": "CJI 2",
     "weight": "ABS",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Ashley Greer",
@@ -4292,7 +5746,8 @@
     "comp": "Pit Fighting",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Sula Lowenthal",
@@ -4301,7 +5756,8 @@
     "comp": "Polaris 34",
     "weight": "65KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -4310,7 +5766,8 @@
     "comp": "ADXC 11",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Julia Boscher",
@@ -4319,7 +5776,8 @@
     "comp": "WNO 31",
     "weight": "65KG",
     "stage": "SPF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Bethany Wright",
@@ -4328,7 +5786,8 @@
     "comp": "World NoGi",
     "weight": "71KG",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -4337,7 +5796,8 @@
     "comp": "World NoGi",
     "weight": "71KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Gabriela Miranda",
@@ -4346,7 +5806,8 @@
     "comp": "World NoGi",
     "weight": "71KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Ane Svendsen",
@@ -4355,7 +5816,8 @@
     "comp": "World NoGi",
     "weight": "71KG",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Aghata Fernandes",
@@ -4364,7 +5826,8 @@
     "comp": "IBJJF NGGP",
     "weight": "71KG",
     "stage": "SPF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Kennedy Franklin",
@@ -4373,7 +5836,8 @@
     "comp": "MCharacter 9",
     "weight": "70KG",
     "stage": "SPF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Jessica Bochenek",
@@ -4382,7 +5846,8 @@
     "comp": "ThugTrials 3",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Nicole",
@@ -4391,7 +5856,8 @@
     "comp": "Polaris 37",
     "weight": "70KG",
     "stage": "SPF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Ryleigh Pirraglia",
@@ -4400,7 +5866,8 @@
     "comp": "ADCC Dallas",
     "weight": "70KG",
     "stage": "RDS",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Ryleigh Pirraglia",
@@ -4409,7 +5876,8 @@
     "comp": "ADCC Dallas",
     "weight": "70KG",
     "stage": "RDS",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    }
   ]
  },
@@ -4424,7 +5892,8 @@
     "comp": "San Jose Open",
     "weight": "ABS",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Jessica Flowers",
@@ -4433,7 +5902,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "NA",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Nikki Sullivan",
@@ -4442,7 +5912,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "NA",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Lowen",
@@ -4451,7 +5922,8 @@
     "comp": "F2W 114",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Talita Nogueira",
@@ -4460,7 +5932,8 @@
     "comp": "American NG Nats",
     "weight": "O76KG",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Talita Nogueira",
@@ -4469,7 +5942,8 @@
     "comp": "American Nats",
     "weight": "O79KG",
     "stage": "RR",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Claudia Doval",
@@ -4478,7 +5952,8 @@
     "comp": "American Nats",
     "weight": "O79KG",
     "stage": "RR",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Talita Nogueira",
@@ -4487,7 +5962,8 @@
     "comp": "Las Vegas Open",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Danielle Alvarez",
@@ -4496,7 +5972,8 @@
     "comp": "Mexico City Open",
     "weight": "O79KG",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Danielle Alvarez",
@@ -4505,7 +5982,8 @@
     "comp": "Mexico City Open",
     "weight": "ABS",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Talita Nogueira",
@@ -4514,7 +5992,8 @@
     "comp": "NoGi Worlds",
     "weight": "76KG",
     "stage": "F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Karen Antunes",
@@ -4523,7 +6002,8 @@
     "comp": "Fresno Open",
     "weight": "ABS",
     "stage": "F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Nathalie Ribeiro",
@@ -4532,7 +6012,8 @@
     "comp": "San Jose Open",
     "weight": "ABS",
     "stage": "F",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Maggie Grindatti",
@@ -4541,7 +6022,8 @@
     "comp": "NoGi Pan Am.",
     "weight": "76KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Custodio",
@@ -4550,7 +6032,8 @@
     "comp": "NoGi Pan Am.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -4559,7 +6042,8 @@
     "comp": "Pan American",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Yara Soares",
@@ -4568,7 +6052,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Rafaela Guedes",
@@ -4577,7 +6062,8 @@
     "comp": "NoGi Worlds",
     "weight": "76KG",
     "stage": "SF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Elisabeth Bravo",
@@ -4586,7 +6072,8 @@
     "comp": "F2W199",
     "weight": "N/A",
     "stage": "SPF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Fernanda Cristo",
@@ -4595,7 +6082,8 @@
     "comp": "Houston Open",
     "weight": "74KG",
     "stage": "F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Fernanda Cristo",
@@ -4604,7 +6092,8 @@
     "comp": "Houston Open",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Fernanda Cristo",
@@ -4613,7 +6102,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Gabrielle McComb",
@@ -4622,7 +6112,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Thamires Monteiro",
@@ -4631,7 +6122,8 @@
     "comp": "Sta Cruz NGO",
     "weight": "ABS",
     "stage": "RR",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Custodio",
@@ -4640,7 +6132,8 @@
     "comp": "Sta Cruz NGO",
     "weight": "ABS",
     "stage": "RR",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Fernanda Mazzelli",
@@ -4649,7 +6142,8 @@
     "comp": "NoGi Worlds",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Amy Campo",
@@ -4658,7 +6152,8 @@
     "comp": "NoGi Worlds",
     "weight": "71KG",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Nathalie Ribeiro",
@@ -4667,7 +6162,8 @@
     "comp": "European Open",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Magda",
@@ -4676,7 +6172,8 @@
     "comp": "European Open",
     "weight": "79KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Cueto",
@@ -4685,7 +6182,8 @@
     "comp": "LA Open",
     "weight": "74KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -4694,7 +6192,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Aurelie Vern",
@@ -4703,7 +6202,8 @@
     "comp": "Pan American",
     "weight": "74KG",
     "stage": "R1",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Custodio",
@@ -4712,7 +6212,8 @@
     "comp": "Santa Cruz O",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malyjasiak",
@@ -4721,7 +6222,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Leticia Cardozo",
@@ -4730,7 +6232,8 @@
     "comp": "American Nats",
     "weight": "69KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Thamara Ferreira",
@@ -4739,7 +6242,8 @@
     "comp": "American NNG",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Roberta Ribeiro",
@@ -4748,7 +6252,8 @@
     "comp": "NoGi Pan",
     "weight": "ABS",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -4757,7 +6262,8 @@
     "comp": "European NoGi",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Jaine Fragoso",
@@ -4766,7 +6272,8 @@
     "comp": "Sacramento NGO",
     "weight": "ABS",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Ffion Davies",
@@ -4775,7 +6282,8 @@
     "comp": "NoGi World",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "H. Crevar",
@@ -4784,7 +6292,8 @@
     "comp": "ADCC LB",
     "weight": "ABS",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Mayara Custodio",
@@ -4793,7 +6302,8 @@
     "comp": "Sacramento Open",
     "weight": "ABS",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Ingridd Alves",
@@ -4802,7 +6312,8 @@
     "comp": "Pan American",
     "weight": "74KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Gabrieli Pessanha",
@@ -4811,7 +6322,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nathiely Jesus",
@@ -4820,7 +6332,8 @@
     "comp": "ADXC 4",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Magda",
@@ -4829,7 +6342,8 @@
     "comp": "World Champ.",
     "weight": "79KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria Malijasiak",
@@ -4838,7 +6352,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nathiely Jesus",
@@ -4847,7 +6362,8 @@
     "comp": "ADCC",
     "weight": "O65KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria Ruffatto",
@@ -4856,7 +6372,8 @@
     "comp": "Portland NGO",
     "weight": "ABS",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Cueto",
@@ -4865,7 +6382,8 @@
     "comp": "Sacramento Op",
     "weight": "79KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nia Blackman",
@@ -4874,7 +6392,8 @@
     "comp": "Euro NoGi",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Anabel Lopez",
@@ -4883,7 +6402,8 @@
     "comp": "Euro NoGi",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Jaine Fragoso",
@@ -4892,7 +6412,8 @@
     "comp": "World NoGi",
     "weight": "ABS",
     "stage": "8F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Paige Ivette",
@@ -4901,7 +6422,8 @@
     "comp": "World NoGi",
     "weight": "77KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Nadia Frankland",
@@ -4910,7 +6432,8 @@
     "comp": "Sacramento O",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Ingridd Alves",
@@ -4919,7 +6442,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "SF",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Ane Svendsen",
@@ -4928,7 +6452,8 @@
     "comp": "Polaris 32",
     "weight": "ABS",
     "stage": "RDS",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Margot Ciccarelli",
@@ -4937,7 +6462,8 @@
     "comp": "Polaris 32",
     "weight": "ABS",
     "stage": "RDS",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Aghata Fernandes",
@@ -4946,7 +6472,8 @@
     "comp": "Sacramento WO",
     "weight": "ABS",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Paige Ivette",
@@ -4955,7 +6482,8 @@
     "comp": "ADCC WC TR",
     "weight": "O65KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Giovanna Carneiro",
@@ -4964,7 +6492,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "R1",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Sara Fearon",
@@ -4973,7 +6502,8 @@
     "comp": "F2W 58",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2018
+    "year": 2018,
+    "source": "own_record"
    },
    {
     "opp": "Rita Lynn",
@@ -4982,7 +6512,8 @@
     "comp": "Mexico City NGO",
     "weight": "NA",
     "stage": "NA",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Veronica Macedo",
@@ -4991,7 +6522,8 @@
     "comp": "NoGi Worlds",
     "weight": "76KG",
     "stage": "4F",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Jessica Guedry",
@@ -5000,7 +6532,8 @@
     "comp": "NoGi Worlds",
     "weight": "76KG",
     "stage": "SF",
-    "year": 2019
+    "year": 2019,
+    "source": "own_record"
    },
    {
     "opp": "Talita Nogueira",
@@ -5009,7 +6542,8 @@
     "comp": "F2W 135",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2020
+    "year": 2020,
+    "source": "own_record"
    },
    {
     "opp": "Tara White",
@@ -5018,7 +6552,8 @@
     "comp": "F2W 162",
     "weight": "N/A",
     "stage": "SPF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Silvia Silva",
@@ -5027,7 +6562,8 @@
     "comp": "F2W 168",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Cueto",
@@ -5036,7 +6572,8 @@
     "comp": "Art Suave E4",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Kylie Villicano",
@@ -5045,7 +6582,8 @@
     "comp": "Pan American",
     "weight": "79KG",
     "stage": "4F",
-    "year": 2021
+    "year": 2021,
+    "source": "own_record"
    },
    {
     "opp": "Laura Heiman",
@@ -5054,7 +6592,8 @@
     "comp": "Houston Open",
     "weight": "74KG",
     "stage": "SF",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Hannah Rauch",
@@ -5063,7 +6602,8 @@
     "comp": "Houston Open",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Marcia Ramos",
@@ -5072,7 +6612,8 @@
     "comp": "NoGi Worlds",
     "weight": "ABS",
     "stage": "8F",
-    "year": 2022
+    "year": 2022,
+    "source": "own_record"
    },
    {
     "opp": "Rana Qubbaj",
@@ -5081,7 +6622,8 @@
     "comp": "European Open",
     "weight": "79KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Vannessa Griffin",
@@ -5090,7 +6632,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "R1",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Isa Reiber",
@@ -5099,7 +6642,8 @@
     "comp": "Santa Cruz O",
     "weight": "74KG",
     "stage": "RR",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Isa Reiber",
@@ -5108,7 +6652,8 @@
     "comp": "Santa Cruz O",
     "weight": "74KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Silvia Silva",
@@ -5117,7 +6662,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "R1",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Emilly Vasconcelos",
@@ -5126,7 +6672,8 @@
     "comp": "Arte Suave E25",
     "weight": "NA",
     "stage": "SPF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Deise Leonanjo",
@@ -5135,7 +6682,8 @@
     "comp": "American Nats",
     "weight": "69KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Leticia Cardozo",
@@ -5144,7 +6692,8 @@
     "comp": "American NNG",
     "weight": "O77KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Bruse",
@@ -5153,7 +6702,8 @@
     "comp": "NoGi Pan",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Jordan Patrick",
@@ -5162,7 +6712,8 @@
     "comp": "NoGi Pan",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Maggie Grindatti",
@@ -5171,7 +6722,8 @@
     "comp": "NoGi Pan",
     "weight": "71KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Jordan Patrick",
@@ -5180,7 +6732,8 @@
     "comp": "NoGi Pan",
     "weight": "71KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -5189,7 +6742,8 @@
     "comp": "European NoGi",
     "weight": "71KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Ane Svendsen",
@@ -5198,7 +6752,8 @@
     "comp": "European NoGi",
     "weight": "71KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Lunna Silva",
@@ -5207,7 +6762,8 @@
     "comp": "Sacramento Open",
     "weight": "74KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Bruse",
@@ -5216,7 +6772,8 @@
     "comp": "Sacramento NGO",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Maggie Grindatti",
@@ -5225,7 +6782,8 @@
     "comp": "NoGi World",
     "weight": "72KG",
     "stage": "4F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Graciele Fava",
@@ -5234,7 +6792,8 @@
     "comp": "NoGi World",
     "weight": "72KG",
     "stage": "SF",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "Salla Simola",
@@ -5243,7 +6802,8 @@
     "comp": "NoGi World",
     "weight": "72KG",
     "stage": "F",
-    "year": 2023
+    "year": 2023,
+    "source": "own_record"
    },
    {
     "opp": "C. Behm",
@@ -5252,7 +6812,8 @@
     "comp": "ADCC LB",
     "weight": "70KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "N. Dillon",
@@ -5261,7 +6822,8 @@
     "comp": "ADCC LB",
     "weight": "70KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "S. Blochowsky",
@@ -5270,7 +6832,8 @@
     "comp": "ADCC LB",
     "weight": "70KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "C. Behm",
@@ -5279,7 +6842,8 @@
     "comp": "ADCC LB",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "P. Letcher",
@@ -5288,7 +6852,8 @@
     "comp": "ADCC LB",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Leticia Cardozo",
@@ -5297,7 +6862,8 @@
     "comp": "Sacramento Open",
     "weight": "74KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Lavinia Barbosa",
@@ -5306,7 +6872,8 @@
     "comp": "Sacramento Open",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Karen Terra",
@@ -5315,7 +6882,8 @@
     "comp": "Sacramento NGO",
     "weight": "ABS",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Kyssa Silva",
@@ -5324,7 +6892,8 @@
     "comp": "Sacramento NGO",
     "weight": "ABS",
     "stage": "RR",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Fernanda Cristo",
@@ -5333,7 +6902,8 @@
     "comp": "Pan American",
     "weight": "74KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maria Barboza",
@@ -5342,7 +6912,8 @@
     "comp": "Pan American",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Sonja Tsiouris",
@@ -5351,7 +6922,8 @@
     "comp": "ADCC WC Trials",
     "weight": "O65KG",
     "stage": "R1",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Ashley Green",
@@ -5360,7 +6932,8 @@
     "comp": "ADCC WC Trials",
     "weight": "O65KG",
     "stage": "8F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Brittney Elkin",
@@ -5369,7 +6942,8 @@
     "comp": "ADCC WC Trials",
     "weight": "O65KG",
     "stage": "4F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Bridget McEliece",
@@ -5378,7 +6952,8 @@
     "comp": "ADCC WC Trials",
     "weight": "O65KG",
     "stage": "SF",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Amanda Leve",
@@ -5387,7 +6962,8 @@
     "comp": "ADCC WC Trials",
     "weight": "O65KG",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Maryanna Cardoso",
@@ -5396,7 +6972,8 @@
     "comp": "World Champ.",
     "weight": "ABS",
     "stage": "RDS",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Breanna Stikkelman",
@@ -5405,7 +6982,8 @@
     "comp": "Sacramento NGO",
     "weight": "ABS",
     "stage": "F",
-    "year": 2024
+    "year": 2024,
+    "source": "own_record"
    },
    {
     "opp": "Iasmim Casser",
@@ -5414,7 +6992,8 @@
     "comp": "SJose SPO",
     "weight": "ABS",
     "stage": "F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Magdalena Loska",
@@ -5423,7 +7002,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "R1",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -5432,7 +7012,8 @@
     "comp": "World Champ.",
     "weight": "74KG",
     "stage": "4F",
-    "year": 2025
+    "year": 2025,
+    "source": "own_record"
    },
    {
     "opp": "Karen Terra",
@@ -5441,7 +7022,8 @@
     "comp": "Sacramento WO",
     "weight": "ABS",
     "stage": "4F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Elizabeth Bonani",
@@ -5450,7 +7032,8 @@
     "comp": "Sacramento WO",
     "weight": "ABS",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Denise Krahn",
@@ -5459,7 +7042,8 @@
     "comp": "Pan American",
     "weight": "74KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Maria Vicentini",
@@ -5468,7 +7052,8 @@
     "comp": "Pan American",
     "weight": "74KG",
     "stage": "F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Christina Hansen",
@@ -5477,7 +7062,8 @@
     "comp": "ADCC WC TR",
     "weight": "O65KG",
     "stage": "R1",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Melissa Sheppey",
@@ -5486,7 +7072,8 @@
     "comp": "ADCC WC TR",
     "weight": "O65KG",
     "stage": "4F",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    },
    {
     "opp": "Joslyn Molina",
@@ -5495,7 +7082,8 @@
     "comp": "ADCC WC TR",
     "weight": "O65KG",
     "stage": "SF",
-    "year": 2026
+    "year": 2026,
+    "source": "own_record"
    }
   ]
  }

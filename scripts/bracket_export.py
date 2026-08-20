@@ -75,7 +75,6 @@ MANIFEST = SCOUTING / "adcc_2026_women.json"
 # docstring because a default runs and a docstring drifts.
 RECORDS = SCOUTING / "adcc_2026_women_records.json"
 SEQUENCES = SCOUTING / "adcc_2026_women_sequences.json"
-DERIVED = SCOUTING / "adcc_2026_women_derived.json"
 LINKS = REPO / "data" / "frame_pdf" / "women_65_links.json"
 FRAMES = REPO / "data" / "frame_pdf" / "out"
 
@@ -309,6 +308,10 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
         for cut_name, subset in _cuts(rows):  # noqa: B007
             w = [r for r in subset if r["wl"] == "W"]
             loss = [r for r in subset if r["wl"] == "L"]
+            # A bout that is neither. One draw exists (Helena Crevar x Adele Fornarino, CJI 2
+            # 2025, method "---"), and it used to vanish from both columns while still counting
+            # toward `n`, which is why wins + losses did not add up to the cut size.
+            undecided = [r for r in subset if r["wl"] not in ("W", "L")]
             fw, fl = Counter(r["family"] for r in w), Counter(r["family"] for r in loss)
             subs_w = sum(fw[f] for f in SUB_FAMILIES)
             subs_l = sum(fl[f] for f in SUB_FAMILIES)
@@ -321,7 +324,7 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
             fb = Counter(r["family"] for r in bouts)
             cov_b = coverage(list(Counter(r["athlete"] for r in bouts).values()))
             cuts[cut_name] = {
-                "n": len(subset), "w": len(w), "l": len(loss),
+                "n": len(subset), "w": len(w), "l": len(loss), "undecided": len(undecided),
                 "by_bout": {f: gated(fb[f], len(bouts), cov_b) for f in FAMILIES},
                 # The headline of the per-bout view: what share of bouts ended in a submission
                 # at all. Belongs here rather than only beside the roster's own record, where
@@ -349,7 +352,23 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
                 "named_conceded": Counter(_fold(r["method"]) for r in loss
                                           if r["family"] in SUB_FAMILIES).most_common(14),
             }
-        out[div] = {"cuts": cuts,
+        # Where each athlete's record came from. Eight of the sixteen have no record of their
+        # own -- seven are absent from BJJ Heroes' A-Z list entirely and one has a profile with
+        # no match table -- so theirs is reconstructed from the pages of athletes they fought
+        # and from bouts already in the corpus. That reconstruction is biased in a knowable
+        # direction: it can only contain opponents notable enough to have their own page, so it
+        # over-represents strong opposition. Publishing the mix beats implying every record was
+        # gathered the same way.
+        provenance = {
+            nm: {"division": v.get("division"),
+                 "record_source": v.get("record_source", "own" if v.get("rows") else "none"),
+                 "rows": len(v.get("rows") or []),
+                 "by_source": dict(Counter(r.get("source", "own_record")
+                                           for r in (v.get("rows") or [])))}
+            for nm, v in records.items() if v.get("division") == div
+        }
+        out[div] = {"record_provenance": provenance,
+                    "cuts": cuts,
                     "uniform_split": Counter(r["uniform"] for r in rows),
                     "ruleset_split": Counter(r["ruleset"] for r in rows),
                     "by_year": _year_series(rows),
@@ -1228,8 +1247,6 @@ def main() -> int:
     ap.add_argument("--records", type=Path, default=RECORDS,
                     help="BJJ Heroes records JSON (division + rows per athlete)")
     ap.add_argument("--sequences", type=Path, default=SEQUENCES, help="corpus bouts JSON")
-    ap.add_argument("--derived", type=Path, default=DERIVED,
-                    help="opponent-derived records JSON")
     ap.add_argument("--out", type=Path, default=REPO.parent / "BracketAnalysis" / "data.json")
     a = ap.parse_args()
 
@@ -1288,7 +1305,6 @@ def main() -> int:
         "data_quality": dq_,
         "rd": {**rating,
                "athletes": {display[k]: v for k, v in rating["athletes"].items()}},
-        "derived": json.loads(a.derived.read_text(encoding="utf-8")),
     }
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(doc, ensure_ascii=False, default=str), encoding="utf-8")
