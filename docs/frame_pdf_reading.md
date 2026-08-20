@@ -17,12 +17,12 @@ rendered" and ends at "an answer JSON is ready to import".
 | 2 | Render sheets for a manifest | `uv run python scripts/frame_pdf.py --manifest data/frame_pdf/women_65.json` | maintainer |
 | 3 | Render as a directory instead of a PDF | add `--format frames` | maintainer |
 | 4 | **Read the sheet → answer JSON** | manual, see §2 | vision model |
-| 5 | **Validate the answer** | *does not exist yet* — see §4.6 | — |
-| 6 | **Convert answer → dump shape** | *does not exist yet* — see §4.7 | — |
-| 7 | Import the dump | `scripts/dump_import` | maintainer |
-
-Steps 5 and 6 are the live gap: an answer produced at step 4 is a dead end until someone retypes it
-into the `(athlete_a_name, year)` dump shape `dump_import` expects.
+| 5 | Validate the answer | `uv run python scripts/frame_answer.py` | maintainer |
+| 6 | **Human review against the frames** | `uv run python scripts/frame_review.py` → localhost:8765 | maintainer |
+| 7 | **Convert answer → dump shape** | *does not exist yet* — see §4.7 | — |
+| 8 | Import the dump | `scripts/dump_import` | maintainer |
+Step 7 is the live gap: a reviewed answer is still a dead end until someone retypes it into the
+`(athlete_a_name, year)` dump shape `dump_import` expects.
 
 **Answer location (convention, adopted 2026-08-20):** `data/frame_pdf/out/processed/<slug>.json`,
 same slug as the rendered sheet. The `out/processed/` directory already existed but was empty and
@@ -131,7 +131,7 @@ Bout: `anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY`, 32 fra
 |---|---|---|
 | Action region as share of frame area | ~3% | full-frame reading is unusable; §2.3 is mandatory |
 | Athlete height in frame | ~60 px | top/bottom unreadable without a crop |
-| Source resolution available | **1280×720** (fmt 136) | we sampled 640×360 — see §4.2 |
+| Source resolution available | **1280×720** (fmt 136) | now sampled at 1280×720 for `full_match` — §4.2 |
 | Frames with no bout action | 5 of 32 (16%) | 2 pre-start, 3 channel outro cards |
 | Events produced | 7 | |
 | Items left unresolved | 4 | 2 of them purely from the 5s sampling gap |
@@ -153,7 +153,7 @@ bout would have resolved both unresolved transitions above for roughly 24 extra 
 This is the only backlog item that improves **correctness** rather than ergonomics. Everything else
 makes reading faster; this makes answers more complete.
 
-### 4.2 Stop discarding resolution
+### 4.2 Stop discarding resolution — DONE 2026-08-20
 
 Two knobs conspire, and both must move together:
 
@@ -203,10 +203,10 @@ blue is not mat footage — and drop trailing frames that fail it. Pre-start fra
 **keeping**: they are often the cleanest view of both athletes standing apart, which is what §2.1
 needs.
 
-### 4.6 `schemas/frame_answer.py` + `scripts/validate_frame_answer.py`
+### 4.6 `scripts/frame_answer.py` — DONE 2026-08-20
 
-There is currently no schema for the answer, so its shape was invented at read time. A validator
-should reject or warn on:
+One module, not the two proposed: the schema and the checks are the same knowledge, and splitting
+them is how a validator ends up enforcing a shape the schema no longer describes. It rejects:
 
 - any `label` not present verbatim in the sheet's `labels.md`
 - any `ts` outside `[bout_start_seconds, bout_end_seconds]` or beyond the video duration
@@ -215,6 +215,21 @@ should reject or warn on:
 - a missing identity-discriminator field (§2.6)
 - non-monotonic `ts`
 - a high generic-label ratio — a signal the bout wants a denser pass (§4.1) rather than a defect
+  — **not implemented**; it is a ranking signal, not a defect, and belongs with §4.1
+
+Two departures from the proposal above, both deliberate. `ts` is checked against the frames that
+actually exist (`frames.jsonl`), not against `bout_start_seconds`/`bout_end_seconds`: those are
+themselves claims in the answer being validated, so checking one field against another in the same
+file proves nothing. And a null `actor` is REJECTED rather than allowed — the reader is told to put
+the uncertainty in `note` and still name someone, because a null actor silently drops the event from
+every per-athlete artefact downstream while looking like a recorded observation.
+
+### 4.6b `scripts/frame_review.py` — DONE 2026-08-20
+
+The half a validator cannot do: put the event next to the frame it was read off and let a human say
+whether it is there. Writes `review.json` beside `answer.json`, keeping the machine's event AND the
+verdict — a rejected event stays, marked `wrong`, because that is a measurement of the reader and
+deleting it throws the measurement away.
 
 ### 4.7 `scripts/frame_answer_to_dump.py`
 
@@ -227,7 +242,7 @@ the missing link that makes the whole pipeline runnable end to end.
 `frame_pdf.py` already skips fights whose video backs a reviewed sequence, but that check is a DB
 query only. A `--status` mode reading `out/` and `out/processed/` would show the three states that
 matter: rendered-but-unanswered, answered-but-unimported, done. As of 2026-08-20 `out/` held 24
-rendered PDFs plus 1 frames directory, against 1 answer.
+rendered PDFs plus 24 frames directories.
 
 ### 4.9 Prompt additions for the generated README
 
