@@ -524,14 +524,7 @@
   "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
   "b_id": "af55e370-d9b1-458f-8089-26ef0bcd06b0",
   "win_type": "SUBMISSION",
-  "seq": [
-   {
-    "type": "match",
-    "label": "Match",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": true
-   }
-  ]
+  "seq": []
  },
  {
   "id": "5335a75c-5056-49f1-9fd9-5221ba42a4a8",
@@ -2433,14 +2426,7 @@
   "a_id": "282d721e-c83d-4fb8-9be9-f5a18ed00e4e",
   "b_id": "3a898164-baa2-4b16-9f23-d607548c5928",
   "win_type": "DECISION",
-  "seq": [
-   {
-    "type": "match",
-    "label": "Match",
-    "actor_id": "282d721e-c83d-4fb8-9be9-f5a18ed00e4e",
-    "successful": true
-   }
-  ]
+  "seq": []
  },
  {
   "id": "2955352c-9468-4009-b710-2a0d33552de3",
