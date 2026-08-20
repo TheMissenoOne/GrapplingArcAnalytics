@@ -331,12 +331,33 @@ def _opponent_index(records: dict[str, dict[str, Any]],
             src = r.get("source", "own_record")
             if src not in o["sources"]:
                 o["sources"].append(src)
-    for o in out.values():
-        # Longest spelling as the display form: "Paige Ivette Climber" over "P. Ivette", because
-        # an initial is the abbreviation and never the name.
+    # BJJ Heroes abbreviates the opponent cell -- "L. Bernales" for Leilani Bernales -- and
+    # `athlete_key` cannot see through that, so the same person opens two identities. The same
+    # rule the roster matcher already trusts closes them: last token equal, first token equal or
+    # an initial of it. It refuses "Jon Hansen" against "John Hansen", which is a real open
+    # question in this corpus and must not be settled by a string.
+    #
+    # ponytail: O(n^2) over ~314 opponents, which is 49k comparisons and runs in milliseconds.
+    # If the scope ever widens to the whole corpus, bucket by last token first.
+    merged: dict[str, dict[str, Any]] = {}
+    for key in sorted(out, key=lambda k: -out[k]["bouts_vs_roster"]):
+        o = out[key]
+        into = next((m for m in merged.values()
+                     if any(_same_person(s1, s2) for s1 in o["spellings"]
+                            for s2 in m["spellings"])), None)
+        if into is None:
+            merged[key] = o
+            continue
+        into["spellings"] += [s for s in o["spellings"] if s not in into["spellings"]]
+        into["bouts_vs_roster"] += o["bouts_vs_roster"]
+        into["vs"] += [v for v in o["vs"] if v not in into["vs"]]
+        into["sources"] += [s for s in o["sources"] if s not in into["sources"]]
+
+    for o in merged.values():
+        # Longest spelling as the display form: an initial is the abbreviation, never the name.
         o["display"] = max(o["spellings"], key=len)
         o["has_own_page"] = (CACHE / f"match__{o['key'].replace(' ', '_')}.html").exists()
-    return out
+    return merged
 
 
 def build(dry_run: bool) -> int:
