@@ -173,6 +173,10 @@ ownership table: **`docs/match_event_model.md`**. The refiner prompt + rules: **
 with the command + owner for each step: **`docs/ingestion_pipeline.md`**. QA a fresh batch with
 `analysis/match_deviance.py` (per-bout deviance from each athlete's usual game → recheck list).
 
+**Footage → events** (the other entry path, via `scripts/frame_pdf.py`): reading a rendered frame
+sheet without inventing events, where the answer JSON goes, and the automation backlog —
+**`docs/frame_pdf_reading.md`**. Answers live at `data/frame_pdf/out/processed/<slug>.json`.
+
 ## ELO Engine
 
 From `felixgnwn/adcc_elo_engine/elo_engine.py`:

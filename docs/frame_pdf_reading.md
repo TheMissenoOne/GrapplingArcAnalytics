@@ -1,0 +1,294 @@
+# Reading a frame sheet — operator guide and automation backlog
+
+`scripts/frame_pdf.py` turns competition footage into frames a vision model reads back as a
+timestamped match sequence. That script is documented by its own docstring; **this doc covers the
+half that is still manual** — how to actually read a rendered sheet without inventing events, where
+the answer goes, and what should be automated next.
+
+Scope boundary: the transcript → dump → DB → site path is `docs/ingestion_pipeline.md`. The event
+and actor-ownership model is `docs/match_event_model.md`. This doc starts at "a sheet has been
+rendered" and ends at "an answer JSON is ready to import".
+
+## 1. The loop today
+
+| # | Step | Command | Owner |
+|---|---|---|---|
+| 1 | Refresh the label vocabulary | `uv run python scripts/frame_pdf.py --dump-library` | maintainer |
+| 2 | Render sheets for a manifest | `uv run python scripts/frame_pdf.py --manifest data/frame_pdf/women_65.json` | maintainer |
+| 3 | Render as a directory instead of a PDF | add `--format frames` | maintainer |
+| 4 | **Read the sheet → answer JSON** | manual, see §2 | vision model |
+| 5 | **Validate the answer** | *does not exist yet* — see §4.6 | — |
+| 6 | **Convert answer → dump shape** | *does not exist yet* — see §4.7 | — |
+| 7 | Import the dump | `scripts/dump_import` | maintainer |
+
+Steps 5 and 6 are the live gap: an answer produced at step 4 is a dead end until someone retypes it
+into the `(athlete_a_name, year)` dump shape `dump_import` expects.
+
+**Answer location (convention, adopted 2026-08-20):** `data/frame_pdf/out/processed/<slug>.json`,
+same slug as the rendered sheet. The `out/processed/` directory already existed but was empty and
+unreferenced by any code; this doc is what makes it the contract.
+
+## 2. How to read a sheet
+
+Do these in order. The order is the point — steps 1 and 2 make steps 4 and 5 possible, and doing
+them last means re-reading everything.
+
+### 2.1 Read the END first
+
+The last frames carry the result graphic and the hand-raise. They tell you **who won** and, far more
+importantly, **which competitor is which**. Grapplers in no-gi are frequently both in black; the
+victory card is often the only frame in the whole sheet that binds a name to a body.
+
+Work backwards from it: find a kit discriminator that holds across the whole bout (shorts colour,
+long spats versus bare legs, hair) and only then read the timeline forwards.
+
+### 2.2 Derive the clock mapping
+
+The match clock is visible and counts **down**. Two frames give you the bout's position in the video:
+
+```
+bout_start_seconds = frame_ts - (match_duration - clock_reading)
+```
+
+Worked example (2026-08-20, `8xvq3lM6kQY`): the clock reads 10:00 at t=0 and t=5, and 9:56 at t=10.
+Four seconds had elapsed by t=10, so the bout started at video-absolute **t=6**. The clock freezing
+at 7:58 puts the finish at 6 + 122 = **t≈128**.
+
+This is also the only reliable way to spot a bout that starts partway into a video, which is the
+mislocalisation defect the frame_pdf docstring warns about (AA-010).
+
+### 2.3 Crop before you read — do not read full frames
+
+**This is the single highest-leverage habit.** These are wide-angle fixed-camera broadcasts. On the
+bout measured 2026-08-20 the two athletes occupied roughly a 110×70 px region of a 640×360 frame —
+about **3% of the frame area**. The rest is empty mat, banners and crowd. A vision model resizes the
+whole image into a fixed budget, so reading full frames spends ~97% of that budget on nothing.
+
+Cropping to the action and upscaling turned "cannot tell who is on top" into a confident read:
+
+```bash
+# generous action window, 6x — good default for a first pass
+magick tNNNNN.jpg -crop 270x150+195+55 +repage -filter Lanczos -resize 600% zoom.png
+
+# tight, 9-10x — for settling top/bottom in a ground scramble
+magick tNNNNN.jpg -crop 110x70+215+100 +repage -filter Lanczos -resize 900% tight.png
+
+# scoreboard strip: stack several frames' score regions into one image
+magick t00045.jpg t00070.jpg t00100.jpg t00125.jpg \
+  -crop 150x50+0+5 +repage -filter Lanczos -resize 500% -append score.png
+```
+
+Upscaling adds no information — the win comes from the **crop**, which is what redirects the
+model's attention budget. Lanczos just keeps the existing pixels legible after the crop.
+
+### 2.4 Read the scoreboard as its own pass
+
+Points are the one thing the scoreboard is authoritative for, and it sits at a fixed screen
+position, so a stacked strip (above) settles the whole bout in one image. Read it at several
+checkpoints rather than trusting one frame.
+
+A scoreboard that never changes is itself a strong finding: it **bounds** every other reading. On
+the 2026-08-20 bout the board was 0-0-0 for both athletes at t=45/70/100/125, which independently
+rules out any credited takedown (2), sweep (2) or completed guard pass (3) — so a "she passed the
+guard here" reading can be rejected without ever seeing the pass.
+
+Never write `points: 0` to mean "could not tell". An absent field is the only thing that carries
+"nobody could score this".
+
+### 2.5 Label coarsely, and prefer omission to invention
+
+At one frame every 5s, techniques start and finish between samples and leave only a result. Record
+the result generically (`Guard Pass`, `Takedown`, `Submission`, `Top Control`) rather than naming an
+entry nobody saw. Every label must come **verbatim** from the sheet's `labels.md` — an unlisted
+spelling does not fail, it mints a second node and splits one technique in two silently.
+
+Check labels mechanically before returning an answer:
+
+```bash
+cd data/frame_pdf/out/<slug>
+for l in "Guard" "Top Control" "Submission"; do
+  grep -qx "\- $l" labels.md && echo "OK   $l" || echo "MISS $l"
+done
+```
+
+### 2.6 State the identity discriminator in the answer
+
+Write down *how* the two athletes were told apart and *what verified it*. An identity mapping that
+is asserted but not justified is unfalsifiable, and a correct technique on the wrong athlete is two
+errors. The answer schema (§4.6) should require this field.
+
+### 2.7 The result line is not evidence
+
+The BJJ Heroes line printed on the sheet exists so you can tell the competitors apart and know the
+bout ended. An armbar named there and an armbar visible in the frames are two different claims;
+only the second belongs in the answer.
+
+## 3. Measured baseline — first full read (2026-08-20)
+
+Bout: `anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY`, 32 frames at 5s.
+
+| Observation | Number | Consequence |
+|---|---|---|
+| Action region as share of frame area | ~3% | full-frame reading is unusable; §2.3 is mandatory |
+| Athlete height in frame | ~60 px | top/bottom unreadable without a crop |
+| Source resolution available | **1280×720** (fmt 136) | we sampled 640×360 — see §4.2 |
+| Frames with no bout action | 5 of 32 (16%) | 2 pre-start, 3 channel outro cards |
+| Events produced | 7 | |
+| Items left unresolved | 4 | 2 of them purely from the 5s sampling gap |
+| Scoreboard changes in the bout | 0 | bounded every position reading |
+
+The two sampling-gap losses were the transition that put a competitor on the ground (0:15→0:20) and
+the finish itself (2:05→2:10). Both are exactly what a denser second pass over a named interval
+would recover — see §4.1.
+
+## 4. Automation backlog, ranked by measured impact
+
+### 4.1 `--zoom SLUG:START-END:STEP` — a second, denser pass (highest value)
+
+The frame_pdf docstring already names this as the right fix when events fall between frames ("a
+second pass at `--step 2` over the interval in question"), but there is no ergonomic path to it —
+today it means hand-editing a manifest. A flag that re-renders one window of an already-rendered
+bout would have resolved both unresolved transitions above for roughly 24 extra frames.
+
+This is the only backlog item that improves **correctness** rather than ergonomics. Everything else
+makes reading faster; this makes answers more complete.
+
+### 4.2 Stop discarding resolution
+
+Two knobs conspire, and both must move together:
+
+| Location | Current | Effect |
+|---|---|---|
+| `fetch()` format selector | `bv*[height<=480]/b[height<=480]/…` | picks 360p when 720p exists |
+| `FRAME_WIDTH` | `640` | rescales back down at extraction |
+
+The 480p ceiling has a stated rationale — "tell mount from side control, not read a patch on a
+sleeve", plus disk pressure from full-event reels. The disk half still holds. The legibility half
+did not survive contact with this bout: at 640×360 the reader could not reliably tell top from
+bottom, which is precisely the thing the ceiling was chosen to preserve.
+
+Suggested shape, rather than a blanket raise: a per-entry manifest field (`"quality": 720`) that
+defaults to 480 for `kind: full_event` and 720 for `kind: full_match`. A single bout is minutes of
+footage, not hours, so the disk argument barely applies to it.
+
+### 4.3 Auto-crop to the action region
+
+Do §2.3 in the renderer instead of by hand. `opencv-python` is already a dependency (`pyproject.toml`),
+and no ML is needed: the mat is a large uniform blue/yellow field, so the athletes are the
+low-saturation / high-contrast blob on it. Compute a per-video action bounding box once as the union
+of motion across sampled frames, pad it, and crop every frame to it.
+
+Payoff compounds with §4.2: a crop taken from a 720p source is genuinely detailed, where a crop from
+360p is merely legible.
+
+### 4.4 A scoreboard strip and, later, clock OCR
+
+Two tiers:
+
+- **Cheap:** crop the fixed scoreboard rectangle from every frame at native resolution and render a
+  strip of them on the context page. Settles points and clock without squinting at 32 frames.
+- **Real prize:** OCR the clock and score. Clock readings alone yield `bout_start_seconds`,
+  `bout_end_seconds` and every score change **with its timestamp** — deterministically, with no
+  model judgement. That is the most error-prone manual arithmetic in §2.2 and §2.4.
+
+Note `tesseract` is **not** currently on this machine's PATH (checked 2026-08-20). For a broadcast
+scoreboard, digit template-matching with OpenCV is likely more robust than general OCR anyway, and
+avoids adding a system dependency.
+
+### 4.5 Drop dead frames
+
+Trailing channel outro cards ("THANK YOU FOR WATCHING") were 3 of 32 frames, and they are
+indistinguishable from content until read. Detect by colour histogram — a frame with none of the mat
+blue is not mat footage — and drop trailing frames that fail it. Pre-start frames are worth
+**keeping**: they are often the cleanest view of both athletes standing apart, which is what §2.1
+needs.
+
+### 4.6 `schemas/frame_answer.py` + `scripts/validate_frame_answer.py`
+
+There is currently no schema for the answer, so its shape was invented at read time. A validator
+should reject or warn on:
+
+- any `label` not present verbatim in the sheet's `labels.md`
+- any `ts` outside `[bout_start_seconds, bout_end_seconds]` or beyond the video duration
+- any `actor` that is not one of the two named competitors (null allowed, and meaningful)
+- `points: 0` anywhere (the "could not tell" anti-pattern)
+- a missing identity-discriminator field (§2.6)
+- non-monotonic `ts`
+- a high generic-label ratio — a signal the bout wants a denser pass (§4.1) rather than a defect
+
+### 4.7 `scripts/frame_answer_to_dump.py`
+
+Converts the answer JSON into the `(athlete_a_name, year)` dump shape, carrying `ts` and
+`video_start_seconds` through so `ts_origin='video_absolute'` stays true across the seam. This is
+the missing link that makes the whole pipeline runnable end to end.
+
+### 4.8 `--status` for the sheet backlog
+
+`frame_pdf.py` already skips fights whose video backs a reviewed sequence, but that check is a DB
+query only. A `--status` mode reading `out/` and `out/processed/` would show the three states that
+matter: rendered-but-unanswered, answered-but-unimported, done. As of 2026-08-20 `out/` held 24
+rendered PDFs plus 1 frames directory, against 1 answer.
+
+### 4.9 Prompt additions for the generated README
+
+Fold the lessons above into the context page the model actually reads:
+
+- name the scoreboard's screen position and that it is fixed
+- explain the countdown clock and the `bout_start_seconds` arithmetic (§2.2)
+- require an explicit identity discriminator with its verification (§2.6)
+- require `bout_end_seconds`, not just `bout_start_seconds` — the end is what bounds a finish
+- instruct the reader to crop rather than read full frames (§2.3)
+- optionally, a manifest `kit` field (`{"Aurelie Le Vern": "all black, long spats", …}`) printed on
+  the context page. One line of human input per bout removes the hardest ambiguity in the whole
+  task, at zero compute cost — the laziest fix on this list.
+
+## Provenance & maintenance
+
+Written 2026-08-20 from a first end-to-end manual read of
+`data/frame_pdf/out/anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY/` (32 frames),
+which produced `out/processed/<same-slug>.json`.
+
+Facts and how each was checked:
+
+1. **720p available while we sample 360p** — `yt-dlp -F` on the video lists format 136 at 1280×720;
+   `fetch()`'s selector is `bv*[height<=480]/b[height<=480]/…` and `FRAME_WIDTH = 640`. Both read
+   directly from `scripts/frame_pdf.py`.
+2. **~3% action area / ~60px athletes** — measured from the crop windows that produced a readable
+   image (110×70 out of 640×360).
+3. **Scoreboard never changed** — read from stacked crops of t=45/70/100/125.
+4. **5 of 32 frames carried no bout action** — t=0 and t=5 pre-start (clock 10:00, not running),
+   t=145/150/155 channel outro cards.
+5. **`out/processed/` was unreferenced** — `grep -rn "out/processed\|frame_pdf/out" --include="*.py"`
+   over the repo returned nothing outside `data/`.
+6. **`tesseract` not on PATH**; `opencv-python>=4.10` and `pillow>=10.4` are declared in
+   `pyproject.toml`.
+
+Not verified: whether the 720p bump changes yt-dlp's failure rate on members-only or geo-blocked
+uploads (the 403 behaviour documented in `fetch()` was not re-tested at a different quality); whether
+the auto-crop heuristic in §4.3 holds on non-IBJJF footage with a different mat palette or a moving
+camera. Both should be measured on a handful of bouts before either is made a default.
+
+Re-verification commands:
+
+```bash
+cd GrapplingArcAnalytics
+
+# what resolutions a given upload actually offers
+yt-dlp -F --cookies-from-browser firefox "https://www.youtube.com/watch?v=<id>" | grep mp4
+
+# the two resolution knobs
+grep -n "FRAME_WIDTH\|height<=480" scripts/frame_pdf.py
+
+# sheet backlog: rendered vs answered
+cd data/frame_pdf/out && echo "pdf=$(ls *.pdf | wc -l) frames=$(ls -d */ | grep -vc processed) answered=$(ls processed/*.json 2>/dev/null | wc -l)"
+
+# label check for one answer
+python3 -c "
+import json,sys,re,pathlib
+slug=sys.argv[1]
+d=json.load(open(f'data/frame_pdf/out/processed/{slug}.json'))
+lab=set(re.findall(r'^- (.+)$', pathlib.Path(f'data/frame_pdf/out/{slug}/labels.md').read_text(), re.M))
+bad=[e['label'] for b in d['bouts'] for e in b['events'] if e['label'] not in lab]
+print('unknown labels:', bad or 'none')
+" <slug>
+```

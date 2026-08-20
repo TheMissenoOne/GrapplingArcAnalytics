@@ -85,7 +85,19 @@ LIBRARY_PATH = REPO / "data" / "frame_pdf" / "node_library.json"
 # just to reprint a line it already knew. It also records which bouts resolved and which did
 # not, which is the half worth keeping: "no result found" is a fact about coverage.
 BJJH_PATH = REPO / "data" / "frame_pdf" / "bjjh_results.json"
-FRAME_WIDTH = 640          # px; readable body position without an unopenable file
+# Frame width and download ceiling, per footage kind. A single bout is the thing anyone
+# actually reads events off, and 640x360 was measured to be too little: the competitors
+# occupy roughly 3% of the frame (~110x70 px), and a reader could not tell top from bottom.
+# A full-event reel is a locator -- you are finding WHERE a bout is, not reading it -- so it
+# keeps the cheap ceiling, which is also what keeps a 6-hour broadcast off a 94%-full disk.
+# The two numbers move together: raising the download ceiling while ffmpeg still rescales to
+# 640 throws the pixels away a second time.
+FRAME_WIDTH = 640          # px; the default, and what a reel gets
+QUALITY: dict[str, tuple[int, str]] = {
+    "full_match": (1280, "bv*[height<=720]/b[height<=720]/bv*[height<=1080]/b"),
+    "full_event": (640, "bv*[height<=480]/b[height<=480]/bv*[height<=720]/b"),
+}
+_DEFAULT_QUALITY = QUALITY["full_event"]
 JPEG_QUALITY = 72
 
 PAGE_W, PAGE_H = 1654, 2339   # A4 at 200 dpi, portrait
@@ -248,10 +260,11 @@ def probe(url: str) -> dict[str, Any]:
     return {k: d.get(k) for k in ("title", "duration", "uploader", "upload_date", "description")}
 
 
-def fetch(url: str, dest: Path, start: float | None, end: float | None) -> Path:
-    """Download at <=480p, and only the requested section when one is given.
+def fetch(url: str, dest: Path, start: float | None, end: float | None,
+          fmt: str = "") -> Path:
+    """Download at the ceiling this footage kind earns, and only the requested section.
 
-    480p is a deliberate ceiling: the reader has to tell mount from side control, not read
+    The ceiling is deliberate: the reader has to tell mount from side control, not read
     a patch on a sleeve, and the disk on this machine is the binding constraint (a full
     ADCC stream at 1080p is tens of GB). ``--download-sections`` means a 4-minute bout
     inside a 6-hour broadcast costs 4 minutes of download, not 6 hours.
@@ -261,8 +274,8 @@ def fetch(url: str, dest: Path, start: float | None, end: float | None) -> Path:
     combined 360p format 18, against which ``bv*+ba`` has no match at all. Nothing
     downstream of here ever opens an audio track.
     """
-    cmd = ["yt-dlp", "--no-warnings", *_cookie_args(), "-f",
-           "bv*[height<=480]/b[height<=480]/bv*[height<=720]/b",
+    fmt = fmt or _DEFAULT_QUALITY[1]
+    cmd = ["yt-dlp", "--no-warnings", *_cookie_args(), "-f", fmt,
            "-o", str(dest / "%(id)s.%(ext)s")]
     if start is not None:
         cmd += ["--download-sections", f"*{int(start)}-{int(end) if end else 999999}",
@@ -279,7 +292,8 @@ def fetch(url: str, dest: Path, start: float | None, end: float | None) -> Path:
     return max(files, key=lambda p: p.stat().st_size)
 
 
-def extract(video: Path, out: Path, step: int, offset: float) -> list[tuple[float, Path]]:
+def extract(video: Path, out: Path, step: int, offset: float,
+            width: int = FRAME_WIDTH) -> list[tuple[float, Path]]:
     """Sample every ``step`` seconds. ``offset`` is added back to each frame's time so the
     stamp stays video-absolute even when only a section was downloaded -- the section starts
     at 0 in the local file, and forgetting that is precisely how a bout-relative clock gets
@@ -287,7 +301,7 @@ def extract(video: Path, out: Path, step: int, offset: float) -> list[tuple[floa
     out.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", str(video),
-         "-vf", f"fps=1/{step},scale={FRAME_WIDTH}:-2", "-q:v", "4",
+         "-vf", f"fps=1/{step},scale={width}:-2", "-q:v", "4",
          str(out / "f_%05d.jpg")], check=True)
     frames = sorted(out.glob("f_*.jpg"))
     # ffmpeg's fps filter emits the first frame at t=0, then every `step` seconds.
@@ -997,8 +1011,11 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
         step = widened
     with tempfile.TemporaryDirectory(dir=workdir) as tmp:
         tmpd = Path(tmp)
-        video = fetch(entry.url, tmpd, entry.start, entry.end)
-        frames = extract(video, tmpd / "frames", step, entry.start or 0.0)
+        # NOT `fmt` -- that name already means the output format, and shadowing it here sent
+        # every --format frames run down the PDF branch instead.
+        width, dl_fmt = QUALITY.get(entry.kind, _DEFAULT_QUALITY)
+        video = fetch(entry.url, tmpd, entry.start, entry.end, dl_fmt)
+        frames = extract(video, tmpd / "frames", step, entry.start or 0.0, width)
         video.unlink(missing_ok=True)          # the frames are the artefact; disk is tight
         if not frames:
             return f"FAIL {entry.vid}: ffmpeg produced no frames"
