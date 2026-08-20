@@ -519,6 +519,14 @@ def context_prose(step: int, with_library: bool, first_ts: float, last_ts: float
               "uses it. If a frame genuinely shows something the list does not cover, use "
               "your own words and flag it as `new_label: true` rather than bending it into "
               "the nearest listed name."),
+        ("p", "NOT EVERY FRAME IS LIVE ACTION. A broadcast cuts to slow-motion replays, "
+              "usually right after a finish or a scoring exchange, and a replay looks exactly "
+              "like the thing it replays. Read one as new action and the same event is "
+              "recorded twice, seconds apart, which downstream reads as a repeated technique "
+              "rather than one shown twice. Tells: a graphics bug or logo appears, the clock "
+              "stops or disappears, the camera angle changes, the action repeats something "
+              "you already saw. Skip those frames rather than logging them, and say in the "
+              "note which range you treated as replay."),
         ("p", "THE SCOREBOARD'S NAME ORDER IS NOT A MAT POSITION. A lower-third graphic puts "
               "one name left and one right by broadcast convention; which competitor stands "
               "where on the mat is unrelated and changes shot to shot. Binding a name to a "
