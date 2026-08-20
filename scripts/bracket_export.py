@@ -563,7 +563,6 @@ def video_layer(conn: Any, roster: Mapping[str, str]) -> list[dict[str, Any]]:
                 events = -1
         out.append({"slug": d.name, "title": title, "source": "local clip",
                     "clip": (d / "clip.mp4").exists(),
-                    "thumbs": sum(1 for _ in (d / "frames.jsonl").open()),
                     "registered_events": events,
                     "registered": events > 0,
                     "links": links.get(d.name, [])})
@@ -574,12 +573,31 @@ def video_layer(conn: Any, roster: Mapping[str, str]) -> list[dict[str, Any]]:
                          join athletes b on b.id=m.athlete_b_id
          where m.status='final' and m.video_url is not null
     """)).fetchall()
+    # A bout can be BOTH a local clip and a corpus row -- five of these were downloaded even
+    # though the corpus already held them. Listing it twice inflates the count and makes the
+    # same fight look like two, so the corpus row is folded into the local one and its
+    # sequence count reported there: "we hold the footage AND it already has events".
+    def _names(text_: str) -> set[str]:
+        folded = _fold(text_)
+        return {w for w in re.sub(r"[^a-z ]", " ", folded).split() if len(w) > 2}
+
+    local_names = [(o, _names(o["title"])) for o in out]
     for na, nb, ev, yr, url, start, n in rows:
         if not (roster.get(athlete_key(na)) or roster.get(athlete_key(nb))):
             continue
-        out.append({"slug": None, "title": f"{na} vs {nb}, {ev or '?'} {yr or ''}".strip(),
+        title = f"{na} vs {nb}, {ev or '?'} {yr or ''}".strip()
+        mine = _names(title)
+        hit = next((o for o, names in local_names if len(mine & names) >= 4), None)
+        if hit is not None:
+            hit["corpus_events"] = int(n)
+            hit.setdefault("links", []).append(
+                {"host": "YouTube · corpus", "url": url}) if url and not any(
+                    l.get("url") == url for l in hit.get("links", [])) else None
+            continue
+        out.append({"slug": None, "title": title,
                     "source": "published link", "url": url, "start": start,
-                    "events": int(n), "uniform": uniform(ev), "ruleset": ruleset(ev)})
+                    "events": int(n), "uniform": uniform(ev), "ruleset": ruleset(ev),
+                    "host": "YouTube" if "youtube" in (url or "") else "link publicado"})
     return out
 
 
@@ -738,6 +756,50 @@ def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
             "corpus_mean_rating": round(corpus_mean), "divisions": out}
 
 
+# ── layer 8: data quality ───────────────────────────────────────────────────────
+def data_quality(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
+    """Roster athletes who appear in the corpus under more than one spelling.
+
+    Reported as CANDIDATES, never merged here. Merging two athlete rows is a decision that
+    needs corroboration from outside the string -- this corpus has already had a real bout
+    collapsed into a self-match by a merge that looked obvious -- so the page names the pair,
+    says what it costs, and stops.
+
+    It costs something specific and checkable: a split athlete's rating is computed from only
+    the bouts filed under one of her spellings, which inflates her RD and can push her past
+    the publish gate for no reason but a typo.
+    """
+    import difflib
+
+    rows = conn.execute(text("""
+        select a.name, count(m.id) from athletes a
+          left join matches m on (m.athlete_a_id = a.id or m.athlete_b_id = a.id)
+               and m.status = 'final'
+         group by 1
+    """)).fetchall()
+    names = [(r[0], int(r[1])) for r in rows]
+    roster_keys = set(roster)
+    pairs = []
+    for i, (n1, c1) in enumerate(names):
+        for n2, c2 in names[i + 1:]:
+            if not c1 or not c2:
+                continue
+            k1, k2 = athlete_key(n1), athlete_key(n2)
+            if k1 == k2:
+                continue
+            if not (k1 in roster_keys or k2 in roster_keys):
+                continue
+            if difflib.SequenceMatcher(None, k1, k2).ratio() >= 0.80:
+                pairs.append({"a": n1, "a_bouts": c1, "b": n2, "b_bouts": c2,
+                              "ratio": round(difflib.SequenceMatcher(None, k1, k2).ratio(), 3)})
+    return {"duplicate_candidates": sorted(pairs, key=lambda p: -(p["a_bouts"] + p["b_bouts"])),
+            "rule": "difflib ratio >= 0.80 on the canonical key, at least one side on the "
+                    "roster, both sides carrying bouts",
+            "not_merged": "candidates only — merging athlete rows needs corroboration from "
+                          "outside the string, and a wrong merge collapses a real bout into "
+                          "a self-match"}
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--records", type=Path, required=True,
@@ -767,6 +829,7 @@ def main() -> int:
         corr = correlation_layer(conn, bouts)
         rating = rating_layer(conn, roster)
         radar = radar_layer(conn, bouts, roster)
+        dq_ = data_quality(conn, roster)
 
     doc = {
         "generated": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -783,6 +846,7 @@ def main() -> int:
         "videos": vids,
         "correlations": corr,
         "radar": radar,
+        "data_quality": dq_,
         "rd": {**rating,
                "athletes": {display[k]: v for k, v in rating["athletes"].items()}},
         "derived": json.loads(a.derived.read_text(encoding="utf-8")),
