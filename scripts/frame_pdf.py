@@ -33,6 +33,7 @@ bytes of its frames and nothing more.
 from __future__ import annotations
 
 import argparse
+import bisect
 import json
 import logging
 import re
@@ -42,6 +43,7 @@ import sys
 import tempfile
 import unicodedata
 from dataclasses import dataclass, field
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -163,6 +165,7 @@ class Entry:
     step: float | None = None    # per-entry override of --step
     kind: str = ""               # sourcing type: full_match / full_event / highlights
     skip: str = ""               # non-empty = do not render, and this says why
+    transcript: str = ""         # path to a transcript .md (see parse_transcript); empty = none
 
     @property
     def vid(self) -> str:
@@ -201,6 +204,143 @@ def load_manifest(path: Path) -> list[Entry]:
             continue
         seen[key] = e
     return list(seen.values())
+
+
+# ── Transcript alignment ─────────────────────────────────────────────────────────
+# A YouTube auto-caption export (the "show transcript" panel, copy-pasted). Its clock is the
+# same video-absolute axis as everything else here -- ffmpeg's, --download-sections', the
+# frame stamps' -- so a caption is placed next to a frame by second, no bout-relative
+# conversion involved.
+def _parse_hms(ts: str) -> int | None:
+    """``H:MM:SS`` or ``M:SS`` -> seconds, or None. Same shape as ``hhmmss`` in reverse."""
+    parts = ts.strip().split(":")
+    try:
+        nums = [int(p) for p in parts]
+    except ValueError:
+        return None
+    if len(nums) == 2:
+        m, s = nums
+        return m * 60 + s
+    if len(nums) == 3:
+        h, m, s = nums
+        return h * 3600 + m * 60 + s
+    return None
+
+
+def parse_transcript(path: Path) -> list[tuple[int, str]]:
+    """A YouTube transcript export -> ``[(second, caption_text)]``, in file order.
+
+    The export repeats a triple per caption: a timestamp line (``H:MM:SS`` or ``M:SS``), a
+    Portuguese long-form duration line ("3 horas, 45 minutos e 6 segundos") that says nothing
+    the timestamp didn't, and the caption text. The duration line is discarded here rather
+    than parsed -- it is redundant with the timestamp by construction, and it is the line most
+    likely to change shape with a different UI locale.
+    """
+    lines = path.read_text(encoding="utf-8").splitlines()
+    try:
+        body = lines[lines.index("Transcrição") + 1:]
+    except ValueError:
+        body = lines
+    if body and body[0].strip() == "Pesquisar transcrição":
+        body = body[1:]
+    while body and not body[-1].strip():
+        body.pop()
+    out: list[tuple[int, str]] = []
+    n = len(body) - len(body) % 3
+    for i in range(0, n, 3):
+        ts = _parse_hms(body[i])
+        if ts is None:
+            continue                      # a triple whose first line isn't a timestamp
+        out.append((ts, body[i + 2].strip()))
+    return out
+
+
+_BOUT_LINE = re.compile(
+    r'(?P<label>.+?)\s*\((?P<start>\d{1,2}:\d{2}(?::\d{2})?)\s*-\s*'
+    r'(?P<end>\d{1,2}:\d{2}(?::\d{2})?)\)')
+
+
+def parse_bout_index(path: Path) -> list[tuple[str, int, int]]:
+    """The header's partial bout list -> ``[(label, start_seconds, end_seconds)]``.
+
+    Only rows shaped ``Name vs Name (H:MM:SS - H:MM:SS)`` become entries. A row with a single
+    bare timestamp and no range (a highlight moment, not a bout span) has nothing to match
+    the regex's two-timestamp group and is silently skipped -- correct, not a defect: it
+    is not a usable window. Trailing junk after the closing paren (quote marks, "(Pode haver
+    mais)") is never captured because the regex stops matching at the paren.
+    """
+    out: list[tuple[str, int, int]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.strip() == "Transcrição":
+            break
+        m = _BOUT_LINE.search(line)
+        if not m:
+            continue
+        s, e = _parse_hms(m.group("start")), _parse_hms(m.group("end"))
+        if s is None or e is None:
+            continue
+        out.append((m.group("label").strip(), s, e))
+    return out
+
+
+def transcript_window(times: list[int], texts: list[str], t: float, step: float) -> str:
+    """Caption text for the frame at video-absolute second ``t``: every line whose timestamp
+    falls in ``[t, t + step)``, joined in order. Empty when nothing was said in the window --
+    that is a real answer (the reader renders a placeholder, not a shifted caption from a
+    neighbouring frame). ``times`` must be sorted ascending, as ``parse_transcript`` returns.
+    """
+    lo = bisect.bisect_left(times, t)
+    hi = bisect.bisect_left(times, t + step)
+    return " ".join(x for x in texts[lo:hi] if x)
+
+
+def build_windows(bouts: list[tuple[str, int, int]], total_seconds: float,
+                  window: float = 600.0) -> list[tuple[float, float]]:
+    """Fixed-size windows covering everything ``bouts`` does NOT already span, from 0 to
+    ``total_seconds``. This is how a partial bout index still yields full coverage: the named
+    ranges become fine-grained entries elsewhere, and this fills the gaps between and around
+    them so no part of the video is dropped on the floor."""
+    cur = 0.0
+    gaps: list[tuple[float, float]] = []
+    for _, s, e in sorted(bouts, key=lambda b: b[1]):
+        if s > cur:
+            gaps.append((cur, float(s)))
+        cur = max(cur, float(e))
+    if cur < total_seconds:
+        gaps.append((cur, total_seconds))
+
+    out: list[tuple[float, float]] = []
+    for gs, ge in gaps:
+        t = gs
+        while t < ge:
+            out.append((t, min(t + window, ge)))
+            t += window
+    return out
+
+
+@lru_cache(maxsize=4)
+def _load_transcript(path: str) -> tuple[tuple[int, str], ...]:
+    """Cached: the same transcript backs dozens of manifest entries in one run, and re-reading
+    a several-thousand-line file per entry is wasted work a dict lookup avoids."""
+    return tuple(parse_transcript(Path(path)))
+
+
+class DiskLowError(RuntimeError):
+    """Raised instead of letting a download run a filesystem to zero."""
+
+
+def _check_disk(*paths: Path, min_free_bytes: int) -> None:
+    seen: set[int] = set()
+    for p in paths:
+        p = p if p.exists() else p.parent
+        free = shutil.disk_usage(p).free
+        st_dev = p.stat().st_dev
+        if st_dev in seen:
+            continue
+        seen.add(st_dev)
+        if free < min_free_bytes:
+            raise DiskLowError(f"{free / 1e9:.2f} GB free on {p} -- below the "
+                          f"{min_free_bytes / 1e9:.2f} GB floor; aborting rather than filling it")
 
 
 # ── What the database already knows ─────────────────────────────────────────────
@@ -412,6 +552,26 @@ def _text_block(c: Canvas, text: str, x: float, y: float, width: float,
     return y
 
 
+def _text_block_capped(c: Canvas, text: str, x: float, y: float, width: float,
+                       size: float, leading: float, max_h: float, font: str = FONT) -> None:
+    """Wrapped text, hard-capped to ``max_h`` -- for a caption block glued to a fixed-size grid
+    cell, where ``_text_block``'s "keep drawing until the string ends" would run the block
+    into the frame below it. Truncates with an ellipsis rather than silently dropping the
+    tail, so a long caption reads as cut off, not as a caption that was fully shown."""
+    c.setFont(font, size)
+    lines = simpleSplit(_txt(text), font, size, width)
+    max_lines = max(1, int(max_h // leading))
+    if len(lines) > max_lines:
+        lines = lines[:max_lines]
+        last = lines[-1]
+        while last and c.stringWidth(last + "...", font, size) > width:
+            last = last[:-1]
+        lines[-1] = last + "..."
+    for line in lines:
+        c.drawString(x, y, line)
+        y -= leading
+
+
 def _break(c: Canvas, y: float, need: float = 46) -> float:
     """Start a new page when ``need`` points of room are gone.
 
@@ -472,7 +632,8 @@ def context_facts(entry: Entry, meta: dict[str, Any], db: DbContext, n_frames: i
 
 
 def context_prose(step: float, with_library: bool, first_ts: float, last_ts: float,
-                  lib_file: str = "", ts_source: str = "") -> list[tuple[str, str]]:
+                  lib_file: str = "", ts_source: str = "",
+                  with_transcript: bool = False) -> list[tuple[str, str]]:
     """What the reader is being asked for. ``("p", text)`` is a paragraph; ``("f", "name|desc")``
     is one row of the field table.
 
@@ -496,6 +657,16 @@ def context_prose(step: float, with_library: bool, first_ts: float, last_ts: flo
               "rebase the event times to it. A bout-relative time reported as an absolute one "
               "places the whole fight in a different part of the broadcast, and the result "
               "looks plausible while being wrong."),
+    ]
+    if with_transcript:
+        paras.append(
+            ("p", "THE CAPTION TEXT BESIDE EACH FRAME IS A GUIDE, NOT GROUND TRUTH. It is an "
+                  "auto-caption of live commentary: the commentator misnames athletes, talks "
+                  "about one bout while another is on screen, anticipates and speculates, and "
+                  "the text lags the picture. When the caption and the frame disagree, THE "
+                  "FRAME WINS. Use the caption to orient where to look and to break a tie on a "
+                  "label -- never to record an event you did not see in the frame itself."))
+    paras += [
         ("p", "For each event you can see, give:"),
         ("f", "ts|integer seconds, video-absolute"),
         ("f", "label|a technique name, taken verbatim from the label list"),
@@ -585,7 +756,8 @@ def context_prose(step: float, with_library: bool, first_ts: float, last_ts: flo
 
 def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbContext,
                       n_frames: int, step: float, first_ts: float, last_ts: float,
-                      with_library: bool, bjjh: dict[str, Any] | None = None) -> None:
+                      with_library: bool, bjjh: dict[str, Any] | None = None,
+                      with_transcript: bool = False) -> None:
     """The first page: which fight, which clock, and what the answer must look like.
 
     It is written as a prompt because it IS the prompt -- the PDF is the whole message the
@@ -634,7 +806,7 @@ def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbConte
     c.drawString(PAD, y, "How to read this")
     y -= 22
 
-    paras = context_prose(step, with_library, first_ts, last_ts)
+    paras = context_prose(step, with_library, first_ts, last_ts, with_transcript=with_transcript)
 
     for kind, body in paras:
         y = _break(c, y)
@@ -711,8 +883,13 @@ def draw_library_pages(c: Canvas, library: dict[str, Any]) -> None:
     c.showPage()
 
 
-def draw_grid_pages(c: Canvas, frames: list[tuple[float, Path]], grid: tuple[int, int]) -> None:
-    """The frames, each with its video-absolute stamp as real text above it.
+def draw_grid_pages(c: Canvas, frames: list[tuple[float, Path]], grid: tuple[int, int],
+                    captions: dict[float, str] | None = None) -> None:
+    """The frames, each with its video-absolute stamp as real text above it, and -- when
+    ``captions`` was supplied -- the transcript text for that frame's window as a wrapped,
+    height-capped block beneath the image. A frame with nothing said in its window still gets
+    the block, carrying a placeholder rather than being left out: the layout must not shift
+    depending on whether a caption exists.
 
     ``drawImage`` on a JPEG path embeds the original DCTDecode stream, so a frame costs what
     ffmpeg already spent on it and nothing more.
@@ -721,6 +898,9 @@ def draw_grid_pages(c: Canvas, frames: list[tuple[float, Path]], grid: tuple[int
     per = cols * rows
     cell_w = (PW - 2 * PAD) / cols
     cell_h = (PH - 2 * PAD) / rows
+    # A caption block takes a fixed slice of the cell's bottom, shrinking the image rather
+    # than growing the page -- so a sheet with a transcript still has a predictable size.
+    cap_h = cell_h * 0.26 if captions is not None else 0.0
     for i in range(0, len(frames), per):
         for j, (ts, path) in enumerate(frames[i:i + per]):
             x = PAD + (j % cols) * cell_w
@@ -728,9 +908,13 @@ def draw_grid_pages(c: Canvas, frames: list[tuple[float, Path]], grid: tuple[int
             y_top = PH - PAD - (j // cols) * cell_h
             c.setFont(FONT_B, 8)
             c.drawString(x, y_top - 9, f"{hhmmss(ts)}   ({int(ts)}s)")
-            c.drawImage(ImageReader(str(path)), x, y_top - cell_h + 6,
-                        width=cell_w - 8, height=cell_h - 22,
+            c.drawImage(ImageReader(str(path)), x, y_top - cell_h + 6 + cap_h,
+                        width=cell_w - 8, height=cell_h - 22 - cap_h,
                         preserveAspectRatio=True, anchor="n")
+            if captions is not None:
+                text = captions.get(ts) or "(no narration in this window)"
+                _text_block_capped(c, text, x, y_top - cell_h + cap_h - 4,
+                                   cell_w - 8, 6.5, 7.6, cap_h - 4)
         c.showPage()
 
 
@@ -819,16 +1003,23 @@ def write_frames_dir(entry: Entry, meta: dict[str, Any], db: DbContext,
 def build_pdf(entry: Entry, meta: dict[str, Any], db: DbContext,
               frames: list[tuple[float, Path]], step: float, grid: tuple[int, int],
               out_path: Path, library: dict[str, Any] | None = None,
-              bjjh: dict[str, Any] | None = None) -> None:
+              bjjh: dict[str, Any] | None = None,
+              transcript: tuple[tuple[int, str], ...] | None = None) -> None:
     c = Canvas(str(out_path), pagesize=PAGE)
     c.setTitle(_txt(entry.label or str(meta.get("title") or entry.vid)))
     c.setSubject(f"https://www.youtube.com/watch?v={entry.vid} — frames every {step}s, "
                  "timestamps are video-absolute")
+    captions = None
+    if transcript is not None:
+        times = [t for t, _ in transcript]
+        texts = [x for _, x in transcript]
+        captions = {ts: transcript_window(times, texts, ts, step) for ts, _ in frames}
     draw_context_page(c, entry, meta, db, len(frames), step,
-                      frames[0][0], frames[-1][0], with_library=library is not None, bjjh=bjjh)
+                      frames[0][0], frames[-1][0], with_library=library is not None, bjjh=bjjh,
+                      with_transcript=captions is not None)
     if library:
         draw_library_pages(c, library)
-    draw_grid_pages(c, frames, grid)
+    draw_grid_pages(c, frames, grid, captions=captions)
     c.save()
 
 
@@ -1047,7 +1238,8 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: float,
             library: dict[str, Any] | None = None,
             bjjh: dict[str, Any] | None = None, fmt: str = "pdf",
             pdf_step: float = DEFAULT_STEP_SECONDS,
-            strip_cap: int = DEFAULT_STRIP_FRAMES) -> str:
+            strip_cap: int = DEFAULT_STRIP_FRAMES,
+            min_free_bytes: int = 0) -> str:
     """One download, up to two artefacts.
 
     **They do not share a sampling interval, and that is not an oversight.** A sheet is a
@@ -1074,10 +1266,14 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: float,
     if not force and not missing:
         return f"skip {entry.vid}: both artefacts already built"
 
+    if min_free_bytes:
+        _check_disk(out_dir, workdir, min_free_bytes=min_free_bytes)
+
     meta = probe(entry.url)
     span = _span_seconds(entry, meta)
     strip_step = _capped(entry.step or step, span, strip_cap, entry.vid, "strip")
     sheet_step = _capped(entry.step or pdf_step, span, max_frames, entry.vid, "sheet")
+    transcript = _load_transcript(entry.transcript) if entry.transcript else None
 
     made: list[str] = []
     with tempfile.TemporaryDirectory(dir=workdir) as tmp:
@@ -1101,7 +1297,8 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: float,
             sheet = extract(video, tmpd / "sheet", sheet_step, entry.start or 0.0, width)
             if not sheet:
                 return f"FAIL {entry.vid}: ffmpeg produced no frames for the sheet"
-            build_pdf(entry, meta, db, sheet, sheet_step, grid, pdf_path, library, bjjh)
+            build_pdf(entry, meta, db, sheet, sheet_step, grid, pdf_path, library, bjjh,
+                     transcript)
             made.append(f"{pdf_path.name} ({len(sheet)} fr @{sheet_step:g}s, "
                         f"{pdf_path.stat().st_size / 1e6:.1f} MB)")
 
@@ -1157,6 +1354,10 @@ def main() -> int:
     ap.add_argument("--refresh-bjjh", action="store_true",
                     help="re-scrape BJJ Heroes instead of reading the cached resolution")
     ap.add_argument("--dry-run", action="store_true", help="report the plan, download nothing")
+    ap.add_argument("--min-free-gb", type=float, default=0.0,
+                    help="abort the whole run (not just one entry) when free space on --out "
+                         "or --workdir's filesystem drops below this many GB. 0 (default) "
+                         "checks nothing -- opt in for a long batch on a tight disk")
     a = ap.parse_args()
 
     if a.dump_library:
@@ -1203,12 +1404,19 @@ def main() -> int:
             print(f"  {e.vid}  {state:20s}  {e.label or '(no label)'}")
         return 0
 
+    min_free_bytes = int(a.min_free_gb * 1e9)
     results = []
     for e in entries:
         try:
             results.append(process(e, db, a.out, a.step, (cols, rows), a.workdir,
                                    a.force, a.max_frames, library, bjjh.get(e.slug),
-                                   a.format, a.pdf_step))
+                                   a.format, a.pdf_step, DEFAULT_STRIP_FRAMES, min_free_bytes))
+        except DiskLowError as exc:
+            # Loud and whole-run: every remaining entry would hit the same wall, and letting
+            # them try one by one just fails 30 times slower and messier than stopping once.
+            logger.error("aborting after %d entries: %s", len(results), exc)
+            results.append(f"FAIL {e.vid}: {exc}")
+            break
         except Exception as exc:                                  # noqa: BLE001
             # One dead link must not cost the other 27 downloads. The reason is printed
             # next to the id, so the manifest row can be fixed and only that row re-run.

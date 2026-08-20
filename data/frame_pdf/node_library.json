@@ -1,8 +1,8 @@
 {
  "generated": "2026-08-20",
  "source": "technique_nodes on prod, alembic 0048",
- "node_count": 392,
- "attested_in_corpus": 281,
+ "node_count": 376,
+ "attested_in_corpus": 279,
  "how_a_label_becomes_a_node": "label -> analysis.names._normalize_name (lowercase, strip punctuation and accents, collapse whitespace) -> canonicalize (the `synonyms` map below) -> node_key. Prefer a `label` from this file verbatim. A label that normalises to a key not listed here mints a new node instead of failing, which is how one technique ends up split across two spellings.",
  "event_types": [
   {
@@ -56,7 +56,9 @@
   "straight foot lock": "foot lock",
   "leg entry 5050": "5050 guard",
   "armbar choi bar": "choi bar",
-  "half guard control": "top control half guard"
+  "half guard control": "top control half guard",
+  "pull guard": "guard pull",
+  "pass": "guard pass"
  },
  "nodes": [
   {
@@ -148,6 +150,14 @@
    "corpus_events": 194
   },
   {
+   "key": "guard pull",
+   "label": "Guard Pull",
+   "type": "technique",
+   "node_type": "transition",
+   "taxonomy_id": null,
+   "corpus_events": 174
+  },
+  {
    "key": "heel hook",
    "label": "Heel Hook",
    "type": "technique",
@@ -156,20 +166,20 @@
    "corpus_events": 171
   },
   {
-   "key": "guard pull",
-   "label": "Guard Pull",
-   "type": "technique",
-   "node_type": "transition",
-   "taxonomy_id": null,
-   "corpus_events": 170
-  },
-  {
    "key": "butterfly guard",
    "label": "Butterfly Guard",
    "type": "technique",
    "node_type": "guard",
    "taxonomy_id": "butterfly-guard",
    "corpus_events": 163
+  },
+  {
+   "key": "guard pass",
+   "label": "Guard Pass",
+   "type": "technique",
+   "node_type": "pass",
+   "taxonomy_id": null,
+   "corpus_events": 146
   },
   {
    "key": "closed guard",
@@ -194,14 +204,6 @@
    "node_type": "control",
    "taxonomy_id": null,
    "corpus_events": 125
-  },
-  {
-   "key": "guard pass",
-   "label": "Guard Pass",
-   "type": "technique",
-   "node_type": "pass",
-   "taxonomy_id": null,
-   "corpus_events": 123
   },
   {
    "key": "knee bar",
@@ -553,14 +555,6 @@
    "type": "technique",
    "node_type": "guard",
    "taxonomy_id": null,
-   "corpus_events": 23
-  },
-  {
-   "key": "pass",
-   "label": "Pass",
-   "type": "technique",
-   "node_type": "pass",
-   "taxonomy_id": "pass",
    "corpus_events": 23
   },
   {
@@ -1088,14 +1082,6 @@
    "label": "North South Choke",
    "type": "technique",
    "node_type": "submission",
-   "taxonomy_id": null,
-   "corpus_events": 4
-  },
-  {
-   "key": "pull guard",
-   "label": "Pull Guard",
-   "type": "technique",
-   "node_type": "guard",
    "taxonomy_id": null,
    "corpus_events": 4
   },
@@ -2308,34 +2294,10 @@
    "corpus_events": 1
   },
   {
-   "key": "ankle pick takedown",
-   "label": "Ankle Pick Takedown",
-   "type": "technique",
-   "node_type": "takedown",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
    "key": "arm drag takedown",
    "label": "Arm Drag Takedown",
    "type": "technique",
    "node_type": "takedown",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
-   "key": "arm lock",
-   "label": "Arm Lock",
-   "type": "technique",
-   "node_type": "submission",
-   "taxonomy_id": "arm-lock",
-   "corpus_events": 0
-  },
-  {
-   "key": "armbar choi bar",
-   "label": "Armbar / Choi Bar",
-   "type": "technique",
-   "node_type": "submission",
    "taxonomy_id": null,
    "corpus_events": 0
   },
@@ -2668,22 +2630,6 @@
    "corpus_events": 0
   },
   {
-   "key": "half guard control",
-   "label": "Half Guard Control",
-   "type": "technique",
-   "node_type": "control",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
-   "key": "half guard recovery",
-   "label": "Half Guard Recovery",
-   "type": "technique",
-   "node_type": "escape",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
    "key": "head kick",
    "label": "Head Kick",
    "type": "technique",
@@ -2820,14 +2766,6 @@
    "corpus_events": 0
   },
   {
-   "key": "leg entry 5050",
-   "label": "Leg Entry (50/50)",
-   "type": "technique",
-   "node_type": "transition",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
    "key": "leg kick",
    "label": "Leg Kick",
    "type": "technique",
@@ -2892,14 +2830,6 @@
    "corpus_events": 0
   },
   {
-   "key": "pass the guard",
-   "label": "Pass The Guard",
-   "type": "technique",
-   "node_type": "pass",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
    "key": "passagem headquarters",
    "label": "Passagem Headquarters",
    "type": "technique",
@@ -2920,14 +2850,6 @@
    "label": "Reset / Stalemate",
    "type": "technique",
    "node_type": "transition",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
-   "key": "reverse arm lock",
-   "label": "Reverse Arm Lock",
-   "type": "technique",
-   "node_type": "submission",
    "taxonomy_id": null,
    "corpus_events": 0
   },
@@ -2972,14 +2894,6 @@
    "corpus_events": 0
   },
   {
-   "key": "single leg x guard entry",
-   "label": "Single Leg X Guard Entry",
-   "type": "technique",
-   "node_type": "guard",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
    "key": "singleleg defense",
    "label": "Single-leg Defense",
    "type": "technique",
@@ -3020,14 +2934,6 @@
    "corpus_events": 0
   },
   {
-   "key": "snatch single leg takedown",
-   "label": "Snatch Single Leg Takedown",
-   "type": "technique",
-   "node_type": "takedown",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
    "key": "spinning attack",
    "label": "Spinning Attack",
    "type": "technique",
@@ -3040,14 +2946,6 @@
    "label": "Stalling Warning",
    "type": "technique",
    "node_type": "penalty",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
-   "key": "stand up escape",
-   "label": "Stand Up Escape",
-   "type": "technique",
-   "node_type": "transition",
    "taxonomy_id": null,
    "corpus_events": 0
   },
@@ -3070,14 +2968,6 @@
   {
    "key": "straight armbar",
    "label": "Straight Armbar",
-   "type": "technique",
-   "node_type": "submission",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
-   "key": "straight foot lock",
-   "label": "Straight Foot Lock",
    "type": "technique",
    "node_type": "submission",
    "taxonomy_id": null,
@@ -3137,22 +3027,6 @@
    "type": "technique",
    "node_type": "transition",
    "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
-   "key": "trip takedown",
-   "label": "Trip Takedown",
-   "type": "technique",
-   "node_type": "takedown",
-   "taxonomy_id": null,
-   "corpus_events": 0
-  },
-  {
-   "key": "turtle escape",
-   "label": "Turtle Escape",
-   "type": "technique",
-   "node_type": "escape",
-   "taxonomy_id": "turtle-escape",
    "corpus_events": 0
   },
   {
