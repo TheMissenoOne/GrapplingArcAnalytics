@@ -72,6 +72,7 @@ from analysis.attribution import (  # noqa: E402
     attribute,
     bout_flags,
     is_event,
+    normalize_chain,
     usable_perspective,
     usable_role,
 )
@@ -921,6 +922,8 @@ def _sequence_block(mine: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
 
     # What the attribution model withheld, counted rather than hidden.
     unattributed: Counter[str] = Counter()
+    seq_norm: Counter[str] = Counter()
+    re_entries: Counter[str] = Counter()
     role_unknown = 0
     gated_bouts: list[dict[str, Any]] = []
     by_reason: Counter[str] = Counter()
@@ -970,9 +973,17 @@ def _sequence_block(mine: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
                     role_unknown += 1
 
             # The chain stays A FAVOR: a transition tree mixing her move with her opponent's
-            # would draw a route neither of them took.
-            chain = [str(e["label"]) for e in evs
-                     if e["perspective"] == "favor" and usable_perspective(e) and e.get("label")]
+            # would draw a route neither of them took. And it is NORMALIZED: consecutive
+            # repeats of the same node fold, because `Half Guard -> Half Guard` is one
+            # occupancy logged twice and not a transition. A -> B -> A survives untouched.
+            own = [e for e in evs if e["perspective"] == "favor" and usable_perspective(e)
+                   and is_event(e)]
+            chain, norm = normalize_chain(own)
+            for k in ("raw", "normalized", "state_collapses", "action_repeats_folded",
+                      "self_loops_removed"):
+                seq_norm[k] += norm[k]
+            for lbl, c in norm["re_entries"].items():
+                re_entries[lbl] += c
             if chain:
                 openers[outcome][chain[0]] += 1
                 finishers[outcome][chain[-1]] += 1
@@ -1015,6 +1026,19 @@ def _sequence_block(mine: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
             "transitions": sum(gaps.values()),
             "transitions_adjacent": gaps.get(0, 0),
             "opponent_events_skipped": sum(g * c for g, c in gaps.items()),
+        },
+        # Traceability for the fold, published rather than described: how many rows went in,
+        # how many nodes the paths are built from, and what the difference was made of.
+        "sequence_normalization": {
+            "raw_events": seq_norm["raw"],
+            "normalized_events": seq_norm["normalized"],
+            "consecutive_duplicates_removed": seq_norm["self_loops_removed"],
+            "self_loops_removed": seq_norm["self_loops_removed"],
+            "state_collapses": seq_norm["state_collapses"],
+            "action_repeats_folded": seq_norm["action_repeats_folded"],
+            "re_entries": re_entries.most_common(12),
+            "rule_code": "consecutive_only_array_order",
+            "scope": "paths, bigrams, trigrams, heatmap — counts are untouched",
         },
         "path_to_victory": _path(won),
         "path_to_defeat": _path(lost),

@@ -234,3 +234,78 @@ def test_bookkeeping_rows_are_not_events() -> None:
     assert at.is_event({"type": "strike"}) is False
     for t in at.EVENT_TYPES:
         assert at.is_event({"type": t}) is True
+
+
+# ── sequence normalization ──────────────────────────────────────────────────────
+def _n(*evs: tuple[str, str]) -> list[dict[str, object]]:
+    return [{"type": t, "label": lbl} for t, lbl in evs]
+
+
+def _chain(*evs: tuple[str, str]) -> list[str]:
+    return at.normalize_chain(_n(*evs))[0]
+
+
+G, C, T, S_ = "guard", "control", "takedown", "submission"
+
+
+def test_a_state_logged_three_times_is_one_visit() -> None:
+    assert _chain((G, "Half Guard"), (G, "Half Guard"), (G, "Half Guard")) == ["Half Guard"]
+
+
+def test_a_repeat_followed_by_a_move_keeps_the_move() -> None:
+    assert _chain((G, "Half Guard"), (G, "Half Guard"), (T, "Guard Pass")) == \
+        ["Half Guard", "Guard Pass"]
+
+
+def test_a_repeat_in_the_middle_folds_and_the_rest_survives() -> None:
+    assert _chain((G, "Half Guard"), (C, "Mount"), (C, "Mount"), (S_, "Armbar")) == \
+        ["Half Guard", "Mount", "Armbar"]
+
+
+def test_the_spec_example_end_to_end() -> None:
+    """Half Guard x3 -> Guard Pass -> Mount x2 is one visit each side of one pass."""
+    assert _chain((G, "Half Guard"), (G, "Half Guard"), (G, "Half Guard"),
+                  ("pass", "Guard Pass"), (C, "Mount"), (C, "Mount")) == \
+        ["Half Guard", "Guard Pass", "Mount"]
+
+
+def test_a_return_is_not_a_duplicate() -> None:
+    """A -> B -> A is a real trajectory: passed, recovered, passed again. Only CONSECUTIVE
+    rows fold, and this is the case a global dedup would destroy."""
+    assert _chain((G, "Half Guard"), ("pass", "Guard Pass"), (G, "Half Guard")) == \
+        ["Half Guard", "Guard Pass", "Half Guard"]
+
+
+def test_two_attempts_with_anything_between_stay_two_attempts() -> None:
+    assert _chain((T, "Single Leg Takedown"), ("escape", "Sprawl"),
+                  (T, "Single Leg Takedown")) == \
+        ["Single Leg Takedown", "Sprawl", "Single Leg Takedown"]
+
+
+def test_no_chain_ever_contains_a_self_loop() -> None:
+    chain = _chain((C, "Back Control"), (C, "Back Control"), (S_, "Armbar"), (S_, "Armbar"),
+                   (C, "Back Control"))
+    assert all(x != y for x, y in zip(chain, chain[1:]))
+
+
+def test_the_raw_count_survives_the_fold() -> None:
+    """The fold is for the GRAPH. Every row is still counted -- `nodes` and
+    `type_by_outcome` see all of them -- and the counters say exactly what was folded."""
+    _, st = at.normalize_chain(_n((G, "Half Guard"), (G, "Half Guard"),
+                                  (T, "Single Leg Takedown"), (T, "Single Leg Takedown")))
+    assert st["raw"] == 4 and st["normalized"] == 2
+    assert st["self_loops_removed"] == 2
+    assert st["state_collapses"] == 1        # the position
+    assert st["action_repeats_folded"] == 1  # the attempt, indeterminable, folded anyway
+    assert st["re_entries"] == {"Half Guard": 1, "Single Leg Takedown": 1}
+
+
+def test_the_same_label_under_two_types_is_two_nodes() -> None:
+    """Turtle Position is filed under `control` and under `escape` for different movements.
+    Folding on the label alone would merge two different readings of the corpus."""
+    assert _chain((C, "Turtle Position"), ("escape", "Turtle Position")) == \
+        ["Turtle Position", "Turtle Position"]
+
+
+def test_an_unlabelled_row_is_not_a_node() -> None:
+    assert at.normalize_chain([{"type": "guard", "label": ""}])[0] == []

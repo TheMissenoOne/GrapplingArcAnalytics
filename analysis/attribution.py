@@ -44,6 +44,7 @@ it. Fewer correct numbers beat more inferred ones.
 """
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
@@ -385,3 +386,62 @@ def directional(ev: Mapping[str, Any]) -> bool:
     attribution could not be resolved is kept, shown and counted in the totals, and excluded
     from anything with a direction."""
     return usable_perspective(ev) and usable_role(ev)
+
+
+# ── sequence normalization ──────────────────────────────────────────────────────
+def normalize_chain(events: Sequence[Mapping[str, Any]]) -> tuple[list[str], dict[str, int]]:
+    """A bout-side's event chain with consecutive repeats folded, for transition analysis only.
+
+    A transition graph built straight off the raw rows is dominated by edges that say nothing.
+    ``Half Guard -> Half Guard`` is not a transition: it is one occupancy of one position that
+    the refiner logged three times, and every A -> A edge crowds out the A -> B edges the graph
+    exists to show.
+
+    **Only CONSECUTIVE repeats fold.** ``A -> B -> A`` is a real trajectory -- she was passed,
+    recovered, was passed again -- and survives untouched. Two separate single-leg attempts
+    with anything in between stay two attempts.
+
+    The rule for two IDENTICAL rows sitting next to each other, and why it is what it is:
+
+    ``state``     (guard, control) -- collapsed, and this is not a judgement call. A position
+                  is an occupancy, not an act; being in half guard across three logged rows is
+                  one visit to half guard.
+    everything    (actions, transitions) -- **indeterminable, and folded anyway for the graph
+    else          while the raw count is preserved everywhere else.** Two consecutive
+                  ``Single Leg Takedown`` rows might be two attempts or one attempt logged
+                  twice, and this corpus cannot tell: `successful` is present on 29% of events,
+                  `matches.ts_origin` is NULL on all 864 rows, so a `ts` gap is a position in
+                  an unanchored timeline and not a duration. **The only ordering signal that
+                  exists is the array itself**, and array order cannot separate those two
+                  cases. So the count survives -- `nodes`, `type_by_outcome` and every total
+                  still see both rows -- and the PATH loses the self-loop, because an A -> A
+                  edge is a claim about a transition that no reading of the data supports.
+
+    The repetition is not thrown away: it comes back as `re_entries`, which is a fact about a
+    node ("she went back to it") rather than an edge in a graph.
+
+    Returns the folded chain of labels and the counters `sequence_normalization` publishes.
+    """
+    chain: list[str] = []
+    prev_key: tuple[str, str] | None = None
+    stats = {"raw": 0, "normalized": 0, "state_collapses": 0, "action_repeats_folded": 0}
+    re_entries: Counter[str] = Counter()
+    for e in events:
+        label = str(e.get("label") or "")
+        if not label:
+            continue
+        stats["raw"] += 1
+        key = ((e.get("type") or "").lower(), label)
+        if key == prev_key:
+            # Same event, same row-neighbour: a self-loop and nothing else.
+            if (e.get("category") or classify(e.get("type"), label).category) == STATE:
+                stats["state_collapses"] += 1
+            else:
+                stats["action_repeats_folded"] += 1
+            re_entries[label] += 1
+            continue
+        chain.append(label)
+        prev_key = key
+    stats["normalized"] = len(chain)
+    stats["self_loops_removed"] = stats["state_collapses"] + stats["action_repeats_folded"]
+    return chain, {**stats, "re_entries": dict(re_entries)}

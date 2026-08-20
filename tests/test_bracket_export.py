@@ -394,3 +394,55 @@ def test_a_later_own_table_lands_on_the_same_identity() -> None:
     assert a["provenance"]["has_own_table"] is True
     assert a["provenance"]["reconstructed_share"] == 0.5
     assert a["cuts"][bx.ALL_CUT]["by_source"] == {"own_record": 1, "opponent_record": 1}
+
+
+# ── the fold, at the layer that publishes it ────────────────────────────────────
+REPEATS = _bout("b5", [
+    _e(10, "guard", "Half Guard", "A"), _e(20, "guard", "Half Guard", "A"),
+    _e(30, "guard", "Half Guard", "A"),
+    _e(40, "pass", "Guard Pass", "A"),
+    _e(50, "control", "Mount", "A"), _e(60, "control", "Mount", "A"),
+    _e(70, "submission", "Armbar", "B"),
+])
+
+
+def test_the_transition_graph_carries_no_self_loop() -> None:
+    """A -> A is not a transition. Before the fold, the +65 kg heatmap held 31 of them on the
+    diagonal and the win path five self-loop edges — a graph substantially about nothing."""
+    out = bx.sequence_layer([REPEATS], "65 kg")
+    for kind in ("path_to_victory", "path_to_defeat"):
+        assert [e for e in out[kind]["edges"] if e["from"] == e["to"]] == []
+        pairs = [b[0].split(" → ") for b in out[kind]["bigrams"]]
+        assert [p for p in pairs if p[0] == p[1]] == []
+    h = out["heatmap"]
+    assert all(h["matrix"][i][i] == 0 for i in range(len(h["labels"])))
+
+
+def test_the_fold_is_published_rather_than_described() -> None:
+    out = bx.sequence_layer([REPEATS], "65 kg")
+    n = out["sequence_normalization"]
+    assert n["raw_events"] == 6 and n["normalized_events"] == 3
+    assert n["consecutive_duplicates_removed"] == 3
+    assert n["state_collapses"] == 3 and n["action_repeats_folded"] == 0
+    assert dict(n["re_entries"]) == {"Half Guard": 2, "Mount": 1}
+    assert n["rule_code"] == "consecutive_only_array_order"
+
+
+def test_the_counts_do_not_move_when_the_graph_folds() -> None:
+    """The fold is for edges. Every row still reaches the node list and the type mix."""
+    out = bx.sequence_layer([REPEATS], "65 kg")
+    assert out["attribution"]["favor"] == 6          # all six of hers, unfolded
+    state = {(x["label"], x["k"]) for x in out["nodes"]["favor"]["state"]}
+    assert ("Half Guard", 3) in state and ("Mount", 2) in state
+
+
+def test_a_return_still_draws_its_edge() -> None:
+    back = _bout("b6", [
+        _e(10, "guard", "Half Guard", "A"), _e(20, "pass", "Guard Pass", "A"),
+        _e(30, "guard", "Half Guard", "A"), _e(40, "submission", "Armbar", "A"),
+    ])
+    out = bx.sequence_layer([back], "65 kg")
+    edges = {(e["from"], e["to"]) for e in out["path_to_victory"]["edges"]}
+    assert ("Half Guard", "Guard Pass") in edges
+    assert ("Guard Pass", "Half Guard") in edges
+    assert out["sequence_normalization"]["consecutive_duplicates_removed"] == 0
