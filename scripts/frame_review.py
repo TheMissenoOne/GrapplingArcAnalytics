@@ -159,7 +159,7 @@ INDEX = r"""<!doctype html><html lang="en"><head><meta charset="utf-8">
 --ok:#4ac07a;--bad:#e2585c;--fix:#e0a63c;--sel:#3d7de0}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
 font:13px/1.45 ui-sans-serif,system-ui,sans-serif;height:100vh;display:flex}
-#rail{width:250px;flex:none;border-right:1px solid var(--line);overflow:auto;background:var(--pane)}
+#rail{width:230px;flex:none;border-right:1px solid var(--line);overflow:auto;background:var(--pane)}
 #rail h1{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);
 margin:0;padding:14px 12px 8px}
 .b{padding:8px 12px;border-bottom:1px solid var(--line);cursor:pointer}
@@ -173,18 +173,19 @@ justify-content:space-between;align-items:center;gap:16px}
 #body{flex:1;display:flex;min-height:0}
 #stage{flex:1;display:flex;flex-direction:column;min-width:0;padding:12px;gap:8px}
 #big{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
-background:#000;border:1px solid var(--line);border-radius:4px;position:relative}
+background:#000;border:1px solid var(--line);border-radius:4px;position:relative;overflow:hidden}
 #big img{max-width:100%;max-height:100%;object-fit:contain}
 #bigts{position:absolute;left:8px;top:8px;background:#000c;padding:2px 7px;border-radius:3px;
 font-variant-numeric:tabular-nums;font-size:12px}
-#strip{height:74px;display:flex;gap:4px;overflow-x:auto;align-items:center}
+#strip{height:78px;flex:none;display:flex;gap:4px;overflow-x:auto;align-items:center;
+padding-bottom:6px}
 #strip img{height:64px;border:2px solid transparent;border-radius:3px;cursor:pointer;flex:none}
 #strip img.on{border-color:var(--sel)}
 #strip img.ev{border-color:var(--fix)}
-#side{width:400px;flex:none;border-left:1px solid var(--line);display:flex;flex-direction:column}
-#evs{flex:1;overflow:auto}
+#side{width:360px;flex:none;border-left:1px solid var(--line);display:flex;flex-direction:column}
+#evs{flex:1;overflow:auto;min-height:120px}
 #ident{padding:8px 10px;border-bottom:1px solid var(--line);font-size:11px;color:var(--dim);
-background:#12161c}
+background:#12161c;max-height:132px;overflow:auto;flex:none}
 #ident b{color:var(--fg);font-weight:600}
 #ident button{margin-top:6px;font-size:11px;padding:3px 8px}
 .e{padding:7px 10px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:8px}
@@ -214,7 +215,7 @@ button.pri{background:var(--sel);border-color:var(--sel);color:#fff}
  <div id="body">
   <div id="stage"><div id="big"><span id="bigts"></span><img id="img"></div>
    <div id="strip"></div></div>
-  <div id="side"><div id="evs"></div>
+  <div id="side"><div id="ident"></div><div id="evs"></div>
    <div id="edit"></div>
    <div id="bar">
     <button class="ok" onclick="verdict('ok')">Correct (a)</button>
