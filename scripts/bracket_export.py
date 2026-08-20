@@ -5,9 +5,11 @@ so a number can never differ between the page and the analysis that produced it.
 
 Scope is the CATEGORY by default, and every block says which universe it describes: `scopes`
 labels each one `filtered` (respects the division and the current filters), `category`
-(division-specific, and it names the axes it ignores and why) or `global` (the whole corpus).
-A number is never allowed to sit beside another one drawn from a different universe without
-saying so.
+(division-specific, and it names the axes it ignores and why), `career` (one athlete's whole
+record, filters and all -- her tape is the only universe here that is a person) or `global`
+(the whole corpus). A number is never allowed to sit beside another one drawn from a different
+universe without saying so, and neither renderer may invent a scope the export did not
+publish: a hard-coded badge is a claim nothing tested.
 
 Per-athlete PAGES do exist (`athletes`), and they are not an exception to the rule above --
 they are the same rule at a different scope. Each carries the same three axes, the same Wilson
@@ -156,13 +158,15 @@ ALL_CUT = cut_key()
 #
 #   filtered   respects the division AND the current filters
 #   category   division-specific, does NOT respect the other filters -- and names which ones
+#   career     ONE athlete's whole record, no filters -- the only universe here that is a
+#              person rather than a set of bouts
 #   global     the whole corpus, the division included in it
 #
 # `ignored_reason_code` exists because "does not respect the filter" and "cannot respect the
 # filter" are different statements. Where a block could be filtered and is not, that is a
 # defect; where the filter would destroy the question the block asks -- a ruleset comparison
 # cannot hold the ruleset fixed -- the refusal is the answer.
-FILTERED, CATEGORY, GLOBAL = "filtered", "category", "global"
+FILTERED, CATEGORY, CAREER, GLOBAL = "filtered", "category", "career", "global"
 ALL_AXES = ("uniform", "ruleset", "since")
 SCOPES: dict[str, dict[str, Any]] = {
     "method_cuts": {"kind": FILTERED, "respects": list(ALL_AXES), "ignores": [],
@@ -174,6 +178,16 @@ SCOPES: dict[str, dict[str, Any]] = {
     "radar": {"kind": FILTERED, "respects": ["uniform", "since"], "ignores": ["ruleset"],
               "ignored_reason_code": "gate_refuses_every_cell", "unit": "eventos"},
     "athlete": {"kind": FILTERED, "respects": list(ALL_AXES), "ignores": [], "unit": "lutas"},
+    # `athletes[*].sequence_bouts` is her career tape and nothing else: every bout of hers the
+    # corpus holds event data for, whatever the cut. It is the one block on her page that
+    # ignores the reader's filters, so it needs the badge that says so -- the reading page was
+    # inventing the word CARREIRA in the renderer because the export had no scope to read, and
+    # a hard-coded badge is exactly the thing this layer was built to abolish. The refusal is
+    # measured, not preferred: the tapes run 1 to 14 bouts (five athletes have none at all), so
+    # applying the three axes would empty most of them, and every row carries its own year for
+    # the reader who wants the recency by eye.
+    "athlete_tape": {"kind": CAREER, "respects": [], "ignores": list(ALL_AXES),
+                     "ignored_reason_code": "tape_is_too_thin_to_slice", "unit": "lutas"},
     "recency": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
                 # The panel IS the recency axis: it walks four nested windows over no-gi bouts
                 # on purpose. Applying the reader's own recency cut would compare a window
@@ -755,12 +769,35 @@ def athlete_layer(records: Mapping[str, Any], rating: Mapping[str, Any],
                     w = [r for r in sub if r["wl"] == "W"]
                     loss = [r for r in sub if r["wl"] == "L"]
                     fam = Counter(r["family"] for r in sub)
+                    fw = Counter(r["family"] for r in w)
+                    fl = Counter(r["family"] for r in loss)
                     subs_w = sum(1 for r in w if r["family"] in SUB_FAMILIES)
                     subs_l = sum(1 for r in loss if r["family"] in SUB_FAMILIES)
+                    # How she WINS against how she LOSES, which is the question her page is
+                    # named after and the one thing it could not answer: pooled `by_family`
+                    # puts the armbar she finished with and the armbar she was caught in on
+                    # the same bar. Two sides, two denominators -- her wins and her losses are
+                    # different sets of bouts, and a share of one is not a share of the other.
+                    #
+                    # `est`, not `gated`: the cluster coverage gate asks how many independent
+                    # athletes a number comes from, and on her own page there is one by
+                    # construction, so running it here would refuse every cell for the exact
+                    # property the page is about. `gate.cluster_coverage_applies` already says
+                    # so. What survives is what still means something about her -- n, the
+                    # Wilson interval, and the n<5 floor that grades it `insufficient`.
+                    #
+                    # Sparse, and paired: a family neither side reached is omitted, and a
+                    # family EITHER side reached is published on BOTH, because a submission she
+                    # hits often and has never been caught in is a finding that only exists as
+                    # a pair. Publishing all eight families on both sides of all 688
+                    # athlete-cuts would be a megabyte of zeroes.
+                    reached = [f for f in FAMILIES if fw[f] or fl[f]]
                     cuts[cut_key(u, rs, y)] = {
                         "n": len(sub), "w": len(w), "l": len(loss),
                         "undecided": len(sub) - len(w) - len(loss),
                         "by_family": {f: fam[f] for f in FAMILIES if fam[f]},
+                        "by_family_win": {f: est(fw[f], len(w)) for f in reached},
+                        "by_family_loss": {f: est(fl[f], len(loss)) for f in reached},
                         "by_source": dict(Counter(r.get("source", "own_record") for r in sub)),
                         "by_uniform": dict(Counter(r["uniform"] for r in sub)),
                         "finish_rate": est(subs_w, len(w)),
@@ -827,12 +864,26 @@ def _attributed(bout: Mapping[str, Any], side: str) -> tuple[list[dict[str, Any]
     return [attribute(e, me, other, flags) for e in bout["seq"]], flags
 
 
-def _node_rows(events: Sequence[Mapping[str, Any]]) -> dict[str, list[Any]]:
+def _node_rows(events: Sequence[Mapping[str, Any]],
+               publish_n: bool = False) -> dict[str, list[Any]]:
     """The nodes of one perspective, split into positions, actions and transitions.
 
     Grouped by (label, role) rather than by label alone, because `Half Guard · por baixo` and
     `Half Guard · por cima` are two different findings about a category and collapsing them
     into one bar is exactly the ambiguity this layer exists to remove.
+
+    Each row carries `k`, the count, and `n`, the perspective's own total -- every event
+    attributed to that side in this cut, not the category's twelve most common. `n` is what
+    makes the two sides of a diverging bar comparable at all: A FAVOR and CONTRA are different
+    numbers of events (181 against 80 in one real cut), so equal counts are not equal shares
+    and a bar drawn on counts alone reports the size of the record as if it were the shape of
+    the game.
+
+    `publish_n` is the perspective's coverage verdict, and a REFUSED side publishes no
+    denominator. The count stays -- an observed count is a fact about the corpus either way --
+    but a denominator invites the rate, and a rate over a side the gate refused reads as a
+    claim about the category that the gate exists to withhold. The page keeps those bars on
+    counts and says so.
     """
     out: dict[str, list[Any]] = {}
     for cat in ("state", "action", "transition"):
@@ -847,7 +898,8 @@ def _node_rows(events: Sequence[Mapping[str, Any]]) -> dict[str, list[Any]]:
         # two perspectives it was 14 KB per point of the cut space, which is 1 MB of payload
         # nothing reads. The perspective's own coverage verdict, which IS rendered, sits one
         # level up.
-        out[cat] = [{"label": lbl, "role": role, "k": k}
+        out[cat] = [{"label": lbl, "role": role, "k": k,
+                     "n": len(events) if publish_n else None}
                     for (lbl, role), k in c.most_common(12)]
     return out
 
@@ -1048,7 +1100,8 @@ def _sequence_block(mine: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
         "type_contrast": {p: _type_contrast(type_by[p], cov[p]) for p in ("favor", "contra")},
         "openers": {k: c.most_common(8) for k, c in openers.items()},
         "finishers": {k: c.most_common(8) for k, c in finishers.items()},
-        "nodes": {p: _node_rows(kept[p]) for p in ("favor", "contra")},
+        "nodes": {p: _node_rows(kept[p], cov_all[p].estimable)
+                  for p in ("favor", "contra")},
         "heatmap": _heatmap(won + lost),
     }
 
@@ -1282,8 +1335,68 @@ def _centroid_neighbours(conn: Any, centroid: Sequence[float] | None, k: int = 1
 
 
 # ── layer 4: footage we hold ────────────────────────────────────────────────────
-def video_layer(conn: Any, roster: Mapping[str, str]) -> list[dict[str, Any]]:
+# ── who is in a piece of footage ────────────────────────────────────────────────
+# Footage used to carry no identity at all, so the reading page linked an athlete to her own
+# bouts by folding her display name and her aliases and testing each as a SUBSTRING of the
+# title. That silently missed every spelling neither the manifest nor the page happened to
+# know, and it could only ever be as good as the aliases the renderer was handed.
+#
+# The identity already exists on this side: `analysis.names.athlete_key` folds, de-accents and
+# resolves the alias table, and the manifest carries the per-athlete spellings on top of it.
+# So the export names the two athletes in every piece of footage by KEY, once, and the page
+# joins on the same key it joins everything else on.
+_VS = re.compile(r"\s+vs\.?\s+", re.IGNORECASE)
+
+
+def title_pair(title: str) -> list[str]:
+    """The two athletes a footage title names, or `[]` when it does not name a pair.
+
+    Both sources of footage title the same way -- `A vs B, Event Year` -- because both are
+    built here, one from a clip directory's README heading and one from the corpus row. A
+    title that does not split into exactly two names resolves to nothing rather than to a
+    guess: an empty list makes the gap visible on the page, and a guess makes it invisible.
+    """
+    parts = _VS.split(title)
+    if len(parts) != 2:
+        return []
+    # `A vs B, Event Year`. The split happens on `vs` FIRST and the event is cut off the second
+    # name at its comma, so an event name that contains one -- `ADCC Trials 2023, East Coast`
+    # -- does not take the athlete with it, which is what splitting on the comma first did.
+    pair = [parts[0].strip(), parts[1].split(",")[0].strip()]
+    return pair if all(pair) else []
+
+
+def footage_keys(names: Sequence[str], aliases: Mapping[str, str]) -> list[str]:
+    """Canonical keys for the athletes in one bout, roster and opponent alike.
+
+    `aliases` maps an alternate spelling's key to the roster key it belongs to -- the manifest's
+    own per-athlete list, which is what closes the spellings `ATHLETE_ALIASES` has never seen.
+    Sorted and de-duplicated so the field is stable across runs and a bout between two rostered
+    athletes carries both of them.
+    """
+    out = set()
+    for n in names:
+        if not n:
+            continue
+        k = athlete_key(n)
+        out.add(aliases.get(k, k))
+    return sorted(out)
+
+
+def alias_index(records: Mapping[str, Any]) -> dict[str, str]:
+    """Every spelling of a roster athlete, keyed, pointing at her canonical key."""
+    idx: dict[str, str] = {}
+    for name, entry in records.items():
+        key = entry.get("key") or athlete_key(name)
+        for spelling in (name, entry.get("display") or name, *(entry.get("aliases") or [])):
+            idx[athlete_key(spelling)] = key
+    return idx
+
+
+def video_layer(conn: Any, roster: Mapping[str, str],
+                aliases: Mapping[str, str] | None = None) -> list[dict[str, Any]]:
     """Every bout of these categories we can actually watch, local clip or published link."""
+    aliases = aliases or {}
     links = json.loads(LINKS.read_text(encoding="utf-8"))["bouts"] if LINKS.exists() else {}
     out = []
     for d in sorted(FRAMES.iterdir()) if FRAMES.exists() else []:
@@ -1305,6 +1418,11 @@ def video_layer(conn: Any, roster: Mapping[str, str]) -> list[dict[str, Any]]:
                     "clip": (d / "clip.mp4").exists(),
                     "registered_events": events,
                     "registered": events > 0,
+                    # From the title, which is the only identity a clip directory carries --
+                    # but resolved through the same key machinery as everything else, so a
+                    # spelling the manifest knows lands on her page and one it does not is an
+                    # empty list here rather than a silent miss on the page.
+                    "athlete_keys": footage_keys(title_pair(title), aliases),
                     "links": links.get(d.name, [])})
     rows = conn.execute(text("""
         select a.name, b.name, m.event, m.year, m.video_url, m.video_start_seconds,
@@ -1330,12 +1448,19 @@ def video_layer(conn: Any, roster: Mapping[str, str]) -> list[dict[str, Any]]:
         hit = next((o for o, names in local_names if len(mine & names) >= 4), None)
         if hit is not None:
             hit["corpus_events"] = int(n)
+            # The corpus row names both athletes as rows, which beats a title parse. Union
+            # rather than replacement: the clip may name someone the row does not.
+            hit["athlete_keys"] = sorted(set(hit.get("athlete_keys") or [])
+                                         | set(footage_keys((na, nb), aliases)))
             hit.setdefault("links", []).append(
                 {"host": "YouTube · corpus", "url": url}) if url and not any(
                     l.get("url") == url for l in hit.get("links", [])) else None
             continue
         out.append({"slug": None, "title": title,
                     "source": "published link", "url": url, "start": start,
+                    # Straight off the row: these two names ARE athlete rows, so there is no
+                    # spelling to guess at all.
+                    "athlete_keys": footage_keys((na, nb), aliases),
                     "events": int(n), "uniform": uniform(ev), "ruleset": ruleset(ev),
                     "host": "YouTube" if "youtube" in (url or "") else "link publicado"})
     return out
@@ -1692,7 +1817,7 @@ def main() -> int:
     eng = get_engine()
     with eng.connect() as conn:
         emb = embedding_layer(conn, roster)
-        vids = video_layer(conn, roster)
+        vids = video_layer(conn, roster, alias_index(records))
         corr = correlation_layer(conn, bouts)
         rating = rating_layer(conn, roster)
         radar = radar_layer(conn, bouts, roster)

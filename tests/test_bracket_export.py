@@ -464,3 +464,165 @@ def test_a_match_marker_cannot_reach_the_sequence() -> None:
     kept = _clean_events("Alice A", "Bob B", events)
     assert [e["type"] for e in kept] == ["takedown"]
     assert "match" not in VALID_EVENT_TYPES
+
+
+# ── who is in a piece of footage ────────────────────────────────────────────────
+# The reading page linked an athlete to her own bouts by folding her display name and testing
+# it as a SUBSTRING of the footage title, which could only ever be as good as the spellings the
+# renderer happened to be handed. The identity lives on this side; the export carries it.
+ALIASES = {"helena cravar": "helena crevar", "helena crevar": "helena crevar",
+           "sarah galvao": "sarah galvao", "mo black": "morgan black"}
+
+
+@pytest.mark.parametrize("title,expected", [
+    ("Helena Crevar vs Amanda Nicole, Polaris 37 2026", ["Helena Crevar", "Amanda Nicole"]),
+    ("Anabel Lopez vs Aurelie Le Vern, European No-Gi 2024",
+     ["Anabel Lopez", "Aurelie Le Vern"]),
+    ("Yara Soares vs Ana Carolina Vieira, ? 2021", ["Yara Soares", "Ana Carolina Vieira"]),
+    # A comma inside the event name is the common case; only the LAST one separates the bout
+    # from where it happened.
+    # A comma inside the event name must not take the second athlete with it.
+    ("Morgan Black vs Sophia Delgado, ADCC Trials 2023, East Coast 2023",
+     ["Morgan Black", "Sophia Delgado"]),
+])
+def test_a_footage_title_names_the_pair_it_is_of(title: str, expected: list[str]) -> None:
+    assert bx.title_pair(title) == expected
+
+
+@pytest.mark.parametrize("title", ["Open mat, 2024", "", "Helena Crevar highlight"])
+def test_a_title_that_names_no_pair_resolves_to_nothing_rather_than_a_guess(title: str) -> None:
+    """An empty list makes the gap visible on the page. A guess makes it invisible."""
+    assert bx.footage_keys(bx.title_pair(title), ALIASES) == []
+
+
+def test_footage_is_linked_by_key_not_by_the_spelling_in_the_title() -> None:
+    """`Helena Cravar` is a real misspelling in the corpus and one of her manifest aliases.
+    Substring matching on the display name misses it; the key resolves it."""
+    keys = bx.footage_keys(bx.title_pair("Helena Cravar vs Yara Soares, ADCC 2024"), ALIASES)
+    assert keys == ["helena crevar", "yara soares"]
+
+
+def test_an_accent_is_not_an_identity() -> None:
+    assert bx.footage_keys(["Sarah Galvão"], ALIASES) == ["sarah galvao"]
+
+
+def test_a_bout_between_two_rostered_athletes_carries_both_of_them() -> None:
+    """Her footage list is not the roster's minus her: a bout she fought against another woman
+    in this bracket belongs on BOTH pages."""
+    keys = bx.footage_keys(("Helena Crevar", "Mo Black"), ALIASES)
+    assert keys == ["helena crevar", "morgan black"]
+
+
+def test_the_alias_index_maps_every_spelling_to_one_key() -> None:
+    idx = bx.alias_index({"Sarah Galvão": {"key": "sarah galvao", "display": "Sarah Galvão",
+                                           "aliases": ["Sarah Galvao"], "rows": []}})
+    assert idx["sarah galvao"] == "sarah galvao"
+    assert set(idx.values()) == {"sarah galvao"}
+
+
+# ── how she wins against how she loses ──────────────────────────────────────────
+def test_how_she_wins_and_how_she_loses_have_their_own_denominators() -> None:
+    """Two wins and one loss: a family that took one of the wins is 1/2, and one that took the
+    loss is 1/1. Pooling them -- which is what `by_family` alone can do -- makes both 1/3."""
+    recs = _rec("Helena Crevar", [_rrow(2024, "W", "Armbar"), _rrow(2024, "W", "Points"),
+                                  _rrow(2023, "L", "Heel Hook")])
+    cut = bx.athlete_layer(recs, NO_RATING, [])["helena crevar"]["cuts"][bx.ALL_CUT]
+    assert cut["by_family_win"]["joint"]["k"] == 1
+    assert cut["by_family_win"]["joint"]["n"] == 2
+    assert cut["by_family_loss"]["leg"]["k"] == 1
+    assert cut["by_family_loss"]["leg"]["n"] == 1
+    # And the pooled histogram it sits beside still says what it always said.
+    assert cut["by_family"]["joint"] == 1
+
+
+def test_a_family_only_one_side_reached_is_published_on_both() -> None:
+    """A submission she hits and has never been caught in is a finding, and it only exists as a
+    pair: 1/2 against 0/1, on the same row."""
+    recs = _rec("Gabi Garcia", [_rrow(2024, "W", "Armbar"), _rrow(2024, "W", "Points"),
+                                _rrow(2023, "L", "Points")])
+    cut = bx.athlete_layer(recs, NO_RATING, [])["gabi garcia"]["cuts"][bx.ALL_CUT]
+    assert cut["by_family_win"]["joint"]["k"] == 1
+    assert cut["by_family_loss"]["joint"]["k"] == 0
+    assert cut["by_family_loss"]["joint"]["n"] == 1
+
+
+def test_a_family_neither_side_reached_is_not_published_at_all() -> None:
+    """688 athlete-cuts times eight families times two sides is a megabyte of zeroes."""
+    recs = _rec("Ane Svendsen", [_rrow(2024, "W", "Armbar")])
+    cut = bx.athlete_layer(recs, NO_RATING, [])["ane svendsen"]["cuts"][bx.ALL_CUT]
+    assert set(cut["by_family_win"]) == {"joint"}
+    assert "leg" not in cut["by_family_loss"]
+
+
+def test_her_own_page_grades_the_split_but_does_not_gate_it() -> None:
+    """The cluster gate asks how many independent athletes a number comes from. Here there is
+    one by construction, so it cannot apply -- and would refuse every cell if it did. What
+    still applies is the n<5 floor."""
+    recs = _rec("Yara Soares", [_rrow(2024, "W", "Armbar"), _rrow(2023, "L", "Heel Hook")])
+    cut = bx.athlete_layer(recs, NO_RATING, [])["yara soares"]["cuts"][bx.ALL_CUT]
+    assert cut["by_family_win"]["joint"]["grade"] == "insufficient"
+    assert "estimable" not in cut["by_family_win"]["joint"]
+    assert cut["by_family_win"]["joint"]["lo"] is not None
+
+
+def test_a_side_with_no_bouts_publishes_no_interval() -> None:
+    """She has never lost in this cut, so `0/0` is not `0%` -- there is nothing to be a share
+    of, and the interval is absent rather than [0,1]."""
+    recs = _rec("Nadia Frankland", [_rrow(2024, "W", "Armbar")])
+    cut = bx.athlete_layer(recs, NO_RATING, [])["nadia frankland"]["cuts"][bx.ALL_CUT]
+    loss = cut["by_family_loss"]["joint"]
+    assert loss["n"] == 0 and loss["p"] is None and loss["lo"] is None
+    assert loss["grade"] == "none"
+
+
+# ── the tape declares its own universe ──────────────────────────────────────────
+def test_the_tape_has_a_scope_of_its_own_instead_of_the_page_inventing_one() -> None:
+    """`sequence_bouts` is her whole career whatever the cut, and the reading page was
+    hard-coding the word CARREIRA because the export gave it nothing to read."""
+    sc = bx.SCOPES["athlete_tape"]
+    assert sc["kind"] == bx.CAREER
+    assert sorted(sc["ignores"]) == sorted(bx.ALL_AXES)
+    assert sc["respects"] == []
+    assert sc["ignored_reason_code"] == "tape_is_too_thin_to_slice"
+
+
+def test_every_scope_that_ignores_an_axis_says_why() -> None:
+    for key, sc in bx.SCOPES.items():
+        assert bool(sc.get("ignores")) == bool(sc.get("ignored_reason_code")), key
+
+
+# ── the perspective's denominator ───────────────────────────────────────────────
+def _five_sided_bouts() -> list[dict[str, object]]:
+    """Five bouts from five different roster athletes, so the coverage gate passes."""
+    out = []
+    for i in range(5):
+        b = _bout(f"c{i}", [
+            _e(30, "guard", "Half Guard", f"B{i}"),
+            _e(45, "pass", "Knee Cut Pass", f"A{i}"),
+            _e(70, "control", "Back Control", f"A{i}"),
+        ], winner=f"A{i}")
+        b.update({"a_id": f"A{i}", "b_id": f"B{i}", "a": f"Roster {i}", "b": f"Opponent {i}"})
+        out.append(b)
+    return out
+
+
+def test_a_node_carries_the_denominator_its_rate_needs() -> None:
+    """Counts alone compare two sides that do not have the same number of events. `n` is the
+    perspective's own total, so a share of one side is comparable to a share of the other."""
+    out = bx.sequence_layer(_five_sided_bouts(), "65 kg")
+    assert out["coverage"]["favor"]["all"]["estimable"] is True
+    back = next(n for n in out["nodes"]["favor"]["state"] if n["label"] == "Back Control")
+    assert back["k"] == 5
+    assert back["n"] == out["events_own"] == 10
+    guard = next(n for n in out["nodes"]["contra"]["state"] if n["label"] == "Half Guard")
+    assert guard["n"] == out["events_against"] == 5
+
+
+def test_a_refused_perspective_publishes_no_denominator() -> None:
+    """The count survives -- it is a fact about the corpus. The denominator does not, because
+    a rate over a refused side reads as the category claim the gate exists to withhold."""
+    out = bx.sequence_layer([TWO_SIDED], "65 kg")
+    assert out["coverage"]["favor"]["all"]["estimable"] is False
+    assert all(n["n"] is None for cat in ("state", "action", "transition")
+               for n in out["nodes"]["favor"][cat])
+    assert any(n["k"] for n in out["nodes"]["favor"]["state"])
