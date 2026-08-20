@@ -3,13 +3,31 @@
 One exporter, one `data.json`. The site does no statistics: it draws what this file decides,
 so a number can never differ between the page and the analysis that produced it.
 
-Scope is the CATEGORY, never an athlete. Per-athlete rows exist only where the question is
-itself about distribution across athletes -- coverage, concentration, archetype outliers --
-and they carry the athlete's own uncertainty so a thin record cannot masquerade as a profile.
+Scope is the CATEGORY by default, and every block says which universe it describes: `scopes`
+labels each one `filtered` (respects the division and the current filters), `category`
+(division-specific, and it names the axes it ignores and why) or `global` (the whole corpus).
+A number is never allowed to sit beside another one drawn from a different universe without
+saying so.
+
+Per-athlete PAGES do exist (`athletes`), and they are not an exception to the rule above --
+they are the same rule at a different scope. Each carries the same three axes, the same Wilson
+interval, the same precision grade and the same n<5 floor, plus the provenance mix of her
+record, so a two-bout reconstruction cannot read like a profile. What does NOT apply on an
+athlete's page is the CLUSTER coverage gate, and the export says so in `athletes[*].gate`
+rather than leaving it implicit: that gate asks how many independent athletes a number comes
+from, because a category estimate drawn from one athlete is a portrait and not a sample. On her
+own page there is one athlete by construction.
+
+Perspective is explicit throughout the sequence layer. Every event is stamped **a favor** (the
+event is attributed to the roster athlete) or **contra** (it is attributed to her opponent,
+against her), with a role where the label defines one -- and refused entirely where the bout
+cannot say whose event is whose. See `analysis/attribution.py` and the measurement in
+`docs/match_event_model.md`.
 
 Layers are kept apart on purpose and never fill each other in:
 
-  method    602 bouts of published records -- how a bout ENDED, nothing about the path
+  method    725 athlete-perspective rows of published records over 707 distinct bouts
+            (189/183 in -65 kg, 536/524 in +65 kg) -- how a bout ENDED, not the path
   sequence   corpus bouts with event-by-event data -- the path, on a much smaller sample
   embedding  graph vectors and archetypes -- shape of a game, thinnest layer of the three
 
@@ -128,6 +146,65 @@ def cut_key(uniform_: str = "all", ruleset_: str = "all", since: str = "all") ->
 
 
 ALL_CUT = cut_key()
+
+# ── what universe each block describes ──────────────────────────────────────────
+# Every panel on the page draws one of these, and until now none of them said which. A reader
+# comparing a filtered method table against an unfiltered radar has no way to know the two
+# describe different universes -- the numbers look like they belong together because they sit
+# on the same screen under the same heading.
+#
+#   filtered   respects the division AND the current filters
+#   category   division-specific, does NOT respect the other filters -- and names which ones
+#   global     the whole corpus, the division included in it
+#
+# `ignored_reason_code` exists because "does not respect the filter" and "cannot respect the
+# filter" are different statements. Where a block could be filtered and is not, that is a
+# defect; where the filter would destroy the question the block asks -- a ruleset comparison
+# cannot hold the ruleset fixed -- the refusal is the answer.
+FILTERED, CATEGORY, GLOBAL = "filtered", "category", "global"
+ALL_AXES = ("uniform", "ruleset", "since")
+SCOPES: dict[str, dict[str, Any]] = {
+    "method_cuts": {"kind": FILTERED, "respects": list(ALL_AXES), "ignores": [],
+                    "unit": "lutas"},
+    "record_provenance": {"kind": FILTERED, "respects": list(ALL_AXES), "ignores": [],
+                          "unit": "lutas"},
+    "sequence": {"kind": FILTERED, "respects": ["uniform", "since"], "ignores": ["ruleset"],
+                 "ignored_reason_code": "gate_refuses_every_cell", "unit": "eventos"},
+    "radar": {"kind": FILTERED, "respects": ["uniform", "since"], "ignores": ["ruleset"],
+              "ignored_reason_code": "gate_refuses_every_cell", "unit": "eventos"},
+    "athlete": {"kind": FILTERED, "respects": list(ALL_AXES), "ignores": [], "unit": "lutas"},
+    "recency": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
+                # The panel IS the recency axis: it walks four nested windows over no-gi bouts
+                # on purpose. Applying the reader's own recency cut would compare a window
+                # against itself, and applying the uniform cut would empty three of the four.
+                "ignored_reason_code": "panel_is_the_axis", "unit": "lutas"},
+    "by_year": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
+                "ignored_reason_code": "panel_is_the_axis", "unit": "lutas"},
+    "ruleset_test": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
+                     # A comparison between rulesets cannot hold the ruleset fixed, and it
+                     # already holds the uniform fixed itself so gi is not doing the work.
+                     "ignored_reason_code": "comparison_owns_the_axis", "unit": "lutas"},
+    "embedding": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
+                  # A graph embedding is built from an athlete's whole career; there is no
+                  # per-bout vector to filter.
+                  "ignored_reason_code": "no_per_bout_evidence", "unit": "grafos"},
+    "rating": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
+               # Glicko-2 state is the end of a replay over the whole corpus. A rating "since
+               # 2024" would be a different replay, not a filter.
+               "ignored_reason_code": "cumulative_by_construction", "unit": "atletas"},
+    "videos": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
+               "ignored_reason_code": "inventory_not_evidence", "unit": "lutas"},
+    "baseline": {"kind": GLOBAL, "respects": [], "ignores": list(ALL_AXES),
+                 # The comparator is elite no-gi at large, minus this roster. Filtering it to
+                 # the reader's cut would make it a comparison against itself.
+                 "ignored_reason_code": "comparator_is_the_corpus", "unit": "eventos"},
+    "correlations": {"kind": GLOBAL, "respects": [], "ignores": list(ALL_AXES),
+                     "ignored_reason_code": "needs_the_whole_corpus", "unit": "lutas"},
+    "data_quality": {"kind": GLOBAL, "respects": [], "ignores": list(ALL_AXES),
+                     "ignored_reason_code": "needs_the_whole_corpus", "unit": "pares"},
+    "identity": {"kind": GLOBAL, "respects": [], "ignores": list(ALL_AXES),
+                 "ignored_reason_code": "needs_the_whole_corpus", "unit": "atletas"},
+}
 # What the page opens on. Recent no-gi is the question the bracket asks; the full career is a
 # secondary view, one selection away.
 OPENING_CUT = cut_key(uniform_="no_gi", since="2024")
@@ -684,6 +761,7 @@ def athlete_layer(records: Mapping[str, Any], rating: Mapping[str, Any],
                         "undecided": len(sub) - len(w) - len(loss),
                         "by_family": {f: fam[f] for f in FAMILIES if fam[f]},
                         "by_source": dict(Counter(r.get("source", "own_record") for r in sub)),
+                        "by_uniform": dict(Counter(r["uniform"] for r in sub)),
                         "finish_rate": est(subs_w, len(w)),
                         "conceded_finish_rate": est(subs_l, len(loss)),
                         "win_rate": est(len(w), len(sub)),
@@ -1365,7 +1443,6 @@ def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
     to the division mean and looking like a measurement.
     """
     from analysis.rating_v2.config import SITE_RATING_RUN_ID
-    from analysis.stats_rigor import wilson
 
     rated = {athlete_key(r[0]): float(r[1]) for r in conn.execute(text("""
         select a.name, s.rating from athlete_rating_states_v2 s
@@ -1378,88 +1455,125 @@ def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
         id_key[b["a_id"]] = athlete_key(b["a"])
         id_key[b["b_id"]] = athlete_key(b["b"])
 
+    # Two things this loop did not do before. It ignored the reader's filter entirely, so a
+    # radar labelled with a category sat under a filtered method table describing a different
+    # universe. And it counted every event whose actor was a roster athlete, including the
+    # events of bouts that file 100% of their rows under one athlete -- where the actor field
+    # carries no information at all, so an axis built from it is an artefact.
+    stamped = []
+    for b in bouts:
+        if not b["seq"]:
+            continue
+        stamped.append({**b, "uniform": uniform(b.get("event")),
+                        "ruleset": ruleset(b.get("event")),
+                        "readable": bout_flags(b["seq"], b["a_id"],
+                                               b["b_id"])["perspective_reliable"]})
+
     out: dict[str, Any] = {}
     for div in ("65 kg", "+65 kg"):
-        counts: Counter[str] = Counter()
-        weighted: dict[str, list[tuple[float, int]]] = defaultdict(list)
-        own_ids = set()
-        for b in bouts:
-            for side in ("a", "b"):
-                if (b["div_a"] if side == "a" else b["div_b"]) != div:
-                    continue
-                own_ids.add(b[f"{side}_id"])
-        per_axis_athletes: dict[str, set[str]] = defaultdict(set)
-        # Contributors, counted separately from RATED contributors. These were the same set
-        # until now, because the add() sat inside the `in rated` branch -- so an axis fed by
-        # three athletes of whom one carried a rating reported `contributors: 1` and drew the
-        # dashed "1 atleta" ray. The warning was misreporting the thing it exists to warn about.
-        per_axis_all: dict[str, set[str]] = defaultdict(set)
-        per_athlete_axis: dict[str, Counter[str]] = defaultdict(Counter)
-        for b in bouts:
-            for e in b["seq"]:
-                aid = e.get("actor_id")
-                if aid not in own_ids:
-                    continue
-                axis = _axis_of(e.get("type"))
-                if not axis:
-                    continue
-                counts[axis] += 1
-                key = id_key.get(aid) or str(aid)
-                per_axis_all[axis].add(key)
-                per_athlete_axis[key][axis] += 1
-                if key in rated:
-                    weighted[axis].append((rated[key], 1))
-                    per_axis_athletes[axis].add(key)
-        total = sum(counts.values())
-        div_ratings = [rated[k] for k in {id_key.get(i) for i in own_ids} if k and k in rated]
-        div_mean = sum(div_ratings) / len(div_ratings) if div_ratings else None
-
-        axes = []
-        for axis in RADAR_AXES:
-            n = counts[axis]
-            w = weighted[axis]
-            axis_rating = sum(r for r, _ in w) / len(w) if w else None
-            # Pooled share and the mean of per-athlete shares answer different questions, and
-            # with one athlete holding most of the events they are very different numbers. The
-            # pooled one describes the corpus; the athlete mean is the closer estimator of "the
-            # typical athlete", which is what a radar labelled with a category name implies.
-            shares = [c[axis] / sum(c.values()) for c in per_athlete_axis.values()
-                      if sum(c.values())]
-            axis_ratings = [rated[k] for k in per_axis_athletes[axis]]
-            axes.append({
-                "axis": axis,
-                "usage": {**wilson(n, total).to_dict()},
-                "usage_athlete_mean": round(sum(shares) / len(shares), 4) if shares else None,
-                "coverage": coverage([c[axis] for c in per_athlete_axis.values()
-                                      if c[axis]]).to_dict(),
-                "n_events": n,
-                "rated_events": len(w),
-                "contributors": len(per_axis_all[axis]),
-                "rated_contributors": len(per_axis_athletes[axis]),
-                # Event-weighted, deliberately: an axis mostly produced by a strong athlete is
-                # a strong athlete's axis. The unweighted mean over distinct contributors sits
-                # beside it so the weighting is visible instead of implied.
-                "rating": round(axis_rating) if axis_rating else None,
-                "rating_athlete_mean": (round(sum(axis_ratings) / len(axis_ratings))
-                                        if axis_ratings else None),
-                # 0.5 = level with this division's own mean, so the polygon has a shape
-                "vs_self": round(_expected(axis_rating, div_mean), 4)
-                           if axis_rating and div_mean else None,
-                # 0.5 = level with the whole rated corpus
-                "vs_corpus": round(_expected(axis_rating, corpus_mean), 4)
-                             if axis_rating else None,
-            })
-        out[div] = {
-            "axes": axes, "events": total,
-            "division_mean_rating": round(div_mean) if div_mean else None,
-            "corpus_mean_rating": round(corpus_mean),
-            "rated_athletes_in_division": len(div_ratings),
-            "note": "usage is the share of this division's own events on that axis; the two "
-                    "rating rings are athlete-level (node-level ratings do not exist) and "
-                    "weight each axis by whoever produced its events.",
-        }
+        cuts: dict[str, Any] = {}
+        for u in UNIFORM_AXIS:
+            for y in SINCE_AXIS:
+                sub = [b for b in stamped
+                       if in_cut(b["uniform"], b["ruleset"], b.get("year"), u, "all", y)]
+                if sub:
+                    cuts[cut_key(u, "all", y)] = _radar_block(sub, div, id_key, rated,
+                                                              corpus_mean)
+        out[div] = {**cuts[ALL_CUT], "cuts": cuts}
     return {"axes": list(RADAR_AXES), "pools": {"sweep": "guard"},
             "corpus_mean_rating": round(corpus_mean), "divisions": out}
+
+
+def _radar_block(bouts: Sequence[Mapping[str, Any]], div: str, id_key: Mapping[str, str],
+                 rated: Mapping[str, float], corpus_mean: float) -> dict[str, Any]:
+    from analysis.stats_rigor import wilson
+    """One division's radar over ONE point of the cut space.
+
+    Split out of `radar_layer` so the same computation can run per cut instead of once per
+    division. `bouts` arrives already stamped with `readable` -- the attribution model's
+    verdict on whether the bout's actor field means anything.
+    """
+    counts: Counter[str] = Counter()
+    weighted: dict[str, list[tuple[float, int]]] = defaultdict(list)
+    own_ids = set()
+    for b in bouts:
+        for side in ("a", "b"):
+            if (b["div_a"] if side == "a" else b["div_b"]) != div:
+                continue
+            own_ids.add(b[f"{side}_id"])
+    per_axis_athletes: dict[str, set[str]] = defaultdict(set)
+    # Contributors, counted separately from RATED contributors. These were the same set
+    # until now, because the add() sat inside the `in rated` branch -- so an axis fed by
+    # three athletes of whom one carried a rating reported `contributors: 1` and drew the
+    # dashed "1 atleta" ray. The warning was misreporting the thing it exists to warn about.
+    per_axis_all: dict[str, set[str]] = defaultdict(set)
+    per_athlete_axis: dict[str, Counter[str]] = defaultdict(Counter)
+    for b in bouts:
+        if not b["readable"]:
+            continue
+        for e in b["seq"]:
+            aid = e.get("actor_id")
+            if aid not in own_ids:
+                continue
+            axis = _axis_of(e.get("type"))
+            if not axis:
+                continue
+            counts[axis] += 1
+            key = id_key.get(aid) or str(aid)
+            per_axis_all[axis].add(key)
+            per_athlete_axis[key][axis] += 1
+            if key in rated:
+                weighted[axis].append((rated[key], 1))
+                per_axis_athletes[axis].add(key)
+    total = sum(counts.values())
+    div_ratings = [rated[k] for k in {id_key.get(i) for i in own_ids} if k and k in rated]
+    div_mean = sum(div_ratings) / len(div_ratings) if div_ratings else None
+
+    axes = []
+    for axis in RADAR_AXES:
+        n = counts[axis]
+        w = weighted[axis]
+        axis_rating = sum(r for r, _ in w) / len(w) if w else None
+        # Pooled share and the mean of per-athlete shares answer different questions, and
+        # with one athlete holding most of the events they are very different numbers. The
+        # pooled one describes the corpus; the athlete mean is the closer estimator of "the
+        # typical athlete", which is what a radar labelled with a category name implies.
+        shares = [c[axis] / sum(c.values()) for c in per_athlete_axis.values()
+                  if sum(c.values())]
+        axis_ratings = [rated[k] for k in per_axis_athletes[axis]]
+        axes.append({
+            "axis": axis,
+            "usage": {**wilson(n, total).to_dict()},
+            "usage_athlete_mean": round(sum(shares) / len(shares), 4) if shares else None,
+            "coverage": coverage([c[axis] for c in per_athlete_axis.values()
+                                  if c[axis]]).to_dict(),
+            "n_events": n,
+            "rated_events": len(w),
+            "contributors": len(per_axis_all[axis]),
+            "rated_contributors": len(per_axis_athletes[axis]),
+            # Event-weighted, deliberately: an axis mostly produced by a strong athlete is
+            # a strong athlete's axis. The unweighted mean over distinct contributors sits
+            # beside it so the weighting is visible instead of implied.
+            "rating": round(axis_rating) if axis_rating else None,
+            "rating_athlete_mean": (round(sum(axis_ratings) / len(axis_ratings))
+                                    if axis_ratings else None),
+            # 0.5 = level with this division's own mean, so the polygon has a shape
+            "vs_self": round(_expected(axis_rating, div_mean), 4)
+                       if axis_rating and div_mean else None,
+            # 0.5 = level with the whole rated corpus
+            "vs_corpus": round(_expected(axis_rating, corpus_mean), 4)
+                         if axis_rating else None,
+        })
+    return {
+        "axes": axes, "events": total, "bouts": len(bouts),
+        "bouts_refused": sum(1 for b in bouts if not b["readable"]),
+        "division_mean_rating": round(div_mean) if div_mean else None,
+        "corpus_mean_rating": round(corpus_mean),
+        "rated_athletes_in_division": len(div_ratings),
+        "note": "usage is the share of this division's own events on that axis; the two "
+                "rating rings are athlete-level (node-level ratings do not exist) and "
+                "weight each axis by whoever produced its events.",
+    }
 
 
 # ── layer 8: data quality ───────────────────────────────────────────────────────
@@ -1577,6 +1691,7 @@ def main() -> int:
         # The coordinate system the page builds its controls from. The renderer must not
         # hard-code an axis: a value added here has to appear in the selects without a
         # front-end change, and a value removed has to disappear.
+        "scopes": SCOPES,
         "cut_axes": {"uniform": list(UNIFORM_AXIS), "ruleset": list(RULESET_AXIS),
                      "since": list(SINCE_AXIS), "key_format": CUT_KEY_FORMAT,
                      "all_key": ALL_CUT, "opening": OPENING_CUT},
