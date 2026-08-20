@@ -315,8 +315,25 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
             cov_w = coverage(list(Counter(r["athlete"] for r in w).values()))
             cov_l = coverage(list(Counter(r["athlete"] for r in loss).values()))
             bouts = _distinct_bouts(subset)
+            # How a BOUT ended, each counted once, whoever won. This is the question the panel
+            # asks by its name, and it was the one distribution missing: a bout ends exactly
+            # one way, so splitting by outcome answers something else.
+            fb = Counter(r["family"] for r in bouts)
+            cov_b = coverage(list(Counter(r["athlete"] for r in bouts).values()))
             cuts[cut_name] = {
                 "n": len(subset), "w": len(w), "l": len(loss),
+                "by_bout": {f: gated(fb[f], len(bouts), cov_b) for f in FAMILIES},
+                # The headline of the per-bout view: what share of bouts ended in a submission
+                # at all. Belongs here rather than only beside the roster's own record, where
+                # it silently became "how often these athletes finish".
+                "bout_finish_rate": gated(sum(fb[f] for f in SUB_FAMILIES), len(bouts), cov_b),
+                "bout_coverage": cov_b.to_dict(),
+                # The win and loss tables are NOT two views of one set of bouts. A bout with a
+                # rostered athlete on both sides would appear in both, and only this many do;
+                # for every other bout exactly one side is on the roster, so the two tables are
+                # drawn from disjoint bouts and describe this roster's offence and its defence
+                # rather than one distribution seen twice.
+                "sides_share_bouts": len(subset) - len(bouts),
                 # `n` counts athlete-perspective ROWS. A bout between two rostered athletes
                 # produces two of them, one W and one L, and there are 39 such rows across the
                 # roster. `bouts` is the count of distinct events that actually happened.
