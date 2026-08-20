@@ -873,7 +873,8 @@ def _node_rows(events: Sequence[Mapping[str, Any]],
     into one bar is exactly the ambiguity this layer exists to remove.
 
     Each row carries `k`, the count, and `n`, the perspective's own total -- every event
-    attributed to that side in this cut, not the category's twelve most common. `n` is what
+    attributed to that side in this cut, not the category's twelve most common -- plus `p`,
+    the share those two imply, decided here rather than left to the page. That share is what
     makes the two sides of a diverging bar comparable at all: A FAVOR and CONTRA are different
     numbers of events (181 against 80 in one real cut), so equal counts are not equal shares
     and a bar drawn on counts alone reports the size of the record as if it were the shape of
