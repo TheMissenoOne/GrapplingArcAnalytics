@@ -50,6 +50,8 @@ from sqlalchemy import text  # noqa: E402
 from analysis.names import athlete_key  # noqa: E402
 from analysis.stats_rigor import (  # noqa: E402
     MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE,
+    MIN_EFFECTIVE_N_FOR_CATEGORY_ESTIMATE,
+    MIN_N_FOR_ANY_GRADE,
     Coverage,
     benjamini_hochberg,
     compare_proportions,
@@ -1191,6 +1193,18 @@ def main() -> int:
 
     doc = {
         "generated": datetime.now(UTC).isoformat(timespec="seconds"),
+        # Every number the page compares against. They were literals inside app.js -- `eff < 2`,
+        # `usable < 5`, `events < 300`, `contributors < 2`, a hard-coded roster size of 16 --
+        # which meant the renderer was quietly deciding things while its own header claimed it
+        # computed nothing. It compares now; it does not decide.
+        "thresholds": {
+            "min_clusters": MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE,
+            "min_effective_n": MIN_EFFECTIVE_N_FOR_CATEGORY_ESTIMATE,
+            "min_n_for_grade": MIN_N_FOR_ANY_GRADE,
+            "min_usable_for_outlier": MIN_USABLE_FOR_OUTLIER,
+            "thin_axis_contributors": 2,
+            "roster_size": len(roster),
+        },
         "confidence": {"z": 1.959963984540054, "interval": "Wilson 95%",
                        "ratio_interval": "delta method on log RR",
                        "multiplicity": "Benjamini-Hochberg, alpha 0.05",
@@ -1208,7 +1222,6 @@ def main() -> int:
         "rd": {**rating,
                "athletes": {display[k]: v for k, v in rating["athletes"].items()}},
         "derived": json.loads(a.derived.read_text(encoding="utf-8")),
-        "roster": manifest["divisions"],
     }
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(doc, ensure_ascii=False, default=str), encoding="utf-8")

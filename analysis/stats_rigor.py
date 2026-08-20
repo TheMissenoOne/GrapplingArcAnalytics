@@ -458,6 +458,10 @@ class Separation:
     n_neg: int
     grade: str
     interpretation: str
+    # A stable key for the verdict above. Consumers render in their own language, and a
+    # renderer that string-compares the English sentence silently leaks it the day the
+    # wording changes.
+    verdict: str
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -478,7 +482,7 @@ def auc(scores: Sequence[float], labels: Sequence[bool], n_boot: int = 4000,
     neg = [s for s, y in zip(scores, labels) if not y]
     if not pos or not neg:
         return Separation(float("nan"), float("nan"), float("nan"), len(pos), len(neg),
-                          "none", "one class is empty")
+                          "none", "one class is empty", "empty_class")
 
     def _a(p: Sequence[float], q: Sequence[float]) -> float:
         wins = sum(1.0 if x > y else 0.5 if x == y else 0.0 for x in p for y in q)
@@ -492,4 +496,5 @@ def auc(scores: Sequence[float], labels: Sequence[bool], n_boot: int = 4000,
     crosses = lo <= 0.5 <= hi
     return Separation(obs, lo, hi, len(pos), len(neg),
                       grade(len(pos) + len(neg), (hi - lo) / 2),
-                      "not distinguishable from chance" if crosses else "separates the classes")
+                      "not distinguishable from chance" if crosses else "separates the classes",
+                      "chance" if crosses else "separates")
