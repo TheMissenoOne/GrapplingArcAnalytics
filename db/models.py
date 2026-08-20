@@ -90,6 +90,11 @@ class Athlete(Base):
     elo_series: Mapped[list[Any] | None] = mapped_column(JSONB)
     archetype_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("archetypes.id"))
     is_published: Mapped[bool] = mapped_column(Boolean, default=False)
+    # Set when this athlete exercised a rights request (LGPD Art. 18) and their identity was
+    # removed IN PLACE (alembic 0048). The row survives so the graph keeps a valid owner — see
+    # `db.repository.delete_athlete`, and the invariant it protects: every athlete-owned graph
+    # has an athletes row, with no exceptions, so an orphan is always a defect.
+    anonymized_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

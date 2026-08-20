@@ -5,6 +5,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from enum import StrEnum
 from typing import Any
 
 from sqlalchemy import delete, or_, select, update
@@ -777,3 +778,66 @@ def seed_athletes_from_leaderboard(session: Session) -> int:
         existing.add(_normalize_name(name))
         created += 1
     return created
+
+
+class AthleteRemovalReason(StrEnum):
+    """Why an athlete is being removed — and therefore what happens to their graph.
+
+    The two are not variants of one operation. They differ in what they believe about the data,
+    and that belief is what decides the graph's fate, so the caller has to state it.
+    """
+
+    #: The athlete was never real, or the data behind them is wrong — a duplicate, a phantom from
+    #: a bad name mapping, an audit finding. The graph is derived from the same wrong data, so it
+    #: goes with them.
+    INVALID_DATA = "invalid_data"
+
+    #: The person is real and so are the bouts; what must stop is the data identifying them
+    #: (LGPD Art. 18). Nothing was wrong, so the graph is anonymised and KEPT.
+    RIGHTS_REQUEST = "rights_request"
+
+
+#: Everything on an athlete row that names a person. `id` is not here: it is a pseudonymous UUID
+#: carrying no identity of its own, and keeping it is what lets the graph keep a valid owner.
+_IDENTIFYING_COLUMNS = ("nickname", "team", "weight_class")
+
+#: What the name becomes. A fixed token rather than a blank, so a row that went through this is
+#: visibly distinct from one where the name was simply never filled in.
+ANONYMIZED_NAME = "[anonymized]"
+
+
+def remove_athlete(athlete: Athlete, session: Session, *, reason: AthleteRemovalReason) -> None:
+    """Remove an athlete for ``reason``, and do the right thing with their graph.
+
+    **The invariant this exists to protect:** every graph with ``owner_kind='athlete'`` has a row
+    in ``athletes``, with no exceptions. An orphaned athlete graph is therefore always a defect,
+    and nobody has to ask whether a particular one was intentional.
+
+    That is why the rights-request path does not delete the row. Deleting it and marking the
+    graph instead would create a second, legitimate kind of orphan, and the guard would weaken to
+    "an orphan without a marker" — the same ambiguity that let seven of them accumulate in
+    production unnoticed until 2026-08-19.
+
+    A database cascade cannot do this job. ``graphs.owner_id`` is polymorphic, so Postgres cannot
+    carry a foreign key on it at all; and a cascade fires on every delete regardless of why,
+    which would destroy exactly the graph a rights request says to keep.
+    """
+    if reason is AthleteRemovalReason.RIGHTS_REQUEST:
+        # In place: the row survives, the person does not. `elo`, `elo_series` and `archetype_id`
+        # stay — they are derived from published bouts and identify nobody once the name is gone,
+        # and they are what keeps the graph useful to aggregate work over the athlete corpus.
+        athlete.name = ANONYMIZED_NAME
+        for column in _IDENTIFYING_COLUMNS:
+            setattr(athlete, column, None)
+        # No individual page for someone who asked not to be identified.
+        athlete.is_published = False
+        athlete.anonymized_at = datetime.now(UTC)
+        session.flush()
+        return
+
+    # INVALID_DATA: the graph is derived from the same data that was wrong.
+    session.execute(
+        delete(Graph).where(Graph.owner_kind == "athlete", Graph.owner_id == athlete.id)
+    )
+    session.execute(delete(Athlete).where(Athlete.id == athlete.id))
+    session.flush()
