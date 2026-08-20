@@ -328,3 +328,227 @@ proveniência por luta ao `graph_edges`) é uma decisão de produto fora do esco
 - `analysis/athlete_systems.py` — intocado.
 - Nenhuma escrita no banco. Leitura via `db.base.get_session_factory` só com `SELECT`.
 - `analysis/archetype.py` — fora de escopo, como na wave 6.
+
+---
+
+## Wave 6c — o bootstrap por LUTA na entrada de produção (condição (a) do ADR-08)
+
+A wave 6b reabriu o ADR-08 e nomeou o que faltava: a estabilidade dela foi medida
+reamostrando **arestas**, porque `graph_edges` não tinha proveniência por luta, e decidir por
+esse número seria repetir o erro que a própria 6b acabara de expor — ler como propriedade do
+algoritmo um número que é propriedade do formato da entrada. A nota de 2026-08-19 no ADR foi
+mais longe: estender além dos 15 atletas **sem** consertar a unidade produz "um número mais
+apertado em volta da mesma dúvida".
+
+`graph_edge_bouts` (alembic 0046, em prod) é a unidade que faltava. Esta wave troca a unidade de
+reamostragem de aresta para luta e refaz a medição — as duas condições juntas, na ordem que o
+ADR mandou.
+
+### O que mudou no instrumento
+
+`scripts/compare_prod_input_athlete_systems.py`:
+
+- **A unidade.** Antes: sortear `len(arestas)` arestas com reposição; repetir uma aresta só a
+  torna mais pesada. Agora: sortear `len(lutas)` **lutas** com reposição e **reconstruir o
+  conjunto de arestas a partir das lutas sorteadas** (`edges_by_bout` lê `graph_edge_bouts`,
+  restrito às arestas grappling que o detector realmente recebe). Uma luta não sorteada leva
+  as arestas dela junto — variação estrutural, exatamente o que a wave 6 fazia com sequências.
+- **Peso.** A proveniência registra presença, não contagem de transição por luta. O padrão
+  (`weighted=False`) mantém o peso uniforme 1 da produção — e por isso o sorteio de todas as
+  lutas exatamente uma vez **reproduz o grafo de produção**, ou seja, a base do bootstrap é o
+  próprio objeto sob teste, não uma terceira construção. `weighted=True` (peso = nº de lutas
+  sorteadas que contêm a aresta) roda ao lado como teste de sensibilidade, porque o motivo de
+  este ADR ter reaberto foi justamente um número que dependia da forma da entrada.
+- **O que NÃO mudou.** `analysis/athlete_systems.py` continua intocado. Os dois detectores
+  continuam recebendo a **mesma** reamostra em cada iteração (invariante da wave 6: a diferença
+  entre os dois números é o algoritmo, não ruído de amostragem). Por isso
+  `measure_community_stability_under_weight.resample_partitions` **não** foi reusado apesar de
+  ser genérico em `units`: ele fixa o `detect()` do detector novo e não consegue rodar os dois
+  detectores sobre uma reamostra só.
+- **A coorte, que não era reprodutível.** A wave 6 escolheu 5 nomeados + "os 10 com mais linhas
+  em `matches`". Essa cauda drifta: rerodar o mesmo código em 2026-08-19 devolveu Cam Hurd e
+  Lucas Barbosa no lugar de Roberto Jimenez e Victor Hugo. Comparar uma unidade nova contra a
+  tabela publicada exige que a coorte seja a constante que se supunha ser — os 15 estão agora
+  fixados por nome em `WAVE6_COHORT`. Sem isso, uma troca de coorte entraria na conta do
+  instrumento.
+
+Read-only, como as waves anteriores: só `SELECT` (agora também em `graph_edge_bouts`), nenhuma
+escrita, nenhum replay.
+
+### Cobertura da proveniência (medida, 2026-08-19)
+
+6639 linhas em `graph_edge_bouts`; **6395 de 6395** arestas de grafo de atleta têm ao menos uma
+luta de origem (100%); 631 lutas distintas; 502 grafos de atleta. Mas a distribuição é o que
+manda na condição (b): **353 grafos têm 1 luta só**, 78 têm 2, e apenas **27 chegam a 5** — o
+piso `MIN_BOUTS_FOR_STABILITY` que a wave 6 já usava. Abaixo de 5 lutas, um bootstrap por luta
+não tem o que variar.
+
+### Tabela por atleta
+
+`estab.` = Jaccard best-match médio de 100 reamostras contra a base, `min_system_size=1` dos dois
+lados — o mesmo instrumento das waves 6/6b. As colunas "aresta" são a unidade da 6b, recalculadas
+neste mesmo snapshot; as colunas "LUTA" são a unidade nova.
+
+### coorte da wave 6
+
+| Atleta | nós/arestas | lutas c/ proveniência | estab. novo (aresta) | estab. antigo (aresta) | estab. novo (LUTA) | estab. antigo (LUTA) | Δ luta | luta ponderada (novo/antigo) |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| Gordon Ryan | 45/112 | 15 | 0.4438 | 0.4729 | 0.4684 | 0.5771 | -0.1087 | 0.5214 / 0.4500 |
+| Craig Jones | 40/90 | 26 | 0.4354 | 0.4558 | 0.5103 | 0.5257 | -0.0154 | 0.5313 / 0.5429 |
+| Leandro Lo | 13/21 | 9 | 0.6282 | 0.6038 | 0.6717 | 0.6089 | +0.0628 | 0.6600 / 0.6862 |
+| Kade Ruotolo | 31/34 | 10 | 0.5544 | 0.5528 | 0.6372 | 0.6423 | -0.0051 | 0.6079 / 0.6171 |
+| Nick Rodriguez | 24/42 | 10 | 0.5571 | 0.4854 | 0.6164 | 0.5464 | +0.0700 | 0.6006 / 0.5092 |
+| Tye Ruotolo | 16/18 | 7 | 0.6629 | 0.5914 | 0.6496 | 0.6254 | +0.0242 | 0.6283 / 0.6478 |
+| Felipe Pena | 21/29 | 6 | 0.6410 | 0.6418 | 0.6809 | 0.6264 | +0.0546 | 0.6534 / 0.5902 |
+| Giancarlo Bodoni | 31/63 | 8 | 0.5494 | 0.5224 | 0.5623 | 0.5110 | +0.0513 | 0.5101 / 0.5018 |
+| Helena Crevar | 50/109 | 10 | 0.4223 | 0.3771 | 0.4281 | 0.4054 | +0.0227 | 0.4250 / 0.4367 |
+| Mica Galvão | 25/58 | 6 | 0.4638 | 0.4603 | 0.4509 | 0.4886 | -0.0378 | 0.4551 / 0.4505 |
+| Vagner Rocha | 34/68 | 9 | 0.4973 | 0.4511 | 0.5625 | 0.4718 | +0.0907 | 0.5162 / 0.4693 |
+| Roberto Jimenez | 15/28 | 3 | 0.6077 | 0.5812 | — | — | — | — / — |
+| Jake Strauss | 8/11 | 4 | 0.6423 | 0.6658 | — | — | — | — / — |
+| Shawn Melanson | 13/17 | 6 | 0.6341 | 0.5991 | 0.5117 | 0.5728 | -0.0611 | 0.5513 / 0.5715 |
+| Victor Hugo | 27/47 | 9 | 0.5202 | 0.4876 | 0.5611 | 0.5478 | +0.0133 | 0.5567 / 0.5222 |
+
+### extensão
+
+| Atleta | nós/arestas | lutas | estab. novo (aresta) | estab. antigo (aresta) | estab. novo (LUTA) | estab. antigo (LUTA) | Δ luta | luta ponderada (novo/antigo) |
+|---|---|---:|---:|---:|---:|---:|---:|---|
+| Ethan Crelinsten | 18/28 | 6 | 0.5891 | 0.5836 | 0.4837 | 0.4734 | +0.0102 | 0.5344 / 0.5316 |
+| Khabib Nurmagomedov | 14/23 | 9 | 0.6064 | 0.6056 | 0.6266 | 0.7077 | -0.0812 | 0.6019 / 0.6529 |
+| Dante Leon | 24/37 | 6 | 0.6056 | 0.5858 | 0.6328 | 0.5795 | +0.0533 | 0.5909 / 0.5636 |
+| Kyle Chambers | 17/31 | 6 | 0.6719 | 0.6516 | 0.6703 | 0.6868 | -0.0164 | 0.6499 / 0.6259 |
+| Travis Haven | 9/14 | 5 | 0.6404 | 0.6289 | 0.6971 | 0.6225 | +0.0746 | 0.6771 / 0.6294 |
+| Cam Hurd | 11/15 | 7 | 0.7025 | 0.6882 | 0.7442 | 0.6711 | +0.0731 | 0.7436 / 0.6504 |
+| Georges St-Pierre | 10/16 | 10 | 0.6441 | 0.6173 | 0.8003 | 0.7396 | +0.0607 | 0.7802 / 0.6945 |
+| Bruno Fernandes Rocha | 63/108 | 9 | 0.4189 | 0.4314 | 0.4577 | 0.4691 | -0.0114 | 0.4644 / 0.4350 |
+| Lucas Barbosa | 20/27 | 5 | 0.5357 | 0.5536 | 0.5315 | 0.5810 | -0.0495 | 0.5432 / 0.5542 |
+| Jett Thompson | 9/16 | 6 | 0.5304 | 0.5457 | 0.6008 | 0.5861 | +0.0147 | 0.4964 / 0.5947 |
+| Derek Rayfield | 10/12 | 5 | 0.6201 | 0.6067 | 0.6260 | 0.6299 | -0.0038 | 0.6005 / 0.5890 |
+| Kaynan Duarte | 17/26 | 5 | 0.5982 | 0.5333 | 0.6743 | 0.6391 | +0.0352 | 0.6566 / 0.6337 |
+| Levi Jones-Leary | 17/20 | 5 | 0.6595 | 0.6183 | 0.6084 | 0.5896 | +0.0188 | 0.6034 / 0.5768 |
+| Sarah Galvao | 27/36 | 5 | 0.5264 | 0.5129 | 0.6275 | 0.6435 | -0.0160 | 0.5965 / 0.5830 |
+
+Roberto Jimenez (3 lutas) e Jake Strauss (4) ficam abaixo do piso: o bootstrap por aresta roda
+para eles, o por luta não. Isso não é um defeito da medição nova — é a medição nova recusando um
+número que ela não tem dado para produzir, onde a antiga produzia um assim mesmo.
+
+### Agregado — a mesma pergunta, três unidades
+
+Δ = média pareada (novo − antigo) da estabilidade. IC95% por bootstrap pareado (20 000
+reamostras) sobre os Δ por atleta; `sign p` = teste de sinais binomial exato bicaudal.
+
+**Coorte da wave 6 (15 atletas, fixada por nome):**
+
+| Unidade de reamostragem | n | Δ (novo − antigo) | IC95% | novo vence | sign p |
+|---|---:|---:|---|---:|---:|
+| sequência (wave 6, recalculada) | 14 | +0.0128 | [−0.0121, +0.0371] | 8/14 | 0.791 |
+| **aresta** (wave 6b) | 15 | +0.0208 | [**+0.0050**, +0.0365] | 11/15 | 0.118 |
+| **luta** (esta wave) | 13 | +0.0124 | [−0.0187, +0.0405] | 8/13 | 0.581 |
+| luta, ponderada (sensibilidade) | 13 | +0.0171 | [−0.0029, +0.0386] | 7/13 | 1.000 |
+
+**Corpus estendido (29 atletas = os 15 + todos os outros que passam do piso de 5 lutas):**
+
+| Unidade de reamostragem | n | Δ (novo − antigo) | IC95% | novo vence | sign p |
+|---|---:|---:|---|---:|---:|
+| **aresta** (wave 6b) | 29 | +0.0172 | [**+0.0076**, **+0.0272**] | 22/29 | **0.008** |
+| **luta** (esta wave) | 27 | +0.0120 | [−0.0068, +0.0301] | 16/27 | 0.442 |
+| luta, ponderada (sensibilidade) | 27 | +0.0165 | [+0.0001, +0.0327] | 18/27 | 0.122 |
+
+Cobertura, os 29 atletas, entrada de produção: **100% dos dois lados, sem exceção**
+(`old_coverage` = 1.0 em todos; `new_singleton_share` = 0.0 em todos). O achado estrutural da
+6b — a entrada de produção não produz nó de grau 0, então não há singleton para o Louvain isolar
+— sobrevive à troca de unidade e à extensão do corpus. Essa parte da 6b está confirmada.
+
+### A leitura: a unidade de aresta fabricava o sinal
+
+**O "13/15" que reabriu o ADR não sobrevive à troca de unidade.** Com a unidade correta, a
+vantagem do detector novo cai para 8/13 na coorte e **16/27** no corpus estendido — cara-ou-coroa
+(sign p = 0.44), e o IC95% do Δ **cruza o zero**. Com a unidade de aresta, o mesmo corpus dá
+22/29, p = 0.008, IC excluindo o zero. A significância inverte com a unidade, não com o dado.
+
+**E o mecanismo é mensurável, não uma suspeita.** O desvio-padrão dos Δ por atleta é **0.0273
+na unidade de aresta contra 0.0505 na unidade de luta** — quase o dobro de dispersão quando se
+reamostra a unidade real. É esperado: reamostrar arestas nunca remove estrutura, só a repondera,
+então as partições reamostradas ficam artificialmente perto da base, a variância por atleta
+encolhe, e o intervalo de confiança aperta em volta de um Δ que continua pequeno. O bootstrap por
+aresta não estava medindo mais estabilidade; estava medindo menos variação.
+
+**A convergência que fecha o argumento:** as duas unidades de rigor comparável concordam. O
+bootstrap por sequência da wave 6 dá Δ = +0.0128 (IC cruza 0) e o bootstrap por luta desta wave dá
+Δ = +0.0120 (IC cruza 0) — praticamente o mesmo número, por caminhos independentes (grafo de
+sequência com contagem real × grafo de produção com peso uniforme). A unidade de aresta é a única
+das três que produz um resultado significativo, e é a única cuja unidade não é uma observação.
+
+**O sinal do efeito é consistente, o tamanho é que não decide.** Δ é positivo em toda combinação
+medida (+0.012 a +0.021, quatro unidades × duas coortes) — o detector novo provavelmente é um
+pouco mais estável. Só que, com sd = 0.0505 nos Δ por luta, detectar Δ = 0.0120 com 80% de poder
+exigiria **≈ 140 atletas** (90% de poder: ≈ 187). Hoje existem 27 acima do piso. A diferença é
+real na direção e pequena demais para este corpus decidir — que é uma conclusão diferente de
+"não existe".
+
+### Veredito contra o ADR-08
+
+O critério declarado: o detector compartilhado só substitui `athlete_systems` se **ganhar em
+estabilidade E não perder em cobertura**.
+
+| Condição do ADR-08 | Unidade de sequência (w6) | Unidade de aresta (w6b) | **Unidade de luta (w6c)** |
+|---|---|---|---|
+| Ganhar em estabilidade | empate (8/15, Δ0.005) | vence (22/29, p=0.008) | **empate** (16/27, p=0.44, IC cruza 0) |
+| Não perder cobertura | perde (86.6% × 96.3%) | empata (100% × 100%) | **empata** (100% × 100%, n=29) |
+
+**As duas condições do ADR-08 estão cumpridas — e o resultado é NÃO substituir.**
+
+1. **Condição (a), proveniência por luta: cumprida.** `graph_edge_bouts` existe, cobre 100% das
+   arestas de atleta, e o bootstrap desta wave roda no mesmo padrão de rigor da wave 6.
+2. **Condição (b), além dos 15: cumprida até o teto que o dado permite.** 29 atletas = todos os
+   que o corpus consegue sustentar. O corte não é arbitrário nem preguiça: é o piso de 5 lutas,
+   e o dado tem 353 grafos com uma luta só.
+3. **O critério de substituição falha no eixo de estabilidade** — não por derrota, por empate
+   estatístico. E a razão de cobertura que a wave 6 usou para fechar continua morta: empata em
+   100% dos dois lados.
+
+**O ADR-08 fecha, e fecha por resultado — mas o motivo da coexistência mudou de mãos.** A wave 6
+mandou coexistir porque o detector novo perdia cobertura; essa razão era propriedade da entrada e
+não existe na entrada real. A razão que resta é outra: **os dois detectores são equivalentes nos
+dois eixos que o ADR nomeou**, e substituir um módulo de 582 linhas que já alimenta produto por um
+equivalente medido não paga o risco. Coexistir por empate medido é uma decisão diferente de
+coexistir por precaução, e é a que este relatório sustenta.
+
+**O que reabriria isto (e só isso):** corpus. Não outro detector, não outro parâmetro, não outra
+métrica — cerca de 140 atletas com ≥ 5 lutas de proveniência, contra os 27 de hoje. Enquanto o
+número for esse, rodar de novo é computação sem informação, pelo mesmo motivo que o ADR-03 mandou
+parar de varrer `tau`. O caminho para lá é ingestão de luta com sequência, não medição.
+
+**Achado metodológico que vale por si, e é o segundo desta série:** a wave 6b encontrou um
+Jaccard 0.0 perfeito causado por espaços de chave incompatíveis; esta wave encontrou uma
+significância estatística causada por uma unidade de reamostragem que sub-dispersa. As duas são a
+mesma classe de erro — um número que descreve o instrumento e se lê como se descrevesse o objeto.
+O antídoto que funcionou nas duas vezes foi o mesmo: desconfiar do número limpo demais.
+
+### Proposta de texto para o ADR-08 (`01_DECISOES.md`)
+
+A aplicar como bloco final do ADR-08, substituindo o status "REABERTO" — decisão de produto, não
+aplicada aqui, no mesmo padrão da wave 6b:
+
+> **Fechado em 2026-08-19 (wave 6c), com as duas condições cumpridas: COEXISTIR, agora por
+> resultado.** (a) `graph_edge_bouts` (alembic 0046) deu proveniência por luta a `graph_edges`, e
+> a estabilidade na entrada real foi rebootstrapada **por luta**, no mesmo rigor da wave 6.
+> (b) A medição foi estendida de 15 para 29 atletas — todos os que passam do piso de 5 lutas com
+> proveniência (353 dos 502 grafos de atleta têm uma luta só). Resultado
+> (`05_COMPARACAO_DETECTORES.md`#wave-6c): **cobertura empata em 100%** dos dois lados, e a
+> **estabilidade empata** — 16/27 a favor do novo, Δ +0.0120, IC95% [−0.0068, +0.0301], sign
+> p = 0.44. O "13/15" da wave 6b era artefato da unidade: reamostrar arestas nunca remove
+> estrutura, só a repondera, e o sd dos Δ por atleta cai de 0.0505 (luta) para 0.0273 (aresta) —
+> intervalo apertado em volta do mesmo efeito pequeno. As duas unidades de rigor comparável
+> convergem (Δ +0.0128 por sequência, +0.0120 por luta, ambas com IC cruzando zero). O critério
+> "ganhar em estabilidade E não perder cobertura" **não** se cumpre: não perde cobertura, mas
+> também não ganha. Coexistência mantida — não mais por precaução, e não mais pela razão da wave
+> 6 (perda de cobertura, que era propriedade da entrada de sequência). Reabrir exige **corpus**:
+> ≈ 140 atletas com ≥ 5 lutas de proveniência para 80% de poder no efeito medido, contra 27 hoje.
+
+### O que não mudou (nesta wave também)
+
+- `analysis/athlete_systems.py` — intocado.
+- `analysis/constellations/*` — intocado; o detector novo é o mesmo objeto medido nas waves 6/6b.
+- Nenhuma escrita no banco, nenhum replay, nenhuma migração. Só `SELECT`.
+- `01_DECISOES.md` — não editado aqui; o texto acima é proposta, como na wave 6b.
