@@ -27,6 +27,7 @@ import html
 import json
 import logging
 import re
+import unicodedata
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -177,6 +178,52 @@ def _dossier_href(slug: str, dossier_slugs: frozenset[str]) -> str | None:
     return f"grapple-{slug}.html" if slug in dossier_slugs else None
 
 
+# ── Withheld athletes: published corpus, unpublished person ─────────────────────
+# Names held back from INDIVIDUAL publication. Editorial like SITE_MIN_CONFIDENCE_RD, but
+# answering a different question: RD asks "are we sure enough about this rating", this asks
+# "should this competitor be read individually in public right now". The answer is the
+# coach's, not a property of the data — so it lives here, in git, with the reason written
+# down, rather than as a column someone can flip without leaving a trace.
+#
+#   Livia Barasine — the coach's own competitor (data/scouting/adcc_2026_women.json lists
+#                    her as "Atleta do técnico", 65 kg, ADCC 2026). Publishing her dossier
+#                    publishes her game to the division she is about to compete in.
+#   Yara Soares    — held alongside her, same request.
+#
+# Withholding is STRICTLY STRONGER than failing the confidence gate. Failing the gate only
+# costs an athlete their own dossier; their bouts still publish whenever the OTHER side is
+# trusted, which would put the withheld athlete's game on the site as the opponent's match
+# analysis. So a withheld competitor suppresses the whole bout — see build_breakdowns.
+#
+# It never thins the corpus. GA_ELO, GA_OCEAN, GA_EVENTS, PageRank, the transition network
+# and every technique-frequency aggregate are still built from all 865 bouts — the same
+# contract `trusted` already carries. This decides pages, never data.
+#
+# Matched on a fold of the name (accents stripped, case-folded) so "Lívia"/"Livia" and any
+# other diacritic spelling of the same person are one entry, not a game of whack-a-mole.
+WITHHELD_ATHLETE_NAMES = frozenset({"yara soares", "livia barasine"})
+
+
+def _fold_name(name: str) -> str:
+    """Accent-stripped, case-folded, whitespace-trimmed — only for matching a name against
+    WITHHELD_ATHLETE_NAMES. Deliberately NOT `analysis.names._normalize_name`: that one is
+    the char-for-char node-key contract with the App (graphSync.ts:normalizeLabel) and must
+    not grow a second, unrelated caller whose needs could pull it out of sync."""
+    decomposed = unicodedata.normalize("NFKD", name)
+    return "".join(c for c in decomposed if not unicodedata.combining(c)).strip().casefold()
+
+
+def _withheld_athlete_ids(session: Session) -> frozenset[str]:
+    """athlete_ids matching WITHHELD_ATHLETE_NAMES. Empty when nobody is withheld, and
+    empty is the normal state — a name in the set that matches no athlete is not an error
+    (Livia Barasine has no bouts in the corpus yet; the entry is what makes sure she never
+    silently publishes on the import that first gives her some)."""
+    return frozenset(
+        a.id for a in session.execute(select(Athlete)).scalars()
+        if _fold_name(a.name) in WITHHELD_ATHLETE_NAMES
+    )
+
+
 def _compute_trusted_athletes(session: Session) -> set[str]:
     """Wave 8: athlete_ids allowed a dossier page, and whose presence in a bout is
     enough to publish that bout's breakdown page. Same two-condition AND as
@@ -189,12 +236,16 @@ def _compute_trusted_athletes(session: Session) -> set[str]:
     that separately, cached, only for athletes that pass here) — so paying for it twice
     (once here, once in build_fighters for the trusted subset) is cheaper than making
     build_breakdowns wait on build_fighters's heavy per-fighter analytics.
+
+    Athletes in ``WITHHELD_ATHLETE_NAMES`` are dropped from the candidate set before any
+    of that runs — no dossier, whatever their record says.
     """
     from db.repository import _perspective_view
 
     rd_by_athlete = _load_rating_deviations(session, SITE_RATING_RUN_ID)
+    withheld = _withheld_athlete_ids(session)
     candidate_ids = {aid for m in _final_matches(session)
-                      for aid in (m.athlete_a_id, m.athlete_b_id)}
+                      for aid in (m.athlete_a_id, m.athlete_b_id)} - withheld
     trusted: set[str] = set()
     for aid in candidate_ids:
         if not qualifies(aid, session):
@@ -418,13 +469,19 @@ def build_breakdowns(
     session: Session,
     cache: ItemCache | None = None,
     trusted: frozenset[str] = frozenset(),
+    withheld: frozenset[str] = frozenset(),
 ) -> tuple[list[dict[str, Any]], list[tuple[str, dict[str, Any]]], dict[str, Any] | None, int]:
     """Returns (GA_BREAKDOWNS rows, [(slug, full breakdown)], GA_FEATURED, omitted_count)
     for sequence bouts where at least one side is in ``trusted`` (Wave 8 publish-
-    confidence gate — see ``_compute_trusted_athletes``). A bout with neither side
-    trusted contributes no row/page/href, but ``corpus_g``/``ptv_v`` below are still
-    built from the FULL corpus — the gate never thins what feeds momentum/PageRank/
-    the transition network for the bouts that DO publish.
+    confidence gate — see ``_compute_trusted_athletes``) and NEITHER side is in
+    ``withheld``. A bout skipped either way contributes no row/page/href, but
+    ``corpus_g``/``ptv_v`` below are still built from the FULL corpus — the gate never
+    thins what feeds momentum/PageRank/the transition network for the bouts that DO
+    publish.
+
+    The two conditions are not the same shape, on purpose: ``trusted`` needs ONE side to
+    pass, ``withheld`` is vetoed by EITHER side. A withheld competitor's game must not
+    reach the site as their opponent's match analysis (see WITHHELD_ATHLETE_NAMES).
 
     The featured bout = the decided match with the highest combined opponent rank_elo, so the
     homepage spotlight is real (names, method, mini-stats) and auto-updates with the data.
@@ -458,6 +515,13 @@ def build_breakdowns(
         a = athletes_by_id.get(match.athlete_a_id)
         b = athletes_by_id.get(match.athlete_b_id)
         if a is None or b is None:
+            continue
+        if a.id in withheld or b.id in withheld:
+            # Held back by name, not by confidence — one side is enough to veto the whole
+            # bout, because publishing it would publish their game as the other side's
+            # reading. Counted as omitted so the transparency note stays honest about how
+            # many bouts have no page.
+            omitted += 1
             continue
         if a.id not in trusted and b.id not in trusted:
             # Wave 8: neither side confident enough for an individual reading — no
@@ -1839,8 +1903,10 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
     # page/href emission only; GA_OCEAN/GA_ELO/GA_EVENTS counts and the corpus-wide
     # transition network stay unfiltered (see build_breakdowns/build_fighters docstrings).
     trusted = frozenset(_compute_trusted_athletes(session))
-    _t = _phase(f"compute_trusted_athletes ({len(trusted)} trusted)", _t)
-    rows, full_bds, featured, omitted_bouts = build_breakdowns(session, cache=bd_cache, trusted=trusted)
+    withheld = _withheld_athlete_ids(session)
+    _t = _phase(f"compute_trusted_athletes ({len(trusted)} trusted, {len(withheld)} withheld)", _t)
+    rows, full_bds, featured, omitted_bouts = build_breakdowns(
+        session, cache=bd_cache, trusted=trusted, withheld=withheld)
     bd_cache.save()
     _t = _phase(f"build_breakdowns ({bd_cache.hits} cached, {bd_cache.misses} rebuilt)", _t)
     fighters, details = build_fighters(session, cache=ft_cache, trusted=trusted)

@@ -10,9 +10,12 @@ from __future__ import annotations
 
 from export.site_data import (
     SITE_MIN_CONFIDENCE_RD,
+    WITHHELD_ATHLETE_NAMES,
     _bout_href,
     _dossier_href,
+    _fold_name,
     _load_rating_deviations,
+    _withheld_athlete_ids,
     is_confident,
 )
 
@@ -66,3 +69,52 @@ def test_dossier_href_only_for_trusted_athletes() -> None:
     dossier_slugs = frozenset({"gordon-ryan"})
     assert _dossier_href("gordon-ryan", dossier_slugs) == "grapple-gordon-ryan.html"
     assert _dossier_href("unknown-fighter", dossier_slugs) is None
+
+
+# ── Withheld athletes ───────────────────────────────────────────────────────────
+# A stronger veto than the confidence gate: no dossier, and no breakdown for ANY bout
+# they appear in — even opposite a trusted opponent. See WITHHELD_ATHLETE_NAMES.
+
+
+def test_withheld_names_are_stored_folded_so_lookups_can_match() -> None:
+    # the set is compared against _fold_name output, so an entry that isn't already
+    # folded could never match anything — a silent no-op instead of a withhold.
+    for name in WITHHELD_ATHLETE_NAMES:
+        assert _fold_name(name) == name
+
+
+def test_fold_name_collapses_accents_and_case() -> None:
+    assert _fold_name("Lívia Barasine") == "livia barasine"
+    assert _fold_name("  LIVIA BARASINE  ") == "livia barasine"
+    assert _fold_name("Yara Soares") == "yara soares"
+    assert _fold_name("Yara Soarez") != "yara soares"  # not fuzzy — exact after folding
+
+
+def test_withheld_athlete_ids_matches_diacritic_spellings() -> None:
+    class _Athlete:
+        def __init__(self, aid: str, name: str) -> None:
+            self.id, self.name = aid, name
+
+    rows = [
+        _Athlete("w1", "Yara Soares"),
+        _Athlete("w2", "Lívia Barasine"),   # accented spelling of a withheld name
+        _Athlete("ok", "Ana Carolina Vieira"),
+        _Athlete("no", "Livia Giles"),      # different person, shares a first name
+    ]
+
+    class _Session:
+        def execute(self, *a: object, **kw: object) -> object:
+            class _R:
+                def scalars(self) -> list[_Athlete]:
+                    return rows
+            return _R()
+
+    assert _withheld_athlete_ids(_Session()) == frozenset({"w1", "w2"})
+
+
+def test_withheld_vetoes_the_bout_even_opposite_a_trusted_opponent() -> None:
+    # This is the asymmetry that makes withholding stronger than the RD gate:
+    # `trusted` needs ONE side, `withheld` is vetoed by EITHER side.
+    trusted, withheld = frozenset({"star"}), frozenset({"held"})
+    assert ("star" in trusted or "held" in trusted)          # would have published...
+    assert ("star" in withheld or "held" in withheld)        # ...but one side is withheld

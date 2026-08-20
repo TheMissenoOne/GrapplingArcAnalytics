@@ -51,7 +51,21 @@ class EngineConfig:
 # a single RD of 152.
 # Swapping this value changes what the site publishes and requires a full
 # `export.site_data --full` regeneration afterward.
-SITE_RATING_RUN_ID: str | None = "f8ae4860-9feb-4a5c-9f78-aa8f6ce92c5b"
+#
+# Third pass, same day: AA-011. `url_mapping.json` has `opponent` identical to `athlete` in
+# 89 of 307 entries, and four of those reached the corpus as a bout between two spellings of
+# one person. Merging the two names would have collapsed a real bout into a self-match, so
+# the true opponent was re-derived instead -- each corroborated twice, by name in
+# url_mapping AND by the row's first ts landing just after that bout's mapped offset:
+#   Rafael Lovato Jr vs "R. Lovato Jr."   -> Evangelista     (mapped @0,    first ts 38s)
+#   Isaac Michelle   vs "Izaak Michell"   -> Ryan Aitken     (mapped @2238, first ts 2258s)
+#   Owen Flanagan    vs "Eoghan Oflanagan"-> Santeri Lilius  (mapped @3706, first ts 3730s)
+#   Ethan Crelinsten vs "Ethan Krellstein"-> DeAndre Corban  (mapped @179,  first ts 243s)
+# Three phantom athletes deleted; Eoghan Oflanagan kept (a real athlete with other bouts).
+# The last repair revealed the WNO 24 Corban/Crelinsten bout existed twice -- the richer
+# 14-event row kept, the verified video link carried across from the row that was dropped.
+# 866 -> 865 matches, 644 -> 642 rated athletes.
+SITE_RATING_RUN_ID: str | None = "0d086675-6ea0-40cf-830a-0a9f489604b6"
 
 # Publish-confidence cut. An editorial decision calibrated against measured impact
 # (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87
