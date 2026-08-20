@@ -65,32 +65,79 @@ JOINT = r"armbar|arm bar|kimura|americana|omoplata|wrist ?lock|choi bar|monoplat
 SLICER = r"slicer|twister|crucifix"
 POINTS = r"^pts|^points|advantage|^adv|^\d+x\d+"
 DECISION = r"referee decision|decision|judge"
-VOID = r"^dq|disqualif|injur|withdraw|n/a|^-$|walkover|forfeit"
+VOID = r"^dq|disqualif|injur|withdraw|n/a|^-+$|walkover|forfeit"
 SUB_FAMILIES = ("strangle", "joint", "leg", "slicer", "sub_other")
 FAMILIES = ("points", "decision", *SUB_FAMILIES, "void")
+
+# A compound name is decided by whichever family regex is tested first, which gets these wrong:
+# "calf slicer" is a slicer that LEG claims through `calf`, and "triangle armlock" is a joint
+# lock that STRANGLE claims through `triangle`. Left to the fallback, the `slicer` family is
+# unreachable — it scored k=0 in both divisions not because nobody hits one but because no
+# string can ever reach the branch. Entries here win over the regexes; the regexes stay for
+# labels this table has not seen. A corpus string that matches two family regexes and is NOT
+# listed here is a test failure, not a silent coin flip.
+METHOD_FAMILY: dict[str, str] = {
+    "calf slicer": "slicer",
+    "triangle armlock": "joint",
+    "triangle armbar": "joint",
+}
+
+
+def _vocab(*tokens: str) -> re.Pattern[str]:
+    """One alternation for a vocabulary of event-name fragments.
+
+    Each token is anchored at its START on a word boundary and deliberately left open at the
+    end, because several are prefixes: "grappling ind" for Grappling Industries, "world champ"
+    for World Championship, "sacramento o" for Sacramento Open. The leading anchor is the whole
+    point — without it `open` fires inside "Copenhagen" and `gi ` fires inside "nogi ", the
+    second being harmless today only because NO_GI happens to be tested before GI.
+    """
+    return re.compile("|".join(
+        (r"\b" if t[:1].isalnum() else "") + re.escape(t) for t in tokens))
+
 
 # Uniform. Gi and no-gi are different sports for this purpose: the grips, the pace and which
 # submissions are even available all change, so pooling them produces an average of two
 # distributions that describes neither.
-NO_GI = ("no-gi", "no gi", "nogi", "adcc", "polaris", "wno", "who's number one", "cji",
-         "quintet", "subversiv", "f2w", "fight to win", "grapplefest", "adxc", "ufc fpi",
-         "ufc fp", "pgf", "sub", "queen of mats", "emerald city", "main character",
-         "spokane subs", "pit series", "grappling ind", "adgs", "grand slam")
-GI = ("world champ", "pan american", "european champ", "brasileiro", "world pro", "copa",
-      "gi ", "ibjjf gi", "jiu-jitsu champ", "san jose open", "sacramento o", "bjj stars")
+NO_GI = _vocab("no-gi", "no gi", "nogi", "adcc", "polaris", "wno", "who's number one", "cji",
+               "quintet", "subversiv", "f2w", "fight to win", "grapplefest", "adxc", "ufc fpi",
+               "ufc fp", "pgf", "sub", "queen of mats", "emerald city", "main character",
+               "spokane subs", "pit series", "grappling ind",
+               # BJJ Heroes abbreviations that spell the uniform out: NGO/NGN/NNG/NGGP are
+               # No-Gi Open / Nationals / Grand Prix. "Sacramento WO" sitting beside
+               # "Sacramento NGO" in the same record is what makes this a reading of the
+               # source's own convention rather than a guess about the event.
+               "ng", "nng", "sngo", "fngo", "mcharacter")
+# `"gi "` used to sit in here. It classified nothing correctly -- every one of the 38 bouts it
+# matched across the records and all 110 corpus events was a NO-GI event ("nogi worlds",
+# "no gi pan am."), reached only because NO_GI happens to be tested first. A token whose every
+# hit is a false positive it never gets blamed for is a trap, not a rule.
+GI = _vocab("world champ", "pan american", "european champ", "brasileiro", "world pro", "copa",
+            "ibjjf gi", "jiu-jitsu champ", "san jose open", "sacramento o", "bjj stars",
+            "adgs", "grand slam", "ajp",
+            # An IBJJF "Open" is the gi bracket. The no-gi one is named No-Gi Open (NGO), and
+            # NO_GI is tested first, so it claims that one before this line is reached.
+            "open")
 
 # Rulesets. Sourced from data/scouting/rulesets.json, which records decision_model per family.
-# The three differ in exactly the way that changes how a bout ends: ADCC has a negative-points
-# window then overtime, IBJJF scores throughout with advantages, and superfights are commonly
-# submission-only with a judges' card as the fallback.
+# They differ in exactly the way that changes how a bout ends: ADCC has a negative-points window
+# then overtime, IBJJF scores throughout with advantages, AJP scores on its own table with
+# advantages and runs its events in the gi, and superfights are commonly submission-only with a
+# judges' card as the fallback.
+#
+# `ajp` is listed FIRST because `ruleset` returns on the first family that matches and dicts
+# iterate in insertion order: Abu Dhabi Grand Slam, ADGS and World Pro are AJP/UAEJJF events, and
+# filing them under `adcc` put 95 bouts — every one of them in +65 kg — under the rules of a
+# different organisation. Half of what the page called "no-gi under ADCC rules" was gi.
 RULESETS = {
-    "adcc": ("adcc", "adgs", "grand slam", "world pro"),
-    "ibjjf": ("world champ", "pan american", "european", "no-gi worlds", "world nogi",
-              "world no-gi", "nogi pan", "pan nogi", "no gi pan", "brasileiro", "open",
-              "jiu-jitsu champ", "world champ."),
-    "superfight": ("polaris", "wno", "who's number one", "cji", "f2w", "fight to win",
-                   "subversiv", "grapplefest", "adxc", "queen of mats", "bjj stars",
-                   "main character", "spokane subs", "pit series", "ufc fp", "quintet"),
+    "ajp": _vocab("adgs", "grand slam", "world pro", "ajp", "uaejj"),
+    "adcc": _vocab("adcc"),
+    "ibjjf": _vocab("world champ", "pan american", "european", "no-gi worlds", "world nogi",
+                    "world no-gi", "nogi pan", "pan nogi", "no gi pan", "brasileiro", "open",
+                    "jiu-jitsu champ", "world champ."),
+    "superfight": _vocab("polaris", "wno", "who's number one", "cji", "f2w", "fight to win",
+                         "subversiv", "grapplefest", "adxc", "queen of mats", "bjj stars",
+                         "main character", "spokane subs", "pit series", "ufc fp", "quintet"),
 }
 
 
@@ -103,6 +150,8 @@ def family(method: str | None) -> str:
     s = _fold(method)
     if not s or re.search(VOID, s):
         return "void"
+    if s in METHOD_FAMILY:
+        return METHOD_FAMILY[s]
     if re.search(POINTS, s):
         return "points"
     if re.search(DECISION, s):
@@ -120,17 +169,17 @@ def family(method: str | None) -> str:
 
 def uniform(event: str | None) -> str:
     s = _fold(event)
-    if any(w in s for w in NO_GI):
+    if NO_GI.search(s):
         return "no_gi"
-    if any(w in s for w in GI):
+    if GI.search(s):
         return "gi"
     return "unknown"
 
 
 def ruleset(event: str | None) -> str:
     s = _fold(event)
-    for name, keys in RULESETS.items():
-        if any(k in s for k in keys):
+    for name, pat in RULESETS.items():
+        if pat.search(s):
             return name
     return "other"
 
