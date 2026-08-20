@@ -75,6 +75,9 @@ DEFAULT_GRID = (2, 3)      # cols x rows -> 6 frames per page
 # answer to a video that needs both is two entries: this one to find the bouts, then one
 # per bout with a `start`/`end` and the normal step.
 DEFAULT_MAX_FRAMES = 400
+# The strip is 12 KB a frame and exists to be scrubbed, so it earns a much higher ceiling than
+# the sheet -- a 20-minute bout at one frame per second is still only ~14 MB of thumbnails.
+DEFAULT_STRIP_FRAMES = 2000
 
 # Where --dump-library writes by default, and where the context page tells the reader the
 # vocabulary lives. Versioned next to the manifests: the manifest says which fights, this
@@ -1028,11 +1031,36 @@ def _span_seconds(entry: Entry, meta: dict[str, Any]) -> float | None:
     return float(meta["duration"]) - (entry.start or 0.0)
 
 
+def _capped(step: float, span: float | None, cap: int, vid: str, what: str) -> float:
+    """Widen the step rather than blow past a frame cap, and say so."""
+    if not span or span / step <= cap:
+        return step
+    widened = -(-span // cap)
+    logger.info("%s: %s of video at %gs would be %d %s frames -- widening to %gs",
+                vid, hhmmss(span), step, int(span / step), what, widened)
+    return float(widened)
+
+
 def process(entry: Entry, db: DbContext, out_dir: Path, step: float,
             grid: tuple[int, int], workdir: Path, force: bool,
             max_frames: int = DEFAULT_MAX_FRAMES,
             library: dict[str, Any] | None = None,
-            bjjh: dict[str, Any] | None = None, fmt: str = "pdf") -> str:
+            bjjh: dict[str, Any] | None = None, fmt: str = "pdf",
+            pdf_step: float = DEFAULT_STEP_SECONDS,
+            strip_cap: int = DEFAULT_STRIP_FRAMES) -> str:
+    """One download, up to two artefacts.
+
+    **They do not share a sampling interval, and that is not an oversight.** A sheet is a
+    single file handed to a reader that gets nothing else, so its density is bounded by what
+    stays uploadable and legible -- a 15-minute bout at one frame per second is 900 frames and
+    150 pages. The folder is scrubbed by a person against a clip that can materialise any
+    instant, so its strip wants to be fine. `--step` sets the strip; `--pdf-step` sets the
+    sheet; each is capped independently.
+    """
+    wants_pdf = fmt in ("pdf", "both")
+    wants_dir = fmt in ("frames", "both")
+    pdf_path, dir_path = out_dir / f"{entry.slug}.pdf", out_dir / entry.slug
+
     known = db.bouts_for(entry.vid)
     if known and not force:
         with_seq = [b for b in known if b["events"]]
@@ -1040,39 +1068,57 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: float,
             return (f"skip {entry.vid}: already in the corpus with a reviewed sequence "
                     f"({with_seq[0]['a']} vs {with_seq[0]['b']}, {with_seq[0]['events']} events)")
 
-    out_path = out_dir / (entry.slug if fmt == "frames" else f"{entry.slug}.pdf")
-    if out_path.exists() and not force:
-        return f"skip {entry.vid}: {out_path.name} already built"
+    missing = [n for n, want, path in (("sheet", wants_pdf, pdf_path),
+                                       ("folder", wants_dir, dir_path))
+               if want and not path.exists()]
+    if not force and not missing:
+        return f"skip {entry.vid}: both artefacts already built"
 
     meta = probe(entry.url)
-    step = entry.step or step
     span = _span_seconds(entry, meta)
-    if span and span / step > max_frames:
-        widened = int(-(-span // max_frames))          # ceil, so the count lands under the cap
-        logger.info("%s: %s of video at %ds would be %d frames -- widening to %ds",
-                    entry.vid, hhmmss(span), step, int(span / step), widened)
-        step = widened
+    strip_step = _capped(entry.step or step, span, strip_cap, entry.vid, "strip")
+    sheet_step = _capped(entry.step or pdf_step, span, max_frames, entry.vid, "sheet")
+
+    made: list[str] = []
     with tempfile.TemporaryDirectory(dir=workdir) as tmp:
         tmpd = Path(tmp)
         # NOT `fmt` -- that name already means the output format, and shadowing it here sent
         # every --format frames run down the PDF branch instead.
         width, dl_fmt = QUALITY.get(entry.kind, _DEFAULT_QUALITY)
-        video = fetch(entry.url, tmpd, entry.start, entry.end, dl_fmt)
-        frames = extract(video, tmpd / "frames", step, entry.start or 0.0, width,
-                         thumb=THUMB_WIDTH if fmt == "frames" else None)
-        if not frames:
-            return f"FAIL {entry.vid}: ffmpeg produced no frames"
-        if fmt == "frames":
-            d = write_frames_dir(entry, meta, db, frames, step, out_dir, library, bjjh)
-            # The clip IS the artefact now, not the frames. Moved rather than copied: it is
-            # already the only heavy thing in the temp dir and it is about to be deleted.
-            shutil.move(str(video), str(d / "clip.mp4"))
-            mb = sum(f.stat().st_size for f in d.iterdir()) / 1e6
-            return f"ok   {d.name}/  {len(frames)} frames, {mb:.1f} MB"
-        video.unlink(missing_ok=True)      # a sheet keeps its frames, not its source
-        build_pdf(entry, meta, db, frames, step, grid, out_path, library, bjjh)
-    mb = out_path.stat().st_size / 1e6
-    return f"ok   {out_path.name}  {len(frames)} frames, {mb:.1f} MB"
+        # The clip we already keep IS a valid source for any frame -- that is the whole reason
+        # it is kept. Re-downloading a bout whose clip is on disk costs bandwidth and, on a
+        # tight disk, room for two copies of the same video at once.
+        held = dir_path / "clip.mp4"
+        reused = held.exists() and not (wants_dir and force)
+        video = held if reused else fetch(entry.url, tmpd, entry.start, entry.end, dl_fmt)
+        if reused:
+            logger.info("%s: extracting from the clip already on disk", entry.vid)
+
+        # The sheet is built FIRST, while the clip is still in the temp dir: the folder branch
+        # moves that file out, and extracting from a path that has just been moved is the kind
+        # of ordering bug that only shows up when both formats are asked for at once.
+        if wants_pdf and (force or not pdf_path.exists()):
+            sheet = extract(video, tmpd / "sheet", sheet_step, entry.start or 0.0, width)
+            if not sheet:
+                return f"FAIL {entry.vid}: ffmpeg produced no frames for the sheet"
+            build_pdf(entry, meta, db, sheet, sheet_step, grid, pdf_path, library, bjjh)
+            made.append(f"{pdf_path.name} ({len(sheet)} fr @{sheet_step:g}s, "
+                        f"{pdf_path.stat().st_size / 1e6:.1f} MB)")
+
+        if wants_dir and (force or not dir_path.exists()):
+            strip = extract(video, tmpd / "strip", strip_step, entry.start or 0.0, width,
+                            thumb=THUMB_WIDTH)
+            if not strip:
+                return f"FAIL {entry.vid}: ffmpeg produced no frames for the strip"
+            d = write_frames_dir(entry, meta, db, strip, strip_step, out_dir, library, bjjh)
+            # The clip IS the artefact, not the frames. Moved rather than copied: it is already
+            # the only heavy thing in the temp dir and it is about to be deleted.
+            if not reused:
+                shutil.move(str(video), str(d / "clip.mp4"))
+            mb = sum(f.stat().st_size for f in d.rglob("*") if f.is_file()) / 1e6
+            made.append(f"{d.name}/ ({len(strip)} thumbs @{strip_step:g}s, {mb:.1f} MB)")
+
+    return f"ok   {entry.slug}  " + " + ".join(made) if made else f"skip {entry.vid}: nothing to do"
 
 
 def main() -> int:
@@ -1097,10 +1143,14 @@ def main() -> int:
                     help="rebuild even when the video already backs a reviewed sequence")
     ap.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES,
                     help="widen the step rather than exceed this many frames in one PDF")
-    ap.add_argument("--format", choices=("pdf", "frames"), default="pdf",
+    ap.add_argument("--format", choices=("pdf", "frames", "both"), default="both",
                     help="pdf: one contact sheet per bout, for an upload that takes one file. "
-                         "frames: a directory per bout -- one JPEG per frame at full size, "
-                         "plus README.md and labels.md -- for an agent that reads a filesystem")
+                         "frames: a directory per bout -- thumbnail strip, clip.mp4, README "
+                         "and labels -- for a person at the registrar. both (default): one "
+                         "download, both artefacts, each at its own sampling step")
+    ap.add_argument("--pdf-step", type=float, default=DEFAULT_STEP_SECONDS,
+                    help="seconds between frames ON THE SHEET (default %(default)gs). Separate "
+                         "from --step because a sheet dense enough to scrub is too long to read")
     ap.add_argument("--limit", type=int, help="stop after N videos (a smoke run)")
     ap.add_argument("--no-bjjh", action="store_true",
                     help="do not print the BJJ Heroes result line or profile links")
@@ -1158,7 +1208,7 @@ def main() -> int:
         try:
             results.append(process(e, db, a.out, a.step, (cols, rows), a.workdir,
                                    a.force, a.max_frames, library, bjjh.get(e.slug),
-                                   a.format))
+                                   a.format, a.pdf_step))
         except Exception as exc:                                  # noqa: BLE001
             # One dead link must not cost the other 27 downloads. The reason is printed
             # next to the id, so the manifest row can be fixed and only that row re-run.
