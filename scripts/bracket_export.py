@@ -83,6 +83,12 @@ POINTS = r"^pts|^points|advantage|^adv|^\d+x\d+"
 DECISION = r"referee decision|decision|judge"
 VOID = r"^dq|disqualif|injur|withdraw|n/a|^-+$|walkover|forfeit"
 DIVISIONS = ("65 kg", "+65 kg")
+# Nested recency windows, newest last. Fixed years rather than "N years back from today" so a
+# rebuild in six months does not silently re-slice the report.
+RECENCY_WINDOWS = (2019, 2022, 2024)
+# What the page opens on. Recent no-gi is the question the bracket asks; the full career is a
+# secondary view, one selection away.
+OPENING_CUT = "no_gi+since:2024"
 SUB_FAMILIES = ("strangle", "joint", "leg", "slicer", "sub_other")
 # An SD-based outlier rule needs enough members for the SD to mean anything. Stated here so it
 # is arguable rather than buried in the layer that applies it.
@@ -320,6 +326,8 @@ def method_layer(records: Mapping[str, Any]) -> dict[str, Any]:
                     "uniform_split": Counter(r["uniform"] for r in rows),
                     "ruleset_split": Counter(r["ruleset"] for r in rows),
                     "by_year": _year_series(rows),
+                    "recency": _recency(rows),
+                    "opening_cut": OPENING_CUT,
                     "ruleset_test": _ruleset_test(rows),
                     # Only possible now that AJP is its own family. Filing it under ADCC made
                     # the gi comparison meaningless: the two organisations score differently
@@ -417,7 +425,42 @@ def _cuts(rows: Sequence[Mapping[str, Any]]) -> list[tuple[str, list[Mapping[str
     for rs in ("adcc", "ibjjf", "superfight"):
         cuts.append((f"no_gi+{rs}",
                      [r for r in rows if r["uniform"] == "no_gi" and r["ruleset"] == rs]))
+    # Recency. The +65 kg records reach back to 2008, and a gi bout from then carries the same
+    # weight as a 2025 no-gi one in any career-wide number -- which describes a career, not the
+    # bracket. The page opens on `no_gi+since:2024` for that reason.
+    for y0 in RECENCY_WINDOWS:
+        cuts.append((f"since:{y0}", [r for r in rows if (r.get("year") or 0) >= y0]))
+        cuts.append((f"no_gi+since:{y0}",
+                     [r for r in rows if r["uniform"] == "no_gi" and (r.get("year") or 0) >= y0]))
     return [(k, v) for k, v in cuts if v]
+
+
+def _recency(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Does the finding survive when only recent evidence is used?
+
+    One statistic -- the finish rate in no-gi -- across four nested windows. Surviving all four
+    is far stronger evidence than any single interval, and failing to survive is the finding:
+    it says the career number is describing an era the bracket is not in.
+    """
+    bouts = _distinct_bouts(rows)
+    out: list[dict[str, Any]] = []
+    for label, y0 in (("carreira", None), *((f"{y}+", y) for y in RECENCY_WINDOWS)):
+        sub = [r for r in bouts if r["uniform"] == "no_gi"
+               and (y0 is None or (r.get("year") or 0) >= y0)]
+        w = [r for r in sub if r["wl"] == "W"]
+        cov = coverage(list(Counter(r["athlete"] for r in w).values()))
+        subs = sum(1 for r in w if r["family"] in SUB_FAMILIES)
+        out.append({"window": label, "from_year": y0, "bouts": len(sub), "wins": len(w),
+                    "finish_rate": gated(subs, len(w), cov), "coverage": cov.to_dict()})
+
+    # "Stable" means every window that produced an interval overlaps every other one. Windows
+    # the gate refused cannot agree or disagree, so they are counted, not judged.
+    bands = [(e["finish_rate"]["lo"], e["finish_rate"]["hi"]) for e in out
+             if e["finish_rate"].get("estimable")]
+    stable = all(a[0] <= b[1] and b[0] <= a[1] for a in bands for b in bands)
+    return {"basis": "no-gi, lutas distintas, taxa de finalização entre as vitórias",
+            "windows": out, "estimable_windows": len(bands),
+            "stable": stable if len(bands) > 1 else None}
 
 
 def _year_series(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
