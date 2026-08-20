@@ -65,7 +65,22 @@ class EngineConfig:
 # The last repair revealed the WNO 24 Corban/Crelinsten bout existed twice -- the richer
 # 14-event row kept, the verified video link carried across from the row that was dropped.
 # 866 -> 865 matches, 644 -> 642 rated athletes.
-SITE_RATING_RUN_ID: str | None = "0d086675-6ea0-40cf-830a-0a9f489604b6"
+#
+# Fourth pass, 2026-08-20: the ADCC 2026 women's roster carried four athletes whose records
+# were split across spellings, and a split record inflates RD directly -- fewer rated bouts
+# per identity means less information, means a wider deviation, means the publication gate
+# below rejects an athlete who has actually competed enough. Confirmed from the bouts, not
+# from a similarity score, and merged via `scripts.dedupe_athletes`:
+#   Helena Cravar        -> Helena Crevar   (transposition; WNO 31 fits her circuit)
+#   Raphaela Guedes, R. Guedes, "Raphaela Guedes Final" -> Rafaela Guedes
+#   Mo Black             -> Morgan Black    (nickname; Trials 2023/24 then ADCC 2024)
+#   Gabby Garcia, Gabrielle Garcia -> Gabi Garcia (the CJI 2024 Craig Jones superfight)
+# NOT merged: "Anna Karolina Vieira" vs "Ana Carolina Vieira" -- two substitutions rather
+# than a typo, no shared event either way, and both plausible real names.
+# Measured effect on the roster: Rafaela Guedes 1642/RD220 on one rated bout -> 1883/RD144 on
+# seven; Morgan Black 1615/RD215 -> 1717/RD169; Gabi Garcia 1661/RD213 -> 1590/RD197. Athletes
+# clearing the gate went from 6 to 9. 865 -> 864 matches (one pairing became a duplicate).
+SITE_RATING_RUN_ID: str | None = "99503191-a2b3-470e-898f-c27c303e00b5"
 
 # Publish-confidence cut. An editorial decision calibrated against measured impact
 # (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87

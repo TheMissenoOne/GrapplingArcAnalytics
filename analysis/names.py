@@ -191,6 +191,24 @@ ATHLETE_ALIASES: dict[str, str] = {
     "p gaudio": "patrick gaudio",       # initial → Patrick
     "felipe pena sf": "felipe pena",    # leaked "SF" (semifinal) stage tag
     "kyle bame": "kyle boehm",          # "Bame" transcription typo → Kyle Boehm
+    # ADCC 2026 women's roster, confirmed 2026-08-20 from the bouts themselves rather than
+    # from a string-similarity score. Each merges into the spelling the roster manifest uses.
+    "helena cravar": "helena crevar",          # transposed letter; her one bout is WNO 31
+                                               # 2025, and Crevar fought WNO 25 and 27
+    "raphaela guedes": "rafaela guedes",       # ph/f spelling; both rows sit in ADCC 2022,
+                                               # one W and one L, a normal bracket path
+    "r guedes": "rafaela guedes",              # initial form; only one Guedes in the corpus
+    "raphaela guedes final": "rafaela guedes", # stage tag leaked into the name, same class as
+                                               # "felipe pena sf" above
+    "mo black": "morgan black",                # nickname; ADCC Trials 2023/2024 then ADCC 2024
+    "gabby garcia": "gabi garcia",             # her single bout is Craig Jones at CJI 2024 —
+                                               # the publicised superfight, which is hers
+    "gabrielle garcia": "gabi garcia",         # full name, no bouts; aliased so a future
+                                               # import cannot open a third row
+    # NOT aliased, deliberately: "Anna Karolina Vieira" (3 bouts, all ADCC 2024) and
+    # "Ana Carolina Vieira" (3 bouts, WNO 2021 / CJI 2025). Two substitutions rather than a
+    # typo, no shared event to corroborate either way, and both are plausible real Brazilian
+    # names. Merging on resemblance alone is how two people become one.
     # NOTE: Junny vs Edwin Ocasio, Maia vs Mayssa Bastos, George vs Jorge Santos are
     # DISTINCT people (real bouts) — do not alias.
 }

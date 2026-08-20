@@ -142,13 +142,34 @@ def test_dedup_nao_pega_quando_nome_cru_do_banco_diverge_por_alias() -> None:
     # the raw DB alias spelling instead of the roster canonical name gets a false negative —
     # the duplicate slips through and inflates the bout count. This is the failure the
     # canonicalization step in _augment_with_db exists to close.
+    #
+    # This used to use "Mo Black"/"Morgan Black". That pair moved into ATHLETE_ALIASES on
+    # 2026-08-20 once the bouts confirmed it, so it stopped being an example of a divergent
+    # spelling and started being an example of a closed one — see the test below. The failure
+    # mode is unchanged; only the spelling that still exhibits it is.
+    corpus = {
+        "Morgan Black": [bout("d1", ["Morgan Black", "Sophia Delgado"], 2024, "no_gi", [])],
+    }
+    db_bout = bout("db:1", ["M. Black", "Sophia Delgado"], 2024, "no_gi", [], origem="db")
+    db_rows = [("M. Black", "Sophia Delgado", db_bout, ["Morgan Black"])]
+    _merged, stats = augment_corpus(corpus, db_rows)
+    assert stats == {"descartadas": 0, "adicionadas": 1}
+
+
+def test_alias_registrado_fecha_a_divergencia_na_camada_de_identidade() -> None:
+    """A spelling in ATHLETE_ALIASES dedupes without the caller canonicalising anything.
+
+    This is what the registry buys: the fix stops depending on every caller remembering to
+    resolve the roster spelling first. `augment_corpus` compares by `athlete_key`, so once the
+    alias exists the divergence never reaches it.
+    """
     corpus = {
         "Morgan Black": [bout("d1", ["Morgan Black", "Sophia Delgado"], 2024, "no_gi", [])],
     }
     db_bout = bout("db:1", ["Mo Black", "Sophia Delgado"], 2024, "no_gi", [], origem="db")
     db_rows = [("Mo Black", "Sophia Delgado", db_bout, ["Morgan Black"])]
     _merged, stats = augment_corpus(corpus, db_rows)
-    assert stats == {"descartadas": 0, "adicionadas": 1}
+    assert stats == {"descartadas": 1, "adicionadas": 0}
 
 
 def test_banco_dedup_ignora_ano_diferente() -> None:
