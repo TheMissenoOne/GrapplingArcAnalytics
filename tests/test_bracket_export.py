@@ -614,6 +614,9 @@ def test_a_node_carries_the_denominator_its_rate_needs() -> None:
     back = next(n for n in out["nodes"]["favor"]["state"] if n["label"] == "Back Control")
     assert back["k"] == 5
     assert back["n"] == out["events_own"] == 10
+    # The share arrives decided too. A proportion the page computes is a proportion that can
+    # disagree with the analysis that produced the counts under it.
+    assert back["p"] == 0.5
     guard = next(n for n in out["nodes"]["contra"]["state"] if n["label"] == "Half Guard")
     assert guard["n"] == out["events_against"] == 5
 
@@ -623,6 +626,7 @@ def test_a_refused_perspective_publishes_no_denominator() -> None:
     a rate over a refused side reads as the category claim the gate exists to withhold."""
     out = bx.sequence_layer([TWO_SIDED], "65 kg")
     assert out["coverage"]["favor"]["all"]["estimable"] is False
-    assert all(n["n"] is None for cat in ("state", "action", "transition")
+    assert all(n["n"] is None and n["p"] is None
+               for cat in ("state", "action", "transition")
                for n in out["nodes"]["favor"][cat])
     assert any(n["k"] for n in out["nodes"]["favor"]["state"])

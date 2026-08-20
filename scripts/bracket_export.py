@@ -900,7 +900,13 @@ def _node_rows(events: Sequence[Mapping[str, Any]],
         # nothing reads. The perspective's own coverage verdict, which IS rendered, sits one
         # level up.
         out[cat] = [{"label": lbl, "role": role, "k": k,
-                     "n": len(events) if publish_n else None}
+                     "n": len(events) if publish_n else None,
+                     # The share itself, not the two numbers and a division for the page to
+                     # do. `k/n` is trivial arithmetic, which is exactly why it was tempting
+                     # to leave it to the renderer -- whose own header promises that every
+                     # proportion on screen arrives decided from here. A number a page
+                     # computes is a number that can disagree with the analysis.
+                     "p": round(k / len(events), 4) if publish_n and events else None}
                     for (lbl, role), k in c.most_common(12)]
     return out
 
