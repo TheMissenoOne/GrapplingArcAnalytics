@@ -68,7 +68,11 @@ SLICER = r"slicer|twister|crucifix"
 POINTS = r"^pts|^points|advantage|^adv|^\d+x\d+"
 DECISION = r"referee decision|decision|judge"
 VOID = r"^dq|disqualif|injur|withdraw|n/a|^-+$|walkover|forfeit"
+DIVISIONS = ("65 kg", "+65 kg")
 SUB_FAMILIES = ("strangle", "joint", "leg", "slicer", "sub_other")
+# An SD-based outlier rule needs enough members for the SD to mean anything. Stated here so it
+# is arguable rather than buried in the layer that applies it.
+MIN_USABLE_FOR_OUTLIER = 6
 FAMILIES = ("points", "decision", *SUB_FAMILIES, "void")
 
 # A compound name is decided by whichever family regex is tested first, which gets these wrong:
@@ -552,7 +556,11 @@ def _path(chains: Sequence[Sequence[str]]) -> dict[str, Any]:
         for x, y, z in zip(ch, ch[1:], ch[2:]):
             trigrams[(x, y, z)] += 1
     edges: list[dict[str, Any]] = [
-        {"from": x, "to": y, "n": c, "of": out_deg[x], **est(c, out_deg[x])}
+        # `"n": c` used to sit here and was silently overwritten by est()'s own `n`, which is
+        # the denominator. The raw count survived only as `k`, and the page's branch sort --
+        # `sort((a, b) => b.n - a.n)` -- was therefore comparing a value identical across every
+        # sibling edge, leaving the tree unordered.
+        {"from": x, "to": y, "of": out_deg[x], **est(c, out_deg[x])}
         for (x, y), c in trans.most_common(80)]
     return {
         "chains": len(chains),
@@ -659,19 +667,43 @@ def embedding_layer(conn: Any, roster: Mapping[str, str]) -> dict[str, Any]:
         # mean similarity to the category centroid. With n this small it is a pointer for a
         # human to look, never a classification -- which is why `n` travels with the flag.
         mu = sum(sims) / len(sims) if sims else None
-        sd = math.sqrt(sum((s - mu) ** 2 for s in sims) / len(sims)) if sims and len(sims) > 1 else None
+        sd = (math.sqrt(sum((s - mu) ** 2 for s in sims) / (len(sims) - 1))
+              if sims and mu is not None and len(sims) > 1 else None)
+        # Scored against a centroid that EXCLUDES the athlete being scored. With three usable
+        # graphs, a member is a third of the mean she is being measured against, which pulls
+        # the centroid toward her and hides exactly the athlete the rule is looking for.
+        for m in members:
+            loo = _centroid([o["vec"] for o in members if o is not m and o.get("vec")])
+            m["to_centroid_loo"] = (round(_cos(m["vec"], loo), 4)
+                                    if m["vec"] and loo else None)
+        loo_sims = [m["to_centroid_loo"] for m in members if m["to_centroid_loo"] is not None]
+        loo_mu = sum(loo_sims) / len(loo_sims) if loo_sims else None
+        loo_sd = (math.sqrt(sum((x - loo_mu) ** 2 for x in loo_sims) / (len(loo_sims) - 1))
+                  if loo_sims and loo_mu is not None and len(loo_sims) > 1 else None)
+        # Below this many usable vectors the mean and the spread are estimated from so few
+        # numbers that a "mean - 1 sd" cut is decoration. The field is null rather than false:
+        # false would read as "checked, and she is not one".
+        enough = len(vecs) >= MIN_USABLE_FOR_OUTLIER
         for m in members:
             m["outlier"] = bool(
-                sd is not None and mu is not None and m["to_centroid"] is not None
-                and m["to_centroid"] < mu - sd)
+                enough and loo_sd is not None and loo_mu is not None
+                and m["to_centroid_loo"] is not None
+                and m["to_centroid_loo"] < loo_mu - loo_sd) if enough else None
         conc = inverse_hhi_concentration([m["edges"] for m in members])
         per_div[div] = {
             "members": [{k: v for k, v in m.items() if k != "vec"} for m in members],
             "usable": len(vecs), "with_graph": len(members),
             "edge_concentration": conc,
-            "outlier_rule": {"basis": "cosine to category centroid", "cut": "mean - 1 sd",
-                             "mean": round(mu, 4) if mu else None,
-                             "sd": round(sd, 4) if sd else None, "n": len(sims)},
+            "outlier_rule": {"basis": "cosine to leave-one-out category centroid",
+                             "cut": "mean - 1 sd", "min_usable": MIN_USABLE_FOR_OUTLIER,
+                             "applied": enough,
+                             "why_not": None if enough else
+                             f"{len(vecs)} usable vector(s); the rule needs "
+                             f"{MIN_USABLE_FOR_OUTLIER}",
+                             "mean": round(loo_mu, 4) if loo_mu else None,
+                             "sd": round(loo_sd, 4) if loo_sd else None, "n": len(loo_sims),
+                             "pooled_mean": round(mu, 4) if mu else None,
+                             "pooled_sd": round(sd, 4) if sd else None},
             "centroid_neighbours": _centroid_neighbours(conn, centroid),
         }
     return {"divisions": per_div,
@@ -792,18 +824,27 @@ def baseline_layer(bouts: Sequence[Mapping[str, Any]], roster_ids: set[str],
     real difference — an error that always flatters the null.
     """
     pool: Counter[str] = Counter()
+    per_athlete: Counter[str] = Counter()
     n_bouts = 0
     for b in bouts:
         if not any(k in _fold(b.get("event")) for k in ELITE):
             continue
-        n_bouts += 1
+        kept = 0
         for e in b["seq"]:
             if e.get("actor_id") in roster_ids:
                 continue
             pool[e.get("type") or "?"] += 1
+            per_athlete[str(e.get("actor_id"))] += 1
+            kept += 1
+        # Counted only if it survived the roster exclusion. A bout where every event belongs
+        # to a rostered athlete contributes nothing to the pool, and counting it inflates the
+        # apparent size of the comparator.
+        n_bouts += 1 if kept else 0
     total = sum(pool.values())
+    cov = coverage(list(per_athlete.values()))
     out: dict[str, Any] = {"bouts": n_bouts, "events": total,
-                           "mix": {t: est(v, total) for t, v in pool.most_common()},
+                           "coverage": cov.to_dict(),
+                           "mix": {t: gated(v, total, cov) for t, v in pool.most_common()},
                            "roster_excluded": True}
     for div, seq in per_div.items():
         own: Counter[str] = Counter()
@@ -811,6 +852,17 @@ def baseline_layer(bouts: Sequence[Mapping[str, Any]], roster_ids: set[str],
             for t, e in seq["type_by_outcome"][outcome].items():
                 own[t] += e["k"]
         n_own = sum(own.values())
+        own_cov = seq.get("coverage", {}).get("all", {})
+        blocked = []
+        if not own_cov.get("estimable"):
+            blocked.append(f"category side: {own_cov.get('reason')}")
+        if not cov.estimable:
+            blocked.append(f"baseline pool: {cov.reason}")
+        if blocked:
+            out[div] = {"n_own": n_own, "available": False, "why": "; ".join(blocked),
+                        "observed": [{"type": t, "own": own[t], "pool": pool[t]}
+                                     for t in sorted(set(own) | set(pool))]}
+            continue
         rows2: list[dict[str, Any]] = []
         for t in sorted(set(own) | set(pool)):
             rows2.append({"type": t,
@@ -819,7 +871,8 @@ def baseline_layer(bouts: Sequence[Mapping[str, Any]], roster_ids: set[str],
         it2 = iter(benjamini_hochberg(ps2, 0.05))
         for r in rows2:
             r["survives_bh"] = next(it2) if r["contrast"]["p_value"] is not None else False
-        out[div] = {"n_own": n_own, "rows": rows2}
+        out[div] = {"n_own": n_own, "available": True, "rows": rows2,
+                    "family": "baseline event mix", "m": len(ps2)}
     return out
 
 
@@ -884,6 +937,12 @@ def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
                     continue
                 own_ids.add(b[f"{side}_id"])
         per_axis_athletes: dict[str, set[str]] = defaultdict(set)
+        # Contributors, counted separately from RATED contributors. These were the same set
+        # until now, because the add() sat inside the `in rated` branch -- so an axis fed by
+        # three athletes of whom one carried a rating reported `contributors: 1` and drew the
+        # dashed "1 atleta" ray. The warning was misreporting the thing it exists to warn about.
+        per_axis_all: dict[str, set[str]] = defaultdict(set)
+        per_athlete_axis: dict[str, Counter[str]] = defaultdict(Counter)
         for b in bouts:
             for e in b["seq"]:
                 aid = e.get("actor_id")
@@ -893,8 +952,10 @@ def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
                 if not axis:
                     continue
                 counts[axis] += 1
-                key = id_key.get(aid)
-                if key and key in rated:
+                key = id_key.get(aid) or str(aid)
+                per_axis_all[axis].add(key)
+                per_athlete_axis[key][axis] += 1
+                if key in rated:
                     weighted[axis].append((rated[key], 1))
                     per_axis_athletes[axis].add(key)
         total = sum(counts.values())
@@ -906,13 +967,29 @@ def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
             n = counts[axis]
             w = weighted[axis]
             axis_rating = sum(r for r, _ in w) / len(w) if w else None
+            # Pooled share and the mean of per-athlete shares answer different questions, and
+            # with one athlete holding most of the events they are very different numbers. The
+            # pooled one describes the corpus; the athlete mean is the closer estimator of "the
+            # typical athlete", which is what a radar labelled with a category name implies.
+            shares = [c[axis] / sum(c.values()) for c in per_athlete_axis.values()
+                      if sum(c.values())]
+            axis_ratings = [rated[k] for k in per_axis_athletes[axis]]
             axes.append({
                 "axis": axis,
                 "usage": {**wilson(n, total).to_dict()},
+                "usage_athlete_mean": round(sum(shares) / len(shares), 4) if shares else None,
+                "coverage": coverage([c[axis] for c in per_athlete_axis.values()
+                                      if c[axis]]).to_dict(),
                 "n_events": n,
                 "rated_events": len(w),
-                "contributors": len(per_axis_athletes[axis]),
+                "contributors": len(per_axis_all[axis]),
+                "rated_contributors": len(per_axis_athletes[axis]),
+                # Event-weighted, deliberately: an axis mostly produced by a strong athlete is
+                # a strong athlete's axis. The unweighted mean over distinct contributors sits
+                # beside it so the weighting is visible instead of implied.
                 "rating": round(axis_rating) if axis_rating else None,
+                "rating_athlete_mean": (round(sum(axis_ratings) / len(axis_ratings))
+                                        if axis_ratings else None),
                 # 0.5 = level with this division's own mean, so the polygon has a shape
                 "vs_self": round(_expected(axis_rating, div_mean), 4)
                            if axis_rating and div_mean else None,
@@ -996,8 +1073,11 @@ def main() -> int:
     bouts = json.loads(a.sequences.read_text(encoding="utf-8"))
 
     seq = {d: sequence_layer(bouts, d) for d in ("65 kg", "+65 kg")}
+    # Membership in a tracked division, not mere truthiness of the label. The truthy test
+    # treated any athlete carrying any non-empty division string as roster, and so excluded
+    # them from the baseline the roster is supposed to be compared against.
     roster_ids = {b[f"{s}_id"] for b in bouts for s in ("a", "b")
-                  if (b["div_a"] if s == "a" else b["div_b"])}
+                  if (b["div_a"] if s == "a" else b["div_b"]) in DIVISIONS}
 
     eng = get_engine()
     with eng.connect() as conn:
