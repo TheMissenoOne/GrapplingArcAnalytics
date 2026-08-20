@@ -90,3 +90,7 @@ data/cv_decision_poc/model_probe/**
 # Raw caption transcripts — same policy as transcripts/: third-party text,
 # regenerable from the video, paired prompts in docs/prompts/ are what matter.
 docs/raw/
+
+# frame_pdf.py output — contact sheets are regenerable from data/frame_pdf/*.json and
+# each one is megabytes of JPEG. The manifest is the artefact worth versioning, not the PDF.
+data/frame_pdf/out/
