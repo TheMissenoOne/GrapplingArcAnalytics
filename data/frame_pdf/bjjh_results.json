@@ -1,0 +1,183 @@
+{
+ "generated": "2026-08-20",
+ "source": "bjjheroes.com fighter match tables",
+ "bouts": {
+  "ane-svendsen-vs-aurelie-le-vern--european-no-gi-2024-oIMgwDldvmA": {
+   "athletes": {
+    "Aurelie Le Vern": "https://www.bjjheroes.com/?p=13332"
+   },
+   "result": "W  Pts: 4x2  Euro NoGi  71KG  F  2024",
+   "perspective": "Aurelie Le Vern"
+  },
+  "injana-goodman-vs-sarah-galvao--pan-no-gi-2025-waNIGqJ3pTM": {
+   "athletes": {}
+  },
+  "injana-goodman-vs-elisabeth-clay--world-no-gi-2025-C4ZeMLqnTDs": {
+   "athletes": {
+    "Elisabeth Clay": "https://www.bjjheroes.com/?p=11762"
+   },
+   "result": "W  Guillotine  World NoGi  ABS  SF  2025",
+   "perspective": "Elisabeth Clay"
+  },
+  "injana-goodman-vs-julia-maele--european-no-gi-2025-vnYJGBVM78E": {
+   "athletes": {
+    "Julia Maele": "https://www.bjjheroes.com/?p=14094"
+   },
+   "result": "L  RNC  Euro NoGi  ABS  SF  2025",
+   "perspective": "Julia Maele",
+   "other_meetings": [
+    "L  Pts: 11x2  Euro NoGi  67KG  F  2025"
+   ]
+  },
+  "morgan-black-vs-brianna-ste-marie--world-no-gi-2024-BzwFZSrxJkM": {
+   "athletes": {
+    "Morgan Black": "https://www.bjjheroes.com/?p=13594",
+    "Brianna Ste-Marie": "https://www.bjjheroes.com/?p=12599"
+   },
+   "result": "L  Guillotine  World NoGi  61KG  F  2024",
+   "perspective": "Morgan Black"
+  },
+  "nadia-frankland-vs-gabriele-schuck--pan-no-gi-2024-wFqamBHsK3g": {
+   "athletes": {
+    "Nadia Frankland": "https://www.bjjheroes.com/?p=14186"
+   },
+   "result": "W  RNC  NoGi Pan  67KG  F  2024",
+   "perspective": "Nadia Frankland"
+  },
+  "nadia-frankland-vs-elisabeth-clay--world-no-gi-2024-V0TNJTVVuwA": {
+   "athletes": {
+    "Nadia Frankland": "https://www.bjjheroes.com/?p=14186",
+    "Elisabeth Clay": "https://www.bjjheroes.com/?p=11762"
+   },
+   "result": "L  Pts: 2x0  World NoGi  68KG  F  2024",
+   "perspective": "Nadia Frankland"
+  },
+  "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2024-7H1PhSukqZg": {
+   "athletes": {
+    "Nadia Frankland": "https://www.bjjheroes.com/?p=14186",
+    "Gabrieli Pessanha": "https://www.bjjheroes.com/?p=10153"
+   },
+   "result": "L  RNC  World NoGi  ABS  4F  2024",
+   "perspective": "Nadia Frankland"
+  },
+  "nadia-frankland-vs-paige-ivette--world-no-gi-2024-ImqWcrhUF8w": {
+   "athletes": {
+    "Nadia Frankland": "https://www.bjjheroes.com/?p=14186"
+   },
+   "result": "W  Pts: 4x0  World NoGi  ABS  8F  2024",
+   "perspective": "Nadia Frankland"
+  },
+  "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2025-LQUors-3gZM": {
+   "athletes": {
+    "Nadia Frankland": "https://www.bjjheroes.com/?p=14186",
+    "Gabrieli Pessanha": "https://www.bjjheroes.com/?p=10153"
+   },
+   "result": "L  Toe hold  World Champ.  ABS  8F  2025",
+   "perspective": "Nadia Frankland",
+   "other_meetings": [
+    "L  Kimura  Euro NoGi  ABS  SF  2025",
+    "L  Pts: 4x2  World NoGi  ABS  SF  2025"
+   ]
+  },
+  "sarah-galvao-vs-libby-genge--polaris-36-2026-bhtda0EZYpU": {
+   "athletes": {}
+  },
+  "sarah-galvao-vs-zara-tofano--polaris-38-2026-IPgbC27xBQQ": {
+   "athletes": {}
+  },
+  "anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY": {
+   "athletes": {
+    "Anabel Lopez": "https://www.bjjheroes.com/?p=13920",
+    "Aurelie Le Vern": "https://www.bjjheroes.com/?p=13332"
+   },
+   "result": "L  Armbar  Euro NoGi  ABS  F  2024",
+   "perspective": "Anabel Lopez"
+  },
+  "anabel-lopez-vs-nia-blackman--european-no-gi-2024-CLtvPkMGLGc": {
+   "athletes": {
+    "Anabel Lopez": "https://www.bjjheroes.com/?p=13920",
+    "Nia Blackman": "https://www.bjjheroes.com/?p=14244"
+   },
+   "result": "W  Referee Decision  Euro NoGi  79KG  F  2024",
+   "perspective": "Anabel Lopez"
+  },
+  "anabel-lopez-vs-maria-vicentini--world-no-gi-2024-HWNPuVZYB1Q": {
+   "athletes": {
+    "Anabel Lopez": "https://www.bjjheroes.com/?p=13920"
+   },
+   "result": "W  Pts: 4x0  JJ CON  79KG  RR  2024",
+   "perspective": "Anabel Lopez",
+   "other_meetings": [
+    "W  Inside heel hook  World NoGi  77KG  4F  2024"
+   ]
+  },
+  "anabel-lopez-vs-paige-ivette--world-no-gi-2024-GHFT3RO4v_k": {
+   "athletes": {
+    "Anabel Lopez": "https://www.bjjheroes.com/?p=13920"
+   },
+   "result": "W  Pts: 0x0, Adv  World NoGi  77KG  F  2024",
+   "perspective": "Anabel Lopez"
+  },
+  "anabel-lopez-vs-salla-simola--world-no-gi-2024-U7ovaUg3y4U": {
+   "athletes": {
+    "Anabel Lopez": "https://www.bjjheroes.com/?p=13920",
+    "Salla Simola": "https://www.bjjheroes.com/?p=14181"
+   },
+   "result": "W  Pts: 2x0  World NoGi  ABS  4F  2024",
+   "perspective": "Anabel Lopez"
+  },
+  "anabel-lopez-vs-brianna-ste-marie--world-no-gi-2024-9ThUSXSEf8w": {
+   "athletes": {
+    "Anabel Lopez": "https://www.bjjheroes.com/?p=13920",
+    "Brianna Ste-Marie": "https://www.bjjheroes.com/?p=12599"
+   },
+   "result": "L  Pts: 9x5  World NoGi  ABS  SF  2024",
+   "perspective": "Anabel Lopez"
+  },
+  "anabel-lopez-vs-erin-harpe--pan-no-gi-2025-YIJvzBtP3q4": {
+   "athletes": {
+    "Anabel Lopez": "https://www.bjjheroes.com/?p=13920",
+    "Erin Harpe": "https://www.bjjheroes.com/?p=12293"
+   },
+   "result": "W  Pts: 4x2  Pan NoGi  77KG  F  2025",
+   "perspective": "Anabel Lopez"
+  },
+  "anabel-lopez-vs-kendall-reusing--polaris-36-2026-2nfCwbxdvTY": {
+   "athletes": {
+    "Anabel Lopez": "https://www.bjjheroes.com/?p=13920",
+    "Kendall Reusing": "https://www.bjjheroes.com/?p=10885"
+   },
+   "result": "L  Armbar  Polaris 36  ABS  SPF  2026",
+   "perspective": "Anabel Lopez"
+  },
+  "helena-crevar-vs-leilani-bernales--wno-25-2024-Vo7ymhLxDxo": {
+   "athletes": {
+    "Helena Crevar": "https://www.bjjheroes.com/?p=14004"
+   },
+   "result": "W  Referee Decision  WNO 25  65KG  SPF  2024",
+   "perspective": "Helena Crevar"
+  },
+  "helena-crevar-vs-elisabeth-clay--wno-27-2025-jbalVAUFx2Y": {
+   "athletes": {
+    "Helena Crevar": "https://www.bjjheroes.com/?p=14004",
+    "Elisabeth Clay": "https://www.bjjheroes.com/?p=11762"
+   },
+   "result": "W  RNC  WNO 27  64KG  SPF  2025",
+   "perspective": "Helena Crevar"
+  },
+  "helena-crevar-vs-gabriela-miranda--world-no-gi-2025-IGaL1pyNtuU": {
+   "athletes": {
+    "Helena Crevar": "https://www.bjjheroes.com/?p=14004"
+   },
+   "result": "W  Katagatame  World NoGi  71KG  SF  2025",
+   "perspective": "Helena Crevar"
+  },
+  "helena-crevar-vs-amanda-nicole--polaris-37-2026-NO62LWlUUNQ": {
+   "athletes": {
+    "Helena Crevar": "https://www.bjjheroes.com/?p=14004"
+   },
+   "result": "W  RNC  Polaris 37  70KG  SPF  2026",
+   "perspective": "Helena Crevar"
+  }
+ }
+}

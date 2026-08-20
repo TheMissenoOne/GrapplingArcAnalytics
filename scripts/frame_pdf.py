@@ -26,8 +26,9 @@ is how a reviewed corpus quietly regresses. ``--force`` overrides, per video id.
 Privacy class: **A, public competition data.** Published broadcasts of published bouts, the
 same class as everything else in ``matches``. No user-fed data is read, written or implied.
 
-Needs ``yt-dlp``, ``ffmpeg`` and ``ffprobe`` on PATH, and Pillow (already a dependency —
-Pillow writes the PDF itself, so there is no reportlab here).
+Needs ``yt-dlp``, ``ffmpeg`` and ``ffprobe`` on PATH, and reportlab, which writes real text
+objects and passes each JPEG through untouched — so the sheet is searchable and costs the
+bytes of its frames and nothing more.
 """
 from __future__ import annotations
 
@@ -79,6 +80,11 @@ DEFAULT_MAX_FRAMES = 400
 # vocabulary lives. Versioned next to the manifests: the manifest says which fights, this
 # says which words, and a sheet rendered against one vocabulary is read against the same one.
 LIBRARY_PATH = REPO / "data" / "frame_pdf" / "node_library.json"
+# Resolved BJJ Heroes results, tracked. The scraped HTML lives under ``data/raw/`` and is
+# gitignored, so without this a rebuild anywhere else would have to hit bjjheroes.com again
+# just to reprint a line it already knew. It also records which bouts resolved and which did
+# not, which is the half worth keeping: "no result found" is a fact about coverage.
+BJJH_PATH = REPO / "data" / "frame_pdf" / "bjjh_results.json"
 FRAME_WIDTH = 640          # px; readable body position without an unopenable file
 JPEG_QUALITY = 72
 
@@ -296,32 +302,118 @@ def extract(video: Path, out: Path, step: int, offset: float) -> list[tuple[floa
 # does not gain weight. (matplotlib is already a dependency and was measured against: its PDF
 # backend re-compresses every frame losslessly, which turns a 6 MB sheet into ~40 MB.)
 
+# Set by _register_fonts(). The built-in names are the LAST resort: reportlab's standard
+# fonts are Type1/WinAnsi, and a character outside that page does not raise -- it is drawn as
+# a black box and extracts as one too. Silent mojibake in a sheet whose whole job is to be
+# read back is the failure mode worth spending a font on.
 FONT, FONT_B, FONT_M = "Helvetica", "Helvetica-Bold", "Courier"
+
+# (regular, bold, mono) candidates, best coverage first. Liberation carries Latin Extended
+# plus Greek and Cyrillic (2328 glyphs); Vera ships inside reportlab itself (283), so the
+# chain always lands somewhere even on a machine with no system fonts installed.
+_FONT_SETS = [
+    ("/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf",
+     "/usr/share/fonts/dejavu-sans-fonts/DejaVuSans-Bold.ttf",
+     "/usr/share/fonts/dejavu-sans-mono-fonts/DejaVuSansMono.ttf"),
+    ("/usr/share/fonts/liberation-sans-fonts/LiberationSans-Regular.ttf",
+     "/usr/share/fonts/liberation-sans-fonts/LiberationSans-Bold.ttf",
+     "/usr/share/fonts/liberation-mono-fonts/LiberationMono-Regular.ttf"),
+]
+
+# Typographic lookalikes an athlete name or a YouTube title picks up, mapped to the ASCII the
+# fonts above all have. U+2011 is not academic: it is already in this corpus ("World No‑Gi"),
+# and no candidate font carries it.
+_ASCIIFY = str.maketrans({
+    "\u2010": "-", "\u2011": "-", "\u2012": "-", "\u2013": "-", "\u2014": "-",
+    "\u2018": "'", "\u2019": "'", "\u201a": "'", "\u201c": '"', "\u201d": '"',
+    "\u2026": "...", "\u00a0": " ", "\u200b": "", "\u2212": "-",
+})
+_DRAWABLE: frozenset[int] | None = None
 PAGE = A4
 PW, PH = PAGE
 PAD = 40
+
+
+def _register_fonts() -> str:
+    """Swap the Type1 defaults for a TrueType family with real Unicode coverage.
+
+    Returns the family it settled on, for the log -- which font is in use decides which
+    characters survive, so it is not a detail to leave implicit.
+    """
+    global FONT, FONT_B, FONT_M, _DRAWABLE
+    import os
+
+    import reportlab
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+
+    vera = os.path.join(os.path.dirname(reportlab.__file__), "fonts")
+    sets = [*_FONT_SETS, (f"{vera}/Vera.ttf", f"{vera}/VeraBd.ttf", f"{vera}/VeraMono.ttf")]
+    for reg, bold, mono in sets:
+        if not (os.path.exists(reg) and os.path.exists(bold)):
+            continue
+        name = os.path.splitext(os.path.basename(reg))[0]
+        faces = {"sheet": reg, "sheet-b": bold}
+        if os.path.exists(mono):
+            faces["sheet-m"] = mono
+        for alias, path in faces.items():
+            pdfmetrics.registerFont(TTFont(alias, path))
+        FONT, FONT_B = "sheet", "sheet-b"
+        FONT_M = "sheet-m" if "sheet-m" in faces else "sheet"
+        _DRAWABLE = frozenset(pdfmetrics.getFont(FONT).face.charToGlyph)
+        return name
+    logger.warning("no TrueType font found; falling back to Helvetica (Latin-1 only)")
+    return "Helvetica"
+
+
+def _txt(s: str) -> str:
+    """Text as the chosen font can actually draw it.
+
+    Two steps, in order: fold typographic variants onto their ASCII twin, then replace
+    anything the font still has no glyph for with '?'. The second step exists because
+    reportlab does not fail on a missing glyph -- it draws a filled box, and that box is what
+    reaches both the page and the extracted text. A '?' is not better typography; it is an
+    honest marker that a character was dropped, where the box pretends one was rendered.
+    """
+    s = str(s).translate(_ASCIIFY)
+    if _DRAWABLE is None:
+        return s
+    return "".join(ch if ord(ch) in _DRAWABLE or ch in "\n\t" else "?" for ch in s)
 
 
 def _text_block(c: Canvas, text: str, x: float, y: float, width: float,
                 size: float, leading: float, font: str = FONT) -> float:
     """Wrapped paragraph as real text. Returns the new y."""
     c.setFont(font, size)
-    for line in simpleSplit(text, font, size, width):
+    for line in simpleSplit(_txt(text), font, size, width):
         c.drawString(x, y, line)
         y -= leading
     return y
 
 
+def _break(c: Canvas, y: float, need: float = 46) -> float:
+    """Start a new page when ``need`` points of room are gone.
+
+    The context page outgrew one sheet the moment it started carrying a result line: without
+    this the last paragraphs were still written, just below the bottom edge where nothing --
+    a reader, an extractor, a person -- ever sees them. Silent truncation of the instructions
+    is worse than a second page, because the sheet still looks complete."""
+    if y >= PAD + need:
+        return y
+    c.showPage()
+    return float(PH - PAD)
+
+
 def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbContext,
                       n_frames: int, step: int, first_ts: float, last_ts: float,
-                      with_library: bool) -> None:
+                      with_library: bool, bjjh: dict[str, Any] | None = None) -> None:
     """The first page: which fight, which clock, and what the answer must look like.
 
     It is written as a prompt because it IS the prompt -- the PDF is the whole message the
     reader gets, so anything left implicit here comes back as a guess.
     """
     y = PH - PAD
-    title = entry.label or str(meta.get("title") or entry.vid)
+    title = _txt(entry.label or str(meta.get("title") or entry.vid))
     c.setFont(FONT_B, 15)
     for line in simpleSplit(title, FONT_B, 15, PW - 2 * PAD):
         c.drawString(PAD, y, line)
@@ -353,14 +445,39 @@ def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbConte
         rows.append(("Footage type", entry.kind.replace("_", " ")))
     if entry.note:
         rows.append(("Source note", entry.note))
+    if bjjh and bjjh.get("result"):
+        rows.append(("Result (BJJ Heroes)",
+                     f"{bjjh['result']}   (W/L read from {bjjh['perspective']}'s record)"))
+        for extra in bjjh.get("other_meetings", []):
+            rows.append(("Same pair, also", extra))
+        if bjjh.get("year_note"):
+            rows.append(("Year check", bjjh["year_note"]))
     if known:
         rows.append(("Already in the corpus",
                      "; ".join(f"{b['a']} vs {b['b']} ({b['event'] or 'no event'} {b['year']}), "
                                f"{b['events']} events" for b in known)))
     for k, v in rows:
+        y = _break(c, y)
         c.setFont(FONT_B, 9)
         c.drawString(PAD, y, k)
         y = _text_block(c, v, PAD + 130, y, PW - PAD - 130 - PAD, 9, 12) - 4
+
+    # Drawn by hand rather than as another row: the URL has to be a real annotation for a
+    # human clicking it AND plain text for a reader that only gets the extracted characters.
+    for i, (name, url) in enumerate((bjjh or {}).get("athletes", {}).items()):
+        y = _break(c, y)
+        c.setFont(FONT_B, 9)
+        c.drawString(PAD, y, "BJJ Heroes" if i == 0 else "")
+        c.setFont(FONT, 9)
+        c.setFillColorRGB(0.0, 0.0, 0.55)
+        text = _txt(f"{name} - {url}")
+        c.drawString(PAD + 130, y, text)
+        c.linkURL(url, (PAD + 130, y - 2, PAD + 130 + c.stringWidth(text, FONT, 9), y + 9),
+                  relative=0)
+        c.setFillColorRGB(0, 0, 0)
+        y -= 12
+    if (bjjh or {}).get("athletes"):
+        y -= 4
 
     y -= 12
     c.line(PAD, y, PW - PAD, y)
@@ -414,6 +531,28 @@ def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbConte
               "uses it. If a frame genuinely shows something the list does not cover, use "
               "your own words and flag it as `new_label: true` rather than bending it into "
               "the nearest listed name."),
+        ("p", "REPORT ONLY WHAT YOU ARE CONFIDENT OF -- but report uncertainty by getting "
+              "COARSER, not by staying silent and not by guessing. If the frames show that "
+              "something happened and you cannot tell exactly which technique it was, use the "
+              "generic label the library already carries -- `Guard Pass` rather than a named "
+              "pass, `Takedown` rather than a named entry, `Submission` rather than a named "
+              "finish, and likewise `Sweep`, `Escape`, `Guard`. A generic label is the honest "
+              "answer at the resolution these frames give you; a specific one you inferred is "
+              "a claim about a technique nobody saw, and once it is in the athlete's graph "
+              "nothing downstream can tell it from an observed one."),
+        ("p", f"This matters most across the sampling gap. At one frame every {step}s a "
+              "technique can start and finish between two samples, leaving only its result "
+              "visible -- a competitor who was on top now underneath, a grip that is now a "
+              "finish. Recording that result generically is correct. Naming the entry you "
+              "did not see is not, however obvious it feels. The same rule covers `actor`: "
+              "if you cannot tell which competitor did it, say so in `note` rather than "
+              "picking one, because a right technique on the wrong athlete is two errors."),
+        ("p", "The result line at the top, when there is one, comes from the athlete's BJJ "
+              "Heroes record. It is there so you can tell the two competitors apart and know "
+              "the bout ended -- it is NOT evidence of anything you cannot see. Do not report "
+              "a finish, a technique or a score because that line names it: an armbar listed "
+              "as the method and an armbar visible in the frames are two different claims, "
+              "and only the second belongs in your answer."),
         ("p", "Only report what a frame actually shows. The scoreboard settles POINTS and "
               "nothing else: a technique you infer from a score change but never see is "
               "worth less than an omission, because a wrong label propagates into the "
@@ -421,6 +560,7 @@ def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbConte
               "observed one. An omission is recoverable; an invented event is not."),
     ]
     for kind, body in paras:
+        y = _break(c, y)
         if kind == "f":
             # A field list is a table. Re-wrapping it as prose loses the one thing it
             # carries: which name goes with which description.
@@ -488,7 +628,7 @@ def draw_library_pages(c: Canvas, library: dict[str, Any]) -> None:
             if y - line_h < bottom:
                 col, y = advance()
                 c.setFont(FONT, size)
-            c.drawString(PAD + col * col_w, y, str(n["label"])[:36])
+            c.drawString(PAD + col * col_w, y, _txt(str(n["label"]))[:36])
             y -= line_h
         y -= 5
     c.showPage()
@@ -519,17 +659,134 @@ def draw_grid_pages(c: Canvas, frames: list[tuple[float, Path]], grid: tuple[int
 
 def build_pdf(entry: Entry, meta: dict[str, Any], db: DbContext,
               frames: list[tuple[float, Path]], step: int, grid: tuple[int, int],
-              out_path: Path, library: dict[str, Any] | None = None) -> None:
+              out_path: Path, library: dict[str, Any] | None = None,
+              bjjh: dict[str, Any] | None = None) -> None:
     c = Canvas(str(out_path), pagesize=PAGE)
-    c.setTitle(entry.label or str(meta.get("title") or entry.vid))
+    c.setTitle(_txt(entry.label or str(meta.get("title") or entry.vid)))
     c.setSubject(f"https://www.youtube.com/watch?v={entry.vid} — frames every {step}s, "
                  "timestamps are video-absolute")
     draw_context_page(c, entry, meta, db, len(frames), step,
-                      frames[0][0], frames[-1][0], with_library=library is not None)
+                      frames[0][0], frames[-1][0], with_library=library is not None, bjjh=bjjh)
     if library:
         draw_library_pages(c, library)
     draw_grid_pages(c, frames, grid)
     c.save()
+
+
+# ── BJJ Heroes results ──────────────────────────────────────────────────────────
+_VS = re.compile(r"^(?P<a>.+?)\s+vs\.?\s+(?P<b>[^,]+?)\s*(?:,\s*(?P<ev>.+))?$", re.I)
+_YEAR = re.compile(r"\b(20\d{2})\b")
+
+
+def _bout_names(label: str) -> tuple[str, str] | None:
+    """"A vs B, Event Year" -> ("A", "B"). None when the label is not a bout label."""
+    m = _VS.match(label.strip())
+    return (m.group("a").strip(), m.group("b").strip()) if m else None
+
+
+def _same_person(a: str, b: str) -> bool:
+    """Do these two spellings name the same competitor?
+
+    BJJ Heroes' match table abbreviates the opponent -- "L. Bernales", "I. Goodman", "Aurelie
+    Vern" for Aurelie Le Vern -- while the profile it links to spells the name out. Exact key
+    equality therefore misses the athlete's OWN record and silently falls through to the
+    opponent's page, which reports the same bout with the opposite letter. Correctly labelled
+    and still the wrong answer to "how did she do".
+
+    The rule: first token and last token must agree, where an initial agrees with the name it
+    abbreviates. That accepts a dropped particle ("Le") and an abbreviated first name, and
+    still refuses "Jon Hansen" vs "John Hansen" -- two spellings that are a REAL open question
+    in this corpus and must not be answered by a contact sheet.
+    """
+    from analysis.names import athlete_key
+
+    ta, tb = athlete_key(a).split(), athlete_key(b).split()
+    if not ta or not tb:
+        return False
+    if ta == tb:
+        return True
+
+    def first_ok(x: str, y: str) -> bool:
+        x, y = x.rstrip("."), y.rstrip(".")
+        return x == y or (len(x) == 1 and y.startswith(x)) or (len(y) == 1 and x.startswith(y))
+
+    return ta[-1] == tb[-1] and first_ok(ta[0], tb[0])
+
+
+def _result_line(r: Any) -> str:
+    """The BJJ Heroes row as it reads on their page: W/L, method, competition, weight,
+    stage, year. Kept in that order and verbatim -- it is their record, not our rendering
+    of it, and a reworded method is a claim we did not verify."""
+    return "  ".join(x for x in (r.wl, r.method, r.competition, r.weight, r.stage,
+                                 str(r.year or "")) if x)
+
+
+def resolve_bjjh(entries: list[Entry], *, refresh: bool = False) -> dict[str, Any]:
+    """Per bout: the BJJ Heroes result row and both athletes' profile URLs.
+
+    Cached in ``BJJH_PATH``; ``refresh`` re-scrapes. Network failure is not fatal -- the sheet
+    loses a context row, which is worth less than the batch.
+
+    **The result is never inverted.** When only the opponent's page carries the bout, the row
+    is printed from THEIR record with the perspective named, rather than flipping W/L: a
+    method reads one way from each side ("Pts: 2x0" is a win by two for whoever the page
+    belongs to), and a silently mirrored score is a wrong fact that looks like a right one.
+    """
+    if BJJH_PATH.exists() and not refresh:
+        return dict(json.loads(BJJH_PATH.read_text(encoding="utf-8")))
+
+    from datetime import date
+
+    from analysis.date_reconcile import fighter_pages, parse_match_history
+    from analysis.names import athlete_key
+
+    bouts = {e.slug: (_bout_names(e.label), _YEAR.search(e.label)) for e in entries if e.label}
+    names = {n for names_, _ in bouts.values() if names_ for n in names_}
+    try:
+        pages = fighter_pages({athlete_key(n) for n in names})
+    except Exception as exc:                       # offline, 403, DNS -- degrade, never fail
+        logger.warning("BJJ Heroes lookup skipped: %s", exc)
+        return {"generated": date.today().isoformat(), "bouts": {}, "error": str(exc)}
+
+    parsed = {k: (url, parse_match_history(html)) for k, (url, html) in pages.items()}
+    profiles = {n: parsed[athlete_key(n)][0] for n in names if athlete_key(n) in parsed}
+    logger.info("BJJ Heroes: %d of %d athletes have a profile", len(profiles), len(names))
+
+    out: dict[str, Any] = {}
+    for slug, (pair, ym) in bouts.items():
+        if not pair:
+            continue
+        a, b = pair
+        year = int(ym.group(1)) if ym else None
+        rec: dict[str, Any] = {"athletes": {n: profiles[n] for n in (a, b) if n in profiles}}
+        for side, other in ((a, b), (b, a)):
+            if athlete_key(side) not in parsed:
+                continue
+            rows = [r for r in parsed[athlete_key(side)][1] if _same_person(r.opponent, other)]
+            if not rows:
+                continue
+            dated = [r for r in rows if year and r.year == year]
+            hit = dated or rows
+            rec["result"] = _result_line(hit[0])
+            rec["perspective"] = side
+            # A pair that met more than once is not a lookup failure, it is two facts. Naming
+            # the others is what stops the reader treating the first as the only one.
+            if len(hit) > 1:
+                rec["other_meetings"] = [_result_line(r) for r in hit[1:]]
+            if year and not dated:
+                rec["year_note"] = (
+                    f"the label says {year}; BJJ Heroes lists this pair in "
+                    + ", ".join(str(r.year) for r in rows if r.year))
+            break
+        out[slug] = rec
+
+    doc = {"generated": date.today().isoformat(), "source": "bjjheroes.com fighter match tables",
+           "bouts": out}
+    BJJH_PATH.parent.mkdir(parents=True, exist_ok=True)
+    BJJH_PATH.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    logger.info("wrote %s (%d bouts, %d with a result)", BJJH_PATH, len(out),
+                sum(1 for r in out.values() if r.get("result")))
+    return doc
 
 
 # ── Node library ────────────────────────────────────────────────────────────────
@@ -618,7 +875,8 @@ def _span_seconds(entry: Entry, meta: dict[str, Any]) -> float | None:
 def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
             grid: tuple[int, int], workdir: Path, force: bool,
             max_frames: int = DEFAULT_MAX_FRAMES,
-            library: dict[str, Any] | None = None) -> str:
+            library: dict[str, Any] | None = None,
+            bjjh: dict[str, Any] | None = None) -> str:
     known = db.bouts_for(entry.vid)
     if known and not force:
         with_seq = [b for b in known if b["events"]]
@@ -645,7 +903,7 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
         video.unlink(missing_ok=True)          # the frames are the artefact; disk is tight
         if not frames:
             return f"FAIL {entry.vid}: ffmpeg produced no frames"
-        build_pdf(entry, meta, db, frames, step, grid, out_path, library)
+        build_pdf(entry, meta, db, frames, step, grid, out_path, library, bjjh)
     mb = out_path.stat().st_size / 1e6
     return f"ok   {out_path.name}  {len(frames)} frames, {mb:.1f} MB"
 
@@ -673,6 +931,10 @@ def main() -> int:
     ap.add_argument("--max-frames", type=int, default=DEFAULT_MAX_FRAMES,
                     help="widen the step rather than exceed this many frames in one PDF")
     ap.add_argument("--limit", type=int, help="stop after N videos (a smoke run)")
+    ap.add_argument("--no-bjjh", action="store_true",
+                    help="do not print the BJJ Heroes result line or profile links")
+    ap.add_argument("--refresh-bjjh", action="store_true",
+                    help="re-scrape BJJ Heroes instead of reading the cached resolution")
     ap.add_argument("--dry-run", action="store_true", help="report the plan, download nothing")
     a = ap.parse_args()
 
@@ -688,6 +950,7 @@ def main() -> int:
             return 2
 
     COOKIES_FROM_BROWSER = a.cookies_from_browser
+    logger.info("sheet font: %s", _register_fonts())
     cols, rows = (int(x) for x in a.grid.lower().split("x"))
     entries = load_manifest(a.manifest)
     db = load_db_context()
@@ -701,6 +964,10 @@ def main() -> int:
         # query and it is the difference between a rule and a wrong rule.
         logger.info("%s", dump_node_library(LIBRARY_PATH))
         library = json.loads(LIBRARY_PATH.read_text(encoding="utf-8"))
+
+    # Resolved over the WHOLE manifest before --limit trims it, so a smoke run and a full
+    # run write the same cache instead of the smoke run truncating it.
+    bjjh = {} if a.no_bjjh else resolve_bjjh(entries, refresh=a.refresh_bjjh).get("bouts", {})
 
     if a.limit:
         entries = entries[:a.limit]
@@ -719,7 +986,7 @@ def main() -> int:
     for e in entries:
         try:
             results.append(process(e, db, a.out, a.step, (cols, rows), a.workdir,
-                                   a.force, a.max_frames, library))
+                                   a.force, a.max_frames, library, bjjh.get(e.slug)))
         except Exception as exc:                                  # noqa: BLE001
             # One dead link must not cost the other 27 downloads. The reason is printed
             # next to the id, so the manifest row can be fixed and only that row re-run.

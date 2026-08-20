@@ -43,6 +43,10 @@ class MatchRow:
     competition: str
     stage: str
     year: int | None
+    # tds[5]. Always present in the table; the reconciler never needed it, so it was dropped
+    # on the floor until the contact sheets started printing the result line. Defaulted so
+    # the field is additive -- nothing that builds a row positionally has to change.
+    weight: str = ""
 
 
 def parse_match_history(html: str) -> list[MatchRow]:
@@ -67,6 +71,7 @@ def parse_match_history(html: str) -> list[MatchRow]:
             competition=tds[4].get_text(strip=True),
             stage=tds[6].get_text(strip=True),
             year=int(ym.group()) if ym else None,
+            weight=tds[5].get_text(strip=True),
         ))
     return rows
 
@@ -153,9 +158,13 @@ def _bjjh_years_from_pages(
     return years
 
 
-def _scrape(our_keys: set[str], *, force: bool = False) -> dict[str, str]:
-    """Fetch the A-Z list, intersect with our athletes, scrape+cache only the overlap.
-    Returns ``{athlete_key: html}`` for the fighters we could fetch."""
+def fighter_pages(our_keys: set[str], *, force: bool = False) -> dict[str, tuple[str, str]]:
+    """Fetch the A-Z list, intersect with ``our_keys``, scrape+cache only the overlap.
+
+    Returns ``{athlete_key: (profile_url, html)}``. The URL is not an extra fetch -- the A-Z
+    list is where the page was found in the first place, and returning it costs nothing.
+    Callers that only want the match table can ignore it; a caller that wants to LINK the
+    profile would otherwise have to re-derive a URL it already had in hand."""
     import urllib.request
 
     from pipelines.bjjheroes import BASE_URL, USER_AGENT, BJJHeroesPipeline
@@ -169,14 +178,15 @@ def _scrape(our_keys: set[str], *, force: bool = False) -> dict[str, str]:
     logger.info("A-Z list %d fighters; %d overlap our %d athletes",
                 len(fighters), len(overlap), len(our_keys))
 
-    pages: dict[str, str] = {}
+    urls = {k: (h if h.startswith("http") else BASE_URL + h) for k, h in overlap.items()}
+    pages: dict[str, tuple[str, str]] = {}
     to_fetch: dict[str, str] = {}
-    for key, href in overlap.items():
+    for key, url in urls.items():
         cache = _CACHE / f"match__{key.replace(' ', '_')}.html"
         if cache.exists() and not force:
-            pages[key] = cache.read_text(encoding="utf-8")
+            pages[key] = (url, cache.read_text(encoding="utf-8"))
         else:
-            to_fetch[key] = href if href.startswith("http") else BASE_URL + href
+            to_fetch[key] = url
 
     if to_fetch:
         import asyncio
@@ -189,7 +199,7 @@ def _scrape(our_keys: set[str], *, force: bool = False) -> dict[str, str]:
             if fkey:
                 (_CACHE / f"match__{fkey.replace(' ', '_')}.html").write_text(
                     html, encoding="utf-8")
-                pages[fkey] = html
+                pages[fkey] = (urls[fkey], html)
     logger.info("fighter pages available: %d (%d newly fetched)", len(pages), len(to_fetch))
     return pages
 
@@ -219,7 +229,7 @@ def run(*, apply: bool = False, force: bool = False) -> int:
 
     with db_session() as session:
         db_matches, our_keys = _load_db_matches(session)
-        pages = _scrape(our_keys, force=force)
+        pages = {k: html for k, (_url, html) in fighter_pages(our_keys, force=force).items()}
         bjjh = _bjjh_years_from_pages(pages, our_keys)
         mismatches = reconcile(db_matches, bjjh)
         fixable = [m for m in mismatches if m["suggested_year"] is not None]
