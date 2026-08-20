@@ -93,6 +93,10 @@ BJJH_PATH = REPO / "data" / "frame_pdf" / "bjjh_results.json"
 # The two numbers move together: raising the download ceiling while ffmpeg still rescales to
 # 640 throws the pixels away a second time.
 FRAME_WIDTH = 640          # px; the default, and what a reel gets
+# The strip is an INDEX -- 31 of these are on screen at once and none is ever read for
+# technique, only for "roughly where am I". 320px costs ~12 KB against ~85 KB, which is the
+# difference between keeping the clip and not.
+THUMB_WIDTH = 320
 QUALITY: dict[str, tuple[int, str]] = {
     "full_match": (1280, "bv*[height<=720]/b[height<=720]/bv*[height<=1080]/b"),
     "full_event": (640, "bv*[height<=480]/b[height<=480]/bv*[height<=720]/b"),
@@ -153,7 +157,7 @@ class Entry:
     end: float | None = None
     label: str = ""              # human hint: "Ana Lopez vs Maca Vicentini, IBJJF 2025"
     note: str = ""               # provenance from whoever sourced the link
-    step: int | None = None      # per-entry override of --step
+    step: float | None = None    # per-entry override of --step
     kind: str = ""               # sourcing type: full_match / full_event / highlights
     skip: str = ""               # non-empty = do not render, and this says why
 
@@ -292,8 +296,8 @@ def fetch(url: str, dest: Path, start: float | None, end: float | None,
     return max(files, key=lambda p: p.stat().st_size)
 
 
-def extract(video: Path, out: Path, step: int, offset: float,
-            width: int = FRAME_WIDTH) -> list[tuple[float, Path]]:
+def extract(video: Path, out: Path, step: float, offset: float,
+            width: int = FRAME_WIDTH, thumb: int | None = None) -> list[tuple[float, Path]]:
     """Sample every ``step`` seconds. ``offset`` is added back to each frame's time so the
     stamp stays video-absolute even when only a section was downloaded -- the section starts
     at 0 in the local file, and forgetting that is precisely how a bout-relative clock gets
@@ -301,7 +305,7 @@ def extract(video: Path, out: Path, step: int, offset: float,
     out.mkdir(parents=True, exist_ok=True)
     subprocess.run(
         ["ffmpeg", "-nostdin", "-loglevel", "error", "-i", str(video),
-         "-vf", f"fps=1/{step},scale={width}:-2", "-q:v", "4",
+         "-vf", f"fps=1/{step},scale={thumb or width}:-2", "-q:v", "4",
          str(out / "f_%05d.jpg")], check=True)
     frames = sorted(out.glob("f_*.jpg"))
     # ffmpeg's fps filter emits the first frame at t=0, then every `step` seconds.
@@ -419,7 +423,7 @@ def _break(c: Canvas, y: float, need: float = 46) -> float:
 
 
 def context_facts(entry: Entry, meta: dict[str, Any], db: DbContext, n_frames: int,
-                  step: int, first_ts: float, last_ts: float,
+                  step: float, first_ts: float, last_ts: float,
                   bjjh: dict[str, Any] | None) -> list[tuple[str, str]]:
     """The header table: which fight, which video, which clock, what BJJ Heroes says."""
     known = db.bouts_for(entry.vid)
@@ -435,7 +439,7 @@ def context_facts(entry: Entry, meta: dict[str, Any], db: DbContext, n_frames: i
         ("Channel", str(meta.get("uploader") or "-")),
         ("Uploaded", str(meta.get("upload_date") or "-")),
         ("Video length", hhmmss(meta["duration"]) if meta.get("duration") else "-"),
-        ("Frames sampled", f"{n_frames}, one every {step}s"),
+        ("Frames sampled", f"{n_frames}, one every {step:g}s"),
         ("Covers", f"{hhmmss(first_ts)} to {hhmmss(last_ts)} of the video"),
     ]
     if div:
@@ -464,7 +468,7 @@ def context_facts(entry: Entry, meta: dict[str, Any], db: DbContext, n_frames: i
     return rows
 
 
-def context_prose(step: int, with_library: bool, first_ts: float, last_ts: float,
+def context_prose(step: float, with_library: bool, first_ts: float, last_ts: float,
                   lib_file: str = "", ts_source: str = "") -> list[tuple[str, str]]:
     """What the reader is being asked for. ``("p", text)`` is a paragraph; ``("f", "name|desc")``
     is one row of the field table.
@@ -554,7 +558,7 @@ def context_prose(step: int, with_library: bool, first_ts: float, last_ts: float
               "answer at the resolution these frames give you; a specific one you inferred is "
               "a claim about a technique nobody saw, and once it is in the athlete's graph "
               "nothing downstream can tell it from an observed one."),
-        ("p", f"This matters most across the sampling gap. At one frame every {step}s a "
+        ("p", f"This matters most across the sampling gap. At one frame every {step:g}s a "
               "technique can start and finish between two samples, leaving only its result "
               "visible -- a competitor who was on top now underneath, a grip that is now a "
               "finish. Recording that result generically is correct. Naming the entry you "
@@ -577,7 +581,7 @@ def context_prose(step: int, with_library: bool, first_ts: float, last_ts: float
 
 
 def draw_context_page(c: Canvas, entry: Entry, meta: dict[str, Any], db: DbContext,
-                      n_frames: int, step: int, first_ts: float, last_ts: float,
+                      n_frames: int, step: float, first_ts: float, last_ts: float,
                       with_library: bool, bjjh: dict[str, Any] | None = None) -> None:
     """The first page: which fight, which clock, and what the answer must look like.
 
@@ -728,7 +732,7 @@ def draw_grid_pages(c: Canvas, frames: list[tuple[float, Path]], grid: tuple[int
 
 
 def write_frames_dir(entry: Entry, meta: dict[str, Any], db: DbContext,
-                     frames: list[tuple[float, Path]], step: int, out_dir: Path,
+                     frames: list[tuple[float, Path]], step: float, out_dir: Path,
                      library: dict[str, Any] | None, bjjh: dict[str, Any] | None) -> Path:
     """The same sheet, unpacked: one JPEG per frame plus the context as Markdown.
 
@@ -742,13 +746,14 @@ def write_frames_dir(entry: Entry, meta: dict[str, Any], db: DbContext,
     """
     d = out_dir / entry.slug
     d.mkdir(parents=True, exist_ok=True)
-    for old in d.glob("t*.jpg"):        # a re-run must not leave last run's frames behind
-        old.unlink()
+    for stale in (*d.glob("t*.jpg"), *(d / "strip").glob("*.jpg")):
+        stale.unlink()                  # a re-run must not leave last run's frames behind
+    (d / "strip").mkdir(exist_ok=True)
 
     index = []
     for ts, src in frames:
         name = f"t{int(ts):05d}.jpg"
-        shutil.copyfile(src, d / name)
+        shutil.copyfile(src, d / "strip" / name)
         index.append({"file": name, "ts": int(ts)})
     (d / "frames.jsonl").write_text(
         "".join(json.dumps(r) + "\n" for r in index), encoding="utf-8")
@@ -760,10 +765,16 @@ def write_frames_dir(entry: Entry, meta: dict[str, Any], db: DbContext,
     for name, url in (bjjh or {}).get("athletes", {}).items():
         lines.append(f"- **BJJ Heroes:** [{name}]({url})")
     lines += ["",
-              f"`t*.jpg` — {len(frames)} frames, one every {step}s, named by their "
+              f"`strip/t*.jpg` — {len(frames)} thumbnails, one every {step:g}s, named by their "
               "VIDEO-ABSOLUTE second (`t00125.jpg` is 125s into the video). `frames.jsonl` "
               "carries the same index as one JSON object per line, so the timestamp is a "
               "field to read rather than a filename to parse.", "",
+              "`clip.mp4` is the bout's own section of the broadcast, kept on purpose. The "
+              "thumbnails are an index at a fixed interval; the clip holds EVERY frame, and "
+              "at 720p it costs less than one JPEG per second of the same footage. Any "
+              "instant can be materialised from it with a seek, which is what makes the "
+              "sampling interval a choice at read time instead of a decision baked in when "
+              "the folder was built.", "",
               "## How to read this", ""]
 
     fields: list[tuple[str, str]] = []
@@ -803,7 +814,7 @@ def write_frames_dir(entry: Entry, meta: dict[str, Any], db: DbContext,
 
 
 def build_pdf(entry: Entry, meta: dict[str, Any], db: DbContext,
-              frames: list[tuple[float, Path]], step: int, grid: tuple[int, int],
+              frames: list[tuple[float, Path]], step: float, grid: tuple[int, int],
               out_path: Path, library: dict[str, Any] | None = None,
               bjjh: dict[str, Any] | None = None) -> None:
     c = Canvas(str(out_path), pagesize=PAGE)
@@ -1017,7 +1028,7 @@ def _span_seconds(entry: Entry, meta: dict[str, Any]) -> float | None:
     return float(meta["duration"]) - (entry.start or 0.0)
 
 
-def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
+def process(entry: Entry, db: DbContext, out_dir: Path, step: float,
             grid: tuple[int, int], workdir: Path, force: bool,
             max_frames: int = DEFAULT_MAX_FRAMES,
             library: dict[str, Any] | None = None,
@@ -1047,14 +1058,18 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: int,
         # every --format frames run down the PDF branch instead.
         width, dl_fmt = QUALITY.get(entry.kind, _DEFAULT_QUALITY)
         video = fetch(entry.url, tmpd, entry.start, entry.end, dl_fmt)
-        frames = extract(video, tmpd / "frames", step, entry.start or 0.0, width)
-        video.unlink(missing_ok=True)          # the frames are the artefact; disk is tight
+        frames = extract(video, tmpd / "frames", step, entry.start or 0.0, width,
+                         thumb=THUMB_WIDTH if fmt == "frames" else None)
         if not frames:
             return f"FAIL {entry.vid}: ffmpeg produced no frames"
         if fmt == "frames":
             d = write_frames_dir(entry, meta, db, frames, step, out_dir, library, bjjh)
+            # The clip IS the artefact now, not the frames. Moved rather than copied: it is
+            # already the only heavy thing in the temp dir and it is about to be deleted.
+            shutil.move(str(video), str(d / "clip.mp4"))
             mb = sum(f.stat().st_size for f in d.iterdir()) / 1e6
             return f"ok   {d.name}/  {len(frames)} frames, {mb:.1f} MB"
+        video.unlink(missing_ok=True)      # a sheet keeps its frames, not its source
         build_pdf(entry, meta, db, frames, step, grid, out_path, library, bjjh)
     mb = out_path.stat().st_size / 1e6
     return f"ok   {out_path.name}  {len(frames)} frames, {mb:.1f} MB"

@@ -38,8 +38,14 @@ CONFIDENCE = {"high", "low"}
 # names an `actor`, so an answer that never says HOW the two bodies were told apart is a pile
 # of attributions resting on nothing. Stating it makes the assumption reviewable -- and when
 # it is wrong, every actor in the answer flips together rather than being wrong one at a time.
-BOUT_REQUIRED = ("athlete_a", "athlete_b", "identity_discriminator", "identity_verified_by")
+# Only the two names are required. `identity_discriminator` was mandatory while a MODEL did
+# the reading -- an answer that never said how it told two bodies apart was a pile of
+# attributions resting on nothing. A person at the bench is that check, and their names are
+# bound to bodies by the same eyes that logged each event. It stays optional, and worth
+# filling for a bout whose kit was genuinely hard to tell apart.
+BOUT_REQUIRED = ("athlete_a", "athlete_b")
 BOUT_OPTIONAL = ("event", "year", "winner", "win_type", "bout_start_seconds", "bout_end_seconds",
+                 "identity_discriminator", "identity_verified_by",
                  "final_score", "notes",
                  # Penalties are scoreboard facts, readable off footage for the first time --
                  # and deliberately NOT events. `events` feed the technique transition graph,
@@ -148,10 +154,13 @@ def validate(answer: dict[str, Any], labels: set[str], times: list[int]) -> list
     return problems
 
 
+ANSWER_FILES = ("events.json", "answer.json")
+
+
 def check(folder: Path, labels: set[str]) -> tuple[str, list[str]]:
-    path = folder / "answer.json"
-    if not path.exists():
-        return "unanswered", []
+    path = next((folder / n for n in ANSWER_FILES if (folder / n).exists()), None)
+    if path is None:
+        return "unregistered", []
     try:
         answer = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
@@ -170,8 +179,11 @@ def main() -> int:
     bad = 0
     for d in folders:
         state, problems = check(d, labels)
-        n = len(json.loads((d / "answer.json").read_text())["events"]) if state == "ok" else 0
-        print(f"{state:11s} {d.name}" + (f"  ({n} events)" if state == "ok" else ""))
+        n = 0
+        if state == "ok":
+            f = next(d / x for x in ANSWER_FILES if (d / x).exists())
+            n = len(json.loads(f.read_text(encoding="utf-8"))["events"])
+        print(f"{state:12s} {d.name}" + (f"  ({n} events)" if state == "ok" else ""))
         for p in problems:
             print(f"            - {p}")
         bad += state == "invalid"
