@@ -446,3 +446,21 @@ def test_a_return_still_draws_its_edge() -> None:
     assert ("Half Guard", "Guard Pass") in edges
     assert ("Guard Pass", "Half Guard") in edges
     assert out["sequence_normalization"]["consecutive_duplicates_removed"] == 0
+
+
+# ── the importer's type gate ────────────────────────────────────────────────────
+def test_a_match_marker_cannot_reach_the_sequence() -> None:
+    """Eight "Match starts" markers reached prod as events and were counted by every
+    aggregate that asked "how many events" -- until they were deleted on 2026-08-20 (backup in
+    runs/db_consolidation/). This pins the door shut: an event whose type is not in the
+    model's vocabulary is dropped at ingestion, loudly, never passed through."""
+    from scripts.insert_ufc_matches import VALID_EVENT_TYPES, _clean_events
+
+    events = [
+        {"type": "match", "label": "Match", "actor": "Alice A"},
+        {"type": "penalty", "label": "Stalling", "actor": "Alice A"},
+        {"type": "takedown", "label": "Single Leg Takedown", "actor": "Alice A"},
+    ]
+    kept = _clean_events("Alice A", "Bob B", events)
+    assert [e["type"] for e in kept] == ["takedown"]
+    assert "match" not in VALID_EVENT_TYPES

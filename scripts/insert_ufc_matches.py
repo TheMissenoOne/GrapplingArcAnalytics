@@ -208,12 +208,22 @@ def _points(e: dict[str, Any]) -> int | None:
     return pts
 
 
+# The event model's whole vocabulary. Anything else in `sequence` is either a marker
+# ("match"), striking, or a typo -- and until 2026-08-20 all of them passed this function
+# verbatim: eight "Match starts" markers reached prod and sat in the corpus as events, each
+# one dutifully counted by every aggregate that asked "how many events". A marker that
+# survives ingestion is a marker something downstream will count.
+VALID_EVENT_TYPES = frozenset(
+    {"guard", "pass", "control", "takedown", "sweep", "submission", "escape", "transition"})
+
+
 def _clean_events(
     a_name: str, b_name: str, events: list[dict[str, Any]]
 ) -> list[dict[str, Any]]:
     """Drop referee/reset events; tag each remaining event with its actor's name (resolved
     to an id later), retype takedown-labelled transitions, and preserve timestamps (ts in
-    seconds) if present."""
+    seconds) if present. Only `VALID_EVENT_TYPES` survive -- markers and striking are
+    dropped loudly, not passed through."""
     a_norm, b_norm = athlete_key(a_name), athlete_key(b_name)
     out: list[dict[str, Any]] = []
     for e in events:
@@ -237,6 +247,9 @@ def _clean_events(
             continue  # narrator speculation ("hunting for the armbar") → not a real event
         if typ == "transition" and _TAKEDOWN_RE.search(label):
             typ = "takedown"
+        if typ not in VALID_EVENT_TYPES:
+            logger.warning("  dropping event with invalid type %r (label %r)", typ, label)
+            continue
         item: dict[str, Any] = {"label": label, "type": typ, "actor": actor}
         # Strip " Attempt" suffix → set successful: false if not already specified
         if (m := _ATTEMPT_RE.search(label)):
