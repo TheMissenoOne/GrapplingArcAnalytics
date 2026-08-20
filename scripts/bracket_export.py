@@ -105,9 +105,32 @@ DIVISIONS = ("65 kg", "+65 kg")
 # lands almost exactly on it.
 MIN_DUPLICATE_RATIO = 0.80
 RECENCY_WINDOWS = (2019, 2022, 2024)
+
+# ── the cut universe ────────────────────────────────────────────────────────────
+# Three INDEPENDENT axes. They used to be a flat list of hand-picked strings -- `all`,
+# `uniform:gi`, `no_gi+adcc`, `no_gi+since:2024` -- which is not a coordinate system: there was
+# no key for "gi under IBJJF rules since 2022", and more importantly the page could not hold a
+# selection while another axis moved. Switching division reset the reader's `no-gi · desde
+# 2024` because the only thing the renderer could carry was one opaque string that might or
+# might not exist in the other division.
+#
+# The cross product is 96 keys; the empties are dropped, leaving about 70 per division.
+UNIFORM_AXIS = ("all", "no_gi", "gi", "unknown")
+RULESET_AXIS = ("all", "adcc", "ajp", "ibjjf", "superfight", "other")
+SINCE_AXIS = ("all", "2019", "2022", "2024")
+CUT_KEY_FORMAT = "u:{uniform}|r:{ruleset}|y:{since}"
+
+
+def cut_key(uniform_: str = "all", ruleset_: str = "all", since: str = "all") -> str:
+    """One key per point in the cut space. Parseable both ways so the renderer can compose it
+    from three independent selects instead of looking one up in a list."""
+    return CUT_KEY_FORMAT.format(uniform=uniform_, ruleset=ruleset_, since=since)
+
+
+ALL_CUT = cut_key()
 # What the page opens on. Recent no-gi is the question the bracket asks; the full career is a
 # secondary view, one selection away.
-OPENING_CUT = "no_gi+since:2024"
+OPENING_CUT = cut_key(uniform_="no_gi", since="2024")
 SUB_FAMILIES = ("strangle", "joint", "leg", "slicer", "sub_other")
 # An SD-based outlier rule needs enough members for the SD to mean anything. Stated here so it
 # is arguable rather than buried in the layer that applies it.
@@ -484,24 +507,31 @@ def _leg_contrast(w: Sequence[Mapping[str, Any]], loss: Sequence[Mapping[str, An
     return out
 
 
+def in_cut(uniform_: str, ruleset_: str, year: Any, u: str, r: str, y: str) -> bool:
+    """Does one row fall inside one point of the cut space? Each axis is independent of the
+    others, and `all` on an axis means that axis is not filtering."""
+    return ((u == "all" or uniform_ == u)
+            and (r == "all" or ruleset_ == r)
+            and (y == "all" or (year or 0) >= int(y)))
+
+
 def _cuts(rows: Sequence[Mapping[str, Any]]) -> list[tuple[str, list[Mapping[str, Any]]]]:
-    cuts = [("all", list(rows))]
-    for u in ("no_gi", "gi", "unknown"):
-        cuts.append((f"uniform:{u}", [r for r in rows if r["uniform"] == u]))
-    for rs in ("adcc", "ajp", "ibjjf", "superfight", "other"):
-        cuts.append((f"ruleset:{rs}", [r for r in rows if r["ruleset"] == rs]))
-    # the cut that actually matters: ruleset WITHIN no-gi, so uniform is not a confounder
-    for rs in ("adcc", "ibjjf", "superfight"):
-        cuts.append((f"no_gi+{rs}",
-                     [r for r in rows if r["uniform"] == "no_gi" and r["ruleset"] == rs]))
-    # Recency. The +65 kg records reach back to 2008, and a gi bout from then carries the same
-    # weight as a 2025 no-gi one in any career-wide number -- which describes a career, not the
-    # bracket. The page opens on `no_gi+since:2024` for that reason.
-    for y0 in RECENCY_WINDOWS:
-        cuts.append((f"since:{y0}", [r for r in rows if (r.get("year") or 0) >= y0]))
-        cuts.append((f"no_gi+since:{y0}",
-                     [r for r in rows if r["uniform"] == "no_gi" and (r.get("year") or 0) >= y0]))
-    return [(k, v) for k, v in cuts if v]
+    """The full cross product of the three axes, empties dropped.
+
+    Recency matters here more than the axis count suggests: the +65 kg records reach back to
+    2008, and a gi bout from then carries the same weight as a 2025 no-gi one in any
+    career-wide number -- which describes a career, not the bracket. The page opens on
+    no-gi since 2024 for that reason.
+    """
+    out = []
+    for u in UNIFORM_AXIS:
+        for r in RULESET_AXIS:
+            for y in SINCE_AXIS:
+                sub = [x for x in rows if in_cut(x["uniform"], x["ruleset"], x.get("year"),
+                                                 u, r, y)]
+                if sub:
+                    out.append((cut_key(u, r, y), sub))
+    return out
 
 
 def _recency(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
@@ -611,6 +641,93 @@ def _uniform_test(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
             "contrast": compare_proportions(fn, len(n), fg, len(g)).to_dict()}
 
 
+# ── layer 1b: one athlete's own record ──────────────────────────────────────────
+def athlete_layer(records: Mapping[str, Any], rating: Mapping[str, Any],
+                  bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Each roster athlete's own record, over the SAME cut space as the category.
+
+    A reconstructed record is not a second-class page. It gets the same three axes, the same
+    interval, the same precision grade and the same refusal when the evidence is thin -- plus
+    the provenance, because a record assembled from four sources and one scraped from a single
+    table are different objects and the reader is entitled to know which one they are reading.
+
+    **The cluster coverage gate deliberately does NOT apply here, and that is not a loosening.**
+    `analysis.stats_rigor.coverage` asks how many independent athletes a number comes from,
+    because a category estimate drawn from one athlete is a portrait rather than a sample. On an
+    athlete's own page there is one athlete by construction; running the gate would refuse every
+    cell for the exact property the page is about. What survives is the part that still means
+    something about her: n, the Wilson interval, the precision grade it earns, and the n<5 floor.
+    """
+    from analysis.stats_rigor import MIN_N_FOR_ANY_GRADE as _MIN_N
+
+    out: dict[str, Any] = {}
+    for name, entry in records.items():
+        key = entry.get("key") or athlete_key(name)
+        rows = [{**r, "uniform": uniform(r.get("comp")), "ruleset": ruleset(r.get("comp")),
+                 "family": family(r.get("method")), "athlete": name}
+                for r in (entry.get("rows") or [])]
+        cuts: dict[str, Any] = {}
+        for u in UNIFORM_AXIS:
+            for rs in RULESET_AXIS:
+                for y in SINCE_AXIS:
+                    sub = [r for r in rows
+                           if in_cut(r["uniform"], r["ruleset"], r.get("year"), u, rs, y)]
+                    if not sub:
+                        continue
+                    w = [r for r in sub if r["wl"] == "W"]
+                    loss = [r for r in sub if r["wl"] == "L"]
+                    fam = Counter(r["family"] for r in sub)
+                    subs_w = sum(1 for r in w if r["family"] in SUB_FAMILIES)
+                    subs_l = sum(1 for r in loss if r["family"] in SUB_FAMILIES)
+                    cuts[cut_key(u, rs, y)] = {
+                        "n": len(sub), "w": len(w), "l": len(loss),
+                        "undecided": len(sub) - len(w) - len(loss),
+                        "by_family": {f: fam[f] for f in FAMILIES if fam[f]},
+                        "by_source": dict(Counter(r.get("source", "own_record") for r in sub)),
+                        "finish_rate": est(subs_w, len(w)),
+                        "conceded_finish_rate": est(subs_l, len(loss)),
+                        "win_rate": est(len(w), len(sub)),
+                        "years": [min((r.get("year") or 9999) for r in sub),
+                                  max((r.get("year") or 0) for r in sub)],
+                    }
+        # Which of her bouts this report holds event data for, and whether the attribution
+        # model could read them. A profile that showed only her record would imply the deeper
+        # layer does not exist for her; usually it is one or two bouts, and saying so is the
+        # finding.
+        seq = []
+        for b in bouts:
+            if not b["seq"]:
+                continue
+            if athlete_key(b["a"]) != key and athlete_key(b["b"]) != key:
+                continue
+            side = "a" if athlete_key(b["a"]) == key else "b"
+            flags = bout_flags(b["seq"], b["a_id"], b["b_id"])
+            evs = [e for e in _attributed(b, side)[0] if is_event(e)]
+            seq.append({
+                "opponent": b["b"] if side == "a" else b["a"],
+                "event": b.get("event"), "year": b.get("year"),
+                "events": len(b["seq"]),
+                "favor": sum(1 for e in evs
+                             if e["perspective"] == "favor" and usable_perspective(e)),
+                "contra": sum(1 for e in evs
+                              if e["perspective"] == "contra" and usable_perspective(e)),
+                "attribution_reason": flags["reason_code"],
+            })
+        out[key] = {
+            "key": key, "display": entry.get("display") or name,
+            "division": entry.get("division"),
+            "aliases": entry.get("aliases") or [],
+            "provenance": entry.get("provenance") or {},
+            "rating": rating["athletes"].get(key),
+            "cuts": cuts,
+            "sequence_bouts": sorted(seq, key=lambda x: -(x["events"])),
+            "gate": {"cluster_coverage_applies": False,
+                     "why_code": "single_athlete_by_construction",
+                     "min_n_for_grade": _MIN_N},
+        }
+    return out
+
+
 # ── layer 2: event sequences ────────────────────────────────────────────────────
 def _attributed(bout: Mapping[str, Any], side: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Every event of the bout, stamped from ONE athlete's corner, plus that bout's own flags.
@@ -631,8 +748,7 @@ def _attributed(bout: Mapping[str, Any], side: str) -> tuple[list[dict[str, Any]
     return [attribute(e, me, other, flags) for e in bout["seq"]], flags
 
 
-def _node_rows(events: Sequence[Mapping[str, Any]], cov: Coverage,
-               total: int) -> dict[str, list[Any]]:
+def _node_rows(events: Sequence[Mapping[str, Any]]) -> dict[str, list[Any]]:
     """The nodes of one perspective, split into positions, actions and transitions.
 
     Grouped by (label, role) rather than by label alone, because `Half Guard · por baixo` and
@@ -647,13 +763,59 @@ def _node_rows(events: Sequence[Mapping[str, Any]], cov: Coverage,
                 continue
             c[(str(e.get("label") or "?"),
                e.get("subject_role") if usable_role(e) else "unknown")] += 1
-        out[cat] = [{"label": lbl, "role": role, "k": k, "est": gated(k, total, cov)}
-                    for (lbl, role), k in c.most_common(14)]
+        # Count and role only. A Wilson interval per node was computed here and rendered
+        # nowhere -- the histogram draws `k` -- and at twelve nodes across three categories and
+        # two perspectives it was 14 KB per point of the cut space, which is 1 MB of payload
+        # nothing reads. The perspective's own coverage verdict, which IS rendered, sits one
+        # level up.
+        out[cat] = [{"label": lbl, "role": role, "k": k}
+                    for (lbl, role), k in c.most_common(12)]
     return out
 
 
 def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, Any]:
-    """The path, not just the ending -- and now from both corners rather than one.
+    """The sequence layer over the SAME cut space as the method layer.
+
+    It used to be division-only, so a reader who selected "no-gi desde 2024" got a filtered
+    method table above an unfiltered event table, with nothing on either saying so. The bouts
+    carry `event` and `year`, so the same three axes apply here -- it was never a data
+    limitation, only an omission.
+
+    What the filter cannot fix is size: 19 and 25 bouts respectively, so most points in the cut
+    space hold two or three bouts and the coverage gate refuses them. That refusal is the
+    honest answer and it is rendered as one.
+    """
+    mine = []
+    for b in bouts:
+        if (b["div_a"] != div and b["div_b"] != div) or not b["seq"]:
+            continue
+        mine.append({**b, "uniform": uniform(b.get("event")), "ruleset": ruleset(b.get("event"))})
+    cuts: dict[str, Any] = {}
+    for u in UNIFORM_AXIS:
+        for y in SINCE_AXIS:
+            sub = [b for b in mine if in_cut(b["uniform"], b["ruleset"], b.get("year"),
+                                             u, "all", y)]
+            if sub:
+                cuts[cut_key(u, "all", y)] = _sequence_block(sub, div)
+    return {**cuts[ALL_CUT], "cuts": cuts,
+            "cut_keys": sorted(cuts),
+            # Two axes, not three, and the third is refused with a measurement rather than a
+            # preference. Slicing 19 and 25 bouts by ruleset as well produces 28 more points
+            # per division of which **zero** clear the coverage gate on either side -- it costs
+            # about 1.6 MB of payload to publish "nao estimavel" fifty-six times. The method
+            # layer, with 183 and 536 rows, does carry the ruleset axis.
+            "axes": {"uniform": list(UNIFORM_AXIS), "since": list(SINCE_AXIS),
+                     "ruleset": None},
+            "ignores": ["ruleset"],
+            "ignored_reason_code": "gate_refuses_every_cell",
+            "ignored_measured": {"extra_cuts_per_division": 28, "estimable_of_them": 0,
+                                 "bouts": len(mine)},
+            "uniform_split": Counter(b["uniform"] for b in mine),
+            "ruleset_split": Counter(b["ruleset"] for b in mine)}
+
+
+def _sequence_block(mine: Sequence[Mapping[str, Any]], div: str) -> dict[str, Any]:
+    """The path, not just the ending -- and from both corners rather than one.
 
     Every number here is stamped **a favor** (the roster athlete is the one the event belongs
     to) or **contra** (it belongs to her opponent, against her). They are not two views of one
@@ -663,7 +825,6 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
     ``path_to_victory`` and ``path_to_defeat`` stay a-favor-only and stay apart. Averaging the
     winner's chain with the loser's would describe a bout nobody fought.
     """
-    mine = [b for b in bouts if (b["div_a"] == div or b["div_b"] == div) and b["seq"]]
     bout_events = own_events = 0          # for the perspective block below
     gaps: Counter[int] = Counter()
     won: list[list[str]] = []
@@ -785,7 +946,7 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
         "type_contrast": {p: _type_contrast(type_by[p], cov[p]) for p in ("favor", "contra")},
         "openers": {k: c.most_common(8) for k, c in openers.items()},
         "finishers": {k: c.most_common(8) for k, c in finishers.items()},
-        "nodes": {p: _node_rows(kept[p], cov_all[p], n_by[p]) for p in ("favor", "contra")},
+        "nodes": {p: _node_rows(kept[p]) for p in ("favor", "contra")},
         "heatmap": _heatmap(won + lost),
     }
 
@@ -817,7 +978,9 @@ def _path(chains: Sequence[Sequence[str]]) -> dict[str, Any]:
         # `sort((a, b) => b.n - a.n)` -- was therefore comparing a value identical across every
         # sibling edge, leaving the tree unordered.
         {"from": x, "to": y, "of": out_deg[x], **est(c, out_deg[x])}
-        for (x, y), c in trans.most_common(80)]
+        # 40, not 80. This list now ships once per point of the cut space rather than once per
+        # division, and the tree renders ten roots -- the tail was never drawn.
+        for (x, y), c in trans.most_common(40)]
     return {
         "chains": len(chains),
         "mean_len": round(sum(lens) / len(lens), 2) if lens else None,
@@ -869,7 +1032,7 @@ def _type_contrast(by: Mapping[str, Counter[str]],
             "alpha": 0.05, "n_win": nw, "n_loss": nl}
 
 
-def _heatmap(chains: Sequence[Sequence[str]], top: int = 12) -> dict[str, Any]:
+def _heatmap(chains: Sequence[Sequence[str]], top: int = 10) -> dict[str, Any]:
     counts: Counter[str] = Counter()
     for ch in chains:
         counts.update(ch)
@@ -1411,6 +1574,12 @@ def main() -> int:
             "thin_axis_contributors": 2,
             "roster_size": len(roster),
         },
+        # The coordinate system the page builds its controls from. The renderer must not
+        # hard-code an axis: a value added here has to appear in the selects without a
+        # front-end change, and a value removed has to disappear.
+        "cut_axes": {"uniform": list(UNIFORM_AXIS), "ruleset": list(RULESET_AXIS),
+                     "since": list(SINCE_AXIS), "key_format": CUT_KEY_FORMAT,
+                     "all_key": ALL_CUT, "opening": OPENING_CUT},
         "confidence": {"z": 1.959963984540054, "interval": "Wilson 95%",
                        "ratio_interval": "delta method on log RR",
                        "multiplicity": "Benjamini-Hochberg, alpha 0.05",
@@ -1418,6 +1587,9 @@ def main() -> int:
                                   "moderate": "<= 0.15", "low": "> 0.15",
                                   "insufficient": "n < 5"}},
         "method": method_layer(records),
+        # Each athlete's own record, same axes, same interval, same n<5 floor. A reconstructed
+        # record gets the same page as a scraped one -- with its provenance attached.
+        "athletes": athlete_layer(records, rating, bouts),
         "sequence": seq,
         "embedding": emb,
         "baseline": baseline_layer(bouts, roster_ids, seq),

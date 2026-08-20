@@ -290,3 +290,38 @@ def test_the_two_perspectives_are_not_two_views_of_one_distribution() -> None:
     contra = out["type_by_outcome"]["contra"]["win"]
     assert set(favor) == {"pass", "control", "submission"}
     assert set(contra) == {"guard"}
+
+
+# ── the cut space ───────────────────────────────────────────────────────────────
+def test_the_cut_space_is_a_coordinate_system() -> None:
+    """Three independent axes, composable in any combination. The old list of hand-picked
+    strings had no key for "gi under IBJJF rules since 2022" and, worse, no way for the page to
+    hold one selection while another moved."""
+    assert bx.cut_key() == "u:all|r:all|y:all" == bx.ALL_CUT
+    assert bx.cut_key("gi", "ibjjf", "2022") == "u:gi|r:ibjjf|y:2022"
+    assert bx.OPENING_CUT == bx.cut_key(uniform_="no_gi", since="2024")
+
+
+@pytest.mark.parametrize("u,r,y,keep", [
+    ("all", "all", "all", True),
+    ("no_gi", "all", "all", True),
+    ("gi", "all", "all", False),
+    ("all", "adcc", "all", True),
+    ("all", "ibjjf", "all", False),
+    ("all", "all", "2024", True),
+    ("all", "all", "2026", False),
+    ("no_gi", "adcc", "2024", True),
+])
+def test_each_axis_filters_independently(u: str, r: str, y: str, keep: bool) -> None:
+    assert bx.in_cut("no_gi", "adcc", 2025, u, r, y) is keep
+
+
+def test_the_cross_product_covers_every_combination_present() -> None:
+    rows = [{"uniform": "no_gi", "ruleset": "adcc", "year": 2025},
+            {"uniform": "gi", "ruleset": "ibjjf", "year": 2019}]
+    keys = dict(bx._cuts(rows))
+    # Both rows in the origin, one each in their own corner, and the corner that mixes them
+    # does not exist rather than existing empty.
+    assert len(keys[bx.ALL_CUT]) == 2
+    assert len(keys["u:gi|r:ibjjf|y:2019"]) == 1
+    assert "u:gi|r:adcc|y:all" not in keys
