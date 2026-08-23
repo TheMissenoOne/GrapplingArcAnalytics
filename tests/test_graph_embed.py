@@ -6,7 +6,13 @@ import numpy as np
 import pytest
 
 from analysis.athlete_graph import AthleteEdge, AthleteGraph, AthleteNode
-from analysis.graph_embed import graph_vector, node_vector, stack_vectors
+from analysis.graph_embed import (
+    embed_technique_graph,
+    graph_vector,
+    node_vector,
+    stack_vectors,
+    walk_based_fighter_vector,
+)
 
 
 def _make_graph(athlete: str, counts: dict[str, int]) -> AthleteGraph:
@@ -100,3 +106,37 @@ class TestStackVectors:
     def test_empty_graphs_keeps_2d_shape(self) -> None:
         stacked = stack_vectors([], vocab=["mount", "guard", "back"])
         assert stacked.shape == (0, 3)
+
+
+class TestWalkPath:
+    """The walk path had never run: the start distribution was passed to
+    np.random.choice unnormalised, so any graph big enough to walk raised
+    ValueError and only the small-graph fallback was ever exercised."""
+
+    def _graph(self):
+        import networkx as nx
+        g = nx.DiGraph()
+        for a, b in [("guard", "sweep"), ("sweep", "mount"), ("mount", "armbar"),
+                     ("guard", "armbar"), ("armbar", "guard")]:
+            g.add_edge(a, b, weight=2.0)
+        return g
+
+    def test_walk_path_runs_on_a_walkable_graph(self) -> None:
+        emb, nodes = embed_technique_graph(self._graph())
+        assert emb.shape == (4, 16)
+        assert set(nodes) == {"guard", "sweep", "mount", "armbar"}
+
+    def test_embedding_is_reproducible(self) -> None:
+        e1, n1 = embed_technique_graph(self._graph())
+        e2, n2 = embed_technique_graph(self._graph())
+        assert n1 == n2
+        assert np.allclose(e1, e2), "seeded walks must give one embedding per graph"
+
+    def test_fighter_vector_is_reproducible_and_normalised(self) -> None:
+        seqs = [[{"label": lbl, "type": "control"} for lbl in
+                 ("mount", "back control", "armbar", "side control", "mount")]] * 3
+        v1 = walk_based_fighter_vector(seqs)
+        v2 = walk_based_fighter_vector(seqs)
+        assert v1.shape == (16,)
+        assert np.allclose(v1, v2)
+        assert np.isclose(np.linalg.norm(v1), 1.0), "documented as a unit profile vector"

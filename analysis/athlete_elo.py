@@ -70,9 +70,17 @@ GAP_FACTOR_MAX: float = 1.0
 # Tunable per-athlete via the ``competitive_mult`` parameter on ``replay_matches``.
 COMPETITIVE_K_MULT: float = 2.5
 
-# ── Temporal decay (Aldous 2020 / MDPI 2024) ──────────────────────────────
+# ── Temporal decay ────────────────────────────────────────────────────────
 # Older matches contribute less to current rating. Half-life in months: a match
 # that old has its K-factor halved. 36 months ≈ 3 years = half-life.
+# Literature (verified 2026-08-23): Aldous (2017), "Elo Ratings and the Sports
+# Model: A Neglected Topic in Applied Probability?", Statist. Sci. 32(4):616-629,
+# doi:10.1214/17-STS628, motivates Elo as tracking TIME-VARYING strength;
+# "Stochastic Extensions of the Elo Rating System", Appl. Sci. 14(17):8023 (2024),
+# doi:10.3390/app14178023, extends the statistical basis. NEITHER derives this
+# exponential K decay or the 36-month constant — both are this repo's own choice,
+# unvalidated against held-out prediction. (Earlier comments cited "Aldous 2020 /
+# MDPI 2024" with no identifiers; the papers exist, the constant is ours.)
 TEMPORAL_HALFLIFE_MONTHS: float = 36.0
 
 
@@ -166,8 +174,9 @@ def k_factor(
     1.0 for casual app users (base rate).
 
     ``temporal_decay`` halves K every ``TEMPORAL_HALFLIFE_MONTHS`` months, so
-    older matches contribute less (per Aldous / MDPI 2024).  A match from today
-    gets decay = 1.0; a match 3 years old gets decay ~0.5.
+    older matches contribute less (motivation and caveats: see the citation note
+    on ``TEMPORAL_HALFLIFE_MONTHS``).  A match from today gets decay = 1.0; a
+    match 3 years old gets decay ~0.5.
     """
     base = _base_k(n_matches)
     gap = abs(rank_target - graph_elo) / GAP_DIVISOR

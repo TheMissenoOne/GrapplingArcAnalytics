@@ -60,10 +60,29 @@ with keyword knobs; ceiling = fitting scale to observed per-node ELO spreads.
 
 ## References
 
-Singh (2019) *Expected Threat (xT)*; Decroos, Bransen, Van Haaren, Davis (KDD 2019)
-*Actions Speak Louder than Goals (VAEP)*; Cervone, D'Amour, Bornn, Goldsberry (2014)
-*EPV / POINTWISE*; Routley & Schulte (UAI 2015) *Markov Game Model for Valuing Player
-Actions in Ice Hockey*; Ng, Harada, Russell (ICML 1999) *reward shaping*; Lamas et al.
-(2024) *No-gi BJJ: a Markovian analysis* (already the repo's reward-risk base).
-(scientific-papers MCP was down — arxiv/openalex/core all timed out 2026-07-02; citations
-from established literature, re-verify IDs when the MCP is back.)
+Identifiers verified 2026-08-23 (this list previously carried a "scientific-papers MCP
+was down 2026-07-02, re-verify IDs" warning — now resolved):
+
+- Singh, K. (2019). *Introducing Expected Threat (xT)*. https://karun.in/blog/expected-threat.html
+  — the grid-Markov possession-value model; its lineage starts at Rudd, S. (2011),
+  *A framework for tactical analysis and individual offensive production assessment in
+  soccer using Markov chains* (NESSIS 2011).
+- Decroos, T., Bransen, L., Van Haaren, J., Davis, J. (2019). *Actions Speak Louder than
+  Goals: Valuing Player Actions in Soccer.* KDD '19. doi:10.1145/3292500.3330758,
+  arXiv:1802.07127 (VAEP/SPADL).
+- Cervone, D., D'Amour, A., Bornn, L., Goldsberry, K. (2014). *POINTWISE: Predicting
+  points and valuing decisions in real time with NBA optical tracking data.* MIT Sloan
+  Sports Analytics Conference 2014 (EPV; journal version: *A multiresolution stochastic
+  process model for predicting basketball possession outcomes*, JASA 111(514):585-599,
+  2016, doi:10.1080/01621459.2016.1141685).
+- Routley, K., Schulte, O. (2015). *A Markov Game Model for Valuing Player Actions in
+  Ice Hockey.* UAI 2015, pp. 782-791.
+- Ng, A., Harada, D., Russell, S. (1999). *Policy invariance under reward
+  transformations: Theory and application to reward shaping.* ICML 1999, pp. 278-287.
+- Lamas et al. (2024). *No-gi Brazilian jiu-jitsu: a Markovian analysis of elite-level
+  combat dynamics.* Int. J. Sports Sci. & Coaching, doi:10.1177/17479541231210979
+  (already the repo's reward-risk base).
+
+The broader literature cross-reference (what PtV is relative to xT/VAEP/EPV, its
+unvalidated hyperparameters, and the calibration PoC) lives in
+`docs/research/01_LITERATURE_REVIEW.md` §4 and `docs/research/03_POC_PLANS.md`.

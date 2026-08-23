@@ -655,9 +655,11 @@ def _recency(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
 
 
 def _year_series(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """How bouts ended, per year. A bout-level question, so mirrors fold first --
+    a roster-vs-roster bout is one bout, not two pieces of evidence about its year."""
     by: dict[int, dict[str, Counter[str]]] = defaultdict(
         lambda: {"gi": Counter(), "no_gi": Counter(), "all": Counter()})
-    for r in rows:
+    for r in _distinct_bouts(rows):
         if not r.get("year"):
             continue
         by[r["year"]]["all"][r["family"]] += 1
@@ -722,8 +724,18 @@ def _ruleset_test(rows: Sequence[Mapping[str, Any]], uniform_cut: str = "no_gi",
 
 
 def _uniform_test(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
-    g = [r for r in rows if r["uniform"] == "gi"]
-    n = [r for r in rows if r["uniform"] == "no_gi"]
+    """Gi vs no-gi finish rate, over DISTINCT bouts.
+
+    Same reasoning as `_ruleset_test`: a bout between two rostered athletes appears once per
+    corner, and the mirror pair is anti-correlated by construction -- it inflates n while
+    deflating the variance of exactly this contrast. This function counted raw
+    athlete-perspective rows until 2026-08 (gi_n=35/no_gi_n=144 in -65 kg carried 6
+    mirror-duplicated rows) while `_ruleset_test` already folded; the defect was the
+    inconsistency, not the magnitude.
+    """
+    bouts = _distinct_bouts(rows)
+    g = [r for r in bouts if r["uniform"] == "gi"]
+    n = [r for r in bouts if r["uniform"] == "no_gi"]
     if len(g) < 5 or len(n) < 5:
         return {"available": False, "gi_n": len(g), "no_gi_n": len(n)}
     fg = sum(1 for r in g if r["family"] in SUB_FAMILIES)
@@ -1642,7 +1654,6 @@ def radar_layer(conn: Any, bouts: Sequence[Mapping[str, Any]],
 
 def _radar_block(bouts: Sequence[Mapping[str, Any]], div: str, id_key: Mapping[str, str],
                  rated: Mapping[str, float], corpus_mean: float) -> dict[str, Any]:
-    from analysis.stats_rigor import wilson
     """One division's radar over ONE point of the cut space.
 
     Split out of `radar_layer` so the same computation can run per cut instead of once per
@@ -1697,12 +1708,18 @@ def _radar_block(bouts: Sequence[Mapping[str, Any]], div: str, id_key: Mapping[s
         shares = [c[axis] / sum(c.values()) for c in per_athlete_axis.values()
                   if sum(c.values())]
         axis_ratings = [rated[k] for k in per_axis_athletes[axis]]
+        # The usage interval goes through the SAME coverage gate as every other category
+        # estimate. Until 2026-08 this row shipped a naive Wilson interval beside a refusing
+        # coverage block -- the -65 kg `pass` axis carried an "adequate" precision grade next
+        # to "3 source(s) contribute; a category estimate needs 5", which is precisely the
+        # contradiction the gate exists to prevent. `estCell` on the page already renders a
+        # refused cell as observed-only, so the shape change is the fix, not a new burden.
+        cov = coverage([c[axis] for c in per_athlete_axis.values() if c[axis]])
         axes.append({
             "axis": axis,
-            "usage": {**wilson(n, total).to_dict()},
+            "usage": gated(n, total, cov),
             "usage_athlete_mean": round(sum(shares) / len(shares), 4) if shares else None,
-            "coverage": coverage([c[axis] for c in per_athlete_axis.values()
-                                  if c[axis]]).to_dict(),
+            "coverage": cov.to_dict(),
             "n_events": n,
             "rated_events": len(w),
             "contributors": len(per_axis_all[axis]),

@@ -18,6 +18,7 @@ References
 
 from __future__ import annotations
 
+from collections import Counter
 from typing import Any
 
 import networkx as nx
@@ -31,8 +32,16 @@ EMBED_DIM = 16
 MIN_WALK_NODES = 4
 
 
-def _biased_random_walk(g: nx.DiGraph, start: str, length: int) -> list[str]:
-    """Truncated random walk from *start*, following weighted outgoing edges."""
+def _biased_random_walk(
+    g: nx.DiGraph, start: str, length: int, rng: np.random.Generator,
+) -> list[str]:
+    """Truncated random walk from *start*, following weighted outgoing edges.
+
+    Takes an explicit ``rng``: the module-global ``np.random`` this used until
+    2026-08 made every embedding non-reproducible between runs even though the
+    SVD was seeded — the deterministic half of the pipeline was consuming
+    nondeterministic walks.
+    """
     walk = [start]
     node = start
     for _ in range(length - 1):
@@ -41,7 +50,7 @@ def _biased_random_walk(g: nx.DiGraph, start: str, length: int) -> list[str]:
             break
         weights = np.array([ed.get("weight", 1.0) for _, _, ed in outs], dtype=np.float64)
         weights /= weights.sum()
-        idx = np.random.choice(len(outs), p=weights)
+        idx = rng.choice(len(outs), p=weights)
         node = outs[idx][1]
         walk.append(node)
     return walk
@@ -100,8 +109,17 @@ def technique_graph_from_sequences(
 
 def embed_technique_graph(
     g: nx.DiGraph, dim: int = EMBED_DIM, n_walks: int = N_WALKS,
+    seed: int = 42,
 ) -> tuple[np.ndarray, list[str]]:
     """Embed a single technique graph via random-walk co-occurrence → SVD.
+
+    Fixed 2026-08: the walk-start distribution ``degree ** 0.75`` (the word2vec
+    negative-sampling exponent, per Grover & Leskovec 2016's practice) was passed
+    to ``np.random.choice`` UNNORMALISED, so this function raised
+    ``ValueError: probabilities do not sum to 1`` on every graph large enough
+    to take the walk path (>= MIN_WALK_NODES) — it had never actually run
+    beyond the small-graph fallback. Walks are now seeded (``seed``) so two
+    runs on one graph produce one embedding.
 
     Returns
     -------
@@ -123,13 +141,15 @@ def embed_technique_graph(
             emb = PCA(n_components=dim).fit_transform(degs)
         return emb, nodes
 
+    rng = np.random.default_rng(seed)
+    degs = np.array(
+        [g.degree(n, weight="weight") for n in nodes], dtype=np.float64
+    ) ** 0.75
+    p_start = degs / degs.sum() if degs.sum() > 0 else None
     walks: list[list[str]] = []
     for _ in range(n_walks):
-        start = np.random.choice(nodes, p=(
-            np.array([g.degree(n, weight="weight") for n in nodes], dtype=np.float64) ** 0.75
-        ))
-        start = str(start)
-        walks.append(_biased_random_walk(g, start, WALK_LENGTH))
+        start = str(rng.choice(nodes, p=p_start))
+        walks.append(_biased_random_walk(g, start, WALK_LENGTH, rng))
 
     cooc = _co_occurrence_matrix(walks, nodes)
     from sklearn.decomposition import TruncatedSVD
@@ -167,10 +187,19 @@ def fighter_embedding_similarity(
 def walk_based_fighter_vector(
     sequences: list[list[dict[str, Any]]],
     dim: int = EMBED_DIM,
+    seed: int = 42,
 ) -> np.ndarray:
-    """Per-fighter embedding from random walks on the *aggregate* transition
-    network.  Each fighter is represented by their node-visit profile
-    aggregated over all walks seeded from their own technique nodes.
+    """Per-fighter embedding: the fighter's visit-frequency-weighted mean of
+    the node embeddings of their own transition graph.
+
+    Fixed 2026-08: this used to return ``svd.components_[0]`` — the first RIGHT
+    singular vector of the co-occurrence matrix, a property of the whole graph's
+    spectrum, not of any fighter — under a docstring that promised a
+    "node-visit profile". (It also shared the unnormalised/unseeded walk bugs;
+    see ``embed_technique_graph``.) Now it is what the docstring says: embed the
+    fighter's graph, weight each node's embedding row by how often the walks
+    visited that node, average, and L2-normalise. Zero vector when the graph is
+    too small to walk.
 
     Returns a single vector of length ``dim``.
     """
@@ -178,15 +207,24 @@ def walk_based_fighter_vector(
     nodes = list(g.nodes)
     if len(nodes) < MIN_WALK_NODES:
         return np.zeros(dim)
-    walks: list[list[str]] = []
-    for _ in range(N_WALKS):
-        start = np.random.choice(nodes)
-        walks.append(_biased_random_walk(g, start, WALK_LENGTH))
+    rng = np.random.default_rng(seed)
+    walks = [
+        _biased_random_walk(g, str(rng.choice(nodes)), WALK_LENGTH, rng)
+        for _ in range(N_WALKS)
+    ]
     cooc = _co_occurrence_matrix(walks, nodes)
     from sklearn.decomposition import TruncatedSVD
     svd = TruncatedSVD(n_components=min(dim, cooc.shape[0] - 1), random_state=42)
-    _ = svd.fit_transform(cooc)
-    return svd.components_[0] if svd.components_.shape[0] > 0 else np.zeros(dim)
+    emb = svd.fit_transform(cooc)
+    if emb.shape[1] < dim:
+        emb = np.concatenate([emb, np.zeros((emb.shape[0], dim - emb.shape[1]))], axis=1)
+    visits = Counter(n for w in walks for n in w)
+    weights = np.array([visits[n] for n in nodes], dtype=np.float64)
+    if weights.sum() == 0:
+        return np.zeros(dim)
+    vec = np.asarray((emb * (weights / weights.sum())[:, None]).sum(axis=0))
+    norm = float(np.linalg.norm(vec))
+    return vec / norm if norm > 0 else vec
 
 
 # ── Legacy vocabulary-based API (for priors.py / vector_store.py) ─────────────

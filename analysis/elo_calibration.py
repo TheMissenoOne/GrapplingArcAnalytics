@@ -29,10 +29,22 @@ STAGE_MULT: dict[str, float] = {
 
 INITIAL_ELO: float = 1000.0
 
-# ── Draw-probability model (MDPI 2024/Stochastic Elo) ────────────────────
+# ── Draw-probability model ────────────────────────────────────────────────
 # Draws are more likely when fighters are closely matched.
-# P(draw | Δ) = DRAW_SCALE / (DRAW_SCALE + |Δ|)  — a logistic-like decay.
+# P(draw | Δ) = DRAW_SCALE / (DRAW_SCALE + |Δ|)  — a hyperbolic decay.
 # DRAW_SCALE controls how wide the "draw zone" is (units = ELO points).
+#
+# ⚠️ This functional form is this repo's own invention, NOT from the literature
+# (verified 2026-08-23; earlier comments cited "MDPI 2024/Stochastic Elo" with no
+# identifiers). It is DEGENERATE at Δ=0: P(draw)=1.0, i.e. certainty of a draw
+# between equals, which no observed corpus supports. The principled models are
+# the Elo-Davidson / Rao-Kupper extensions — Szczecinski & Djebbi (2020),
+# "Understanding draws in Elo rating algorithm", J. Quant. Anal. Sports
+# 16(3):211-220, doi:10.1515/jqas-2019-0102 — which fit a draw parameter from
+# data; "Stochastic Extensions of the Elo Rating System", Appl. Sci. 14(17):8023
+# (2024), doi:10.3390/app14178023, is the score-process alternative. Draws are
+# ~0 in this ADCC corpus, so the practical exposure is low; replace before using
+# on a draw-bearing corpus. See docs/research/03_POC_PLANS.md (rating PoCs).
 DRAW_SCALE: float = 100.0
 
 
@@ -147,10 +159,16 @@ def compute_elo_with_draws(
     df: pd.DataFrame,
     base_k: float = 40.0,
 ) -> pd.DataFrame:
-    """ELO ratings that account for draw probability (MDPI 2024).
+    """ELO ratings that account for draw probability.
 
     Same as ``compute_adcc_elo`` but uses ``expected_with_draw`` to model
     three outcomes.  Expects an optional ``draw`` bool column in *df*.
+
+    ⚠️ The draw model behind this is home-grown and degenerate at Δ=0, and the
+    draw-branch update ``k·(0.5 − p_win − 0.5·p_draw)`` matches no standard
+    three-outcome Elo formulation (Elo-Davidson's is derived from a likelihood;
+    see the citation note on ``DRAW_SCALE``). Fine on this draw-free ADCC corpus;
+    do not port to a draw-bearing one without replacing both.
     """
     df_sorted = df.sort_values(["year", "match_id"]).reset_index(drop=True)
     elo: dict[str, float] = {}

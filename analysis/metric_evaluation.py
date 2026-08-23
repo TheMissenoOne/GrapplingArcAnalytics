@@ -5,9 +5,16 @@ against external outcomes, ranks them by RandomForest importance, and flags redu
 pairs — then recommends Keep / Refine / Merge / Remove per metric. **Report only**: it
 changes no metric and touches no other table.
 
-Method (grounded in sports-analytics practice — Terner & Franks 2020, *Modeling Player
-and Team Performance*; RF/SHAP importance per Ouyang 2025): Pearson + Spearman vs
-outcomes, RandomForest feature importance, pairwise-|r| redundancy. External outcomes
+Method (grounded in sports-analytics practice — Terner & Franks (2021), *Modeling
+Player and Team Performance in Basketball*, Annu. Rev. Stat. Appl. 8:1-27,
+doi:10.1146/annurev-statistics-040720-015536, arXiv:2007.10550): Pearson + Spearman vs
+outcomes, RandomForest feature importance, pairwise-|r| redundancy. NB the importance
+computed here is Gini/impurity importance (``feature_importances_``), NOT SHAP —
+an earlier version of this docstring cited "RF/SHAP per Ouyang 2025", an
+unresolvable reference, for a quantity the module never computes; Gini importance
+is known to be biased toward high-cardinality features (use permutation importance
+or SHAP, Lundberg & Lee 2017 arXiv:1705.07874, if this ranking starts driving
+decisions). External outcomes
 (win rate, submission rate, ADCC rank-ELO) are the credible targets; PtV and positional
 dominance are included but **leakage-flagged** — a feature from the same family
 correlating with them is tautological, not predictive.

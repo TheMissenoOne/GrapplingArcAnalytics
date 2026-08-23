@@ -80,7 +80,11 @@ def weighted_pagerank(
     tol: float = 1.0e-6,
     personalization: dict[str, float] | None = None,
 ) -> dict[str, float]:
-    """Weighted PageRank (Zhang et al. 2022, Physica A).
+    """Weighted PageRank — Zhang, Wang & Yan (2022), "PageRank centrality and
+    algorithms for weighted, directed networks", Physica A 586:126438,
+    doi:10.1016/j.physa.2021.126438, arXiv:2104.02764 (identifiers verified
+    2026-08-23; distinct from Zhang, Yang & Radicchi 2021, the graph-embedding
+    survey cited in ``graph_embed.py``).
 
     Classical PR uses a uniform transition over outgoing *edges*.  WPR replaces
     this with a convex combination of the weighted (strength) and unweighted

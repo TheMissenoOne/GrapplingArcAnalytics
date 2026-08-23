@@ -630,3 +630,70 @@ def test_a_refused_perspective_publishes_no_denominator() -> None:
                for cat in ("state", "action", "transition")
                for n in out["nodes"]["favor"][cat])
     assert any(n["k"] for n in out["nodes"]["favor"]["state"])
+
+
+# ── mirror folding is uniform across every bout-level statistic ─────────────────
+def _stat_row(athlete: str, opp: str, wl: str, uniform: str, family: str,
+              year: int = 2024, stage: str = "4F") -> dict[str, str | int]:
+    """A row as `category_layer` sees it: classified, stamped with its cut axes."""
+    return {"athlete": athlete, "opp": opp, "wl": wl, "comp": "NoGi Pan", "year": year,
+            "stage": stage, "uniform": uniform, "ruleset": "other", "family": family}
+
+
+def test_uniform_test_folds_the_mirror_pair() -> None:
+    """The defect was inconsistency: `_ruleset_test` folded mirrors while `_uniform_test`
+    counted athlete-perspective rows, so a roster-vs-roster bout entered the gi/no-gi
+    contrast twice -- anti-correlated, inflating n while deflating the variance of exactly
+    this comparison. Ten distinct bouts here, twelve rows."""
+    rows = []
+    for i in range(5):
+        rows.append(_stat_row(f"G{i}", f"GO{i}", "W", "gi", "points", stage=f"g{i}"))
+        rows.append(_stat_row(f"N{i}", f"NO{i}", "W", "no_gi", "strangle", stage=f"n{i}"))
+    # one roster-vs-roster bout per uniform, each seen from both corners
+    rows.append(_stat_row("G0", "G1", "W", "gi", "points", stage="RRg"))
+    rows.append(_stat_row("G1", "G0", "L", "gi", "points", stage="RRg"))
+    rows.append(_stat_row("N0", "N1", "W", "no_gi", "strangle", stage="RRn"))
+    rows.append(_stat_row("N1", "N0", "L", "no_gi", "strangle", stage="RRn"))
+    out = bx._uniform_test(rows)
+    assert out["available"] is True
+    assert out["gi_n"] == 6, "6 distinct gi bouts, not 7 rows"
+    assert out["no_gi_n"] == 6, "6 distinct no-gi bouts, not 7 rows"
+
+
+def test_year_series_folds_the_mirror_pair() -> None:
+    """Same rule, same reason: how bouts ended in a year is a bout-level question."""
+    rows = [_stat_row("A", "B", "W", "no_gi", "strangle", year=2024),
+            _stat_row("B", "A", "L", "no_gi", "strangle", year=2024),
+            _stat_row("A", "C", "W", "no_gi", "points", year=2024, stage="F")]
+    out = bx._year_series(rows)
+    assert out["2024"]["all"]["n"] == 2, "two bouts, not three rows"
+    # the mirror keeps the winner's row, so the finish count stays intact
+    assert out["2024"]["all"]["finish"]["k"] == 1
+
+
+def test_radar_usage_goes_through_the_coverage_gate() -> None:
+    """The regression: the radar shipped a naive Wilson interval with an 'adequate'
+    precision grade BESIDE a coverage block that refused the estimate -- the -65 kg `pass`
+    axis read 'top precision' and '3 sources; a category estimate needs 5' in one row.
+    Below the gate the usage cell must refuse like every other category estimate."""
+    def bout(i: int) -> dict:
+        # one division athlete per bout: a{i} lands one pass and one control
+        seq = [{"actor_id": f"a{i}", "type": "pass"},
+               {"actor_id": f"a{i}", "type": "control"}]
+        return {"div_a": "65 kg", "div_b": "other", "a_id": f"a{i}", "b_id": f"opp{i}",
+                "readable": True, "seq": seq}
+
+    # three contributors on the pass axis -> below MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE
+    out = bx._radar_block([bout(i) for i in range(3)], "65 kg", {}, {}, corpus_mean=1500.0)
+    axis = next(a for a in out["axes"] if a["axis"] == "pass")
+    assert axis["coverage"]["estimable"] is False
+    assert axis["usage"]["estimable"] is False, "usage interval must respect the gate"
+    assert axis["usage"]["lo"] is None and axis["usage"]["grade"] == "none"
+    assert axis["usage"]["k"] == 3, "the observed count survives the refusal"
+
+    # five contributors, balanced -> the gate passes and the interval returns
+    out2 = bx._radar_block([bout(i) for i in range(5)], "65 kg", {}, {}, corpus_mean=1500.0)
+    axis2 = next(a for a in out2["axes"] if a["axis"] == "pass")
+    assert axis2["coverage"]["estimable"] is True
+    assert axis2["usage"]["estimable"] is True
+    assert axis2["usage"]["lo"] is not None

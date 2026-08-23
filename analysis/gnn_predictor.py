@@ -12,7 +12,14 @@ backpropagation through all layers (pure NumPy).
 Reference
 ---------
 Drexler (2024). "Sports Analytics with Graph Neural Networks and Graph
-Convolutional Networks." *Preprints*.
+Convolutional Networks." Preprints.org 202410.0046 (identifier verified
+2026-08-23 — a non-peer-reviewed review article, weak provenance for a
+module's sole reference; Kipf & Welling 2017, arXiv:1609.02907, is the GCN
+primary source).
+
+⚠️ STATUS: research spike, UNVALIDATED — no tests, no train/test evaluation,
+no measured accuracy/AUC/log-loss, and no callers anywhere in the repo.
+Do not cite its outputs. Validation plan: docs/research/03_POC_PLANS.md.
 """
 # ruff: noqa: N803, N806, E501  (matrix notation follows the GCN literature)
 
