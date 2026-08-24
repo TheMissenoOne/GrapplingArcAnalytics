@@ -101,3 +101,44 @@ def test_edge_dashed_fixed_rule() -> None:
     assert edge_dashed(8, 0, "submission") is True    # never lands, high volume
     assert edge_dashed(8, 1, "control") is False      # target type not gated
     assert edge_dashed(0, 0, "submission") is False   # weight 0 guard
+
+
+def test_reward_risk_ci_uses_the_successor_denominator() -> None:
+    """The interval must describe the SAME population as the point estimate.
+
+    `reward`/`risk` are counted only over appearances WITH a successor
+    (`build_graph` excludes terminal appearances from `denom`), so the Beta
+    trials must be `denom`, not `occ`. Until 2026-08 this function used `occ`:
+    on the node below (5 appearances, 2 with a successor, 2 rewards) the
+    "5-trial" interval was centred at (2+1)/(5+2)=0.43 instead of the
+    point-population (2+1)/(2+2)=0.75. Found by an external PoC review.
+    """
+    from analysis.network_metrics import reward_risk_with_ci
+
+    # 'Mount' appears 5 times: twice followed by an own finished submission,
+    # three times terminal (round ended there) -> occ=5, denom=2, reward=2.
+    mount = "Mount"
+    seqs = [
+        [_e(mount, "control", "A"), _e(RNC, "submission", "A", True)],
+        [_e(mount, "control", "A"), _e(RNC, "submission", "A", True)],
+        [_e(BC, "control", "A"), _e(mount, "control", "A")],
+        [_e(BC, "control", "A"), _e(mount, "control", "A")],
+        [_e(BC, "control", "A"), _e(mount, "control", "A")],
+    ]
+    g = network_from_sequences(seqs)
+    assert g.nodes[mount]["occ"] == 5
+    assert g.nodes[mount]["denom"] == 2
+    assert g.nodes[mount]["reward"] == 2
+
+    rows = {r[0]: r for r in reward_risk_with_ci(g, min_occ=1, limit=20)}
+    label, point, lo, hi, occ, denom = rows[mount]
+    assert (occ, denom) == (5, 2)
+    # Beta(2+1, 2-2+1) posterior mean = 0.75; the old occ-based trials gave 3/7.
+    assert abs(point - ((2 + 1) / (2 + 2) - (0 + 1) / (2 + 2))) < 1e-9
+    # and the interval is over 2 trials -> properly wide
+    assert hi - lo > 0.5
+
+    # gating is on denom: with min_occ=3 Mount (denom=2) must be excluded even
+    # though occ=5 clears it
+    gated_rows = {r[0] for r in reward_risk_with_ci(g, min_occ=3, limit=20)}
+    assert mount not in gated_rows

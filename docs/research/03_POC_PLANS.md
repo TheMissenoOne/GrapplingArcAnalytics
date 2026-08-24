@@ -185,6 +185,42 @@ the training kernel (gap #2) or the calibration inherits the attribution noise.
 
 **Effort:** 1–2 days.
 
+### PoC-E8 · Interaction graph (actor-aware states) — app-data-first
+
+**Claim:** an actor-aware interaction graph (states tagged YOU/OPP, edges =
+chronological succession across actors) carries tactical information the
+within-actor ActionFlow graph structurally cannot — e.g. `YOU:Turtle → OPP:Back`
+as an edge — and is the better substrate for Markov/PtV/counter analysis.
+**Source:** the external PoC review (`05_EXTERNAL_POC_REVIEW.md` §1), which
+measured 23 actor-switch edge types on the committed fixture and PageRank shifts
+of 8–11 ranks for reaction-defined positions. **Literature:** the two-actor
+version of transition-network analysis (arXiv:2411.15486); Lamas 2024's kernel is
+already cross-actor at the risk term.
+
+1. `analysis/transitions/interaction_graph.py`: nodes `(role, label)` with
+   role ∈ {you, opp} (app data) or the two athletes (corpus data); edges =
+   consecutive events regardless of actor, within a round/bout. Keep ActionFlow
+   untouched — the two are different products, routed explicitly (the review's
+   strongest point).
+2. Data: the committed fixture first (`analysis/poc/fixtures.py` — app actors are
+   structurally reliable), then corpus bouts **gated on
+   `attribution.bout_flags(...).perspective_reliable`** (43.9% of bouts fail it;
+   ungated interaction edges there measure the ingest batch).
+3. Measure: (a) reproduce the fixture findings with our own code (actor-switch
+   edge count, PageRank rank shifts vs ActionFlow); (b) re-run the PtV absorbing
+   model on the interaction kernel and compare held-out finish-prediction AUC vs
+   the ActionFlow kernel (the PoC-E4 harness decides — same criterion, two
+   kernels).
+4. **Accept criterion:** the interaction kernel wins the E4 AUC comparison, or
+   surfaces vulnerability edges (opp-response patterns) that ActionFlow provably
+   cannot represent AND that survive a stability check. Either earns it a place
+   as a second, explicitly-labelled graph; neither replaces ActionFlow.
+
+**Effort:** 2–3 days. Rider from the same review: audit that nothing presents
+`network_metrics.route_to_submission` (greedy, max_steps=6) under the
+"Path-to-Victory" name — the value model and the greedy walk must never share a
+label (folded into PoC-E4's scope).
+
 ### PoC-E7 · Replace the tech-library effectiveness composite
 
 **Claim:** the 0.35/0.25/0.15/0.15/0.10 composite should be replaced by a model

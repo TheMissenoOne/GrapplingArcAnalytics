@@ -274,22 +274,34 @@ def _beta_ci(successes: int, trials: int, ci: float = 0.95) -> tuple[float, floa
 
 def reward_risk_with_ci(
     g: nx.DiGraph, min_occ: int = 5, limit: int = 15, ci: float = 0.95
-) -> list[tuple[str, float, float, float, int]]:
+) -> list[tuple[str, float, float, float, int, int]]:
     """Reward-risk balance with Bayesian credible intervals (Lamas 2024 style).
 
-    For each position seen ≥ ``min_occ`` times, models:
+    For each position, models:
       - reward (own submission from here) as Beta(reward+1, denom-reward+1)
       - risk (opponent submission from here)   as Beta(risk+1, denom-risk+1)
 
-    Returns ``[(label, point_estimate, ci_lower, ci_upper, occ), ...]``
+    The trials count is the node's ``denom`` — appearances WITH a successor,
+    which is the population ``reward``/``risk`` are counted over (a terminal
+    appearance can produce neither). Until 2026-08 this function used ``occ``
+    (every appearance) as the trials: the interval then described a different
+    population than the point estimate — on a node seen 5 times with 2
+    successor-bearing appearances, the "5-trial" interval was both too narrow
+    and centred too low. Found by an external PoC review, verified against
+    ``transitions/build_graph.py``; see docs/research/05_EXTERNAL_POC_REVIEW.md.
+
+    Gating: ``min_occ`` is applied to ``denom`` — the inferential sample size —
+    not to ``occ``, which is display context. Both ship in the row.
+
+    Returns ``[(label, point_estimate, ci_lower, ci_upper, occ, denom), ...]``
     sorted best-first by the point estimate.
     """
-    rows: list[tuple[str, float, float, float, int]] = []
+    rows: list[tuple[str, float, float, float, int, int]] = []
     for n, d in g.nodes(data=True):
         occ = d.get("occ", 0)
-        if occ < min_occ:
+        denom = d.get("denom", 0)
+        if denom < min_occ:
             continue
-        denom = occ
         r = d.get("reward", 0)
         rk = d.get("risk", 0)
         r_mean, r_lo, r_hi = _beta_ci(r, denom, ci)
@@ -297,5 +309,5 @@ def reward_risk_with_ci(
         point = r_mean - k_mean
         ci_lo = r_lo - k_hi  # worst case: low reward, high risk
         ci_hi = r_hi - k_lo  # best  case: high reward, low risk
-        rows.append((n, round(point, 3), round(ci_lo, 3), round(ci_hi, 3), occ))
+        rows.append((n, round(point, 3), round(ci_lo, 3), round(ci_hi, 3), occ, denom))
     return sorted(rows, key=lambda x: x[1], reverse=True)[:limit]

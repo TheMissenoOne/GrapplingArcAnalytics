@@ -164,24 +164,30 @@ def embed_technique_graph(
 def fighter_embedding_similarity(
     g_a: nx.DiGraph, g_b: nx.DiGraph, dim: int = EMBED_DIM,
 ) -> float:
-    """Cosine similarity between two fighters' technique-graph embeddings.
+    """QUARANTINED 2026-08 — this comparison was never mathematically defined.
 
-    Embeds each graph independently, then aligns nodes by label and averages
-    the pairwise cosines of shared nodes.  Returns 0.0 when there is no shared
-    vocabulary.
+    The old implementation embedded each graph with an INDEPENDENT TruncatedSVD
+    and then averaged cosines of shared-node rows across the two spaces. The
+    sign (and, with near-equal singular values, the rotation) of each SVD basis
+    is arbitrary: flipping any component's sign in one graph changes every
+    within-graph dot product by exactly nothing while swinging the cross-graph
+    cosine through its full range. An external PoC review demonstrated the
+    score ranging −0.85..+0.85 under geometry-preserving sign flips alone
+    (docs/research/05_EXTERNAL_POC_REVIEW.md §7). The number measured the
+    coordinate lottery, not the fighters.
+
+    It had no production callers, so it now refuses instead of silently
+    returning a different quantity under the same name. For a defined
+    cross-fighter similarity today use ``analysis/fighter_similarity.py``
+    (type-share cosine — basis-free) or edge-frequency cosine; the validated
+    replacement is PoC-E5's similarity bake-off
+    (docs/research/03_POC_PLANS.md). ``embed_technique_graph`` /
+    ``walk_based_fighter_vector`` remain valid WITHIN one graph's own space.
     """
-    emb_a, nodes_a = embed_technique_graph(g_a, dim=dim)
-    emb_b, nodes_b = embed_technique_graph(g_b, dim=dim)
-    idx_a = {n: i for i, n in enumerate(nodes_a)}
-    idx_b = {n: i for i, n in enumerate(nodes_b)}
-    shared = [n for n in nodes_a if n in idx_b]
-    if not shared:
-        return 0.0
-    vecs_a = np.array([emb_a[idx_a[n]] for n in shared])
-    vecs_b = np.array([emb_b[idx_b[n]] for n in shared])
-    norms = np.linalg.norm(vecs_a, axis=1) * np.linalg.norm(vecs_b, axis=1)
-    sims = np.sum(vecs_a * vecs_b, axis=1) / np.clip(norms, 1e-10, None)
-    return float(np.mean(sims))
+    raise NotImplementedError(
+        "cross-graph SVD cosine is coordinate-unidentifiable; see docstring — "
+        "use analysis.fighter_similarity or the PoC-E5 bake-off winner instead"
+    )
 
 
 def walk_based_fighter_vector(
@@ -200,6 +206,12 @@ def walk_based_fighter_vector(
     fighter's graph, weight each node's embedding row by how often the walks
     visited that node, average, and L2-normalise. Zero vector when the graph is
     too small to walk.
+
+    ⚠️ WITHIN-GRAPH ONLY. The vector lives in this graph's own SVD basis, whose
+    sign/rotation is arbitrary — comparing vectors from two independently
+    embedded graphs has the identifiability problem that quarantined
+    ``fighter_embedding_similarity``. Compare fighters with basis-free
+    representations (``fighter_similarity``) until PoC-E5 lands a validated one.
 
     Returns a single vector of length ``dim``.
     """

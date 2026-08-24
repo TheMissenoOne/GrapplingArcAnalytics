@@ -141,3 +141,19 @@ def test_winrate_baseline_moves_with_evidence() -> None:
     assert w.predict("a", "b") == 0.5
     w.observe(Bout("a", "b", 1.0, 2020, "Pts", "F", "E1"))
     assert w.predict("a", "b") > 0.5
+
+
+# ── committed user-export fixture (owner-consented; see analysis/poc/fixtures.py) ──
+def test_user_export_fixture_shape() -> None:
+    from analysis.poc.fixtures import load_user_export_slice, user_export_rounds
+    data = load_user_export_slice()
+    assert set(data) >= {"scope", "selected_current_node_metrics", "rounds"}
+    rounds = user_export_rounds()
+    assert len(rounds) == 27
+    events = [e for r in rounds for e in r.get("events", [])]
+    assert len(events) == 136
+    assert all(e["actor"] in ("you", "partner") for e in events)
+    assert all(r["outcome"] in ("succeeded", "failed", "partial", "no_attempt")
+               for r in rounds)
+    # the app export is V2-scale: userElo in the Glicko band, not the 100-700 V1 band
+    assert 1000 < data["scope"]["full_export_graph_summary"]["userElo"] < 1800

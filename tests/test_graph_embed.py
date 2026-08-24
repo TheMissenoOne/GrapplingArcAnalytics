@@ -140,3 +140,33 @@ class TestWalkPath:
         assert v1.shape == (16,)
         assert np.allclose(v1, v2)
         assert np.isclose(np.linalg.norm(v1), 1.0), "documented as a unit profile vector"
+
+
+class TestCrossGraphQuarantine:
+    def test_cross_graph_svd_similarity_refuses(self) -> None:
+        """Independent SVD bases are sign/rotation-arbitrary: the cross-graph
+        cosine measured the coordinate lottery, not the fighters (external PoC
+        review: -0.85..+0.85 under geometry-preserving sign flips). The function
+        must refuse rather than return a different quantity under the old name."""
+        import networkx as nx
+        import pytest as _pytest
+
+        from analysis.graph_embed import fighter_embedding_similarity
+        g = nx.DiGraph()
+        g.add_edge("guard", "sweep", weight=1.0)
+        with _pytest.raises(NotImplementedError):
+            fighter_embedding_similarity(g, g)
+
+    def test_sign_flip_preserves_within_graph_geometry(self) -> None:
+        """The trap, demonstrated: flipping a component's sign changes NOTHING
+        within one graph's own space — which is exactly why a cross-graph cosine
+        between two such spaces carries no information about the graphs."""
+        import networkx as nx
+        g = nx.DiGraph()
+        for a, b in [("guard", "sweep"), ("sweep", "mount"), ("mount", "armbar"),
+                     ("guard", "armbar"), ("armbar", "guard")]:
+            g.add_edge(a, b, weight=2.0)
+        emb, _ = embed_technique_graph(g)
+        flipped = emb.copy()
+        flipped[:, 0] *= -1.0
+        assert np.allclose(emb @ emb.T, flipped @ flipped.T)

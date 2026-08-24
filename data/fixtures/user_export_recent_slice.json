@@ -1,0 +1,1204 @@
+{
+  "scope": {
+    "description": "Privacy-reduced recent slice transcribed from the user-provided GrapplingArc export in this conversation.",
+    "window": [
+      "2026-08-11",
+      "2026-08-20"
+    ],
+    "rounds": 27,
+    "full_export_graph_summary": {
+      "nodesCount": 64,
+      "edgesCount": 131,
+      "userElo": 1306.7654537532958
+    },
+    "caveat": "The original prompt is not a mounted file. The executed POCs use this recent slice; notebooks expose a loader cell for replacing it with the full JSON export."
+  },
+  "selected_current_node_metrics": [
+    {
+      "label": "Guarda de Ganchos",
+      "computedElo": 1465.5333895641077,
+      "usageCount": 18,
+      "fundamentalScore": 0.36,
+      "trend": "core"
+    },
+    {
+      "label": "Raspagem de Gancho",
+      "computedElo": 1410.1567667981567,
+      "usageCount": 15,
+      "fundamentalScore": 0.26,
+      "trend": "core"
+    },
+    {
+      "label": "Costas",
+      "computedElo": 1468.832746716461,
+      "usageCount": 68,
+      "fundamentalScore": 0.97,
+      "trend": "core"
+    },
+    {
+      "label": "Mata-Leão",
+      "computedElo": 1368.9543013099587,
+      "usageCount": 24,
+      "fundamentalScore": 0.26,
+      "trend": "core"
+    },
+    {
+      "label": "Guarda Fechada",
+      "computedElo": 1456.382925414861,
+      "usageCount": 19,
+      "fundamentalScore": 0.37,
+      "trend": "fading"
+    },
+    {
+      "label": "Montada",
+      "computedElo": 1528.309980160098,
+      "usageCount": 56,
+      "fundamentalScore": 0.89,
+      "trend": "core"
+    },
+    {
+      "label": "Meia Guarda",
+      "computedElo": 1515.2199373426454,
+      "usageCount": 27,
+      "fundamentalScore": 0.55,
+      "trend": "core"
+    },
+    {
+      "label": "Quatro Apoios",
+      "computedElo": 1542.9810687014044,
+      "usageCount": 26,
+      "fundamentalScore": 0.46,
+      "trend": "core"
+    },
+    {
+      "label": "Single Leg",
+      "computedElo": 1334.9713839182944,
+      "usageCount": 9,
+      "fundamentalScore": 0.19,
+      "trend": "core"
+    },
+    {
+      "label": "Puxada para Guarda",
+      "computedElo": 1394.3047194341718,
+      "usageCount": 9,
+      "fundamentalScore": 0.19,
+      "trend": "core"
+    },
+    {
+      "label": "Guarda Aberta",
+      "computedElo": 1409.736976869617,
+      "usageCount": 8,
+      "fundamentalScore": 0.13,
+      "trend": "core"
+    },
+    {
+      "label": "Smash da Meia Guarda",
+      "computedElo": 1422.782159427358,
+      "usageCount": 18,
+      "fundamentalScore": 0.31,
+      "trend": "core"
+    },
+    {
+      "label": "Passagem de Pressão",
+      "computedElo": 1380.2708833643387,
+      "usageCount": 10,
+      "fundamentalScore": 0.2,
+      "trend": "core"
+    },
+    {
+      "label": "Raspagem da Cintura",
+      "computedElo": 1334.717705380997,
+      "usageCount": 2,
+      "fundamentalScore": 0.08,
+      "trend": "core"
+    },
+    {
+      "label": "Chave de Tornozelo",
+      "computedElo": 1355.1572285217653,
+      "usageCount": 5,
+      "fundamentalScore": 0.11,
+      "trend": "core"
+    },
+    {
+      "label": "Guarda X Simples",
+      "computedElo": 1341.1956246700433,
+      "usageCount": 2,
+      "fundamentalScore": 0.06,
+      "trend": "core"
+    },
+    {
+      "label": "Controle Lateral",
+      "computedElo": 1384.6731642608877,
+      "usageCount": 10,
+      "fundamentalScore": 0.26,
+      "trend": "fading"
+    },
+    {
+      "label": "Chave de Braço",
+      "computedElo": 1216.5062007253782,
+      "usageCount": 6,
+      "fundamentalScore": 0.13,
+      "trend": "fading"
+    }
+  ],
+  "rounds": [
+    {
+      "date": "2026-08-11",
+      "difficulty": 8,
+      "intensity": 3,
+      "outcome": "succeeded",
+      "title": "Treino de Competição",
+      "events": [
+        {
+          "label": "Guarda De La Riva Invertida",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Guarda de Ganchos",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Raspagem de Gancho",
+          "actor": "you",
+          "successful": true,
+          "type": "sweep"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-11",
+      "difficulty": 5,
+      "intensity": 6,
+      "outcome": "succeeded",
+      "title": "Treino de Competição",
+      "events": [
+        {
+          "label": "Puxada para Guarda",
+          "actor": "partner",
+          "successful": true,
+          "type": "transition"
+        },
+        {
+          "label": "Passagem Smash",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Controle Lateral",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-11",
+      "difficulty": 7,
+      "intensity": 5,
+      "outcome": "failed",
+      "title": "Treino de Competição",
+      "events": [
+        {
+          "label": "Double Leg Takedown",
+          "actor": "partner",
+          "successful": true,
+          "type": "takedown"
+        },
+        {
+          "label": "Guarda Aberta",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-12",
+      "difficulty": 4,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Treino das 12h",
+      "events": [
+        {
+          "label": "Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Guarda Fechada",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Chave de Braço",
+          "actor": "you",
+          "successful": false,
+          "type": "submission"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": false,
+          "type": "control"
+        },
+        {
+          "label": "Chave de Braço",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-12",
+      "difficulty": 2,
+      "intensity": 4,
+      "outcome": "succeeded",
+      "title": "Treino das 12h",
+      "events": [
+        {
+          "label": "Raspagem Flor",
+          "actor": "you",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Triângulo de Corpo",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Quatro Apoios",
+          "actor": "partner",
+          "successful": true,
+          "type": "escape"
+        },
+        {
+          "label": "Chave de Braço",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-13",
+      "difficulty": 7,
+      "intensity": 6,
+      "outcome": "succeeded",
+      "title": "Treino de Competição",
+      "events": [
+        {
+          "label": "Puxada para Guarda",
+          "actor": "partner",
+          "successful": true,
+          "type": "transition"
+        },
+        {
+          "label": "Abraçar as Pernas",
+          "actor": "you",
+          "successful": true,
+          "type": "technique"
+        },
+        {
+          "label": "Controle Lateral",
+          "actor": "you",
+          "successful": false,
+          "type": "control"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-13",
+      "difficulty": 7,
+      "intensity": 7,
+      "outcome": "succeeded",
+      "title": "Treino de Competição",
+      "events": [
+        {
+          "label": "Quatro Apoios",
+          "actor": "you",
+          "successful": true,
+          "type": "escape"
+        },
+        {
+          "label": "Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": false,
+          "type": "control"
+        },
+        {
+          "label": "Guarda X Simples",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Chave de Tornozelo",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-13",
+      "difficulty": 7,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Treino de Competição",
+      "events": [
+        {
+          "label": "Abraçar as Pernas",
+          "actor": "you",
+          "successful": true,
+          "type": "technique"
+        },
+        {
+          "label": "Meia Guarda",
+          "actor": "partner",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Controle Lateral",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-13",
+      "difficulty": 6,
+      "intensity": 7,
+      "outcome": "succeeded",
+      "title": "Treino de Competição",
+      "events": [
+        {
+          "label": "Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Chave de Braço",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        },
+        {
+          "label": "Controle Lateral",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": false,
+          "type": "control"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-14",
+      "difficulty": 5,
+      "intensity": 7,
+      "outcome": "succeeded",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Single Leg",
+          "actor": "you",
+          "successful": true,
+          "type": "takedown"
+        },
+        {
+          "label": "Over-Under",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": false,
+          "type": "control"
+        },
+        {
+          "label": "Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Quatro Apoios",
+          "actor": "you",
+          "successful": true,
+          "type": "escape"
+        },
+        {
+          "label": "Costas",
+          "actor": "partner",
+          "successful": false,
+          "type": "control"
+        },
+        {
+          "label": "Passagem de Pressão",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-14",
+      "difficulty": 2,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Raspagem da Cintura",
+          "actor": "you",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Americana",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-14",
+      "difficulty": 5,
+      "intensity": 7,
+      "outcome": "succeeded",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Puxada para Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "transition"
+        },
+        {
+          "label": "Passagem de Pressão",
+          "actor": "partner",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Raspagem de Gancho",
+          "actor": "you",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": false,
+          "type": "control"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-14",
+      "difficulty": 2,
+      "intensity": 5,
+      "outcome": "failed",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Guarda Aberta",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Quatro Apoios",
+          "actor": "you",
+          "successful": true,
+          "type": "escape"
+        },
+        {
+          "label": "Costas",
+          "actor": "partner",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Meia Guarda",
+          "actor": "partner",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Smash da Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Americana",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        },
+        {
+          "label": "Puxada para Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "transition"
+        },
+        {
+          "label": "Raspagem de Gancho",
+          "actor": "you",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "label": "Guarda X Simples",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Chave de Tornozelo",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-15",
+      "difficulty": 7,
+      "intensity": 6,
+      "outcome": "succeeded",
+      "title": "Treino das 19:15",
+      "events": [
+        {
+          "label": "Posição Norte-Sul",
+          "actor": "partner",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "D'Arce",
+          "actor": "partner",
+          "successful": true,
+          "type": "submission"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-15",
+      "difficulty": 2,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Treino das 19:15",
+      "events": [
+        {
+          "label": "Passagem de Pressão",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-15",
+      "difficulty": 1,
+      "intensity": 3,
+      "outcome": "no_attempt",
+      "title": "Treino das 19:15",
+      "events": []
+    },
+    {
+      "date": "2026-08-15",
+      "difficulty": 7,
+      "intensity": 5,
+      "outcome": "partial",
+      "title": "Open Mat",
+      "events": [
+        {
+          "label": "Passagem de Pressão",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Meia Guarda",
+          "actor": "partner",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Passagem Tripé",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Raspagem de Gancho",
+          "actor": "partner",
+          "successful": true,
+          "type": "sweep"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-15",
+      "difficulty": 3,
+      "intensity": 4,
+      "outcome": "succeeded",
+      "title": "Open Mat",
+      "events": [
+        {
+          "label": "Passagem de Pressão",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-15",
+      "difficulty": 2,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Open Mat",
+      "events": [
+        {
+          "label": "Passagem de Pressão",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Cross Ashi",
+          "actor": "you",
+          "successful": true,
+          "type": "technique"
+        },
+        {
+          "label": "Chave de Tornozelo",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-15",
+      "difficulty": 7,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Open Mat",
+      "events": [
+        {
+          "label": "Puxada para Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "transition"
+        },
+        {
+          "label": "Guarda de Ganchos",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Overhook",
+          "actor": "you",
+          "successful": true,
+          "type": "concept"
+        },
+        {
+          "label": "Raspagem de Gancho",
+          "actor": "you",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-15",
+      "difficulty": 3,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Open Mat",
+      "events": [
+        {
+          "label": "Kimura",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-17",
+      "difficulty": 2,
+      "intensity": 4,
+      "outcome": "succeeded",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Puxada para Guarda",
+          "actor": "partner",
+          "successful": true,
+          "type": "transition"
+        },
+        {
+          "label": "Smash da Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-17",
+      "difficulty": 5,
+      "intensity": 6,
+      "outcome": "succeeded",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Raspagem De Quadril",
+          "actor": "you",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "label": "Smash da Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-17",
+      "difficulty": 3,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Puxada para Guarda",
+          "actor": "partner",
+          "successful": true,
+          "type": "transition"
+        },
+        {
+          "label": "Passagem de Pressão",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Montada",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Mata-Leão",
+          "actor": "you",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-20",
+      "difficulty": 4,
+      "intensity": 5,
+      "outcome": "succeeded",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Costas",
+          "actor": "partner",
+          "successful": false,
+          "type": "control"
+        },
+        {
+          "label": "Posição Norte-Sul",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Cem Quilos",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-20",
+      "difficulty": 6,
+      "intensity": 7,
+      "outcome": "failed",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Double Leg Takedown",
+          "actor": "partner",
+          "successful": true,
+          "type": "takedown"
+        },
+        {
+          "label": "Guarda Aberta",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Quatro Apoios",
+          "actor": "you",
+          "successful": true,
+          "type": "escape"
+        },
+        {
+          "label": "Costas",
+          "actor": "partner",
+          "successful": false,
+          "type": "control"
+        },
+        {
+          "label": "Smash da Meia Guarda",
+          "actor": "you",
+          "successful": true,
+          "type": "pass"
+        },
+        {
+          "label": "Guarda de Ganchos",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Shoulder Crunch",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Raspagem de Gancho",
+          "actor": "you",
+          "successful": true,
+          "type": "sweep"
+        }
+      ]
+    },
+    {
+      "date": "2026-08-20",
+      "difficulty": 6,
+      "intensity": 8,
+      "outcome": "failed",
+      "title": "Treino das 19:30",
+      "events": [
+        {
+          "label": "Body Lock",
+          "actor": "you",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Uchi Mata",
+          "actor": "partner",
+          "successful": false,
+          "type": "takedown"
+        },
+        {
+          "label": "Quatro Apoios",
+          "actor": "partner",
+          "successful": true,
+          "type": "escape"
+        },
+        {
+          "label": "Costas",
+          "actor": "you",
+          "successful": false,
+          "type": "control"
+        },
+        {
+          "label": "Guarda Aberta",
+          "actor": "you",
+          "successful": true,
+          "type": "guard"
+        },
+        {
+          "label": "Quatro Apoios",
+          "actor": "partner",
+          "successful": true,
+          "type": "escape"
+        },
+        {
+          "label": "Costas",
+          "actor": "partner",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Chave de Braço",
+          "actor": "partner",
+          "successful": true,
+          "type": "submission"
+        }
+      ]
+    }
+  ]
+}
