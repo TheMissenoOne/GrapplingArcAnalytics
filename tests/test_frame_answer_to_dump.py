@@ -140,7 +140,15 @@ def test_dropped_keys_are_stripped_and_counted(tmp_path: Path) -> None:
 def test_convert_all_over_real_corpus_converts_zero_today() -> None:
     """Measured 2026-08-24: every file under data/frame_pdf/out/ still carries the
     unreviewed stamp, so a real run converts nothing. That is the gate working, not a
-    defect -- this pins the behavior so a future change can't silently relax the gate."""
+    defect -- this pins the behavior so a future change can't silently relax the gate.
+    data/ is gitignored, so on a fresh checkout (CI) the corpus is absent: skip, like
+    test_grapplemap's data-presence gate."""
+    import pytest
+
+    from scripts.frame_answer_to_dump import OUT
+
+    if not OUT.exists():
+        pytest.skip("data/frame_pdf/out/ not present on this checkout")
     reports, blocks = convert_all()
     assert reports  # the real corpus fixtures actually exist
     assert all(r.status == "skipped_unreviewed" for r in reports)
