@@ -72,7 +72,10 @@ def path_to_victory(
 ) -> dict[str, float]:
     """Node PtV v(n) ∈ [−1, 1] by value iteration (γ-contraction → converges)."""
     kernel = _kernel(g)
-    shaping = {n: _shaping(n, g.nodes[n].get("type", "")) for n in g}
+    # Node ids are the label on an ActionFlow graph and a role-prefixed id on an
+    # interaction graph (PoC-E8), which carries the bare label in a `label` attr —
+    # so shaping reads the same technique name on both kernels. No-op where absent.
+    shaping = {n: _shaping(str(g.nodes[n].get("label", n)), g.nodes[n].get("type", "")) for n in g}
     rates = {n: _rates(g, n) for n in g}
     terminal = {n: _terminal_rate(g, n) for n in g}
     v = dict.fromkeys(g, 0.0)

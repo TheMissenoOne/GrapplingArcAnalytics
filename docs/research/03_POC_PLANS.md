@@ -217,6 +217,15 @@ already cross-actor at the risk term.
    cannot represent AND that survive a stability check. Either earns it a place
    as a second, explicitly-labelled graph; neither replaces ActionFlow.
 
+**Status (2026-08-24): RUN.** Builder `analysis/transitions/interaction_graph.py`,
+runner `analysis/poc/e8_interaction_graph.py`, tests `tests/test_interaction_graph.py`,
+results + verdict in `docs/research/poc/e8.md` (generated — do not hand-edit).
+Outcome: ACCEPT on the second limb only — the fixture's 23 actor-switch edge types
+reproduce exactly, the AUC limb is a null (paired ΔAUC +0.002 [−0.005, +0.010] on 429
+gated bouts), and 464 actor-switch edge types (233 distinct) survive the stability
+check. The two-kernel evaluator there (`Kernel`/`temporal_split`/`evaluate_kernels`)
+is the harness PoC-E4 inherits.
+
 **Effort:** 2–3 days. Rider from the same review: audit that nothing presents
 `network_metrics.route_to_submission` (greedy, max_steps=6) under the
 "Path-to-Victory" name — the value model and the greedy walk must never share a
