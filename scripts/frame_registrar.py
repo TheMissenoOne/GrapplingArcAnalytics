@@ -155,6 +155,16 @@ def summary() -> list[dict[str, Any]]:
     return rows
 
 
+def stamp_source(prior: str) -> str:
+    """Provenance must survive a registrar save: a bout whose events.json began as a
+    model reading (frame_answer_import) stays marked model-origin after a human passes
+    through — a save is a review, not a re-authoring. "model" appears in the reviewed
+    stamp too, so the lineage is sticky across repeated saves."""
+    if "model" in prior or "frame_answer" in prior:
+        return "frame_registrar (human review over model reading)"
+    return "frame_registrar (human)"
+
+
 class Handler(BaseHTTPRequestHandler):
     def log_message(self, *a: Any) -> None:
         pass
@@ -229,7 +239,14 @@ class Handler(BaseHTTPRequestHandler):
             return
         body = json.loads(self.rfile.read(int(self.headers.get("Content-Length", 0))) or b"{}")
         body["saved_at"] = datetime.now(UTC).isoformat(timespec="seconds")
-        body["source"] = "frame_registrar (human)"
+        prior = ""
+        out = d / "events.json"
+        if out.exists():
+            try:
+                prior = str(json.loads(out.read_text(encoding="utf-8")).get("source", ""))
+            except (ValueError, OSError):
+                prior = ""
+        body["source"] = stamp_source(prior)
         (d / "events.json").write_text(json.dumps(body, indent=1, ensure_ascii=False) + "\n",
                                        encoding="utf-8")
         self._json({"ok": True, "events": len(body.get("events", []))})

@@ -212,3 +212,16 @@ def test_build_windows_covers_the_gap_before_and_after_a_named_bout() -> None:
 def test_build_windows_produces_no_gap_when_a_bout_starts_at_zero() -> None:
     windows = build_windows([("A", 0, 100)], total_seconds=250, window=100)
     assert windows == [(100.0, 200.0), (200.0, 250)]
+
+
+def test_registrar_save_preserves_model_provenance() -> None:
+    """frame_registrar must never launder a model reading into pure-human authorship:
+    saving over a frame_answer_import file marks it reviewed-over-model, and that mark
+    is sticky on later saves. A file with no model lineage stamps plain human."""
+    from scripts.frame_registrar import stamp_source
+
+    reviewed = stamp_source("frame_answer_import (returned reading, not yet human-reviewed)")
+    assert reviewed == "frame_registrar (human review over model reading)"
+    assert stamp_source(reviewed) == reviewed  # sticky across repeated saves
+    assert stamp_source("") == "frame_registrar (human)"
+    assert stamp_source("frame_registrar (human)") == "frame_registrar (human)"

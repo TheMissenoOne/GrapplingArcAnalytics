@@ -175,8 +175,9 @@ with the command + owner for each step: **`docs/ingestion_pipeline.md`**. QA a f
 
 **Footage → events** (the other entry path, via `scripts/frame_pdf.py`): reading a rendered frame
 sheet without inventing events, where the answer JSON goes, and the automation backlog —
-**`docs/frame_pdf_reading.md`**. Answers live at `data/frame_pdf/out/<slug>/answer.json`, beside the frames they describe, with
-the human verdict in `review.json` next to it.
+**`docs/frame_pdf_reading.md`**. Answers live at `data/frame_pdf/out/<slug>/events.json`, beside the
+frames they describe (written by `scripts/frame_answer_import.py`, reviewed in place via
+`scripts/frame_registrar.py`; the file's `source` field carries model-vs-human provenance).
 
 ## ELO Engine
 

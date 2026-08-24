@@ -1,0 +1,4050 @@
+[
+ {
+  "graph_id": "48d672de-ed32-4e52-9b50-0a3efd88a6b2",
+  "owner_id": "415a226f-9ced-480a-9629-37ae27e17c54",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:01.091642+00",
+  "athlete_name": "Eric Dahlberg"
+ },
+ {
+  "graph_id": "952166cb-d4ff-431c-81d1-574a3855d11b",
+  "owner_id": "e562df19-6201-4207-bf01-706014efd39b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:17.480544+00",
+  "athlete_name": "Jean Jacques Machado"
+ },
+ {
+  "graph_id": "3e44dca8-4614-466a-b4ba-b7c47b5db252",
+  "owner_id": "57c642a6-0bee-45aa-bef6-9b2b04402851",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:50.004522+00",
+  "athlete_name": "Thiago Tavares"
+ },
+ {
+  "graph_id": "e8dfac10-0be4-42a2-9c6b-8ad92c72a2a5",
+  "owner_id": "422a18e0-8fc3-4c21-b264-2ff86b4756d9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:06.497404+00",
+  "athlete_name": "Ben Askren"
+ },
+ {
+  "graph_id": "dc978732-0c50-46f5-9a7c-51eead518c4b",
+  "owner_id": "5856b1e2-23ec-45ed-b711-297d0d022095",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:53.265282+00",
+  "athlete_name": "Vinicius Magalhaes"
+ },
+ {
+  "graph_id": "acc8c97f-eda9-47e4-99f0-737ebcf6b9a8",
+  "owner_id": "c0a61b14-058f-4610-9dd2-7b29148cb4e4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:04.715014+00",
+  "athlete_name": "Joao Assis"
+ },
+ {
+  "graph_id": "7bba208b-5942-457c-bd4b-993372a7c288",
+  "owner_id": "fdbd386e-9219-46dd-ba94-1eef581141a0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:43.508357+00",
+  "athlete_name": "Demian Maia"
+ },
+ {
+  "graph_id": "3cc1000f-52bc-45ba-a24e-57b5ae30afc6",
+  "owner_id": "ca604e7e-33cd-4de0-af6e-6596901eec7b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:20.101016+00",
+  "athlete_name": "Yurika Nakakura"
+ },
+ {
+  "graph_id": "f5fe40c3-f248-4cf7-b468-ae70043023c9",
+  "owner_id": "dc62d984-68e0-4b3d-ad5c-312c2868fd3d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:58.437624+00",
+  "athlete_name": "Leonardo Vieira"
+ },
+ {
+  "graph_id": "8f7c7a3e-e86b-4976-be8e-0788c753142b",
+  "owner_id": "2c57008f-84f2-4cd7-8b11-8911b14ad0a1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:18.882755+00",
+  "athlete_name": "Dan Schon"
+ },
+ {
+  "graph_id": "0285889d-3479-4d73-bdb4-b0c5992a75ee",
+  "owner_id": "31463796-9002-4f8c-bb55-a3d51a466194",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:02.357188+00",
+  "athlete_name": "Marcio Feitosa"
+ },
+ {
+  "graph_id": "f49216a9-2ff0-483d-b7ae-3c5c5637a33e",
+  "owner_id": "37a53de7-cb73-482c-bda0-e4ce3ebfcf90",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:48.698792+00",
+  "athlete_name": "Saulo Ribeiro"
+ },
+ {
+  "graph_id": "bc54fe9c-300c-48d9-9f36-2d5bfeb7c9e4",
+  "owner_id": "3983bfd6-f903-4c8e-af2b-b9c05098dfa1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:57.368936+00",
+  "athlete_name": "Renzo Gracie"
+ },
+ {
+  "graph_id": "272ca57e-51aa-49eb-85c7-0ec9726046f0",
+  "owner_id": "0b4ba595-d116-4cfa-a16f-94fc9afb757a",
+  "schema_version": 3,
+  "updated_at": "2026-07-02 01:51:05.177996+00",
+  "synced_at": "2026-08-19 22:21:35.12049+00",
+  "athlete_name": "Diego Lopes"
+ },
+ {
+  "graph_id": "0f2b36cf-b632-49fa-a047-ce1951753cfc",
+  "owner_id": "3e52a015-9f2c-4b15-808c-2ab8c1fc562b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:36.005567+00",
+  "athlete_name": "Mikey Burnet"
+ },
+ {
+  "graph_id": "bb9eb23b-c23c-4703-88a3-dbcd71c59657",
+  "owner_id": "72967be7-0737-477d-96d2-f1576045a065",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:25.079544+00",
+  "athlete_name": "Marcio Cruz"
+ },
+ {
+  "graph_id": "88ddf665-8d06-4061-b03b-f1e6b8ec1095",
+  "owner_id": "d078a903-7763-4eea-9b0e-2795ec0dd3b8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:23.822162+00",
+  "athlete_name": "Davi Ramos"
+ },
+ {
+  "graph_id": "91ef33f1-12f8-4a32-a9e0-cfd591fc0aec",
+  "owner_id": "f0d5e88c-5b0b-4b8f-98f4-9e7e5583a96b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:57.517439+00",
+  "athlete_name": "Mark Kerr"
+ },
+ {
+  "graph_id": "088e39f7-de36-4b70-a6e0-3b7e25c0e2b6",
+  "owner_id": "f8053815-bc2f-47a0-b0c9-7c05a9c01963",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:55.357724+00",
+  "athlete_name": "Augusto Mendes"
+ },
+ {
+  "graph_id": "f8d446f7-d2a7-4f2b-b399-4758adaecadc",
+  "owner_id": "1bee83ee-8526-4702-ab46-de5a7ad7570b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:52.783646+00",
+  "athlete_name": "Ricardo Liborio"
+ },
+ {
+  "graph_id": "75fbf579-b212-46f4-b24a-e79a9b9d8a7d",
+  "owner_id": "1d310d4a-f916-44db-9c30-22cf4795638e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:02.73317+00",
+  "athlete_name": "Hideki Shrek"
+ },
+ {
+  "graph_id": "41ed1842-adb9-42c0-ad62-0bcb71383ad8",
+  "owner_id": "d80addf4-03be-46ee-974e-f10b54c26806",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:23.667146+00",
+  "athlete_name": "Yukiyasu Ozawa"
+ },
+ {
+  "graph_id": "9047a1d9-ed5b-43f2-905b-54f8d816d53d",
+  "owner_id": "e4b65d1c-7262-4711-911f-53d05be6e8e9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:04.702218+00",
+  "athlete_name": "Ricardo Mesquita"
+ },
+ {
+  "graph_id": "c57dad1f-4e03-421c-bb79-881aaecb85af",
+  "owner_id": "e66a1d9d-1fff-4016-b1c3-ff11e74e3a2b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:20.713873+00",
+  "athlete_name": "Gianni Grippo"
+ },
+ {
+  "graph_id": "c7c48add-83e7-45e3-abd9-4dfa5d0e6cbc",
+  "owner_id": "e8e2b55c-5fe4-46fb-ad39-eca4d309d51a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:46.223983+00",
+  "athlete_name": "Don Ortega"
+ },
+ {
+  "graph_id": "e2691e22-3d94-4b6f-af8f-fa1c6ea6ddbc",
+  "owner_id": "f9bbc5b6-8ed0-4db8-9410-5f64d20b11d1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:07.676459+00",
+  "athlete_name": "Andy Wang"
+ },
+ {
+  "graph_id": "c951581a-579f-4b38-bb18-3c3faa4c923b",
+  "owner_id": "fa653784-290b-4241-b84c-cd38d4ef28cd",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:14.3847+00",
+  "athlete_name": "Cameron Earle"
+ },
+ {
+  "graph_id": "e293f772-7d72-43c6-a3ef-90b112e8797a",
+  "owner_id": "fb1155eb-b000-4a27-af23-3384ebc08bad",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:19.998092+00",
+  "athlete_name": "Akira Soji"
+ },
+ {
+  "graph_id": "c2667f33-debd-4274-981a-1e3bc51971ad",
+  "owner_id": "fb30680b-d2bd-4611-9ef7-7e4d23882100",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:21.075679+00",
+  "athlete_name": "Chris Wideman"
+ },
+ {
+  "graph_id": "722e3a4e-af2d-4420-86ef-4c1d14af5064",
+  "owner_id": "3f10ae62-6740-4742-af15-fa7dfb39eaf3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:44.664065+00",
+  "athlete_name": "A. Cacareco"
+ },
+ {
+  "graph_id": "b98295ec-1e52-4f4e-b151-1103fca81c13",
+  "owner_id": "5c4a934f-7bfc-4577-8a7e-8f9a2250cd51",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:22.520467+00",
+  "athlete_name": "Darren Andy"
+ },
+ {
+  "graph_id": "059cd0f6-58d9-4b8f-9bdf-65d33332788d",
+  "owner_id": "607bb342-1875-4a69-93f0-55610d523200",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:55.013018+00",
+  "athlete_name": "Paulo Miyao"
+ },
+ {
+  "graph_id": "7201632c-93d3-4add-8dca-50cee14a4f89",
+  "owner_id": "6b232003-669e-45c6-8551-eb2d4066f3c5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:15.416751+00",
+  "athlete_name": "Perttu Tepponen"
+ },
+ {
+  "graph_id": "e8fc1682-a503-446c-929e-11c788ba17cc",
+  "owner_id": "6ebb4106-5a95-49d5-b146-ac94ee723fb4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:46.154705+00",
+  "athlete_name": "Antonio Peinado"
+ },
+ {
+  "graph_id": "57b26147-bbd6-4df1-8bca-25b9de32ad3a",
+  "owner_id": "8cc6fd66-e332-4626-9651-3e8aa77e8cd1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:06.090751+00",
+  "athlete_name": "Chris Brown"
+ },
+ {
+  "graph_id": "84a583fe-0e7c-4961-85e3-54d5815c9d4c",
+  "owner_id": "92c2f724-71da-46f3-b247-b490b214cd27",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:45.452452+00",
+  "athlete_name": "Valdir Araujo Junior"
+ },
+ {
+  "graph_id": "76cf6706-3f21-432c-a29a-f6a2a7547c51",
+  "owner_id": "a65552b1-356a-45e1-ad50-0c36d22fb1db",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:32.927352+00",
+  "athlete_name": "Ruslam Chsiev"
+ },
+ {
+  "graph_id": "9184d870-8bb9-4605-ab4a-e35eedc4201d",
+  "owner_id": "ad26e487-a498-42b0-b9a4-9dd7b1668490",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:39.98375+00",
+  "athlete_name": "Jamie Ballard"
+ },
+ {
+  "graph_id": "b6b2ec84-3f02-4671-b3cb-9ed4a1873453",
+  "owner_id": "b370ccbe-5742-463b-85a4-58fe0c538e83",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:22.2018+00",
+  "athlete_name": "Travis Lutter"
+ },
+ {
+  "graph_id": "d3721c27-8d39-43cb-b1a2-7fe0229f8518",
+  "owner_id": "b93b5eed-62ee-4f3d-b2b3-d75d5814f6a3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:05.352718+00",
+  "athlete_name": "Keller Sodhi"
+ },
+ {
+  "graph_id": "616ab968-62ca-4c69-8058-82a33d4e5baa",
+  "owner_id": "b9677428-32d8-487d-a2e4-a6840cb5aa66",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:08.155465+00",
+  "athlete_name": "Lucio Lagarto"
+ },
+ {
+  "graph_id": "56563b25-4d74-4577-a5b9-c8cfdbb9f28d",
+  "owner_id": "bbc1c7cf-942a-4702-b154-f6045dfc8fe7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:27.370062+00",
+  "athlete_name": "Alexandre de Freitas"
+ },
+ {
+  "graph_id": "25f3f83e-845b-4ab5-a002-9291c731f6cc",
+  "owner_id": "acc030c7-1728-4962-bb4f-bd3a012ac070",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:34.158494+00",
+  "athlete_name": "Kari Petola"
+ },
+ {
+  "graph_id": "6268246c-6e32-499c-8f5e-f93b37bc0722",
+  "owner_id": "eb231077-ae26-490a-b082-5ccbd8ea3726",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:13.22384+00",
+  "athlete_name": "Richard Alarcon"
+ },
+ {
+  "graph_id": "b1ca1799-52f2-4c33-a9c2-d8e6747642d0",
+  "owner_id": "f5f5edd7-eb9a-410b-bcdd-2f20135b0b69",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:36.359761+00",
+  "athlete_name": "Baret Yoshida"
+ },
+ {
+  "graph_id": "39a14151-3e58-42cb-a1bd-987a064cb78a",
+  "owner_id": "c617a2da-e2a7-4dbd-aba5-84e0cbc9e6b1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:43.795961+00",
+  "athlete_name": "Ana Carolina"
+ },
+ {
+  "graph_id": "d9346dc3-bf21-414c-95a5-d348bf89cf0c",
+  "owner_id": "ca829ebd-aae9-4eae-9223-6303be0bc29e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:21.178532+00",
+  "athlete_name": "Takefuni Hanai"
+ },
+ {
+  "graph_id": "1c8818e7-ae2e-4418-aac0-acc27fd49700",
+  "owner_id": "d0fedb8a-64d4-4f88-8d84-e7e1b8181a73",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:27.05591+00",
+  "athlete_name": "Fabricio Werdum"
+ },
+ {
+  "graph_id": "7b24f26e-a8e2-4ad8-a7cc-9df6a9bdfd14",
+  "owner_id": "adb839d9-31fd-4d37-9244-8ef0f7d6de8b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:42.5723+00",
+  "athlete_name": "Charles Pearson"
+ },
+ {
+  "graph_id": "4292c0e0-3cfe-4428-9ff6-1a1fad285946",
+  "owner_id": "df168dbb-1482-4dcb-9eb0-4ee67cd1a625",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:16.802139+00",
+  "athlete_name": "Olav Einemo"
+ },
+ {
+  "graph_id": "990feaef-ef44-4397-827c-900b6487a55b",
+  "owner_id": "3045a439-8be6-46da-a628-ab53541d4ce9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:51.326783+00",
+  "athlete_name": "Shinzo Ansai"
+ },
+ {
+  "graph_id": "5d5515e3-e6ba-4795-9880-67dcad573547",
+  "owner_id": "fdca6ae2-8406-4a28-a57e-a3d71705479c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:44.585488+00",
+  "athlete_name": "Doorwang Jeon"
+ },
+ {
+  "graph_id": "cec74502-282e-4d1d-9138-d2320008ea98",
+  "owner_id": "eb5d2ea9-a39a-4957-913c-d75c3e70fe40",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:16.687532+00",
+  "athlete_name": "Rafael Mendes"
+ },
+ {
+  "graph_id": "8078e3c4-5cb7-4c50-b02f-3887ad5ea54e",
+  "owner_id": "19e7f463-97b2-46fb-b70f-8899174ead53",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:38.721798+00",
+  "athlete_name": "U. Zhakshylyk"
+ },
+ {
+  "graph_id": "fde41230-8e51-4b04-bb65-7bfa6b06de5f",
+  "owner_id": "0b241127-83cf-419a-bca9-12668a1d6058",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:30.579544+00",
+  "athlete_name": "Keita Nakamura"
+ },
+ {
+  "graph_id": "26020823-2663-4691-a0a0-2a376f0148f6",
+  "owner_id": "0c7213b0-7105-4ed5-bd3e-1abdca4a4608",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:43.115979+00",
+  "athlete_name": "Ronaldo Souza"
+ },
+ {
+  "graph_id": "57519026-b116-4ea0-be27-7fd1358be1db",
+  "owner_id": "2a9b4a13-8169-47fc-8ad1-5e37051ff22a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:04.611426+00",
+  "athlete_name": "Braulio Estima"
+ },
+ {
+  "graph_id": "01a1baba-b796-4979-a035-e93d5032a4ad",
+  "owner_id": "0fc1dbde-68ab-46fc-9d0d-b4dbec5011ba",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:09.318913+00",
+  "athlete_name": "Dan Martinez"
+ },
+ {
+  "graph_id": "27f94b3b-6e7f-4b15-a926-797f63b28191",
+  "owner_id": "d34686db-58fe-4ce4-a187-cb3f6bf85855",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:53.865856+00",
+  "athlete_name": "Ezra Lenon"
+ },
+ {
+  "graph_id": "ef1305b5-f096-4bd4-9b57-8fe141bd9ac6",
+  "owner_id": "2d5a2f3f-0c01-4b41-96bc-9f88fe7f27b7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:34.469568+00",
+  "athlete_name": "T. Pyylampi"
+ },
+ {
+  "graph_id": "4b20e2bf-fc43-4ba7-8b6e-e26ba3082502",
+  "owner_id": "357ad1ce-2293-4c9e-ac68-4ad25738d86b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:36.800286+00",
+  "athlete_name": "Keita Iwamoto"
+ },
+ {
+  "graph_id": "dd3e8ec9-2251-432e-a752-4f21d8ca7592",
+  "owner_id": "1e8a9aeb-cce3-4199-9a3c-ee81b40e66f1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:21.576096+00",
+  "athlete_name": "Celso Vinicius"
+ },
+ {
+  "graph_id": "450c06f2-3d7a-4cc6-9a65-8a6325945942",
+  "owner_id": "97db55ca-546a-4bdc-9770-3326bfd92e7d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:38.100474+00",
+  "athlete_name": "G. Sotiropoulos"
+ },
+ {
+  "graph_id": "34768fb1-2da3-4319-92d3-060d2b55eddf",
+  "owner_id": "b35cf2c4-f23e-4983-8e14-17ec0d7e2526",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:18.96885+00",
+  "athlete_name": "Ricardo Arona"
+ },
+ {
+  "graph_id": "5bf02d41-285e-4646-948e-bdba3e55f3c6",
+  "owner_id": "e1282ad6-b268-4986-aa4f-564f00ca4b7c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:25.433762+00",
+  "athlete_name": "Victor Honorio"
+ },
+ {
+  "graph_id": "684f2d63-843d-4f2c-ac09-743126e9de89",
+  "owner_id": "3efebc09-cd55-476e-97aa-eb4bd4dc710b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:43.583877+00",
+  "athlete_name": "Yuki Sasaki"
+ },
+ {
+  "graph_id": "76223209-9e95-43f1-bea5-bc3468a98a4e",
+  "owner_id": "cc92336b-5b9a-4753-97ab-73c6a7567a68",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:43.009761+00",
+  "athlete_name": "John Salter"
+ },
+ {
+  "graph_id": "7ce7bc63-a25c-4afd-b484-e5726659302c",
+  "owner_id": "ccb0f5a3-d492-4711-8d61-4f604da5f5d7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:44.087187+00",
+  "athlete_name": "Jon Einemo"
+ },
+ {
+  "graph_id": "e15e2280-eebc-4e43-a685-c69fc75db4e3",
+  "owner_id": "72cfea31-8560-4b79-bcc7-9d00cdd1f1bf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:29.418551+00",
+  "athlete_name": "Khazmat Stambulov"
+ },
+ {
+  "graph_id": "960bbb87-39d8-475e-9c81-3d38d9ac128e",
+  "owner_id": "107941ea-eb8a-4962-a342-cb1fc29cceaf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:14.955247+00",
+  "athlete_name": "Mario Rinaldi"
+ },
+ {
+  "graph_id": "ed90c3af-8d5d-49bf-8413-dfdf100ac452",
+  "owner_id": "12da5e13-c428-40b4-bc86-0c23b0911da1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:34.412683+00",
+  "athlete_name": "Leonardo Nogueira"
+ },
+ {
+  "graph_id": "fd791f8e-2466-45e2-a2d2-3bc05b724b13",
+  "owner_id": "135720e3-964e-4cb4-ac62-07a02aed07b1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:36.573955+00",
+  "athlete_name": "Halm Gocalli"
+ },
+ {
+  "graph_id": "97cdd435-002c-4fd9-91de-94f348160fd6",
+  "owner_id": "1849948f-5678-4dfc-ba74-c20ef2e500d6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:28.740363+00",
+  "athlete_name": "A. Hamlet"
+ },
+ {
+  "graph_id": "c1182d61-8660-4796-8cc5-90b7d7e5d3e1",
+  "owner_id": "563b3f28-9675-4ea2-abf4-447b1f79ade3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:45.239664+00",
+  "athlete_name": "Elliot Marshal"
+ },
+ {
+  "graph_id": "08376355-e52f-4d33-81ad-d0cfe7d89e86",
+  "owner_id": "74c59e03-ffb4-4be2-b381-63d455dfa187",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:42.605086+00",
+  "athlete_name": "Martin Brown"
+ },
+ {
+  "graph_id": "ad6891e2-d5fe-4b14-b748-717d4ad16a88",
+  "owner_id": "9ead6199-4be5-4570-9331-b350c20e0280",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:41:21.141442+00",
+  "athlete_name": "Hudson Taylor"
+ },
+ {
+  "graph_id": "3a116f1f-2838-4848-98d9-8a95fe098771",
+  "owner_id": "a2e81fb3-7803-44fd-a4d9-976e132a04d0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:07.184941+00",
+  "athlete_name": "Roger Gracie"
+ },
+ {
+  "graph_id": "5518738a-d00e-425c-bad6-b1c891555e15",
+  "owner_id": "ae079af5-3eb8-4477-b53c-0276a6b1fa04",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:49.908778+00",
+  "athlete_name": "R. Anderson"
+ },
+ {
+  "graph_id": "106c40b5-9acc-4a30-b85c-098398e85196",
+  "owner_id": "b08a7fdb-5846-400e-a957-0df947871d1e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:03.414059+00",
+  "athlete_name": "Sim Go"
+ },
+ {
+  "graph_id": "124d60a6-cb7d-4524-b39a-ec8b20b3b169",
+  "owner_id": "b0bfcd56-f3cb-456f-be07-99d3a0fc5c00",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:04.490757+00",
+  "athlete_name": "Davis Heart"
+ },
+ {
+  "graph_id": "433e71b2-d047-4019-8e9e-fb5216c2a1f4",
+  "owner_id": "b2141ecc-b64c-4b54-98af-1be90c4ece3e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:06.644699+00",
+  "athlete_name": "Cassio Francis"
+ },
+ {
+  "graph_id": "2814c301-185a-4786-96df-cb320ac976bc",
+  "owner_id": "b3623e61-841e-4ac2-9e5a-8607a966108d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:20.04574+00",
+  "athlete_name": "Carlos Barreto"
+ },
+ {
+  "graph_id": "9d79982f-3985-4325-8e47-b6a3e3e2cdf9",
+  "owner_id": "b79d8be0-5412-4790-a6e0-40246330df5b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:53.054656+00",
+  "athlete_name": "Rubens Charles"
+ },
+ {
+  "graph_id": "f524f44f-fa82-4812-a968-254e60774e40",
+  "owner_id": "e2c2436e-64f9-407e-b0ff-aa368de1b378",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:45.28213+00",
+  "athlete_name": "Royler Gracie"
+ },
+ {
+  "graph_id": "9c6a5d9e-6736-4057-a971-c7335b906ed1",
+  "owner_id": "ed449dd4-97a0-423d-95cb-816b846d7840",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:32.275789+00",
+  "athlete_name": "Marcelo Garcia"
+ },
+ {
+  "graph_id": "6e101557-571f-47f7-b6e1-19f9a12c29d4",
+  "owner_id": "edb11af2-3f41-47cb-95c1-119a5715bbe3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:34.430957+00",
+  "athlete_name": "Ryan Hall"
+ },
+ {
+  "graph_id": "09df5394-718d-478d-a2bc-76c9f453a62d",
+  "owner_id": "547e640a-e36b-4772-a352-ce76c989050a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:30.313406+00",
+  "athlete_name": "Rodrigo Dib"
+ },
+ {
+  "graph_id": "33babcc6-98e6-4876-92fd-3a1234b00eaf",
+  "owner_id": "ead2fbc1-c269-4ec4-be98-34635560c789",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:00.701427+00",
+  "athlete_name": "Y. Yatso"
+ },
+ {
+  "graph_id": "7ee47a8f-8932-49b5-a292-e9a9bba6feca",
+  "owner_id": "bb688f22-f969-4bfa-a2c7-2c14d0592b6f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:22.844556+00",
+  "athlete_name": "Fabio Gurgel"
+ },
+ {
+  "graph_id": "08ae6b08-b18b-449c-a648-38bcd040c75c",
+  "owner_id": "774e51d5-e281-4e81-9237-3b427b5f906a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:03.876189+00",
+  "athlete_name": "Marcio Cromado"
+ },
+ {
+  "graph_id": "4b9da88c-eb4e-43c5-a2d3-5f4011d8f790",
+  "owner_id": "e28e7401-76d9-4ceb-9c4b-a36ede00619d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:41.834149+00",
+  "athlete_name": "Y. Kinishi"
+ },
+ {
+  "graph_id": "74031573-8389-4075-949e-2160a0e88d4e",
+  "owner_id": "010eb63f-22cf-48e3-9850-dba47bf52b25",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:20:10.883794+00",
+  "athlete_name": "Frank Trigg"
+ },
+ {
+  "graph_id": "799661e8-3c56-4086-9db1-8c5abdee261f",
+  "owner_id": "bdedf997-d1a8-41d7-a95c-e666b7a5e324",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:44.654597+00",
+  "athlete_name": "Mario Miranda"
+ },
+ {
+  "graph_id": "c02c10f1-db6e-40ca-8816-55849d175162",
+  "owner_id": "be16756a-3c79-4441-ae02-ac858b4a56c3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:47.888504+00",
+  "athlete_name": "Kaynan D."
+ },
+ {
+  "graph_id": "679e7339-e3bb-4907-a1ee-7891f8ef41eb",
+  "owner_id": "a3942726-738a-40ce-b7e9-1d229e6781d9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:16.319279+00",
+  "athlete_name": "Stefanie Egger"
+ },
+ {
+  "graph_id": "dc1a3330-3bda-469e-a84e-4613f8c5de69",
+  "owner_id": "c19d1e63-dfca-44f3-865c-96b3006f0ada",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:14.44738+00",
+  "athlete_name": "Justin Garcia"
+ },
+ {
+  "graph_id": "1d49304a-e3f5-4387-bc7a-e2f1742534cc",
+  "owner_id": "062b71c4-f0e7-4eaa-bb4c-52cd3ef9f89c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:00.499303+00",
+  "athlete_name": "Marshurenko"
+ },
+ {
+  "graph_id": "f84992a5-f5eb-4aa2-ad1a-7d3f6c6335a4",
+  "owner_id": "22e728ee-aba0-4f37-bf98-e6cf49354076",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:53.410566+00",
+  "athlete_name": "Rocky Batastini"
+ },
+ {
+  "graph_id": "73ca09fd-94be-4371-993e-c62654845515",
+  "owner_id": "0cd44acd-f16b-4009-af9e-e18995422c86",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:46.360085+00",
+  "athlete_name": "Greger Forsel"
+ },
+ {
+  "graph_id": "2c9d86ae-7a0f-498f-beb9-73b8eb1fd146",
+  "owner_id": "c59aa68f-e2cc-477f-bcbd-2afc734b9391",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:41.641859+00",
+  "athlete_name": "Serguei Onishuk"
+ },
+ {
+  "graph_id": "3d15fbef-8644-43e6-90b0-604e8e6924bc",
+  "owner_id": "0fa356d6-7cc8-4f9c-be32-0013c59fa179",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:08.239536+00",
+  "athlete_name": "D. Hemmings"
+ },
+ {
+  "graph_id": "b0fc1c58-3ff0-403d-a6f1-3e61ef29c49d",
+  "owner_id": "1526fd6f-1da6-49ee-9c3c-a8f36c3ac441",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:53.448951+00",
+  "athlete_name": "Reese Andy"
+ },
+ {
+  "graph_id": "bb029aa3-589e-42ef-8bfd-7c8eed744283",
+  "owner_id": "16ca5ec9-1ab1-45a4-88fd-f530e56d5567",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:10.538682+00",
+  "athlete_name": "Jessica Flowers"
+ },
+ {
+  "graph_id": "76364f37-dae9-4abe-b1d0-37ca2744eec3",
+  "owner_id": "24e79057-a682-4412-ae0a-df522caa291d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:11.36939+00",
+  "athlete_name": "Israel Albuquerque"
+ },
+ {
+  "graph_id": "7339dffd-cbd4-44ea-b1d1-eb5c96a7b55d",
+  "owner_id": "26493946-3650-424d-b8fb-db1b9ff90083",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:24.131876+00",
+  "athlete_name": "Oskar Piechota"
+ },
+ {
+  "graph_id": "4e28cee6-8068-49f9-9979-dc94279960f7",
+  "owner_id": "280e365b-2f1b-4abb-af71-02e763693db5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:36.473217+00",
+  "athlete_name": "Bruno Chavez"
+ },
+ {
+  "graph_id": "8650013b-1a67-40c3-afba-6108d86af15e",
+  "owner_id": "32ba83a8-3c5b-471d-a280-5ed5a29731d0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:19.285942+00",
+  "athlete_name": "Rodrigo Minotauro"
+ },
+ {
+  "graph_id": "c9e1310f-58d3-4055-8b1f-d6da4b15d26f",
+  "owner_id": "37094677-75b4-4a76-8695-77343dee696b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:41.129187+00",
+  "athlete_name": "Carina Santi"
+ },
+ {
+  "graph_id": "40a0c934-c38e-44f0-bcd1-0ba5290328aa",
+  "owner_id": "39e30ff3-682d-40ae-bc1a-015fab00b9d5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:04.072752+00",
+  "athlete_name": "Paulo Pinto"
+ },
+ {
+  "graph_id": "f18858f9-4f99-46ca-8762-f0011516dde8",
+  "owner_id": "3d98f260-fc3d-4fda-a28e-2afd9b0e9cad",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:30.170575+00",
+  "athlete_name": "Elvis Sinosic"
+ },
+ {
+  "graph_id": "b662a4f1-1fe9-4a3d-96ec-c6bb1cc32a63",
+  "owner_id": "3e0d621d-49f7-4620-bb80-7f923fb03646",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:33.411433+00",
+  "athlete_name": "Yushin Okami"
+ },
+ {
+  "graph_id": "f14bd607-298e-43eb-950d-405e9c32cf07",
+  "owner_id": "44838cf8-9b45-4622-aa98-74fcdab8add0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:27.728143+00",
+  "athlete_name": "Joey Gilbert"
+ },
+ {
+  "graph_id": "d51fce0c-f962-47a1-b7d4-1fcde234bd1d",
+  "owner_id": "479193c2-af00-4861-ba1e-9d038b4e9def",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:55.744757+00",
+  "athlete_name": "Beatriz Mesquita"
+ },
+ {
+  "graph_id": "8d84ff0b-333a-4989-b233-e865272228fa",
+  "owner_id": "498f6129-e323-419c-8c55-be2ca1f7a2e7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:10.464816+00",
+  "athlete_name": "Glover Teixeira"
+ },
+ {
+  "graph_id": "695b80a4-6ebf-43e0-82f5-3bd9a7351c7f",
+  "owner_id": "5a9ede6a-e2ba-48a6-8e55-27bb1e03554f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:11.916702+00",
+  "athlete_name": "Jose Junior"
+ },
+ {
+  "graph_id": "2393db11-4813-4ca5-bc3a-5281a26a2204",
+  "owner_id": "5d143388-0a54-4bca-ad3a-f8e125a55ec2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:26.839337+00",
+  "athlete_name": "I. Praporshchikov"
+ },
+ {
+  "graph_id": "3156a232-c970-4f38-9c19-e9b838f75de2",
+  "owner_id": "5eecbea8-55ca-4c4d-9b38-e1b8849e2215",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:40.506399+00",
+  "athlete_name": "Genki Sudo"
+ },
+ {
+  "graph_id": "d366f1ca-3f77-4f95-bd65-25405496142c",
+  "owner_id": "6372c30d-76ad-4bc5-8970-0bdadfd1e831",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:27.724405+00",
+  "athlete_name": "Oleg Taktarov"
+ },
+ {
+  "graph_id": "12acd98d-2239-4dd4-883c-a48159ba975a",
+  "owner_id": "66d875be-f777-4f36-bd2a-bb578708fae8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:45.909772+00",
+  "athlete_name": "Tom Bass"
+ },
+ {
+  "graph_id": "232c8512-c2d7-442e-8bc0-1fb488b914d3",
+  "owner_id": "6efb8d44-65c8-4574-9f17-4bbf18aceabb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:47.233936+00",
+  "athlete_name": "Sotaro Yamada"
+ },
+ {
+  "graph_id": "bab170d1-5d3c-45ab-90ae-b0964a36b4e3",
+  "owner_id": "7ab51a12-3efa-490b-976a-e95d37522d8e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:30.305176+00",
+  "athlete_name": "M. Van"
+ },
+ {
+  "graph_id": "47d456a3-8f60-4a6e-a37e-42195036c7f0",
+  "owner_id": "81d197d3-c752-4c3d-b9d9-e4f23b92f01f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:40.187943+00",
+  "athlete_name": "Joe Guilbert"
+ },
+ {
+  "graph_id": "23f73848-e616-4b43-82c0-c3d6c699fc7c",
+  "owner_id": "83377acf-6579-47b3-bb98-212edc6a2426",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:53.159126+00",
+  "athlete_name": "J. Pietlainen"
+ },
+ {
+  "graph_id": "f85796e4-9240-40a6-9071-11cac5ca4a4e",
+  "owner_id": "9210e35d-7f05-4b37-b6a5-150b479edc5c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:36.374869+00",
+  "athlete_name": "Amanda Alequin / Santana"
+ },
+ {
+  "graph_id": "193cc6d0-ca47-446a-90f4-fd8f74ea0962",
+  "owner_id": "9b11e8a3-bc79-4827-9ffb-63b670cb83f4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:58.436145+00",
+  "athlete_name": "Rigan Machado"
+ },
+ {
+  "graph_id": "35fe1b1a-755d-4657-93f1-9a3f5dbd8591",
+  "owner_id": "9b5b941f-6172-471c-a812-c210e465a880",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:41:01.678185+00",
+  "athlete_name": "Chris Brennan"
+ },
+ {
+  "graph_id": "5c49a25b-be53-4174-abd7-133d4944f467",
+  "owner_id": "a4c7eeb7-dd02-48a1-9ae8-ab3d2296bdda",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:21.926213+00",
+  "athlete_name": "M. Szczecinski"
+ },
+ {
+  "graph_id": "38fcd7fa-922a-48d5-af36-3c14a932935c",
+  "owner_id": "a61700e4-625d-4de7-b751-8f278b7ae538",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:31.850158+00",
+  "athlete_name": "Y. Kohsaka"
+ },
+ {
+  "graph_id": "6aa87e19-516a-4422-853e-201cbe5699a5",
+  "owner_id": "ac438b71-adee-491f-9b03-34c481bb6af3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:32.001462+00",
+  "athlete_name": "Alison Tremblay"
+ },
+ {
+  "graph_id": "889c3064-d9b7-4102-a54b-06e2dce68211",
+  "owner_id": "af2542f2-1553-4f7b-9618-b580a54deba3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:55.535355+00",
+  "athlete_name": "Miodrag Petkovic"
+ },
+ {
+  "graph_id": "e8f6878c-9982-4a5e-bfde-6e522895c49a",
+  "owner_id": "b1228dcc-e42d-4fba-8ef5-e31c74c6c14a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:05.568073+00",
+  "athlete_name": "Mike Cardosa"
+ },
+ {
+  "graph_id": "00211c8b-65a5-48d8-8aa6-42e5fe5cd037",
+  "owner_id": "b6c7f579-48ae-4320-9203-64450437ee20",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:46.588257+00",
+  "athlete_name": "Davion Peterson"
+ },
+ {
+  "graph_id": "70414e60-5a51-40b3-abe8-d93cedf7b497",
+  "owner_id": "b7926aa4-0932-4c64-bcd2-8f4d490f66d1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:51.978005+00",
+  "athlete_name": "Rogent Lorent"
+ },
+ {
+  "graph_id": "efcde2f5-c181-42bc-bb8a-08a5e0cf5c6d",
+  "owner_id": "b8cdb609-bbf5-42b5-92b7-eaab5cc43a58",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:02.119667+00",
+  "athlete_name": "Joaquim Hansen"
+ },
+ {
+  "graph_id": "129c748c-5a43-4f86-8600-3ab5b7d85d28",
+  "owner_id": "b8dc536b-4fff-4f4f-91ee-a2cbf5edf658",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:04.275033+00",
+  "athlete_name": "Tetsu Suzuki"
+ },
+ {
+  "graph_id": "57d0411a-6176-4ced-855f-67bf85f20090",
+  "owner_id": "cb238987-cb59-4cf1-81df-0d370b25c5ed",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:22.255797+00",
+  "athlete_name": "K. Hirate"
+ },
+ {
+  "graph_id": "5c4b54e0-39f8-4834-bbd1-33b7c2537726",
+  "owner_id": "d1392aa7-fb27-4865-9a0d-6fefe5b86cbf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:29.212069+00",
+  "athlete_name": "Luke Costello"
+ },
+ {
+  "graph_id": "a59cebb5-2d36-4a17-b0bd-0a9ff80fe2fa",
+  "owner_id": "d3e9c516-475b-4d86-831a-4aa013ca385d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:58.186534+00",
+  "athlete_name": "L. Papadopoulis"
+ },
+ {
+  "graph_id": "a4984356-f0a4-424a-9fb4-3ae1f328172e",
+  "owner_id": "e2e6f9f4-866c-492d-b1de-7919e3b811a4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:50.89253+00",
+  "athlete_name": "Gavin Kulper"
+ },
+ {
+  "graph_id": "0ff59704-829c-4cc1-9f8e-8a93d29c4ee3",
+  "owner_id": "e6994dff-114e-4736-9b39-44e6f5d75ec2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:22.868894+00",
+  "athlete_name": "Marcio Corleta"
+ },
+ {
+  "graph_id": "15b98d72-b181-4025-a935-4bd79a89401f",
+  "owner_id": "e7f810ae-a0ce-4273-a844-4df93bebc5cf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:36.271304+00",
+  "athlete_name": "Kim Mason"
+ },
+ {
+  "graph_id": "f90b8b1e-da2d-466e-88a5-d12a2002e64d",
+  "owner_id": "eafbaba8-5980-4b3e-b0ee-f7c8690940b2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:08.910467+00",
+  "athlete_name": "F. Vasconcelos"
+ },
+ {
+  "graph_id": "af30afbe-ae45-4999-b8f9-b0306fe0e2ef",
+  "owner_id": "f10b15e9-23c7-4d78-be19-f4f5b38fdcb5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:00.760696+00",
+  "athlete_name": "Chris Weidman"
+ },
+ {
+  "graph_id": "c834fa40-a8ff-4155-bb0b-db7617ad0f9c",
+  "owner_id": "f39c10c9-18fd-4c0e-8a3b-a4fd1ff83593",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:21.254486+00",
+  "athlete_name": "Murilo Bustamante"
+ },
+ {
+  "graph_id": "33b5ad0e-822a-4f43-b7d5-cbe8c8200712",
+  "owner_id": "f6d94df9-29f9-4895-bf3f-dab802d6dee9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:46.07839+00",
+  "athlete_name": "R. Mashurenko"
+ },
+ {
+  "graph_id": "a021203d-4b8a-4cad-815c-200eb38e6968",
+  "owner_id": "fda80963-d824-483b-b9f1-e8debdc93822",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:42.431288+00",
+  "athlete_name": "Eduardo Telles"
+ },
+ {
+  "graph_id": "aaf266b1-63c6-4e58-a23e-cfb492851baa",
+  "owner_id": "fe113b2a-d101-4f32-841d-c7ad5c466848",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:50.217626+00",
+  "athlete_name": "Kassim Anan"
+ },
+ {
+  "graph_id": "b70f5ec7-b226-4cce-a6f2-021f01a17548",
+  "owner_id": "ff124d71-9add-4841-8c5e-bcc7f1c4ead8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:55.822561+00",
+  "athlete_name": "Kuba Witkowski"
+ },
+ {
+  "graph_id": "06a59340-e601-4654-bb90-cfd4298d908c",
+  "owner_id": "055934d8-e4fc-4262-8985-b6e9c79de200",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:20:48.126789+00",
+  "athlete_name": "Tetsu Suzuko"
+ },
+ {
+  "graph_id": "1112652b-6627-4dbe-9dd3-901a2ca0a68b",
+  "owner_id": "3ece1c14-f5c9-4293-8eb3-ca35748cbc37",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:38.599347+00",
+  "athlete_name": "Yoshitomi Mishima"
+ },
+ {
+  "graph_id": "0fa268de-265e-420a-a557-97efaef92870",
+  "owner_id": "26c0a280-f77a-412d-a662-cae1a21a4305",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:29.761433+00",
+  "athlete_name": "Manu Garcia"
+ },
+ {
+  "graph_id": "a4d851db-1fbc-45ae-a49c-ff472e7f2dae",
+  "owner_id": "c5a1b8d2-9236-496a-bbfd-37ad4a847015",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:42.719772+00",
+  "athlete_name": "Yuta Shimada"
+ },
+ {
+  "graph_id": "2a219b7f-b8a8-4d4c-aaa1-2ff1f7cdc60b",
+  "owner_id": "09cf052d-b07d-42e1-963e-658c4d805c1c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:27.339497+00",
+  "athlete_name": "Jason Brudvik"
+ },
+ {
+  "graph_id": "609e3515-cf1b-4935-b1d2-fe1633b3f0c1",
+  "owner_id": "0b46ec26-9619-48fd-9183-4b9d9ded1881",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:34.040701+00",
+  "athlete_name": "Hidemi Mihara"
+ },
+ {
+  "graph_id": "ed2a7dd3-153e-402c-90f2-8e0081a53c45",
+  "owner_id": "19cc3dd5-151a-47d2-aa0f-be5214826344",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:35.255076+00",
+  "athlete_name": "Fan Yi"
+ },
+ {
+  "graph_id": "ed5bd765-8614-4e13-8f7c-f4b4091b068c",
+  "owner_id": "0d57a048-d3a9-4054-aa75-efbd52c723f1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:47.44005+00",
+  "athlete_name": "Tetsu Hadario"
+ },
+ {
+  "graph_id": "26e6b2d4-4fd3-44e1-bda9-7af015d6c8c8",
+  "owner_id": "10f9b5aa-d1ea-4ad4-8281-21b232be7b43",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:23.166027+00",
+  "athlete_name": "Mikael Knutsson"
+ },
+ {
+  "graph_id": "d65f25ac-366f-45b4-8400-3db9ac1d897a",
+  "owner_id": "16bc7145-2813-4286-951e-5e65a237e2a3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:09.458831+00",
+  "athlete_name": "Rob Di"
+ },
+ {
+  "graph_id": "fb968ee0-8458-490e-962e-5a18f9500642",
+  "owner_id": "1ad03ed3-5ef4-4ad2-a9b0-a33fdf03c70e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:44.985966+00",
+  "athlete_name": "T. Hirono"
+ },
+ {
+  "graph_id": "ae2f96a9-e119-4ac1-a2a6-9ebcac2ac435",
+  "owner_id": "1b9553bc-c9cf-4047-8d02-28e9140c0bd0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:49.533086+00",
+  "athlete_name": "Mike Mrkulic"
+ },
+ {
+  "graph_id": "01cd7851-60f3-4cd3-a9e3-cdda58de6762",
+  "owner_id": "1cb55e70-a25f-43bc-b829-c5b8b3a322e6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:59.926143+00",
+  "athlete_name": "Rumina Sato"
+ },
+ {
+  "graph_id": "d82bae33-d51e-4459-970c-7b32c14820f8",
+  "owner_id": "1e272006-8d7d-4461-a8ec-da64ac5d8928",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:18.334894+00",
+  "athlete_name": "Kareem Barkalev"
+ },
+ {
+  "graph_id": "1d4c1173-fb59-4d02-bd40-1ca2c1ec1b94",
+  "owner_id": "1e364bf7-dd3c-4d4e-8c06-136d38ec90d2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:19.414763+00",
+  "athlete_name": "Tamura"
+ },
+ {
+  "graph_id": "6730d984-b3d2-4b61-93bc-623867c345e5",
+  "owner_id": "1f35f5e9-a8d3-4767-b16a-9d5b2889e8bf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:25.040848+00",
+  "athlete_name": "Pete Williams"
+ },
+ {
+  "graph_id": "89a5bc4e-214c-4666-a502-21979b8ae9c6",
+  "owner_id": "24e68945-36bc-47b3-8ab7-e9fbdb36fce6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:10.289527+00",
+  "athlete_name": "Jia Jang"
+ },
+ {
+  "graph_id": "96e09a82-934b-4b44-bbad-ca12176c781c",
+  "owner_id": "2a3c95fc-cbba-4107-9bcf-0b10aa55846e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:57.882101+00",
+  "athlete_name": "Rodrigo Modrias"
+ },
+ {
+  "graph_id": "403a4a12-c871-43c5-9cbe-4cf31dc1e9d1",
+  "owner_id": "2a496000-acf5-476c-8cbb-37da5dcbbcc0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:01.368699+00",
+  "athlete_name": "Mike Martelle"
+ },
+ {
+  "graph_id": "25d9f3d6-9cff-403f-910b-fc4332dd14b6",
+  "owner_id": "2be88b8d-bb28-4158-abf3-ea702fd878d0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:15.644752+00",
+  "athlete_name": "Vernon White"
+ },
+ {
+  "graph_id": "e37b1085-d1d7-4984-a026-19ecde052318",
+  "owner_id": "2cc0bc11-7f09-4a67-9c88-f755fb2e51dd",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:23.205829+00",
+  "athlete_name": "Mark Bocek"
+ },
+ {
+  "graph_id": "1e8354e5-a9aa-4820-86c4-3a586efc7e8a",
+  "owner_id": "2f20ee8a-ea1f-4143-9339-ed33c44db050",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:47.001149+00",
+  "athlete_name": "Janne Pietilainen"
+ },
+ {
+  "graph_id": "2bf05de7-fd58-4cdb-844a-89a4f9cced41",
+  "owner_id": "3114b53c-e923-4e7a-9315-d54f44d7648f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:59.111179+00",
+  "athlete_name": "Isaak Michel"
+ },
+ {
+  "graph_id": "0c6bd3c3-1762-4b91-88b8-9da795f7117e",
+  "owner_id": "35019abc-8ce3-4271-b9e6-143c931fadc8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:29.019019+00",
+  "athlete_name": "Karl Webber"
+ },
+ {
+  "graph_id": "30c5af10-a3b9-4e51-b85c-ab9d4440590e",
+  "owner_id": "3f6d2d92-08f2-462f-bac3-bb4f4cf0eb7a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:46.82407+00",
+  "athlete_name": "Nieman Gracie"
+ },
+ {
+  "graph_id": "8e3b5cdc-1187-4cfc-a689-ba89690b4d2b",
+  "owner_id": "40259643-23fd-411d-a2b5-d36e0dac24da",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:55.690874+00",
+  "athlete_name": "Enson Inoe"
+ },
+ {
+  "graph_id": "d2014683-9ed3-4664-9b9f-354357cd3933",
+  "owner_id": "4d976401-e3a4-43b3-af04-58ebfbf9264f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:37.485487+00",
+  "athlete_name": "Tammy Griego"
+ },
+ {
+  "graph_id": "2e3df183-5498-41c4-8543-11c795bed09d",
+  "owner_id": "4de2e041-b68f-44c6-a122-65000f715843",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:43.327853+00",
+  "athlete_name": "Akira Shoji"
+ },
+ {
+  "graph_id": "a3576173-274b-4c42-a77a-37db163cb893",
+  "owner_id": "53a305f7-b019-4a42-8cda-4a01c71be00e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:22.517076+00",
+  "athlete_name": "F. Capoane"
+ },
+ {
+  "graph_id": "32a726bc-3d81-4da1-b6d6-ea6bf741d725",
+  "owner_id": "5a89ed47-d44f-4507-9d1f-5b0271669439",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:10.837072+00",
+  "athlete_name": "Roberto Magalhaes"
+ },
+ {
+  "graph_id": "04b3b3bb-571c-4823-a0bc-dc92e7bf9e29",
+  "owner_id": "5ffcf8f0-c58b-4a6e-8cc5-44d6a0692282",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:48.962217+00",
+  "athlete_name": "Rodrigo Caporal"
+ },
+ {
+  "graph_id": "b7320233-9e20-46e0-8a70-2b875fe5cd08",
+  "owner_id": "621498bb-3b63-4d88-960e-39f7bcc6c8bf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:05.853606+00",
+  "athlete_name": "Wagnney Fabiano"
+ },
+ {
+  "graph_id": "08f06f0f-f5fd-4812-9021-0c76d5f40c58",
+  "owner_id": "62a38483-1549-4cc5-87fb-3c30e031fb1f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:23.404072+00",
+  "athlete_name": "Egan Inoe"
+ },
+ {
+  "graph_id": "2b247c39-75c6-46ed-94aa-ce3038a21d31",
+  "owner_id": "6c1db252-7489-4be7-b29e-f138ffef2d7c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:23.213375+00",
+  "athlete_name": "Luis Orlando"
+ },
+ {
+  "graph_id": "678ae5fa-f561-44b3-a2bb-edb5ec142110",
+  "owner_id": "6e09ea67-512f-4640-bd5f-b56f8b837afd",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:35.98907+00",
+  "athlete_name": "Renan Sancar"
+ },
+ {
+  "graph_id": "7544d960-ff3b-468d-81fc-97033d534337",
+  "owner_id": "72e7d487-60e9-42d9-9343-4845be9118e5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:31.580022+00",
+  "athlete_name": "Jamal Peterson"
+ },
+ {
+  "graph_id": "35a3ef78-b149-4d07-90da-2c0aa4d6a5f5",
+  "owner_id": "7548b9da-a447-4f9e-b018-fc6eec7438d4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:48.006074+00",
+  "athlete_name": "Y. Setsenko"
+ },
+ {
+  "graph_id": "54433445-b6c2-41b0-a13b-cf2af65dda90",
+  "owner_id": "77b8fb12-b6ee-4eb4-b2c3-87acb1d425ed",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:04.955487+00",
+  "athlete_name": "David Marinakis"
+ },
+ {
+  "graph_id": "c30df31e-b23b-46f9-b563-4996414cd1ea",
+  "owner_id": "7a3a9100-8e87-4c29-a2a8-da062ed650b8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:28.144887+00",
+  "athlete_name": "Carlos Newton"
+ },
+ {
+  "graph_id": "3daed963-561d-4cbb-ae74-2981599e070d",
+  "owner_id": "7b780c2d-2f7c-4449-b991-686ba608a771",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:40.042476+00",
+  "athlete_name": "Jehad Hamdan"
+ },
+ {
+  "graph_id": "8a9cbcf4-a424-4f8b-b286-7fc36fe7a537",
+  "owner_id": "7cd81c53-e454-436a-80cb-f29e2ade1268",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:55.173042+00",
+  "athlete_name": "Ryan Gracie"
+ },
+ {
+  "graph_id": "909aecd2-e698-4262-a484-d11baab9cbad",
+  "owner_id": "828a6af9-9ee7-4e73-90c9-36ec59998663",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:50.999151+00",
+  "athlete_name": "Roan Jucao"
+ },
+ {
+  "graph_id": "58eef14c-b1fb-4418-9b0a-e77a641a773a",
+  "owner_id": "840e5956-9b7f-4949-a9e7-4772a734729c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:58.776973+00",
+  "athlete_name": "Dave Menne"
+ },
+ {
+  "graph_id": "8ff7847d-1b99-4474-bfc5-b12e2e25cea9",
+  "owner_id": "8823fdcf-8212-43af-bd37-bf3accf83f87",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:31.440338+00",
+  "athlete_name": "Carlos Machado"
+ },
+ {
+  "graph_id": "1d3c66f4-96ad-415e-b388-20cceee684b4",
+  "owner_id": "891280e4-f41e-40aa-bb67-b753b3425bbf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:40.991442+00",
+  "athlete_name": "Simon Siasi"
+ },
+ {
+  "graph_id": "fb3329a6-5dc8-43d8-8e0b-76f69cf64411",
+  "owner_id": "8d0e84e3-005c-4803-aeed-bc9963f3dc28",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:09.545872+00",
+  "athlete_name": "Leonardo Saggioro"
+ },
+ {
+  "graph_id": "f391cf37-79ff-4c34-9c98-148caf2c80d7",
+  "owner_id": "913481c2-f2c5-4c40-8890-e8f0cd34c8b2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:31.61534+00",
+  "athlete_name": "K. Toida"
+ },
+ {
+  "graph_id": "2f6de9fe-7937-4908-92e1-27a9aaf78d3b",
+  "owner_id": "95cf6f98-e419-4855-9191-3e1aca0e29ae",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:16.67377+00",
+  "athlete_name": "Abdulaev Ruslan"
+ },
+ {
+  "graph_id": "23c17407-28de-4c46-bc14-58e121ec421e",
+  "owner_id": "b780f309-a5ea-480a-9aa0-67fbffa4d20f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:49.822482+00",
+  "athlete_name": "Jason Lees"
+ },
+ {
+  "graph_id": "cbaa25a7-1a4d-4950-ab7d-c7cb0658041d",
+  "owner_id": "b8d4723b-d944-4ba7-8b53-2dc2f047a606",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:03.197419+00",
+  "athlete_name": "Talita Alencar"
+ },
+ {
+  "graph_id": "d16890c0-906c-46ec-9d2e-3ec652219640",
+  "owner_id": "c75a59bd-bc93-4a0e-a72a-01c272cda274",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:55.692897+00",
+  "athlete_name": "Robert Sulski"
+ },
+ {
+  "graph_id": "12709b58-4976-4cc7-968e-3631c50b45d2",
+  "owner_id": "c78deff0-bd9d-4145-9be6-e86726610eee",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:00.223757+00",
+  "athlete_name": "Jesse Urholin"
+ },
+ {
+  "graph_id": "845afab3-3a8e-443d-b535-04bac0b70106",
+  "owner_id": "c89f6209-4284-455b-9f71-f2ce89aaffc4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:05.844431+00",
+  "athlete_name": "Cole Abate"
+ },
+ {
+  "graph_id": "b2df79bf-460a-44ce-87d0-bee100b8cd1e",
+  "owner_id": "c9168f23-ae95-493d-9418-9feb78a6aa2e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:09.079281+00",
+  "athlete_name": "Muhammad Saleh"
+ },
+ {
+  "graph_id": "13a0b148-2583-49ce-9a1e-eee9808ec4ef",
+  "owner_id": "ce62dd20-316d-4926-a3e6-8d9edaa68558",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:09.13369+00",
+  "athlete_name": "E. Karppinen"
+ },
+ {
+  "graph_id": "31962e25-b65e-4a05-af78-b7130752080c",
+  "owner_id": "e162eba4-5de1-4ec2-b02f-7e21b8ed9ab4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:28.668305+00",
+  "athlete_name": "Joe Gilbert"
+ },
+ {
+  "graph_id": "59d2f30d-b5a5-4916-9e85-b2b3d4769224",
+  "owner_id": "ea0cd933-82f2-448f-8155-ccc27c3c5cf2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:50.968819+00",
+  "athlete_name": "Mike Whitehead"
+ },
+ {
+  "graph_id": "762b4a2a-aba4-4c58-bb18-95343fabc847",
+  "owner_id": "ea97f323-2584-4899-bd34-640115b85609",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:57.675874+00",
+  "athlete_name": "Liu Wen"
+ },
+ {
+  "graph_id": "51c66f22-706a-4bd8-a594-23a874045cd0",
+  "owner_id": "ec5c3447-0651-4c33-8426-e6fde1591f42",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:23.159572+00",
+  "athlete_name": "Luis Roberto"
+ },
+ {
+  "graph_id": "61b757fa-b84b-4aa5-bdc4-1a620ae249dc",
+  "owner_id": "ef5b1abf-747d-4a22-9593-ab06039ccb3b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:41.559593+00",
+  "athlete_name": "Erza Lennon"
+ },
+ {
+  "graph_id": "4534d2bd-c6c2-49d4-bbed-07ed667c3975",
+  "owner_id": "f0a1474e-77e9-473b-8ac9-d4fe767c9ecd",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:54.71456+00",
+  "athlete_name": "C. Jones"
+ },
+ {
+  "graph_id": "5e7f6274-3bb8-4f80-a8f7-15a685cf35ff",
+  "owner_id": "f1f71bec-7784-4750-be35-2b5625f11f51",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:10.686577+00",
+  "athlete_name": "Fernando Vieira"
+ },
+ {
+  "graph_id": "122bf99e-6e0c-46af-8611-766dfccec2eb",
+  "owner_id": "f298c534-b6c7-4d28-a083-ba6ccf54446a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:15.645437+00",
+  "athlete_name": "Take Hanai"
+ },
+ {
+  "graph_id": "e8d97ceb-1378-48e7-97f1-d238cadd87aa",
+  "owner_id": "f51dfd60-9222-40f5-aaee-fabb32f9fc4d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:26.649727+00",
+  "athlete_name": "Joao Roque"
+ },
+ {
+  "graph_id": "a331c3a2-1c91-4cf5-acbb-331cc59f23a9",
+  "owner_id": "f562cd81-9ac2-48ea-9bf9-8b20b2b9292d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:32.045718+00",
+  "athlete_name": "Talita Treta"
+ },
+ {
+  "graph_id": "111aadf8-0089-4788-9c2a-6372a1c874b2",
+  "owner_id": "f68fc8b2-63aa-4627-b79b-aa0abc36cb40",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:43.922798+00",
+  "athlete_name": "Peter Angerer"
+ },
+ {
+  "graph_id": "71afe8be-d4f5-4238-9c22-70bb62c58534",
+  "owner_id": "f813e719-a057-479c-88ee-7a8334ba4b43",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:57.514213+00",
+  "athlete_name": "Asa Fuller"
+ },
+ {
+  "graph_id": "7bacaf34-441e-421a-95a6-332512b809d1",
+  "owner_id": "bf320838-12a8-4b5c-a399-c9918ca063a9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:54.581434+00",
+  "athlete_name": "Gamrot Mateusz"
+ },
+ {
+  "graph_id": "cab0d15b-fe07-44f3-978a-5e80e3ae3eb3",
+  "owner_id": "c05108cb-016a-4ec3-b329-347cacc454f2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:01.479694+00",
+  "athlete_name": "Nicolas Renier"
+ },
+ {
+  "graph_id": "83a42aba-7074-436d-8c4b-cad89a546bdf",
+  "owner_id": "cb7e9c9e-11dd-40e0-a57a-9bb91deb8afd",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:28.097774+00",
+  "athlete_name": "Alexander Savko"
+ },
+ {
+  "graph_id": "b2bf9458-8255-45a4-868a-0078ad0b99fc",
+  "owner_id": "11685e9e-3547-48a4-bde8-6c2f4abb715f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:27.500025+00",
+  "athlete_name": "Jeff Curran"
+ },
+ {
+  "graph_id": "c385cc0d-5d84-416b-a2ec-21b71f22a37a",
+  "owner_id": "1192b493-ead2-499a-992b-11078e024ec8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:29.659567+00",
+  "athlete_name": "Roberto Alencar"
+ },
+ {
+  "graph_id": "632ee461-b19b-4aec-b287-dca5fb741e7f",
+  "owner_id": "e90964c0-9e0c-4d95-ba62-54cef475abfe",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:48.379879+00",
+  "athlete_name": "Jorge Santiago"
+ },
+ {
+  "graph_id": "eb25b11e-2081-4f66-8ea1-19cef8e0ce7f",
+  "owner_id": "2c29e9cc-cac9-435d-9882-f0e4f1a2faee",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:17.803822+00",
+  "athlete_name": "Shane Hill-Taylor"
+ },
+ {
+  "graph_id": "1409f948-6306-486d-887b-ec564949b3e4",
+  "owner_id": "12350c9a-cf4c-4ec0-b891-bcdd39f1a69a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:31.81939+00",
+  "athlete_name": "Tom Lawlor"
+ },
+ {
+  "graph_id": "2d14cf76-b30a-46bf-8e67-ec2dbbc1b594",
+  "owner_id": "bc4c2bb4-353e-4e29-99ca-588c35e90544",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:33.202049+00",
+  "athlete_name": "Kamil Wilk"
+ },
+ {
+  "graph_id": "2b8b2500-c05f-467f-9053-f1f7f6948374",
+  "owner_id": "1561c321-0c73-47f8-a9c9-9a2b1ff08bca",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:59.511611+00",
+  "athlete_name": "Thomas Halpin"
+ },
+ {
+  "graph_id": "3bb55f04-1a7e-4d16-9507-9e7f9d35d1a4",
+  "owner_id": "24541984-b4da-4bfe-a365-76fa798bf83b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:03.370697+00",
+  "athlete_name": "Melchor M."
+ },
+ {
+  "graph_id": "bd361223-2927-4702-8d04-98d2ece62f44",
+  "owner_id": "24842715-1cb9-4ab9-8de4-03644919e2f0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:04.449815+00",
+  "athlete_name": "Ricardo Alves"
+ },
+ {
+  "graph_id": "e6b7c4d8-fbdb-4930-bd06-6a3e5e580ed1",
+  "owner_id": "2ce0f70e-3a0c-4844-881b-bb402deebe72",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:25.366682+00",
+  "athlete_name": "Eddie Sanchez"
+ },
+ {
+  "graph_id": "6fb6a6c5-e395-43cc-8cd5-3dc6c5a8089d",
+  "owner_id": "30a60c4a-1967-4625-b8b2-0317cf22a3b2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:53.7029+00",
+  "athlete_name": "David Bielkheden"
+ },
+ {
+  "graph_id": "427c1e65-1fa9-4f73-bdf0-43893676c841",
+  "owner_id": "364eaba7-d75c-4754-bba7-1ccb890eb1a9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:40.049157+00",
+  "athlete_name": "Jose Mario Queiroga"
+ },
+ {
+  "graph_id": "80878a15-09d7-49a6-bf50-d52e8af2b42d",
+  "owner_id": "3f7e063f-8a22-43b8-bca5-b05ff102a547",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:50.286736+00",
+  "athlete_name": "Larry Parker"
+ },
+ {
+  "graph_id": "77b67aac-e96f-4996-acda-45dc681bf42f",
+  "owner_id": "3fdb8215-0fc7-4713-86b9-30443bc40b51",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:53.53067+00",
+  "athlete_name": "Tim Carpenter"
+ },
+ {
+  "graph_id": "5ad710c6-ae1e-4e15-a398-bd8c9b1ef89d",
+  "owner_id": "41c7cd6e-3e31-4421-814a-e66e6dc10c87",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:04.338256+00",
+  "athlete_name": "Nate Marquardt"
+ },
+ {
+  "graph_id": "8a38001c-3d5c-45ac-a58a-2a2362cf5ff4",
+  "owner_id": "431b779b-7bed-44aa-aad4-f01b8c475a9b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:12.780237+00",
+  "athlete_name": "John Combs"
+ },
+ {
+  "graph_id": "58269e64-111e-4558-9275-cb6c6067827f",
+  "owner_id": "440e2b36-d4db-4fc7-8b4c-2cc0cecd4a7e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:24.055398+00",
+  "athlete_name": "Juan Valles"
+ },
+ {
+  "graph_id": "21dc0dc0-64bc-40c1-8a72-9c389e1d780d",
+  "owner_id": "4491060c-2adf-4268-84a9-e6e424961456",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:28.80837+00",
+  "athlete_name": "Micah Pittman"
+ },
+ {
+  "graph_id": "3505c0b9-e6d3-4ab9-8964-5f21436859ee",
+  "owner_id": "4744ba1b-b155-472b-ab4d-b65d59401557",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:47.883804+00",
+  "athlete_name": "Ashley Williams"
+ },
+ {
+  "graph_id": "26630137-67ae-4be0-999c-514fb47de8f0",
+  "owner_id": "513b8f27-5e66-4e9b-b90c-df6d43a0bab1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:03.462945+00",
+  "athlete_name": "Travers Grubb"
+ },
+ {
+  "graph_id": "7690a12b-1a61-4689-a9df-10ec1b683f87",
+  "owner_id": "5581c6c1-5e9c-4814-9a03-85dfaf5026ae",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:35.729403+00",
+  "athlete_name": "Osman Kasimov"
+ },
+ {
+  "graph_id": "cdb20222-34f2-4c1f-8137-d2b7cacc1ceb",
+  "owner_id": "5bb6fbd9-b60d-4b01-953c-3a688eaf1842",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:19.273446+00",
+  "athlete_name": "Christian Moriarty"
+ },
+ {
+  "graph_id": "5c7264c2-3c16-4a11-af9f-482b8b26a7b7",
+  "owner_id": "634a6539-d3d4-41fb-9fc2-fe26768ba153",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:26.644931+00",
+  "athlete_name": "Sekine Hideki"
+ },
+ {
+  "graph_id": "cd032af7-7caa-4451-b41c-0aa5bd636d2c",
+  "owner_id": "64ed85ae-f64d-491f-a4a4-18a007d80c31",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:28.804935+00",
+  "athlete_name": "Chris Bright"
+ },
+ {
+  "graph_id": "4e8caea4-222b-499e-b2ed-f14d125b984d",
+  "owner_id": "66284264-b61d-4c94-81e0-b44ea97a28f8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:38.972996+00",
+  "athlete_name": "Yuji Arai"
+ },
+ {
+  "graph_id": "5191bcb6-62b5-4857-b4c4-45e52588987a",
+  "owner_id": "690c7084-d151-4f72-a025-a67127f2f9e3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:02.195633+00",
+  "athlete_name": "Milton Vieira"
+ },
+ {
+  "graph_id": "d9cadbd3-4c76-4d67-b7a1-378490667d0d",
+  "owner_id": "717f6551-6d25-4dcc-9ea2-4720ad8c6421",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:18.377615+00",
+  "athlete_name": "E. Elgland"
+ },
+ {
+  "graph_id": "7ba28137-c9bd-42fe-9a90-8251c097bfe5",
+  "owner_id": "71f5f794-8ac7-484d-9ef8-cbf20a2a758a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:22.91948+00",
+  "athlete_name": "Jonathan Satava"
+ },
+ {
+  "graph_id": "9a1b9097-ffba-4b03-aca5-c63d21ba79c6",
+  "owner_id": "7323237e-c3d8-4a45-a114-d140dc12594f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:32.660434+00",
+  "athlete_name": "Yoshiyuki Yoshida"
+ },
+ {
+  "graph_id": "1f9e4345-a2b8-4378-a621-3ddf1338b510",
+  "owner_id": "7439ee46-deac-4569-b4e5-131e26817bf2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:36.988055+00",
+  "athlete_name": "Amir Allam"
+ },
+ {
+  "graph_id": "1b549f78-cd7d-4e0b-8595-2f46dab20e9b",
+  "owner_id": "77dc480d-9f10-4c90-89e2-8e121e104b16",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:07.115246+00",
+  "athlete_name": "Yukissyu Ozawa"
+ },
+ {
+  "graph_id": "e9afa651-f9d3-44e7-a6c7-04db23553bb0",
+  "owner_id": "7b0b6d98-c48c-467a-88b3-d73c8555178a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:34.639243+00",
+  "athlete_name": "Hannette Staack"
+ },
+ {
+  "graph_id": "7120402d-1680-4d8a-9fd1-e6ef126456fb",
+  "owner_id": "7e5cefd6-9498-4ef3-a839-55fd0a2b6b79",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:09.453192+00",
+  "athlete_name": "Perttu Terpponnen"
+ },
+ {
+  "graph_id": "065d473f-43a7-45bc-88b5-5ce3e39062c4",
+  "owner_id": "8060ee47-fc22-40f3-844f-1796c7189f18",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:24.592427+00",
+  "athlete_name": "Robert Sabaruddin"
+ },
+ {
+  "graph_id": "bf1907c0-72a8-4756-abab-1e2a811ed34c",
+  "owner_id": "81470f56-7454-40c1-981a-474e1d58e2d6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:33.469019+00",
+  "athlete_name": "Sanshiro Nakamura"
+ },
+ {
+  "graph_id": "f5f108b5-8152-41bc-b334-e25bafe726ad",
+  "owner_id": "820b030b-4e39-4621-a094-e9f32cc6f90d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:42.347144+00",
+  "athlete_name": "Eleftheria Christodoulou"
+ },
+ {
+  "graph_id": "f3eb2bee-8df2-4188-928a-52f828a5a550",
+  "owner_id": "820bc4ce-a85b-4a59-b796-460a05840bbd",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:43.425799+00",
+  "athlete_name": "Erik Paulson"
+ },
+ {
+  "graph_id": "60e5cdea-01d1-4518-b82d-e78d47543939",
+  "owner_id": "899ed6d9-ff8f-4780-8452-44970e76ed8d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:44.232525+00",
+  "athlete_name": "Alex Negao"
+ },
+ {
+  "graph_id": "282397b2-adf9-4422-a6e7-17cad5a06fca",
+  "owner_id": "8cbbc269-b417-40fc-88d2-315b9d88c339",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:05.011151+00",
+  "athlete_name": "Daniel Hortegas"
+ },
+ {
+  "graph_id": "43486e1a-91ea-489e-b2f6-4404f2a9fcf8",
+  "owner_id": "8d4ec87a-c3a2-4e76-bccd-522498a4f371",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:11.705933+00",
+  "athlete_name": "Tom Barlow"
+ },
+ {
+  "graph_id": "9cb622bb-c872-4134-aa4b-f9fa2b8bbeee",
+  "owner_id": "9636e77c-0169-43c4-9ec4-f53cc24f4c4a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:21.86162+00",
+  "athlete_name": "Gabriel Marangoni"
+ },
+ {
+  "graph_id": "c026b651-0290-4a1e-b181-0dfa0c2f1eaa",
+  "owner_id": "9645d295-7e2f-4c5c-acbb-193ba86309ba",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:22.942445+00",
+  "athlete_name": "T. Kosaka"
+ },
+ {
+  "graph_id": "d11222d2-adcb-44c7-a0f9-ebc4675f6df0",
+  "owner_id": "99091567-3acf-4542-a4f1-83e8582cd416",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:45.452832+00",
+  "athlete_name": "Wellington Dias"
+ },
+ {
+  "graph_id": "1e4d1a30-b44b-4212-8e27-0ef306a17917",
+  "owner_id": "9c297d39-19fa-4cf7-a49e-aa0e672567e6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:41:12.500848+00",
+  "athlete_name": "Fernanda Mazelli"
+ },
+ {
+  "graph_id": "6487207f-5a89-4d4e-82b8-5abe57018367",
+  "owner_id": "a02aeb00-7290-4dd4-9637-4021fa03e3d6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:41:39.949291+00",
+  "athlete_name": "Servio Tulio"
+ },
+ {
+  "graph_id": "0636d3a8-bc83-4683-a93a-b9046c4a67f4",
+  "owner_id": "b4821973-3f4c-4300-be10-511d226b569f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:32.133644+00",
+  "athlete_name": "Garth Taylor"
+ },
+ {
+  "graph_id": "8dc9a968-70a4-4aa7-bff3-eea8a91bc473",
+  "owner_id": "b4b8607e-4850-415f-ae73-9dd30d72f6b6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:35.367959+00",
+  "athlete_name": "Rikako Yuasa"
+ },
+ {
+  "graph_id": "47316bcd-80d2-4fe1-b9a1-1876550b4892",
+  "owner_id": "b5712a2c-84e0-44b7-941e-d8ae6cbb7783",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:37.526944+00",
+  "athlete_name": "Darrel Moodley"
+ },
+ {
+  "graph_id": "4999f587-b51e-41a4-8ec3-baa367a687a0",
+  "owner_id": "b5d526b8-a370-433a-99c8-3954ed0581a6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:39.68166+00",
+  "athlete_name": "David Avellan"
+ },
+ {
+  "graph_id": "f17e83dd-0549-4d83-be82-cc97e057091d",
+  "owner_id": "ccb4250e-134d-423d-9b11-ed6baaf55dee",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:46.243414+00",
+  "athlete_name": "Elvira Karppinen"
+ },
+ {
+  "graph_id": "23bb8344-e54b-446f-b664-a6531b74b0ad",
+  "owner_id": "ce76ce8a-44e7-49be-8e8e-dc94a2a2c407",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:10.21274+00",
+  "athlete_name": "Adrian Serrano"
+ },
+ {
+  "graph_id": "d18330ce-2737-4ab0-891b-0bcb12d256ab",
+  "owner_id": "cf4bc75f-08ef-4e6b-9ddc-190d57ccb2a0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:12.36812+00",
+  "athlete_name": "Adam Sachnoff"
+ },
+ {
+  "graph_id": "fcb9df31-d704-411f-b0d3-d889efbf1007",
+  "owner_id": "cfd1c16c-39d7-419a-beca-dd7ff52a56c4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:15.612653+00",
+  "athlete_name": "Janus Andrejczuk"
+ },
+ {
+  "graph_id": "3943c33c-6c31-49a6-9aff-2245559e7bd3",
+  "owner_id": "d25fcd1b-dc0b-41c9-8a75-4ce6cee99d15",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:48.245543+00",
+  "athlete_name": "Yousef Elzien"
+ },
+ {
+  "graph_id": "c99208e1-54dc-4437-829a-9041f08fbc5c",
+  "owner_id": "d40e2416-2f7c-4a3c-9cef-ec181a53216d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:59.26398+00",
+  "athlete_name": "Joel Tudor"
+ },
+ {
+  "graph_id": "d63ea41e-b9ec-4f5b-bed7-e473c3bee0ad",
+  "owner_id": "d862f322-f3a4-40ea-b75c-8d9106b28c3e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:25.821851+00",
+  "athlete_name": "Jason Manly"
+ },
+ {
+  "graph_id": "788924e1-3209-48dc-83bd-b16b9d748996",
+  "owner_id": "daebdd9d-2b6a-47db-a95e-2e9cda7290db",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:39.21922+00",
+  "athlete_name": "J. Pietkainen"
+ },
+ {
+  "graph_id": "a55613ce-38a6-4c58-88d4-ce9d31029043",
+  "owner_id": "dbbda90f-7df4-4b49-bf95-3cbc088b14a0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:48.298043+00",
+  "athlete_name": "Sergio Ardila-Ibarra"
+ },
+ {
+  "graph_id": "78adab9f-b79c-48a2-aa30-d12f474edb36",
+  "owner_id": "e25d6d22-ac68-4327-80fb-d0cc242cdc0b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:34.499638+00",
+  "athlete_name": "Mraz Avdoyan"
+ },
+ {
+  "graph_id": "3e4f7bb7-64e2-456f-a642-602085f8f703",
+  "owner_id": "eae0ac9b-aabf-4d5d-88f0-de4bc12bc5a9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:01.777867+00",
+  "athlete_name": "Yuki Ozawa"
+ },
+ {
+  "graph_id": "55ff3060-b92d-4df8-b6de-88a3a41c07e5",
+  "owner_id": "eb135d32-37bd-45a4-bd70-4f2325dbc92b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:12.146522+00",
+  "athlete_name": "Jimmy Friedrich"
+ },
+ {
+  "graph_id": "8616cca7-f2f1-48ac-a741-33e10deb2c8d",
+  "owner_id": "ef8362d4-6413-4db3-a807-6236883bc14e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:43.715148+00",
+  "athlete_name": "Alec Baulding"
+ },
+ {
+  "graph_id": "17f47b13-c998-426b-8909-390f4fd93b07",
+  "owner_id": "f1156893-1896-41cf-97de-1ee7164903b1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:01.838776+00",
+  "athlete_name": "George St"
+ },
+ {
+  "graph_id": "984276fe-4d18-4caf-ab8a-2a1131fca2ea",
+  "owner_id": "f21b98be-2384-48c4-aedc-bb7d0332d927",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:11.764665+00",
+  "athlete_name": "Elvira Karpinnen"
+ },
+ {
+  "graph_id": "f5bd5f41-8207-4c2c-b1bf-ba2dcf26fe64",
+  "owner_id": "f314d566-19a9-4d99-a2cd-91220e0e87fb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:19.099028+00",
+  "athlete_name": "James Harbison"
+ },
+ {
+  "graph_id": "04301095-eada-43e3-ad4f-96e8d8e48380",
+  "owner_id": "f776b063-5183-423c-8e06-c2796d81f7bc",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:48.23471+00",
+  "athlete_name": "Trevor Lally"
+ },
+ {
+  "graph_id": "051b5b54-b2e9-4887-8442-61cc82d10b04",
+  "owner_id": "fc2189d1-4ed2-4400-9fab-ac75d1ecc6b7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:26.470577+00",
+  "athlete_name": "Toshiyuki Oyama"
+ },
+ {
+  "graph_id": "56b84e32-d1bf-4125-b1cf-e531739dbb01",
+  "owner_id": "ffb4eea3-9635-4762-b271-ffe605d7a37e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:55:01.865601+00",
+  "athlete_name": "Fabiano Iha"
+ },
+ {
+  "graph_id": "95c2d02d-73b8-441b-9519-c9efb2d7f0c4",
+  "owner_id": "1fd9e19d-f9ea-49e9-96f6-69acaed9fc08",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:28.71417+00",
+  "athlete_name": "Hiroshi Nakamura"
+ },
+ {
+  "graph_id": "468ab33f-bb7c-4d6f-9798-06d39cca9b01",
+  "owner_id": "7715c972-115f-4200-b998-85de7a008b7c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:01.716951+00",
+  "athlete_name": "Hiroyuko Abe"
+ },
+ {
+  "graph_id": "037a7f9a-6d43-4613-bc7a-7f5c80a50260",
+  "owner_id": "bdf34b65-6d0a-4343-9c83-fc270a974da5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:45.73274+00",
+  "athlete_name": "Firas Nakdali"
+ },
+ {
+  "graph_id": "a5606869-9e90-4199-bbbc-31f1404c6c22",
+  "owner_id": "be0386f4-23c9-4a57-b579-5a886853b7a0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:46.810587+00",
+  "athlete_name": "M. Yano"
+ },
+ {
+  "graph_id": "c5154100-6720-4dbd-af0f-8f3bb22798e3",
+  "owner_id": "c767f3a0-783e-4f03-bc97-d35f7deb935c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:56.771183+00",
+  "athlete_name": "Jorge Britto"
+ },
+ {
+  "graph_id": "9cf35025-c1d9-4d81-ab17-acc72bef68db",
+  "owner_id": "b588b1b9-db7c-4e96-9af4-db1feec5211f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:38.603909+00",
+  "athlete_name": "Ryan Harvey"
+ },
+ {
+  "graph_id": "bbbab268-6966-4c7d-bfe0-94b852a787f0",
+  "owner_id": "042943b0-5802-43d3-bb91-8606602a67a3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:20:37.081319+00",
+  "athlete_name": "Renato Verissimo"
+ },
+ {
+  "graph_id": "f8646ba9-f851-48c0-971f-8e8318b096f9",
+  "owner_id": "060354b8-2f5b-46d3-98c9-bb3a074d5d62",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:20:59.419507+00",
+  "athlete_name": "Young-Ahm"
+ },
+ {
+  "graph_id": "8d1d3782-fcda-41de-bdd9-23a638b41ad7",
+  "owner_id": "11a3f896-44eb-4f68-9890-a20bfdbd78ea",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:30.739793+00",
+  "athlete_name": "Youngnam Noh"
+ },
+ {
+  "graph_id": "859f89f3-1b6b-4181-a4c2-76e8b96e891f",
+  "owner_id": "17ad21ce-37d1-4e5c-bcab-0f76077e8cd9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:23.329159+00",
+  "athlete_name": "Joseph Lee"
+ },
+ {
+  "graph_id": "ef169514-75b5-4e92-9d87-4c8c3301b8ed",
+  "owner_id": "18f2999d-f417-4ed3-ae43-89d9fe17d8a9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:32.010852+00",
+  "athlete_name": "Jeon Doo"
+ },
+ {
+  "graph_id": "b9e29f65-128b-470a-b844-9fa26d64cedd",
+  "owner_id": "1a08d3a5-5c0e-4706-a85b-e9ec85205e62",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:39.801738+00",
+  "athlete_name": "Joao Costa"
+ },
+ {
+  "graph_id": "5c98833b-3538-4eb5-87a9-ee86f78ed7d2",
+  "owner_id": "1a76c043-d674-49bb-b119-663b5717e253",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:40.88152+00",
+  "athlete_name": "Mateusz Garmot"
+ },
+ {
+  "graph_id": "a6127dfa-b656-4633-b350-1a153ff8f468",
+  "owner_id": "284ec4ad-3189-4464-a410-66dd97d52a1c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:42.964032+00",
+  "athlete_name": "Tomasz Narkun"
+ },
+ {
+  "graph_id": "f76e54c1-b894-436c-aae6-bb9f9075e4e4",
+  "owner_id": "29530fab-0306-4799-8ca0-816ca4f8e5e4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:50.755964+00",
+  "athlete_name": "Jason Ramsterrer"
+ },
+ {
+  "graph_id": "a1dc472f-fbde-46fd-8f76-67f9296ab9f0",
+  "owner_id": "2a03d361-311b-4206-8d53-d11d9f585db7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:55.723855+00",
+  "athlete_name": "Otto Olsen"
+ },
+ {
+  "graph_id": "699a1422-7dea-4df4-9600-0a391d7c884b",
+  "owner_id": "2bc4fb72-a319-4a98-b5c3-584344237243",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:14.566476+00",
+  "athlete_name": "Livia Giles"
+ },
+ {
+  "graph_id": "4955ff85-91ea-47a0-81df-3338af5b8675",
+  "owner_id": "2f88aa69-8318-41e5-8381-a367abadfce9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:48.080693+00",
+  "athlete_name": "Daniel Simoes"
+ },
+ {
+  "graph_id": "056a1b59-343f-4a20-9873-cde68725c40e",
+  "owner_id": "343ff6af-1deb-4eeb-aac0-bb02a9ef8468",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:23.609327+00",
+  "athlete_name": "Yuta Sasaki"
+ },
+ {
+  "graph_id": "8d489f84-79e7-495b-921e-6798f09aa4a3",
+  "owner_id": "3481828f-30af-4ae2-beae-7f0e8bf567f4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:24.688941+00",
+  "athlete_name": "Marc"
+ },
+ {
+  "graph_id": "03fff0a6-f964-4da5-8dae-61e6e6fd1a0f",
+  "owner_id": "421ee806-a8a4-434e-8c62-c106ce03f7f8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:05.417709+00",
+  "athlete_name": "Roger Neff"
+ },
+ {
+  "graph_id": "eeba7daa-ac62-4ca8-a157-3e533d3377d9",
+  "owner_id": "48e45e49-2fe6-4ca3-bff3-3a20749c1501",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:01.3662+00",
+  "athlete_name": "Mario Delgado"
+ },
+ {
+  "graph_id": "0acad52f-38ed-4815-982b-6d013dcc2ada",
+  "owner_id": "49534fa7-ff21-4633-aa40-28e3831ef9e7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:09.385397+00",
+  "athlete_name": "Gao Hua"
+ },
+ {
+  "graph_id": "603e9efc-4e8e-44a6-8ae6-deb8760f3766",
+  "owner_id": "4c65783a-bcf2-4281-a3fb-0bb9e22dca7a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:33.383366+00",
+  "athlete_name": "Jon Hansen"
+ },
+ {
+  "graph_id": "9e489fa6-6d5a-4605-baf7-5013e986f66f",
+  "owner_id": "4d32ef56-052c-4f38-94e6-ae7ac1538f06",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:34.463448+00",
+  "athlete_name": "Kitner Mendoga"
+ },
+ {
+  "graph_id": "11d734f9-e3b8-408e-97f4-2864aff86cfb",
+  "owner_id": "4fae0f4a-433d-4f27-a56a-914bcdd0d9e6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:00.223938+00",
+  "athlete_name": "Jurie Rachel"
+ },
+ {
+  "graph_id": "55abbb0c-f199-4187-8c9e-ffa709fc1633",
+  "owner_id": "50c6faea-bd7a-4228-8ad5-13d0a4a15f3f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:02.38359+00",
+  "athlete_name": "Ricardo Moraes"
+ },
+ {
+  "graph_id": "322581ab-86bf-4cf1-b3b8-8b126c5420cc",
+  "owner_id": "5b9b743c-2aae-4e03-849b-ca24de8ef701",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:18.194423+00",
+  "athlete_name": "Allan Teo"
+ },
+ {
+  "graph_id": "7b708a22-c54f-438f-b7f3-4cf9da0cb42d",
+  "owner_id": "606e2d78-7b74-49cb-8320-6a09c6a7a184",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:53.933735+00",
+  "athlete_name": "Ahmad Faraj"
+ },
+ {
+  "graph_id": "0ed63864-7916-4c7a-9511-9485a054912d",
+  "owner_id": "6829c9d9-6a9a-4f84-ad65-31d55a84f74c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:55.224093+00",
+  "athlete_name": "Alexandre Vieira"
+ },
+ {
+  "graph_id": "87fc5a9e-4b95-4693-b79f-335f81e71f8c",
+  "owner_id": "6acc2179-ed23-4dca-9bd6-4c06986a0fba",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:14.336803+00",
+  "athlete_name": "Shinsho Anzai"
+ },
+ {
+  "graph_id": "514c20cd-0806-49f0-8415-237493a1f741",
+  "owner_id": "6c008798-15c9-4cbf-82c2-d6ee6e7563db",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:22.133625+00",
+  "athlete_name": "Giovanna Jara"
+ },
+ {
+  "graph_id": "37f47f12-d195-402d-b95d-e983ad4d21ac",
+  "owner_id": "6d8b6051-70f1-4b04-a46c-5656fa6d5c42",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:33.83009+00",
+  "athlete_name": "Gabriel Almeida"
+ },
+ {
+  "graph_id": "036fb8b7-d1ef-42b6-98b6-d3ce90512fb1",
+  "owner_id": "6e95cda7-a844-4909-b0bd-dd957524f5bb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:41.831999+00",
+  "athlete_name": "Kethe Engen"
+ },
+ {
+  "graph_id": "92c4c628-7178-455a-a49c-1eba35e6b3a6",
+  "owner_id": "715de21c-97a8-4bd9-b459-7dfcd3128f9a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:12.32483+00",
+  "athlete_name": "Nathan Marquardt"
+ },
+ {
+  "graph_id": "a4a6c3ac-2843-48ad-a86c-bc6f00997535",
+  "owner_id": "753c0080-0a94-4e56-983f-c80eb62e4745",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:46.92606+00",
+  "athlete_name": "Shinya Aoki"
+ },
+ {
+  "graph_id": "9982e3ff-de49-4fa4-9007-b8b3452113b9",
+  "owner_id": "764c81b2-2116-4a5b-a836-8e4c756312ec",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:53.931831+00",
+  "athlete_name": "Takanori Gomi"
+ },
+ {
+  "graph_id": "46efb954-7316-4587-a52d-d66f7ee6e22c",
+  "owner_id": "772860b5-24f4-4202-99f9-39cf930e1dea",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:02.796469+00",
+  "athlete_name": "H. Kanehara"
+ },
+ {
+  "graph_id": "d4bfe571-2fa4-407f-b467-1e5d42af3e32",
+  "owner_id": "7c88abe3-79d5-44b5-b165-34570a48a348",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:54.093795+00",
+  "athlete_name": "Igor Praporschchikov"
+ },
+ {
+  "graph_id": "218bc2e6-49f5-40eb-b715-5e9d2eaa4553",
+  "owner_id": "7d3bbdbd-39c9-4f3b-a57b-ea2fb6158f4b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:57.33473+00",
+  "athlete_name": "Juskowiak Mateusz"
+ },
+ {
+  "graph_id": "df83a7af-a1a2-4865-a659-0968a9ad1cde",
+  "owner_id": "7e3688d5-e34c-4f59-96ec-9e0ab2757fa6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:07.294902+00",
+  "athlete_name": "Penny Thomas"
+ },
+ {
+  "graph_id": "4ebf0ed4-2d6a-4daa-b3c5-50dd6d091618",
+  "owner_id": "7e7e76c2-3a54-4e27-b6c7-b6e3b8d5691d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:14.641939+00",
+  "athlete_name": "Henrique Cardoso"
+ },
+ {
+  "graph_id": "8cb6b548-5758-41da-bbf8-b5cf86b12e0c",
+  "owner_id": "81efe30a-ba7b-48b2-b84b-49d2036e9b78",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:41.267072+00",
+  "athlete_name": "R. Alvarenga"
+ },
+ {
+  "graph_id": "f8e1438f-1069-45bb-8224-4aa0a411f915",
+  "owner_id": "85975a74-ae69-4ded-a376-185574a575ea",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:13.484803+00",
+  "athlete_name": "Michael Wilson"
+ },
+ {
+  "graph_id": "25f61db0-eee2-44f7-9ec1-544662c49a34",
+  "owner_id": "8d1eefee-0356-4a2e-bb00-138a1961d6ec",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:10.626225+00",
+  "athlete_name": "Robin Gracie"
+ },
+ {
+  "graph_id": "40470097-6262-4063-8650-2ecd3cfb045b",
+  "owner_id": "9726ff8d-20a3-4c18-ba33-6c4957be5a89",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:29.860511+00",
+  "athlete_name": "Tomas Szczerek"
+ },
+ {
+  "graph_id": "8df87acc-8ba7-4697-9315-7da083965544",
+  "owner_id": "a2c7e3fd-2bca-436b-bd86-4e078b4580da",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:06.108215+00",
+  "athlete_name": "N. Uematsu"
+ },
+ {
+  "graph_id": "99d42ddb-710c-436a-9e18-3a2278aa9ef7",
+  "owner_id": "a80deca8-9a47-4dfa-8c9b-dfc64b8d9fd9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:51.052325+00",
+  "athlete_name": "Satori Kitaoka"
+ },
+ {
+  "graph_id": "f3f486fc-5ab6-4765-9f0b-e5eb8b7ae203",
+  "owner_id": "aab7bab8-33ef-4af5-acdd-4d019a55a247",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:13.528875+00",
+  "athlete_name": "Jimmy Freidrich"
+ },
+ {
+  "graph_id": "5b47a3d5-be09-4394-b212-f882f701b30c",
+  "owner_id": "abb226b5-c7a0-4f58-ad18-ab7e78041825",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:24.003915+00",
+  "athlete_name": "T. Suzuki"
+ },
+ {
+  "graph_id": "bff16720-b70e-4318-b22d-7b409bafd267",
+  "owner_id": "acc06c9f-fdc8-4131-a176-a7eb42ab5d18",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:35.236535+00",
+  "athlete_name": "Radoslaw Turek"
+ },
+ {
+  "graph_id": "2d3ac880-8c9b-4378-a271-ee41928ac04a",
+  "owner_id": "cd7188eb-67a5-4edf-a44f-1d017de41107",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:59.189682+00",
+  "athlete_name": "Kim Dong"
+ },
+ {
+  "graph_id": "3f2b4c39-1eca-440f-aae3-036b4d8319d2",
+  "owner_id": "d0a6f42f-21ef-4a9c-a824-6b9e4ae711ec",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:24.900377+00",
+  "athlete_name": "Morris Clifoni"
+ },
+ {
+  "graph_id": "c14b7d58-86d5-464c-a0ca-474dc2924dcc",
+  "owner_id": "d11dc908-e0dd-4161-b846-a4a9bc2a9866",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:28.134059+00",
+  "athlete_name": "Van Arsdale"
+ },
+ {
+  "graph_id": "93996cc0-8029-4e69-bd68-258a4c06af4b",
+  "owner_id": "d1463add-8db4-4a1d-9f51-746274522194",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:30.290064+00",
+  "athlete_name": "Alexandre Jesus"
+ },
+ {
+  "graph_id": "94252af3-082b-4ae6-9b6a-bae08e55d82e",
+  "owner_id": "d216b419-2190-430f-a462-a7792772dd3e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:38.075806+00",
+  "athlete_name": "Jason White"
+ },
+ {
+  "graph_id": "ed2b15ac-e95f-4fa8-a1a1-ceede2393d56",
+  "owner_id": "d86038f5-b4fa-4536-a207-7236352b92ee",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:24.745064+00",
+  "athlete_name": "Teemu Launis"
+ },
+ {
+  "graph_id": "246d2a79-22b2-474e-9a87-2bb231e2053e",
+  "owner_id": "db5bab3d-4867-4eea-9eec-ac4619108f2b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:41.374713+00",
+  "athlete_name": "Bob Schirmer"
+ },
+ {
+  "graph_id": "55add758-a40c-4e0c-b74d-6ed060ef5e50",
+  "owner_id": "dc3f3afc-3a87-402a-8492-f04f2db13bb1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:57.36094+00",
+  "athlete_name": "Rodrigo Cavaca"
+ },
+ {
+  "graph_id": "1cc74f5d-8821-47cf-ab8b-4f7c38eba7ba",
+  "owner_id": "de1cac48-d50e-4005-9734-b3477f843960",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:14.646907+00",
+  "athlete_name": "Alian Drueco"
+ },
+ {
+  "graph_id": "0640c1a3-618f-4136-867f-ab7912cd8158",
+  "owner_id": "e481eacc-38bf-4aaa-9537-1af74bbf985d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:59.734975+00",
+  "athlete_name": "Eduardo Rios"
+ },
+ {
+  "graph_id": "35a2353c-3e9c-4aca-986f-1f97af420d5b",
+  "owner_id": "e56682cc-6efa-4029-bff1-6919d8daa46f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:18.558832+00",
+  "athlete_name": "Luis Brito"
+ },
+ {
+  "graph_id": "8344670c-3535-45a5-88fc-a4f7de1e3396",
+  "owner_id": "e5a3f7b9-df4f-41e2-86e9-475cc238a023",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:19.635941+00",
+  "athlete_name": "Kiuma Kunioku"
+ },
+ {
+  "graph_id": "f3ecfb7e-2860-4a20-872a-02359513815f",
+  "owner_id": "e908d7a4-c56d-432a-aae4-c499edd62080",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:47.30206+00",
+  "athlete_name": "Mourat Ozov"
+ },
+ {
+  "graph_id": "8262f53e-6857-462c-9230-73007d545950",
+  "owner_id": "eb0077cf-527b-46ec-914a-03552c5af0c1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:11.068079+00",
+  "athlete_name": "Eldar Rafigaev"
+ },
+ {
+  "graph_id": "e1efe302-1c7a-40fc-b490-4c2fd976034c",
+  "owner_id": "eff9acea-3084-48b7-bd9e-cb67d467c8e1",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:48.241462+00",
+  "athlete_name": "Diego Sanchez"
+ },
+ {
+  "graph_id": "79ee52c1-da61-48ef-bf5f-d977bc4ff8ad",
+  "owner_id": "f12ee791-a849-4fce-9999-db8febd1bba7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:05.296369+00",
+  "athlete_name": "John Einimo"
+ },
+ {
+  "graph_id": "a8c2469e-adc3-4a2d-b765-264a1b86543c",
+  "owner_id": "f18def40-191b-4658-abfe-77144a02d28a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:09.609826+00",
+  "athlete_name": "Tobias G"
+ },
+ {
+  "graph_id": "6b5d137c-e600-4bf2-981e-a11ca80168df",
+  "owner_id": "f5f2b92c-6181-4857-8e44-f84c5a821707",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:35.282319+00",
+  "athlete_name": "Fellipe Andrew"
+ },
+ {
+  "graph_id": "68b8235f-fee9-4a6e-b3dc-e36a9da24add",
+  "owner_id": "fa5b612f-6332-4e21-bd81-073fe2160e56",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:13.307696+00",
+  "athlete_name": "Michael Groth"
+ },
+ {
+  "graph_id": "cd75aa7a-5701-4ffc-b65b-878c4736b942",
+  "owner_id": "fb3b2363-a6da-4213-b7cf-e2d16288f2df",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:22.153582+00",
+  "athlete_name": "James Poupolo"
+ },
+ {
+  "graph_id": "af12ab31-e8f1-46e8-9b6c-8b3b9bb62f1d",
+  "owner_id": "fc72f2e5-8a60-40d5-863c-7559fff2931e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:28.408253+00",
+  "athlete_name": "Asadulaev Surkhay"
+ },
+ {
+  "graph_id": "7c29efbc-4ef5-4ee3-a504-f1e89d14fea6",
+  "owner_id": "fe7d09e6-ef2b-419c-91f9-afa2107b2d0d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:54.745762+00",
+  "athlete_name": "Jayson Patino"
+ },
+ {
+  "graph_id": "5ca6a416-8ba8-414a-a501-3a44c1272271",
+  "owner_id": "c289df22-9d7c-459a-8971-f939186c9dfb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:17.68669+00",
+  "athlete_name": "James Brasco"
+ },
+ {
+  "graph_id": "f307cff4-8318-4226-a7a4-e2d7e069afa5",
+  "owner_id": "c9677610-68d4-461c-9838-025e92b66bf3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:10.157186+00",
+  "athlete_name": "Geovanny Martinez"
+ },
+ {
+  "graph_id": "2c7ab73b-bc24-42f4-9f56-d9b16a5baf8a",
+  "owner_id": "92990c5f-0215-43f4-a723-380bbb9c9a9d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:44.372777+00",
+  "athlete_name": "Mark Ramos"
+ },
+ {
+  "graph_id": "f673eaea-bfa4-4bf0-9b23-4142ae671e71",
+  "owner_id": "1de4aafd-a81f-4c97-be2e-2d7a0c8517cf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:15.090807+00",
+  "athlete_name": "Abdulkadirov Magomed"
+ },
+ {
+  "graph_id": "da10472b-2016-4048-840d-996528b68d82",
+  "owner_id": "234529f7-b447-4aa6-a6c4-1e80bd9af173",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:54.490876+00",
+  "athlete_name": "Daniel Strauss"
+ },
+ {
+  "graph_id": "0b762e8a-daaa-4584-99e8-759fb864b59f",
+  "owner_id": "24af54e1-6944-467e-a72c-5c3d450089cd",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:07.041668+00",
+  "athlete_name": "Zbigniew Tyszka"
+ },
+ {
+  "graph_id": "2b90b3e8-bf09-4c32-b24d-563812a5b438",
+  "owner_id": "2a3314b4-40db-4986-b4f8-338e43073075",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:56.803639+00",
+  "athlete_name": "A. Zhanpeisov"
+ },
+ {
+  "graph_id": "deae16d1-d113-4859-8837-469193d9fecd",
+  "owner_id": "3991a92c-5587-47f9-8445-53021514f40f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:58.448952+00",
+  "athlete_name": "Gerardi Rinaldi"
+ },
+ {
+  "graph_id": "1b0ec698-aafc-4f29-aa32-7077c65eb8de",
+  "owner_id": "40163eb0-1a17-4d88-bb71-5f79bc2c8b03",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:54.610895+00",
+  "athlete_name": "M. Perez"
+ },
+ {
+  "graph_id": "33d873b2-e320-4193-8799-21ca2ed6ab83",
+  "owner_id": "404c4413-8a18-4ebc-b253-0e55c2b63f4c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:57.851174+00",
+  "athlete_name": "Akihiro Gono"
+ },
+ {
+  "graph_id": "9676000a-0301-44b2-a922-8e60c0f4f10e",
+  "owner_id": "0a40251e-2383-46b5-9e86-799ad4f8fb9a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:28.420301+00",
+  "athlete_name": "Timo-Juhani"
+ },
+ {
+  "graph_id": "c69bc388-2419-48e1-8ef5-c8ecc0744f55",
+  "owner_id": "c9db1908-4b23-4489-bb7d-3047b019f29d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:13.398756+00",
+  "athlete_name": "Bruno Bastos"
+ },
+ {
+  "graph_id": "2201c761-3e21-4f9f-b1fa-f2fba8ea2e9a",
+  "owner_id": "0c06391d-b105-406d-a39b-6132e9f71b89",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:40.9571+00",
+  "athlete_name": "Clark Gracie"
+ },
+ {
+  "graph_id": "dd2f584d-a395-425c-bd92-dfb91760c0bb",
+  "owner_id": "109ad0e4-5139-4044-a099-b691210f575d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:17.55106+00",
+  "athlete_name": "Jerry Bolander"
+ },
+ {
+  "graph_id": "47b79f8a-0d24-416b-a467-4d044bb4ee57",
+  "owner_id": "14027e47-7fdf-46c4-9b6e-74f6e1536884",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:44.143153+00",
+  "athlete_name": "Marko Helen"
+ },
+ {
+  "graph_id": "1b3feef6-79ab-4e43-b26e-0e2c4007015b",
+  "owner_id": "4f4873ba-4ca2-4beb-a675-3ea71854be60",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:56.751892+00",
+  "athlete_name": "Ben Henderson"
+ },
+ {
+  "graph_id": "554560ce-c0b0-41f5-8290-a7cee3fac58b",
+  "owner_id": "4fc5d4c3-ef58-442c-a800-97750e6f820b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:01.304187+00",
+  "athlete_name": "Y. Ozawa"
+ },
+ {
+  "graph_id": "90a90154-7051-4378-a71f-1390b2fea0ee",
+  "owner_id": "5e6e59cc-f958-4e6a-8643-c3a8f3606788",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:30.087723+00",
+  "athlete_name": "Mike Van"
+ },
+ {
+  "graph_id": "c4a7feec-7898-4eae-944a-64cfa9a255ab",
+  "owner_id": "d6f52958-b219-4dc2-9a17-3f65c0d872c5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:14.606781+00",
+  "athlete_name": "Tero Pyylampi"
+ },
+ {
+  "graph_id": "67f24c46-57c1-4827-928f-2345dc2a7a15",
+  "owner_id": "a4207760-5377-449d-927c-d8960f4a7cb7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:20.848791+00",
+  "athlete_name": "Paul Ardila-Ibarra"
+ },
+ {
+  "graph_id": "1338b881-8074-41d7-8cce-8bce47d57eec",
+  "owner_id": "6221eff3-59c5-48d9-a520-de2188a125fb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:11.706119+00",
+  "athlete_name": "Antoine Joude"
+ },
+ {
+  "graph_id": "4d0f256c-a6b2-4dae-8e32-59b1f75e3785",
+  "owner_id": "7b6c208f-1f43-4676-a159-db3ad4e3a84e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:38.962459+00",
+  "athlete_name": "Hideki Sekine"
+ },
+ {
+  "graph_id": "df773b4f-d38b-40f4-9985-1d23ca54273e",
+  "owner_id": "ad22db40-ffd6-43ce-9ebf-1b85cc3d6e49",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:38.906527+00",
+  "athlete_name": "Gabriel Lucas"
+ },
+ {
+  "graph_id": "da18b9cb-dce7-45af-a6ba-f9963402995a",
+  "owner_id": "b038c8d6-c070-47a7-bbb3-804548ae83a8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:02.336737+00",
+  "athlete_name": "Denis Roberts"
+ },
+ {
+  "graph_id": "f66222da-b130-484c-9b3e-38662bc641bd",
+  "owner_id": "b3853cf3-f296-4d70-b256-77f6c2ce0297",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:23.279481+00",
+  "athlete_name": "Matt Lindland"
+ },
+ {
+  "graph_id": "0948576b-5f40-45db-a809-fb615ebc88c7",
+  "owner_id": "b3a295f2-49d0-4fb8-8d33-16d21c4bef08",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:24.357381+00",
+  "athlete_name": "Janne-Pekka"
+ },
+ {
+  "graph_id": "3e666727-9860-40c9-acab-477ac39cccb7",
+  "owner_id": "bb454904-1f0d-4ae4-9068-79f4360732eb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:21.120893+00",
+  "athlete_name": "Gustavo Dantas"
+ },
+ {
+  "graph_id": "c527e197-b7c3-4530-ab60-d073d33d136a",
+  "owner_id": "ed150c0a-e4b8-4b63-94be-ee406052032a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:29.030533+00",
+  "athlete_name": "Dennis Hallman"
+ },
+ {
+  "graph_id": "ff0c34c1-e609-497d-8e54-0f6576556c6d",
+  "owner_id": "ee5cbc4a-a3c6-4147-a3c8-501bbf822422",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:38.971368+00",
+  "athlete_name": "Ilir Lafiti"
+ },
+ {
+  "graph_id": "de598ccf-e977-42ab-966c-9fd672d665b5",
+  "owner_id": "f17d6977-ba38-457b-a950-e20924a7aa70",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:08.531632+00",
+  "athlete_name": "Cristiano Lazzarini"
+ },
+ {
+  "graph_id": "49b3cd75-60b8-4462-a6e1-2b870c8aa8c0",
+  "owner_id": "f4b746a8-98f9-4cec-ad6b-cd41c77c774b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:24.493159+00",
+  "athlete_name": "T. Yano"
+ },
+ {
+  "graph_id": "a56ba056-056f-4a5e-92dd-f33c95499fc5",
+  "owner_id": "fe6242f5-ee69-481e-be68-2e0df16280eb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:51.295352+00",
+  "athlete_name": "Rodrigo Medeiros"
+ },
+ {
+  "graph_id": "ca151069-4fe6-4fe4-9160-3e1e84814079",
+  "owner_id": "ff2c1ece-ef3e-44eb-81fa-0e781df85bdf",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:56.900315+00",
+  "athlete_name": "Caol Uno"
+ },
+ {
+  "graph_id": "bbb5a437-7345-49a0-90a7-ab29bc04638f",
+  "owner_id": "aaacb109-e5ed-4a5a-85e1-1d5172c6aed3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:12.450189+00",
+  "athlete_name": "Antonio Braga Neto"
+ },
+ {
+  "graph_id": "55692d46-fc03-47bc-971a-218c0c00888c",
+  "owner_id": "d1e80f80-c09d-465e-886b-eccc9c089d27",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:32.446122+00",
+  "athlete_name": "Thomas DeBlass"
+ },
+ {
+  "graph_id": "13e0fa2f-674e-4dec-9cc4-c389b7ae8144",
+  "owner_id": "86feec63-ecfb-42d6-a613-a055a56f4a21",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:25.179125+00",
+  "athlete_name": "Gunnar Nelson"
+ },
+ {
+  "graph_id": "523d15ff-21f7-46ed-822f-35aeaff66ef4",
+  "owner_id": "d8a4f46e-9809-4d37-b06e-1220b8b9812f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:26.899157+00",
+  "athlete_name": "R. Babalu"
+ },
+ {
+  "graph_id": "0ec4feb7-9cf2-43d7-94d2-7b7ee199b465",
+  "owner_id": "b8a2ba2b-d9d9-425c-a053-806c2b95c688",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:59.961544+00",
+  "athlete_name": "Wang Yan"
+ },
+ {
+  "graph_id": "32b3b203-3e0f-4ec1-a1aa-b4892c4aaeae",
+  "owner_id": "bc8e176a-315d-41e4-90c5-648002fab859",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:34.279683+00",
+  "athlete_name": "Tezekbaev Rasul"
+ },
+ {
+  "graph_id": "a7e57ae5-5739-4136-b68c-c4654c36153b",
+  "owner_id": "85024acb-5030-43bb-9943-ac8ff3e9fcca",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:05.474727+00",
+  "athlete_name": "Sasha Plavski"
+ },
+ {
+  "graph_id": "30b4e41b-9a44-434b-9d9a-4b247554a5ac",
+  "owner_id": "8f77f100-6af9-4161-aa89-d60d21c3cb68",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:24.487442+00",
+  "athlete_name": "Mateusz Juskowiak"
+ },
+ {
+  "graph_id": "a9fe0b44-7537-4489-83e2-c658e14e1119",
+  "owner_id": "53348f24-d509-41fa-880a-631d45077d09",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:19.266521+00",
+  "athlete_name": "Amanda Santana"
+ },
+ {
+  "graph_id": "b71d7699-80b6-4529-96e9-94887fb9ad31",
+  "owner_id": "71346e80-2907-44b9-91c8-51253643f53f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:08.001194+00",
+  "athlete_name": "Rodrigo Artilheiro"
+ },
+ {
+  "graph_id": "2c0723ad-7a99-4c9c-9c77-bb83d807907e",
+  "owner_id": "394153b7-d05c-4d43-9a1d-013dfc761930",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:55.428435+00",
+  "athlete_name": "J. Wakabayashi"
+ },
+ {
+  "graph_id": "17893b3d-1dea-4dc5-82f9-e5f405d2569a",
+  "owner_id": "cd0ad429-d0ef-47d1-a181-e08ba1581b46",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:49.69401+00",
+  "athlete_name": "James Puopolo"
+ },
+ {
+  "graph_id": "515c271f-77b4-4360-aac2-d34c32029518",
+  "owner_id": "11584183-12c8-4cff-a4f8-90bca483fc88",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:26.420064+00",
+  "athlete_name": "Andy Reese"
+ },
+ {
+  "graph_id": "eac1fe8c-7c9a-4b81-b714-4e45c18bbc4d",
+  "owner_id": "62e178ce-9a0d-4fd5-b425-6575fa245cbb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:25.564894+00",
+  "athlete_name": "Urija Faber"
+ },
+ {
+  "graph_id": "0bc516df-7167-4228-84af-c881fe3b4e37",
+  "owner_id": "01c1f39c-0195-4fc2-aaf2-45caec497808",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:20:22.339789+00",
+  "athlete_name": "Y. Takahito"
+ },
+ {
+  "graph_id": "9acff1e4-b740-483a-b8fb-0828e73b7243",
+  "owner_id": "dd3e783a-0203-43b2-a151-5157256ab4f8",
+  "schema_version": 3,
+  "updated_at": "2026-07-07 17:32:32.252222+00",
+  "synced_at": "2026-08-19 22:50:06.019909+00",
+  "athlete_name": "Alexander Volkanovski"
+ },
+ {
+  "graph_id": "855437da-0f67-4e26-aa6e-651ee6197c67",
+  "owner_id": "99154c36-b487-4d84-adef-7560f13377f5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:46.532775+00",
+  "athlete_name": "Antonio Schembri"
+ },
+ {
+  "graph_id": "9a535429-4a12-432f-af6e-27ee2c39564b",
+  "owner_id": "e449b4e5-36be-4925-a76d-564d68b00752",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:58.656757+00",
+  "athlete_name": "Lucas Daniel Barbosa"
+ },
+ {
+  "graph_id": "68e43401-0817-4ee0-a39a-de14a00041aa",
+  "owner_id": "04cca848-ff33-40bf-be40-8732119c4df2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:20:45.960357+00",
+  "athlete_name": "Gabriel Napao"
+ },
+ {
+  "graph_id": "8eb714ff-3a0b-4878-ad5b-a16f979f325c",
+  "owner_id": "5b54e391-61a5-48d9-aaeb-676287d62d5f",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:17.114245+00",
+  "athlete_name": "Lucas Lepri"
+ },
+ {
+  "graph_id": "e3711c76-ec55-43fe-9455-f85b4b8095f5",
+  "owner_id": "ba668c78-9b2e-4001-8f3f-290b44fee4b9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:16.380418+00",
+  "athlete_name": "Diego Oliveira"
+ },
+ {
+  "graph_id": "b83d7a74-b761-4cfd-bef9-1af91bfb045f",
+  "owner_id": "f502f908-8676-422d-bf09-fa439e6e44e6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:25.57155+00",
+  "athlete_name": "YouTube"
+ },
+ {
+  "graph_id": "dacfe38e-ebe1-4a22-9dde-7d6adec0d2ba",
+  "owner_id": "b6b691b3-100b-447b-84c5-dee15c1c56e3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:45.510567+00",
+  "athlete_name": "Rick Astley"
+ },
+ {
+  "graph_id": "c103189d-4e2d-4ad5-afc2-5f58fcf96d37",
+  "owner_id": "1d6333c0-e510-4ccf-b147-745c32d19acb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:03.812765+00",
+  "athlete_name": "Jonathan Torres"
+ },
+ {
+  "graph_id": "5dbcc30b-914f-4410-a221-52776d7df38e",
+  "owner_id": "c4511663-ece1-4ed0-8eb2-e6bce62da667",
+  "schema_version": 3,
+  "updated_at": "2026-07-07 17:32:32.252222+00",
+  "synced_at": "2026-08-19 22:46:36.244247+00",
+  "athlete_name": "Jean Silva"
+ },
+ {
+  "graph_id": "e45c5933-f525-422c-8221-7b80b87eb333",
+  "owner_id": "d3128e83-d422-4e0c-a6f8-64d634296f48",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:49.322902+00",
+  "athlete_name": "Pablo Popovitch"
+ },
+ {
+  "graph_id": "c19d563a-e626-4552-91b3-fd1ee2f9e1f1",
+  "owner_id": "f69ab787-aaa3-4cb9-b79d-3dbc041a3fc0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:53:45.000661+00",
+  "athlete_name": "Rany Yahya"
+ },
+ {
+  "graph_id": "14b3b5da-35ad-43dd-a2e9-dc078bed5e0e",
+  "owner_id": "fb64fe4b-0cf1-4169-a145-6595f0703cc2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:54:25.392588+00",
+  "athlete_name": "Dean Lister"
+ },
+ {
+  "graph_id": "013f1dc7-3080-42fb-917a-6ca7f9ebf919",
+  "owner_id": "a2fffa23-764d-444c-bafd-5fe156395a0c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:08.262467+00",
+  "athlete_name": "Kron Gracie"
+ },
+ {
+  "graph_id": "b3a28613-fe23-4964-9893-7b26254ece94",
+  "owner_id": "a3f26d77-624a-4a4a-ae34-4cb784781963",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:19.770791+00",
+  "athlete_name": "Jose Mario Sperry"
+ },
+ {
+  "graph_id": "f5da3d42-291a-4f03-955f-767750376878",
+  "owner_id": "3a55b9f5-17e8-4f90-902f-cf64ff52773b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:28:05.151996+00",
+  "athlete_name": "Ricardo Almeida"
+ },
+ {
+  "graph_id": "620f8fac-f025-4ce1-85da-fd0a1d55c6bb",
+  "owner_id": "4a8e5180-c8ef-4609-8b0b-cd732b8b78f3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:19.973717+00",
+  "athlete_name": "Mark Robinson"
+ },
+ {
+  "graph_id": "d947b8ba-b9e6-4cd0-9078-b0d1134bdd84",
+  "owner_id": "5e6e8994-c16a-47aa-8205-09c47ae3b511",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:31.167574+00",
+  "athlete_name": "Otavio Sousa"
+ },
+ {
+  "graph_id": "50efd809-d18d-4647-bc45-1469d7640c53",
+  "owner_id": "dd611de5-d8ee-4dc5-a894-815432fbf7b6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:07.097517+00",
+  "athlete_name": "Robson Moura"
+ },
+ {
+  "graph_id": "1a36fb93-f712-46e6-9695-a1f6492852b1",
+  "owner_id": "87ec316f-3cd7-4f96-a636-f7121375b185",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:28.418426+00",
+  "athlete_name": "Jeff Glover"
+ },
+ {
+  "graph_id": "eb5c4b07-6f75-4015-8b98-5b757411e8ef",
+  "owner_id": "a583bfa2-ea36-4224-82fa-4d1b532f1c5e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:27.971099+00",
+  "athlete_name": "David Terrell"
+ },
+ {
+  "graph_id": "1113e2ab-17fa-4ed7-90ce-ba5001ba8730",
+  "owner_id": "a7577f0a-f1af-4a8d-b8e4-6a9055aec307",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:42.628656+00",
+  "athlete_name": "Bianca Mesquita"
+ },
+ {
+  "graph_id": "baafca90-db26-4d15-b3df-cf0091b6cd35",
+  "owner_id": "aac2b93e-8513-419a-b81b-b8da496e58d8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:14.606854+00",
+  "athlete_name": "Justin Rader"
+ },
+ {
+  "graph_id": "0b24ac28-8b29-4ff7-96ea-722af18c43f4",
+  "owner_id": "b52d8b93-4a08-4dce-864f-6b44265994cc",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:36.448945+00",
+  "athlete_name": "Joao Gabriel Rocha"
+ },
+ {
+  "graph_id": "e6fd6ea2-6212-4de2-a807-d6f1c1a142fd",
+  "owner_id": "b7348e97-3836-4ccc-93a4-3b9099ab7a58",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:44:48.744737+00",
+  "athlete_name": "Rodrigo Gracie"
+ },
+ {
+  "graph_id": "f2b6e716-d729-42fa-b6bf-ecbac4ed1242",
+  "owner_id": "ec1e1e06-8459-4754-be28-c379216fd0b7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:22.082093+00",
+  "athlete_name": "Tarsis Humpreys"
+ },
+ {
+  "graph_id": "e992cc32-9c71-4e9a-b1b4-222494864c95",
+  "owner_id": "002baf20-d34f-407e-82de-7fcbf5725ca2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:19:58.082974+00",
+  "athlete_name": "Robert Drysdale"
+ },
+ {
+  "graph_id": "276bf2e9-c793-4a47-bbb8-bae2f0ac4b65",
+  "owner_id": "040ca4af-331f-4cac-8535-431f401ce32d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:20:35.99896+00",
+  "athlete_name": "Eddie Bravo"
+ },
+ {
+  "graph_id": "f80e3c2a-b591-42cc-8e24-75084d3f826f",
+  "owner_id": "0c13e3d0-0822-4e58-9a99-d964b194e233",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:42.036572+00",
+  "athlete_name": "Roberto Traven"
+ },
+ {
+  "graph_id": "01f94be0-c877-4d29-9b71-af80abf3f132",
+  "owner_id": "0eee7141-2098-43e8-8c1d-8c6edab5e446",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:04.997735+00",
+  "athlete_name": "Kennedy Maciel"
+ },
+ {
+  "graph_id": "d503d468-9003-4352-9f68-59bb2357eba2",
+  "owner_id": "a980e8ee-e4e5-44d3-a9e8-b40f6b033d2d",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:43:04.448954+00",
+  "athlete_name": "Sean Alvarez"
+ },
+ {
+  "graph_id": "90cab725-77fa-4c3d-8325-331bbc8dcc5d",
+  "owner_id": "bb40d906-6a4d-477b-88ee-165f227b7623",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:20.043367+00",
+  "athlete_name": "Jorge Patino"
+ },
+ {
+  "graph_id": "7b1030fb-9a1b-491e-be99-a10c5fbf4b08",
+  "owner_id": "bfe17738-0e76-4cff-b8fe-8b9335563d9c",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:57.167865+00",
+  "athlete_name": "Vitor Ribeiro"
+ },
+ {
+  "graph_id": "8888c56e-857c-4e8a-ac40-6c835f5d5e59",
+  "owner_id": "5c5f084a-2c3a-435d-a40c-971aa81281b9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:23.599866+00",
+  "athlete_name": "Jared Dopp"
+ },
+ {
+  "graph_id": "1e5c89ed-03ad-443a-bf0a-f6cf3b66b4ee",
+  "owner_id": "5c825a2c-a78c-4965-97b3-ac931326fd01",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:24.679015+00",
+  "athlete_name": "Mateusz Szczecinski"
+ },
+ {
+  "graph_id": "2219e9c5-8ea2-490d-9bf9-ff9f02c5f752",
+  "owner_id": "5f624b3c-92da-4aff-a462-f64ed14b63a6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:32:43.982709+00",
+  "athlete_name": "E. Karpinen"
+ },
+ {
+  "graph_id": "c3c0acb2-0332-4b1a-a0f6-b2ef1d001480",
+  "owner_id": "7654e236-f558-4dc8-a611-d922c6b776de",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:55.010885+00",
+  "athlete_name": "Jeff Monson"
+ },
+ {
+  "graph_id": "85694812-96fc-4447-98c1-532ce82130cb",
+  "owner_id": "da6d3221-d6e0-4848-90c7-8834eb996512",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:37.062712+00",
+  "athlete_name": "Gary Tonon"
+ },
+ {
+  "graph_id": "def379e9-ac8a-4326-8e6b-6ebfef422ae7",
+  "owner_id": "7eecfaf7-6c88-4d33-ab63-4ea28b8952a2",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:16.801392+00",
+  "athlete_name": "Sergio Moraes"
+ },
+ {
+  "graph_id": "3dd96344-709e-4bd4-aa49-1fc25a351230",
+  "owner_id": "80dff729-5059-4ed1-a489-45c8b07159b8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:32.389083+00",
+  "athlete_name": "Matt Hughes"
+ },
+ {
+  "graph_id": "6928ed75-7297-4df8-aeda-f1884af70b39",
+  "owner_id": "1b851eee-7b17-4349-845b-132638b7ed92",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:23:48.453119+00",
+  "athlete_name": "Rolles Gracie"
+ },
+ {
+  "graph_id": "fc1e5e65-94fa-455e-9d48-6af17ff08019",
+  "owner_id": "22c1ef89-9bdb-4159-99e5-877513b127e7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:50.166816+00",
+  "athlete_name": "Vitor Viana"
+ },
+ {
+  "graph_id": "5cf01a8f-103b-410c-8ff1-49fd9f7adc0e",
+  "owner_id": "e8e139d6-6232-4d8f-90dc-13aad7ec829a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:51:45.145998+00",
+  "athlete_name": "Jessica Oliveira"
+ },
+ {
+  "graph_id": "c92aea13-10e4-46ca-aab5-104c48d6f925",
+  "owner_id": "edf63f61-7855-4564-95ca-7f8b9e563d6a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:37.893523+00",
+  "athlete_name": "Vinicius Ferreira"
+ },
+ {
+  "graph_id": "28eeb0a0-eba3-4d5a-a9a3-954a19a48abf",
+  "owner_id": "a5e8c4a4-6388-49e3-8c4b-a2263e09e1b9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:29.048375+00",
+  "athlete_name": "Sanae Kikuta"
+ },
+ {
+  "graph_id": "3207fcc9-4167-4032-a254-8f5504445bb7",
+  "owner_id": "00475291-e6e8-486a-baff-99b1b4b28c06",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:19:59.17978+00",
+  "athlete_name": "Ricco Rodriguez"
+ },
+ {
+  "graph_id": "22680ff1-96c5-41b3-9573-71c4f4ba421d",
+  "owner_id": "027b73c4-c1dc-43dd-bd2c-de21f7c658a5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:20:28.825027+00",
+  "athlete_name": "Victor Estima"
+ },
+ {
+  "graph_id": "b749ca81-4639-438b-9dc2-8ca4d782da38",
+  "owner_id": "cd433d0f-f6b3-451a-b43c-557a57331a1c",
+  "schema_version": 3,
+  "updated_at": "2026-07-08 18:39:02.352978+00",
+  "synced_at": "2026-08-19 22:47:55.311866+00",
+  "athlete_name": "Benoit Saint-Denis"
+ },
+ {
+  "graph_id": "3b1fb733-8755-4d83-a523-85baac6d002d",
+  "owner_id": "65be9097-c4d7-470c-a134-dbe86b2c73ea",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:35.730277+00",
+  "athlete_name": "Vitor Belfort"
+ },
+ {
+  "graph_id": "f02fa1ea-f7a7-4f0f-ba53-1458f7e341ec",
+  "owner_id": "976a4fde-41e4-4a02-9a8c-dc33620c00f8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:40:32.453648+00",
+  "athlete_name": "Joao Miyao"
+ },
+ {
+  "graph_id": "c669b08e-e394-4ca5-b824-fea71d547b0e",
+  "owner_id": "a1705d60-8f47-4eef-90ba-26040b592f30",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:41:50.532372+00",
+  "athlete_name": "Sasha Savko"
+ },
+ {
+  "graph_id": "c2ada286-8881-4bc1-a546-58702df49be4",
+  "owner_id": "27d50c44-4e6d-4571-9732-eeae9b768b54",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:35.394819+00",
+  "athlete_name": "Gabriel Arges"
+ },
+ {
+  "graph_id": "472b9c17-b4e3-45b8-8b6d-aec552b7551a",
+  "owner_id": "c3924295-c3f6-4563-a1e4-3f30c4bb7d79",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:28.907429+00",
+  "athlete_name": "Sam McNally"
+ },
+ {
+  "graph_id": "09029d1e-cc78-4cd5-87f6-1ebd369aa609",
+  "owner_id": "ced6ad67-9b05-4f49-a05d-1d90781f3fb0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:48:11.289933+00",
+  "athlete_name": "Marcio Andre Barbosa Junior"
+ },
+ {
+  "graph_id": "2617021e-9002-410f-ac92-d7145efa6245",
+  "owner_id": "d7d28b80-9ffb-4b0d-af0c-4dc42d357f3a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:20.214141+00",
+  "athlete_name": "Mansher Khera"
+ },
+ {
+  "graph_id": "ffb11609-fe6a-4b4f-8dd2-aa53fcc55d31",
+  "owner_id": "2d391d03-7dd5-491c-8372-a4c0864e3165",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:33.388975+00",
+  "athlete_name": "Murilo Santana"
+ },
+ {
+  "graph_id": "57b2648d-9116-4d33-bd36-05b1b77f037f",
+  "owner_id": "6a3ffe7e-b8e1-4168-9612-1d3fcdcce122",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:10.002875+00",
+  "athlete_name": "Edward Cummings"
+ },
+ {
+  "graph_id": "04da4e95-8d5e-4724-90c5-0de92cd80f27",
+  "owner_id": "78f5bf87-9240-4383-8fb5-be7c0dfa4236",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:36:19.056635+00",
+  "athlete_name": "Abraham Marte Messina"
+ },
+ {
+  "graph_id": "e4e14106-51a8-496a-91e3-82d78ea07567",
+  "owner_id": "84a3683a-c37f-43c3-9eb3-73bc0b806aee",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:04.39525+00",
+  "athlete_name": "Abdurakhman Bilarov"
+ },
+ {
+  "graph_id": "92aa7c2f-7a5e-4af8-b8bb-70c21e9bfb7b",
+  "owner_id": "85c32d3a-29d6-42b1-bca2-2cc3ef96d3fa",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:38:14.564438+00",
+  "athlete_name": "Tito Ortiz"
+ },
+ {
+  "graph_id": "85890c96-7db1-463e-a770-db1563d7cee3",
+  "owner_id": "ba93f7c9-b9d1-4473-9deb-a75420760094",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:17.456898+00",
+  "athlete_name": "Matheus Gabriel Barros"
+ },
+ {
+  "graph_id": "3f6f4869-8639-4936-8764-b2bd04fffa9a",
+  "owner_id": "bbb6c056-122c-4f53-8eaf-6575855ef76b",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:45:26.292799+00",
+  "athlete_name": "Flavio Almeida"
+ },
+ {
+  "graph_id": "7944ffb0-ac07-4a8b-a3b1-5a8ad1f9b77f",
+  "owner_id": "c30372c9-b43a-417e-9480-91fa557c61ee",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:22.862317+00",
+  "athlete_name": "Amaury Bitetti"
+ },
+ {
+  "graph_id": "6c2a6e99-fba8-41c1-b9b8-5c78feb2acb1",
+  "owner_id": "da95df89-a03e-49e1-b1d2-809ffcfd4631",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:49:38.140425+00",
+  "athlete_name": "Renato Forasieppi Canuto"
+ },
+ {
+  "graph_id": "9eafde4f-38cc-4da2-a6cd-1de248da6e4a",
+  "owner_id": "e276731b-4a21-4976-8323-7f48040bd2ae",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:50:38.599715+00",
+  "athlete_name": "Rida Haisam"
+ },
+ {
+  "graph_id": "679c24eb-8697-4876-8a80-598ff47fba6c",
+  "owner_id": "1db94939-a592-4f6f-abb8-b2c44921c6df",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:09.459159+00",
+  "athlete_name": "Ricardo Vieira"
+ },
+ {
+  "graph_id": "8cefd02f-18fd-4f74-bde6-af60b55d0aed",
+  "owner_id": "20cc262f-3805-43c6-905e-5a956372c522",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:36.952921+00",
+  "athlete_name": "Sasha Palvski"
+ },
+ {
+  "graph_id": "54a23fae-91c2-4498-a4f7-e8e398966a77",
+  "owner_id": "ef8e2050-2560-4be9-a70c-18a7fab0693e",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:44.791894+00",
+  "athlete_name": "Jeremy Skinner"
+ },
+ {
+  "graph_id": "ff51e226-e76f-4afa-889e-0eeb8e3123a5",
+  "owner_id": "35371a6c-ea0c-4978-943b-dec99e7798a3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:33.342077+00",
+  "athlete_name": "Gabriel Rollo"
+ },
+ {
+  "graph_id": "57d70f87-b9e2-4872-a924-1b383a110113",
+  "owner_id": "43f91e5e-7418-407a-8f94-5cc981440b26",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:22.975073+00",
+  "athlete_name": "Leonardo Santos"
+ },
+ {
+  "graph_id": "b6a2670f-d8a0-4dbf-bbd9-254ec05ea257",
+  "owner_id": "49abe049-8bd3-41cd-8702-2c1e43a4c7df",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:13.708359+00",
+  "athlete_name": "Marcelo Mafra"
+ },
+ {
+  "graph_id": "fd47fc25-3bdc-4738-a297-208b3fc07a9a",
+  "owner_id": "4eaaaeae-7fc4-454e-9280-7d95cecff361",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:48.731707+00",
+  "athlete_name": "Mike Fowler"
+ },
+ {
+  "graph_id": "6ad7ce14-8e03-425f-885f-915916c10c85",
+  "owner_id": "0a99e6dd-b3e4-48f6-adde-2c0e64508809",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:29.499964+00",
+  "athlete_name": "Hayato Sakurai"
+ },
+ {
+  "graph_id": "a361ddb0-9480-4a95-93e2-fc11542ffbab",
+  "owner_id": "58dad03d-4dd5-46b4-99c0-baf20e52f4f5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:31:55.425256+00",
+  "athlete_name": "Rodney Ellis"
+ },
+ {
+  "graph_id": "e1ab3a92-74f2-4ff3-97e6-7b973b5a9eb0",
+  "owner_id": "6a5a396e-900e-4fa2-bac1-5f3883fe7ba3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:11.082878+00",
+  "athlete_name": "DeAlonzio Jackson"
+ },
+ {
+  "graph_id": "3d0ebc55-e7db-4514-9c3e-f12ee2b18a9c",
+  "owner_id": "6ebac9fa-e62e-41d5-9f6a-4dd4ea2f2764",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:34:45.074469+00",
+  "athlete_name": "Hector Lombard"
+ },
+ {
+  "graph_id": "b53d946b-1039-450b-9e6c-1835893933f1",
+  "owner_id": "72a5002c-7496-4d32-be32-092e4b5481e7",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:28.337496+00",
+  "athlete_name": "Pablo Mantovani"
+ },
+ {
+  "graph_id": "c8228d09-0a96-477c-a716-aff3c5283a06",
+  "owner_id": "75127982-0889-495b-becc-860e08ad1a4a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:35:45.846079+00",
+  "athlete_name": "Lucas Leite"
+ },
+ {
+  "graph_id": "ac1b6e57-7d62-4821-8c5b-9fc82e7710e5",
+  "owner_id": "7e592ebe-989a-45f8-89c9-918778847df5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:08.373618+00",
+  "athlete_name": "Egan Inoue"
+ },
+ {
+  "graph_id": "5b4bdccf-92dc-406a-9560-ecf2297281cc",
+  "owner_id": "81712c4b-c74e-432c-8f52-cbad558bf0e5",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:36.944373+00",
+  "athlete_name": "Bruno Frazatto"
+ },
+ {
+  "graph_id": "b49ebda0-4e49-46a3-88d0-af8528e28a65",
+  "owner_id": "9064b8ad-f8a3-41cb-a951-d391c735ff65",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:39:25.567557+00",
+  "athlete_name": "Paul Schreiner"
+ },
+ {
+  "graph_id": "8892bdb5-4363-4abb-9d8e-671692687d7f",
+  "owner_id": "a76616cd-8ff8-4029-860f-9fad78a982c0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:42:43.706493+00",
+  "athlete_name": "Andreas Olsen"
+ },
+ {
+  "graph_id": "654d7f9e-cb0b-4a00-803f-9e2ccf7db908",
+  "owner_id": "c26b5e53-cbd3-4e3c-9e61-a05c99d38bc6",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:16.608962+00",
+  "athlete_name": "Kamil Huminski"
+ },
+ {
+  "graph_id": "65365323-27f1-4915-aa50-5e868aec5e20",
+  "owner_id": "20127ada-1b04-4c4a-bb6a-dea60579f6eb",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:24:31.305807+00",
+  "athlete_name": "Roman Dolidze"
+ },
+ {
+  "graph_id": "1a79f4f5-7c25-4995-a3b4-9de30f89b996",
+  "owner_id": "242c74df-661a-40da-ac7e-a8a25f5e8ce3",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:25:02.291437+00",
+  "athlete_name": "Tomasz Janiszewski"
+ },
+ {
+  "graph_id": "4ff2a4c1-b991-4df1-9c1a-a57ea271ff99",
+  "owner_id": "c6821639-1fd6-4029-956d-761e132d7436",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:46:49.215801+00",
+  "athlete_name": "Kurt Pellegrino"
+ },
+ {
+  "graph_id": "fd5409be-3e4e-438f-852a-9027632691a2",
+  "owner_id": "c8019429-3e1e-48dd-9fb5-b6990982f2ff",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:47:04.766364+00",
+  "athlete_name": "Kouji Kanechika"
+ },
+ {
+  "graph_id": "00ea8879-6fe0-4f67-b993-ca4bb6054245",
+  "owner_id": "2b9b7123-621a-4350-ad39-b09c23bd4478",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:26:13.487322+00",
+  "athlete_name": "Augusto Ferrari"
+ },
+ {
+  "graph_id": "4e6fa24c-7dc9-44ad-8e86-33602f2be853",
+  "owner_id": "31b49a3f-6893-4753-a8a9-d7146fd8deff",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:07.990895+00",
+  "athlete_name": "P. Ardilla"
+ },
+ {
+  "graph_id": "4f0e3763-b8f9-4e98-b20b-be8eac9834bf",
+  "owner_id": "ed89c6c8-fe95-40bc-b36f-25ead501e020",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:52:33.353612+00",
+  "athlete_name": "Lee Hyoung"
+ },
+ {
+  "graph_id": "ba45acef-13c3-4323-bdf8-79ea8ea98fb9",
+  "owner_id": "32c66636-7119-48de-9155-37ddd50f5aea",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:27:20.365824+00",
+  "athlete_name": "George Sotiropoulos"
+ },
+ {
+  "graph_id": "c785a922-aba4-42bf-b233-48f63cb5fdd6",
+  "owner_id": "43d8769b-9d68-404d-a71a-5fe5c0748822",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:29:21.896062+00",
+  "athlete_name": "Anthony Perosh"
+ },
+ {
+  "graph_id": "42050143-0fb8-463a-b14a-c8784bb9489e",
+  "owner_id": "0b714eb6-8f89-44e0-b6ca-ba6c330d8709",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:21:38.362487+00",
+  "athlete_name": "J. Urholin"
+ },
+ {
+  "graph_id": "f9b544f6-a090-4a32-b7ab-ab94295dc70b",
+  "owner_id": "13683932-5e60-4eb6-9e81-caa8b52ff8f0",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:22:38.517073+00",
+  "athlete_name": "Kouhei Yasumi"
+ },
+ {
+  "graph_id": "4e3ea279-1fd5-47d8-81d4-b17a2c60c403",
+  "owner_id": "4b65a139-ed64-497d-acee-c9ec1ec4fca8",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:30.141382+00",
+  "athlete_name": "Piotr Frechowicz"
+ },
+ {
+  "graph_id": "f373900f-23c2-4bc5-ad2c-6622ff8f46ce",
+  "owner_id": "4e1c8a68-4f01-4aa4-bf62-ea50b111781a",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:30:45.487085+00",
+  "athlete_name": "Marcos Oliveira"
+ },
+ {
+  "graph_id": "5b9ece0c-4c33-43ff-b8a7-f6cfe2e20115",
+  "owner_id": "65579662-762a-45e4-bf9f-95bd936db1d9",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:32.26675+00",
+  "athlete_name": "Ilir Latifi"
+ },
+ {
+  "graph_id": "4b17b22a-33fd-4141-bc4c-3761bc624fee",
+  "owner_id": "67d9ed30-8d41-4c95-ab9a-f7ddce3513a4",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:33:54.144369+00",
+  "athlete_name": "D. Marinakis"
+ },
+ {
+  "graph_id": "2cd4409d-ad94-40e5-89ef-3ce36a8fe256",
+  "owner_id": "800171e3-21b6-4048-ba9f-4c7ef5ea5afe",
+  "schema_version": 3,
+  "updated_at": "2026-06-29 23:14:08.966635+00",
+  "synced_at": "2026-08-19 22:37:22.43197+00",
+  "athlete_name": "H. Sekine"
+ }
+]

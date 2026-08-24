@@ -121,19 +121,25 @@ with too little grappling, and sets `Match.video_url` from `url_mapping.json` (s
 ELO are path-dependent, so each touched athlete is rebuilt from all their `status == "final"`
 matches. `reprocess_all` collects the athletes across all dumps and replays each once at the end.
 
-## 7. Video URLs · `url_mapping.json` · generator is broken
+## 7. Video URLs · the dump is the source of truth for the offset · `url_mapping.json` is legacy
 
-Linkage happens at **import** time, not export: `dump_import.video_index()` keys mapped bouts by
-`(frozenset(athlete_key(a), athlete_key(b)), year)` and sets `Match.video_url` + `&t=<start>s`. The
-exporter only reads the column.
+Linkage happens at **import** time, not export: `dump_import.run_dump` resolves each bout's
+`video_url`/`video_start_seconds`/`ts_origin` via `dump_import._resolve_video` — see that
+function's docstring for the full precedence. Short version: an existing non-null DB value is
+never overwritten by a reimport (protects a hand fix applied via
+`scripts/apply_video_fixes.py`); a NULL is filled preferring the dump's own ref-block `start` /
+spliced `bout_start_s` (both video-absolute seconds — step 3/4) over `url_mapping.json`'s `&t=`.
+The exporter only reads the columns.
 
 `scripts/yt/build_url_mapping.py` is **broken for new events** — it hardcodes a root path and looks
 for `<stem>.py` files that have not lived there since dumps moved. `url_mapping.json` holds 28
-entries, all legacy.
+event keys / 307 bout entries, all legacy. New events should not add to it — write the bout start
+into the ref block (step 1) instead, so it lands in the dump's `start` field automatically.
 
-Practical fix: hand-edit `url_mapping.json`, adding a top-level key shaped like an existing entry
-(`event_title`, `video_url`, `file`, `matches[]` with `athlete`/`year`/`opponent`/`seconds`), then
-re-run step 6 — `video_index()` re-reads the file every run.
+`scripts/backfill_video_offsets.py --dry-run` catches up prod matches imported before their dump
+carried a `start`, without a full reimport, and reports how many `url_mapping.json` entries are
+now redundant (covered by a dump) vs. still the only source — that count must be zero before the
+file can be deleted; see the script's docstring for the exact rule.
 
 **Never hand-edit `GrapplingArc/assets/matches/*.json`.** It is generated output; the edit is a
 no-op overwritten on the next export.

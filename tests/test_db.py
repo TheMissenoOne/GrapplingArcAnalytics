@@ -301,6 +301,81 @@ def test_run_dump_batched_delete_insert_is_idempotent(session, monkeypatch):
     assert len(matches) == 1
 
 
+def test_run_dump_fills_video_start_seconds_from_dump_offset(session, monkeypatch):
+    """Q5: a dump-declared ref-block ``start`` (video-absolute) fills a NULL
+    ``video_start_seconds`` at import time when nothing else has resolved one."""
+    import contextlib
+
+    import db.base as db_base
+    from db.models import Match
+    from scripts import dump_import
+
+    @contextlib.contextmanager
+    def _fake_db_session():
+        yield session
+
+    monkeypatch.setattr(db_base, "db_session", _fake_db_session)
+    monkeypatch.setattr(dump_import, "_load_url_mapping", lambda: {})  # no URL, offset only
+
+    raw = [{("Craig Jones", 2024): {
+        "winner": "Craig Jones", "method": "Submission (Armbar)", "opponent": "Kyle Boehm",
+        "start": "1:30",
+        "events": [
+            {"label": "Guard Pull", "type": "guard", "actor": "Craig Jones"},
+            {"label": "Armbar", "type": "submission", "actor": "Craig Jones", "successful": True},
+        ],
+    }}]
+
+    dump_import.run_dump(raw, event=None, label="A", replay=False)
+
+    match = session.execute(select(Match)).scalar_one()
+    assert match.video_url is None  # no URL source available — offset alone still lands
+    assert match.video_start_seconds == 90
+    assert match.ts_origin == "video_absolute"
+
+
+def test_run_dump_preserves_hand_fixed_video_url_on_reimport(session, monkeypatch):
+    """Q5: a reimport must not silently wipe a video_url applied out-of-band (the
+    scripts/apply_video_fixes.py channel) even though run_dump deletes + re-inserts the row."""
+    import contextlib
+
+    import db.base as db_base
+    from db.models import Match
+    from scripts import dump_import
+
+    @contextlib.contextmanager
+    def _fake_db_session():
+        yield session
+
+    monkeypatch.setattr(db_base, "db_session", _fake_db_session)
+    mapping = {"EVT": {"video_url": "https://youtu.be/WRONGVIDEO",
+                        "matches": [{"athlete": "Craig Jones", "opponent": "Kyle Boehm",
+                                     "year": 2024, "winner": "Craig Jones", "seconds": 10}]}}
+    monkeypatch.setattr(dump_import, "_load_url_mapping", lambda: mapping)
+
+    raw = [{("Craig Jones", 2024): {
+        "winner": "Craig Jones", "method": "Submission (Armbar)", "opponent": "Kyle Boehm",
+        "start": "1:30",
+        "events": [
+            {"label": "Guard Pull", "type": "guard", "actor": "Craig Jones"},
+            {"label": "Armbar", "type": "submission", "actor": "Craig Jones", "successful": True},
+        ],
+    }}]
+
+    dump_import.run_dump(raw, event=None, label="A", replay=False)
+    match = session.execute(select(Match)).scalar_one()
+    assert match.video_url == "https://youtu.be/WRONGVIDEO?t=90s"  # filled from mapping+dump
+
+    # Hand fix applied straight to the DB, as scripts/apply_video_fixes.py would.
+    match.video_url = "https://youtu.be/HANDFIXED"
+    session.flush()
+
+    dump_import.run_dump(raw, event=None, label="A", replay=False)  # reimport same dump
+
+    match = session.execute(select(Match)).scalar_one()
+    assert match.video_url == "https://youtu.be/HANDFIXED"  # survived the delete+reinsert
+
+
 def test_fixture_bundle_round_trip():
     """Parse the real mock bundle fixture."""
     fixture = (
