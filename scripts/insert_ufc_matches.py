@@ -114,7 +114,8 @@ class CanonicalMatch:
 
     __slots__ = (
         "a_name", "b_name", "year", "winner_name", "win_type", "submission", "events",
-        "strike_count", "ko_finish", "timeline",
+        "strike_count", "ko_finish", "timeline", "ts_origin", "video_start_seconds",
+        "dump_bout_start_s",
     )
 
     def __init__(
@@ -129,6 +130,9 @@ class CanonicalMatch:
         strike_count: int = 0,
         ko_finish: bool = False,
         timeline: list[dict[str, Any]] | None = None,
+        ts_origin: str | None = None,
+        video_start_seconds: int | None = None,
+        dump_bout_start_s: int | None = None,
     ) -> None:
         self.a_name = a_name
         self.b_name = b_name
@@ -141,6 +145,16 @@ class CanonicalMatch:
         self.ko_finish = ko_finish  # KO/TKO striking finish → gate empty striking bouts
         # Full event timeline (superset of ``events``): all events, actor 'a'/'b'/None, ts kept.
         self.timeline = timeline if timeline is not None else []
+        # matches.ts_origin/video_start_seconds (alembic 0047) -- set when the dump's own
+        # events are video-absolute seconds (frame-read bouts), None everywhere else. This
+        # is the EXPLICIT, always-authoritative channel (see dump_import._resolve_video).
+        self.ts_origin = ts_origin
+        self.video_start_seconds = video_start_seconds
+        # Transcript-pipeline bout offset (video-absolute seconds): the splice's
+        # ``bout_start_s`` or, pre-splice, the raw ref-block ``start`` string. Distinct from
+        # ``video_start_seconds`` above -- this one only FILLS a gap at import time, it is
+        # never treated as more authoritative than an already-resolved value.
+        self.dump_bout_start_s = dump_bout_start_s
 
 
 def _win_type_from_method(method: str) -> str | None:

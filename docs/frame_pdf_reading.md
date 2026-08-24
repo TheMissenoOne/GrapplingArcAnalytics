@@ -19,10 +19,12 @@ rendered" and ends at "an answer JSON is ready to import".
 | 4 | **Read the sheet → answer JSON** | manual, see §2 | vision model |
 | 5 | Validate the answer | `uv run python scripts/frame_answer.py` | maintainer |
 | 6 | **Human review against the frames** | `uv run python scripts/frame_registrar.py` → localhost:8765 | maintainer |
-| 7 | **Convert answer → dump shape** | *does not exist yet* — see §4.7 | — |
+| 7 | **Convert answer → dump shape** | `uv run python -m scripts.frame_answer_to_dump [--write]` | maintainer |
 | 8 | Import the dump | `scripts/dump_import` | maintainer |
-Step 7 is the live gap: a reviewed answer is still a dead end until someone retypes it into the
-`(athlete_a_name, year)` dump shape `dump_import` expects.
+Step 7 (`scripts/frame_answer_to_dump.py`) reads every `events.json`, converts only the
+files a human has reviewed, and refuses (rather than guesses) anything it cannot resolve —
+see §4.7. It never opens a database connection; `--write` only produces
+`scripts/dumps/frame_pdf_data.py`, a plain dump `.py` for step 8 to import later.
 
 **Answer location (real contract, corrected 2026-08-24):** `data/frame_pdf/out/<slug>/events.json`,
 written by `scripts/frame_answer_import.py` (and rewritten by `frame_registrar.py` on save), beside
@@ -236,11 +238,35 @@ whether it is there. The registrar edits `events.json` in place; provenance surv
 reading)`, never plain `(human)` (fixed 2026-08-24; before that every save laundered model readings
 into human authorship). `frame_review.py` and `review.json` were never written.
 
-### 4.7 `scripts/frame_answer_to_dump.py`
+### 4.7 `scripts/frame_answer_to_dump.py` — DONE 2026-08-24
 
-Converts the answer JSON into the `(athlete_a_name, year)` dump shape, carrying `ts` and
-`video_start_seconds` through so `ts_origin='video_absolute'` stays true across the seam. This is
-the missing link that makes the whole pipeline runnable end to end.
+Converts reviewed answer JSON into the `(athlete_a_name, year)` dump shape `scripts/dump_import`
+consumes. Never opens a database connection — reads `events.json`, writes a plain `.py` dump
+literal (`scripts/dumps/frame_pdf_data.py`) on `--write`; importing it into the DB is step 8,
+run separately by a maintainer.
+
+Four things it refuses rather than guesses or silently drops:
+
+- **Review gate.** Only files whose `source` contains "human review" convert (the
+  `frame_registrar` stamp — §1). A raw model reading (`frame_answer_import (…not yet
+  human-reviewed)`) is skipped, reason recorded. Measured 2026-08-24: all 21 files under
+  `out/` are still unreviewed, so a real run converts zero files — the gate working, not a bug.
+- **Actor/winner resolution.** Every event's `actor` and the bout's `winner` are resolved via
+  `analysis.names.athlete_key` against ONLY that file's own `bout.athlete_a`/`athlete_b`. A
+  name matching neither is refused — excluded, counted, listed — never guessed onto a side.
+- **Slash labels.** `analysis.names._normalize_name` folds "Reset / Stalemate" and
+  "Reset/Stalemate" to different keys depending on spacing (a known defect in the shared
+  node-key contract, not fixed here). Any label containing `/` is refused (`slash_label`)
+  rather than let a mangled key into the corpus.
+- **Key whitelist.** Output events keep exactly `label`/`type`/`actor`/`ts`/`successful`/
+  `points` (the same set `scripts/insert_ufc_matches.py`-style import consumes);
+  `confidence`/`note`/`new_label` are dropped, with a per-file dropped-key count in the report.
+
+`ts_origin='video_absolute'` and `video_start_seconds` (from the answer's
+`bout_start_seconds`) are carried onto every converted block and, since `scripts/dump_import`
+did not have anywhere to put them, `CanonicalMatch`/`build_matches`/`run_dump` were extended
+with two new optional fields to carry them onto `matches.ts_origin`/`video_start_seconds`
+(alembic `0047_match_video_clock`) — every other dump source leaves them `None`, unchanged.
 
 ### 4.8 `--status` for the sheet backlog
 

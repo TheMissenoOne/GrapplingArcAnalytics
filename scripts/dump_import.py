@@ -63,6 +63,21 @@ def _build_timeline(
         out.append(item)
     return out
 
+def _dump_bout_start_s(m: dict[str, Any]) -> int | None:
+    """This bout's start offset as the transcript pipeline declares it (video-absolute
+    seconds): the splice's ``bout_start_s`` (set by ``apply_events.py`` from the sidecar's
+    ``timing``/ref-block ``start``) or, pre-splice, the raw ref-block ``start`` string itself
+    (``M:SS``/``H:MM:SS``) -- both are on the same video-absolute clock per
+    ``docs/PROMPT_events_sidecar.md``. Distinct from ``video_start_seconds`` (frame-pdf's own
+    explicit, unconditionally-authoritative field, alembic 0047) -- this one only fills a gap;
+    see ``_resolve_video``."""
+    v = m.get("bout_start_s")
+    if isinstance(v, int):
+        return v
+    raw = m.get("start")
+    return _parse_timestamp(raw) if isinstance(raw, str) else None
+
+
 def _load_url_mapping() -> dict[str, Any]:
     """Load url_mapping.json if available, else return empty dict."""
     try:
@@ -102,6 +117,72 @@ def video_index() -> dict[tuple[frozenset[str], int | None], str]:
             url = f"{base}&t={int(secs)}s" if isinstance(secs, int | float) else base
             index.setdefault((frozenset((athlete_key(a), athlete_key(b))), m.get("year")), url)
     return index
+
+
+_T_PARAM_RE = re.compile(r"[?&]t=(\d+)s?")
+
+
+def _with_t_param(url: str, seconds: int) -> str:
+    """Set/replace the ``&t=<seconds>s`` query param on a YouTube URL."""
+    base = _T_PARAM_RE.sub("", url).rstrip("&?")
+    sep = "&" if "?" in base else "?"
+    return f"{base}{sep}t={seconds}s"
+
+
+def _resolve_video(
+    *,
+    old_url: str | None,
+    old_seconds: int | None,
+    old_ts_origin: str | None,
+    mapped_url: str | None,
+    explicit_seconds: int | None,
+    explicit_ts_origin: str | None,
+    dump_bout_start_s: int | None,
+) -> tuple[str | None, int | None, str | None]:
+    """Video URL + start-offset + clock precedence for one bout, applied at import time.
+
+    ``explicit_seconds``/``explicit_ts_origin`` -- frame-pdf's own ``video_start_seconds``/
+    ``ts_origin`` (alembic 0047) -- are the dump's DECLARED source for that field and always
+    win: a frame-read bout re-asserts its own timing on every reimport, unchanged from the
+    pre-existing behavior.
+
+    Everything else only fills a gap, it never overwrites:
+
+    - ``video_url``: an existing non-null value is kept exactly as-is -- this protects a prior
+      resolution AND a hand fix applied straight to the DB (``scripts/apply_video_fixes.py``),
+      which would otherwise be silently wiped on the next reimport (``run_dump`` deletes and
+      re-inserts every bout in a dump each run). A NULL is filled from ``url_mapping.json``
+      (``video_index()``) -- dumps carry no per-bout URL of their own yet: ``batch_queue.py``
+      parses the transcript's ``Link:`` line but never stores it in the generated dump module.
+    - ``video_start_seconds``/``ts_origin``: an existing non-null value is kept. A NULL is
+      filled from the transcript pipeline's own ``bout_start_s`` (ref-block/splice offset, see
+      ``_dump_bout_start_s``) in preference to whatever ``&t=`` the mapped URL happens to
+      carry -- the dump is the more direct per-bout source, and the two disagree on a
+      measurable slice of the corpus (see ``scripts/backfill_video_offsets.py``).
+    - If a fresh offset is resolved in the same call a URL is also being set, the two are
+      folded together so the URL's ``&t=`` stays consistent with the numeric column.
+    """
+    if explicit_seconds is not None:
+        seconds, ts_origin = explicit_seconds, explicit_ts_origin
+    elif old_seconds is not None:
+        seconds, ts_origin = old_seconds, old_ts_origin
+    elif dump_bout_start_s is not None:
+        seconds, ts_origin = dump_bout_start_s, "video_absolute"
+    else:
+        seconds, ts_origin = None, None
+
+    if old_url is not None:
+        url = old_url
+    else:
+        url = mapped_url
+        if url and seconds is None:
+            m = _T_PARAM_RE.search(url)
+            if m:
+                seconds, ts_origin = int(m.group(1)), "video_absolute"
+        if url and seconds is not None:
+            url = _with_t_param(url, seconds)
+
+    return url, seconds, ts_origin
 
 
 def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
@@ -174,6 +255,8 @@ def build_matches(raw: Dump, *, clean: bool = True) -> list[CanonicalMatch]:
                 submission=clean_label(submission) if (clean and submission) else submission,
                 events=events, strike_count=strike_count,
                 ko_finish=bool(_KO_RE.search(method)), timeline=timeline,
+                ts_origin=m.get("ts_origin"), video_start_seconds=m.get("video_start_seconds"),
+                dump_bout_start_s=_dump_bout_start_s(m),
             )
     return list(seen.values())
 
@@ -231,6 +314,8 @@ def run_dump(
         participants: set[str] = set()
         delete_conds = []
         match_rows: list[dict[str, Any]] = []
+        row_cms: list[CanonicalMatch] = []  # parallel to match_rows, filled in after the
+        # existing-video read below (see ``_resolve_video``)
         for cm in matches:
             a = resolve(cm.a_name, source="manual")
             b = resolve(cm.b_name, source="opponent")
@@ -262,15 +347,44 @@ def run_dump(
                  "actor_id": a.id if e["actor"] == "a" else b.id}
                 for e in cm.events
             ]
-            video_url = videos.get(
-                (frozenset((athlete_key(cm.a_name), athlete_key(cm.b_name))), cm.year)
-            )
             match_rows.append(dict(
                 athlete_a_id=a.id, athlete_b_id=b.id, winner_id=winner_id, win_type=cm.win_type,
                 submission=cm.submission, event=event, year=cm.year,
                 weight_class=None, stage=None, sequence=seq, created_by=None,
-                video_url=video_url, timeline=cm.timeline,
+                video_url=None, timeline=cm.timeline, ts_origin=None, video_start_seconds=None,
             ))
+            row_cms.append(cm)
+
+        # Read whatever video state already exists BEFORE the delete below — a hand fix
+        # (scripts/apply_video_fixes.py) or a prior resolution must survive this reimport,
+        # and the delete+insert below would otherwise silently wipe it (see _resolve_video).
+        existing_video: dict[
+            tuple[frozenset[str], int | None], tuple[str | None, int | None, str | None]
+        ] = {}
+        if delete_conds:
+            for erow in session.execute(
+                select(Match.athlete_a_id, Match.athlete_b_id, Match.year,
+                       Match.video_url, Match.video_start_seconds, Match.ts_origin)
+                .where(or_(*delete_conds))
+            ):
+                pair_key = (frozenset((erow.athlete_a_id, erow.athlete_b_id)), erow.year)
+                existing_video.setdefault(
+                    pair_key, (erow.video_url, erow.video_start_seconds, erow.ts_origin)
+                )
+
+        for row, cm in zip(match_rows, row_cms, strict=True):
+            mapped_url = videos.get(
+                (frozenset((athlete_key(cm.a_name), athlete_key(cm.b_name))), cm.year)
+            )
+            old_url, old_seconds, old_ts_origin = existing_video.get(
+                (frozenset((row["athlete_a_id"], row["athlete_b_id"])), cm.year), (None, None, None)
+            )
+            url, seconds, ts_origin = _resolve_video(
+                old_url=old_url, old_seconds=old_seconds, old_ts_origin=old_ts_origin,
+                mapped_url=mapped_url, explicit_seconds=cm.video_start_seconds,
+                explicit_ts_origin=cm.ts_origin, dump_bout_start_s=cm.dump_bout_start_s,
+            )
+            row["video_url"], row["video_start_seconds"], row["ts_origin"] = url, seconds, ts_origin
 
         # One delete covering every bout in this dump + one bulk insert, instead of a
         # delete+insert round trip per bout (the pair dominated reprocess cost).
