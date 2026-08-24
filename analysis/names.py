@@ -64,6 +64,11 @@ SYNONYMS: dict[str, str] = {
     # split in two with nothing to catch it. Corpus counts settle which way each folds:
     "pull guard": "guard pull",   # 4 raw events vs 170
     "pass": "guard pass",         # 23 raw events vs 120
+    # REVIEWED, NOT MERGED (Q7, 2026-08-24): "katagatame darce" (1 occ) vs "darce choke"
+    # (11 occ). The slash label "Katagatame / Darce" is the narrator refusing to decide
+    # between two DIFFERENT submissions (arm triangle vs d'arce); folding it into either
+    # would assert what the transcript declined to. Stays its own node until footage
+    # settles the single bout that carries it.
 }
 
 

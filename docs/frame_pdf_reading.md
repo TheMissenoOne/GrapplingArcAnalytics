@@ -18,15 +18,19 @@ rendered" and ends at "an answer JSON is ready to import".
 | 3 | Render as a directory instead of a PDF | add `--format frames` | maintainer |
 | 4 | **Read the sheet → answer JSON** | manual, see §2 | vision model |
 | 5 | Validate the answer | `uv run python scripts/frame_answer.py` | maintainer |
-| 6 | **Human review against the frames** | `uv run python scripts/frame_review.py` → localhost:8765 | maintainer |
+| 6 | **Human review against the frames** | `uv run python scripts/frame_registrar.py` → localhost:8765 | maintainer |
 | 7 | **Convert answer → dump shape** | *does not exist yet* — see §4.7 | — |
 | 8 | Import the dump | `scripts/dump_import` | maintainer |
 Step 7 is the live gap: a reviewed answer is still a dead end until someone retypes it into the
 `(athlete_a_name, year)` dump shape `dump_import` expects.
 
-**Answer location (convention, adopted 2026-08-20):** `data/frame_pdf/out/processed/<slug>.json`,
-same slug as the rendered sheet. The `out/processed/` directory already existed but was empty and
-unreferenced by any code; this doc is what makes it the contract.
+**Answer location (real contract, corrected 2026-08-24):** `data/frame_pdf/out/<slug>/events.json`,
+written by `scripts/frame_answer_import.py` (and rewritten by `frame_registrar.py` on save), beside
+the frames it describes. The `out/processed/` convention this doc previously declared was never
+adopted — the directory is empty and unreferenced by any code. The file's `source` field carries
+provenance: `frame_answer_import (…not yet human-reviewed)` for a raw model reading,
+`frame_registrar (human review over model reading)` once a human has passed through the registrar.
+Only reviewed files are admissible for import (§4.7's converter must gate on this).
 
 ## 2. How to read a sheet
 
@@ -224,12 +228,13 @@ file proves nothing. And a null `actor` is REJECTED rather than allowed — the 
 the uncertainty in `note` and still name someone, because a null actor silently drops the event from
 every per-athlete artefact downstream while looking like a recorded observation.
 
-### 4.6b `scripts/frame_review.py` — DONE 2026-08-20
+### 4.6b `scripts/frame_registrar.py` — DONE 2026-08-20 (replaced the planned `frame_review.py`)
 
 The half a validator cannot do: put the event next to the frame it was read off and let a human say
-whether it is there. Writes `review.json` beside `answer.json`, keeping the machine's event AND the
-verdict — a rejected event stays, marked `wrong`, because that is a measurement of the reader and
-deleting it throws the measurement away.
+whether it is there. The registrar edits `events.json` in place; provenance survives the save via
+`stamp_source()` — a save over a model reading stamps `frame_registrar (human review over model
+reading)`, never plain `(human)` (fixed 2026-08-24; before that every save laundered model readings
+into human authorship). `frame_review.py` and `review.json` were never written.
 
 ### 4.7 `scripts/frame_answer_to_dump.py`
 

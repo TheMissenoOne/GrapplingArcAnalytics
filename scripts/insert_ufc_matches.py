@@ -369,6 +369,9 @@ def run(dry_run: bool = False) -> int:
                 winner_id=winner_id,
                 win_type=cm.win_type,
                 submission=cm.submission,
+                # Q8 (2026-08-24): NULL is source truth — ufc_matches_data carries no event
+                # field at all. Backfilling would mean external research; declined (honest
+                # NULL over inferred name). Downstream renders "evento não registrado".
                 event=None,
                 year=cm.year,
                 weight_class=None,
