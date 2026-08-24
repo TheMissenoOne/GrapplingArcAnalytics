@@ -3,19 +3,26 @@
 from __future__ import annotations
 
 import math
+from datetime import datetime
+from typing import Any
 
 from analysis.poc.e0_rating_eval import (
+    K_SWEEP,
+    AthleteEloEngine,
     Bout,
     ConstantBaseline,
     EloEngine,
+    Glicko2PerBout,
     Glicko2Yearly,
     Scored,
     WinRateBaseline,
     _metrics,
     default_engines,
     evaluate,
+    load_db_bouts,
     load_scouting_bouts,
     method_win_type,
+    run_k_sweep,
 )
 
 
@@ -141,6 +148,105 @@ def test_winrate_baseline_moves_with_evidence() -> None:
     assert w.predict("a", "b") == 0.5
     w.observe(Bout("a", "b", 1.0, 2020, "Pts", "F", "E1"))
     assert w.predict("a", "b") > 0.5
+
+
+# ── --source db loader ───────────────────────────────────────────────────────────
+def _db_row(
+    a: str = "a1", b: str = "b1", winner: str | None = "a1", year: int | None = 2020,
+    win_type: str | None = "SUBMISSION", stage: str = "F", event: str = "E1",
+    status: str = "final", created_at: datetime | None = None,
+    sequence: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    return {
+        "athlete_a_id": a, "athlete_b_id": b, "winner_id": winner, "year": year,
+        "win_type": win_type, "stage": stage, "event": event, "status": status,
+        "sequence": sequence if sequence is not None else [], "created_at": created_at,
+    }
+
+
+def test_db_loader_filters_draws_dq_and_non_final() -> None:
+    rows = [
+        _db_row(win_type="SUBMISSION"),                    # eligible
+        _db_row(win_type="DRAW", winner=None),              # excluded win_type
+        _db_row(win_type="DQ"),                              # excluded win_type
+        _db_row(win_type="DECISION", winner=None),           # no winner
+        _db_row(status="draft"),                             # not final
+        _db_row(year=None),                                  # no year
+        _db_row(win_type="POINTS"),                          # eligible
+    ]
+    bouts, dropped = load_db_bouts(rows)
+    assert len(bouts) == 2
+    assert dropped == {"not_final": 1, "excluded_win_type": 2, "no_winner": 1, "no_year": 1}
+
+
+def test_db_loader_orients_blind_and_scores_winner() -> None:
+    rows = [_db_row(a="zzz", b="aaa", winner="zzz")]
+    bouts, _ = load_db_bouts(rows)
+    (b,) = bouts
+    assert b.a == "aaa" and b.b == "zzz"  # a is the lexicographically smaller id
+    assert b.score_a == 0.0  # zzz (== b) won, not a
+
+
+def test_db_loader_orders_by_year_then_created_at() -> None:
+    rows = [
+        _db_row(a="a", b="b1", year=2021, created_at=datetime(2021, 1, 1)),
+        _db_row(a="a", b="b2", year=2020, created_at=datetime(2020, 6, 1)),
+        _db_row(a="a", b="b3", year=2020, created_at=datetime(2020, 1, 1)),
+    ]
+    bouts, _ = load_db_bouts(rows)
+    assert [b.year for b in bouts] == [2020, 2020, 2021]
+    assert bouts[0].b == "b3" and bouts[1].b == "b2"  # earlier created_at first, within year
+
+
+def test_db_loader_carries_sequence_for_the_graph_engine() -> None:
+    events = [{"label": "armbar", "type": "submission", "actor_id": "a1"}]
+    rows = [_db_row(sequence=events)]
+    bouts, _ = load_db_bouts(rows)
+    assert bouts[0].sequence == tuple(events)
+
+
+# ── per-bout-period Glicko-2 ─────────────────────────────────────────────────────
+def test_glicko_per_bout_closes_without_close_year() -> None:
+    g = Glicko2PerBout(tau=0.5)
+    b = Bout("a", "b", 1.0, 2020, "Pts", "F", "E1")
+    p_seed = g.predict("a", "b")
+    g.observe(b)
+    # unlike Glicko2Yearly, the period is already closed -- no close_year() needed
+    assert g.predict("a", "b") > p_seed
+
+
+def test_default_engines_include_both_glicko_period_granularities() -> None:
+    names = {e.name for e in default_engines(taus=(0.5,))}
+    assert "glicko2-tau0.5" in names          # yearly
+    assert "glicko2-perbout-tau0.5" in names  # per-bout
+
+
+# ── athlete_elo graph-growth engine (db-only) ────────────────────────────────────
+def test_athlete_elo_engine_predicts_and_grows_toward_winner() -> None:
+    events = [{"label": "armbar", "type": "submission", "actor_id": "a1", "successful": True}]
+    engine = AthleteEloEngine(rank_targets={"a1": 900.0, "b1": 900.0})
+    p_seed = engine.predict("a1", "b1")
+    assert 0.0 <= p_seed <= 1.0
+    engine.observe(Bout("a1", "b1", 1.0, 2020, "SUBMISSION", "F", "E1", sequence=tuple(events)))
+    assert "a1" in engine.mean  # winner's side contributed a node -> graph mean recorded
+
+
+def test_athlete_elo_engine_skips_bouts_without_sequence() -> None:
+    engine = AthleteEloEngine(rank_targets={})
+    engine.observe(Bout("a1", "b1", 1.0, 2020, "SUBMISSION", "F", "E1"))
+    assert engine.mean == {}  # no sequence -> nothing to replay, no crash
+
+
+# ── K sweep ───────────────────────────────────────────────────────────────────────
+def test_k_sweep_covers_full_grid_flat_and_mult() -> None:
+    bouts = _synthetic()
+    rows = run_k_sweep(bouts, n_boot=50)
+    assert len(rows) == len(K_SWEEP) * 2
+    assert {k for k, _, _ in rows} == set(K_SWEEP)
+    assert {label for _, label, _ in rows} == {"flat", "mult"}
+    for _, _, rep in rows:
+        assert rep.overall["n"] > 0
+        assert "log_loss" in rep.overall
 
 
 # ── committed user-export fixture (owner-consented; see analysis/poc/fixtures.py) ──

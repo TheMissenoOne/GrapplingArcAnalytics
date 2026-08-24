@@ -31,12 +31,18 @@ BETWEEN engines on one corpus is still fair — they all see the same stream —
 run this against the DB corpus before treating any absolute number as the engine's
 quality. The graph-growth engine (`athlete_elo`) needs per-match sequences and is
 therefore not comparable on a records-only corpus; it joins when run with
-``--source db``.
+``--source db``. ``AthleteEloEngine`` below calls the real ``athlete_elo.replay_matches``
+(not a reimplementation) -- it is a batch replay toward a rank-ELO target, not natively
+predict-then-update, so the adapter re-replays each athlete's own history-so-far on every
+observed bout and caches the resulting graph-mean ELO, predicting via the same /400
+logistic the other engines use. Bounded cost on this corpus (<= ~100 bouts for the
+busiest athlete).
 
 Usage::
 
     uv run python -m analysis.poc.e0_rating_eval                 # scouting corpus
-    uv run python -m analysis.poc.e0_rating_eval --out docs/research/poc/e0.md
+    uv run python -m analysis.poc.e0_rating_eval --source db     # closed `matches` corpus
+    uv run python -m analysis.poc.e0_rating_eval --source all --out docs/research/poc/e0.md
 """
 
 from __future__ import annotations
@@ -48,9 +54,12 @@ import unicodedata
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
+from analysis import athlete_elo
 from analysis.rating_v2.glicko2 import expected_score, update_period
 from analysis.rating_v2.models import Observation, RatingState
 from analysis.stats_rigor import bootstrap_ci
@@ -72,6 +81,7 @@ GLICKO_SEED_RATING = 1750.0   # rating_v2 config: athlete_seed
 GLICKO_SEED_RD = 250.0
 GLICKO_SEED_VOL = 0.06
 TAU_SWEEP = (0.2, 0.5, 0.8, 1.2)
+K_SWEEP = (10.0, 20.0, 30.0, 40.0, 60.0, 80.0)
 
 
 # ── corpus ──────────────────────────────────────────────────────────────────────
@@ -87,6 +97,10 @@ class Bout:
     method: str
     stage: str
     comp: str
+    # Raw match events (``{label, type, actor_id, successful?}``), db source only --
+    # needed by AthleteEloEngine to replay each athlete's own perspective. Empty for
+    # the scouting records, which carry no event-level data.
+    sequence: tuple[Mapping[str, Any], ...] = ()
 
 
 def _fold(s: str | None) -> str:
@@ -161,6 +175,95 @@ def load_scouting_bouts(path: Path = SCOUTING_RECORDS) -> tuple[list[Bout], dict
 
     bouts.sort(key=lambda x: (x.year, x.comp, x.stage, x.a, x.b))
     return bouts, dropped
+
+
+DB_WIN_TYPES = ("SUBMISSION", "POINTS", "DECISION")
+
+
+def load_db_bouts(
+    rows: Sequence[Any] | None = None,
+) -> tuple[list[Bout], dict[str, int]]:
+    """Chronological bout stream from the closed ``matches`` corpus (read-only).
+
+    Eligible: ``status == 'final'``, ``win_type`` one of SUBMISSION/POINTS/DECISION
+    (drops DRAW, DQ, INJURY, NULL), and a known ``winner_id`` (drops the residual
+    decisions scraped without one). Ordered by ``(year, created_at)`` -- the corpus's
+    actual chronology (unlike the scouting loader, which has no ``created_at`` and
+    falls back to a deterministic (comp, stage, pair) tiebreak).
+
+    ``rows`` injectable for tests (mapping-like rows, e.g. sqlalchemy ``RowMapping``
+    or plain dicts with the same keys); ``None`` reads the live DB.
+    """
+    resolved: Sequence[Any]
+    if rows is None:
+        from sqlalchemy import select
+
+        from db.base import db_session
+        from db.models import Match
+
+        with db_session() as session:
+            resolved = (
+                session.execute(
+                    select(
+                        Match.athlete_a_id, Match.athlete_b_id, Match.winner_id,
+                        Match.year, Match.win_type, Match.stage, Match.event,
+                        Match.status, Match.sequence, Match.created_at,
+                    )
+                )
+                .mappings()
+                .all()
+            )
+    else:
+        resolved = rows
+
+    dropped = {"not_final": 0, "excluded_win_type": 0, "no_winner": 0, "no_year": 0}
+    eligible: list[Any] = []
+    for r in resolved:
+        if r["status"] != "final":
+            dropped["not_final"] += 1
+            continue
+        if (r["win_type"] or "").upper() not in DB_WIN_TYPES:
+            dropped["excluded_win_type"] += 1
+            continue
+        if not r["winner_id"]:
+            dropped["no_winner"] += 1
+            continue
+        if not r["year"]:
+            dropped["no_year"] += 1
+            continue
+        eligible.append(r)
+
+    eligible.sort(key=lambda r: (r["year"], r["created_at"] or datetime.min))
+
+    bouts: list[Bout] = []
+    for r in eligible:
+        aid_a, aid_b = str(r["athlete_a_id"]), str(r["athlete_b_id"])
+        a, b = sorted((aid_a, aid_b))
+        bouts.append(Bout(
+            a=a, b=b, score_a=1.0 if str(r["winner_id"]) == a else 0.0,
+            year=int(r["year"]), method=str(r["win_type"] or "").upper(),
+            stage=str(r["stage"] or ""), comp=str(r["event"] or ""),
+            sequence=tuple(r["sequence"] or ()),
+        ))
+    return bouts, dropped
+
+
+def load_rank_elo(rows: Sequence[Any] | None = None) -> dict[str, float]:
+    """``Athlete.rank_elo`` by id -- the ADCC leaderboard target ``athlete_elo`` replays
+    toward. Injectable for tests; ``None`` reads the live DB."""
+    resolved: Sequence[Any]
+    if rows is None:
+        from sqlalchemy import select
+
+        from db.base import db_session
+        from db.models import Athlete
+
+        with db_session() as session:
+            stmt = select(Athlete.id, Athlete.rank_elo).where(Athlete.rank_elo.is_not(None))
+            resolved = session.execute(stmt).mappings().all()
+    else:
+        resolved = rows
+    return {str(r["id"]): float(r["rank_elo"]) for r in resolved}
 
 
 # ── engines ─────────────────────────────────────────────────────────────────────
@@ -261,6 +364,93 @@ class Glicko2Yearly:
         self.pending.clear()
 
 
+class Glicko2PerBout:
+    """Glicko-2 with one bout = one rating period, closed immediately after both sides
+    observe it -- e0_notes' predicted fix for period granularity (each bout updates the
+    state a prediction three bouts later can already see, matching Elo's per-bout update
+    cadence instead of freezing a whole year at once)."""
+
+    def __init__(self, tau: float = 0.5) -> None:
+        self.tau = tau
+        self.name = f"glicko2-perbout-tau{tau:g}"
+        self.states: dict[str, RatingState] = {}
+
+    def _state(self, key: str) -> RatingState:
+        return self.states.get(key, RatingState(GLICKO_SEED_RATING, GLICKO_SEED_RD,
+                                                GLICKO_SEED_VOL))
+
+    def predict(self, a: str, b: str) -> float:
+        sa, sb = self._state(a), self._state(b)
+        return expected_score(sa.rating, sa.deviation, sb.rating, sb.deviation)
+
+    def observe(self, bout: Bout) -> None:
+        sa, sb = self._state(bout.a), self._state(bout.b)
+        self.states[bout.a] = update_period(
+            sa, [Observation(sb.rating, sb.deviation, bout.score_a)], tau=self.tau)
+        self.states[bout.b] = update_period(
+            sb, [Observation(sa.rating, sa.deviation, 1.0 - bout.score_a)], tau=self.tau)
+
+    def close_year(self) -> None:
+        pass  # periods close per-bout in observe(), not at year boundary
+
+
+class AthleteEloEngine:
+    """Adapter over the real graph-growth engine (``analysis.athlete_elo.replay_matches``),
+    not a reimplementation. That engine batch-replays ONE athlete's own match history
+    toward a rank-ELO target, so it has no native symmetric predict(a, b); this adapter
+    re-replays each side's updated history-so-far on every observed bout (bounded on this
+    corpus -- busiest athlete tops out around 100 bouts) and caches the resulting graph-mean
+    ELO, predicting with the same /400 logistic (``athlete_elo.expected``) the other engines
+    use. DB-only: needs per-bout ``sequence`` + ``Athlete.rank_elo``, neither on the
+    scouting records.
+
+    Known simplification: ``Match`` rows carry no per-bout date (only ``year`` and
+    ``created_at``), so every replayed match gets ``date=None`` -- ``athlete_elo``'s
+    temporal K-decay is inert here rather than biased by wall-clock run time.
+    """
+
+    name = "athlete-elo"
+
+    def __init__(self, rank_targets: Mapping[str, float]) -> None:
+        self.rank_targets = rank_targets
+        self.history: dict[str, list[Any]] = defaultdict(list)
+        self.opp_elos: dict[str, list[float]] = defaultdict(list)
+        self.mean: dict[str, float] = {}
+
+    def _target(self, athlete: str) -> float:
+        return self.rank_targets.get(athlete, athlete_elo.BASE_BLACKBELT_ELO)
+
+    def predict(self, a: str, b: str) -> float:
+        ra = self.mean.get(a, self._target(a))
+        rb = self.mean.get(b, self._target(b))
+        return athlete_elo.expected(ra, rb)
+
+    def observe(self, bout: Bout) -> None:
+        if not bout.sequence:
+            return
+        for me, opp, won in ((bout.a, bout.b, bout.score_a == 1.0),
+                             (bout.b, bout.a, bout.score_a == 0.0)):
+            events = [
+                {"label": e.get("label", ""), "type": e.get("type", ""),
+                 "actor": "you" if e.get("actor_id") == me else "opponent"}
+                for e in bout.sequence
+            ]
+            match = SimpleNamespace(
+                sequence=events, won=won, win_type=bout.method, date=None,
+                id=f"{bout.year}-{bout.comp}-{me}-{len(self.history[me])}",
+            )
+            self.history[me].append(match)
+            self.opp_elos[me].append(self._target(opp))
+            _, snapshots = athlete_elo.replay_matches(
+                me, self.history[me], self._target(me), self.opp_elos[me], belt="black",
+            )
+            if snapshots:
+                self.mean[me] = snapshots[-1]
+
+    def close_year(self) -> None:
+        pass
+
+
 # ── evaluation ──────────────────────────────────────────────────────────────────
 @dataclass
 class Scored:
@@ -338,7 +528,21 @@ def default_engines(taus: Sequence[float] = TAU_SWEEP) -> list[Any]:
     engines: list[Any] = [ConstantBaseline(), WinRateBaseline(),
                           EloEngine(), EloEngine(use_mults=False)]
     engines += [Glicko2Yearly(tau=t) for t in taus]
+    engines.append(Glicko2PerBout(tau=0.5))
     return engines
+
+
+def run_k_sweep(
+    bouts: Sequence[Bout], k_values: Sequence[float] = K_SWEEP, n_boot: int = 2000,
+) -> list[tuple[float, str, EngineReport]]:
+    """Elo K sweep by predictive log loss -- flat and win-type/stage-multiplied,
+    replacing ``calibrate_k_factor``'s target-sigma criterion (ADR-03)."""
+    rows: list[tuple[float, str, EngineReport]] = []
+    for k in k_values:
+        for use_mults, label in ((True, "mult"), (False, "flat")):
+            rep = evaluate(bouts, [EloEngine(k=k, use_mults=use_mults)], n_boot=n_boot)[0]
+            rows.append((k, label, rep))
+    return rows
 
 
 # ── report ──────────────────────────────────────────────────────────────────────
@@ -350,10 +554,11 @@ def _fmt(m: Mapping[str, Any]) -> str:
 
 
 def render_markdown(reports: Sequence[EngineReport], bouts: Sequence[Bout],
-                    dropped: Mapping[str, int], source: str) -> str:
+                    dropped: Mapping[str, int], source: str,
+                    k_rows: Sequence[tuple[float, str, EngineReport]] | None = None) -> str:
     years = sorted({b.year for b in bouts})
     lines = [
-        "# PoC-E0 — rating-engine log-loss harness: first run",
+        f"# PoC-E0 — rating-engine log-loss harness: {source} run",
         "",
         f"Source: **{source}** · {len(bouts)} distinct bouts, {years[0]}–{years[-1]}"
         f" · dropped: {dict(dropped)} · burn-in: first corpus year unscored ·"
@@ -375,20 +580,41 @@ def render_markdown(reports: Sequence[EngineReport], bouts: Sequence[Bout],
                   "|---|---|---|---|---|"]
         for r in sorted(reports, key=lambda r: r.slices[slice_name].get("log_loss", 9)):
             lines.append(f"| {r.name} " + _fmt(r.slices[slice_name]))
+    if k_rows:
+        lines += ["", "## K sweep — Elo by log loss (flat and win-type/stage multiplied)",
+                  "", "| K | variant | n | log loss [95% CI] | Brier | accuracy |",
+                  "|---|---|---|---|---|---|"]
+        for k, label, rep in k_rows:
+            lines.append(f"| {k:g} | {label} " + _fmt(rep.overall))
+        best_k, best_label, best_rep = min(k_rows, key=lambda t: t[2].overall.get("log_loss", 9))
+        lines += ["", f"Best by log loss: K={best_k:g} ({best_label}), "
+                      f"{best_rep.overall['log_loss']:.4f}."]
     return "\n".join(lines) + "\n"
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--source", default="scouting", choices=["scouting"],
-                    help="bout stream (db source lands when a DATABASE_URL run is possible)")
+    ap.add_argument("--source", default="scouting", choices=["scouting", "db", "all"],
+                    help="bout stream: scouting records, closed `matches` db corpus, or both")
     ap.add_argument("--out", default=str(REPO / "docs" / "research" / "poc" / "e0.md"))
     ap.add_argument("--n-boot", type=int, default=2000)
     args = ap.parse_args(argv)
 
-    bouts, dropped = load_scouting_bouts()
-    reports = evaluate(bouts, default_engines(), n_boot=args.n_boot)
-    md = render_markdown(reports, bouts, dropped, source=args.source)
+    sources = ["scouting", "db"] if args.source == "all" else [args.source]
+    sections: list[str] = []
+    for source in sources:
+        if source == "scouting":
+            bouts, dropped = load_scouting_bouts()
+            engines = default_engines()
+        else:
+            bouts, dropped = load_db_bouts()
+            engines = default_engines()
+            engines.append(AthleteEloEngine(load_rank_elo()))
+        reports = evaluate(bouts, engines, n_boot=args.n_boot)
+        k_rows = run_k_sweep(bouts, n_boot=args.n_boot)
+        sections.append(render_markdown(reports, bouts, dropped, source=source, k_rows=k_rows))
+
+    md = "\n---\n\n".join(sections)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(md, encoding="utf-8")
