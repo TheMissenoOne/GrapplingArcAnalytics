@@ -389,7 +389,9 @@ def directional(ev: Mapping[str, Any]) -> bool:
 
 
 # ── sequence normalization ──────────────────────────────────────────────────────
-def normalize_chain(events: Sequence[Mapping[str, Any]]) -> tuple[list[str], dict[str, int]]:
+def normalize_chain(
+    events: Sequence[Mapping[str, Any]],
+) -> tuple[list[str], dict[str, int | dict[str, int]]]:
     """A bout-side's event chain with consecutive repeats folded, for transition analysis only.
 
     A transition graph built straight off the raw rows is dominated by edges that say nothing.

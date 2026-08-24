@@ -204,7 +204,8 @@ already cross-actor at the risk term.
    strongest point).
 2. Data: the committed fixture first (`analysis/poc/fixtures.py` — app actors are
    structurally reliable), then corpus bouts **gated on
-   `attribution.bout_flags(...).perspective_reliable`** (43.9% of bouts fail it;
+   `attribution.bout_flags(...)["perspective_reliable"]`** — `bout_flags` returns a
+   plain dict, not the `Attribution` dataclass (43.9% of bouts fail it;
    ungated interaction edges there measure the ingest batch).
 3. Measure: (a) reproduce the fixture findings with our own code (actor-switch
    edge count, PageRank rank shifts vs ActionFlow); (b) re-run the PtV absorbing

@@ -30,12 +30,17 @@ EDITORIAL = EditorialBreakdown(thesis="option reduction",
                                segments={"editorial:14": "This is where it changed."})
 
 
-def beat(**kw):
-    base = {"kind": BeatKind.HOOK, "duration": 3.0, "headline": "The finish started earlier."}
-    return VideoBeat(**{**base, **kw})
+def beat(kind: BeatKind = BeatKind.HOOK, duration: float = 3.0,
+         headline: str | None = "The finish started earlier.",
+         body: str | None = None,
+         claims: list[Claim] | None = None,
+         visual: VisualSpec | None = None) -> VideoBeat:
+    return VideoBeat(kind=kind, duration=duration, headline=headline, body=body,
+                      claims=claims if claims is not None else [],
+                      visual=visual if visual is not None else VisualSpec())
 
 
-def brief(beats, target=None):
+def brief(beats: list[VideoBeat], target: float | None = None) -> VideoBrief:
     total = sum(b.duration for b in beats)
     return VideoBrief("m", "t", "thesis", target if target is not None else total, beats)
 

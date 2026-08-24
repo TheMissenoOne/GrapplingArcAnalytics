@@ -26,7 +26,7 @@ Nothing in this module knows about grappling. It takes counts.
 from __future__ import annotations
 
 import math
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass
 from typing import Any
 
@@ -316,6 +316,7 @@ def bootstrap_ci(values: Sequence[float], statistic: Any, n_boot: int = 5000,
     obs = float(statistic(values))
     tail = (1 - _two_sided_mass(z)) / 2
 
+    draw: Callable[[], list[float]]
     if groups is None:
         n = len(values)
         draw = lambda: [values[rng.randrange(n)] for _ in range(n)]  # noqa: E731

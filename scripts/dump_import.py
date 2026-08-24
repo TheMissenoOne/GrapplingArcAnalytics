@@ -33,7 +33,7 @@ from scripts.insert_ufc_matches import (
 
 logger = logging.getLogger(__name__)
 
-Dump = list[dict[tuple[str, int], dict[str, Any]]]
+Dump = list[dict[tuple[str, int | None], dict[str, Any]]]
 
 
 def _build_timeline(

@@ -217,12 +217,13 @@ def _e(ts: int, ty: str, label: str, actor: str) -> dict[str, object]:
     return {"ts": ts, "type": ty, "label": label, "actor_id": actor}
 
 
-TWO_SIDED = _bout("b1", [
+TWO_SIDED_SEQ: list[dict[str, object]] = [
     _e(30, "guard", "Half Guard", "B"),          # the opponent is underneath
     _e(45, "pass", "Knee Cut Pass", "A"),        # the roster athlete passes
     _e(70, "control", "Back Control", "A"),      # ... and takes the back
     _e(95, "submission", "Rear Naked Choke", "A"),
-])
+]
+TWO_SIDED = _bout("b1", TWO_SIDED_SEQ)
 
 
 def test_a_named_actor_produces_both_a_favor_and_a_contra() -> None:
@@ -277,7 +278,7 @@ def test_a_bout_that_contradicts_itself_keeps_perspective_and_loses_topology() -
 
 
 def test_a_bookkeeping_row_never_reaches_a_node_list() -> None:
-    junk = _bout("b4", [*TWO_SIDED["seq"], _e(120, "match", "Match", "A")])
+    junk = _bout("b4", [*TWO_SIDED_SEQ, _e(120, "match", "Match", "A")])
     out = bx.sequence_layer([junk], "65 kg")
     labels = [n["label"] for cat in ("state", "action", "transition")
               for p in ("favor", "contra") for n in out["nodes"][p][cat]]
@@ -676,7 +677,7 @@ def test_radar_usage_goes_through_the_coverage_gate() -> None:
     precision grade BESIDE a coverage block that refused the estimate -- the -65 kg `pass`
     axis read 'top precision' and '3 sources; a category estimate needs 5' in one row.
     Below the gate the usage cell must refuse like every other category estimate."""
-    def bout(i: int) -> dict:
+    def bout(i: int) -> dict[str, object]:
         # one division athlete per bout: a{i} lands one pass and one control
         seq = [{"actor_id": f"a{i}", "type": "pass"},
                {"actor_id": f"a{i}", "type": "control"}]

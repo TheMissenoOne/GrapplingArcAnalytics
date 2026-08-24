@@ -17,7 +17,11 @@ jobs:
       - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-      - run: uv sync --all-extras
+      # The video extra (manimgl/moviepy/playwright) assumes system toolchains the
+      # runner lacks (Pango headers, g++/OpenGL) -- its own pyproject comment says the
+      # base env must not need them. Building it here killed every CI run at sync
+      # since 2026-08-20, masking real mypy debt behind a build failure.
+      - run: uv sync --all-extras --no-extra video
       - run: uv run ruff check .
       - run: uv run mypy .
       - run: uv run pytest

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import networkx as nx
 import numpy as np
 import pytest
 
@@ -113,8 +114,7 @@ class TestWalkPath:
     np.random.choice unnormalised, so any graph big enough to walk raised
     ValueError and only the small-graph fallback was ever exercised."""
 
-    def _graph(self):
-        import networkx as nx
+    def _graph(self) -> nx.DiGraph:
         g = nx.DiGraph()
         for a, b in [("guard", "sweep"), ("sweep", "mount"), ("mount", "armbar"),
                      ("guard", "armbar"), ("armbar", "guard")]:
