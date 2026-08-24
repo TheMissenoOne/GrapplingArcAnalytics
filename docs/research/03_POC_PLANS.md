@@ -42,6 +42,14 @@ Build `analysis/poc/e0_rating_eval.py`:
 sanity. Every subsequent engine claim in these repos cites its number from this
 harness. **Effort:** 2–3 days. **Risk:** none (read-only).
 
+> **STATUS 2026-08-23: BUILT AND ACCEPTED.** `analysis/poc/e0_rating_eval.py` +
+> `tests/test_poc_e0.py` (11 tests). First run on the scouting corpus (689 scored
+> bouts): tables in `poc/e0.md`, reading in `poc/e0_notes.md`. Findings: Elo K=40
+> with multipliers wins (log loss 0.5174 / acc 0.747); the τ sweep is a four-decimal
+> null (FightMatrix confirmed); yearly-period Glicko-2 trails the win-rate baseline —
+> period granularity, not τ, is the lever. No production change; `--source db` run,
+> per-bout-period Glicko variant, and a K sweep are the recorded next actions.
+
 App-side twin (smaller): wire the exported-but-uncalled `expectedScore` into a
 replay-based log-loss over `entry.successful` on the last 20% of sessions, per
 athlete with ≥30 sessions (`churnReport`'s own floor). This is the pre-registered
