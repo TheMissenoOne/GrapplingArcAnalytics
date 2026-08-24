@@ -77,13 +77,17 @@ def role_map(events: Sequence[Mapping[str, Any]], perspective: Any | None) -> di
     return {a: (YOU if i == 0 else OPP) for i, a in enumerate(actors)}
 
 
-def _chain(
-    sequence: Sequence[Mapping[str, Any]], perspective: Any | None
+def chain_segments(
+    sequence: Sequence[Mapping[str, Any]], perspective: Any | None = None
 ) -> list[list[dict[str, Any]]]:
     """One bout → the segments of consecutive events that carry a readable actor.
 
     An event with no actor BREAKS the chain instead of being dropped through: joining
     its neighbours would invent a succession across an event nobody can attribute.
+
+    Public because it is this kernel's definition of "what follows what" — the Markov
+    order probe (PoC-E4) has to score the SAME successions the graph is built from, and
+    a second copy of this loop would be free to drift away from ``interaction_graph``.
     """
     roles = role_map(sequence, perspective)
     segments: list[list[dict[str, Any]]] = [[]]
@@ -147,7 +151,7 @@ def interaction_graph(
 
     for i, seq in enumerate(sequences):
         persp = perspectives[i] if perspectives is not None else None
-        for events in _chain(seq, persp):
+        for events in chain_segments(seq, persp):
             for e in events:
                 occ[e["id"]] += 1
                 if e["ok"]:

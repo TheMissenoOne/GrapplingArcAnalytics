@@ -38,7 +38,13 @@ v(n) = clamp₋₁¹( shaping(n) + p_reward(n)·(+1) + p_risk(n)·(−1)
   0.26 — consistent with `route_to_submission`'s max_steps=6 horizon and with xT's
   effective ~5-iteration lookahead.
 - `ponytail:` fixed γ + fixed shaping weights; ceiling = calibrating γ against held-out
-  finish prediction (VAEP-style). Both are explicit keyword args.
+  finish prediction (VAEP-style). Both are explicit keyword args (`gamma`, `shaping_w`).
+- **The ceiling was measured** (PoC-E4, `docs/research/poc/e4.md`): γ swept over
+  {0.60…0.95} × shaping {on, off} on held-out finish prediction, temporal split, both
+  kernels. Read that report before changing either constant — the short version is that no
+  γ in the grid is distinguishable from 0.8 on this corpus, so the value stayed, and the
+  first-order kernel survived a second-order comparison. Neither is "assumed" any more;
+  both are "measured and not resolvable", which is a different and weaker claim.
 
 ## Edge PtV & derived metrics
 

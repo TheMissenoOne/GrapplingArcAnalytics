@@ -72,6 +72,7 @@ from analysis.transitions.build_graph import network_from_sequences
 from analysis.transitions.interaction_graph import (
     OPP,
     YOU,
+    chain_segments,
     interaction_graph,
     node_id,
     node_key,
@@ -106,11 +107,20 @@ class Bout:
 
 @dataclass(frozen=True)
 class Kernel:
-    """A named way to turn bouts into a graph and an event into a node of it."""
+    """A named way to turn bouts into a graph, an event into a node of it, and a bout
+    into the node chains that graph's edges are counted from.
+
+    ``chains`` exists so a model of the SUCCESSIONS (PoC-E4's Markov-order probe) reads
+    the same definition of "what follows what" as ``build`` does — one bout can yield
+    several chains (one per actor on ActionFlow, one per attributable segment on the
+    interaction kernel), and consecutive repeats are folded out, matching both builders'
+    ``a != b`` edge rule.
+    """
 
     name: str
     build: Callable[[Sequence[Bout]], nx.DiGraph]
     node_of: Callable[[Mapping[str, Any]], str]
+    chains: Callable[[Bout], list[list[str]]]
 
 
 @dataclass
@@ -126,6 +136,14 @@ class KernelResult:
     verdict: str
     cold_rows: int
     scores: list[float] = field(default_factory=list)
+    # Bout-clustered interval, filled by PoC-E4 (rows inside one bout are consecutive events
+    # of one fight, so the row-level `lo`/`hi` above are anti-conservative). NaN = not computed.
+    clo: float = float("nan")
+    chi: float = float("nan")
+    # Share of train nodes whose value saturated at the ±1 clamp. A value function that is
+    # mostly clamped has no ranking left to score, which is how a γ/shaping pair can be
+    # significantly WORSE than another without anything being wrong with the corpus (PoC-E4).
+    clamped: float = 0.0
 
 
 def temporal_split(
@@ -209,17 +227,22 @@ def rank_auc(scores: Sequence[float], labels: Sequence[bool]) -> float:
 
 
 def _boot_ci(
-    labels: Sequence[bool], statistic: Callable[[Sequence[int]], float], n_boot: int
+    labels: Sequence[bool], statistic: Callable[[Sequence[int]], float], n_boot: int,
+    groups: Sequence[Any] | None = None,
 ) -> tuple[float, float, float]:
     """Percentile bootstrap over EVAL ROWS via ``stats_rigor.bootstrap_ci``.
 
     ``bootstrap_ci`` resamples a list of floats, so what it is handed is row INDICES
     (as floats) and the statistic recomputes on the drawn rows — the only way to keep
     two kernels' scores PAIRED inside a generic resampler.
+
+    ``groups`` = one bout key per row makes the resampling unit the BOUT. Rows inside one
+    bout are not independent (they are consecutive events of the same fight), so the
+    row-level interval is anti-conservative; PoC-E4 reports both.
     """
     idx = [float(i) for i in range(len(labels))]
     return bootstrap_ci(idx, lambda s: statistic([int(x) for x in s]),
-                        n_boot=n_boot, seed=SEED)
+                        n_boot=n_boot, seed=SEED, groups=groups)
 
 
 def evaluate_kernels(
@@ -228,47 +251,85 @@ def evaluate_kernels(
     kernels: Sequence[Kernel],
     k: int = FINISH_WINDOW,
     n_boot: int = 4000,
+    value_fn: Callable[[nx.DiGraph], dict[str, float]] = path_to_victory,
+    groups: Sequence[Any] | None = None,
 ) -> tuple[list[KernelResult], list[bool]]:
-    """Fit each kernel on ``train``, score the SAME held-out rows, AUC per kernel."""
+    """Fit each kernel on ``train``, score the SAME held-out rows, AUC per kernel.
+
+    ``value_fn`` is how PoC-E4 sweeps: a (γ, shaping) pair is a partially-applied
+    ``path_to_victory``, and everything else — label, split, rows, pairing — is held
+    fixed by construction. ``groups`` (one cluster label per eval row) switches the
+    interval to a CLUSTER bootstrap; ``None`` keeps E8's row-level resample.
+    """
     rows = eval_rows(held_out, k)
     labels = [y for _, y in rows]
     n_pos = sum(1 for y in labels if y)
     results: list[KernelResult] = []
     for kern in kernels:
         g = kern.build(train)
-        v = path_to_victory(g)
+        v = value_fn(g)
         scores = [v.get(kern.node_of(e), COLD_SCORE) for e, _ in rows]
         cold = sum(1 for e, _ in rows if kern.node_of(e) not in v)
         if n_pos and n_pos < len(labels):
             def stat(s: Sequence[int], sc: list[float] = scores) -> float:
                 return rank_auc([sc[i] for i in s], [labels[i] for i in s])
 
-            obs, lo, hi = _boot_ci(labels, stat, n_boot)
+            obs, lo, hi = _boot_ci(labels, stat, n_boot, groups)
         else:
             obs = lo = hi = float("nan")
+        clamped = (sum(1 for x in v.values() if abs(x) >= 0.9999) / len(v)) if v else 0.0
         results.append(KernelResult(kern.name, g.number_of_nodes(), g.number_of_edges(),
                                     obs, lo, hi, n_pos, len(labels) - n_pos,
                                     "chance" if not (lo > 0.5 or hi < 0.5) else "separates",
-                                    cold, scores))
+                                    cold, scores, clamped=clamped))
     return results, labels
 
 
 def paired_delta_auc(
-    a: KernelResult, b: KernelResult, labels: Sequence[bool], n_boot: int = 2000
+    a: KernelResult, b: KernelResult, labels: Sequence[bool], n_boot: int = 2000,
+    groups: Sequence[Any] | None = None,
 ) -> tuple[float, float, float]:
     """AUC(a) − AUC(b) with a paired percentile-bootstrap interval over eval rows."""
     return _boot_ci(labels, lambda s: (
         rank_auc([a.scores[i] for i in s], [labels[i] for i in s])
-        - rank_auc([b.scores[i] for i in s], [labels[i] for i in s])), n_boot)
+        - rank_auc([b.scores[i] for i in s], [labels[i] for i in s])), n_boot, groups)
 
 
 # ── the two kernels ─────────────────────────────────────────────────────────────
+def _fold_repeats(chain: Sequence[str]) -> list[str]:
+    """Drop consecutive duplicates — an ``A → A`` step is not a transition (both
+    builders refuse that edge; a successor model has to refuse it too)."""
+    out: list[str] = []
+    for s in chain:
+        if not out or out[-1] != s:
+            out.append(s)
+    return out
+
+
+def _actionflow_chains(b: Bout) -> list[list[str]]:
+    """One chain per actor: that fighter's own ordered labels, which is exactly the
+    succession ``network_from_sequences`` builds its edges from."""
+    by_actor: defaultdict[Any, list[str]] = defaultdict(list)
+    for e in b.sequence:
+        actor = e.get("actor_id", e.get("actor"))
+        label = clean_label(str(e.get("label", "")), str(e.get("type", "")))
+        if actor is not None and label:
+            by_actor[actor].append(label)
+    return [c for c in (_fold_repeats(v) for v in by_actor.values()) if len(c) > 1]
+
+
+def _interaction_chains(b: Bout) -> list[list[str]]:
+    return [c for c in (_fold_repeats([e["id"] for e in seg])
+                        for seg in chain_segments(b.sequence, b.perspective)) if len(c) > 1]
+
+
 def actionflow_kernel() -> Kernel:
     """Production ActionFlow (within-actor), untouched."""
     return Kernel(
         name="actionflow (within-actor)",
         build=lambda bouts: network_from_sequences([b.sequence for b in bouts]),
         node_of=lambda e: clean_label(str(e.get("label", "")), str(e.get("type", ""))),
+        chains=_actionflow_chains,
     )
 
 
@@ -279,6 +340,7 @@ def interaction_kernel() -> Kernel:
                                               [b.perspective for b in bouts]),
         node_of=lambda e: node_id(YOU, node_key(str(e.get("label", "")),
                                                 str(e.get("type", "")))),
+        chains=_interaction_chains,
     )
 
 

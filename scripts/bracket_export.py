@@ -974,6 +974,17 @@ def _sequence_block(mine: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
 
     ``path_to_victory`` and ``path_to_defeat`` stay a-favor-only and stay apart. Averaging the
     winner's chain with the loser's would describe a bout nobody fought.
+
+    ⚠️ NAME COLLISION, deliberate and bounded. These two JSON keys are OBSERVED transition
+    distributions over the chains of bouts won / lost. They are neither
+    ``analysis/path_to_victory.py`` (the discounted absorbing value model) nor
+    ``network_metrics.route_to_submission`` (the greedy six-step walk) — three different
+    objects, and only the first is "Path-to-Victory". Nothing renders these keys under that
+    name: BracketAnalysis titles them "Chegou aqui, venceu -- e depois?" (``app.js``) and
+    "Quando chega aqui, o que vem depois" (``explorar.js``). Keep it that way; renaming the
+    keys is a BracketAnalysis contract change (``app.js``, ``explorar.js``,
+    ``tools/validate.py:REQUIRED_SEQ``), not a docstring edit. Audited by PoC-E4's naming
+    rider (``docs/research/poc/e4.md``).
     """
     bout_events = own_events = 0          # for the perspective block below
     gaps: Counter[int] = Counter()

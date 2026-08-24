@@ -234,7 +234,17 @@ def reward_risk_ranking(
 
 
 def route_to_submission(g: nx.DiGraph, start: str, max_steps: int = 6) -> list[str]:
-    """Greedy highest-probability walk from ``start`` until a submission node (or a dead end)."""
+    """Greedy highest-probability walk from ``start`` until a submission node (or a dead end).
+
+    **This is NOT Path-to-Victory and must never be presented under that name.** PtV
+    (``analysis/path_to_victory.py``) is a discounted absorbing/value model that scores every
+    node by its whole downstream distribution; this is a single greedy walk capped at six
+    steps, which answers "what is the modal route from here" and nothing about value. The
+    external PoC review (``docs/research/05_EXTERNAL_POC_REVIEW.md`` §4) mistook one for the
+    other; the audit that closed it is PoC-E4's rider (``docs/research/poc/e4.md``). Its only
+    caller is ``analysis/insights.py``, under the heading "Highest-probability routes to a
+    finish" — keep any new caller's label equally distinct.
+    """
     if start not in g:
         return []
     path = [start]

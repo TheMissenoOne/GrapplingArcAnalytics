@@ -9,8 +9,12 @@ generalization (xT / VAEP / hockey-Q family — see docs/path_to_victory.md):
 All functions are pure on the ``network_from_sequences`` graph (or raw sequences where
 noted), mirroring ``network_metrics``. Derived metrics each reuse a named existing brick.
 
-ponytail: fixed γ=0.8 + fixed shaping weights (keyword knobs); ceiling = calibrating γ
-against held-out finish prediction, VAEP-style.
+ponytail: fixed γ=0.8 + fixed shaping weights (keyword knobs); the ceiling — calibrating
+them against held-out finish prediction, VAEP-style — was measured by PoC-E4
+(``analysis/poc/e4_ptv_eval.py`` → ``docs/research/poc/e4.md``) and both defaults stayed.
+
+NOT the greedy walk. ``network_metrics.route_to_submission`` (max_steps=6) is a different
+object and never wears this module's name — see its docstring.
 """
 
 from __future__ import annotations
@@ -31,11 +35,14 @@ _DEV_SCALE = 200.0     # ELO points per unit of centered PtV
 _DEV_CLAMP = 150       # ≈ 70% expected score on the /400 logistic — a strong prior
 
 
-def _shaping(label: str, typ: str) -> float:
-    """Small positional prior — reuses the app point map + decision-space defaults."""
+def _shaping(label: str, typ: str, w: float = _SHAPING_W) -> float:
+    """Small positional prior — reuses the app point map + decision-space defaults.
+
+    ``w`` is the per-term weight; ``w=0`` is the no-shaping ablation PoC-E4 sweeps.
+    """
     pts = _points_for_entry({"label": label, "type": typ}) / 4.0
     ds = position_decision_space(typ)
-    return _SHAPING_W * pts + _SHAPING_W * (ds["attacker_score"] - ds["defender_score"])
+    return w * pts + w * (ds["attacker_score"] - ds["defender_score"])
 
 
 def _rates(g: nx.DiGraph, n: str) -> tuple[float, float]:
@@ -68,14 +75,21 @@ def _kernel(g: nx.DiGraph) -> dict[str, list[tuple[str, float]]]:
 
 
 def path_to_victory(
-    g: nx.DiGraph, gamma: float = GAMMA, max_iter: int = 200, tol: float = 1e-6
+    g: nx.DiGraph, gamma: float = GAMMA, max_iter: int = 200, tol: float = 1e-6,
+    shaping_w: float = _SHAPING_W,
 ) -> dict[str, float]:
-    """Node PtV v(n) ∈ [−1, 1] by value iteration (γ-contraction → converges)."""
+    """Node PtV v(n) ∈ [−1, 1] by value iteration (γ-contraction → converges).
+
+    ``gamma``/``shaping_w`` are the two unfitted constants gap #12 names; both default
+    to production, and PoC-E4 (``analysis/poc/e4_ptv_eval.py``) is the harness that
+    sweeps them. Nothing in ``export/`` passes either.
+    """
     kernel = _kernel(g)
     # Node ids are the label on an ActionFlow graph and a role-prefixed id on an
     # interaction graph (PoC-E8), which carries the bare label in a `label` attr —
     # so shaping reads the same technique name on both kernels. No-op where absent.
-    shaping = {n: _shaping(str(g.nodes[n].get("label", n)), g.nodes[n].get("type", "")) for n in g}
+    shaping = {n: _shaping(str(g.nodes[n].get("label", n)), g.nodes[n].get("type", ""), shaping_w)
+               for n in g}
     rates = {n: _rates(g, n) for n in g}
     terminal = {n: _terminal_rate(g, n) for n in g}
     v = dict.fromkeys(g, 0.0)

@@ -145,6 +145,20 @@ sparse, fully-stored, batch-recomputed corpus. **Literature:** Coulom 2008.
    includes 0.5, PtV is demoted from site prose until it doesn't (that is ADR-03's
    rule applied to a metric).
 
+**Status (2026-08-24): RUN.** Runner `analysis/poc/e4_ptv_eval.py` (harness inherited
+from PoC-E8), tests `tests/test_poc_e4.py`, results + verdict in
+`docs/research/poc/e4.md` (generated — do not hand-edit). Outcome: **ACCEPT, no
+production change.** Production PtV separates on held-out finish prediction (AUC 0.683,
+bout-clustered CI excluding 0.5), so it is not demoted; the grid's argmax beats it by
++0.007 with a paired interval covering 0, so the criterion selects no change and γ=0.8
+stays — measured, not assumed. Two things the run surfaced beyond the criterion: high γ
+*with* shaping saturates against the ±1 clamp (41% of nodes at γ=0.95) and is
+significantly worse, and the γ=0 ablation ties production, so the multi-step machinery
+is justified today by what it represents, not by finish prediction. Memorylessness:
+second order does not merely fail to win, it LOSES materially (Δ per-step log-likelihood
+−0.203 [−0.258, −0.133]) — the first-order kernel is not the defect. The naming rider is
+closed: nothing presents `route_to_submission` under the PtV name (audit in `e4.md`).
+
 **Effort:** 3 days. Dependency: the `perspective_reliable` gate must be applied to
 the training kernel (gap #2) or the calibration inherits the attribution noise.
 

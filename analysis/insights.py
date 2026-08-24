@@ -41,6 +41,9 @@ def generate_insights(session: Any) -> dict[str, Any]:
     pagerank = [[n, s] for n, s in pagerank_ranking(g, 15)]
     rr_rows = reward_risk_ranking(g, min_occ=5, limit=15)
     reward_risk = [[n, rr, occ] for n, rr, occ in rr_rows]
+    # Greedy modal walks, NOT Path-to-Victory — they render under "Highest-probability
+    # routes to a finish" and the PtV section below is a different model entirely
+    # (`network_metrics.route_to_submission`'s docstring; PoC-E4's naming rider).
     routes = {n: route_to_submission(g, n) for n, _, _ in rr_rows[:6]}
     communities = [
         {"size": len(c), "type_lead": _lead_type(g, c), "members": c[:12]}
