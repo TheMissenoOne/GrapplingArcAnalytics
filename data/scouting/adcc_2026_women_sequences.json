@@ -3107,16 +3107,16 @@
  {
   "id": "300a2142-bccc-490c-9822-9cc4ba15e428",
   "a": "Helena Crevar",
-  "b": "Anabel Lopez Beard",
+  "b": "Anabel Lopez",
   "a_key": "helena crevar",
-  "b_key": "anabel lopez beard",
+  "b_key": "anabel lopez",
   "div_a": "+65 kg",
-  "div_b": null,
+  "div_b": "+65 kg",
   "event": null,
   "year": 2025,
   "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
   "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "b_id": "22c12e8b-8dff-43e8-920a-6f82e1e9b520",
+  "b_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
   "win_type": "DECISION",
   "seq": [
    {
@@ -3155,14 +3155,14 @@
     "ts": 325,
     "type": "submission",
     "label": "Heel Hook",
-    "actor_id": "22c12e8b-8dff-43e8-920a-6f82e1e9b520",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
     "successful": false
    },
    {
     "ts": 450,
     "type": "submission",
     "label": "Heel Hook",
-    "actor_id": "22c12e8b-8dff-43e8-920a-6f82e1e9b520",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
     "successful": false
    },
    {
@@ -4556,32 +4556,43 @@
   ]
  },
  {
-  "id": "ce59607c-68b9-4968-94ff-a006f90ae141",
-  "a": "Anabel Lopez",
-  "b": "Kendall Reusing",
-  "a_key": "anabel lopez",
-  "b_key": "kendall reusing",
-  "div_a": "+65 kg",
-  "div_b": null,
+  "id": "48ed7fc4-eb18-4c0a-8db3-1e375bfa1298",
+  "a": "Kendall Reusing",
+  "b": "Anabel Lopez",
+  "a_key": "kendall reusing",
+  "b_key": "anabel lopez",
+  "div_a": null,
+  "div_b": "+65 kg",
   "event": "Polaris 36",
   "year": 2026,
   "winner": "967085a5-0898-436a-8d65-8cd4a0ba45ae",
-  "a_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
-  "b_id": "967085a5-0898-436a-8d65-8cd4a0ba45ae",
+  "a_id": "967085a5-0898-436a-8d65-8cd4a0ba45ae",
+  "b_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
   "win_type": "SUBMISSION",
   "seq": [
    {
-    "ts": 195,
+    "ts": 32,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3"
+   },
+   {
+    "ts": 45,
+    "type": "guard",
+    "label": "Closed Guard",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3"
+   },
+   {
+    "ts": 170,
+    "type": "control",
+    "label": "Mount",
+    "actor_id": "967085a5-0898-436a-8d65-8cd4a0ba45ae"
+   },
+   {
+    "ts": 292,
     "type": "submission",
     "label": "Armbar",
     "actor_id": "967085a5-0898-436a-8d65-8cd4a0ba45ae",
-    "successful": true
-   },
-   {
-    "ts": 215,
-    "type": "submission",
-    "label": "Tap",
-    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
     "successful": true
    }
   ]
