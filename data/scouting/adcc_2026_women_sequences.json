@@ -1465,65 +1465,65 @@
  {
   "id": "38dd458c-9d7d-4fa2-82c0-f934d5eef559",
   "a": "Elizabeth Mitrovic",
-  "b": "Amanda Levy",
+  "b": "Amanda Leve",
   "a_key": "elizabeth mitrovic",
-  "b_key": "amanda levy",
+  "b_key": "amanda leve",
   "div_a": "+65 kg",
   "div_b": null,
   "event": "ADCC Trials 2024 West Coast",
   "year": 2024,
   "winner": "80d52d5a-6139-4684-9799-870ac5e513a6",
   "a_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
-  "b_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+  "b_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
   "win_type": "SUBMISSION",
   "seq": [
    {
     "ts": 3293,
     "type": "takedown",
     "label": "Trip",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": true
    },
    {
     "ts": 3343,
     "type": "submission",
     "label": "Submission",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": true
    },
    {
     "ts": 3407,
     "type": "submission",
     "label": "Guillotine Choke",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": true
    },
    {
     "ts": 3443,
     "type": "pass",
     "label": "Pass",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 22440,
     "type": "control",
     "label": "Collar Tie",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": true
    },
    {
     "ts": 22470,
     "type": "control",
     "label": "Two-on-One Control",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": true
    },
    {
     "ts": 22510,
     "type": "takedown",
     "label": "Takedown",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": true
    },
    {
@@ -1551,7 +1551,7 @@
     "ts": 22720,
     "type": "pass",
     "label": "Double Under Pass",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
@@ -1579,14 +1579,14 @@
     "ts": 23020,
     "type": "takedown",
     "label": "Arm Drag",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 23050,
     "type": "submission",
     "label": "Tap",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": true
    }
   ]
@@ -2409,16 +2409,16 @@
  {
   "id": "b85383fb-1a94-491f-9945-09a7fce75564",
   "a": "Ana Carolina Vieira",
-  "b": "Amanda Levy",
+  "b": "Amanda Leve",
   "a_key": "ana carolina vieira",
-  "b_key": "amanda levy",
+  "b_key": "amanda leve",
   "div_a": "65 kg",
   "div_b": null,
   "event": "ADCC 2024",
   "year": 2024,
   "winner": "423cbcd4-4746-46b2-a856-b9331bee8b17",
   "a_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
-  "b_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+  "b_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
   "win_type": "DECISION",
   "seq": [
    {
@@ -2449,19 +2449,19 @@
     "ts": 109,
     "type": "guard",
     "label": "Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 109,
     "type": "guard",
     "label": "Deep Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 109,
     "type": "guard",
     "label": "Deep Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 117,
@@ -2480,19 +2480,19 @@
     "ts": 185,
     "type": "guard",
     "label": "Deep Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 185,
     "type": "guard",
     "label": "Deep Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 185,
     "type": "guard",
     "label": "Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 191,
@@ -2548,68 +2548,68 @@
     "ts": 340,
     "type": "guard",
     "label": "Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 340,
     "type": "guard",
     "label": "Deep Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 340,
     "type": "guard",
     "label": "Deep Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 406,
     "type": "escape",
     "label": "Bridge (Upa Escape)",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 406,
     "type": "control",
     "label": "Back Control",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 428,
     "type": "guard",
     "label": "Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 428,
     "type": "guard",
     "label": "Deep Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 428,
     "type": "guard",
     "label": "Deep Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 428,
     "type": "takedown",
     "label": "Single Leg Takedown",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 428,
     "type": "guard",
     "label": "Half Guard",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
@@ -2634,14 +2634,14 @@
     "ts": 500,
     "type": "control",
     "label": "Mount",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
     "ts": 531,
     "type": "takedown",
     "label": "Single Leg Takedown",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 581,
@@ -2653,7 +2653,7 @@
     "ts": 617,
     "type": "control",
     "label": "Back Control",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
     "successful": false
    },
    {
@@ -2690,7 +2690,7 @@
     "ts": 781,
     "type": "control",
     "label": "Back Control",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 807,
@@ -2732,7 +2732,7 @@
     "ts": 986,
     "type": "control",
     "label": "Back Control",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a"
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b"
    },
    {
     "ts": 1121,
