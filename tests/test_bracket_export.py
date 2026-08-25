@@ -11,6 +11,7 @@ Each case below is a real string from the corpus, not an invented one.
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 from pathlib import Path
 
@@ -519,6 +520,82 @@ def test_the_alias_index_maps_every_spelling_to_one_key() -> None:
                                            "aliases": ["Sarah Galvao"], "rows": []}})
     assert idx["sarah galvao"] == "sarah galvao"
     assert set(idx.values()) == {"sarah galvao"}
+
+
+# ── the 2026-08-25 archive policy: frames dropped, PDF + sidecar in out/processed/ ──────────
+def _write_legacy_bout(root: Path, slug: str, *, events: int | None, clip: bool) -> None:
+    d = root / slug
+    d.mkdir(parents=True)
+    (d / "frames.jsonl").write_text("{}\n", encoding="utf-8")
+    if clip:
+        (d / "clip.mp4").write_bytes(b"")
+    if events is not None:
+        (d / "events.json").write_text(
+            json.dumps({"events": [{}] * events}), encoding="utf-8")
+
+
+def _write_processed_bout(root: Path, slug: str, *, events: int | None) -> None:
+    d = root / "processed"
+    d.mkdir(parents=True, exist_ok=True)
+    (d / f"{slug}.pdf").write_bytes(b"")
+    if events is not None:
+        (d / f"{slug}.events.json").write_text(
+            json.dumps({"events": [{}] * events}), encoding="utf-8")
+
+
+def test_an_archived_pdf_is_footage_without_a_clip(tmp_path: Path) -> None:
+    """The archive policy drops the clip -- a bout whose frames were never re-rendered has a
+    PDF and no clip.mp4, and the loader must still count it as footage, honestly (no clip)."""
+    slug = "a-vs-b--event-2024-VID1"
+    _write_processed_bout(tmp_path, slug, events=4)
+    out = bx._local_footage(tmp_path, {}, {"VID1": "A vs B, Event 2024"})
+    assert len(out) == 1
+    entry = out[0]
+    assert entry["slug"] == slug
+    assert entry["clip"] is False
+    assert entry["registered_events"] == 4
+    assert entry["registered"] is True
+    assert entry["title"] == "A vs B, Event 2024"
+
+
+def test_a_legacy_dir_still_counts_and_keeps_its_clip_flag(tmp_path: Path) -> None:
+    _write_legacy_bout(tmp_path, "old-slug", events=2, clip=True)
+    out = bx._local_footage(tmp_path, {}, {})
+    assert len(out) == 1
+    assert out[0]["clip"] is True
+    assert out[0]["registered_events"] == 2
+
+
+def test_both_layouts_present_are_not_double_counted(tmp_path: Path) -> None:
+    """A bout rendered before AND after the policy is one bout, not two -- the legacy dir
+    wins because it still has the clip."""
+    slug = "dup-slug"
+    _write_legacy_bout(tmp_path, slug, events=1, clip=True)
+    _write_processed_bout(tmp_path, slug, events=99)
+    out = bx._local_footage(tmp_path, {}, {})
+    assert len(out) == 1
+    assert out[0]["clip"] is True
+    assert out[0]["registered_events"] == 1
+
+
+def test_an_unregistered_archived_bout_reports_zero_not_missing(tmp_path: Path) -> None:
+    slug = "no-sidecar--event-2024-VID2"
+    _write_processed_bout(tmp_path, slug, events=None)
+    out = bx._local_footage(tmp_path, {}, {})
+    assert out[0]["registered_events"] == 0
+    assert out[0]["registered"] is False
+
+
+def test_title_falls_back_to_the_slug_when_the_manifest_does_not_cover_it() -> None:
+    assert bx._title_for_slug("unknown-slug-XYZ", {"VID1": "A vs B, Event 2024"}) \
+        == "unknown-slug-XYZ"
+
+
+def test_title_lookup_matches_a_video_id_that_itself_contains_a_hyphen() -> None:
+    """`LQUors-3gZM` is a real YouTube id with a hyphen in it (measured 2026-08-25) -- suffix
+    matching must prefer the longest/most specific id, not the shortest tail split on `-`."""
+    titles = {"3gZM": "Wrong Bout, 2020", "LQUors-3gZM": "Right Bout, 2025"}
+    assert bx._title_for_slug("a-vs-b--event-2025-LQUors-3gZM", titles) == "Right Bout, 2025"
 
 
 # ── how she wins against how she loses ──────────────────────────────────────────

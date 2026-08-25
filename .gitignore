@@ -95,3 +95,4 @@ docs/raw/
 # each one is megabytes of JPEG. The manifest is the artefact worth versioning, not the PDF.
 data/frame_pdf/out/
 data/frame_pdf/trials_2023_24/*.pdf
+data/frame_pdf/trials_2023_24/pendentes_gemini/

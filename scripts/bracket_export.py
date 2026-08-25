@@ -31,6 +31,9 @@ Layers are kept apart on purpose and never fill each other in:
   method    725 athlete-perspective rows of published records over 707 distinct bouts
             (189/183 in -65 kg, 536/524 in +65 kg) -- how a bout ENDED, not the path
   sequence   corpus bouts with event-by-event data -- the path, on a much smaller sample
+  markov     the SAME bouts as `sequence`, re-read into Lamas et al. 2024's twelve action
+             states (`analysis/lamas_chain.py`) -- the only layer here with an external
+             published matrix to be checked against
   embedding  graph vectors and archetypes -- shape of a game, thinnest layer of the three
 
 Privacy class: **A, public competition data.** Every graph query filters
@@ -78,6 +81,7 @@ from analysis.attribution import (  # noqa: E402
     usable_perspective,
     usable_role,
 )
+from analysis.lamas_chain import markov_block  # noqa: E402
 from analysis.names import (  # noqa: E402
     athlete_key,
     reviewed_verdict,
@@ -108,6 +112,12 @@ RECORDS = SCOUTING / "adcc_2026_women_records.json"
 SEQUENCES = SCOUTING / "adcc_2026_women_sequences.json"
 LINKS = REPO / "data" / "frame_pdf" / "women_65_links.json"
 FRAMES = REPO / "data" / "frame_pdf" / "out"
+# Storage policy 2026-08-25 (docs/frame_pdf_reading.md): once a bout's PDF renders, its image
+# folder (frames.jsonl/clip.mp4) is dropped -- the durable artefact moves to
+# out/processed/<slug>.pdf (+ <slug>.events.json sidecar). `out/<slug>/` dirs still exist for
+# any bout rendered before that policy, so both layouts are read.
+PROCESSED = FRAMES / "processed"
+RENDER_MANIFEST = REPO / "data" / "frame_pdf" / "women_65.json"
 
 # ── vocabulary ──────────────────────────────────────────────────────────────────
 LEG = r"heel hook|toe hold|kneebar|knee bar|ankle|foot lock|footlock|aoki|estima|calf|leg lock|50/50"
@@ -175,6 +185,16 @@ SCOPES: dict[str, dict[str, Any]] = {
                           "unit": "lutas"},
     "sequence": {"kind": FILTERED, "respects": ["uniform", "since"], "ignores": ["ruleset"],
                  "ignored_reason_code": "gate_refuses_every_cell", "unit": "eventos"},
+    # Lamas et al. 2024's chain. Division-specific and deliberately unfiltered: a transition
+    # matrix needs the whole tape. `markov_layer` publishes the measurement behind that
+    # refusal in `ignored_measured` rather than leaving it as a preference -- at FULL division
+    # size only 6 and 5 of the twelve rows clear the bout-cluster gate, and across the ten
+    # non-trivial points of the uniform x since space 170 of 240 rows are refused outright,
+    # for about 780 KB of extra payload. NOT `gate_refuses_every_cell`: some cuts do produce
+    # estimable rows, and a reason code that overstates its own evidence is the defect this
+    # block exists to avoid.
+    "markov": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
+               "ignored_reason_code": "cuts_refuse_most_rows", "unit": "transições"},
     "radar": {"kind": FILTERED, "respects": ["uniform", "since"], "ignores": ["ruleset"],
               "ignored_reason_code": "gate_refuses_every_cell", "unit": "eventos"},
     "athlete": {"kind": FILTERED, "respects": list(ALL_AXES), "ignores": [], "unit": "lutas"},
@@ -857,6 +877,60 @@ def athlete_layer(records: Mapping[str, Any], rating: Mapping[str, Any],
 
 
 # ── layer 2: event sequences ────────────────────────────────────────────────────
+def division_bouts(bouts: Sequence[Mapping[str, Any]],
+                   div: str) -> list[Mapping[str, Any]]:
+    """The division's bout set: every corpus bout WITH event data that either corner belongs to.
+
+    One definition, used by both the sequence layer and the Markov layer, so the two can never
+    describe different universes under the same division heading. Six bouts have a rostered
+    athlete in both corners and therefore belong to both divisions -- that is the fight itself
+    appearing in two categories, not a duplicate.
+    """
+    return [b for b in bouts
+            if (b["div_a"] == div or b["div_b"] == div) and b["seq"]]
+
+
+def markov_layer(bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Lamas et al. 2024's twelve-state chain per division, plus why it ignores the cut axes.
+
+    The mapping, the chain rules and every caveat live in `analysis/lamas_chain.py`; this
+    wrapper exists for one thing the analysis module has no business knowing about -- the
+    reader's cut space, and the MEASUREMENT that justifies not honouring it. `SCOPES` in this
+    file says a block that could be filtered and is not is a defect, so the refusal ships with
+    its own number: how many of the twelve rows clear the bout-cluster gate at full division
+    size, and how many clear it across the uniform x since cross product.
+    """
+    out: dict[str, Any] = {}
+    for div in DIVISIONS:
+        full = division_bouts(bouts, div)
+        block = markov_block(full)
+        estimable_full = sum(1 for r in block["rows"] if r["coverage"]["estimable"])
+        cuts = estimable_cut_rows = 0
+        for u in UNIFORM_AXIS:
+            for y in SINCE_AXIS:
+                sub = [b for b in full
+                       if in_cut(uniform(b.get("event")), ruleset(b.get("event")),
+                                 b.get("year"), u, "all", y)]
+                if not sub or len(sub) == len(full):
+                    continue
+                cuts += 1
+                estimable_cut_rows += sum(1 for r in markov_block(sub)["rows"]
+                                          if r["coverage"]["estimable"])
+        rows_across_cuts = cuts * len(block["rows"])
+        out[div] = {**block, "ignores": list(ALL_AXES),
+                    "ignored_reason_code": "cuts_refuse_most_rows",
+                    "ignored_measured": {
+                        "states": len(block["rows"]),
+                        "estimable_at_full_size": estimable_full,
+                        "extra_cuts": cuts,
+                        "rows_across_cuts": rows_across_cuts,
+                        "estimable_rows_across_cuts": estimable_cut_rows,
+                        "refused_rows_across_cuts": rows_across_cuts - estimable_cut_rows,
+                        "payload_kb_if_published": round(
+                            cuts * len(json.dumps(block, ensure_ascii=False)) / 1024)}}
+    return out
+
+
 def _attributed(bout: Mapping[str, Any], side: str) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Every event of the bout, stamped from ONE athlete's corner, plus that bout's own flags.
 
@@ -935,11 +1009,8 @@ def sequence_layer(bouts: Sequence[Mapping[str, Any]], div: str) -> dict[str, An
     space hold two or three bouts and the coverage gate refuses them. That refusal is the
     honest answer and it is rendered as one.
     """
-    mine = []
-    for b in bouts:
-        if (b["div_a"] != div and b["div_b"] != div) or not b["seq"]:
-            continue
-        mine.append({**b, "uniform": uniform(b.get("event")), "ruleset": ruleset(b.get("event"))})
+    mine = [{**b, "uniform": uniform(b.get("event")), "ruleset": ruleset(b.get("event"))}
+            for b in division_bouts(bouts, div)]
     cuts: dict[str, Any] = {}
     for u in UNIFORM_AXIS:
         for y in SINCE_AXIS:
@@ -1423,13 +1494,48 @@ def alias_index(records: Mapping[str, Any]) -> dict[str, str]:
     return idx
 
 
-def video_layer(conn: Any, roster: Mapping[str, str],
-                aliases: Mapping[str, str] | None = None) -> list[dict[str, Any]]:
-    """Every bout of these categories we can actually watch, local clip or published link."""
-    aliases = aliases or {}
-    links = json.loads(LINKS.read_text(encoding="utf-8"))["bouts"] if LINKS.exists() else {}
-    out = []
-    for d in sorted(FRAMES.iterdir()) if FRAMES.exists() else []:
+_VIDEO_ID = re.compile(r"[?&]v=([\w-]+)")
+
+
+def _render_manifest_titles(manifest_path: Path = RENDER_MANIFEST) -> dict[str, str]:
+    """video-id -> rendered `label`, off the manifest `frame_pdf.py` renders from.
+
+    This is the one place the "A vs B, Event Year" title for a bout actually comes from
+    (there is no other one once the README that used to carry it is archived away with the
+    frames) -- verified 2026-08-25 to resolve all 24 processed slugs, including the one
+    (`LQUors-3gZM`) whose YouTube id itself contains a hyphen, which is why matching is by
+    slug SUFFIX against every known id rather than by splitting the slug on `-`.
+    """
+    if not manifest_path.exists():
+        return {}
+    videos = json.loads(manifest_path.read_text(encoding="utf-8")).get("videos", [])
+    titles = {}
+    for v in videos:
+        m = _VIDEO_ID.search(v.get("url", ""))
+        vid = m.group(1) if m else v.get("url", "").rsplit("/", 1)[-1]
+        if vid and v.get("label"):
+            titles[vid] = v["label"]
+    return titles
+
+
+def _title_for_slug(slug: str, titles: Mapping[str, str]) -> str:
+    hit = next((vid for vid in sorted(titles, key=len, reverse=True) if slug.endswith(vid)), None)
+    # ponytail: no manifest match (future slug the render manifest doesn't cover yet) falls
+    # back to the raw slug rather than guessing at word-boundaries inside it -- add a proper
+    # "A vs B, Event Year" reconstruction if that ever actually happens.
+    return titles[hit] if hit else slug
+
+
+def _local_footage(frames_root: Path, aliases: Mapping[str, str],
+                   titles: Mapping[str, str]) -> list[dict[str, Any]]:
+    """Bouts we hold footage for locally -- legacy `out/<slug>/` dirs (frames still on disk)
+    and the archived `out/processed/<slug>.pdf` (frames dropped per the 2026-08-25 storage
+    policy, docs/frame_pdf_reading.md). `clip` is only ever true for the legacy case: an
+    archived PDF has no seekable clip.mp4 to offer, and the field says so rather than staying
+    silent about the loss.
+    """
+    out: list[dict[str, Any]] = []
+    for d in sorted(frames_root.iterdir()) if frames_root.exists() else []:
         if not (d / "frames.jsonl").exists():
             continue
         readme = (d / "README.md")
@@ -1453,7 +1559,40 @@ def video_layer(conn: Any, roster: Mapping[str, str],
                     # spelling the manifest knows lands on her page and one it does not is an
                     # empty list here rather than a silent miss on the page.
                     "athlete_keys": footage_keys(title_pair(title), aliases),
-                    "links": links.get(d.name, [])})
+                    "links": []})
+
+    processed = frames_root / "processed"
+    known = {o["slug"] for o in out}
+    for pdf in sorted(processed.glob("*.pdf")) if processed.exists() else []:
+        slug = pdf.stem
+        if slug in known:  # a bout rendered under both layouts -- legacy wins, it has a clip
+            continue
+        sidecar = processed / f"{slug}.events.json"
+        events = 0
+        if sidecar.exists():
+            try:
+                events = len(json.loads(sidecar.read_text(encoding="utf-8"))["events"])
+            except (json.JSONDecodeError, KeyError):
+                events = -1
+        title = _title_for_slug(slug, titles)
+        out.append({"slug": slug, "title": title, "source": "local clip",
+                    "clip": False,
+                    "registered_events": events,
+                    "registered": events > 0,
+                    "athlete_keys": footage_keys(title_pair(title), aliases),
+                    "links": []})
+    return out
+
+
+def video_layer(conn: Any, roster: Mapping[str, str],
+                aliases: Mapping[str, str] | None = None) -> list[dict[str, Any]]:
+    """Every bout of these categories we can actually watch, local clip or published link."""
+    aliases = aliases or {}
+    links = json.loads(LINKS.read_text(encoding="utf-8"))["bouts"] if LINKS.exists() else {}
+    out = _local_footage(FRAMES, aliases, _render_manifest_titles())
+    for o in out:
+        if o["slug"] is not None:
+            o["links"] = links.get(o["slug"], [])
     rows = conn.execute(text("""
         select a.name, b.name, m.event, m.year, m.video_url, m.video_start_seconds,
                jsonb_array_length(coalesce(m.sequence,'[]'::jsonb))
@@ -1843,6 +1982,10 @@ def main() -> int:
     bouts = json.loads(a.sequences.read_text(encoding="utf-8"))
 
     seq = {d: sequence_layer(bouts, d) for d in ("65 kg", "+65 kg")}
+    # Lamas et al. 2024's own analysis, on the SAME per-division bout set the sequence layer
+    # uses -- `division_bouts` is the single definition, so the two blocks cannot describe
+    # different universes under one heading. Pure Python over the corpus file: no DB.
+    markov = markov_layer(bouts)
     # Membership in a tracked division, not mere truthiness of the label. The truthy test
     # treated any athlete carrying any non-empty division string as roster, and so excluded
     # them from the baseline the roster is supposed to be compared against.
@@ -1890,6 +2033,7 @@ def main() -> int:
         # record gets the same page as a scraped one -- with its provenance attached.
         "athletes": athlete_layer(records, rating, bouts),
         "sequence": seq,
+        "markov": markov,
         "embedding": emb,
         "baseline": baseline_layer(bouts, roster_ids, seq),
         "videos": vids,
@@ -1917,6 +2061,11 @@ def main() -> int:
     for d, s in seq.items():
         print(f"  {d}: {s['bouts']} bouts, {s['events_own']} own events, "
               f"effective_n {s['concentration']['effective_n']:.2f}")
+    for d, m in markov.items():
+        agree = sum(1 for a in m["anchor"] if a["cross"]["agrees"])
+        print(f"  markov {d}: {m['n_transitions']} transitions, "
+              f"{m['n_events_mapped']} mapped / {m['n_events_skipped']} skipped, "
+              f"anchor {agree}/{len(m['anchor'])} agree with Lamas 2024")
     print(f"  videos: {len(vids)}   embedded graphs: "
           f"{sum(v['usable'] for v in emb['divisions'].values())}")
     return 0
