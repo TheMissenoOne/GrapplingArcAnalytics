@@ -43,9 +43,14 @@ for §1 step 6: reviewing one of the 21 preserved model readings against its fra
 re-capturing them first — re-run `frame_pdf.py --format both` for that bout (or `--format
 frames` alone) before opening `frame_registrar.py`.
 
-The 56 ADCC-trials PDFs live canonically in `data/frame_pdf/trials_2023_24/` (duplicates that
-used to sit under `out/` were removed); they already carry per-window narration captions
-sourced from the event transcript (`--transcript`, §2 in the script's own docstring).
+The 52 ADCC-trials bout PDFs live canonically in `data/frame_pdf/trials_2023_24/`, one per
+bout, every athlete named — regenerated 2026-08-25 from the curated index
+`data/frame_pdf/trials_2023_24_bouts.json` (scoreboard-read of every frame of the previous
+set, cross-referenced against the published finals of all 8 trials events in the 2023-24
+cycle; see that file's `_comment` and the set's own `README.md` for provenance). This
+replaced the v1 set of 6 header-named bouts + 50 blind 600s windows, which split fights
+across files and carried no athlete names. They carry per-window narration captions sourced
+from the event transcript (`--transcript`, §2 in the script's own docstring).
 
 **`--orientation landscape`** (added 2026-08-25): rotates the sheet to A4 landscape and, unless
 `--grid` is given explicitly, switches the default grid from 2x3 (portrait, 6 frames/page) to

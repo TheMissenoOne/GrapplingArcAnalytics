@@ -1,0 +1,382 @@
+{
+ "_comment": [
+  "Curated bout index for the ADCC Trials Finals 2023-24 compilation (pwGbW5GZgfc, 8h29m33s).",
+  "Derived 2026-08-25 by reading the corner scoreboard on every rendered frame of the previous",
+  "PDF set (6 vision passes over 436 pages) and cross-referencing bjjheroes/jitsmagazine finals",
+  "results for all 8 trials events of the 2023-24 cycle. Timestamps are VIDEO-ABSOLUTE seconds,",
+  "padded ~20-30s around the observed walkout/celebration; windows step was 20s so boundaries",
+  "are +-20s accurate. The 8 events appear in this order: Warsaw men, Atlantic City men,",
+  "Singapore men, Belo Horizonte men, Sao Paulo (all 8), Zagreb (7 finals + one 65kg F SEMI),",
+  "Las Vegas (all 8), Bangkok (all 8). Women's finals of the four 2023/BH events are not in the video."
+ ],
+ "url": "https://www.youtube.com/watch?v=pwGbW5GZgfc",
+ "bouts": [
+  {
+   "start": 0,
+   "end": 830,
+   "label": "Heikki Jussila vs. Daniel Manasoiu",
+   "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+   "division": "+99kg"
+  },
+  {
+   "start": 810,
+   "end": 955,
+   "label": "Luke Griffith vs. Mraz Avdoyan",
+   "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+   "division": "99kg",
+   "note": "short clip in compilation"
+  },
+  {
+   "start": 950,
+   "end": 1450,
+   "label": "Santeri Lilius vs. Tuomas Simola",
+   "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+   "division": "88kg"
+  },
+  {
+   "start": 1450,
+   "end": 2330,
+   "label": "Jozef Chen vs. Oliver Taza",
+   "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+   "division": "77kg"
+  },
+  {
+   "start": 2330,
+   "end": 2890,
+   "label": "Owen Jones vs. Cammy Donnelly",
+   "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+   "division": "66kg"
+  },
+  {
+   "start": 3000,
+   "end": 3440,
+   "label": "Daniel Manasoiu vs. Damon Ramos",
+   "event": "East Coast Trials 2023 (Atlantic City)",
+   "division": "+99kg"
+  },
+  {
+   "start": 3560,
+   "end": 3880,
+   "label": "Paul Ardila vs. Alex Grandy",
+   "event": "East Coast Trials 2023 (Atlantic City)",
+   "division": "99kg"
+  },
+  {
+   "start": 3870,
+   "end": 4280,
+   "label": "Jacob Couch vs. Elder Cruz",
+   "event": "East Coast Trials 2023 (Atlantic City)",
+   "division": "88kg"
+  },
+  {
+   "start": 4370,
+   "end": 5270,
+   "label": "Elijah Dorsey vs. Nicky Ryan",
+   "event": "East Coast Trials 2023 (Atlantic City)",
+   "division": "77kg"
+  },
+  {
+   "start": 5320,
+   "end": 6040,
+   "label": "Dorian Olivarez vs. Dominic Mejia",
+   "event": "East Coast Trials 2023 (Atlantic City)",
+   "division": "66kg"
+  },
+  {
+   "start": 6040,
+   "end": 6350,
+   "label": "Josh Saunders vs. Ricky Luzny",
+   "event": "Asia & Oceania Trials 2023 (Singapore)",
+   "division": "+99kg"
+  },
+  {
+   "start": 6350,
+   "end": 6890,
+   "label": "Declan Moody vs. Anton Minenko",
+   "event": "Asia & Oceania Trials 2023 (Singapore)",
+   "division": "99kg"
+  },
+  {
+   "start": 6890,
+   "end": 7470,
+   "label": "Izaak Michell vs. Roberto Dib",
+   "event": "Asia & Oceania Trials 2023 (Singapore)",
+   "division": "88kg"
+  },
+  {
+   "start": 7470,
+   "end": 8030,
+   "label": "Kenta Iwamoto vs. Rhys Allan",
+   "event": "Asia & Oceania Trials 2023 (Singapore)",
+   "division": "77kg"
+  },
+  {
+   "start": 8030,
+   "end": 8490,
+   "label": "Ethan Thomas vs. Minoru Takeuchi",
+   "event": "Asia & Oceania Trials 2023 (Singapore)",
+   "division": "66kg"
+  },
+  {
+   "start": 8490,
+   "end": 9030,
+   "label": "Inacio Santos vs. Antonio Assef",
+   "event": "South American Trials 1 2024 (Belo Horizonte)",
+   "division": "+99kg"
+  },
+  {
+   "start": 9030,
+   "end": 9550,
+   "label": "Felipe Costa vs. Elionai Braz",
+   "event": "South American Trials 1 2024 (Belo Horizonte)",
+   "division": "99kg"
+  },
+  {
+   "start": 9550,
+   "end": 10350,
+   "label": "Charles Negromonte vs. Gabriel Almeida",
+   "event": "South American Trials 1 2024 (Belo Horizonte)",
+   "division": "88kg"
+  },
+  {
+   "start": 10350,
+   "end": 10730,
+   "label": "Luiz Paulo vs. Jefferson Pontes",
+   "event": "South American Trials 1 2024 (Belo Horizonte)",
+   "division": "77kg"
+  },
+  {
+   "start": 10730,
+   "end": 11230,
+   "label": "Kennedy Maciel vs. Kaua Gabriel",
+   "event": "South American Trials 1 2024 (Belo Horizonte)",
+   "division": "66kg"
+  },
+  {
+   "start": 11230,
+   "end": 12145,
+   "label": "Anna Rodrigues vs. Franciele Santos",
+   "event": "South American Trials 2 2024 (Sao Paulo)",
+   "division": "55kg F"
+  },
+  {
+   "start": 12140,
+   "end": 12575,
+   "label": "Ana Vieira vs. Gabrielle McComb",
+   "event": "South American Trials 2 2024 (Sao Paulo)",
+   "division": "65kg F"
+  },
+  {
+   "start": 12570,
+   "end": 12800,
+   "label": "Maria Ruffatto vs. Kauane Silva",
+   "event": "South American Trials 2 2024 (Sao Paulo)",
+   "division": "+65kg F"
+  },
+  {
+   "start": 12800,
+   "end": 13360,
+   "label": "Victor Honorio vs. Matheus Lino",
+   "event": "South American Trials 2 2024 (Sao Paulo)",
+   "division": "+99kg"
+  },
+  {
+   "start": 13360,
+   "end": 13940,
+   "label": "Henrique Cardoso vs. Elionai Braz",
+   "event": "South American Trials 2 2024 (Sao Paulo)",
+   "division": "99kg"
+  },
+  {
+   "start": 13940,
+   "end": 15100,
+   "label": "Pedro Marinho vs. Gabriel Almeida",
+   "event": "South American Trials 2 2024 (Sao Paulo)",
+   "division": "88kg",
+   "note": "blood stoppage mid-match"
+  },
+  {
+   "start": 15100,
+   "end": 15950,
+   "label": "Alexandre Jesus vs. Jonnatas Gracie",
+   "event": "South American Trials 2 2024 (Sao Paulo)",
+   "division": "77kg"
+  },
+  {
+   "start": 15950,
+   "end": 16830,
+   "label": "Fabricio Andrey vs. Kaua Gabriel",
+   "event": "South American Trials 2 2024 (Sao Paulo)",
+   "division": "66kg"
+  },
+  {
+   "start": 16830,
+   "end": 17660,
+   "label": "Margot Ciccarelli vs. Ashley Bendle",
+   "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+   "division": "55kg F"
+  },
+  {
+   "start": 17660,
+   "end": 17730,
+   "label": "Aurelie Le Vern vs. Nadia Frankland",
+   "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+   "division": "65kg F",
+   "note": "SEMIFINAL (armbar) - the Le Vern vs Schultz final is not in the compilation"
+  },
+  {
+   "start": 17730,
+   "end": 18560,
+   "label": "Nia Blackman vs. Salla Simola",
+   "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+   "division": "+65kg F"
+  },
+  {
+   "start": 18560,
+   "end": 19090,
+   "label": "Mark Macqueen vs. Freddy Vosgroene",
+   "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+   "division": "+99kg"
+  },
+  {
+   "start": 19090,
+   "end": 19330,
+   "label": "Marcin Maciulewicz vs. Kasper Larsen",
+   "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+   "division": "99kg"
+  },
+  {
+   "start": 19320,
+   "end": 19610,
+   "label": "Taylor Pearman vs. Ben Bennett",
+   "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+   "division": "88kg"
+  },
+  {
+   "start": 19600,
+   "end": 20050,
+   "label": "Tommy Langaker vs. Davis Asare",
+   "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+   "division": "77kg"
+  },
+  {
+   "start": 20040,
+   "end": 20870,
+   "label": "Gairbeg Ibragimov vs. Yigit Hanay",
+   "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+   "division": "66kg"
+  },
+  {
+   "start": 20860,
+   "end": 21605,
+   "label": "Jasmine Rocha vs. Alex Enriquez",
+   "event": "West Coast Trials 2024 (Las Vegas)",
+   "division": "55kg F"
+  },
+  {
+   "start": 21600,
+   "end": 22320,
+   "label": "Helena Crevar vs. Morgan Black",
+   "event": "West Coast Trials 2024 (Las Vegas)",
+   "division": "65kg F"
+  },
+  {
+   "start": 22320,
+   "end": 23160,
+   "label": "Elizabeth Mitrovic vs. Amanda Leve",
+   "event": "West Coast Trials 2024 (Las Vegas)",
+   "division": "+65kg F"
+  },
+  {
+   "start": 23160,
+   "end": 24120,
+   "label": "Michael Perez vs. Michael Pezzuto",
+   "event": "West Coast Trials 2024 (Las Vegas)",
+   "division": "+99kg"
+  },
+  {
+   "start": 24120,
+   "end": 25020,
+   "label": "Michael Pixley vs. Adam Bradley",
+   "event": "West Coast Trials 2024 (Las Vegas)",
+   "division": "99kg"
+  },
+  {
+   "start": 25100,
+   "end": 25430,
+   "label": "William Tackett vs. Jacob Rodriguez",
+   "event": "West Coast Trials 2024 (Las Vegas)",
+   "division": "88kg"
+  },
+  {
+   "start": 25540,
+   "end": 26080,
+   "label": "Andrew Tackett vs. Oliver Taza",
+   "event": "West Coast Trials 2024 (Las Vegas)",
+   "division": "77kg"
+  },
+  {
+   "start": 26290,
+   "end": 26790,
+   "label": "Deandre Corbe vs. Keith Krikorian",
+   "event": "West Coast Trials 2024 (Las Vegas)",
+   "division": "66kg"
+  },
+  {
+   "start": 26880,
+   "end": 27380,
+   "label": "Adele Fornarino vs. Kanae Yamada",
+   "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+   "division": "55kg F"
+  },
+  {
+   "start": 27390,
+   "end": 27920,
+   "label": "Sula Loewenthal vs. Nadia Frankland",
+   "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+   "division": "65kg F"
+  },
+  {
+   "start": 27920,
+   "end": 28240,
+   "label": "Nikki Lloyd-Griffiths vs. Gase Sanita",
+   "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+   "division": "+65kg F"
+  },
+  {
+   "start": 28240,
+   "end": 28430,
+   "label": "Mansur Makhmakhanov vs. Dalton Terei",
+   "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+   "division": "+99kg"
+  },
+  {
+   "start": 28430,
+   "end": 28960,
+   "label": "Daniel Schuardt vs. Alibi Orazbek",
+   "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+   "division": "99kg"
+  },
+  {
+   "start": 28970,
+   "end": 29200,
+   "label": "Lucas Kanard vs. William Dias",
+   "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+   "division": "88kg"
+  },
+  {
+   "start": 29200,
+   "end": 29700,
+   "label": "Levi Jones-Leary vs. Jeremy Skinner",
+   "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+   "division": "77kg"
+  },
+  {
+   "start": 29700,
+   "end": 30500,
+   "label": "Xu Huaiqing vs. Daiki Yonekura",
+   "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+   "division": "66kg"
+  }
+ ]
+}
