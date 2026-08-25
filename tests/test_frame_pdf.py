@@ -14,10 +14,14 @@ from pathlib import Path
 import pytest
 
 from scripts.frame_pdf import (
+    DEFAULT_GRID,
+    DEFAULT_GRID_LANDSCAPE,
+    PAD,
     _bout_names,
     _result_line,
     _same_person,
     build_windows,
+    page_size,
     parse_bout_index,
     parse_transcript,
     transcript_window,
@@ -139,6 +143,54 @@ def test_prose_names_the_vocabulary_file_it_was_given() -> None:
     inline = [b for k, b in context_prose(5, True, 0.0, 1.0)
               if k == "p" and "CLOSED VOCABULARY" in b]
     assert inline and "pages immediately after" in inline[0]
+
+
+# ── Orientation ───────────────────────────────────────────────────────────────────
+def test_portrait_page_size_is_unchanged() -> None:
+    from reportlab.lib.pagesizes import A4
+
+    assert page_size("portrait") == A4
+
+
+def test_landscape_swaps_page_dimensions() -> None:
+    from reportlab.lib.pagesizes import A4
+
+    w, h = page_size("landscape")
+    assert (w, h) == (A4[1], A4[0])
+    assert w > h                      # wider than tall, unlike portrait
+
+
+_VIDEO_ASPECT = 16 / 9
+
+
+def _cell_image_area(orientation: str, grid: tuple[int, int]) -> float:
+    """The actual rendered size of a 16:9 frame inside its cell -- same box math
+    draw_grid_pages uses (image inset 8/22), then reportlab's preserveAspectRatio fit. Raw
+    box area is NOT this: a box narrower than 16:9 leaves the box's height half-empty, which
+    is exactly the waste a wider (fewer-columns) landscape grid is meant to buy back."""
+    pw, ph = page_size(orientation)
+    cols, rows = grid
+    box_w = (pw - 2 * PAD) / cols - 8
+    box_h = (ph - 2 * PAD) / rows - 22
+    if _VIDEO_ASPECT > box_w / box_h:            # width-constrained
+        disp_w, disp_h = box_w, box_w / _VIDEO_ASPECT
+    else:                                         # height-constrained
+        disp_h, disp_w = box_h, box_h * _VIDEO_ASPECT
+    return disp_w * disp_h
+
+
+def test_landscape_default_grid_gives_larger_cells_than_portrait() -> None:
+    """A naive 90-degree relabelling of the portrait grid (3 cols x 2 rows) actually measures
+    out SMALLER than portrait's 2x3 -- the column count, not the row count, drives the
+    width-constrained cell size for a 16:9 frame. 2x2 is the grid that is actually bigger."""
+    assert DEFAULT_GRID_LANDSCAPE != (3, 2)
+    assert _cell_image_area("landscape", (3, 2)) < _cell_image_area("portrait", DEFAULT_GRID)
+    assert (_cell_image_area("landscape", DEFAULT_GRID_LANDSCAPE)
+            > _cell_image_area("portrait", DEFAULT_GRID))
+
+
+def test_portrait_default_grid_is_unchanged() -> None:
+    assert DEFAULT_GRID == (2, 3)
 
 
 # ── Transcript alignment ─────────────────────────────────────────────────────────

@@ -69,6 +69,13 @@ sys.path.insert(0, str(REPO))
 # uniformly denser sheet that costs 3x the pages for the 95% of a bout that is static.
 DEFAULT_STEP_SECONDS = 5
 DEFAULT_GRID = (2, 3)      # cols x rows -> 6 frames per page
+# Landscape default. NOT a 90-degree relabelling of the portrait grid (3x2 measures out
+# smaller AND further from 16:9 -- 34,030pt^2 @ 1.04 vs portrait's 35,054pt^2 @ 1.08, since
+# reducing rows barely changes the row-driven cell height when the column count still governs
+# it). 2x2 is what's actually Pareto-better: fewer, wider columns give each cell's
+# width-constrained image ~2.2x the area (~78,200pt^2) at a box aspect of 1.58, much nearer
+# the 16:9 (1.78) a video frame actually is. Measured against A4 @ PAD=40, image inset 8/22.
+DEFAULT_GRID_LANDSCAPE = (2, 2)   # cols x rows -> 4 frames per page, larger + closer to 16:9
 
 # Ceiling on frames per PDF. A full-event stream with no interval is hours long, and 5s over
 # six hours is 4,300 frames -- a file nothing will read and a download that fills the disk.
@@ -493,6 +500,25 @@ _DRAWABLE: frozenset[int] | None = None
 PAGE = A4
 PW, PH = PAGE
 PAD = 40
+
+
+def page_size(orientation: str) -> tuple[float, float]:
+    """(width, height) in points for ``--orientation``. Landscape is A4 rotated, not a
+    different sheet -- same points, swapped axes."""
+    return (A4[1], A4[0]) if orientation == "landscape" else A4
+
+
+def set_page_size(orientation: str) -> None:
+    """Point PAGE/PW/PH at ``orientation``'s dims, called once before any page is drawn.
+
+    draw_context_page/draw_library_pages/draw_grid_pages/build_pdf all read PW/PH/PAGE as
+    module globals rather than a threaded parameter (the same pattern _register_fonts uses for
+    FONT/FONT_B) -- so mutating them here is what makes every page respect --orientation
+    without duplicating three drawing functions for a rotated sheet.
+    """
+    global PAGE, PW, PH
+    PAGE = page_size(orientation)
+    PW, PH = PAGE
 
 
 def _register_fonts() -> str:
@@ -1328,7 +1354,11 @@ def main() -> int:
                     help="write the label vocabulary a returned event may use, and exit")
     ap.add_argument("--out", type=Path, default=REPO / "data" / "frame_pdf" / "out")
     ap.add_argument("--step", type=int, default=DEFAULT_STEP_SECONDS)
-    ap.add_argument("--grid", default="2x3", help="cols x rows per page (default 2x3)")
+    ap.add_argument("--orientation", choices=("portrait", "landscape"), default="portrait",
+                    help="portrait (default): A4. landscape: A4 rotated, with a wider default "
+                         "grid so each cell holds a 16:9 video frame at higher resolution")
+    ap.add_argument("--grid", default=None,
+                    help="cols x rows per page (default 2x3 portrait, 2x2 landscape)")
     ap.add_argument("--workdir", type=Path, default=Path("/mnt/dados/bjjh/tmp"),
                     help="scratch for downloads; defaults off the small root volume")
     ap.add_argument("--cookies-from-browser", default=COOKIES_FROM_BROWSER,
@@ -1372,8 +1402,12 @@ def main() -> int:
             return 2
 
     COOKIES_FROM_BROWSER = a.cookies_from_browser
+    set_page_size(a.orientation)
     logger.info("sheet font: %s", _register_fonts())
-    cols, rows = (int(x) for x in a.grid.lower().split("x"))
+    if a.grid:
+        cols, rows = (int(x) for x in a.grid.lower().split("x"))
+    else:
+        cols, rows = DEFAULT_GRID_LANDSCAPE if a.orientation == "landscape" else DEFAULT_GRID
     entries = load_manifest(a.manifest)
     db = load_db_context()
     a.out.mkdir(parents=True, exist_ok=True)

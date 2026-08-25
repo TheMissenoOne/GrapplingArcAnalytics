@@ -16,6 +16,7 @@ rendered" and ends at "an answer JSON is ready to import".
 | 1 | Refresh the label vocabulary | `uv run python scripts/frame_pdf.py --dump-library` | maintainer |
 | 2 | Render sheets for a manifest | `uv run python scripts/frame_pdf.py --manifest data/frame_pdf/women_65.json` | maintainer |
 | 3 | Render as a directory instead of a PDF | add `--format frames` | maintainer |
+| 3a | Render landscape (bigger, more 16:9 cells) | add `--orientation landscape` | maintainer |
 | 4 | **Read the sheet → answer JSON** | manual, see §2 | vision model |
 | 5 | Validate the answer | `uv run python scripts/frame_answer.py` | maintainer |
 | 6 | **Human review against the frames** | `uv run python scripts/frame_registrar.py` → localhost:8765 | maintainer |
@@ -26,13 +27,44 @@ files a human has reviewed, and refuses (rather than guesses) anything it cannot
 see §4.7. It never opens a database connection; `--write` only produces
 `scripts/dumps/frame_pdf_data.py`, a plain dump `.py` for step 8 to import later.
 
-**Answer location (real contract, corrected 2026-08-24):** `data/frame_pdf/out/<slug>/events.json`,
-written by `scripts/frame_answer_import.py` (and rewritten by `frame_registrar.py` on save), beside
-the frames it describes. The `out/processed/` convention this doc previously declared was never
-adopted — the directory is empty and unreferenced by any code. The file's `source` field carries
-provenance: `frame_answer_import (…not yet human-reviewed)` for a raw model reading,
-`frame_registrar (human review over model reading)` once a human has passed through the registrar.
-Only reviewed files are admissible for import (§4.7's converter must gate on this).
+**Answer location (corrected again 2026-08-25 — `out/processed/` IS now adopted):**
+`data/frame_pdf/out/processed/<slug>.pdf` plus a `<slug>.events.json` sidecar, written by
+`scripts/frame_answer_import.py` (and rewritten by `frame_registrar.py` on save). Measured
+2026-08-25: `processed/` holds all 24 bout PDFs, 21 `.events.json` sidecars (model readings,
+preserved) and 1 hand-read `.json`. The file's `source` field carries provenance:
+`frame_answer_import (…not yet human-reviewed)` for a raw model reading, `frame_registrar
+(human review over model reading)` once a human has passed through the registrar. Only
+reviewed files are admissible for import (§4.7's converter must gate on this).
+
+**Storage policy (2026-08-25):** once a bout's PDF is rendered, its image folder (`strip/`,
+`clip.mp4`, `frames.jsonl`) is dropped — the PDF is the durable artefact, and frames are
+regenerable from the video URL. `out/` now holds only `processed/` (~2.5 GB freed). Consequence
+for §1 step 6: reviewing one of the 21 preserved model readings against its frames requires
+re-capturing them first — re-run `frame_pdf.py --format both` for that bout (or `--format
+frames` alone) before opening `frame_registrar.py`.
+
+The 56 ADCC-trials PDFs live canonically in `data/frame_pdf/trials_2023_24/` (duplicates that
+used to sit under `out/` were removed); they already carry per-window narration captions
+sourced from the event transcript (`--transcript`, §2 in the script's own docstring).
+
+**`--orientation landscape`** (added 2026-08-25): rotates the sheet to A4 landscape and, unless
+`--grid` is given explicitly, switches the default grid from 2x3 (portrait, 6 frames/page) to
+2x2 (landscape, 4 frames/page) — measured to render each cell's 16:9 video frame at roughly
+2.2x the area of the portrait default, and closer to the actual 16:9 aspect (box aspect 1.58
+vs portrait's 1.08). A naive 3x2 relabelling of the portrait grid was checked and rejected —
+it measures out smaller than portrait, not bigger, because column count (not row count) drives
+the width-constrained cell size. Use it for a bout you expect to need cropping/scrubbing detail;
+portrait stays the default (matches existing sheets, and fits more frames per page).
+
+**Sourcing from FloGrappling** (measured 2026-08-25): `frame_pdf.py` works unchanged against a
+FloGrappling page URL — `yt-dlp`'s generic extractor resolves the CloudFront m3u8 the page
+embeds, and `--cookies-from-browser firefox` (the script's default) authenticates as the logged-in
+browser session. Because FloGrappling serves split video/audio streams, the existing
+`bv*[height<=…]` selectors (§4.2 below) are required — a bare `b[height<=720]` format string
+fails on this source. **Store the page URL** in a manifest
+(`flograppling.com/video/<id>-slug` or `flograppling.com/events/…?playing=<id>`), never the
+resolved CloudFront playlist URL — that carries expiring auth tokens and will 403 on any later
+re-run.
 
 ## 2. How to read a sheet
 
@@ -271,9 +303,10 @@ with two new optional fields to carry them onto `matches.ts_origin`/`video_start
 ### 4.8 `--status` for the sheet backlog
 
 `frame_pdf.py` already skips fights whose video backs a reviewed sequence, but that check is a DB
-query only. A `--status` mode reading `out/` and `out/processed/` would show the three states that
-matter: rendered-but-unanswered, answered-but-unimported, done. As of 2026-08-20 `out/` held 24
-rendered PDFs plus 24 frames directories.
+query only. A `--status` mode reading `out/processed/` would show the three states that matter:
+rendered-but-unanswered, answered-but-unimported, done. As of 2026-08-25 `out/processed/` holds
+24 PDFs, 21 unreviewed `.events.json` sidecars and 1 hand-reviewed one — the frames directories
+that used to sit next to them are gone (storage policy, §1).
 
 ### 4.9 Prompt additions for the generated README
 
@@ -325,10 +358,11 @@ yt-dlp -F --cookies-from-browser firefox "https://www.youtube.com/watch?v=<id>" 
 # the two resolution knobs
 grep -n "FRAME_WIDTH\|height<=480" scripts/frame_pdf.py
 
-# sheet backlog: rendered vs answered
-cd data/frame_pdf/out && echo "pdf=$(ls *.pdf | wc -l) frames=$(ls -d */ | grep -vc processed) answered=$(ls processed/*.json 2>/dev/null | wc -l)"
+# sheet backlog: rendered vs answered (out/ now holds only processed/, no frames dirs -- §1)
+cd data/frame_pdf/out/processed && echo "pdf=$(ls *.pdf | wc -l) answered=$(ls *.events.json 2>/dev/null | wc -l)"
 
-# label check for one answer
+# label check for one answer -- frames dirs are dropped after render (§1), so this needs the
+# folder re-captured first: uv run python scripts/frame_pdf.py --manifest <m> --format frames --force
 python3 -c "
 import json,sys,re,pathlib
 slug=sys.argv[1]

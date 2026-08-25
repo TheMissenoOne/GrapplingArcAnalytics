@@ -1,8 +1,8 @@
 {
- "generated": "2026-08-20",
+ "generated": "2026-08-25",
  "source": "technique_nodes on prod, alembic 0048",
  "node_count": 376,
- "attested_in_corpus": 279,
+ "attested_in_corpus": 278,
  "how_a_label_becomes_a_node": "label -> analysis.names._normalize_name (lowercase, strip punctuation and accents, collapse whitespace) -> canonicalize (the `synonyms` map below) -> node_key. Prefer a `label` from this file verbatim. A label that normalises to a key not listed here mints a new node instead of failing, which is how one technique ends up split across two spellings.",
  "event_types": [
   {
@@ -36,10 +36,6 @@
   {
    "type": "escape",
    "corpus_events": 330
-  },
-  {
-   "type": "match",
-   "corpus_events": 8
   }
  ],
  "synonyms": {
@@ -890,14 +886,6 @@
    "label": "Escaped to Neutral",
    "type": "technique",
    "node_type": "transition",
-   "taxonomy_id": null,
-   "corpus_events": 8
-  },
-  {
-   "key": "match",
-   "label": "Match",
-   "type": "technique",
-   "node_type": "match",
    "taxonomy_id": null,
    "corpus_events": 8
   },
@@ -2778,6 +2766,14 @@
    "label": "Low Single Leg Takedown",
    "type": "technique",
    "node_type": "takedown",
+   "taxonomy_id": null,
+   "corpus_events": 0
+  },
+  {
+   "key": "match",
+   "label": "Match",
+   "type": "technique",
+   "node_type": "match",
    "taxonomy_id": null,
    "corpus_events": 0
   },
