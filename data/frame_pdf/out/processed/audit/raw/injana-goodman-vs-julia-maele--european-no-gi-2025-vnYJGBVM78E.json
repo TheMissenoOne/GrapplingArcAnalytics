@@ -1,0 +1,53 @@
+{
+ "bout": {
+  "athlete_a": "Injana Goodman",
+  "athlete_b": "Julia Maele",
+  "event": "European Championship No-Gi",
+  "year": 2025,
+  "winner": "Injana Goodman",
+  "win_type": "Points",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Injana Goodman": 11,
+   "Julia Maele": 2
+  },
+  "identity_verified_by": "0:10 (Injana Goodman vs Julia Maele match card graphic)",
+  "notes": "identity: 0:10 (Injana Goodman vs Julia Maele match card graphic) \u00b7 UNRECONCILED \u2014 final_score 11-2 is not fully accounted for by events [0, 9] (under-count, not a contradiction)"
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Takedown",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  },
+  {
+   "ts": 310,
+   "label": "Guard Pass",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 540,
+   "label": "Mount",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "control",
+   "points": 4
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 630,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "injana-goodman-vs-julia-maele--european-no-gi-2025-vnYJGBVM78E.events.json"
+ }
+}

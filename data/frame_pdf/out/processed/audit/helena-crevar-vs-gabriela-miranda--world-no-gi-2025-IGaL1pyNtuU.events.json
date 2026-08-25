@@ -1,0 +1,33 @@
+{
+ "bout": {
+  "athlete_a": "Helena Crevar",
+  "athlete_b": "Gabriela Miranda",
+  "event": "IBJJF World Championship No-Gi",
+  "year": 2025,
+  "winner": "Helena Crevar",
+  "win_type": "Submission",
+  "bout_start_seconds": 70,
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: frame 1:10 Crevar on upper scoreboard row in Gameness gear · UNRECONCILED — events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) · UNRECONCILED — events[1] 'Katagatame / Head-Arm Strangle': normalises to 'katagatame headarm strangle', which is not a library node · 'Katagatame / Head-Arm Strangle' flagged new_label: the library holds 'Arm Triangle Choke' (95 ev), 'Arm-Triangle / Head-Arm Strangle' (1 ev) and 'Katagatame / Darce' (1 ev) — three spellings of the same family and a fourth arriving. A synonym pair collapsing them onto 'Arm Triangle Choke' is the fix, and it is a decision, not something to take silently. | The whole event timeline in this reading was shifted ~150s early relative to the actual footage (submission logged at 255/270 vs the real 405/410); the guard-pull event additionally has the actor's final position backwards from what a guard pull implies, so it was dropped rather than time-corrected. Ground-truth win_type 'Katagatame' from BJJ Heroes corroborates the corrected submission.",
+  "identity_discriminator": "No lower-third at 0:00-1:00; scoreboard names appear from 1:05 (65s) onward: HELENA CREVAR (left) / GABRIELA DE MIRANDA (right). Helena wears the light/white Gameness-sponsored kit (matches source note 'Crevar in Gameness gear'), Gabriela wears the dark kit with a BC Brazil patch. Identity held for the whole continuous single-camera broadcast. Final result: Helena wins by submission (Katagatame), matching BJJ Heroes ground truth (W Katagatame, World NoGi 71KG SF 2025)."
+ },
+ "events": [
+  {
+   "ts": 405,
+   "label": "Arm‑Triangle / Head‑Arm Strangle",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "submission",
+   "note": "ts corrected from 255, label snapped from off-library 'Katagatame / Head-Arm Strangle' -- see log"
+  },
+  {
+   "ts": 410,
+   "label": "Tap",
+   "actor": "Gabriela Miranda",
+   "successful": true,
+   "type": "submission",
+   "note": "ts corrected from 270 -- see log"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 2/3) 2026-08-25"
+}

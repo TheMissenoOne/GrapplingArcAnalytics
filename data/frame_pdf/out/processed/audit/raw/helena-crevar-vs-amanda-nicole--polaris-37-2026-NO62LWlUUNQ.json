@@ -1,0 +1,57 @@
+{
+ "bout": {
+  "athlete_a": "Helena Crevar",
+  "athlete_b": "Amanda Nicole",
+  "event": "Polaris 37",
+  "year": 2026,
+  "winner": "Helena Crevar",
+  "win_type": "Rear Naked Choke",
+  "bout_start_seconds": 20,
+  "final_score": {
+   "Helena Crevar": 0,
+   "Amanda Nicole": 0
+  },
+  "identity_verified_by": "0:20 (Amanda Pamela Nicole vs Helena Crevar banner graphic)",
+  "notes": "identity: 0:20 (Amanda Pamela Nicole vs Helena Crevar banner graphic)"
+ },
+ "events": [
+  {
+   "ts": 25,
+   "label": "Pull Guard",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 125,
+   "label": "Leg Entanglement",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 380,
+   "label": "Back Take",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 605,
+   "label": "Rear Naked Choke",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 780,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "helena-crevar-vs-amanda-nicole--polaris-37-2026-NO62LWlUUNQ.events.json"
+ }
+}

@@ -1,0 +1,47 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Paige Ivette",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Nadia Frankland",
+  "win_type": "Points",
+  "bout_start_seconds": 5,
+  "final_score": {
+   "Nadia Frankland": 4,
+   "Paige Ivette": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: 0:05 (Paige Ivette Borras vs Nadia Frankland broadcast graphic) | Unlike the other two Frankland/Ivette-family bouts in this batch, this bout's match clock ticks continuously (no multi-minute freeze), so video-absolute time and match time track closely EXCEPT across the ts145-150 window where two scoring actions land almost back-to-back. Reconstructed total (2+2=4, Frankland) matches bjjh_results.json ('W Pts: 4x0') and bout.final_score exactly, which is the main evidence the pair of events is correctly identified even though their precise sub-5s sequencing/technique split could not be independently confirmed frame by frame.",
+  "identity_discriminator": "Scoreboard bar from ts0: PAIGE IVETTE BORRAS left, NADIA FRANKLAND right. Continuous single wide camera the whole bout (no cuts detected in any page checked: 05-11,14,15). A green ankle band is visible on one fighter starting ts20 and stays with the bottom/guard player through the ts45-85 guard-retention sequence -- consistent with the scoreboard's left/right-to-name mapping held from the opening squareoff (minimal time elapsed before the first engagement)."
+ },
+ "events": [
+  {
+   "ts": 42,
+   "label": "Guard Pull",
+   "actor": "Paige Ivette",
+   "successful": true,
+   "type": "guard",
+   "note": "ts corrected from 10 to 42: at ts10-25 the fighters are still circling/hand-fighting at range, no pull yet; by ts45 the green-ankle-band fighter (Paige, consistent with the left=Paige mapping) is already seated pulling guard, so the pull lands between ts40-45. Actor/label/type otherwise confirmed."
+  },
+  {
+   "ts": 146,
+   "label": "Sweep",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "sweep",
+   "points": 2,
+   "note": "ts corrected from 320 to ~146. Match clock ticks continuously in this bout (no long freeze like the other two bouts in this batch), so video time tracks match time reasonably well -- but the scoreboard shows Frankland's score is STILL 0 at ts140-145 and is already 4 by ts150, i.e. both of Frankland's 2-point scores land inside the ts145-150 gap, nowhere near the logged ts320/ts530. Referee's arm is raised at ts145 (advantage/score call) right as a tight ground scramble compresses -- consistent with back-to-back scoring actions in a single fast exchange."
+  },
+  {
+   "ts": 148,
+   "label": "Takedown",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "takedown",
+   "points": 2,
+   "note": "ts corrected from 530 to ~148 (see companion Sweep event note -- both of Frankland's scores land in the ts145-150 gap, not at 320/530). Lower confidence than the Sweep correction: the fighters have been continuously grounded since ~ts120 with no clear stand-up visible in the 5s samples, so a true Takedown is not directly confirmed -- but the tight, compressed clinch at ts145 is consistent with a brief scramble-to-feet-and-back that a 5s sampling step would miss entirely. Kept (not dropped) because actor and points are solid via the name-bound scoreboard total (0->4, matching exactly two 2pt scores = the two logged events), and the technique label itself was not contradicted by anything visible, only unconfirmed."
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 3/3) 2026-08-25"
+}

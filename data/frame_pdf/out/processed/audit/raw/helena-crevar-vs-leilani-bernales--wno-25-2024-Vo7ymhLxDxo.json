@@ -1,0 +1,51 @@
+{
+ "bout": {
+  "athlete_a": "Helena Crevar",
+  "athlete_b": "Leilani Bernales",
+  "event": "WNO 25",
+  "year": 2024,
+  "winner": "Helena Crevar",
+  "win_type": "Referee Decision",
+  "bout_start_seconds": 15,
+  "identity_verified_by": "0:15 (Helena Crevar in leopard print rashguard; Leilani Bernales in black shorts with blue ankle band)",
+  "notes": "identity: 0:15 (Helena Crevar in leopard print rashguard; Leilani Bernales in black shorts with blue ankle band)"
+ },
+ "events": [
+  {
+   "ts": 20,
+   "label": "Pull Guard",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 25,
+   "label": "Open Guard",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 40,
+   "label": "Leg Entanglement",
+   "actor": "Helena Crevar",
+   "successful": false,
+   "type": "guard"
+  },
+  {
+   "ts": 1030,
+   "label": "Match",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "transition"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 1035,
+  "flags": [],
+  "db_match": "54d7e3f7",
+  "db_events": 10,
+  "source_file": "helena-crevar-vs-leilani-bernales--wno-25-2024-Vo7ymhLxDxo.events.json"
+ }
+}

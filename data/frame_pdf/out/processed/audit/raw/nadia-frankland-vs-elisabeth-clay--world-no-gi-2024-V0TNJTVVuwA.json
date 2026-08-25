@@ -1,0 +1,44 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Elisabeth Clay",
+  "event": "IBJJF World Championship No-Gi",
+  "year": 2024,
+  "winner": "Elisabeth Clay",
+  "win_type": "Points",
+  "bout_start_seconds": 25,
+  "final_score": {
+   "Elisabeth Clay": 2,
+   "Nadia Frankland": 0
+  },
+  "identity_verified_by": "frame 0:25 broadcast graphic, Frankland left / Clay right",
+  "notes": "identity: frame 0:25 broadcast graphic, Frankland left / Clay right \u00b7 UNRECONCILED \u2014 events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) \u00b7 UNRECONCILED \u2014 final_score 2-0 read against competitors order gives Nadia Frankland the higher score, but winner is Elisabeth Clay \u2014 the field has no declared orientation"
+ },
+ "events": [
+  {
+   "ts": 30,
+   "label": "Pull Guard",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 240,
+   "label": "Sweep",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 675,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "nadia-frankland-vs-elisabeth-clay--world-no-gi-2024-V0TNJTVVuwA.events.json"
+ }
+}

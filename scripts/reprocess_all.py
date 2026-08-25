@@ -138,6 +138,15 @@ DATASETS: list[tuple[str, str | None, str]] = [
     ("scripts.dumps.wno25_data", "WNO 25", "WNO25"),
     ("scripts.dumps.wno27_data", "WNO 27", "WNO27"),
     ("scripts.dumps.pan_nogi2025_data", "Pan No-Gi 2025", "PanNoGi2025"),
+    # Women-65 audited frame-read batch -- scripts/w65_frames_to_dump.py, see
+    # docs/gemini_concordance_audit.md. One module per event tag per this file's convention.
+    ("scripts.dumps.european_nogi2024_frames_data", "European No-Gi 2024", "EuroNoGi2024-Frames"),
+    ("scripts.dumps.world_nogi2024_frames_data", "World No-Gi 2024", "WorldNoGi2024-Frames"),
+    ("scripts.dumps.pan_nogi2024_frames_data", "Pan No-Gi 2024", "PanNoGi2024-Frames"),
+    ("scripts.dumps.world_nogi2025_frames_data", "World No-Gi 2025", "WorldNoGi2025-Frames"),
+    ("scripts.dumps.european_nogi2025_frames_data", "European No-Gi 2025", "EuroNoGi2025-Frames"),
+    ("scripts.dumps.pan_nogi2025_frames2_data", "Pan No-Gi 2025", "PanNoGi2025-Frames"),
+    ("scripts.dumps.polaris36_frames_data", "Polaris 36", "Polaris36-Frames"),
 ]
 
 

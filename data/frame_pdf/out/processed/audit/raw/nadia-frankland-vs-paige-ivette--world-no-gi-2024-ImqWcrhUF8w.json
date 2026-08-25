@@ -1,0 +1,52 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Paige Ivette",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Nadia Frankland",
+  "win_type": "Points",
+  "bout_start_seconds": 5,
+  "final_score": {
+   "Nadia Frankland": 4,
+   "Paige Ivette": 0
+  },
+  "identity_verified_by": "0:05 (Paige Ivette Borras vs Nadia Frankland broadcast graphic)",
+  "notes": "identity: 0:05 (Paige Ivette Borras vs Nadia Frankland broadcast graphic)"
+ },
+ "events": [
+  {
+   "ts": 10,
+   "label": "Guard Pull",
+   "actor": "Paige Ivette",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 320,
+   "label": "Sweep",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 530,
+   "label": "Takedown",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 680,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "nadia-frankland-vs-paige-ivette--world-no-gi-2024-ImqWcrhUF8w.events.json"
+ }
+}

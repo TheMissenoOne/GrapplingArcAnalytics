@@ -1,0 +1,29 @@
+{
+ "log": [
+  {
+   "ts": 30,
+   "label": "Pull Guard",
+   "actor": "Elisabeth Clay",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "off-library label synonym (Pull Guard -> Guard Pull, per the file's own note) plus an actor swap: crouching/level-change fighter at ts30 (guard-puller) is on screen-left, which was confirmed as Nadia Frankland only 5s earlier at ts25.",
+   "corrections": {
+    "label": "Guard Pull",
+    "actor": "Nadia Frankland"
+   }
+  },
+  {
+   "ts": 240,
+   "label": "Sweep",
+   "actor": "Elisabeth Clay",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "actor/label/type/points all confirmed via the scoreboard's name-bound score column (Clay 0->2 between ts210 and ts215) and continuous position tracking (no camera cut), but the timestamp is ~27s late -- by ts240 the fighters have already moved on to an unrelated leg-lock scramble.",
+   "corrections": {
+    "ts": 213
+   }
+  }
+ ],
+ "identity_check": "Scoreboard bar from ts0 on: NADIA FRANKLAND left, ELISABETH ANN CLAY right; single continuous static wide camera the entire bout (same background/ring-circle logo position, no cuts/replays detected in any page checked: 05-13, 27). At ts660 the referee raises the RIGHT-side fighter's arm for the win, matching the published winner Elisabeth Clay -- confirms the left/right-to-name binding held through the whole match. NOTE: this bout is genuinely hard to re-identify mid-scramble by kit/hair alone (both wear plain black, hair goes in and out of braids as the match progresses) -- see per-event caveats below; the safest identity anchor used per-event is 'how much time elapsed since the last confirmed-clean stance' rather than a single fixed visual tag.",
+ "notes": "This bout's own source metadata flagged an 'UNRECONCILED' orientation ambiguity on final_score before we opened it. That's resolved: bjjh_results.json confirms Nadia Frankland lost 2x0, i.e. Elisabeth Clay is the 2-0 winner, matching bout.winner and both kept events reconstruct to that same 2-0 (Clay). The Guard Pull actor correction (Clay->Frankland) is independent of that resolution and rests on tight temporal proximity to the one genuinely clean identity frame (ts25); confidence on mid-match (ts150+) actor calls is lower in this bout than in the others in this batch because hairstyle/logo cues are inconsistent frame to frame -- no other events needed that judgment here."
+}

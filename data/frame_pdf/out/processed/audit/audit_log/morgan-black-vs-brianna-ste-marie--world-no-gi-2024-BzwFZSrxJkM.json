@@ -1,0 +1,13 @@
+{
+ "log": [
+  {
+   "ts": 110,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "clock runs live to 115s (8:16) then freezes at 8:11 from 120s onward with both fighters standing for the hand-raise -- the finish lands ~117-119s, inside the +-10s tolerance of the claimed ts=110. Frame at 110s already shows Morgan (white/BLACK kit) folded down with Brianna (dark kit, green band) controlling her head/neck, consistent with a guillotine; score stays 0-0 throughout, as expected for a submission finish. Matches BJJ Heroes win_type"
+  }
+ ],
+ "identity_check": "Bar reads MORGAN LEIGH BLACK (left name) / BRIANNA STE-MARIE (right name) from 0:10 onward, but the NAME ORDER DOES NOT MATCH physical mat position here (the exact trap the protocol warns about): the white/light kit with 'BLACK'/'BIGHORN' text printed on the back sits on the physical RIGHT of the mat from ~65s on -- that is Morgan Black. The dark kit with a green ankle band sits on the physical LEFT -- that is Brianna Ste-Marie (same green-band marker she wears in her other audited bout this batch). Identity bound to the kit text/band, not to bar position. Result matches BJJ Heroes ground truth: Morgan Black L Guillotine, World NoGi 61KG F 2024.",
+ "notes": "Short clip (2:36 video, bout occupies its entirety); no other events in the sparse reading to audit."
+}

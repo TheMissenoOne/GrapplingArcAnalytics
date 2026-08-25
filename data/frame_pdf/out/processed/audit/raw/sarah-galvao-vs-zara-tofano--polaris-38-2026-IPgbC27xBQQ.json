@@ -1,0 +1,65 @@
+{
+ "bout": {
+  "athlete_a": "Sarah Galvao",
+  "athlete_b": "Zara Di Tofano",
+  "event": "Polaris 38",
+  "year": 2026,
+  "winner": "Sarah Galvao",
+  "win_type": "Decision",
+  "bout_start_seconds": 210,
+  "identity_verified_by": "frame 3:35 (215s) Sarah Galvao yellow/green Brazil rashguard, Zara Di Tofano teal Aesthetic",
+  "notes": "identity: frame 3:35 (215s) Sarah Galvao yellow/green Brazil rashguard, Zara Di Tofano teal Aesthetic \u00b7 UNRECONCILED \u2014 events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) \u00b7 UNRECONCILED \u2014 events[2] 'Reset/Stalemate': normalises to 'resetstalemate', which is not a library node \u00b7 UNRECONCILED \u2014 events[3] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) \u00b7 UNRECONCILED \u2014 events[4] 'Reset/Stalemate': normalises to 'resetstalemate', which is not a library node \u00b7 UNRECONCILED \u2014 events[5] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) \u00b7 CORRECTED: 'Reset/Stalemate' rewritten to the library's 'Reset / Stalemate'. _normalize_name drops the slash WITHOUT inserting a space, so the two spellings land on different keys ('resetstalemate' vs 'reset stalemate'). That asymmetry is in the cross-module node_key contract and was not changed here."
+ },
+ "events": [
+  {
+   "ts": 215,
+   "label": "Pull Guard",
+   "actor": "Zara Di Tofano",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 240,
+   "label": "Front Headlock Control",
+   "actor": "Sarah Galvao",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 275,
+   "label": "Reset / Stalemate",
+   "actor": "Sarah Galvao",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 285,
+   "label": "Pull Guard",
+   "actor": "Zara Di Tofano",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 330,
+   "label": "Reset / Stalemate",
+   "actor": "Zara Di Tofano",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 340,
+   "label": "Pull Guard",
+   "actor": "Zara Di Tofano",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 695,
+  "flags": [],
+  "db_match": "d717f8e5",
+  "db_events": 6,
+  "source_file": "sarah-galvao-vs-zara-tofano--polaris-38-2026-IPgbC27xBQQ.events.json"
+ }
+}

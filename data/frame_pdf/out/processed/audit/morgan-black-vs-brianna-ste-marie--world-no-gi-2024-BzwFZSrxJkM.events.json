@@ -1,0 +1,28 @@
+{
+ "bout": {
+  "athlete_a": "Morgan Black",
+  "athlete_b": "Brianna Ste-Marie",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Brianna Ste-Marie",
+  "win_type": "Guillotine Choke",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Brianna Ste-Marie": 0,
+   "Morgan Black": 0
+  },
+  "identity_discriminator": "Bar reads MORGAN LEIGH BLACK (left name) / BRIANNA STE-MARIE (right name) from 0:10 onward, but the NAME ORDER DOES NOT MATCH physical mat position here (the exact trap the protocol warns about): the white/light kit with 'BLACK'/'BIGHORN' text printed on the back sits on the physical RIGHT of the mat from ~65s on -- that is Morgan Black. The dark kit with a green ankle band sits on the physical LEFT -- that is Brianna Ste-Marie (same green-band marker she wears in her other audited bout this batch). Identity bound to the kit text/band, not to bar position. Result matches BJJ Heroes ground truth: Morgan Black L Guillotine, World NoGi 61KG F 2024.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "Short clip (2:36 video, bout occupies its entirety); no other events in the sparse reading to audit."
+ },
+ "events": [
+  {
+   "ts": 110,
+   "label": "Guillotine Choke",
+   "actor": "Brianna Ste-Marie",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 1/1) 2026-08-25"
+}

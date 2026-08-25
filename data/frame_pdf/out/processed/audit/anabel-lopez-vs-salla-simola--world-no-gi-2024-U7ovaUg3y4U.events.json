@@ -1,0 +1,38 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Salla Simola",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Anabel Lopez",
+  "win_type": "Points",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Anabel Lopez": 2,
+   "Salla Simola": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: 0:10 (Anabel Lopez identified on broadcast scoreboard banner) | This clip has an unusually long clock-frozen stretch (~ts25 to at least ts205, ~180s of video, round clock stuck at 9:44) from repeated guard-pull/reset/stalling-penalty cycles -- confirmed real (not a broadcast cut: single static camera, consistent background/lighting/referee the whole time) by the referee visibly resetting positions and signalling penalties mid-sequence (ts95, ts155). Anything time-based in this bout must be read off the scoreboard's own second-by-second penalty/score/advantage counters, not the video-absolute ts, once inside that stretch. Reconstructed score (2-0 Anabel, 1 adv Anabel, 2 pen Salla) matches bjjh_results.json ('W Pts: 2x0').",
+  "identity_discriminator": "Scoreboard at 0:00-0:10 (page05): ANABEL LOPEZ BEARD left, SALLA MARI SIMOLA right. Physical discriminators carried on kit, checked repeatedly across the whole clip (pages05-11, ts0-205, one continuous static-camera shot, no cuts): left fighter's rashguard shows a 'TATAMI' sponsor logo (clearly readable ts105-145) = Anabel Lopez; right fighter wears a green ankle band = Salla Simola. Left/right screen position never changes and matches the scoreboard order the whole time (no camera cut or angle change observed anywhere checked)."
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "guard",
+   "note": "actor corrected from Salla Simola to Anabel Lopez: across every repeated engage/reset/pull cycle visible in this clip (ts15,30,60,65,70,80,90,105,120-145 -- roughly 8 cycles), it is consistently the TATAMI-branded fighter (Anabel, left/screen-consistent) who is seated/on the ground pulling guard while the green-ankle-band fighter (Salla) remains standing/re-engaging. No cycle shows the reverse. ts itself was accurate (clock still ticking 9:56->9:51 at ts10-15, matching a live guard pull at 15s)."
+  },
+  {
+   "ts": 158,
+   "label": "Takedown",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "takedown",
+   "points": 2,
+   "note": "ts corrected from 180 to ~158: match clock froze at 9:44 from ~ts25 through at least ts205 (repeated guard-pull/reset/penalty cycles, clock only runs during live action), so video-absolute time keeps advancing while the round clock doesn't. Scoreboard trace: ts150 Anabel shoots for a takedown (level change) on Salla; ts155 Anabel gets +1 advantage, Salla gets her 1st penalty; ts160 Anabel's score is already 2 and Salla has her 2nd penalty. The takedown lands inside the 155-160s frame pair, not at 180s (score/pens are already final -2-0/2 pen- by 160s and stay that way through 180-205s)."
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 2/2) 2026-08-25"
+}

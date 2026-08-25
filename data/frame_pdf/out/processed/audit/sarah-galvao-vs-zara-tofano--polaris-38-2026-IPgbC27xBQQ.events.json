@@ -1,0 +1,59 @@
+{
+ "bout": {
+  "athlete_a": "Sarah Galvao",
+  "athlete_b": "Zara Di Tofano",
+  "event": "Polaris 38",
+  "year": 2026,
+  "winner": "Sarah Galvao",
+  "win_type": "Decision",
+  "bout_start_seconds": 210,
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: frame 3:35 (215s) Sarah Galvao yellow/green Brazil rashguard, Zara Di Tofano teal Aesthetic · UNRECONCILED — events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) · UNRECONCILED — events[2] 'Reset/Stalemate': normalises to 'resetstalemate', which is not a library node · UNRECONCILED — events[3] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) · UNRECONCILED — events[4] 'Reset/Stalemate': normalises to 'resetstalemate', which is not a library node · UNRECONCILED — events[5] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) · CORRECTED: 'Reset/Stalemate' rewritten to the library's 'Reset / Stalemate'. _normalize_name drops the slash WITHOUT inserting a space, so the two spellings land on different keys ('resetstalemate' vs 'reset stalemate'). That asymmetry is in the cross-module node_key contract and was not changed here. | Clean bout: named, colored HUD bar makes actor identity unambiguous for every event, all 6 archived events check out against the frames with no corrections needed. This matches the archive's own db_match note (already 6 events in the corpus, non-'NOT in DB' flags) -- a re-confirmation rather than a discovery.",
+  "identity_discriminator": "Named/colored HUD bar present and stable throughout the whole bout (not just at the start): 'ZARA DI TOFANO' = teal/maroon 'Aesthetic' rashguard (left, blue-cyan corner light). 'SARAH GALVAO' = yellow/green Brazil rashguard (right, red corner light). This is a direct per-frame identity confirmation, not an inference from kit alone."
+ },
+ "events": [
+  {
+   "ts": 215,
+   "label": "Guard Pull",
+   "actor": "Zara Di Tofano",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 240,
+   "label": "Front Headlock Control",
+   "actor": "Sarah Galvao",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 275,
+   "label": "Reset / Stalemate",
+   "actor": "Sarah Galvao",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 285,
+   "label": "Guard Pull",
+   "actor": "Zara Di Tofano",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 330,
+   "label": "Reset / Stalemate",
+   "actor": "Zara Di Tofano",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 340,
+   "label": "Guard Pull",
+   "actor": "Zara Di Tofano",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 6/6) 2026-08-25"
+}

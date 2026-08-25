@@ -1,0 +1,55 @@
+{
+ "log": [
+  {
+   "ts": 15,
+   "label": "Pull Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:10-0:15 frames show one athlete seated pulling guard as the other stands over her; consistent with the claim, and coherent with Schuck being the guard-recovery side throughout (also seen at 80s and, per the score record, never the one who scores)."
+  },
+  {
+   "ts": 80,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "1:20 frame shows the same tangled seated-guard exchange continuing; plausible leg-entanglement phase for the defending guard player."
+  },
+  {
+   "ts": 330,
+   "label": "Sweep",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "Scoreboard shows Frankland's points cell going 1adv->2pts at exactly 3:35/215s (0:00-3:30 all show 0-1adv, 3:35 on shows 0-2pts) -- that is where the real, scored sweep is. By 5:30/330s the score has been sitting at 0-2 unchanged since 3:35, so nothing scores at 330s; the claimed ts is ~115s off from the only matching scoreboard event and there's no second scored action near 330s to attach it to -> dropped rather than fabricate a corrected timestamp. (The genuine sweep at 215s exists in the footage but has no claimed event to correct onto it, so nothing added, per the no-invented-events rule.)"
+  },
+  {
+   "ts": 440,
+   "label": "Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Scoreboard confirms Frankland's points cell going 2->4 at exactly 7:20/440s (2 at 7:15, 4 at 7:20); matches claimed actor, points, and timestamp precisely, and 7:05-7:15 frames show an active scramble/roll consistent with a sweep."
+  },
+  {
+   "ts": 475,
+   "label": "Back Take",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "7:50/470s frame shows both fighters flat/tangled with no clear back exposed; 8:00/480s frame shows Frankland already established behind Schuck in back-mount/RNC position. A back-take transition in the intervening 10s window is the only thing that explains that change, and no scoreboard/label alternative fits better -> kept as the coarse-but-plausible read the frames support."
+  },
+  {
+   "ts": 480,
+   "label": "Rear Naked Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "8:00 frame shows exactly this: Frankland behind Schuck, arm position around the neck consistent with an RNC, immediately followed by referee intervention at 8:05."
+  },
+  {
+   "ts": 480,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Same 8:00-8:05 sequence: action stops abruptly, referee steps in at 8:05, both athletes seated calmly by 8:10 and standing/celebrating by 8:15-8:25 -- consistent with a tap-triggered stoppage at this timestamp."
+  }
+ ],
+ "identity_check": "IBJJF broadcast, per-athlete scoreboard: 'G. DA SILVA SCHUCK' vs 'N. FRANKLAND', each with own points/adv cells, stable throughout. One athlete wears a visible green ankle band from ~3:30 onward -- the same fighter whose points cell is the one that climbs (0->1adv at 0:20, ->2pts at 3:35, ->4pts at 7:20), i.e. the green-band fighter is Frankland, matching bjjh_results.json (Nadia Frankland, W RNC) and the reading's own winner/final_score. No actor swap found in this bout (unlike the other two IBJJF-scoreboard bouts in this batch) -- every scored event's named actor matches whichever cell actually moved.",
+ "notes": "curated window is 0-520s (8:40); video ends shortly after the 8:25 victory-raise frame, nothing sampled past it. The ts=330 Sweep drop means this bout's real first scoring sweep (215s) is not represented by any kept event -- flagging in case the assembler wants to know a real, unclaimed scoring moment exists in the footage rather than assuming the bout only had 2 scored sweeps total as claimed."
+}

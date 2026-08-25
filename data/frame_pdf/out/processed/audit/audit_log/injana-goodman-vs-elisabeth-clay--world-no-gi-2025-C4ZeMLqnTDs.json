@@ -1,0 +1,55 @@
+{
+ "log": [
+  {
+   "ts": 5,
+   "label": "Pull Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:00-0:05 frames show one athlete already seated/pulling guard as the other closes distance standing; consistent with claim. Note: verbatim vocabulary label is 'Guard Pull', not 'Pull Guard' -- reading's raw label is non-verbatim but not corrected here per instructions to only correct label/actor/successful/type on a DISCORDANT event; this one reads CONCORDANT on substance so left as-is other than flagging."
+  },
+  {
+   "ts": 15,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:10-0:15 continues the same seated-guard exchange, no reset/scoreboard change; consistent with an open-guard phase."
+  },
+  {
+   "ts": 25,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:25 frame shows the standing/passing fighter engaging low near the legs of the seated fighter; consistent with the claim, actor plausible given she is the one on the attacking/passing side throughout this stretch."
+  },
+  {
+   "ts": 60,
+   "label": "Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Scoreboard confirms: Elisabeth Clay's point cell is 0 at 0:55 and reads 2 at exactly 1:00 -- matches claimed actor, points, and timestamp precisely."
+  },
+  {
+   "ts": 80,
+   "label": "Seated Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "1:20 frame shows the same seated/tangled position recurring after the 1:00 sweep, consistent with the swept fighter (Injana) recovering to seated guard; no scoreboard change."
+  },
+  {
+   "ts": 130,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "2:15 frame shows a kneeling front-headlock/guillotine-type neck wrap by the top fighter (Elisabeth Clay, consistent kit/position with the 60s sweep winner) over the other, matching the claim within the +-10s window."
+  },
+  {
+   "ts": 138,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "2:20 frame shows the controlled fighter (Injana Goodman) flat with a visible tap-out gesture while Clay stands over her; 2:25 shows both fighters raised by the referee with the round clock frozen, confirming the stoppage."
+  }
+ ],
+ "identity_check": "IBJJF broadcast, clean per-athlete scoreboard: left/'ELISABETH CLAY', right/'INJANA GOODMAN', each with own points/adv/pen cells, stable the whole (short, 2:45) clip. Bound the one scored action to a name via the scoreboard cell that actually changes (authoritative for points per the reading sheet's own rule): Elisabeth Clay's points cell goes 0->2 at exactly 1:00/60s, matching the claimed Sweep/Elisabeth Clay/points:2 event -- no swap here (unlike the previous bout in this batch). Ground truth (bjjh_results.json: Elisabeth Clay, W Guillotine) and the reading's own bout.winner agree, and the finish sequence (kneeling front-headlock/guillotine grip at 2:15, opponent flat and tapping at 2:20, both fighters raised by ref at 2:25 with the clock frozen) matches Elisabeth Clay on top throughout, consistent with her also being the guard-passer/leg-entanglement side from 0:25 on.",
+ "notes": "Clean short clip (2:45, 34 frames), single continuous sequence, no cutaways/replays observed, no identity or points contradictions found -- all 7 events kept as-is."
+}

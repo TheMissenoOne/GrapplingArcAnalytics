@@ -1,0 +1,34 @@
+{
+ "log": [
+  {
+   "ts": 75,
+   "label": "Pull Guard",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "frames 65-75s show Helena already standing OVER a grounded Gabriela (top position), and Helena remains on top through 75s onward -- the opposite of what pulling guard would put her in. Could not confirm any bottom/seated guard entry by Helena in [60,90]s with confidence; residual doubt -> drop"
+  },
+  {
+   "ts": 255,
+   "label": "Katagatame / Head-Arm Strangle",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "corrections": {
+    "ts": 405,
+    "label": "Arm-Triangle / Head-Arm Strangle"
+   },
+   "reason": "frames at 240-295s show ongoing live grappling with the clock actively counting down and score unchanged at 2-0 -- no finish there. The real finish is visible at 405s (Helena applying a head-arm choke control from top) with the clock freezing at 4:00-3:55 immediately after and the hand-raise ceremony following; corrected ts to 405. Off-library label snapped to the closest verifiable listed vocabulary entry, 'Arm-Triangle / Head-Arm Strangle' (matches BJJ Heroes win_type 'Katagatame' and the visible head/arm control), per the off-library-label flag handling rule"
+  },
+  {
+   "ts": 270,
+   "label": "Tap",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "corrections": {
+    "ts": 410
+   },
+   "reason": "same reasoning as the submission above -- match is still live at 270s. The tap/stoppage is visible at 410s (corner and ref rushing in as the clock reads 4:05), corrected ts to 410"
+  }
+ ],
+ "identity_check": "No lower-third at 0:00-1:00; scoreboard names appear from 1:05 (65s) onward: HELENA CREVAR (left) / GABRIELA DE MIRANDA (right). Helena wears the light/white Gameness-sponsored kit (matches source note 'Crevar in Gameness gear'), Gabriela wears the dark kit with a BC Brazil patch. Identity held for the whole continuous single-camera broadcast. Final result: Helena wins by submission (Katagatame), matching BJJ Heroes ground truth (W Katagatame, World NoGi 71KG SF 2025).",
+ "notes": "The whole event timeline in this reading was shifted ~150s early relative to the actual footage (submission logged at 255/270 vs the real 405/410); the guard-pull event additionally has the actor's final position backwards from what a guard pull implies, so it was dropped rather than time-corrected. Ground-truth win_type 'Katagatame' from BJJ Heroes corroborates the corrected submission."
+}

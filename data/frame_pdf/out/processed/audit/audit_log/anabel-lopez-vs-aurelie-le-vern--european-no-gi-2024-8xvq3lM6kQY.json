@@ -1,0 +1,34 @@
+{
+ "log": [
+  {
+   "ts": 10,
+   "label": "Pull Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:10-0:15 shows Anabel (green ankle band) crouching/shooting low into Aurelie, ending on the ground by 0:20-0:25 -- consistent with a guard pull by Anabel."
+  },
+  {
+   "ts": 20,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:20-0:25 continues the same ground exchange from the pull; no contradiction, actor/type match."
+  },
+  {
+   "ts": 120,
+   "label": "Armbar",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "2:00-2:10 shows a fighter down on the mat with the other close/finishing and the referee stepping in moments later; the 'Victory / Aurelie Le Vern' graphic at 2:20 confirms an armbar finish in this window, matching BJJ Heroes exactly."
+  },
+  {
+   "ts": 130,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "2:10 shows Anabel kneeling near the referee immediately before the stoppage/hand-raise sequence at 2:15-2:20 -- consistent with the tap that ended the match."
+  }
+ ],
+ "identity_check": "Anabel Lopez = TATAMI kit + green ankle band (visible 0:00-0:25, consistent marker also seen in the sister bout anabel-lopez-vs-maria-vicentini). Aurelie Le Vern = taller athlete with white side-stripe shorts, no ankle band. Winner confirmed beyond doubt by the 'Victory / Aurelie Le Vern / Sic Braba Jiu-Jitsu' graphic at 2:20 (140s), matching BJJ Heroes ('L Armbar' for Anabel Lopez).",
+ "notes": "Short, clean bout (4 events, no drops). No narration text on these w65 sheets (unlike the main protocol's grid pages) so successful=true on the armbar/tap pair rests on visible post-finish position + the Victory graphic rather than a close-up of the submission itself, but there is no residual doubt given the outcome is independently confirmed by BJJ Heroes."
+}

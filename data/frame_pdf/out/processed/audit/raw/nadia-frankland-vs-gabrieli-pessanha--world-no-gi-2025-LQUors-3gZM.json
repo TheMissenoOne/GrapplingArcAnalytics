@@ -1,0 +1,48 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Gabrieli Pessanha",
+  "event": "World Championship No-Gi",
+  "year": 2025,
+  "winner": "Gabrieli Pessanha",
+  "win_type": "Decision (Advantages)",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Gabrieli Pessanha": 2,
+   "Nadia Frankland": 2
+  },
+  "identity_verified_by": "0:10 (Gabrieli Pessanha on left scoreboard order, wearing black rashguard with gold emblem)",
+  "notes": "CORRECTED 2026-08-20 from the frames: no submission in this video. The board reads 2-2 at ts=615 with 0:52 left and 2-2 (ADV 2-1) at the buzzer. The Toe Hold event was removed and win_type changed from 'Toe Hold' to a decision on advantages. The toe hold on this pair's record belongs to a different 2025 meeting.",
+  "advantages": {
+   "Gabrieli Pessanha": 2,
+   "Nadia Frankland": 1
+  }
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 255,
+   "label": "Sweep",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 685,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2025-LQUors-3gZM.events.json"
+ }
+}

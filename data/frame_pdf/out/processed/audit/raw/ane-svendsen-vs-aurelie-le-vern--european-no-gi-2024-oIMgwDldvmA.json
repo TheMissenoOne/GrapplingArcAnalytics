@@ -1,0 +1,60 @@
+{
+ "bout": {
+  "athlete_a": "Ane Svendsen",
+  "athlete_b": "Aurelie Le Vern",
+  "event": "IBJJF European Championship No-Gi",
+  "year": 2024,
+  "winner": "Aurelie Le Vern",
+  "win_type": "Points",
+  "bout_start_seconds": 15,
+  "final_score": {
+   "Aurelie Le Vern": 4,
+   "Ane Svendsen": 2
+  },
+  "identity_verified_by": "frame 0:25 scoreboard order vs kit colours and red/green ankle bands",
+  "notes": "identity: frame 0:25 scoreboard order vs kit colours and red/green ankle bands \u00b7 UNRECONCILED \u2014 events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) \u00b7 UNRECONCILED \u2014 final_score 4-2 read against competitors order gives Ane Svendsen the higher score, but winner is Aurelie Le Vern \u2014 the field has no declared orientation"
+ },
+ "events": [
+  {
+   "ts": 25,
+   "label": "Pull Guard",
+   "actor": "Ane Svendsen",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 180,
+   "label": "Sweep",
+   "actor": "Aurelie Le Vern",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 285,
+   "label": "Sweep",
+   "actor": "Ane Svendsen",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 440,
+   "label": "Sweep",
+   "actor": "Aurelie Le Vern",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 665,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "ane-svendsen-vs-aurelie-le-vern--european-no-gi-2024-oIMgwDldvmA.events.json"
+ }
+}

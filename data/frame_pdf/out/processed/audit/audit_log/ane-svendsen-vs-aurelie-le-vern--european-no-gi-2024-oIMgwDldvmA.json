@@ -1,0 +1,40 @@
+{
+ "log": [
+  {
+   "ts": 25,
+   "label": "Pull Guard",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "Frames 0:15-0:25 show one athlete sitting to guard while the other stays standing/passing posture, consistent with the claimed guard pull; actor plausible (see narrative note) and unchallenged by any scoreboard evidence. Only the label text was non-verbatim.",
+   "corrections": {
+    "label": "Pull Guard -> Guard Pull"
+   }
+  },
+  {
+   "ts": 180,
+   "label": "Sweep",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "Frames 2:55 (both tangled in guard on the ground, no clear top) -> 3:00 (clean top position established) support a genuine sweep at this timestamp, but the scoreboard shows ANE's point cell going 0->2 at exactly 3:00, not Aurelie's (hers stays 0 until 4:45) -- actor swapped in the original reading.",
+   "corrections": {
+    "actor": "Aurelie Le Vern -> Ane Svendsen"
+   }
+  },
+  {
+   "ts": 285,
+   "label": "Sweep",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "Scoreboard confirms a real 2pt score at 4:45, and it belongs to AURELIE's cell (0->2), not Ane's as claimed -- so the actor is swapped here too. But the action itself is obscured: 4:30-4:40 is blocked by the referee standing in frame, and the 4:45 frame shows both athletes STANDING with one pursuing/chasing the other who is off-balance -- that reads more like a takedown scramble than a guard-to-top sweep reversal, and I cannot confirm which from a single 5s frame either side of the blackout. Real actor is knowable (Aurelie) but the technique itself is not confirmable at required confidence -> dropped rather than guessing sweep vs takedown."
+  },
+  {
+   "ts": 440,
+   "label": "Sweep",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "No points change on the scoreboard anywhere near 7:20 -- Aurelie's cells go 2-2-0 (7:10) -> 2-3-0 (7:20), i.e. only an ADVANTAGE increment, not points; Ane's stay 2-0-1 throughout. A 'Sweep... points:2' claim here is unsupported by the one thing the board is authoritative for -> dropped."
+  }
+ ],
+ "identity_check": "IBJJF broadcast with a clean, legible per-athlete scoreboard: top row/green box = 'ANE N. SVENDSEN', bottom row/red box = 'AURÉLIE LE VERN', each with its own [points, advantages, penalties] cells, stable for the whole bout (0:00-10:35). Per the reading sheet's own rule, the scoreboard is authoritative for POINTS, so for the three scored 'Sweep' events I bound actor to whichever named box's point cell actually changed at that timestamp, rather than to kit colour/body position (which the archived reading itself flagged as unreconciled). This directly caught a swapped actor pair: Ane's box (not Aurelie's) gains 2pts at 3:00/180s, and Aurelie's box (not Ane's) gains 2pts at 4:45/285s -- the reading has these two backwards. The bjjh_results.json ground truth (Aurelie Le Vern, W Pts 4x2) and the in-video 'Victory / Aurelie Le Vern' graphic at 10:40 both confirm Aurelie as winner, consistent with only her side of the board showing further advantage growth (3 adv vs Ane's 1) late in the round -- no winner contradiction, just the two mid-round point events swapped.",
+ "notes": "The live in-graphic scoreboard's final tally before 0:00 (10:30/630s) reads Ane 2-1-1, Aurelie 2-3-1 (points TIED 2-2, Aurelie ahead only on advantages 3-1), yet both bjjh_results.json and this reading's own final_score report 'W Pts 4x2' for Aurelie -- a real discrepancy between the on-screen scoreboard I audited against and the official published score, unresolved here (out of scope: no event in the reading claims points past 285s, so it doesn't affect any kept/dropped call above, but the assembler should not assume the video-visible running score matches the official card for any later derived stats)."
+}

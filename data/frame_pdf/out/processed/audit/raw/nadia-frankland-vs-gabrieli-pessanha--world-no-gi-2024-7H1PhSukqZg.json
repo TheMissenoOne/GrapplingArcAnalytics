@@ -1,0 +1,58 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Gabrieli Pessanha",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Gabrieli Pessanha",
+  "win_type": "Rear Naked Choke",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Gabrieli Pessanha": 2,
+   "Nadia Frankland": 0
+  },
+  "identity_verified_by": "0:10 (Nadia Frankland on graphic order)",
+  "notes": "identity: 0:10 (Nadia Frankland on graphic order) \u00b7 UNRECONCILED \u2014 final_score 2-0 read against competitors order gives Nadia Frankland the higher score, but winner is Gabrieli Pessanha \u2014 the field has no declared orientation"
+ },
+ "events": [
+  {
+   "ts": 20,
+   "label": "Guard Pull",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 290,
+   "label": "Sweep",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 590,
+   "label": "Back Take",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 600,
+   "label": "Rear Naked Choke",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 610,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2024-7H1PhSukqZg.events.json"
+ }
+}

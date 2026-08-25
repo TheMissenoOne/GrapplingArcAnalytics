@@ -1,0 +1,30 @@
+{
+ "log": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "frames 0-30s show a level-change/leg shot (10-15s) then both fighters back on their feet by 20s; no seated guard-pull position visible anywhere in window, score stays 0-0 (consistent with either a pull or a stuffed shot); residual doubt -> drop"
+  },
+  {
+   "ts": 105,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "scoreboard reads 0-0 through 115s then jumps to 2-0 (Brianna) at 120s; frame at 110s shows Brianna lifting/taking Anabel down; label/actor/points match, ts inside tolerance of the landing window"
+  },
+  {
+   "ts": 655,
+   "label": "Pass",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "corrections": {
+    "ts": 438
+   },
+   "reason": "match is already over by 655s -- score fixed at final 9-5 since 630s, fighters hugging at 645s, no live action. Scoreboard shows a clean +3 jump for Brianna between 435s (2) and 440s (5), matching a guard pass; corrected ts to ~438 with high confidence (label/actor/points/successful otherwise match)"
+  }
+ ],
+ "identity_check": "Single continuous fixed camera, no cuts. At 0:05 (5s) the scoreboard bar reads BRIANNA STE-MARIE (left name) / ANABEL LOPEZ BEARD (right name); the left-of-mat fighter (green ankle band, on the mat since 0:00 before Anabel's walkout entrance) = Brianna Ste-Marie. Green-band identity holds consistently through 11:00 (660s, post-match handshake). Final scoreboard read at 660s: 9-5 Brianna, matching BJJ Heroes ground truth (Anabel Lopez L Pts 9x5).",
+ "notes": "Two more scoreboard jumps in the same stretch were not captured by this sparse reading and are NOT added as new events per protocol: another +3 for Brianna ~448s (score 5->8, another pass-like score) and a +1 ~453s (8->9, likely an advantage). Flagging for the assembler in case a denser pass over this bout is ever done. bout_start_seconds=10 in the source file is inconsistent with the video (0:00 already shows referee/athlete on mat, scoreboard active from 0:05) -- treated curated_start=0 as authoritative per audit.curated_start."
+}

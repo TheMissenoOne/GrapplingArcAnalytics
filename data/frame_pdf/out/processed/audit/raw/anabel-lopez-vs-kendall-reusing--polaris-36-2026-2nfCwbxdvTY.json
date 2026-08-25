@@ -1,0 +1,46 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Kendall Reusing",
+  "event": "Polaris 36",
+  "year": 2026,
+  "winner": "Kendall Reusing",
+  "win_type": "Submission",
+  "bout_start_seconds": 10,
+  "identity_verified_by": "frame 0:10 banner: Kendall Reusing and Anabel Lopez Beard",
+  "notes": "identity: frame 0:10 banner: Kendall Reusing and Anabel Lopez Beard"
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Takedown",
+   "actor": "Kendall Reusing",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 195,
+   "label": "Armbar",
+   "actor": "Kendall Reusing",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 215,
+   "label": "Tap",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 565,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "anabel-lopez-vs-kendall-reusing--polaris-36-2026-2nfCwbxdvTY.events.json"
+ }
+}

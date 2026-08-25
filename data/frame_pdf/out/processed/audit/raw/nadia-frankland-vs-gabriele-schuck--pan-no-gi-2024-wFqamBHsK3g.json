@@ -1,0 +1,78 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Gabriele Schuck",
+  "event": "Pan No-Gi",
+  "year": 2024,
+  "winner": "Nadia Frankland",
+  "win_type": "Rear Naked Choke",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Nadia Frankland": 4,
+   "Gabriele Schuck": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Pull Guard",
+   "actor": "Gabriele Schuck",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 80,
+   "label": "Leg Entanglement",
+   "actor": "Gabriele Schuck",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 330,
+   "label": "Sweep",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 440,
+   "label": "Sweep",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 475,
+   "label": "Back Take",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 480,
+   "label": "Rear Naked Choke",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 480,
+   "label": "Tap",
+   "actor": "Gabriele Schuck",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 520,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "nadia-frankland-vs-gabriele-schuck--pan-no-gi-2024-wFqamBHsK3g.events.json"
+ }
+}

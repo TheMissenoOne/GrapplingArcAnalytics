@@ -1,0 +1,47 @@
+{
+ "bout": {
+  "athlete_a": "Helena Crevar",
+  "athlete_b": "Gabriela Miranda",
+  "event": "IBJJF World Championship No-Gi",
+  "year": 2025,
+  "winner": "Helena Crevar",
+  "win_type": "Submission",
+  "bout_start_seconds": 70,
+  "identity_verified_by": "frame 1:10 Crevar on upper scoreboard row in Gameness gear",
+  "notes": "identity: frame 1:10 Crevar on upper scoreboard row in Gameness gear \u00b7 UNRECONCILED \u2014 events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) \u00b7 UNRECONCILED \u2014 events[1] 'Katagatame / Head-Arm Strangle': normalises to 'katagatame headarm strangle', which is not a library node \u00b7 'Katagatame / Head-Arm Strangle' flagged new_label: the library holds 'Arm Triangle Choke' (95 ev), 'Arm-Triangle / Head-Arm Strangle' (1 ev) and 'Katagatame / Darce' (1 ev) \u2014 three spellings of the same family and a fourth arriving. A synonym pair collapsing them onto 'Arm Triangle Choke' is the fix, and it is a decision, not something to take silently."
+ },
+ "events": [
+  {
+   "ts": 75,
+   "label": "Pull Guard",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 255,
+   "label": "Katagatame / Head-Arm Strangle",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "submission",
+   "new_label": true
+  },
+  {
+   "ts": 270,
+   "label": "Tap",
+   "actor": "Gabriela Miranda",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 445,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "helena-crevar-vs-gabriela-miranda--world-no-gi-2025-IGaL1pyNtuU.events.json"
+ }
+}

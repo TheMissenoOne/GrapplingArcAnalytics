@@ -1,0 +1,23 @@
+{
+ "log": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "10s frame shows a standing clinch; by 15s Gabi is already on TOP controlling a flat Nadia -- the opposite of what Gabi pulling guard would produce. Could not confirm this was Gabi sitting to bottom guard rather than a takedown/scramble entry; residual doubt -> drop"
+  },
+  {
+   "ts": 255,
+   "label": "Sweep",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "corrections": {
+    "ts": 232
+   },
+   "reason": "score is flat at 2-0 (Gabi) for the entire 240-265s window -- already scored before that. Score jumps from 0 to 2 for Gabi between 230s (still 0) and 235s (2), with Gabi on top of a grounded Nadia at 230s; matches a sweep for 2 points. Corrected ts to 232 (midpoint of the observed jump) with high confidence"
+  }
+ ],
+ "identity_check": "Bar reads GABI PESSANHA (left name) / NADIA FRANKLAND (right name) from 0:00. Gabi (curly hair, no ankle band) enters/walks in from the physical left at 0s, Nadia (braided hair, green ankle band) from the physical right at 5s; positions match the name order and hold for the whole continuous single-camera broadcast. Confirmed at the buzzer (11:00-11:05, 660-665s): board reads 2-2 main score with ADV 2 (Gabi) - 1 (Nadia), ref raises Gabi's hand -- matches this reading's own self-corrected win_type ('Decision (Advantages)') and the file's notes field.",
+ "notes": "Source file's own prior correction (toe hold removed, decision-on-advantages substituted) was spot-checked at the buzzer (660-665s) and confirmed correct: 2-2 main score, ADV 2-1 Gabi, hand raised for Gabi."
+}

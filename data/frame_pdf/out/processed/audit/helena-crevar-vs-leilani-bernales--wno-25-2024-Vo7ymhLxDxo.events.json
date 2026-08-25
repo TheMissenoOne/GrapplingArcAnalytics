@@ -1,0 +1,46 @@
+{
+ "bout": {
+  "athlete_a": "Helena Crevar",
+  "athlete_b": "Leilani Bernales",
+  "event": "WNO 25",
+  "year": 2024,
+  "winner": "Helena Crevar",
+  "win_type": "Referee Decision",
+  "bout_start_seconds": 15,
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: 0:15 (Helena Crevar in leopard print rashguard; Leilani Bernales in black shorts with blue ankle band) | Straightforward bout, no identity or scoring contradictions. Only correction was an off-library label normalization (Pull Guard -> Guard Pull).",
+  "identity_discriminator": "Tale-of-the-tape graphic (0:00-0:10) and scoreboard bar (from 0:15 on): LEILANI BERNALES left/blue, HELENA CREVAR right/red. Helena Crevar wears a leopard-print rashguard/spats throughout (matches bjjh notes); Leilani Bernales wears plain solid black. Left/right stays consistent with the scoreboard through every page checked (05,06,39), and the ts1035 'WINNER BY DECISION HELENA CREVAR' graphic confirms the leopard-print fighter is Helena Crevar, matching the published winner."
+ },
+ "events": [
+  {
+   "ts": 20,
+   "label": "Guard Pull",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard",
+   "note": "label corrected from off-library 'Pull Guard' to the verbatim vocabulary entry 'Guard Pull' (same technique, word order only). Frames at ts20 confirm Helena (leopard) already seated pulling guard while Leilani stands over her."
+  },
+  {
+   "ts": 25,
+   "label": "Open Guard",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 40,
+   "label": "Leg Entanglement",
+   "actor": "Helena Crevar",
+   "successful": false,
+   "type": "guard"
+  },
+  {
+   "ts": 1030,
+   "label": "Match",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "transition"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 4/4) 2026-08-25"
+}

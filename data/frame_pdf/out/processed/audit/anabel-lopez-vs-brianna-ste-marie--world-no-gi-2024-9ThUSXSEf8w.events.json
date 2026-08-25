@@ -1,0 +1,38 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Brianna Ste-Marie",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Brianna Ste-Marie",
+  "win_type": "Points",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Brianna Ste-Marie": 9,
+   "Anabel Lopez": 5
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: 0:10 (Brianna Ste-Marie in short hair/black top; Anabel Lopez in braided hair) · UNRECONCILED — final_score 9-5 is not fully accounted for by events [0, 5] (under-count, not a contradiction) · UNRECONCILED — final_score 9-5 read against competitors order gives Anabel Lopez the higher score, but winner is Brianna Ste-Marie — the field has no declared orientation · CONTRADICTED BY FRAMES — final_score '9-5' is winner-first, not competitors-order: the buzzer board reads STE-MARIE 9 (ADV 2) — 5 (ADV 0) LOPEZ. Read positionally against competitors [Lopez, Ste-Marie] it would hand Lopez the 9 | Two more scoreboard jumps in the same stretch were not captured by this sparse reading and are NOT added as new events per protocol: another +3 for Brianna ~448s (score 5->8, another pass-like score) and a +1 ~453s (8->9, likely an advantage). Flagging for the assembler in case a denser pass over this bout is ever done. bout_start_seconds=10 in the source file is inconsistent with the video (0:00 already shows referee/athlete on mat, scoreboard active from 0:05) -- treated curated_start=0 as authoritative per audit.curated_start.",
+  "identity_discriminator": "Single continuous fixed camera, no cuts. At 0:05 (5s) the scoreboard bar reads BRIANNA STE-MARIE (left name) / ANABEL LOPEZ BEARD (right name); the left-of-mat fighter (green ankle band, on the mat since 0:00 before Anabel's walkout entrance) = Brianna Ste-Marie. Green-band identity holds consistently through 11:00 (660s, post-match handshake). Final scoreboard read at 660s: 9-5 Brianna, matching BJJ Heroes ground truth (Anabel Lopez L Pts 9x5)."
+ },
+ "events": [
+  {
+   "ts": 105,
+   "label": "Takedown",
+   "actor": "Brianna Ste-Marie",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  },
+  {
+   "ts": 438,
+   "label": "Guard Pass",
+   "actor": "Brianna Ste-Marie",
+   "successful": true,
+   "type": "pass",
+   "points": 3,
+   "note": "ts corrected from 655 -- see log"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 2/3) 2026-08-25"
+}

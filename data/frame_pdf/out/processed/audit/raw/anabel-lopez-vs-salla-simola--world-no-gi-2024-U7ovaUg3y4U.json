@@ -1,0 +1,44 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Salla Simola",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Anabel Lopez",
+  "win_type": "Points",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Anabel Lopez": 2,
+   "Salla Simola": 0
+  },
+  "identity_verified_by": "0:10 (Anabel Lopez identified on broadcast scoreboard banner)",
+  "notes": "identity: 0:10 (Anabel Lopez identified on broadcast scoreboard banner)"
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 180,
+   "label": "Takedown",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 680,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "anabel-lopez-vs-salla-simola--world-no-gi-2024-U7ovaUg3y4U.events.json"
+ }
+}

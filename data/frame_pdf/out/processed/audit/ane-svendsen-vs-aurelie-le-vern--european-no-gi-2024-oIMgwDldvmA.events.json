@@ -1,0 +1,37 @@
+{
+ "bout": {
+  "athlete_a": "Ane Svendsen",
+  "athlete_b": "Aurelie Le Vern",
+  "event": "IBJJF European Championship No-Gi",
+  "year": 2024,
+  "winner": "Aurelie Le Vern",
+  "win_type": "Points",
+  "bout_start_seconds": 15,
+  "final_score": {
+   "Aurelie Le Vern": 4,
+   "Ane Svendsen": 2
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: frame 0:25 scoreboard order vs kit colours and red/green ankle bands · UNRECONCILED — events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) · UNRECONCILED — final_score 4-2 read against competitors order gives Ane Svendsen the higher score, but winner is Aurelie Le Vern — the field has no declared orientation | The live in-graphic scoreboard's final tally before 0:00 (10:30/630s) reads Ane 2-1-1, Aurelie 2-3-1 (points TIED 2-2, Aurelie ahead only on advantages 3-1), yet both bjjh_results.json and this reading's own final_score report 'W Pts 4x2' for Aurelie -- a real discrepancy between the on-screen scoreboard I audited against and the official published score, unresolved here (out of scope: no event in the reading claims points past 285s, so it doesn't affect any kept/dropped call above, but the assembler should not assume the video-visible running score matches the official card for any later derived stats).",
+  "identity_discriminator": "IBJJF broadcast with a clean, legible per-athlete scoreboard: top row/green box = 'ANE N. SVENDSEN', bottom row/red box = 'AURÉLIE LE VERN', each with its own [points, advantages, penalties] cells, stable for the whole bout (0:00-10:35). Per the reading sheet's own rule, the scoreboard is authoritative for POINTS, so for the three scored 'Sweep' events I bound actor to whichever named box's point cell actually changed at that timestamp, rather than to kit colour/body position (which the archived reading itself flagged as unreconciled). This directly caught a swapped actor pair: Ane's box (not Aurelie's) gains 2pts at 3:00/180s, and Aurelie's box (not Ane's) gains 2pts at 4:45/285s -- the reading has these two backwards. The bjjh_results.json ground truth (Aurelie Le Vern, W Pts 4x2) and the in-video 'Victory / Aurelie Le Vern' graphic at 10:40 both confirm Aurelie as winner, consistent with only her side of the board showing further advantage growth (3 adv vs Ane's 1) late in the round -- no winner contradiction, just the two mid-round point events swapped."
+ },
+ "events": [
+  {
+   "ts": 25,
+   "label": "Guard Pull",
+   "actor": "Ane Svendsen",
+   "successful": true,
+   "type": "guard",
+   "note": "label corrected to verbatim vocabulary form ('Pull Guard' -> 'Guard Pull')"
+  },
+  {
+   "ts": 180,
+   "label": "Sweep",
+   "actor": "Ane Svendsen",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 2/4) 2026-08-25"
+}

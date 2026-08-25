@@ -1,0 +1,55 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Aurelie Le Vern",
+  "event": "European No-Gi",
+  "year": 2024,
+  "winner": "Aurelie Le Vern",
+  "win_type": "Armbar",
+  "bout_start_seconds": 0,
+  "final_score": {
+   "Aurelie Le Vern": 0,
+   "Anabel Lopez": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 10,
+   "label": "Pull Guard",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 20,
+   "label": "Open Guard",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 120,
+   "label": "Armbar",
+   "actor": "Aurelie Le Vern",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 130,
+   "label": "Tap",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 155,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY.events.json"
+ }
+}

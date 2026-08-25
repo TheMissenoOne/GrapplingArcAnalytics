@@ -1,0 +1,48 @@
+{
+ "log": [
+  {
+   "ts": 215,
+   "label": "Pull Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "3:35 (215s) shows Zara (teal) seated/kneeling with Sarah (yellow) bent over her -- matches actor/label."
+  },
+  {
+   "ts": 240,
+   "label": "Front Headlock Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "4:00-4:05 (240-245s) shows Sarah on top with her arm wrapped around Zara's head/neck, Zara curled beneath -- a clean front headlock control, matches exactly."
+  },
+  {
+   "ts": 275,
+   "label": "Reset / Stalemate",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "4:35 (275s) shows both athletes standing, separated, re-starting from feet after the prior control ended -- matches a reset."
+  },
+  {
+   "ts": 285,
+   "label": "Pull Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "4:45 (285s) shows Zara back on the ground with Sarah over her, same guard-pull shape as the first instance -- matches."
+  },
+  {
+   "ts": 330,
+   "label": "Reset / Stalemate",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "5:35 (335s, 5s after the claimed ts) shows both standing and separating after a ground exchange visible at 5:30 -- within tolerance of a reset event."
+  },
+  {
+   "ts": 340,
+   "label": "Pull Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "5:40 (340s) shows Sarah reaching down to a seated Zara -- another guard pull, matches."
+  }
+ ],
+ "identity_check": "Named/colored HUD bar present and stable throughout the whole bout (not just at the start): 'ZARA DI TOFANO' = teal/maroon 'Aesthetic' rashguard (left, blue-cyan corner light). 'SARAH GALVAO' = yellow/green Brazil rashguard (right, red corner light). This is a direct per-frame identity confirmation, not an inference from kit alone.",
+ "notes": "Clean bout: named, colored HUD bar makes actor identity unambiguous for every event, all 6 archived events check out against the frames with no corrections needed. This matches the archive's own db_match note (already 6 events in the corpus, non-'NOT in DB' flags) -- a re-confirmation rather than a discovery."
+}

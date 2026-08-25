@@ -1,0 +1,52 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Brianna Ste-Marie",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Brianna Ste-Marie",
+  "win_type": "Points",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Brianna Ste-Marie": 9,
+   "Anabel Lopez": 5
+  },
+  "identity_verified_by": "0:10 (Brianna Ste-Marie in short hair/black top; Anabel Lopez in braided hair)",
+  "notes": "identity: 0:10 (Brianna Ste-Marie in short hair/black top; Anabel Lopez in braided hair) \u00b7 UNRECONCILED \u2014 final_score 9-5 is not fully accounted for by events [0, 5] (under-count, not a contradiction) \u00b7 UNRECONCILED \u2014 final_score 9-5 read against competitors order gives Anabel Lopez the higher score, but winner is Brianna Ste-Marie \u2014 the field has no declared orientation \u00b7 CONTRADICTED BY FRAMES \u2014 final_score '9-5' is winner-first, not competitors-order: the buzzer board reads STE-MARIE 9 (ADV 2) \u2014 5 (ADV 0) LOPEZ. Read positionally against competitors [Lopez, Ste-Marie] it would hand Lopez the 9"
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "actor": "Brianna Ste-Marie",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 105,
+   "label": "Takedown",
+   "actor": "Brianna Ste-Marie",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  },
+  {
+   "ts": 655,
+   "label": "Pass",
+   "actor": "Brianna Ste-Marie",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 680,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "anabel-lopez-vs-brianna-ste-marie--world-no-gi-2024-9ThUSXSEf8w.events.json"
+ }
+}

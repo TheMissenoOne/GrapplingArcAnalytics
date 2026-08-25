@@ -1,0 +1,34 @@
+{
+ "log": [
+  {
+   "ts": 20,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "The match opens with immediate ground engagement at 0:00-0:10 (Gabrieli, box braids, seated gripping Nadia's leg), Gabrieli picks up a penalty point by 0:20 (scoreboard 0->1), and they reset to neutral standing right at 0:20 -- all one continuous opening sequence with Gabrieli as the guard-pulling/engaging party. Exact instant is loose within that scramble but actor/label/type are right."
+  },
+  {
+   "ts": 290,
+   "label": "Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Scoreboard jumps 0->2 for Gabrieli between 4:30 (270s) and 4:35 (275s); Gabrieli (KNGZ text) is on top controlling Nadia continuously through 4:50 (290s) -- same sweep-and-hold sequence, points match exactly."
+  },
+  {
+   "ts": 590,
+   "label": "Back Take",
+   "verdict": "UNVERIFIABLE",
+   "kept": false,
+   "reason": "9:50 (590s) shows a post-fight administrative moment (referee + athletes standing, feet only in frame) -- the match clock is already frozen at :34 from ~9:28 onward, meaning the fight ended well before this ts. No back-take action visible here; the real back-take-into-RNC sequence is clearly visible earlier at ~9:05-9:25 (545-565s), where the running clock actually counts down to the :34 freeze."
+  },
+  {
+   "ts": 600,
+   "label": "Rear Naked Choke",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "10:00 (600s) is the literal 'THANK YOU FOR WATCHING' outro card -- zero video content, definitely not live action. Explicitly excluded by the cross-check rule. The real RNC finish (Gabrieli sinks the choke, Nadia goes limp, Gabrieli sits up celebrating) is visible at ~9:20-9:25 (560-565s), matching the running clock freezing at :34 and the final 2-0 score."
+  }
+ ],
+ "identity_check": "Full per-athlete scoreboard bar present (adv/pen boxes bound to each name, updating live e.g. Gabrieli's pen 0->1 at 0:20, her adv/score 0->2 at ~4:32-4:35). Nadia Frankland = lighter-skinned, ponytail (left/blue side of the bar). Gabrieli Pessanha (de Souza Marin) = darker-skinned, box braids (right/red side). Confirmed self-consistent across the whole match by the live-updating per-athlete counters, not just name order.",
+ "notes": "Ground truth (BJJ Heroes 'L RNC World NoGi ABS 4F 2024' for Nadia) matches what's visible: Gabrieli wins by RNC after a back take, clearly visible at ~545-565s video-absolute, with the match clock counting down live and freezing at :34 exactly when the finish lands. The archived reading's ts=590/600 for Back Take/RNC are both past that freeze point (590s is post-fight procedure, 600s is the outro card) -- dropped per protocol rather than retimed, since only label/actor/successful/type are correctable on a DISCORDANT verdict, not ts, and the w65 variant says audit what exists rather than add events. Assembler should know a real, well-confirmed Back Take + RNC by Gabrieli exists at ~545-565s if that gap needs filling."
+}

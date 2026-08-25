@@ -1,0 +1,28 @@
+{
+ "log": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "actor": "Salla Simola",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "action/timing/type correct, but actor reversed: consistent across ~8 repeated pull/reset cycles it is Anabel (TATAMI logo) on bottom, Salla (green ankle band) standing.",
+   "corrections": {
+    "actor": "Anabel Lopez"
+   }
+  },
+  {
+   "ts": 180,
+   "label": "Takedown",
+   "actor": "Anabel Lopez",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "actor/label/points/successful all correct, but the scoreboard shows the score already final (2-0, Salla 2 pen) by ts160 and unchanged through ts180-205; the round clock froze at 9:44 during the long stalling/reset sequence so video time and match time diverge. Corrected ts to ~158, inside the frame pair where the jump is seen.",
+   "corrections": {
+    "ts": 158
+   }
+  }
+ ],
+ "identity_check": "Scoreboard at 0:00-0:10 (page05): ANABEL LOPEZ BEARD left, SALLA MARI SIMOLA right. Physical discriminators carried on kit, checked repeatedly across the whole clip (pages05-11, ts0-205, one continuous static-camera shot, no cuts): left fighter's rashguard shows a 'TATAMI' sponsor logo (clearly readable ts105-145) = Anabel Lopez; right fighter wears a green ankle band = Salla Simola. Left/right screen position never changes and matches the scoreboard order the whole time (no camera cut or angle change observed anywhere checked).",
+ "notes": "This clip has an unusually long clock-frozen stretch (~ts25 to at least ts205, ~180s of video, round clock stuck at 9:44) from repeated guard-pull/reset/stalling-penalty cycles -- confirmed real (not a broadcast cut: single static camera, consistent background/lighting/referee the whole time) by the referee visibly resetting positions and signalling penalties mid-sequence (ts95, ts155). Anything time-based in this bout must be read off the scoreboard's own second-by-second penalty/score/advantage counters, not the video-absolute ts, once inside that stretch. Reconstructed score (2-0 Anabel, 1 adv Anabel, 2 pen Salla) matches bjjh_results.json ('W Pts: 2x0')."
+}

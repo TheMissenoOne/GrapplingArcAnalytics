@@ -1,0 +1,34 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Gabrieli Pessanha",
+  "event": "World Championship No-Gi",
+  "year": 2025,
+  "winner": "Gabrieli Pessanha",
+  "win_type": "Decision (Advantages)",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Gabrieli Pessanha": 2,
+   "Nadia Frankland": 2
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "CORRECTED 2026-08-20 from the frames: no submission in this video. The board reads 2-2 at ts=615 with 0:52 left and 2-2 (ADV 2-1) at the buzzer. The Toe Hold event was removed and win_type changed from 'Toe Hold' to a decision on advantages. The toe hold on this pair's record belongs to a different 2025 meeting. | Source file's own prior correction (toe hold removed, decision-on-advantages substituted) was spot-checked at the buzzer (660-665s) and confirmed correct: 2-2 main score, ADV 2-1 Gabi, hand raised for Gabi.",
+  "advantages": {
+   "Gabrieli Pessanha": 2,
+   "Nadia Frankland": 1
+  },
+  "identity_discriminator": "Bar reads GABI PESSANHA (left name) / NADIA FRANKLAND (right name) from 0:00. Gabi (curly hair, no ankle band) enters/walks in from the physical left at 0s, Nadia (braided hair, green ankle band) from the physical right at 5s; positions match the name order and hold for the whole continuous single-camera broadcast. Confirmed at the buzzer (11:00-11:05, 660-665s): board reads 2-2 main score with ADV 2 (Gabi) - 1 (Nadia), ref raises Gabi's hand -- matches this reading's own self-corrected win_type ('Decision (Advantages)') and the file's notes field."
+ },
+ "events": [
+  {
+   "ts": 232,
+   "label": "Sweep",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "sweep",
+   "points": 2,
+   "note": "ts corrected from 255 -- see log"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 1/2) 2026-08-25"
+}

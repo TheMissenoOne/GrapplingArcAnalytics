@@ -1,0 +1,43 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Paige Ivette",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Anabel Lopez",
+  "win_type": "Points / Advantages",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Anabel Lopez": 0,
+   "Paige Ivette": 0
+  },
+  "identity_verified_by": "0:10 (Paige Ivette Borras vs Anabel Lopez on match header graphic)",
+  "notes": "identity: 0:10 (Paige Ivette Borras vs Anabel Lopez on match header graphic)"
+ },
+ "events": [
+  {
+   "ts": 20,
+   "label": "Clinch",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 115,
+   "label": "Guard Pull",
+   "actor": "Paige Ivette",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 695,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "anabel-lopez-vs-paige-ivette--world-no-gi-2024-GHFT3RO4v_k.events.json"
+ }
+}

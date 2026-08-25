@@ -1,0 +1,60 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Erin Harpe",
+  "event": "Pan Championship No-Gi",
+  "year": 2025,
+  "winner": "Anabel Lopez",
+  "win_type": "Points",
+  "bout_start_seconds": 15,
+  "final_score": {
+   "Anabel Lopez": 4,
+   "Erin Harpe": 2
+  },
+  "identity_verified_by": "0:15 (Erin Harpe vs Anabel Lopez scoreboard graphic)",
+  "notes": "identity: 0:15 (Erin Harpe vs Anabel Lopez scoreboard graphic)"
+ },
+ "events": [
+  {
+   "ts": 20,
+   "label": "Guard Pull",
+   "actor": "Erin Harpe",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 160,
+   "label": "Sweep",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 515,
+   "label": "Sweep",
+   "actor": "Erin Harpe",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 520,
+   "label": "Takedown",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 690,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "anabel-lopez-vs-erin-harpe--pan-no-gi-2025-YIJvzBtP3q4.events.json"
+ }
+}

@@ -1,0 +1,77 @@
+{
+ "bout": {
+  "athlete_a": "Elisabeth Clay",
+  "athlete_b": "Injana Goodman",
+  "event": "World Championship No-Gi",
+  "year": 2025,
+  "winner": "Elisabeth Clay",
+  "win_type": "Guillotine Choke",
+  "bout_start_seconds": 0,
+  "final_score": {
+   "Elisabeth Clay": 2,
+   "Injana Goodman": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 5,
+   "label": "Pull Guard",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 15,
+   "label": "Open Guard",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 25,
+   "label": "Leg Entanglement",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 60,
+   "label": "Sweep",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 80,
+   "label": "Seated Guard",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 130,
+   "label": "Guillotine Choke",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 138,
+   "label": "Tap",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 165,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "injana-goodman-vs-elisabeth-clay--world-no-gi-2025-C4ZeMLqnTDs.events.json"
+ }
+}

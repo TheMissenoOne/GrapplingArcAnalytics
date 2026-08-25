@@ -1,0 +1,38 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Elisabeth Clay",
+  "event": "IBJJF World Championship No-Gi",
+  "year": 2024,
+  "winner": "Elisabeth Clay",
+  "win_type": "Points",
+  "bout_start_seconds": 25,
+  "final_score": {
+   "Elisabeth Clay": 2,
+   "Nadia Frankland": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: frame 0:25 broadcast graphic, Frankland left / Clay right · UNRECONCILED — events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) · UNRECONCILED — final_score 2-0 read against competitors order gives Nadia Frankland the higher score, but winner is Elisabeth Clay — the field has no declared orientation | This bout's own source metadata flagged an 'UNRECONCILED' orientation ambiguity on final_score before we opened it. That's resolved: bjjh_results.json confirms Nadia Frankland lost 2x0, i.e. Elisabeth Clay is the 2-0 winner, matching bout.winner and both kept events reconstruct to that same 2-0 (Clay). The Guard Pull actor correction (Clay->Frankland) is independent of that resolution and rests on tight temporal proximity to the one genuinely clean identity frame (ts25); confidence on mid-match (ts150+) actor calls is lower in this bout than in the others in this batch because hairstyle/logo cues are inconsistent frame to frame -- no other events needed that judgment here.",
+  "identity_discriminator": "Scoreboard bar from ts0 on: NADIA FRANKLAND left, ELISABETH ANN CLAY right; single continuous static wide camera the entire bout (same background/ring-circle logo position, no cuts/replays detected in any page checked: 05-13, 27). At ts660 the referee raises the RIGHT-side fighter's arm for the win, matching the published winner Elisabeth Clay -- confirms the left/right-to-name binding held through the whole match. NOTE: this bout is genuinely hard to re-identify mid-scramble by kit/hair alone (both wear plain black, hair goes in and out of braids as the match progresses) -- see per-event caveats below; the safest identity anchor used per-event is 'how much time elapsed since the last confirmed-clean stance' rather than a single fixed visual tag."
+ },
+ "events": [
+  {
+   "ts": 30,
+   "label": "Guard Pull",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "guard",
+   "note": "actor corrected from Elisabeth Clay to Nadia Frankland. Only 5s elapsed since the last clean, unambiguous left=Frankland/right=Clay stance (ts25, both apart and squared up), so mat position is still trustworthy here: at ts30 the LEFT (Frankland) fighter is crouched/bent low into a level-change, RIGHT (Clay) stands tall reaching down -- classic guard-pull entry by the low fighter, i.e. Frankland."
+  },
+  {
+   "ts": 213,
+   "label": "Sweep",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "sweep",
+   "points": 2,
+   "note": "ts corrected from 240 to ~213 (the sweep itself isn't resolvable frame-by-frame at 5s sampling, but the scoreboard is authoritative and name-bound regardless of mat-identity ambiguity: score is 0-0 at ts210, Clay's score is already 2 at ts215, and stays 2 through ts240-265+ -- so the 2-point action lands inside that 5s gap, not at 240). Actor is read directly off the scoreboard's ELISABETH ANN CLAY-bound score field, not off visual identity, so it does not depend on the harder mid-match kit/hair re-identification. Position tracking (continuous, no cuts) also shows one fighter identifiable by a green ankle band pinned underneath from ts180 through ts210 with no reset in between, consistent with a bottom player (the swept-from position) completing a sweep in that window."
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 2/2) 2026-08-25"
+}

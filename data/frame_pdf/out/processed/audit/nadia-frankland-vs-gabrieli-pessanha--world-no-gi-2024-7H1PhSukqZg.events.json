@@ -1,0 +1,36 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Gabrieli Pessanha",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Gabrieli Pessanha",
+  "win_type": "Rear Naked Choke",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Gabrieli Pessanha": 2,
+   "Nadia Frankland": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: 0:10 (Nadia Frankland on graphic order) · UNRECONCILED — final_score 2-0 read against competitors order gives Nadia Frankland the higher score, but winner is Gabrieli Pessanha — the field has no declared orientation | Ground truth (BJJ Heroes 'L RNC World NoGi ABS 4F 2024' for Nadia) matches what's visible: Gabrieli wins by RNC after a back take, clearly visible at ~545-565s video-absolute, with the match clock counting down live and freezing at :34 exactly when the finish lands. The archived reading's ts=590/600 for Back Take/RNC are both past that freeze point (590s is post-fight procedure, 600s is the outro card) -- dropped per protocol rather than retimed, since only label/actor/successful/type are correctable on a DISCORDANT verdict, not ts, and the w65 variant says audit what exists rather than add events. Assembler should know a real, well-confirmed Back Take + RNC by Gabrieli exists at ~545-565s if that gap needs filling.",
+  "identity_discriminator": "Full per-athlete scoreboard bar present (adv/pen boxes bound to each name, updating live e.g. Gabrieli's pen 0->1 at 0:20, her adv/score 0->2 at ~4:32-4:35). Nadia Frankland = lighter-skinned, ponytail (left/blue side of the bar). Gabrieli Pessanha (de Souza Marin) = darker-skinned, box braids (right/red side). Confirmed self-consistent across the whole match by the live-updating per-athlete counters, not just name order."
+ },
+ "events": [
+  {
+   "ts": 20,
+   "label": "Guard Pull",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 290,
+   "label": "Sweep",
+   "actor": "Gabrieli Pessanha",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 2/4) 2026-08-25"
+}

@@ -1,0 +1,47 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Erin Harpe",
+  "event": "Pan Championship No-Gi",
+  "year": 2025,
+  "winner": "Anabel Lopez",
+  "win_type": "Points",
+  "bout_start_seconds": 15,
+  "final_score": {
+   "Anabel Lopez": 4,
+   "Erin Harpe": 2
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: 0:15 (Erin Harpe vs Anabel Lopez scoreboard graphic) | Reconstructed running score from corrected events matches the published final score exactly: Erin 2 (from an unlogged early scramble ~ts45-50, not in this reading's events -- not added, out of scope), Anabel 2 (ts160 pass) + 2 (ts515 pass) = 4. Final 4-2 Anabel Lopez matches bjjh_results.json ('W Pts: 4x2'). Two of the four original events described the same scoring moment (ts515 Sweep/Erin and ts520 Takedown/Anabel) with conflicting actors; scoreboard evidence resolved it in Anabel's favor and the Erin-actor copy was dropped rather than kept as a duplicate.",
+  "identity_discriminator": "Lower-third at 0:00-0:15 (page05): ERIN HARPE (Gracie Humaita South Bay, left) vs ANABEL LOPEZ (Checkmat Fight Zone London, right). Left fighter wears black/white checkered (houndstooth) rashguard = Erin Harpe; right fighter wears plain solid black = Anabel Lopez. Scoreboard bar order (ERIN HARPE left, ANABEL LOPEZ right) matches physical mat position consistently through every checked page (05,06,09,10,21,22). No cuts/replays/side-swap observed."
+ },
+ "events": [
+  {
+   "ts": 42,
+   "label": "Guard Pull",
+   "actor": "Erin Harpe",
+   "successful": true,
+   "type": "guard",
+   "note": "ts corrected from 20 to 42: frames 15-35s show standing hand-fighting/clinch, no pull yet; pull completes between 40s (bent knee, initiating) and 45s (Erin grounded on bottom, Anabel on top)."
+  },
+  {
+   "ts": 160,
+   "label": "Guard Pass",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "pass",
+   "points": 2,
+   "note": "corrected from 'Sweep'/type sweep: scoreboard shows Anabel's score jump 0->2 between the 160s and 165s frames, but Anabel is already on top at 145s (guard pull landed there per event above) and stays on top at 150/160/165/170/175s -- no bottom-to-top reversal visible, so a pass (she was already top, advanced position) fits, not a sweep."
+  },
+  {
+   "ts": 515,
+   "label": "Guard Pass",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "pass",
+   "points": 2,
+   "note": "merged/corrected from the pair of ts515 'Sweep' (Erin Harpe) and ts520 'Takedown' (Anabel Lopez) events. Scoreboard: Anabel jumps 2->4 in the 510s/515s frame pair; Erin's score stays 2 unchanged from 480s through 535s (in fact unchanged since ~50s), so the scoring actor is Anabel, not Erin. Both fighters are already grounded from a guard-pull scramble since ~495s (page21) -- no stand-up visible before the jump -- so 'Guard Pass' fits better than 'Takedown'. ts moved from 520 to 515 to sit inside the frame pair where the jump is seen."
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 3/4) 2026-08-25"
+}

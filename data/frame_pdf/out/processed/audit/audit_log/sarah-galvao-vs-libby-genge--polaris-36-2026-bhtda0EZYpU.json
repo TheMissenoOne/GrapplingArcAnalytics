@@ -1,0 +1,34 @@
+{
+ "log": [
+  {
+   "ts": 20,
+   "label": "Pull Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:30 frame (10s after claimed ts, within window) shows one fighter curled/seated on the ground while the other stands over her, consistent with a guard pull; actor consistent with the guard-defending fighter identified throughout this stretch."
+  },
+  {
+   "ts": 70,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "1:00-1:25 frames show the maroon-kit fighter (Sarah Galvao per continuity) consistently on top, driving forward over the other fighter's legs -- consistent with an active guard pass through this stretch."
+  },
+  {
+   "ts": 130,
+   "label": "Guard Recovery",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "2:00-2:15 frames show the grey-kit fighter (Libby Genge) re-establishing legs/guard around the top fighter after the 1:00-1:25 passing sequence, consistent with a guard recovery around this timestamp."
+  },
+  {
+   "ts": 380,
+   "label": "Pull Guard",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "This falls in Round 2 (clock resets and shows 'R2' from 6:05 on). Every sampled frame from 6:00 to 6:55 (360-415s, a 55s window straddling the claimed ts=380 on both sides) shows both fighters standing and circling/clinching -- neither ever sits or pulls guard anywhere in that stretch. No support for a guard pull at or near this timestamp -> dropped."
+  }
+ ],
+ "identity_check": "Polaris broadcast, lower-third names only ('LIBBY GENGE' left/cyan, 'SARAH GALVAO' right/red), no scoreboard/points to cross-check against (win_type is Decision, no visible score). Stage lighting shifts kit colour a lot (pink/purple wash at times), so I could not independently confirm the archived reading's own claimed discriminator ('frame 0:15 Galvao yellow/green Brasil, Genge black/red'). Fell back on continuity: one fighter (dark maroon/black kit) is the consistent top/passing/attacking side from 1:00-2:25 (guard pass -> recovery exchange) and is also the more active fighter generally, consistent with her being the decision winner Sarah Galvao; the other (grey/white-trimmed kit) is the guard-pulling/defending side, consistent with Libby Genge. This bout is already in the DB (audit.flags empty, db_match 04f0e490, 10 events already recorded) and has no bjjh_results.json entry (athletes:{} for this slug) and no winner-contradiction flag, so there is no independent ground truth to cross-check the winner against beyond the reading's own bout.winner=Sarah Galvao/Decision.",
+ "notes": "Bout runs at least two rounds (R1 then R2 starting ~6:00); curated window is 0-795s (13:15), matching the video length. Only these 4 events were provided by this archived reading; per the DB note it already has 10 events recorded elsewhere, so this reading is a partial/independent re-read, not the primary source, and the ts=380 drop does not remove the bout's only record of that phase."
+}

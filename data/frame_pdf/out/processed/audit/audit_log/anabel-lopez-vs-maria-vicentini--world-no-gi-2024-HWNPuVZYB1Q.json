@@ -1,0 +1,27 @@
+{
+ "log": [
+  {
+   "ts": 55,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:55-1:00 shows both fighters tangled on the ground, legs interlocked, matching a leg entanglement with Anabel involved as established by the identity check."
+  },
+  {
+   "ts": 65,
+   "label": "Heel Hook",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "1:05-1:10 close-up: Anabel's TATAMI-lettered shorts/torso at the bottom controlling a captured leg, her own leg (green band) reaching up through the tangle; Maria's tattooed arm/head visible defending on top -- a heel-hook control position, matches actor/label."
+  },
+  {
+   "ts": 70,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "1:10 shows the referee's hand raised (stoppage signal) right over the same entangled pair -- consistent with Maria tapping to the heel hook seconds after."
+  }
+ ],
+ "identity_check": "Anabel Lopez = TATAMI-branded kit + green ankle band (confirmed at 0:00 walkout, 'ANABEL LOPEZ BEARD' name tag, no tattoos). Maria Vicentini = camo-pattern kit + visible forearm/hand tattoo, no ankle band (confirmed same frame, 'MARIA CAROLINA BARÓN VICENTINI'). At the 1:05-1:10 leg-entanglement finish, Anabel's torso + TATAMI-lettered shorts anchor the bottom while her own leg (green band) loops up near the top of the tangle, and Maria's tattooed arm/hand is visible gripping near her own head -- resolves what first looks like a body-swap. Matches BJJ Heroes 'W Inside heel hook' for Anabel Lopez (World NoGi 77KG, same pair's other meeting).",
+ "notes": "Identity here required careful cross-checking (green ankle band vs. tattooed arm ended up on what first looked like the same tangled figure) because legs cross over in a leg-entanglement position -- resolved by tracking the TATAMI-lettered torso (Anabel) separately from the tattooed gripping arm (Maria). No drops; matches BJJ Heroes exactly (Anabel wins by inside heel hook)."
+}

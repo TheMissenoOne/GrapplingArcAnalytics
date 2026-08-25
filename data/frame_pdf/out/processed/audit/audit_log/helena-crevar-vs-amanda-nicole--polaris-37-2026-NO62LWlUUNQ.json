@@ -1,0 +1,34 @@
+{
+ "log": [
+  {
+   "ts": 25,
+   "label": "Pull Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Helena (white gi, dark hair) sits to guard at 0:20-0:25 while Amanda stands over her; matches actor/label/type exactly."
+  },
+  {
+   "ts": 125,
+   "label": "Leg Entanglement",
+   "verdict": "UNVERIFIABLE",
+   "kept": false,
+   "reason": "Frames 2:00-2:25 show a standard mount/half-guard scramble with roles flipping (Amanda passing, then Helena reversing on top) -- no distinct leg-hooked/ashi-garami position visible to justify the specific 'Leg Entanglement' label."
+  },
+  {
+   "ts": 380,
+   "label": "Back Take",
+   "verdict": "UNVERIFIABLE",
+   "kept": false,
+   "reason": "6:00-6:25 (start of Round 2, ~11s in) shows standing clinch/collar-tie re-engagement only -- no back take lands in this window. The real back-take-into-RNC sequence is clearly visible later at ~8:00-8:25 (480-505s), ~100s away from the claimed ts -- too far to call the same event within +-10s, so this claim as timed is dropped rather than silently retimed."
+  },
+  {
+   "ts": 605,
+   "label": "Rear Naked Choke",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "Frames at 10:05 (605s) are the post-match microphone interview -- 'HELENA CREVAR WINNER' graphic already shown at 10:00/600s. This is podium/interview footage, explicitly excluded by the cross-check rule (never walkout/replay/podium frames). The actual RNC finish (back mount, choking arm locked in, ref stopping it, SUBMISSION graphic) is clearly visible at ~8:00-8:25 (480-505s), ~100-125s off the claimed ts."
+  }
+ ],
+ "identity_check": "Amanda Pamela Nicole = blonde hair, black/white cow-print gi (blue-corner HUD photo is blonde; matches the standing/attacking figure early). Helena Crevar = dark hair, white gi w/ black trim (red-corner HUD photo is dark-haired; confirmed beyond doubt by the 'HELENA CREVAR WINNER' graphic at 10:00/600s, worn by the white-gi dark-haired athlete). This reverses the naive guess from mat position at t=0.",
+ "notes": "This bout's true finish (Helena Crevar, Rear Naked Choke from back control) is clearly visible on the sheet at ~480-505s video-absolute -- matches BJJ Heroes 'W RNC Polaris 37'. The archived reading's ts=380 Back Take and ts=605 RNC both point at the wrong part of the video (clinch re-engagement, and post-fight interview respectively) rather than that real sequence; protocol only allows correcting label/actor/successful/type on a DISCORDANT, not ts, and the w65 variant says audit what exists / do not add events -- so both are dropped rather than retimed or a new event invented at ~500s. Assembler should know a real, well-confirmed RNC-by-Helena event exists in this video around 480-505s if that gap needs filling from elsewhere."
+}

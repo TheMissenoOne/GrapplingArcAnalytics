@@ -1,0 +1,50 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Maria Vicentini",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Anabel Lopez",
+  "win_type": "Heel Hook",
+  "bout_start_seconds": 7,
+  "final_score": {
+   "Anabel Lopez": 0,
+   "Maria Vicentini": 0
+  },
+  "identity_verified_by": "Frame 0:25 (Anabel Lopez wearing green ankle band matching green scoreboard indicator)",
+  "notes": "CORRECTED 2026-08-20 from the frames: bout_start_seconds 25 -> 7. The clock reads 9:07 at t=60 and 9:02 at t=65, two consistent readings. The scoreboard graphic is blank before t~55, which is what made the first reading anchor on visible action instead."
+ },
+ "events": [
+  {
+   "ts": 55,
+   "label": "Leg Entanglement",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 65,
+   "label": "Heel Hook",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 70,
+   "label": "Tap",
+   "actor": "Maria Vicentini",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 145,
+  "flags": [
+   "NOT in DB (new bout)"
+  ],
+  "db_match": null,
+  "db_events": null,
+  "source_file": "anabel-lopez-vs-maria-vicentini--world-no-gi-2024-HWNPuVZYB1Q.events.json"
+ }
+}

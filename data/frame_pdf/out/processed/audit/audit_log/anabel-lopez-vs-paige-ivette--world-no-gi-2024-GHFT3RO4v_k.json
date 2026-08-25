@@ -1,0 +1,23 @@
+{
+ "log": [
+  {
+   "ts": 20,
+   "label": "Clinch",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "20s frame shows the two fighters and ref converging center-mat, 25s frame shows them engaged in a mutual tie-up/clinch; no points to check (transition), actor attribution to Anabel is not contradicted by anything visible"
+  },
+  {
+   "ts": 115,
+   "label": "Guard Pull",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "corrections": {
+    "ts": 140
+   },
+   "reason": "115s frame shows both fighters standing with the ref mid-conversation (a reset/break), no guard action; a clear guard pull is visible at 140-145s -- green-band fighter (Paige) drops/kneels first and pulls Anabel into her guard. Corrected ts to 140 with high confidence"
+  }
+ ],
+ "identity_check": "Single continuous camera. Bar reads PAIGE IVETTE BORRAS (left name) / ANABEL LOPEZ BEARD (right name) from 0:05 onward. Paige walks in from the physical left of the mat at 5-15s (matching left name); Anabel enters from the right at ~20s. Green ankle band on Paige holds consistently through 145s. No score change through the whole audited window (final result W Pts 0x0, Adv per BJJ Heroes, consistent with a 0-0 scoreboard never moving in the sampled frames).",
+ "notes": "final_score in the source file (0-0) is corroborated by every sampled frame's scoreboard staying at 0-0 throughout; win was by advantage (BJJ Heroes: W Pts 0x0, Adv), consistent with no point-scoring events being logged."
+}

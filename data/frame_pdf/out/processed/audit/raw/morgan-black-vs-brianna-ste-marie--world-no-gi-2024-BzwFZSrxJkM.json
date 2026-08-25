@@ -1,0 +1,32 @@
+{
+ "bout": {
+  "athlete_a": "Morgan Black",
+  "athlete_b": "Brianna Ste-Marie",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Brianna Ste-Marie",
+  "win_type": "Guillotine Choke",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Brianna Ste-Marie": 0,
+   "Morgan Black": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 110,
+   "label": "Guillotine Choke",
+   "actor": "Brianna Ste-Marie",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 150,
+  "flags": [],
+  "db_match": "1a5d8201",
+  "db_events": 36,
+  "source_file": "morgan-black-vs-brianna-ste-marie--world-no-gi-2024-BzwFZSrxJkM.events.json"
+ }
+}

@@ -1,0 +1,37 @@
+{
+ "log": [
+  {
+   "ts": 20,
+   "label": "Pull Guard",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "off-library label (flags: not vocab-verbatim); technique/actor/successful confirmed in frames -- snapped to the closest verified vocab label 'Guard Pull'.",
+   "corrections": {
+    "label": "Guard Pull"
+   }
+  },
+  {
+   "ts": 25,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Helena seated in open guard at ts25, Leilani standing over her -- matches."
+  },
+  {
+   "ts": 40,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "ts35 shows a dynamic ground scramble with tangled legs (consistent with a leg-entanglement attempt); by ts40 they've separated/reset to standing distance -- consistent with successful:false."
+  },
+  {
+   "ts": 1030,
+   "label": "Match",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "ts1030 shows post-fight formalities (walkout line-up); ts1035 shows the explicit 'WINNER BY DECISION HELENA CREVAR' graphic -- generic match-end marker fits and actor/winner matches the published result."
+  }
+ ],
+ "identity_check": "Tale-of-the-tape graphic (0:00-0:10) and scoreboard bar (from 0:15 on): LEILANI BERNALES left/blue, HELENA CREVAR right/red. Helena Crevar wears a leopard-print rashguard/spats throughout (matches bjjh notes); Leilani Bernales wears plain solid black. Left/right stays consistent with the scoreboard through every page checked (05,06,39), and the ts1035 'WINNER BY DECISION HELENA CREVAR' graphic confirms the leopard-print fighter is Helena Crevar, matching the published winner.",
+ "notes": "Straightforward bout, no identity or scoring contradictions. Only correction was an off-library label normalization (Pull Guard -> Guard Pull)."
+}

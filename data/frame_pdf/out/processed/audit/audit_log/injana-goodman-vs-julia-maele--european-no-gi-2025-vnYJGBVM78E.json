@@ -1,0 +1,27 @@
+{
+ "log": [
+  {
+   "ts": 15,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "0:10-0:20 shows a clinch-into-ground transition landing the patterned/green-band athlete (Injana) on top; matches actor/label/type/points."
+  },
+  {
+   "ts": 310,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "5:00-5:15 shows Injana (patterned/green-band) passing from standing into a dominant top position over Julia; matches."
+  },
+  {
+   "ts": 540,
+   "label": "Mount",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "9:00-9:05 shows Injana on top in a controlling top position over Julia; 4 points is the correct IBJJF value for Mount specifically, cross-checking the label."
+  }
+ ],
+ "identity_check": "Injana Goodman = patterned/checkered shorts + green ankle band (visible from the 0:00 slate walkout onward); Julia Maele = plain black shorts, no ankle band. Confirmed by role: the patterned/green-band athlete is consistently on top and scoring (takedown at ~15s, guard-pass-to-top at ~310s, mount-level top control at ~540s), matching the BJJ Heroes 'W Pts: 11x2' result for Injana Goodman (this video is the IBJJF final; note the archive's own source note flags it as the 11-2 final, distinct from a separate semifinal RNC loss for Julia Maele in the same pair's record).",
+ "notes": "All 3 sparse events landed cleanly with a single, consistently-identifiable dominant athlete (kit + ankle band) across the whole match, matching the 11-2 final win. No contradictions found; final_score under-count (9 of 11 points accounted for) is expected sparse-sampling loss, not an error."
+}

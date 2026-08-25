@@ -1,0 +1,42 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Maria Vicentini",
+  "event": "World Championship No-Gi",
+  "year": 2024,
+  "winner": "Anabel Lopez",
+  "win_type": "Heel Hook",
+  "bout_start_seconds": 7,
+  "final_score": {
+   "Anabel Lopez": 0,
+   "Maria Vicentini": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "CORRECTED 2026-08-20 from the frames: bout_start_seconds 25 -> 7. The clock reads 9:07 at t=60 and 9:02 at t=65, two consistent readings. The scoreboard graphic is blank before t~55, which is what made the first reading anchor on visible action instead. | Identity here required careful cross-checking (green ankle band vs. tattooed arm ended up on what first looked like the same tangled figure) because legs cross over in a leg-entanglement position -- resolved by tracking the TATAMI-lettered torso (Anabel) separately from the tattooed gripping arm (Maria). No drops; matches BJJ Heroes exactly (Anabel wins by inside heel hook).",
+  "identity_discriminator": "Anabel Lopez = TATAMI-branded kit + green ankle band (confirmed at 0:00 walkout, 'ANABEL LOPEZ BEARD' name tag, no tattoos). Maria Vicentini = camo-pattern kit + visible forearm/hand tattoo, no ankle band (confirmed same frame, 'MARIA CAROLINA BARÓN VICENTINI'). At the 1:05-1:10 leg-entanglement finish, Anabel's torso + TATAMI-lettered shorts anchor the bottom while her own leg (green band) loops up near the top of the tangle, and Maria's tattooed arm/hand is visible gripping near her own head -- resolves what first looks like a body-swap. Matches BJJ Heroes 'W Inside heel hook' for Anabel Lopez (World NoGi 77KG, same pair's other meeting)."
+ },
+ "events": [
+  {
+   "ts": 55,
+   "label": "Leg Entanglement",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 65,
+   "label": "Heel Hook",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 70,
+   "label": "Tap",
+   "actor": "Maria Vicentini",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 3/3) 2026-08-25"
+}

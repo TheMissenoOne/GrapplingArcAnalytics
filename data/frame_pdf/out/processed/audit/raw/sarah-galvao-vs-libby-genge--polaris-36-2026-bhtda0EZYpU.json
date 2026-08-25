@@ -1,0 +1,51 @@
+{
+ "bout": {
+  "athlete_a": "Sarah Galvao",
+  "athlete_b": "Libby Genge",
+  "event": "Polaris 36",
+  "year": 2026,
+  "winner": "Sarah Galvao",
+  "win_type": "Decision",
+  "bout_start_seconds": 15,
+  "identity_verified_by": "frame 0:15 Galvao yellow/green Brasil, Genge black/red",
+  "notes": "identity: frame 0:15 Galvao yellow/green Brasil, Genge black/red \u00b7 UNRECONCILED \u2014 events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) \u00b7 UNRECONCILED \u2014 events[3] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible)"
+ },
+ "events": [
+  {
+   "ts": 20,
+   "label": "Pull Guard",
+   "actor": "Libby Genge",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 70,
+   "label": "Guard Pass",
+   "actor": "Sarah Galvao",
+   "successful": true,
+   "type": "pass"
+  },
+  {
+   "ts": 130,
+   "label": "Guard Recovery",
+   "actor": "Libby Genge",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 380,
+   "label": "Pull Guard",
+   "actor": "Libby Genge",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "audit": {
+  "curated_start": 0,
+  "curated_end": 795,
+  "flags": [],
+  "db_match": "04f0e490",
+  "db_events": 10,
+  "source_file": "sarah-galvao-vs-libby-genge--polaris-36-2026-bhtda0EZYpU.events.json"
+ }
+}

@@ -1,0 +1,28 @@
+{
+ "bout": {
+  "athlete_a": "Helena Crevar",
+  "athlete_b": "Amanda Nicole",
+  "event": "Polaris 37",
+  "year": 2026,
+  "winner": "Helena Crevar",
+  "win_type": "Rear Naked Choke",
+  "bout_start_seconds": 20,
+  "final_score": {
+   "Helena Crevar": 0,
+   "Amanda Nicole": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: 0:20 (Amanda Pamela Nicole vs Helena Crevar banner graphic) | This bout's true finish (Helena Crevar, Rear Naked Choke from back control) is clearly visible on the sheet at ~480-505s video-absolute -- matches BJJ Heroes 'W RNC Polaris 37'. The archived reading's ts=380 Back Take and ts=605 RNC both point at the wrong part of the video (clinch re-engagement, and post-fight interview respectively) rather than that real sequence; protocol only allows correcting label/actor/successful/type on a DISCORDANT, not ts, and the w65 variant says audit what exists / do not add events -- so both are dropped rather than retimed or a new event invented at ~500s. Assembler should know a real, well-confirmed RNC-by-Helena event exists in this video around 480-505s if that gap needs filling from elsewhere.",
+  "identity_discriminator": "Amanda Pamela Nicole = blonde hair, black/white cow-print gi (blue-corner HUD photo is blonde; matches the standing/attacking figure early). Helena Crevar = dark hair, white gi w/ black trim (red-corner HUD photo is dark-haired; confirmed beyond doubt by the 'HELENA CREVAR WINNER' graphic at 10:00/600s, worn by the white-gi dark-haired athlete). This reverses the naive guess from mat position at t=0."
+ },
+ "events": [
+  {
+   "ts": 25,
+   "label": "Guard Pull",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 1/4) 2026-08-25"
+}

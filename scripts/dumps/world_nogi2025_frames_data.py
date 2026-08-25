@@ -1,0 +1,11 @@
+"""Women-65 frame-read match dump -- World No-Gi 2025 (concordance-audited).
+
+Generated from concordance-audited frame readings under data/frame_pdf/out/processed/audit/ (procedure: docs/gemini_concordance_audit.md) by scripts/w65_frames_to_dump.py, via scripts/frame_answer_to_dump.py's convert_all/render_dump; keyed by (athlete_a_name, year). Event tag: 'World No-Gi 2025'.
+Do not edit by hand."""
+# ruff: noqa: E501  (single-line serialized data literal)
+
+from __future__ import annotations
+
+from typing import Any
+
+RAW: list[dict[tuple[str, int | None], dict[str, Any]]] = [{('Helena Crevar vs Gabriela Miranda', 2025): {'winner': 'Helena Crevar', 'method': 'Submission', 'opponent': 'Gabriela Miranda', 'event': 'World No-Gi 2025', 'weight_class': '', 'stage': '', 'events': [{'label': 'Tap', 'type': 'submission', 'ts': 410, 'successful': True, 'actor': 'Gabriela Miranda'}], 'ts_origin': 'video_absolute', 'video_start_seconds': 70}, ('Elisabeth Clay vs Injana Goodman', 2025): {'winner': 'Elisabeth Clay', 'method': 'Guillotine Choke', 'opponent': 'Injana Goodman', 'event': 'World No-Gi 2025', 'weight_class': '', 'stage': '', 'events': [{'label': 'Guard Pull', 'type': 'guard', 'ts': 5, 'successful': True, 'actor': 'Injana Goodman'}, {'label': 'Open Guard', 'type': 'guard', 'ts': 15, 'successful': True, 'actor': 'Injana Goodman'}, {'label': 'Leg Entanglement', 'type': 'guard', 'ts': 25, 'successful': True, 'actor': 'Elisabeth Clay'}, {'label': 'Sweep', 'type': 'sweep', 'ts': 60, 'successful': True, 'points': 2, 'actor': 'Elisabeth Clay'}, {'label': 'Seated Guard', 'type': 'guard', 'ts': 80, 'successful': True, 'actor': 'Injana Goodman'}, {'label': 'Guillotine Choke', 'type': 'submission', 'ts': 130, 'successful': True, 'actor': 'Elisabeth Clay'}, {'label': 'Tap', 'type': 'submission', 'ts': 138, 'successful': True, 'actor': 'Injana Goodman'}], 'ts_origin': 'video_absolute', 'video_start_seconds': 0}, ('Nadia Frankland vs Gabrieli Pessanha', 2025): {'winner': 'Gabrieli Pessanha', 'method': 'Decision (Advantages)', 'opponent': 'Gabrieli Pessanha', 'event': 'World No-Gi 2025', 'weight_class': '', 'stage': '', 'events': [{'label': 'Sweep', 'type': 'sweep', 'ts': 232, 'successful': True, 'points': 2, 'actor': 'Gabrieli Pessanha'}], 'ts_origin': 'video_absolute', 'video_start_seconds': 10}}]

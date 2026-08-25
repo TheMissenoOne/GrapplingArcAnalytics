@@ -1,0 +1,49 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Aurelie Le Vern",
+  "event": "European No-Gi",
+  "year": 2024,
+  "winner": "Aurelie Le Vern",
+  "win_type": "Armbar",
+  "bout_start_seconds": 0,
+  "final_score": {
+   "Aurelie Le Vern": 0,
+   "Anabel Lopez": 0
+  },
+  "identity_discriminator": "Anabel Lopez = TATAMI kit + green ankle band (visible 0:00-0:25, consistent marker also seen in the sister bout anabel-lopez-vs-maria-vicentini). Aurelie Le Vern = taller athlete with white side-stripe shorts, no ankle band. Winner confirmed beyond doubt by the 'Victory / Aurelie Le Vern / Sic Braba Jiu-Jitsu' graphic at 2:20 (140s), matching BJJ Heroes ('L Armbar' for Anabel Lopez).",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "Short, clean bout (4 events, no drops). No narration text on these w65 sheets (unlike the main protocol's grid pages) so successful=true on the armbar/tap pair rests on visible post-finish position + the Victory graphic rather than a close-up of the submission itself, but there is no residual doubt given the outcome is independently confirmed by BJJ Heroes."
+ },
+ "events": [
+  {
+   "ts": 10,
+   "label": "Guard Pull",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 20,
+   "label": "Open Guard",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 120,
+   "label": "Armbar",
+   "actor": "Aurelie Le Vern",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 130,
+   "label": "Tap",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 4/4) 2026-08-25"
+}

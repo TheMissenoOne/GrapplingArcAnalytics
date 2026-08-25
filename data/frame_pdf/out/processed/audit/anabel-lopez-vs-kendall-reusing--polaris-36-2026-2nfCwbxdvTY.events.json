@@ -1,0 +1,31 @@
+{
+ "bout": {
+  "athlete_a": "Anabel Lopez",
+  "athlete_b": "Kendall Reusing",
+  "event": "Polaris 36",
+  "year": 2026,
+  "winner": "Kendall Reusing",
+  "win_type": "Submission",
+  "bout_start_seconds": 10,
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: frame 0:10 banner: Kendall Reusing and Anabel Lopez Beard | Bout is NOT in DB per audit.flags (new bout) -- nothing to reconcile there. Round clock reads ~10s ahead of a naive bout_start_seconds=10 computation from mid-bout on (e.g. 00:30 shown at video 4:30/270s implies ~40s elapsed since a 5:00 clock, not the ~260s a flat bout_start=10 would predict) -- likely an in-round stoppage/reset not modeled by a single offset; did not attempt to correct event ts off this, only used it as a sanity signal.",
+  "identity_discriminator": "Two fighters, no walkout banner (video opens mid-approach at 0:00). Bound identity by continuity of kit/hair through the finish, not by scoreboard left/right order: the blonde/light-brown wavy-haired fighter in a dark rashguard with pink piping is dominant/on-top for the entire back half of the bout (clinch+lift 0:30-0:55, extended-arm armbar control 3:15-3:55) and is the fighter shown post-match (9:00-9:25) in a pink/purple 'Gracie Barra' kit wearing the gold medal, arms raised as winner. The brunette fighter in pink shorts is underneath/defending throughout and is the one visibly tapping 3:35-3:55. Cross-checked against bjjh_results.json for this slug: winner Kendall Reusing, method Armbar, matches this reading's own bout.winner (no gemini/published-winner contradiction flag) -> blonde/dominant = Kendall Reusing, pink-shorts/bottom = Anabel Lopez Beard."
+ },
+ "events": [
+  {
+   "ts": 195,
+   "label": "Armbar",
+   "actor": "Kendall Reusing",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 215,
+   "label": "Tap",
+   "actor": "Anabel Lopez",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 2/3) 2026-08-25"
+}

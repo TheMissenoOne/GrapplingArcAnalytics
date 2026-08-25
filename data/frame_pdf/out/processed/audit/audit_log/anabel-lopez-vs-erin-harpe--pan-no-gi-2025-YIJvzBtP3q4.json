@@ -1,0 +1,48 @@
+{
+ "log": [
+  {
+   "ts": 20,
+   "label": "Guard Pull",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "technique/actor/successful confirmed on second look, but timing off by ~20s (still standing/hand-fighting at ts20-35); corrected ts to 42.",
+   "corrections": {
+    "ts": 42
+   }
+  },
+  {
+   "ts": 160,
+   "label": "Sweep",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "score change confirmed near ts160-165 and actor/points correct, but position frames (145-175s) show Anabel continuously on top before and after -- no reversal -- so relabeled Sweep->Guard Pass.",
+   "corrections": {
+    "label": "Guard Pass",
+    "type": "pass"
+   }
+  },
+  {
+   "ts": 515,
+   "label": "Sweep",
+   "actor": "Erin Harpe",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "Erin's scoreboard total is unchanged (2) across 480s-535s; no scoring action by Erin visible or evidenced in this window. This looks like a misattributed duplicate read of the same scramble that produced Anabel's +2 jump (see kept ts515 event) rather than a separate Erin score."
+  },
+  {
+   "ts": 520,
+   "label": "Takedown",
+   "actor": "Anabel Lopez",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "scoreboard confirms Anabel +2 (2->4) landing in the 510s/515s frame pair, close to logged ts520 -- but both fighters are already on the ground since ~495s (guard-pull scramble), no stand-up visible, so 'Takedown' doesn't fit; relabeled to Guard Pass and ts moved to 515.",
+   "corrections": {
+    "ts": 515,
+    "label": "Guard Pass",
+    "type": "pass"
+   }
+  }
+ ],
+ "identity_check": "Lower-third at 0:00-0:15 (page05): ERIN HARPE (Gracie Humaita South Bay, left) vs ANABEL LOPEZ (Checkmat Fight Zone London, right). Left fighter wears black/white checkered (houndstooth) rashguard = Erin Harpe; right fighter wears plain solid black = Anabel Lopez. Scoreboard bar order (ERIN HARPE left, ANABEL LOPEZ right) matches physical mat position consistently through every checked page (05,06,09,10,21,22). No cuts/replays/side-swap observed.",
+ "notes": "Reconstructed running score from corrected events matches the published final score exactly: Erin 2 (from an unlogged early scramble ~ts45-50, not in this reading's events -- not added, out of scope), Anabel 2 (ts160 pass) + 2 (ts515 pass) = 4. Final 4-2 Anabel Lopez matches bjjh_results.json ('W Pts: 4x2'). Two of the four original events described the same scoring moment (ts515 Sweep/Erin and ts520 Takedown/Anabel) with conflicting actors; scoreboard evidence resolved it in Anabel's favor and the Erin-actor copy was dropped rather than kept as a duplicate."
+}

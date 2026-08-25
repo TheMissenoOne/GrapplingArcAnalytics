@@ -1,0 +1,71 @@
+{
+ "bout": {
+  "athlete_a": "Elisabeth Clay",
+  "athlete_b": "Injana Goodman",
+  "event": "World Championship No-Gi",
+  "year": 2025,
+  "winner": "Elisabeth Clay",
+  "win_type": "Guillotine Choke",
+  "bout_start_seconds": 0,
+  "final_score": {
+   "Elisabeth Clay": 2,
+   "Injana Goodman": 0
+  },
+  "identity_discriminator": "IBJJF broadcast, clean per-athlete scoreboard: left/'ELISABETH CLAY', right/'INJANA GOODMAN', each with own points/adv/pen cells, stable the whole (short, 2:45) clip. Bound the one scored action to a name via the scoreboard cell that actually changes (authoritative for points per the reading sheet's own rule): Elisabeth Clay's points cell goes 0->2 at exactly 1:00/60s, matching the claimed Sweep/Elisabeth Clay/points:2 event -- no swap here (unlike the previous bout in this batch). Ground truth (bjjh_results.json: Elisabeth Clay, W Guillotine) and the reading's own bout.winner agree, and the finish sequence (kneeling front-headlock/guillotine grip at 2:15, opponent flat and tapping at 2:20, both fighters raised by ref at 2:25 with the clock frozen) matches Elisabeth Clay on top throughout, consistent with her also being the guard-passer/leg-entanglement side from 0:25 on.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "Clean short clip (2:45, 34 frames), single continuous sequence, no cutaways/replays observed, no identity or points contradictions found -- all 7 events kept as-is."
+ },
+ "events": [
+  {
+   "ts": 5,
+   "label": "Guard Pull",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 15,
+   "label": "Open Guard",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 25,
+   "label": "Leg Entanglement",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 60,
+   "label": "Sweep",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 80,
+   "label": "Seated Guard",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 130,
+   "label": "Guillotine Choke",
+   "actor": "Elisabeth Clay",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 138,
+   "label": "Tap",
+   "actor": "Injana Goodman",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 7/7) 2026-08-25"
+}

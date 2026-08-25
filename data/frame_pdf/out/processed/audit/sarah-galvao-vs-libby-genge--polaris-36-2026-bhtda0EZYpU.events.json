@@ -1,0 +1,38 @@
+{
+ "bout": {
+  "athlete_a": "Sarah Galvao",
+  "athlete_b": "Libby Genge",
+  "event": "Polaris 36",
+  "year": 2026,
+  "winner": "Sarah Galvao",
+  "win_type": "Decision",
+  "bout_start_seconds": 15,
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "identity: frame 0:15 Galvao yellow/green Brasil, Genge black/red · UNRECONCILED — events[0] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) · UNRECONCILED — events[3] 'Pull Guard': folds to 'Guard Pull' via the synonym map (not an error, recorded so the rewrite is visible) | Bout runs at least two rounds (R1 then R2 starting ~6:00); curated window is 0-795s (13:15), matching the video length. Only these 4 events were provided by this archived reading; per the DB note it already has 10 events recorded elsewhere, so this reading is a partial/independent re-read, not the primary source, and the ts=380 drop does not remove the bout's only record of that phase.",
+  "identity_discriminator": "Polaris broadcast, lower-third names only ('LIBBY GENGE' left/cyan, 'SARAH GALVAO' right/red), no scoreboard/points to cross-check against (win_type is Decision, no visible score). Stage lighting shifts kit colour a lot (pink/purple wash at times), so I could not independently confirm the archived reading's own claimed discriminator ('frame 0:15 Galvao yellow/green Brasil, Genge black/red'). Fell back on continuity: one fighter (dark maroon/black kit) is the consistent top/passing/attacking side from 1:00-2:25 (guard pass -> recovery exchange) and is also the more active fighter generally, consistent with her being the decision winner Sarah Galvao; the other (grey/white-trimmed kit) is the guard-pulling/defending side, consistent with Libby Genge. This bout is already in the DB (audit.flags empty, db_match 04f0e490, 10 events already recorded) and has no bjjh_results.json entry (athletes:{} for this slug) and no winner-contradiction flag, so there is no independent ground truth to cross-check the winner against beyond the reading's own bout.winner=Sarah Galvao/Decision."
+ },
+ "events": [
+  {
+   "ts": 20,
+   "label": "Guard Pull",
+   "actor": "Libby Genge",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 70,
+   "label": "Guard Pass",
+   "actor": "Sarah Galvao",
+   "successful": true,
+   "type": "pass"
+  },
+  {
+   "ts": 130,
+   "label": "Guard Recovery",
+   "actor": "Libby Genge",
+   "successful": true,
+   "type": "escape"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 3/4) 2026-08-25"
+}

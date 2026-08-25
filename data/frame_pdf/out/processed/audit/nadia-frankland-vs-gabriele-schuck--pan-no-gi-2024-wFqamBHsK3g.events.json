@@ -1,0 +1,64 @@
+{
+ "bout": {
+  "athlete_a": "Nadia Frankland",
+  "athlete_b": "Gabriele Schuck",
+  "event": "Pan No-Gi",
+  "year": 2024,
+  "winner": "Nadia Frankland",
+  "win_type": "Rear Naked Choke",
+  "bout_start_seconds": 10,
+  "final_score": {
+   "Nadia Frankland": 4,
+   "Gabriele Schuck": 0
+  },
+  "identity_discriminator": "IBJJF broadcast, per-athlete scoreboard: 'G. DA SILVA SCHUCK' vs 'N. FRANKLAND', each with own points/adv cells, stable throughout. One athlete wears a visible green ankle band from ~3:30 onward -- the same fighter whose points cell is the one that climbs (0->1adv at 0:20, ->2pts at 3:35, ->4pts at 7:20), i.e. the green-band fighter is Frankland, matching bjjh_results.json (Nadia Frankland, W RNC) and the reading's own winner/final_score. No actor swap found in this bout (unlike the other two IBJJF-scoreboard bouts in this batch) -- every scored event's named actor matches whichever cell actually moved.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "curated window is 0-520s (8:40); video ends shortly after the 8:25 victory-raise frame, nothing sampled past it. The ts=330 Sweep drop means this bout's real first scoring sweep (215s) is not represented by any kept event -- flagging in case the assembler wants to know a real, unclaimed scoring moment exists in the footage rather than assuming the bout only had 2 scored sweeps total as claimed."
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "actor": "Gabriele Schuck",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 80,
+   "label": "Leg Entanglement",
+   "actor": "Gabriele Schuck",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 440,
+   "label": "Sweep",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 475,
+   "label": "Back Take",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 480,
+   "label": "Rear Naked Choke",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 480,
+   "label": "Tap",
+   "actor": "Gabriele Schuck",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 6/7) 2026-08-25"
+}
