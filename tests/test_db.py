@@ -301,6 +301,39 @@ def test_run_dump_batched_delete_insert_is_idempotent(session, monkeypatch):
     assert len(matches) == 1
 
 
+def test_run_dump_different_concrete_events_coexist(session, monkeypatch):
+    """Same pair, same year, two DIFFERENT concrete events = two physical bouts. Importing
+    the second must not delete the first (measured 2026-08-25: World No-Gi 2024 clobbered
+    the pair's ADCC 2024 match, 36 events lost). A None-tagged career dump still replaces
+    (wildcard, the historical behavior) -- covered by the idempotency test above."""
+    import contextlib
+
+    import db.base as db_base
+    from db.models import Match
+    from scripts import dump_import
+
+    @contextlib.contextmanager
+    def _fake_db_session():
+        yield session
+
+    monkeypatch.setattr(db_base, "db_session", _fake_db_session)
+
+    def raw(label):
+        return [{("Morgan Black", 2024): {
+            "winner": "Morgan Black", "method": "Decision", "opponent": "Brianna Ste-Marie",
+            "events": [{"label": "Guard Pull", "type": "guard", "actor": "Morgan Black"}],
+        }}]
+
+    dump_import.run_dump(raw("x"), event="ADCC 2024", label="A", replay=False)
+    dump_import.run_dump(raw("x"), event="World No-Gi 2024", label="B", replay=False)
+    matches = list(session.execute(select(Match)).scalars())
+    assert len(matches) == 2, "different concrete events must coexist"
+    # and re-running one of them still replaces itself, not the sibling
+    dump_import.run_dump(raw("x"), event="World No-Gi 2024", label="B", replay=False)
+    matches = list(session.execute(select(Match)).scalars())
+    assert len(matches) == 2
+
+
 def test_run_dump_fills_video_start_seconds_from_dump_offset(session, monkeypatch):
     """Q5: a dump-declared ref-block ``start`` (video-absolute) fills a NULL
     ``video_start_seconds`` at import time when nothing else has resolved one."""

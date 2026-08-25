@@ -320,15 +320,26 @@ def run_dump(
             a = resolve(cm.a_name, source="manual")
             b = resolve(cm.b_name, source="opponent")
             participants.update((a.id, b.id))
-            delete_conds.append(
-                and_(
-                    Match.year.is_(cm.year) if cm.year is None else Match.year == cm.year,
-                    or_(
-                        and_(Match.athlete_a_id == a.id, Match.athlete_b_id == b.id),
-                        and_(Match.athlete_a_id == b.id, Match.athlete_b_id == a.id),
-                    ),
-                )
+            # Replace key: (unordered pair, year, event-compatible). Two dumps describing the
+            # SAME physical bout replace each other (same event tag, or a None-tagged career
+            # dump acting as wildcard, both directions -- the historical behavior). Two bouts
+            # of the same pair in the same year at DIFFERENT concrete events are different
+            # physical bouts and must coexist: measured 2026-08-25, importing Black vs
+            # Ste-Marie (World No-Gi 2024, 1 event) silently deleted their ADCC 2024 match
+            # (36 events) because the old key ignored the event.
+            pair_year = and_(
+                Match.year.is_(cm.year) if cm.year is None else Match.year == cm.year,
+                or_(
+                    and_(Match.athlete_a_id == a.id, Match.athlete_b_id == b.id),
+                    and_(Match.athlete_a_id == b.id, Match.athlete_b_id == a.id),
+                ),
             )
+            if event is None:
+                delete_conds.append(pair_year)
+            else:
+                delete_conds.append(
+                    and_(pair_year, or_(Match.event.is_(None), Match.event == event))
+                )
             # Striking match (MMA) with too little grappling — purged by the batched delete
             # below regardless, just not re-registered. Striking evidence = logged strikes OR
             # a KO/TKO finish (catches empty striking marathons). Pure-grappling bouts (no

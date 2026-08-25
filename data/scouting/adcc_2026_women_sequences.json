@@ -840,7 +840,1426 @@
   ]
  },
  {
-  "id": "1a5d8201-1c0b-4cd8-8233-af7f9bbf8e83",
+  "id": "1106404b-b7ed-43e5-85d3-b03cc6f23acc",
+  "a": "Nadia Frankland",
+  "b": "Gabriele Schuck",
+  "a_key": "nadia frankland",
+  "b_key": "gabriele schuck",
+  "div_a": "65 kg",
+  "div_b": null,
+  "event": "Pan No-Gi 2024",
+  "year": 2024,
+  "winner": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "a_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "b_id": "0b7e531e-7f9e-4856-b61d-44ee77c5f7ae",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 15,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "0b7e531e-7f9e-4856-b61d-44ee77c5f7ae",
+    "successful": true
+   },
+   {
+    "ts": 80,
+    "type": "guard",
+    "label": "Leg Entanglement",
+    "actor_id": "0b7e531e-7f9e-4856-b61d-44ee77c5f7ae",
+    "successful": true
+   },
+   {
+    "ts": 440,
+    "type": "sweep",
+    "label": "Sweep",
+    "points": 2,
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 475,
+    "type": "transition",
+    "label": "Back Take",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 480,
+    "type": "submission",
+    "label": "Rear Naked Choke",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 480,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "0b7e531e-7f9e-4856-b61d-44ee77c5f7ae",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "1741b4a7-1f7e-48a1-9cc0-bef011ae4619",
+  "a": "Anabel Lopez",
+  "b": "Maria Vicentini",
+  "a_key": "anabel lopez",
+  "b_key": "maria vicentini",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "World No-Gi 2024",
+  "year": 2024,
+  "winner": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "a_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "b_id": "e73f6352-d9f4-495b-9247-8f1dd883e39d",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 55,
+    "type": "guard",
+    "label": "Leg Entanglement",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   },
+   {
+    "ts": 65,
+    "type": "submission",
+    "label": "Heel Hook",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   },
+   {
+    "ts": 70,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "e73f6352-d9f4-495b-9247-8f1dd883e39d",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "229f3bd1-e4b9-4314-a74b-163ee06364b7",
+  "a": "Brianna Ste-Marie",
+  "b": "Helena Crevar",
+  "a_key": "brianna stemarie",
+  "b_key": "helena crevar",
+  "div_a": null,
+  "div_b": "+65 kg",
+  "event": "ADCC 2024",
+  "year": 2024,
+  "winner": null,
+  "a_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+  "b_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 5,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 5,
+    "type": "submission",
+    "label": "Kimura",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 30,
+    "type": "pass",
+    "label": "Knee Cut Pass",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 51,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 220,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 220,
+    "type": "takedown",
+    "label": "Snapdown",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 242,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 358,
+    "type": "guard",
+    "label": "K-Guard",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 395,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 434,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 434,
+    "type": "transition",
+    "label": "Berimbolo",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   },
+   {
+    "ts": 494,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+    "successful": false
+   },
+   {
+    "ts": 494,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+    "successful": false
+   },
+   {
+    "ts": 519,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 519,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 548,
+    "type": "control",
+    "label": "Body Triangle",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 548,
+    "type": "submission",
+    "label": "Triangle Choke",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 605,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
+   }
+  ]
+ },
+ {
+  "id": "2b9815d4-b11e-43ea-b697-2afad2cd9e53",
+  "a": "Ane Svendsen",
+  "b": "Aurelie Le Vern",
+  "a_key": "ane svendsen",
+  "b_key": "aurelie le vern",
+  "div_a": "65 kg",
+  "div_b": null,
+  "event": "European No-Gi 2024",
+  "year": 2024,
+  "winner": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+  "a_id": "a8a4d48e-80ca-4914-a34d-c276fd18522f",
+  "b_id": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 25,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "a8a4d48e-80ca-4914-a34d-c276fd18522f",
+    "successful": true
+   },
+   {
+    "ts": 180,
+    "type": "sweep",
+    "label": "Sweep",
+    "points": 2,
+    "actor_id": "a8a4d48e-80ca-4914-a34d-c276fd18522f",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "371bcade-d835-4903-84e1-fbad03315847",
+  "a": "Helena Crevar",
+  "b": "Morgan Black",
+  "a_key": "helena crevar",
+  "b_key": "morgan black",
+  "div_a": "+65 kg",
+  "div_b": "65 kg",
+  "event": "ADCC Trials 2024 West Coast",
+  "year": 2024,
+  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "b_id": "621883db-7537-4f4e-a986-27708c84c07b",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 3880,
+    "type": "submission",
+    "label": "Submission",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 3888,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "621883db-7537-4f4e-a986-27708c84c07b",
+    "successful": true
+   },
+   {
+    "ts": 21755,
+    "type": "control",
+    "label": "Collar Tie",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 21765,
+    "type": "control",
+    "label": "Two-on-One Control",
+    "actor_id": "621883db-7537-4f4e-a986-27708c84c07b",
+    "successful": true
+   },
+   {
+    "ts": 21805,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "621883db-7537-4f4e-a986-27708c84c07b",
+    "successful": false
+   },
+   {
+    "ts": 21875,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 21920,
+    "type": "control",
+    "label": "Russian Tie",
+    "actor_id": "621883db-7537-4f4e-a986-27708c84c07b",
+    "successful": true
+   },
+   {
+    "ts": 21945,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 21965,
+    "type": "transition",
+    "label": "Leg Entry",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 21975,
+    "type": "guard",
+    "label": "Open Guard",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 22020,
+    "type": "sweep",
+    "label": "Sweep",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 22025,
+    "type": "control",
+    "label": "Front Headlock",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 22085,
+    "type": "escape",
+    "label": "Turtle Position",
+    "actor_id": "621883db-7537-4f4e-a986-27708c84c07b",
+    "successful": true
+   },
+   {
+    "ts": 22085,
+    "type": "control",
+    "label": "Turtle Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 22180,
+    "type": "transition",
+    "label": "Wrestle-Up",
+    "actor_id": "621883db-7537-4f4e-a986-27708c84c07b",
+    "successful": true
+   },
+   {
+    "ts": 22200,
+    "type": "takedown",
+    "label": "Snapdown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "38dd458c-9d7d-4fa2-82c0-f934d5eef559",
+  "a": "Elizabeth Mitrovic",
+  "b": "Amanda Levy",
+  "a_key": "elizabeth mitrovic",
+  "b_key": "amanda levy",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "ADCC Trials 2024 West Coast",
+  "year": 2024,
+  "winner": "80d52d5a-6139-4684-9799-870ac5e513a6",
+  "a_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
+  "b_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 3293,
+    "type": "takedown",
+    "label": "Trip",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": true
+   },
+   {
+    "ts": 3343,
+    "type": "submission",
+    "label": "Submission",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": true
+   },
+   {
+    "ts": 3407,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": true
+   },
+   {
+    "ts": 3443,
+    "type": "pass",
+    "label": "Pass",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 22440,
+    "type": "control",
+    "label": "Collar Tie",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": true
+   },
+   {
+    "ts": 22470,
+    "type": "control",
+    "label": "Two-on-One Control",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": true
+   },
+   {
+    "ts": 22510,
+    "type": "takedown",
+    "label": "Takedown",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": true
+   },
+   {
+    "ts": 22540,
+    "type": "guard",
+    "label": "Closed Guard",
+    "actor_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
+    "successful": true
+   },
+   {
+    "ts": 22670,
+    "type": "submission",
+    "label": "Kimura",
+    "actor_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
+    "successful": false
+   },
+   {
+    "ts": 22700,
+    "type": "guard",
+    "label": "Shin to Shin Guard",
+    "actor_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
+    "successful": true
+   },
+   {
+    "ts": 22720,
+    "type": "pass",
+    "label": "Double Under Pass",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 22750,
+    "type": "guard",
+    "label": "Closed Guard",
+    "actor_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
+    "successful": true
+   },
+   {
+    "ts": 22855,
+    "type": "guard",
+    "label": "Inversion",
+    "actor_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
+    "successful": true
+   },
+   {
+    "ts": 22875,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
+    "successful": false
+   },
+   {
+    "ts": 23020,
+    "type": "takedown",
+    "label": "Arm Drag",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": false
+   },
+   {
+    "ts": 23050,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "3cdab98e-91e8-4721-a934-4ce69bf5ed33",
+  "a": "Helena Crevar",
+  "b": "Ana Carolina Vieira",
+  "a_key": "helena crevar",
+  "b_key": "ana carolina vieira",
+  "div_a": "+65 kg",
+  "div_b": "65 kg",
+  "event": "ADCC 2024",
+  "year": 2024,
+  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "b_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 47,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 103,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 117,
+    "type": "pass",
+    "label": "Double Under Pass",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 117,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 130,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 191,
+    "type": "submission",
+    "label": "Knee Bar",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 196,
+    "type": "submission",
+    "label": "Triangle Choke",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 196,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 217,
+    "type": "escape",
+    "label": "Escape to Standing",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 217,
+    "type": "submission",
+    "label": "Triangle Choke",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 288,
+    "type": "guard",
+    "label": "Shin to Shin Guard",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 294,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 311,
+    "type": "pass",
+    "label": "Smash Pass",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 311,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 331,
+    "type": "pass",
+    "label": "Smash Pass",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 689,
+    "type": "pass",
+    "label": "Double Under Pass",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 689,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 739,
+    "type": "submission",
+    "label": "Straight Ankle Lock",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 759,
+    "type": "guard",
+    "label": "50/50 Guard",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 864,
+    "type": "takedown",
+    "label": "Arm Drag",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 872,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1007,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1021,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1021,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1028,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1059,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 1067,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1092,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1123,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 1131,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1146,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1164,
+    "type": "control",
+    "label": "Body Lock",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1210,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1238,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1245,
+    "type": "pass",
+    "label": "Folding Pass",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1253,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1264,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 1264,
+    "type": "control",
+    "label": "Mount",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 1277,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 1327,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1363,
+    "type": "pass",
+    "label": "Smash Pass",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+    "successful": false
+   },
+   {
+    "ts": 1370,
+    "type": "control",
+    "label": "Mount",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 1407,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1413,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1427,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1456,
+    "type": "takedown",
+    "label": "Arm Drag",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1475,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1475,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1502,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1623,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1656,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1670,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1776,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1879,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 1888,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 1900,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   }
+  ]
+ },
+ {
+  "id": "4dc68a8c-74ec-4870-97c2-3b9395147dbc",
+  "a": "Helena Crevar",
+  "b": "Aurelie Le Vern",
+  "a_key": "helena crevar",
+  "b_key": "aurelie le vern",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": null,
+  "year": 2024,
+  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "b_id": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 62,
+    "type": "guard",
+    "label": "Closed Guard",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 104,
+    "type": "sweep",
+    "label": "Sweep",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 122,
+    "type": "submission",
+    "label": "Straight Ankle Lock",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 159,
+    "type": "control",
+    "label": "Inside Ashi",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 167,
+    "type": "submission",
+    "label": "Leg Lock",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 175,
+    "type": "escape",
+    "label": "Leg Lock Escape",
+    "actor_id": "3c8bb09e-3133-4613-976a-40adeb6894b0"
+   },
+   {
+    "ts": 182,
+    "type": "submission",
+    "label": "Heel Hook",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "4fd8e336-ec8e-4910-8397-352266910383",
+  "a": "Bia Mesquita",
+  "b": "Ana Carolina Vieira",
+  "a_key": "bia mesquita",
+  "b_key": "ana carolina vieira",
+  "div_a": null,
+  "div_b": "65 kg",
+  "event": "ADCC 2024",
+  "year": 2024,
+  "winner": null,
+  "a_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+  "b_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 0,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 63,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 145,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 171,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 255,
+    "type": "takedown",
+    "label": "Uchi Mata",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 315,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 382,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 525,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+    "successful": false
+   },
+   {
+    "ts": 578,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 594,
+    "type": "escape",
+    "label": "Turtle Position",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 663,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 687,
+    "type": "sweep",
+    "label": "Sweep",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 687,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 721,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 721,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 747,
+    "type": "escape",
+    "label": "Turtle Position",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 747,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 766,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 826,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 838,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+    "successful": false
+   },
+   {
+    "ts": 870,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+    "successful": false
+   },
+   {
+    "ts": 928,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 957,
+    "type": "takedown",
+    "label": "Arm Drag",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+    "successful": false
+   },
+   {
+    "ts": 1007,
+    "type": "takedown",
+    "label": "Foot Sweep",
+    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
+   },
+   {
+    "ts": 1053,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 1270,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+   },
+   {
+    "ts": 1366,
+    "type": "guard",
+    "label": "Lasso Guard",
+    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
+    "successful": false
+   }
+  ]
+ },
+ {
+  "id": "54d7e3f7-0936-4194-9874-a22b496ccc4b",
+  "a": "Helena Crevar",
+  "b": "Leilani Bernales",
+  "a_key": "helena crevar",
+  "b_key": "leilani bernales",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "WNO 25",
+  "year": 2024,
+  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "b_id": "db55d83e-6374-4bac-a887-6739a987c91f",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 20,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 25,
+    "type": "guard",
+    "label": "Open Guard",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 40,
+    "type": "guard",
+    "label": "Leg Entanglement",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 78,
+    "type": "transition",
+    "label": "Two-on-One Wrist Control",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 235,
+    "type": "guard",
+    "label": "Guard Recovery",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 257,
+    "type": "submission",
+    "label": "Straight Ankle Lock",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 324,
+    "type": "submission",
+    "label": "Kimura",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 483,
+    "type": "guard",
+    "label": "Inverted De La Riva Guard",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 554,
+    "type": "guard",
+    "label": "Closed Guard",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 619,
+    "type": "sweep",
+    "label": "Lumberjack Sweep",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 619,
+    "type": "control",
+    "label": "Body Lock",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   },
+   {
+    "ts": 743,
+    "type": "sweep",
+    "label": "Sweep",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   },
+   {
+    "ts": 879,
+    "type": "submission",
+    "label": "Foot Lock",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": false
+   },
+   {
+    "ts": 1030,
+    "type": "transition",
+    "label": "Match",
+    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "5a3806cb-eacc-45f7-9321-d7755c8822b6",
+  "a": "Anabel Lopez",
+  "b": "Brianna Ste-Marie",
+  "a_key": "anabel lopez",
+  "b_key": "brianna stemarie",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "World No-Gi 2024",
+  "year": 2024,
+  "winner": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+  "a_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "b_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 105,
+    "type": "takedown",
+    "label": "Takedown",
+    "points": 2,
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+    "successful": true
+   },
+   {
+    "ts": 438,
+    "type": "pass",
+    "label": "Guard Pass",
+    "points": 3,
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "60f2d1ca-ec4d-40e9-bca0-bbe5394135a2",
+  "a": "Anabel Lopez",
+  "b": "Paige Ivette",
+  "a_key": "anabel lopez",
+  "b_key": "paige ivette",
+  "div_a": "+65 kg",
+  "div_b": "+65 kg",
+  "event": "World No-Gi 2024",
+  "year": 2024,
+  "winner": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "a_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "b_id": "3a898164-baa2-4b16-9f23-d607548c5928",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 20,
+    "type": "transition",
+    "label": "Clinch",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   },
+   {
+    "ts": 140,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "3a898164-baa2-4b16-9f23-d607548c5928",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "6649899a-12bb-483c-9a73-375f6f8de624",
+  "a": "Gabi Garcia",
+  "b": "Craig Jones",
+  "a_key": "gabi garcia",
+  "b_key": "craig jones",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "CJI",
+  "year": 2024,
+  "winner": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+  "a_id": "8af18b42-ada3-465d-ab81-615b8300a1c2",
+  "b_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 10323,
+    "type": "control",
+    "label": "Body Lock",
+    "actor_id": "8af18b42-ada3-465d-ab81-615b8300a1c2"
+   },
+   {
+    "ts": 10403,
+    "type": "submission",
+    "label": "Triangle Choke",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "successful": false
+   },
+   {
+    "ts": 10483,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "successful": false
+   },
+   {
+    "ts": 10563,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "successful": false
+   },
+   {
+    "ts": 10643,
+    "type": "submission",
+    "label": "Toe Hold",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "successful": false
+   },
+   {
+    "ts": 10723,
+    "type": "submission",
+    "label": "Twister",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "successful": false
+   },
+   {
+    "ts": 10883,
+    "type": "submission",
+    "label": "Twister",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "successful": false
+   },
+   {
+    "ts": 10963,
+    "type": "submission",
+    "label": "Heel Hook",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "successful": false
+   },
+   {
+    "ts": 11043,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6"
+   },
+   {
+    "ts": 11123,
+    "type": "submission",
+    "label": "Rear Naked Choke",
+    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "692529c7-2e7d-4b84-9bab-899df8b4c219",
+  "a": "Anabel Lopez",
+  "b": "Salli Simola",
+  "a_key": "anabel lopez",
+  "b_key": "salli simola",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "World No-Gi 2024",
+  "year": 2024,
+  "winner": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "a_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "b_id": "d4775237-2ac4-4f1b-a83c-4a8bda8175e6",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 15,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   },
+   {
+    "ts": 158,
+    "type": "takedown",
+    "label": "Takedown",
+    "points": 2,
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "821f9398-5b54-4b84-a16d-1b4a1cd0695a",
   "a": "Brianna Ste-Marie",
   "b": "Morgan Black",
   "a_key": "brianna stemarie",
@@ -849,7 +2268,7 @@
   "div_b": "65 kg",
   "event": "ADCC 2024",
   "year": 2024,
-  "winner": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+  "winner": null,
   "a_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
   "b_id": "621883db-7537-4f4e-a986-27708c84c07b",
   "win_type": "DECISION",
@@ -1077,313 +2496,71 @@
   ]
  },
  {
-  "id": "371bcade-d835-4903-84e1-fbad03315847",
-  "a": "Helena Crevar",
-  "b": "Morgan Black",
-  "a_key": "helena crevar",
-  "b_key": "morgan black",
-  "div_a": "+65 kg",
-  "div_b": "65 kg",
-  "event": "ADCC Trials 2024 West Coast",
+  "id": "8c682305-356b-47e8-95d5-b23a236006bf",
+  "a": "Nadia Frankland",
+  "b": "Paige Ivette",
+  "a_key": "nadia frankland",
+  "b_key": "paige ivette",
+  "div_a": "65 kg",
+  "div_b": "+65 kg",
+  "event": "World No-Gi 2024",
   "year": 2024,
-  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "b_id": "621883db-7537-4f4e-a986-27708c84c07b",
+  "winner": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "a_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "b_id": "3a898164-baa2-4b16-9f23-d607548c5928",
   "win_type": "DECISION",
   "seq": [
    {
-    "ts": 3880,
-    "type": "submission",
-    "label": "Submission",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "ts": 42,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "3a898164-baa2-4b16-9f23-d607548c5928",
     "successful": true
    },
    {
-    "ts": 3888,
-    "type": "submission",
-    "label": "Guillotine Choke",
-    "actor_id": "621883db-7537-4f4e-a986-27708c84c07b",
+    "ts": 146,
+    "type": "sweep",
+    "label": "Sweep",
+    "points": 2,
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
     "successful": true
-   }
-  ]
- },
- {
-  "id": "38dd458c-9d7d-4fa2-82c0-f934d5eef559",
-  "a": "Elizabeth Mitrovic",
-  "b": "Amanda Levy",
-  "a_key": "elizabeth mitrovic",
-  "b_key": "amanda levy",
-  "div_a": "+65 kg",
-  "div_b": null,
-  "event": "ADCC Trials 2024 West Coast",
-  "year": 2024,
-  "winner": "80d52d5a-6139-4684-9799-870ac5e513a6",
-  "a_id": "80d52d5a-6139-4684-9799-870ac5e513a6",
-  "b_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
-  "win_type": "SUBMISSION",
-  "seq": [
+   },
    {
-    "ts": 3293,
+    "ts": 148,
     "type": "takedown",
-    "label": "Trip",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
-    "successful": true
-   },
-   {
-    "ts": 3343,
-    "type": "submission",
-    "label": "Submission",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
-    "successful": true
-   },
-   {
-    "ts": 3407,
-    "type": "submission",
-    "label": "Guillotine Choke",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
-    "successful": true
-   },
-   {
-    "ts": 3443,
-    "type": "pass",
-    "label": "Pass",
-    "actor_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
-    "successful": false
-   }
-  ]
- },
- {
-  "id": "4dc68a8c-74ec-4870-97c2-3b9395147dbc",
-  "a": "Helena Crevar",
-  "b": "Aurelie Le Vern",
-  "a_key": "helena crevar",
-  "b_key": "aurelie le vern",
-  "div_a": "+65 kg",
-  "div_b": null,
-  "event": null,
-  "year": 2024,
-  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "b_id": "3c8bb09e-3133-4613-976a-40adeb6894b0",
-  "win_type": "SUBMISSION",
-  "seq": [
-   {
-    "ts": 62,
-    "type": "guard",
-    "label": "Closed Guard",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 104,
-    "type": "sweep",
-    "label": "Sweep",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": true
-   },
-   {
-    "ts": 122,
-    "type": "submission",
-    "label": "Straight Ankle Lock",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 159,
-    "type": "control",
-    "label": "Inside Ashi",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 167,
-    "type": "submission",
-    "label": "Leg Lock",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 175,
-    "type": "escape",
-    "label": "Leg Lock Escape",
-    "actor_id": "3c8bb09e-3133-4613-976a-40adeb6894b0"
-   },
-   {
-    "ts": 182,
-    "type": "submission",
-    "label": "Heel Hook",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "label": "Takedown",
+    "points": 2,
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
     "successful": true
    }
   ]
  },
  {
-  "id": "54d7e3f7-0936-4194-9874-a22b496ccc4b",
-  "a": "Helena Crevar",
-  "b": "Leilani Bernales",
-  "a_key": "helena crevar",
-  "b_key": "leilani bernales",
-  "div_a": "+65 kg",
+  "id": "bfa11fd3-f3f6-44ef-a0e5-9022a238c3c9",
+  "a": "Morgan Black",
+  "b": "Brianna Ste-Marie",
+  "a_key": "morgan black",
+  "b_key": "brianna stemarie",
+  "div_a": "65 kg",
   "div_b": null,
-  "event": "WNO 25",
+  "event": "World No-Gi 2024",
   "year": 2024,
-  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "b_id": "db55d83e-6374-4bac-a887-6739a987c91f",
+  "winner": "31e45570-3136-4eb3-866b-8c4f70ee6334",
+  "a_id": "621883db-7537-4f4e-a986-27708c84c07b",
+  "b_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
   "win_type": "DECISION",
   "seq": [
    {
-    "ts": 78,
-    "type": "transition",
-    "label": "Two-on-One Wrist Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 235,
-    "type": "guard",
-    "label": "Guard Recovery",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 257,
+    "ts": 110,
     "type": "submission",
-    "label": "Straight Ankle Lock",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 324,
-    "type": "submission",
-    "label": "Kimura",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 483,
-    "type": "guard",
-    "label": "Inverted De La Riva Guard",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 554,
-    "type": "guard",
-    "label": "Closed Guard",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 619,
-    "type": "sweep",
-    "label": "Lumberjack Sweep",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": true
-   },
-   {
-    "ts": 619,
-    "type": "control",
-    "label": "Body Lock",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 743,
-    "type": "sweep",
-    "label": "Sweep",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": true
-   },
-   {
-    "ts": 879,
-    "type": "submission",
-    "label": "Foot Lock",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   }
-  ]
- },
- {
-  "id": "6649899a-12bb-483c-9a73-375f6f8de624",
-  "a": "Gabi Garcia",
-  "b": "Craig Jones",
-  "a_key": "gabi garcia",
-  "b_key": "craig jones",
-  "div_a": "+65 kg",
-  "div_b": null,
-  "event": "CJI",
-  "year": 2024,
-  "winner": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-  "a_id": "8af18b42-ada3-465d-ab81-615b8300a1c2",
-  "b_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-  "win_type": "SUBMISSION",
-  "seq": [
-   {
-    "ts": 10323,
-    "type": "control",
-    "label": "Body Lock",
-    "actor_id": "8af18b42-ada3-465d-ab81-615b8300a1c2"
-   },
-   {
-    "ts": 10403,
-    "type": "submission",
-    "label": "Triangle Choke",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-    "successful": false
-   },
-   {
-    "ts": 10483,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-    "successful": false
-   },
-   {
-    "ts": 10563,
-    "type": "submission",
-    "label": "Armbar",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-    "successful": false
-   },
-   {
-    "ts": 10643,
-    "type": "submission",
-    "label": "Toe Hold",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-    "successful": false
-   },
-   {
-    "ts": 10723,
-    "type": "submission",
-    "label": "Twister",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-    "successful": false
-   },
-   {
-    "ts": 10883,
-    "type": "submission",
-    "label": "Twister",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-    "successful": false
-   },
-   {
-    "ts": 10963,
-    "type": "submission",
-    "label": "Heel Hook",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
-    "successful": false
-   },
-   {
-    "ts": 11043,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6"
-   },
-   {
-    "ts": 11123,
-    "type": "submission",
-    "label": "Rear Naked Choke",
-    "actor_id": "68ef37f5-226d-4edc-bacb-c1a1129e4ad6",
+    "label": "Guillotine Choke",
+    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
     "successful": true
    }
   ]
  },
  {
-  "id": "6d7d92c5-290d-4663-af30-f517a06f19bf",
+  "id": "c491096b-ab22-4d5b-bdf5-d4559c5b2ca3",
   "a": "Ana Carolina Vieira",
   "b": "Amanda Levy",
   "a_key": "ana carolina vieira",
@@ -1392,7 +2569,7 @@
   "div_b": null,
   "event": "ADCC 2024",
   "year": 2024,
-  "winner": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "winner": null,
   "a_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
   "b_id": "ac1bde77-9a74-439f-af99-7cb1611a761a",
   "win_type": "DECISION",
@@ -1720,679 +2897,34 @@
   ]
  },
  {
-  "id": "7577f162-0372-4aa6-be2e-640349e272da",
-  "a": "Helena Crevar",
-  "b": "Ana Carolina Vieira",
-  "a_key": "helena crevar",
-  "b_key": "ana carolina vieira",
-  "div_a": "+65 kg",
-  "div_b": "65 kg",
-  "event": "ADCC 2024",
+  "id": "d11bda52-8a5f-4474-a677-de309555bec5",
+  "a": "Nadia Frankland",
+  "b": "Gabrieli Pessanha",
+  "a_key": "nadia frankland",
+  "b_key": "gabrieli pessanha",
+  "div_a": "65 kg",
+  "div_b": null,
+  "event": "World No-Gi 2024",
   "year": 2024,
-  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "b_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
-  "win_type": "SUBMISSION",
-  "seq": [
-   {
-    "ts": 47,
-    "type": "takedown",
-    "label": "Uchi Mata",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 103,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 117,
-    "type": "pass",
-    "label": "Double Under Pass",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 117,
-    "type": "takedown",
-    "label": "Double Leg Takedown",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 130,
-    "type": "takedown",
-    "label": "Uchi Mata",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 191,
-    "type": "submission",
-    "label": "Knee Bar",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 196,
-    "type": "submission",
-    "label": "Triangle Choke",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 196,
-    "type": "submission",
-    "label": "Armbar",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 217,
-    "type": "escape",
-    "label": "Stand Up",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 217,
-    "type": "submission",
-    "label": "Triangle Choke",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 288,
-    "type": "guard",
-    "label": "Shin to Shin Guard",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 294,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 311,
-    "type": "pass",
-    "label": "Smash Pass",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
-   },
-   {
-    "ts": 311,
-    "type": "takedown",
-    "label": "Foot Sweep",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
-   },
-   {
-    "ts": 331,
-    "type": "pass",
-    "label": "Smash Pass",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 689,
-    "type": "pass",
-    "label": "Double Under Pass",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 689,
-    "type": "takedown",
-    "label": "Double Leg Takedown",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 739,
-    "type": "submission",
-    "label": "Straight Ankle Lock",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 759,
-    "type": "guard",
-    "label": "50/50 Guard",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 864,
-    "type": "takedown",
-    "label": "Arm Drag",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 872,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1007,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1021,
-    "type": "takedown",
-    "label": "Single Leg Takedown",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1021,
-    "type": "takedown",
-    "label": "Single Leg Takedown",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1028,
-    "type": "guard",
-    "label": "Guard Pull",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1059,
-    "type": "takedown",
-    "label": "Uchi Mata",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 1067,
-    "type": "takedown",
-    "label": "Double Leg Takedown",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1092,
-    "type": "submission",
-    "label": "Guillotine Choke",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1123,
-    "type": "submission",
-    "label": "Guillotine Choke",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": true
-   },
-   {
-    "ts": 1131,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1146,
-    "type": "takedown",
-    "label": "Uchi Mata",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1164,
-    "type": "control",
-    "label": "Body Lock",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1210,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1238,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1245,
-    "type": "pass",
-    "label": "Folding Pass",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1253,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1264,
-    "type": "takedown",
-    "label": "Double Leg Takedown",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 1264,
-    "type": "control",
-    "label": "Mount",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 1277,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": true
-   },
-   {
-    "ts": 1327,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1363,
-    "type": "pass",
-    "label": "Smash Pass",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
-    "successful": false
-   },
-   {
-    "ts": 1370,
-    "type": "control",
-    "label": "Mount",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
-   },
-   {
-    "ts": 1407,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1413,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1427,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1456,
-    "type": "takedown",
-    "label": "Arm Drag",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1475,
-    "type": "takedown",
-    "label": "Single Leg Takedown",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1475,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1502,
-    "type": "submission",
-    "label": "Armbar",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1623,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1656,
-    "type": "guard",
-    "label": "Half Guard",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1670,
-    "type": "takedown",
-    "label": "Single Leg Takedown",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1776,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1879,
-    "type": "takedown",
-    "label": "Uchi Mata",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 1888,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 1900,
-    "type": "submission",
-    "label": "Guillotine Choke",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   }
-  ]
- },
- {
-  "id": "c2992229-7c00-417b-8236-e7544e215e71",
-  "a": "Brianna Ste-Marie",
-  "b": "Helena Crevar",
-  "a_key": "brianna stemarie",
-  "b_key": "helena crevar",
-  "div_a": null,
-  "div_b": "+65 kg",
-  "event": "ADCC 2024",
-  "year": 2024,
-  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "a_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
-  "b_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-  "win_type": "POINTS",
-  "seq": [
-   {
-    "ts": 5,
-    "type": "submission",
-    "label": "Guillotine Choke",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 5,
-    "type": "submission",
-    "label": "Kimura",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 30,
-    "type": "pass",
-    "label": "Knee Cut Pass",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 51,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 220,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 220,
-    "type": "takedown",
-    "label": "Snapdown",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 242,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 358,
-    "type": "guard",
-    "label": "K-Guard",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 395,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 434,
-    "type": "takedown",
-    "label": "Double Leg Takedown",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 434,
-    "type": "transition",
-    "label": "Berimbolo",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   },
-   {
-    "ts": 494,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
-    "successful": false
-   },
-   {
-    "ts": 494,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334",
-    "successful": false
-   },
-   {
-    "ts": 519,
-    "type": "submission",
-    "label": "Armbar",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 519,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
-    "successful": false
-   },
-   {
-    "ts": 548,
-    "type": "control",
-    "label": "Body Triangle",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 548,
-    "type": "submission",
-    "label": "Triangle Choke",
-    "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
-   },
-   {
-    "ts": 605,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "31e45570-3136-4eb3-866b-8c4f70ee6334"
-   }
-  ]
- },
- {
-  "id": "db27bea3-4f23-4c14-9dc0-c41f68f6c590",
-  "a": "Bia Mesquita",
-  "b": "Ana Carolina Vieira",
-  "a_key": "bia mesquita",
-  "b_key": "ana carolina vieira",
-  "div_a": null,
-  "div_b": "65 kg",
-  "event": "ADCC 2024",
-  "year": 2024,
-  "winner": "423cbcd4-4746-46b2-a856-b9331bee8b17",
-  "a_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
-  "b_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
+  "winner": "2ec7c5d9-0eb1-4f29-9ca5-1464fae97644",
+  "a_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "b_id": "2ec7c5d9-0eb1-4f29-9ca5-1464fae97644",
   "win_type": "DECISION",
   "seq": [
    {
-    "ts": 0,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
-   },
-   {
-    "ts": 63,
+    "ts": 20,
     "type": "guard",
-    "label": "Half Guard",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
+    "label": "Guard Pull",
+    "actor_id": "2ec7c5d9-0eb1-4f29-9ca5-1464fae97644",
+    "successful": true
    },
    {
-    "ts": 145,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 171,
-    "type": "takedown",
-    "label": "Double Leg Takedown",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 255,
-    "type": "takedown",
-    "label": "Uchi Mata",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
-   },
-   {
-    "ts": 315,
-    "type": "submission",
-    "label": "Guillotine Choke",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 382,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 525,
-    "type": "takedown",
-    "label": "Foot Sweep",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
-    "successful": false
-   },
-   {
-    "ts": 578,
-    "type": "guard",
-    "label": "Half Guard",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 594,
-    "type": "escape",
-    "label": "Turtle Position",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 663,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 687,
+    "ts": 290,
     "type": "sweep",
     "label": "Sweep",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 687,
-    "type": "takedown",
-    "label": "Foot Sweep",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 721,
-    "type": "takedown",
-    "label": "Single Leg Takedown",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 721,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 747,
-    "type": "escape",
-    "label": "Turtle Position",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 747,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 766,
-    "type": "takedown",
-    "label": "Single Leg Takedown",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
-   },
-   {
-    "ts": 826,
-    "type": "takedown",
-    "label": "Single Leg Takedown",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
-   },
-   {
-    "ts": 838,
-    "type": "takedown",
-    "label": "Foot Sweep",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
-    "successful": false
-   },
-   {
-    "ts": 870,
-    "type": "takedown",
-    "label": "Foot Sweep",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17",
-    "successful": false
-   },
-   {
-    "ts": 928,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 957,
-    "type": "takedown",
-    "label": "Arm Drag",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
-    "successful": false
-   },
-   {
-    "ts": 1007,
-    "type": "takedown",
-    "label": "Foot Sweep",
-    "actor_id": "423cbcd4-4746-46b2-a856-b9331bee8b17"
-   },
-   {
-    "ts": 1053,
-    "type": "takedown",
-    "label": "Double Leg Takedown",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 1270,
-    "type": "control",
-    "label": "Back Control",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55"
-   },
-   {
-    "ts": 1366,
-    "type": "guard",
-    "label": "Lasso Guard",
-    "actor_id": "79dc768f-fe65-4ea0-80a6-2228c9a3ea55",
-    "successful": false
+    "points": 2,
+    "actor_id": "2ec7c5d9-0eb1-4f29-9ca5-1464fae97644",
+    "successful": true
    }
   ]
  },
@@ -2411,6 +2943,114 @@
   "b_id": "282d721e-c83d-4fb8-9be9-f5a18ed00e4e",
   "win_type": "DECISION",
   "seq": []
+ },
+ {
+  "id": "e371a018-c2bc-42ed-acce-1f1e01fd9f8c",
+  "a": "Nadia Frankland",
+  "b": "Elisabeth Clay",
+  "a_key": "nadia frankland",
+  "b_key": "elisabeth clay",
+  "div_a": "65 kg",
+  "div_b": null,
+  "event": "World No-Gi 2024",
+  "year": 2024,
+  "winner": "2d2b0edf-c879-4860-932b-861499e1d435",
+  "a_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "b_id": "2d2b0edf-c879-4860-932b-861499e1d435",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 30,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 213,
+    "type": "sweep",
+    "label": "Sweep",
+    "points": 2,
+    "actor_id": "2d2b0edf-c879-4860-932b-861499e1d435",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "eb4da991-55c0-47c1-94a4-17a487c619bc",
+  "a": "Anabel Lopez",
+  "b": "Aurelie Le Vern",
+  "a_key": "anabel lopez",
+  "b_key": "aurelie le vern",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "European No-Gi 2024",
+  "year": 2024,
+  "winner": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+  "a_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "b_id": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 10,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   },
+   {
+    "ts": 20,
+    "type": "guard",
+    "label": "Open Guard",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   },
+   {
+    "ts": 120,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+    "successful": true
+   },
+   {
+    "ts": 130,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "ec414b84-7a7b-4289-9db6-7e20fce290a6",
+  "a": "Aurelie Le Vern",
+  "b": "Nadia Frankland",
+  "a_key": "aurelie le vern",
+  "b_key": "nadia frankland",
+  "div_a": null,
+  "div_b": "65 kg",
+  "event": "ADCC Trials 2024 European",
+  "year": 2024,
+  "winner": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+  "a_id": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+  "b_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 17665,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "3c8bb09e-3133-4613-976a-40adeb6894b0",
+    "successful": true
+   },
+   {
+    "ts": 17705,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   }
+  ]
  },
  {
   "id": "0fdd85f9-eb9f-4495-9cf0-c32d93df2fa8",
@@ -2568,6 +3208,30 @@
     "type": "control",
     "label": "Body Triangle",
     "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   }
+  ]
+ },
+ {
+  "id": "3e5c0aeb-36a1-4709-8315-bcc3e97032ab",
+  "a": "Helena Crevar",
+  "b": "Gabriela Miranda",
+  "a_key": "helena crevar",
+  "b_key": "gabriela miranda",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "World No-Gi 2025",
+  "year": 2025,
+  "winner": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "a_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+  "b_id": "28584e04-1719-49ce-9426-1bf27495bb5e",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 410,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "28584e04-1719-49ce-9426-1bf27495bb5e",
+    "successful": true
    }
   ]
  },
@@ -3175,6 +3839,31 @@
   ]
  },
  {
+  "id": "686acae6-3f89-4467-beb0-145af71ea8b0",
+  "a": "Nadia Frankland",
+  "b": "Gabrieli Pessanha",
+  "a_key": "nadia frankland",
+  "b_key": "gabrieli pessanha",
+  "div_a": "65 kg",
+  "div_b": null,
+  "event": "World No-Gi 2025",
+  "year": 2025,
+  "winner": "2ec7c5d9-0eb1-4f29-9ca5-1464fae97644",
+  "a_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "b_id": "2ec7c5d9-0eb1-4f29-9ca5-1464fae97644",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 232,
+    "type": "sweep",
+    "label": "Sweep",
+    "points": 2,
+    "actor_id": "2ec7c5d9-0eb1-4f29-9ca5-1464fae97644",
+    "successful": true
+   }
+  ]
+ },
+ {
   "id": "6eb67ae5-0759-433a-ad96-cd4c60574848",
   "a": "Helena Crevar",
   "b": "Ane Svendsen",
@@ -3277,6 +3966,47 @@
     "type": "submission",
     "label": "Rear Naked Choke",
     "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "859e978f-0c25-4e33-a445-b90d9f13642a",
+  "a": "Injana Goodman",
+  "b": "Julia Maele",
+  "a_key": "injana goodman",
+  "b_key": "julia maele",
+  "div_a": "65 kg",
+  "div_b": null,
+  "event": "European No-Gi 2025",
+  "year": 2025,
+  "winner": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+  "a_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+  "b_id": "1dbcc815-e0bb-4ade-8300-9bef33ead57d",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 15,
+    "type": "takedown",
+    "label": "Takedown",
+    "points": 2,
+    "actor_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+    "successful": true
+   },
+   {
+    "ts": 310,
+    "type": "pass",
+    "label": "Guard Pass",
+    "points": 3,
+    "actor_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+    "successful": true
+   },
+   {
+    "ts": 540,
+    "type": "control",
+    "label": "Mount",
+    "points": 4,
+    "actor_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
     "successful": true
    }
   ]
@@ -3547,6 +4277,113 @@
   ]
  },
  {
+  "id": "f68a75c8-c090-446b-8b81-f66ad154edcb",
+  "a": "Elisabeth Clay",
+  "b": "Injana Goodman",
+  "a_key": "elisabeth clay",
+  "b_key": "injana goodman",
+  "div_a": null,
+  "div_b": "65 kg",
+  "event": "World No-Gi 2025",
+  "year": 2025,
+  "winner": "2d2b0edf-c879-4860-932b-861499e1d435",
+  "a_id": "2d2b0edf-c879-4860-932b-861499e1d435",
+  "b_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 5,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+    "successful": true
+   },
+   {
+    "ts": 15,
+    "type": "guard",
+    "label": "Open Guard",
+    "actor_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+    "successful": true
+   },
+   {
+    "ts": 25,
+    "type": "guard",
+    "label": "Leg Entanglement",
+    "actor_id": "2d2b0edf-c879-4860-932b-861499e1d435",
+    "successful": true
+   },
+   {
+    "ts": 60,
+    "type": "sweep",
+    "label": "Sweep",
+    "points": 2,
+    "actor_id": "2d2b0edf-c879-4860-932b-861499e1d435",
+    "successful": true
+   },
+   {
+    "ts": 80,
+    "type": "guard",
+    "label": "Seated Guard",
+    "actor_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+    "successful": true
+   },
+   {
+    "ts": 130,
+    "type": "submission",
+    "label": "Guillotine Choke",
+    "actor_id": "2d2b0edf-c879-4860-932b-861499e1d435",
+    "successful": true
+   },
+   {
+    "ts": 138,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "7c0b7ea9-83b0-476e-9492-c573882d0159",
+    "successful": true
+   }
+  ]
+ },
+ {
+  "id": "ffefc7b7-6e55-4f44-adf5-a256a1bcddbe",
+  "a": "Anabel Lopez",
+  "b": "Erin Harpe",
+  "a_key": "anabel lopez",
+  "b_key": "erin harpe",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "Pan No-Gi 2025",
+  "year": 2025,
+  "winner": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "a_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "b_id": "a2c11dbd-9f62-4195-a736-ac1476097b60",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 42,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "a2c11dbd-9f62-4195-a736-ac1476097b60",
+    "successful": true
+   },
+   {
+    "ts": 160,
+    "type": "pass",
+    "label": "Guard Pass",
+    "points": 2,
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   },
+   {
+    "ts": 515,
+    "type": "pass",
+    "label": "Guard Pass",
+    "points": 2,
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   }
+  ]
+ },
+ {
   "id": "04f0e490-d0e1-4ee6-95e3-801db4a8efef",
   "a": "Sarah Galvao",
   "b": "Libby Genge",
@@ -3562,6 +4399,13 @@
   "win_type": "SUBMISSION",
   "seq": [
    {
+    "ts": 20,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "4387319b-803a-4e87-a17c-e2e892340e89",
+    "successful": true
+   },
+   {
     "ts": 36,
     "type": "control",
     "label": "Back Control",
@@ -3572,6 +4416,20 @@
     "type": "control",
     "label": "Body Triangle",
     "actor_id": "ecd7d0d1-f04b-4aff-af6b-ac8131a26021"
+   },
+   {
+    "ts": 70,
+    "type": "pass",
+    "label": "Guard Pass",
+    "actor_id": "ecd7d0d1-f04b-4aff-af6b-ac8131a26021",
+    "successful": true
+   },
+   {
+    "ts": 130,
+    "type": "escape",
+    "label": "Guard Recovery",
+    "actor_id": "4387319b-803a-4e87-a17c-e2e892340e89",
+    "successful": true
    },
    {
     "ts": 201,
@@ -3698,6 +4556,37 @@
   ]
  },
  {
+  "id": "ce59607c-68b9-4968-94ff-a006f90ae141",
+  "a": "Anabel Lopez",
+  "b": "Kendall Reusing",
+  "a_key": "anabel lopez",
+  "b_key": "kendall reusing",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "Polaris 36",
+  "year": 2026,
+  "winner": "967085a5-0898-436a-8d65-8cd4a0ba45ae",
+  "a_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+  "b_id": "967085a5-0898-436a-8d65-8cd4a0ba45ae",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 195,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "967085a5-0898-436a-8d65-8cd4a0ba45ae",
+    "successful": true
+   },
+   {
+    "ts": 215,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
+    "successful": true
+   }
+  ]
+ },
+ {
   "id": "d717f8e5-6226-4ee5-8a30-aa2b16c157ef",
   "a": "Zara Di Tofano",
   "b": "Sarah Galvao",
@@ -3712,6 +4601,13 @@
   "b_id": "ecd7d0d1-f04b-4aff-af6b-ac8131a26021",
   "win_type": "SUBMISSION",
   "seq": [
+   {
+    "ts": 215,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "2b99f4e5-ba6a-49dc-ad99-808c4deaec6f",
+    "successful": true
+   },
    {
     "ts": 228,
     "type": "control",
@@ -3730,6 +4626,34 @@
     "type": "guard",
     "label": "Closed Guard",
     "actor_id": "ecd7d0d1-f04b-4aff-af6b-ac8131a26021"
+   },
+   {
+    "ts": 275,
+    "type": "transition",
+    "label": "Reset / Stalemate",
+    "actor_id": "ecd7d0d1-f04b-4aff-af6b-ac8131a26021",
+    "successful": true
+   },
+   {
+    "ts": 285,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "2b99f4e5-ba6a-49dc-ad99-808c4deaec6f",
+    "successful": true
+   },
+   {
+    "ts": 330,
+    "type": "transition",
+    "label": "Reset / Stalemate",
+    "actor_id": "2b99f4e5-ba6a-49dc-ad99-808c4deaec6f",
+    "successful": true
+   },
+   {
+    "ts": 340,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "2b99f4e5-ba6a-49dc-ad99-808c4deaec6f",
+    "successful": true
    },
    {
     "ts": 396,
