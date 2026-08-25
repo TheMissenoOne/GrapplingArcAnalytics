@@ -65,6 +65,14 @@ Two more choices, stated because they are contestable:
   ``normalize_chain`` folds consecutive repeats; both would delete exactly the cell Lamas
   publishes (guard pass -> guard pass, 0.30). Nothing is folded here.
 
+**Reward-risk** (``reward_risk``) is the one layer here that DOES depend on ``actor_id``, and it
+inherits its convention from ``analysis/transitions/build_graph.py`` /
+``network_metrics.reward_risk_ranking`` rather than inventing one: same denominator rule
+(appearances that have a successor), two disjoint rates, unknown attribution never charged,
+composite = reward − risk. What is translated is the event class, not the structure — see that
+function's docstring. Because the metric stands entirely on the actor field, bouts are REFUSED
+before they enter it (``_actor_reliability``), which the matrix never needs to do.
+
 **Cross-actor by default.** ``chain_of`` links the bout's actions whoever produced them,
 because the paper's chain is the MATCH's flow: CDP is dyadic by definition (both athletes are
 standing and disputing), and the dominance states carry their actor implicitly. The
@@ -88,6 +96,8 @@ from analysis.names import _deaccent, _normalize_name
 from analysis.stats_rigor import (
     MIN_CLUSTERS_FOR_CATEGORY_ESTIMATE,
     Coverage,
+    bootstrap_ci,
+    compare_proportions,
     coverage,
     wilson,
 )
@@ -231,6 +241,29 @@ ANCHOR_CELLS: tuple[tuple[str, str, str, float], ...] = (
 
 PATHWAY_LENGTH = 3      # two transitions into a submission; length 2 IS the matrix's SUB column
 PATHWAY_TOP = 5
+# Cluster bootstrap draws for the reward-risk composite. `bootstrap_ci` is deterministic by
+# seed, so this is a precision knob and not a source of run-to-run drift.
+N_BOOT = 2000
+
+REWARD_RISK_CAVEATS: tuple[str, ...] = (
+    "Esta é a ÚNICA camada do bloco que depende de `actor_id`. A matriz é cruzada entre "
+    "atletas e não lê esse campo; aqui ele é o instrumento inteiro. Por isso as lutas passam "
+    "por uma recusa antes de entrar (`bouts_refused`): `one_sided` é o veredito do próprio "
+    "corpus (307 de 700 lutas arquivam tudo sob uma atleta) e `single_actor` fecha o buraco "
+    "que ele deixa — luta curta com um só nome pontuaria reward 1,00 por construção.",
+    "A convenção de dono do evento é `actor` = a atleta de cujo JOGO o nó é, não quem está "
+    "ganhando a troca (docs/match_event_model.md): um nó de guarda é da guardeira, a passagem "
+    "é da passadora. Cada evento arquivado fora dessa convenção troca um reward por um risco "
+    "aqui. É a maior fonte de erro desta tabela e não é corrigível só a partir dos eventos.",
+    "Aparição sem sucessora fica FORA do denominador (convenção de build_graph): um estado que "
+    "encerra a cadeia — toda SUB que finaliza a luta, por exemplo — não é pontuado.",
+    "Atribuição desconhecida não é cobrada de nenhum lado e permanece no denominador, então um "
+    "estado cujas sucessoras são majoritariamente não atribuíveis tende a score 0. Isso é "
+    "proposital: falta de atribuição deve ler como AUSÊNCIA de afirmação, não como afirmação.",
+    "O score é uma diferença de duas taxas e não tem forma fechada; o intervalo vem de "
+    "bootstrap percentil AGRUPADO POR LUTA. Abaixo do corte de cobertura nenhum intervalo é "
+    "publicado — nem o de Wilson dos braços, nem o do score.",
+)
 
 
 def _key(label: Any) -> str:
@@ -280,6 +313,11 @@ class Chain(NamedTuple):
     skipped_labels: Counter[str]
     after_finish: int       # events dropped by the absorbing rule
     truncated: bool
+    # Whether THIS bout's `actor_id` field can carry a directional reading at all. Only the
+    # reward-risk layer reads it -- the matrix is cross-actor and does not depend on the actor
+    # field. `None` when the bout carried no `a_id`/`b_id` to check against.
+    actor_reliable: bool | None = None
+    actor_refusal: str | None = None
 
 
 def chain_of(bout: Mapping[str, Any]) -> Chain:
@@ -294,6 +332,7 @@ def chain_of(bout: Mapping[str, Any]) -> Chain:
     skipped_labels: Counter[str] = Counter()
     mapped = skipped = 0
     truncated = False
+    after = 0
     for i, e in enumerate(seq):
         state = lamas_state(e)
         if state is None:
@@ -303,10 +342,40 @@ def chain_of(bout: Mapping[str, Any]) -> Chain:
         mapped += 1
         steps.append(Step(state, e.get("actor_id")))
         if finishes and state == "SUB":
-            truncated = True
-            return Chain(str(bout.get("id")), steps, mapped, skipped, skipped_labels,
-                         len(seq) - i - 1, True)
-    return Chain(str(bout.get("id")), steps, mapped, skipped, skipped_labels, 0, truncated)
+            truncated, after = True, len(seq) - i - 1
+            break
+    reliable, refusal = _actor_reliability(bout, steps)
+    return Chain(str(bout.get("id")), steps, mapped, skipped, skipped_labels, after, truncated,
+                 reliable, refusal)
+
+
+def _actor_reliability(bout: Mapping[str, Any],
+                       steps: Sequence[Step]) -> tuple[bool | None, str | None]:
+    """Can this bout's ``actor_id`` support a REWARD-RISK reading? Two refusals, both measured.
+
+    ``one_sided``     `analysis.attribution.bout_flags`' own verdict (`perspective_reliable`) --
+                      every event of a bout with >= 6 events filed under one athlete, 43.9% of
+                      the corpus. The field carries no information there.
+    ``single_actor``  the mapped CHAIN names fewer than two athletes. This is not redundant with
+                      the first: `bout_flags` only calls a bout one-sided at >= 6 events, so a
+                      short bout filed entirely under one name passes it while scoring
+                      reward = 1.00 by construction. Measured on the scouting corpus, this
+                      catches 7 and 8 bouts per division against the first rule's 1 and 3 --
+                      it is the bigger hole, and leaving it open would have handed the metric a
+                      pile of free reward.
+
+    The matrix does NOT consult this. It is cross-actor and never reads `actor_id`; only
+    reward-risk does, which is why the refusal lives here rather than in the bout selection.
+    """
+    a_id, b_id = bout.get("a_id"), bout.get("b_id")
+    if a_id is None or b_id is None:
+        return None, "no_sides_recorded"
+    from analysis.attribution import bout_flags
+    if not bout_flags(bout.get("seq") or [], str(a_id), str(b_id))["perspective_reliable"]:
+        return False, "one_sided"
+    if len({s.actor_id for s in steps if s.actor_id is not None}) < 2:
+        return False, "single_actor"
+    return True, None
 
 
 class Transition(NamedTuple):
@@ -382,6 +451,152 @@ def _occupancy(chains: Sequence[Chain]) -> list[dict[str, Any]]:
     return [{"state": s, "k": c[s], "bouts": len(per_bout[s]),
              "share": _cell(c[s], total, coverage(list(per_bout[s].values())))}
             for s in STATES]
+
+
+def reward_risk(chains: Sequence[Chain], n_boot: int = N_BOOT) -> dict[str, Any]:
+    """Per-state reward-risk in the Lamas action space, translated from `build_graph`.
+
+    **The convention it inherits.** ``analysis/transitions/build_graph.py`` scores each node
+    (Lamas et al. 2024) over *appearances that have a successor* -- a node that simply ends the
+    recorded sequence is out of the denominator -- with two disjoint rates on that one
+    denominator, unknown attribution charged to neither, composed as
+    ``(reward - risk) / denom``. ``network_metrics.reward_risk_ranking`` then orders nodes by
+    that composite. All four properties are kept here verbatim: same denominator rule, two
+    disjoint rates, unknown never charged, difference-of-rates composite.
+
+    **What is translated.** `build_graph` anchors both arms on a *finished submission* -- own
+    next action is a landed sub (reward) vs the very next event is the OPPONENT's landed sub
+    (risk). That anchor does not survive the move to this state space: rule 3 of the module
+    docstring puts almost every real finish in ``SUBA``, leaving 10 and 14 ``SUB`` events per
+    division, so a submission-anchored numerator would be 0-3 for nearly every state and the
+    table would measure the corpus's `successful` coverage rather than the grappling.
+
+    So the *event class* widens while the structure stays. Every action that survives into a
+    Lamas chain is an ATTACKING action by construction (rule 2 skips escapes, guard postures
+    and dwell states), so "did the exchange advance" reduces to **who acts next**:
+
+        reward(s) = P(the next action is by the SAME athlete   | appearance of s with a successor)
+        risk(s)   = P(the next action is by the OPPONENT       | same denominator)
+        score(s)  = reward(s) - risk(s)          # == (reward_k - risk_k) / denom, build_graph's
+
+    An appearance whose own actor or whose successor's actor is unknown scores neither and
+    stays in the denominator -- `build_graph`'s "left neutral, never charged". That is
+    deliberate: it pulls a state whose successors are mostly unattributable toward score 0, so
+    missing attribution reads as *no claim* rather than as a strong one.
+
+    **Actor noise is handled by refusal, not by a footnote.** This metric is built entirely on
+    ``actor_id``, which is exactly the field `docs/match_event_model.md` measured as
+    uninformative in 307 of 700 corpus bouts, and which §1.3 rule 4 refuses to build the matrix
+    on. A bout that files every event under one athlete would score reward = 1.00 and risk =
+    0.00 for every state in it. So bouts are gated by `_actor_reliability` BEFORE they enter
+    this layer (`bouts_refused` says how many and why), and the surviving denominator is
+    reported per state.
+
+    Also note the guard/pass ownership convention this corpus writes under -- ``actor`` is the
+    fighter whose GAME the node belongs to, not who is winning the exchange
+    (`docs/match_event_model.md`). It is a documented convention that entry paths have violated
+    before, and every event it mis-files flips a reward into a risk here. It is the single
+    largest source of error in this table and it is not correctable from the events alone.
+
+    **Intervals.** Wilson on each arm (both are binomial over one denominator). The composite
+    has no closed form, so it gets `stats_rigor.bootstrap_ci` over per-appearance values of
+    +1 / -1 / 0 -- whose mean IS the composite -- **clustered on the bout**, which is the right
+    resampling unit because appearances inside one fight are not independent. Everything is
+    gated on the same bout-cluster `coverage` as the matrix cells, and below the gate the counts
+    survive while every interval is withheld (`bootstrap_ci`'s own docstring: gate first).
+    """
+    from statistics import fmean
+
+    usable = [ch for ch in chains if ch.actor_reliable]
+    refused: Counter[str] = Counter()
+    for ch in chains:
+        if not ch.actor_reliable:
+            refused[ch.actor_refusal or "unknown"] += 1
+
+    vals: dict[str, list[float]] = defaultdict(list)
+    bouts: dict[str, list[str]] = defaultdict(list)
+    for ch in usable:
+        for a, b in zip(ch.steps, ch.steps[1:]):
+            if a.actor_id is None or b.actor_id is None:
+                v = 0.0                       # unknown: neutral, never charged
+            else:
+                v = 1.0 if a.actor_id == b.actor_id else -1.0
+            vals[a.state].append(v)
+            bouts[a.state].append(ch.bout_id)
+
+    rows: list[dict[str, Any]] = []
+    for s in STATES:
+        scored, bl = vals[s], bouts[s]
+        denom = len(scored)
+        r_k = sum(1 for x in scored if x > 0)
+        k_k = sum(1 for x in scored if x < 0)
+        cov = coverage(list(Counter(bl).values()))
+        score = round((r_k - k_k) / denom, 4) if denom else None
+        lo: float | None = None
+        hi: float | None = None
+        if cov.estimable and denom:
+            _, b_lo, b_hi = bootstrap_ci(scored, fmean, n_boot=n_boot, groups=bl)
+            lo, hi = round(b_lo, 4), round(b_hi, 4)
+        rows.append({
+            "state": s, "n": denom, "bouts": len(set(bl)),
+            "reward": _cell(r_k, denom, cov),
+            "risk": _cell(k_k, denom, cov),
+            "neutral": denom - r_k - k_k,
+            "score": score, "score_lo": lo, "score_hi": hi,
+            "gated": cov.estimable,
+            "coverage": cov.to_dict(),
+        })
+    # Estimable rows first, then best score, then the fixed state order. A denom-of-one state
+    # scoring 1.00 would otherwise top a table the gate exists to keep it off.
+    rows.sort(key=lambda r: (not r["gated"], -(r["score"] if r["score"] is not None else -9),
+                             STATE_INDEX[r["state"]]))
+    return {
+        "rows": rows,
+        "method": ("reward = P(próxima ação é da MESMA atleta); risco = P(é da adversária); "
+                   "score = reward − risco, sobre as aparições que têm sucessora. Convenção "
+                   "herdada de analysis/transitions/build_graph.py (Lamas et al. 2024): mesmo "
+                   "denominador, duas taxas disjuntas, atribuição desconhecida nunca é "
+                   "cobrada, composição por diferença."),
+        "bouts_used": len(usable),
+        "bouts_refused": dict(refused),
+        "n_appearances": sum(len(v) for v in vals.values()),
+        "boot": {"n": n_boot, "unit": "bout", "kind": "cluster percentile"},
+        "caveats": list(REWARD_RISK_CAVEATS),
+    }
+
+
+def reward_risk_comparison(a_rows: Sequence[Mapping[str, Any]],
+                           b_rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """65 kg against +65 kg, one row per state, in the fixed state order.
+
+    ``delta`` is published for every state that HAS a score on both sides, and
+    ``both_estimable`` says whether either division earned an interval — a delta between two
+    refused cells is arithmetic, not evidence, and the flag is what stops a renderer treating
+    the two the same. The ``contrast`` (Agresti-Caffo difference + interval + p-value, via
+    `stats_rigor.compare_proportions`) is computed on the REWARD arm only: it is the one
+    genuine proportion here, and risk is its mirror once the neutral share is fixed.
+    """
+    a = {r["state"]: r for r in a_rows}
+    b = {r["state"]: r for r in b_rows}
+    out: list[dict[str, Any]] = []
+    for s in STATES:
+        ra, rb = a.get(s), b.get(s)
+        if ra is None or rb is None:
+            continue
+        d65, d65p = ra["score"], rb["score"]
+        both = bool(ra["gated"] and rb["gated"])
+        row: dict[str, Any] = {
+            "state": s, "d65": d65, "d65p": d65p,
+            "delta": round(d65 - d65p, 4) if d65 is not None and d65p is not None else None,
+            "both_estimable": both,
+            "n65": ra["n"], "n65p": rb["n"],
+            "bouts65": ra["bouts"], "bouts65p": rb["bouts"],
+        }
+        if both:
+            row["contrast"] = compare_proportions(
+                ra["reward"]["k"], ra["n"], rb["reward"]["k"], rb["n"]).to_dict()
+        out.append(row)
+    return out
 
 
 def pathways_to_sub(chains: Sequence[Chain], probs: Sequence[Sequence[float | None]],
@@ -503,6 +718,9 @@ def markov_block(bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "occupancy": _occupancy(chains),
         "pathways_to_sub": pathways_to_sub(chains, m["probs"]),
         "anchor": anchor(trans),
+        # `comparison` is filled in by the caller that holds BOTH divisions
+        # (`scripts/bracket_export.markov_layer`); one division cannot compare itself.
+        "reward_risk": {**reward_risk(chains), "comparison": []},
         "n_bouts": len(bouts),
         "n_transitions": len(trans),
         "n_events_mapped": sum(ch.mapped for ch in chains),
@@ -523,6 +741,9 @@ def markov_block(bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
 
 def _demo() -> None:
     """One runnable check of the non-trivial logic, no framework."""
+    def ev(t: str, label: str, actor: str = "a") -> dict[str, Any]:
+        return {"type": t, "label": label, "actor_id": actor}
+
     bout = {"id": "b1", "win_type": "SUBMISSION", "seq": [
         {"type": "control", "label": "Collar Tie"},                      # CDP
         {"type": "takedown", "label": "Single Leg Takedown", "successful": True},   # TKD
@@ -542,6 +763,18 @@ def _demo() -> None:
     for row in block["probs"]:
         s = sum(p for p in row if p)
         assert s == 0 or abs(s - 1.0) < 1e-9, row
+
+    # reward-risk, hand-computable: X acts, X acts (reward), Y acts (risk), Y acts (reward).
+    rr = reward_risk([chain_of({"id": "r", "seq": [
+        ev("control", "Collar Tie", "X"), ev("takedown", "Trip", "X"),
+        ev("pass", "Pass", "Y"), ev("submission", "Armbar", "Y"),
+    ], "a_id": "X", "b_id": "Y"})])
+    by = {r["state"]: r for r in rr["rows"]}
+    assert by["CDP"]["score"] == 1.0 and by["CDP"]["reward"]["k"] == 1          # CDP → same
+    assert by["TKDA"]["score"] == -1.0 and by["TKDA"]["risk"]["k"] == 1         # TKDA → other
+    assert by["GPSA"]["score"] == 1.0                                          # GPSA → same
+    assert by["SUBA"]["n"] == 0                                                # no successor
+    assert rr["bouts_used"] == 1
     print("lamas_chain self-check ok")
 
 

@@ -33,7 +33,9 @@ Layers are kept apart on purpose and never fill each other in:
   sequence   corpus bouts with event-by-event data -- the path, on a much smaller sample
   markov     the SAME bouts as `sequence`, re-read into Lamas et al. 2024's twelve action
              states (`analysis/lamas_chain.py`) -- the only layer here with an external
-             published matrix to be checked against
+             published matrix to be checked against. Its `reward_risk` sub-block is the ONE
+             place in this file that stands on `actor_id`, and it refuses bouts the field
+             cannot carry (11 of 19 and 12 of 23 survive) rather than averaging over them
   embedding  graph vectors and archetypes -- shape of a game, thinnest layer of the three
 
 Privacy class: **A, public competition data.** Every graph query filters
@@ -81,7 +83,7 @@ from analysis.attribution import (  # noqa: E402
     usable_perspective,
     usable_role,
 )
-from analysis.lamas_chain import markov_block  # noqa: E402
+from analysis.lamas_chain import markov_block, reward_risk_comparison  # noqa: E402
 from analysis.names import (  # noqa: E402
     athlete_key,
     reviewed_verdict,
@@ -928,6 +930,16 @@ def markov_layer(bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
                         "refused_rows_across_cuts": rows_across_cuts - estimable_cut_rows,
                         "payload_kb_if_published": round(
                             cuts * len(json.dumps(block, ensure_ascii=False)) / 1024)}}
+    # The reward-risk comparison needs both divisions, so it is filled in here and written into
+    # BOTH blocks. Duplicated on purpose: twelve rows is a rounding error of payload, and every
+    # other block in this file is self-contained enough that a renderer never has to reach
+    # sideways into another division to draw one panel.
+    a, b = DIVISIONS
+    cmp_rows = reward_risk_comparison(out[a]["reward_risk"]["rows"],
+                                      out[b]["reward_risk"]["rows"])
+    for div in DIVISIONS:
+        out[div]["reward_risk"]["comparison"] = cmp_rows
+        out[div]["reward_risk"]["comparison_sides"] = {"d65": a, "d65p": b}
     return out
 
 
@@ -2063,9 +2075,13 @@ def main() -> int:
               f"effective_n {s['concentration']['effective_n']:.2f}")
     for d, m in markov.items():
         agree = sum(1 for a in m["anchor"] if a["cross"]["agrees"])
+        rr = m["reward_risk"]
         print(f"  markov {d}: {m['n_transitions']} transitions, "
               f"{m['n_events_mapped']} mapped / {m['n_events_skipped']} skipped, "
               f"anchor {agree}/{len(m['anchor'])} agree with Lamas 2024")
+        print(f"    reward-risk: {rr['bouts_used']}/{m['n_bouts']} bouts usable "
+              f"({rr['bouts_refused'] or 'none refused'}), "
+              f"{sum(1 for r in rr['rows'] if r['gated'])}/{len(rr['rows'])} states estimable")
     print(f"  videos: {len(vids)}   embedded graphs: "
           f"{sum(v['usable'] for v in emb['divisions'].values())}")
     return 0

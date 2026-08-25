@@ -362,7 +362,161 @@ finding: +65 kg's `TKDA` row is not a division estimate.
 
 ---
 
-## 5. Caveats (these ship inside the export, `markov[div].caveats`)
+## 5. Reward-risk per state
+
+### 5.1 What is inherited, and what is translated
+
+The repo already has a reward-risk convention and this does not invent a second one.
+`analysis/transitions/build_graph.py` scores each node (citing Lamas et al. 2024) and
+`network_metrics.reward_risk_ranking` orders by the result. Four properties, kept verbatim:
+
+| property | `build_graph` | here |
+|---|---|---|
+| denominator | appearances **that have a successor** — a node that ends the sequence is out | same |
+| arms | two **disjoint** rates on that one denominator | same |
+| unknown attribution | "left neutral, **never charged**" — stays in the denominator, scores neither | same |
+| composite | `(reward − risk) / denom`, a **difference of rates** | same |
+
+What changes is the *event class*, not the structure. `build_graph` anchors both arms on a
+**finished submission**: reward = the fighter's own next action is a landed sub, risk = the very
+next event is the *opponent's* landed sub. That anchor does not survive the move to this state
+space. §1.4 puts almost every real finish in `SUBA`, leaving **10 and 14 `SUB` events** per
+division, so a submission-anchored numerator would sit at 0–3 for nearly every state and the
+table would be measuring the corpus's `successful` coverage rather than the grappling.
+
+Every action that survives into a Lamas chain is an *attacking* action by construction (rule 1
+of §1.3 skips escapes, guard postures and dwell states). So "did the exchange advance the
+acting athlete" reduces to **who acts next**:
+
+```
+reward(s) = P(next action is by the SAME athlete | appearance of s that has a successor)
+risk(s)   = P(next action is by the OPPONENT     | same denominator)
+score(s)  = reward(s) − risk(s)        ≡ (reward_k − risk_k) / denom
+```
+
+**Read this as retention of the initiative, not as points scored.** A state with a high score
+is one the acting athlete keeps working from; a negative one hands the exchange over. That is
+the Lamas reward-risk question asked in the only currency this corpus has enough of.
+
+### 5.2 Actor noise is handled by refusal, not by a footnote
+
+This is the **only** layer in the block that depends on `actor_id` — the matrix is cross-actor
+and never reads it (§1.3 rule 4), precisely because `docs/match_event_model.md` measures the
+field as uninformative in 307 of 700 corpus bouts. A bout filing every event under one athlete
+would score `reward = 1.00`, `risk = 0.00` for every state in it. So bouts are refused before
+they enter:
+
+| refusal | rule | 65 kg | +65 kg |
+|---|---|---|---|
+| `one_sided` | `attribution.bout_flags(...)["perspective_reliable"]` — the corpus's own verdict | 1 | 3 |
+| `single_actor` | the mapped chain names fewer than two athletes | **7** | **8** |
+| **usable** | | **11 / 19** | **12 / 23** |
+
+The second rule is not redundant with the first, and the numbers say why: `bout_flags` only
+calls a bout one-sided at ≥6 events, so a *short* bout filed under one name passes it while
+scoring reward 1.00 by construction. It catches seven and eight bouts against the first rule's
+one and three — the bigger hole by far.
+
+**The residual error this cannot fix.** The corpus's ownership convention is `actor` = the
+athlete whose *game* the node belongs to, not who is winning the exchange
+(`docs/match_event_model.md`): a guard node belongs to the guard player, the pass to the
+passer. Every event filed against that convention flips a reward into a risk here. It is a
+documented convention that entry paths have violated before, it is the single largest source of
+error in these tables, and it is **not correctable from the events alone**.
+
+### 5.3 Intervals and gating
+
+Wilson on each arm (both are binomial over one denominator). The composite is a difference of
+two rates with no closed form, so it takes `stats_rigor.bootstrap_ci` over per-appearance
+values of +1 / −1 / 0 — whose mean *is* the composite — **clustered on the bout**, 2000 draws,
+seeded. Everything is gated on the same bout-cluster `coverage` as the matrix cells, and below
+the gate the counts survive while **every** interval is withheld, the arm's and the composite's
+alike (`bootstrap_ci`'s own docstring: gate first, it is not a rescue).
+
+Rows are ranked **estimable-first, then by score, then by the fixed state order** — a state with
+denom 1 scoring +1.000 would otherwise top a table the gate exists to keep it off.
+
+### 5.4 65 kg — 11 usable bouts, 164 scored appearances
+
+| # | state | n | bouts | reward | risk | score | score 95% CI (bout-clustered) | gate |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `SUBA` | 35 | 8 | 0.77 [0.61, 0.88] | 0.23 [0.12, 0.39] | **+0.543** | [+0.200, +1.000] | yes |
+| 2 | `BTKA` | 53 | 8 | 0.72 [0.58, 0.82] | 0.28 [0.18, 0.42] | **+0.434** | [+0.333, +0.615] | yes |
+| 3 | `TKDA` | 47 | 6 | 0.70 [0.56, 0.81] | 0.30 [0.19, 0.44] | **+0.404** | [+0.077, +0.739] | yes |
+| 4 | `CDP` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 5 | `SWPA` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 6 | `SWP` | 4 | 4 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 7 | `GPS` | 3 | 2 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 8 | `BTK` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 9 | `GPSA` | 10 | 3 | 0.70 | 0.30 | +0.400 | withheld | no |
+| 10 | `PGD` | 4 | 4 | 0.50 | 0.50 | +0.000 | withheld | no |
+| 11 | `TKD` | 4 | 3 | 0.50 | 0.50 | +0.000 | withheld | no |
+| 12 | `SUB` | 1 | 1 | 0.00 | 1.00 | −1.000 | withheld | no |
+
+Rows 4–12 are the gate doing its job: five states show a perfect +1.000 off one to four
+appearances. None of them is a finding, and none of them outranks a gated row.
+
+### 5.5 +65 kg — 12 usable bouts, 147 scored appearances
+
+| # | state | n | bouts | reward | risk | score | score 95% CI (bout-clustered) | gate |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `BTKA` | 37 | 7 | 0.78 [0.63, 0.89] | 0.22 [0.11, 0.37] | **+0.568** | [+0.467, +0.750] | yes |
+| 2 | `GPSA` | 15 | 7 | 0.73 [0.48, 0.89] | 0.27 [0.11, 0.52] | **+0.467** | [+0.067, +1.000] | yes |
+| 3 | `SUBA` | 47 | 9 | 0.68 [0.54, 0.80] | 0.32 [0.20, 0.46] | **+0.362** | [−0.167, +0.706] | yes |
+| 4 | `PGD` | 6 | 6 | 0.67 [0.30, 0.90] | 0.33 [0.10, 0.70] | **+0.333** | [−0.333, +1.000] | yes |
+| 5 | `SWP` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 6 | `GPS` | 2 | 2 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 7 | `BTK` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 8 | `TKDA` | 20 | 3 | 0.85 | 0.15 | +0.700 | withheld | no |
+| 9 | `SWPA` | 14 | 1 | 0.79 | 0.21 | +0.571 | withheld | no |
+| 10 | `CDP` | 3 | 3 | 0.67 | 0.33 | +0.333 | withheld | no |
+| 11 | `SUB` | 1 | 1 | 0.00 | 1.00 | −1.000 | withheld | no |
+| 12 | `TKD` | 0 | 0 | — | — | — | withheld | no |
+
+Two rows are worth naming even though they are refused. `SWPA` at +0.571 over **1 bout** is the
+sweep-attempt spam already visible as the matrix's `SWPA → SWPA` 0.74 — the same single athlete,
+seen through a second statistic, which is exactly why a reader must not treat the two tables as
+independent corroboration. And `SUB` at −1.000 is one escaped submission whose opponent acted
+next; every other `SUB` in the division ended its bout and left the denominator (§1.5).
+
+### 5.6 The comparison
+
+`d65` = 65 kg, `d65p` = +65 kg (`comparison_sides` names them in the export). The `contrast` is
+Agresti-Caffo on the **reward arm**, the only genuine proportion in the row, computed only when
+both divisions clear the gate.
+
+| state | 65 kg | +65 kg | delta | both estimable | reward diff (AC 95%) | p |
+|---|---|---|---|---|---|---|
+| `CDP` | +1.000 (n=1, 1b) | +0.333 (n=3, 3b) | +0.667 | no | — | — |
+| `PGD` | +0.000 (n=4, 4b) | +0.333 (n=6, 6b) | −0.333 | no | — | — |
+| `SWPA` | +1.000 (n=1, 1b) | +0.571 (n=14, 1b) | +0.429 | no | — | — |
+| `SWP` | +1.000 (n=4, 4b) | +1.000 (n=1, 1b) | +0.000 | no | — | — |
+| `TKDA` | +0.404 (n=47, 6b) | +0.700 (n=20, 3b) | −0.296 | no | — | — |
+| `TKD` | +0.000 (n=4, 3b) | — | — | no | — | — |
+| `GPSA` | +0.400 (n=10, 3b) | +0.467 (n=15, 7b) | −0.067 | no | — | — |
+| `GPS` | +1.000 (n=3, 2b) | +1.000 (n=2, 2b) | +0.000 | no | — | — |
+| `BTKA` | +0.434 (n=53, 8b) | +0.568 (n=37, 7b) | −0.134 | **yes** | −0.067 [−0.239, +0.118] | 0.639 |
+| `BTK` | +1.000 (n=1, 1b) | +1.000 (n=1, 1b) | +0.000 | no | — | — |
+| `SUBA` | +0.543 (n=35, 8b) | +0.362 (n=47, 9b) | +0.181 | **yes** | +0.091 [−0.107, +0.274] | 0.513 |
+| `SUB` | −1.000 (n=1, 1b) | −1.000 (n=1, 1b) | +0.000 | no | — | — |
+
+**The reading: nothing separates the two divisions.** Exactly two states clear the gate on both
+sides, and both contrasts cover zero comfortably (p = 0.639 and p = 0.513). The eye-catching
+deltas — `TKDA` at −0.296, `CDP` at +0.667 — sit on refused cells, and `TKDA` in +65 kg is three
+bouts. Per §0, spread between the two matrices is not evidence that the divisions play
+differently, and the reward-risk comparison is the clearest illustration in this document: the
+one place a difference *could* have been established, it was not.
+
+**What does survive, in both divisions and with an interval:** every gated state is positive.
+Attacking actions in this corpus are followed by the *same* athlete's next action roughly 70–78%
+of the time. `BTKA` is the most reliable of them (+0.434 [+0.333, +0.615] and +0.568 [+0.467,
++0.750], the two narrowest intervals in either table) — once someone gets to the back, they keep
+working there. That is consistent with the matrix's `BTKA → BTKA` 0.39 / 0.46 and with §4.2's
+finding, and it is the same underlying fact seen three ways, not three findings.
+
+---
+
+## 6. Caveats (these ship inside the export, `markov[div].caveats`)
 
 1. **`successful` is present on 28.9% of corpus events; absent reads as attempt.** Every
    success rate here is a floor, and the distortion is uneven — 89 of 91 back-controls fall in
@@ -382,7 +536,13 @@ finding: +65 kg's `TKDA` row is not a division estimate.
 7. **19 and 23 bouts.** Do not read a difference between the two matrices as a difference
    between the divisions unless the intervals say so — and most of them do not.
 
-## 6. What this does not do
+Reward-risk carries five more of its own (`markov[div].reward_risk.caveats`), all of §5: it is
+the only layer standing on `actor_id`; the guard/pass ownership convention is its largest
+uncorrectable error; a terminal appearance is out of the denominator; unknown attribution is
+neutral and never charged; the composite's interval is a bout-clustered bootstrap and is
+withheld entirely below the gate.
+
+## 7. What this does not do
 
 - No second-order / semi-Markov check. PoC-E4 already measured second order losing materially
   on the raw label space (Δ per-step log-likelihood −0.203 [−0.258, −0.133], bout-clustered);
@@ -391,6 +551,14 @@ finding: +65 kg's `TKDA` row is not a division estimate.
 - No held-out evaluation, no stationary distribution, no absorbing-chain expected-steps
   arithmetic. All three are cheap to add once anyone needs them; none is needed to draw the
   scouting tables above.
+- Reward-risk is not weighted. `build_graph` takes an optional `weight_fn` so a corpus can be
+  confidence-weighted per athlete (`analysis/confidence_weight.py`); this does not, because
+  with 11 and 12 usable bouts the weighting would be estimated from fewer athletes than it
+  reweights. Add it when the usable set outgrows the gate, not before.
+- Reward-risk does not distinguish `TKDA → TKD` from `TKDA → TKDA`. Both are the same athlete
+  acting again, and both count as reward. A landed-only refinement is one predicate away, and
+  it is deliberately not taken: §1.4 means "landed" is a statement about `successful` coverage
+  as much as about the grappling.
 - No production value moves. ADR-03: this is a report, not a calibration.
 
 ---

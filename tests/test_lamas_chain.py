@@ -23,6 +23,8 @@ from analysis.lamas_chain import (
     lamas_state,
     markov_block,
     pathways_to_sub,
+    reward_risk,
+    reward_risk_comparison,
     transitions,
 )
 
@@ -35,9 +37,19 @@ def ev(type_: str, label: str, successful: bool | None = None,
     return e
 
 
-def bout(*events: dict[str, Any], win_type: str = "DECISION",
-         id_: str = "b") -> dict[str, Any]:
-    return {"id": id_, "win_type": win_type, "seq": list(events)}
+def bout(*events: dict[str, Any], win_type: str = "DECISION", id_: str = "b",
+         sides: tuple[str, str] | None = None) -> dict[str, Any]:
+    """`sides` supplies `a_id`/`b_id`. Omitted by default: only the reward-risk layer reads
+    them, and a bout with no recorded sides is refused there by construction."""
+    d: dict[str, Any] = {"id": id_, "win_type": win_type, "seq": list(events)}
+    if sides:
+        d["a_id"], d["b_id"] = sides
+    return d
+
+
+def two_sided(*events: dict[str, Any], id_: str = "b",
+              win_type: str = "DECISION") -> dict[str, Any]:
+    return bout(*events, id_=id_, win_type=win_type, sides=("X", "Y"))
 
 
 # ── rule 1: type first, then label ──────────────────────────────────────────────
@@ -310,3 +322,172 @@ def test_empty_division_produces_a_full_shaped_block() -> None:
     assert b["pathways_to_sub"] == []
     assert all(r["cross"]["n"] == 0 and not r["cross"]["agrees"] for r in b["anchor"])
     assert b["caveats"] and b["source"].startswith("Lamas")
+
+
+# ── reward-risk ─────────────────────────────────────────────────────────────────
+def _rows(*bouts: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    rr = reward_risk([chain_of(b) for b in bouts], n_boot=200)
+    return {r["state"]: r for r in rr["rows"]}
+
+
+def test_reward_and_risk_are_hand_computable() -> None:
+    """X, X, Y, Y — CDP hands off to X (reward), TKDA to Y (risk), GPSA to Y (reward)."""
+    by = _rows(two_sided(
+        ev("control", "Collar Tie", actor="X"),      # CDP  → X acts next  → reward
+        ev("takedown", "Trip", actor="X"),           # TKDA → Y acts next  → risk
+        ev("pass", "Pass", actor="Y"),               # GPSA → Y acts next  → reward
+        ev("submission", "Armbar", actor="Y"),       # SUBA → no successor → out of denom
+    ))
+    assert (by["CDP"]["n"], by["CDP"]["reward"]["k"], by["CDP"]["risk"]["k"]) == (1, 1, 0)
+    assert by["CDP"]["score"] == 1.0
+    assert (by["TKDA"]["n"], by["TKDA"]["reward"]["k"], by["TKDA"]["risk"]["k"]) == (1, 0, 1)
+    assert by["TKDA"]["score"] == -1.0
+    assert by["GPSA"]["score"] == 1.0
+
+
+def test_terminal_appearance_is_out_of_the_denominator() -> None:
+    """build_graph's rule, verbatim: a state that simply ends the sequence is not scored."""
+    by = _rows(two_sided(ev("control", "Collar Tie", actor="X"),
+                         ev("submission", "Armbar", actor="Y")))
+    assert by["SUBA"]["n"] == 0 and by["SUBA"]["score"] is None
+    assert by["CDP"]["n"] == 1
+
+
+def test_score_is_reward_minus_risk_over_one_denominator() -> None:
+    """Three appearances of TKDA: two hand off to the same athlete, one to the opponent."""
+    by = _rows(two_sided(
+        ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="X"),
+        ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="X"),
+        ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="Y"),
+    ))
+    r = by["TKDA"]
+    assert (r["n"], r["reward"]["k"], r["risk"]["k"]) == (3, 2, 1)
+    assert r["score"] == round((2 - 1) / 3, 4)
+    assert abs(r["reward"]["p"] - 2 / 3) < 1e-9
+
+
+def test_unknown_actor_is_neutral_and_stays_in_the_denominator() -> None:
+    """build_graph leaves unknown attribution 'neutral, never charged' — so a state whose
+    successor has no actor is diluted toward 0 rather than scored either way."""
+    a = ev("takedown", "Trip", actor="X")
+    b = ev("pass", "Pass", actor="X")
+    b["actor_id"] = None
+    # TKDA appears twice; only the FIRST has a successor, so the denominator is 1.
+    by = _rows(two_sided(a, b, ev("takedown", "Trip", actor="Y")))
+    r = by["TKDA"]
+    assert r["n"] == 1 and r["reward"]["k"] == 0 and r["risk"]["k"] == 0
+    assert r["neutral"] == 1 and r["score"] == 0.0
+    assert by["GPSA"]["neutral"] == 1 and by["GPSA"]["score"] == 0.0
+
+
+def test_single_actor_bout_is_refused_not_scored() -> None:
+    """The whole point of the gate: a bout filed under one name scores reward 1.00 for every
+    state in it, and `bout_flags` alone would let a SHORT one through (its one-sided rule
+    needs six events)."""
+    rr = reward_risk([chain_of(two_sided(
+        ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="X")))], n_boot=200)
+    assert rr["bouts_used"] == 0
+    assert rr["bouts_refused"] == {"single_actor": 1}
+    assert all(r["n"] == 0 for r in rr["rows"])
+
+
+def test_one_sided_long_bout_is_refused_by_the_corpus_own_verdict() -> None:
+    rr = reward_risk([chain_of(two_sided(
+        *[ev("takedown", "Trip", actor="X") for _ in range(8)]))], n_boot=200)
+    assert rr["bouts_refused"] == {"one_sided": 1}
+
+
+def test_bout_without_recorded_sides_is_refused() -> None:
+    rr = reward_risk([chain_of(bout(ev("takedown", "Trip", actor="X"),
+                                    ev("pass", "Pass", actor="Y")))], n_boot=200)
+    assert rr["bouts_used"] == 0 and rr["bouts_refused"] == {"no_sides_recorded": 1}
+
+
+def test_the_matrix_does_not_consult_the_actor_gate() -> None:
+    """Cross-actor by construction: a bout refused by reward-risk still feeds the matrix."""
+    b = markov_block([two_sided(ev("takedown", "Trip", actor="X"),
+                                ev("pass", "Pass", actor="X"))])
+    assert b["n_transitions"] == 1
+    assert b["reward_risk"]["bouts_used"] == 0
+
+
+def test_gate_and_intervals_follow_the_matrix_convention() -> None:
+    """Below the bout-cluster gate: counts survive, EVERY interval is withheld."""
+    by = _rows(two_sided(ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="Y")))
+    r = by["TKDA"]
+    assert r["n"] == 1 and r["gated"] is False
+    assert r["reward"]["lo"] is None and r["risk"]["lo"] is None
+    assert r["score_lo"] is None and r["score_hi"] is None
+    assert r["score"] == -1.0                       # the count-derived score survives
+
+
+def test_gate_passes_and_yields_a_clustered_interval() -> None:
+    """Six bouts, so the cluster gate clears and the composite earns a bootstrap interval."""
+    bs = [two_sided(ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="Y"),
+                    ev("control", "Back Control", actor="X"), id_=f"b{i}") for i in range(6)]
+    r = _rows(*bs)["TKDA"]
+    assert r["gated"] is True and r["bouts"] == 6
+    assert r["reward"]["lo"] is not None
+    assert r["score_lo"] is not None and r["score_lo"] <= r["score"] <= r["score_hi"]
+
+
+def test_rows_are_ranked_estimable_first_then_by_score_deterministically() -> None:
+    # Both athletes must appear or the whole bout is refused, so the fixture is three long.
+    bs = [two_sided(ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="X"),
+                    ev("control", "Back Control", actor="Y"), id_=f"g{i}") for i in range(6)]
+    bs.append(two_sided(ev("control", "Collar Tie", actor="X"),
+                        ev("sweep", "Sweep", actor="Y"), id_="thin"))
+    rr = reward_risk([chain_of(b) for b in bs], n_boot=200)
+    gated = [r["state"] for r in rr["rows"] if r["gated"]]
+    assert gated and rr["rows"][0]["gated"] is True
+    # CDP scores -1.0 off ONE bout; ranking it above a gated row would be exactly the
+    # confident-looking noise the gate exists to keep off the top of the table.
+    assert rr["rows"].index(next(r for r in rr["rows"] if r["state"] == "CDP")) > 0
+    flags = [r["gated"] for r in rr["rows"]]
+    assert flags == sorted(flags, reverse=True)
+    assert [r["state"] for r in rr["rows"]] == [
+        r["state"] for r in reward_risk([chain_of(b) for b in bs], n_boot=200)["rows"]]
+
+
+def test_every_state_appears_exactly_once_in_the_rows() -> None:
+    rr = reward_risk([chain_of(two_sided(ev("takedown", "Trip", actor="X"),
+                                         ev("pass", "Pass", actor="Y")))], n_boot=200)
+    assert sorted(r["state"] for r in rr["rows"]) == sorted(STATES)
+
+
+def test_comparison_is_in_state_order_and_flags_both_estimable() -> None:
+    six = [two_sided(ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="Y"),
+                     id_=f"a{i}") for i in range(6)]
+    one = [two_sided(ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="X"),
+                     ev("control", "Back Control", actor="Y"), id_="z")]
+    a = reward_risk([chain_of(b) for b in six], n_boot=200)["rows"]
+    b = reward_risk([chain_of(x) for x in one], n_boot=200)["rows"]
+    cmp_ = reward_risk_comparison(a, b)
+    assert [c["state"] for c in cmp_] == list(STATES)      # fixed order, never ranked
+    tk = next(c for c in cmp_ if c["state"] == "TKDA")
+    assert tk["d65"] == -1.0 and tk["d65p"] == 1.0 and tk["delta"] == -2.0
+    assert tk["both_estimable"] is False and "contrast" not in tk
+
+
+def test_comparison_carries_a_contrast_only_when_both_sides_clear_the_gate() -> None:
+    # Both fixtures name both athletes (or the actor gate refuses them outright); they differ
+    # only in WHO acts after the takedown attempt, which is exactly what reward-risk measures.
+    def mk(tag: str, after_tkd: str, last: str) -> list[dict[str, Any]]:
+        return [two_sided(ev("takedown", "Trip", actor="X"),
+                          ev("pass", "Pass", actor=after_tkd),
+                          ev("control", "Back Control", actor=last),
+                          id_=f"{tag}{i}") for i in range(6)]
+
+    a = reward_risk([chain_of(b) for b in mk("a", "X", "Y")], n_boot=200)["rows"]
+    b = reward_risk([chain_of(x) for x in mk("b", "Y", "X")], n_boot=200)["rows"]
+    tk = next(c for c in reward_risk_comparison(a, b) if c["state"] == "TKDA")
+    assert tk["both_estimable"] is True
+    assert tk["d65"] == 1.0 and tk["d65p"] == -1.0 and tk["delta"] == 2.0
+    # reward 6/6 against 0/6 — the one contrast in this file that should NOT cover zero
+    assert tk["contrast"]["diff_lo"] > 0
+
+
+def test_comparison_skips_a_state_missing_from_one_side() -> None:
+    a = reward_risk([chain_of(two_sided(ev("takedown", "Trip", actor="X"),
+                                        ev("pass", "Pass", actor="Y")))], n_boot=200)["rows"]
+    assert reward_risk_comparison(a, []) == []
