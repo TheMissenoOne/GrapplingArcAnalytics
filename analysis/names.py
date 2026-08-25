@@ -215,6 +215,12 @@ ATHLETE_ALIASES: dict[str, str] = {
     # string -- the thing the rule asks for and the thing the data could not supply. The bouts
     # alone never settled it: three each, no shared event, and a double variation.
     "anna karolina vieira": "ana carolina vieira",
+    # "Jocelyn" DB spelling vs "Joslyn" roster manifest spelling, same human (her one bout,
+    # WNO 31 2025, is the same fight the manifest lists for "Joslyn Molina"). The scouting
+    # records layer (data/scouting/adcc_2026_women.json) already carries this as an alias;
+    # this entry is the same call for the rating-engine identity key, which reads a separate
+    # DB name and had no way to see that file's decision.
+    "jocelyn molina": "joslyn molina",
     # NOTE: Junny vs Edwin Ocasio, Maia vs Mayssa Bastos, George vs Jorge Santos are
     # DISTINCT people (real bouts) — do not alias.
 }

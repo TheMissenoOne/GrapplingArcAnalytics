@@ -28,7 +28,13 @@
     "ADCC 2022": "submission_grappling",
     "ADCC 2024": "submission_grappling",
     "ADCC Trials 2022 South America": "submission_grappling",
+    "ADCC Trials 2023 Asia & Oceania": "submission_grappling",
     "ADCC Trials 2023 East Coast": "submission_grappling",
+    "ADCC Trials 2023 European": "submission_grappling",
+    "ADCC Trials 2024 Asia & Oceania": "submission_grappling",
+    "ADCC Trials 2024 European": "submission_grappling",
+    "ADCC Trials 2024 South American 1": "submission_grappling",
+    "ADCC Trials 2024 South American 2": "submission_grappling",
     "ADCC Trials 2024 West Coast": "submission_grappling",
     "ADCC WC Trials": "submission_grappling",
     "ADCC World Championship": "submission_grappling",
@@ -41,6 +47,8 @@
     "EBI 14": "submission_grappling",
     "EBI 6": "submission_grappling",
     "EBI 8": "submission_grappling",
+    "European No-Gi 2024": "submission_grappling",
+    "European No-Gi 2025": "submission_grappling",
     "F2W 30": "submission_grappling",
     "F2W 34": "submission_grappling",
     "Goodfight Pro": "submission_grappling",
@@ -62,6 +70,7 @@
     "PGF World 2026": "submission_grappling",
     "PGF World Season 9": "submission_grappling",
     "PTL Sunday Open": "submission_grappling",
+    "Pan No-Gi 2024": "submission_grappling",
     "Pan No-Gi 2025": "submission_grappling",
     "Polaris 1": "submission_grappling",
     "Polaris 16: Squads 3": "submission_grappling",
@@ -132,7 +141,9 @@
     "Women Who Fight Invitational": "submission_grappling",
     "Women Who Fight Invitational 2": "submission_grappling",
     "Women Who Fight Invitational 2024": "submission_grappling",
-    "World Festival": "submission_grappling"
+    "World Festival": "submission_grappling",
+    "World No-Gi 2024": "submission_grappling",
+    "World No-Gi 2025": "submission_grappling"
   },
   "null_event": "unknown"
 }

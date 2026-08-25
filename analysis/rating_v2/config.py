@@ -82,7 +82,15 @@ class EngineConfig:
 # Measured effect on the roster: Rafaela Guedes 1642/RD220 on one rated bout -> 1883/RD144 on
 # seven; Morgan Black 1615/RD215 -> 1717/RD169; Gabi Garcia 1661/RD213 -> 1590/RD197. Athletes
 # clearing the gate went from 6 to 9. 865 -> 864 matches (one pairing became a duplicate).
-SITE_RATING_RUN_ID: str | None = "b0def998-6c7c-4011-b9ea-d0ea01e7b6bc"
+# Sixth pin, 2026-08-25: rerun over the audited-ingestion corpus (909 matches). What moved
+# since b0def998 (08-20): the trials + women-65 concordance batches (+46 bouts incl. every
+# Nadia Frankland and Anabel Lopez bout), the Leve/Ryan/Lopez identity merges, the discipline
+# map regenerated for 8 new event strings (all auto-classified submission_grappling), and one
+# alias fix ("jocelyn molina" -> "joslyn molina" -- DB and roster spelled her differently, the
+# join silently missed her). Measured on the roster: rated 9 -> 13, passing the RD<=200 gate
+# 8 -> 11 (Frankland 1660/RD147 and Anabel Lopez 1779/RD138 enter passing; Svendsen 1642/RD220
+# and Molina 1858/RD220 rated but honestly failing the gate on one bout each).
+SITE_RATING_RUN_ID: str | None = "bacf04ed-1469-42c5-84bc-df2410b2a700"
 
 # Publish-confidence cut. An editorial decision calibrated against measured impact
 # (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87
