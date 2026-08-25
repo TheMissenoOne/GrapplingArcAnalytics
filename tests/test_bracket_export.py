@@ -653,6 +653,22 @@ def test_a_side_with_no_bouts_publishes_no_interval() -> None:
     assert loss["grade"] == "none"
 
 
+def test_her_tape_counts_bouts_from_either_corner() -> None:
+    """`sequence_bouts` walks every corpus bout checking BOTH `a` and `b` against her key --
+    an athlete recovered only from an opponent's page (no `own_record` row of her own) still
+    gets her tape wherever the corpus bout happens to list her second. A regression here
+    reproduces the reported defect: an athlete with real sequenced bouts reading as if she had
+    none, because only bouts filed under her own perspective were counted."""
+    recs = _rec("Ane Svendsen", [_rrow(2024, "L", "Armbar", source="opponent_record")])
+    as_a = _bout("bA", TWO_SIDED_SEQ)                              # roster athlete is corner "a"
+    as_b = {**_bout("bB", TWO_SIDED_SEQ), "a": "Someone Else", "b": "Ane Svendsen",
+            "a_id": "X", "b_id": "Y"}                              # she is corner "b"
+    out = bx.athlete_layer(recs, NO_RATING, [as_a, as_b])
+    tape = out["ane svendsen"]["sequence_bouts"]
+    assert len(tape) == 1                       # bA is "Roster Athlete" -- a different identity
+    assert tape[0]["opponent"] == "Someone Else"
+
+
 # ── the tape declares its own universe ──────────────────────────────────────────
 def test_the_tape_has_a_scope_of_its_own_instead_of_the_page_inventing_one() -> None:
     """`sequence_bouts` is her whole career whatever the cut, and the reading page was
@@ -775,3 +791,81 @@ def test_radar_usage_goes_through_the_coverage_gate() -> None:
     assert axis2["coverage"]["estimable"] is True
     assert axis2["usage"]["estimable"] is True
     assert axis2["usage"]["lo"] is not None
+
+
+# ── ADCC 2023-24 cycle selection ────────────────────────────────────────────────
+# The SQL that feeds this is deliberately dumb (`event ilike '%adcc%'`); every decision about
+# which bout belongs to the cycle lives in `adcc_corpus_of`, so the whole selection — including
+# the exclusion of the PREVIOUS cycle — is testable without a database.
+#
+# Reached through `bx`, the importlib-loaded module at the top of this file, and NOT through a
+# plain `from scripts.bracket_export import ...`. That is not a style choice: `scripts/` is in
+# mypy's `exclude` list (pyproject.toml), and a real import here drags the module into the
+# checked set and surfaces three pre-existing errors in code the gate was configured to skip.
+ADCC_TRIALS_2023_24 = bx.ADCC_TRIALS_2023_24
+ADCC_TRIALS_LABEL = bx.ADCC_TRIALS_LABEL
+ADCC_WORLDS_LABEL = bx.ADCC_WORLDS_LABEL
+ADCC_CYCLE_LABEL = bx.ADCC_CYCLE_LABEL
+adcc_corpus_of = bx.adcc_corpus_of
+
+
+@pytest.mark.parametrize("tag", ADCC_TRIALS_2023_24)
+def test_every_listed_trials_tag_lands_in_the_trials_corpus(tag: str) -> None:
+    """The tag names its own year, so the year column is not consulted at all — a row whose
+    `year` is missing or wrong still classifies correctly."""
+    assert adcc_corpus_of(tag, 2023) == ADCC_TRIALS_LABEL
+    assert adcc_corpus_of(tag, None) == ADCC_TRIALS_LABEL
+
+
+def test_the_east_coast_tag_covers_finals_and_semis_under_one_name() -> None:
+    """Both EC-2023 dumps carry the same tag, so semis are in by construction rather than by a
+    second rule that could drift from the first."""
+    assert adcc_corpus_of("ADCC Trials 2023 East Coast", 2023) == ADCC_TRIALS_LABEL
+
+
+def test_the_worlds_tag_lands_in_the_worlds_corpus() -> None:
+    assert adcc_corpus_of("ADCC 2024", 2024) == ADCC_WORLDS_LABEL
+
+
+@pytest.mark.parametrize(("tag", "year"), [
+    ("ADCC 2022", 2022),                        # the previous cycle's Worlds, 53 bouts w/ events
+    ("ADCC Trials 2022 South America", 2022),   # the previous cycle's qualifier, 6 bouts
+    ("ADCC", 2017), ("ADCC", 2019), ("ADCC", 2022),
+    ("ADCC World Championship", 2022),
+    ("ADCC WC Trials", 2017),
+    ("Polaris 25", 2024), ("", 2024), (None, 2024),
+])
+def test_out_of_cycle_and_unrelated_tags_are_refused(tag: str | None, year: int) -> None:
+    assert adcc_corpus_of(tag, year) is None
+
+
+@pytest.mark.parametrize("tag", ["ADCC", "ADCC World Championship"])
+@pytest.mark.parametrize("year", [2023, 2024])
+def test_an_undated_tag_is_admitted_only_by_its_row_year(tag: str, year: int) -> None:
+    """These two tags name no year, so the row decides. Measured: the in-cycle rows under them
+    are Worlds bouts (the Ryan x Pena superfight and two Crelinsten matches) and none duplicates
+    an `ADCC 2024` row — which is why they resolve to the Worlds bucket."""
+    assert adcc_corpus_of(tag, year) == ADCC_WORLDS_LABEL
+
+
+@pytest.mark.parametrize("year", [2017, 2019, 2021, 2022, 2025, None, "", "abc"])
+def test_an_undated_tag_outside_the_cycle_years_is_refused(year: object) -> None:
+    assert adcc_corpus_of("ADCC", year) is None
+
+
+def test_a_trials_named_undated_tag_never_reaches_the_worlds_bucket() -> None:
+    """`ADCC WC Trials` names a trials, so it is deliberately absent from the undated list —
+    admitting it by year would file a qualifier under the World Championship."""
+    assert adcc_corpus_of("ADCC WC Trials", 2024) is None
+
+
+def test_tags_are_matched_exactly_after_stripping_not_by_substring() -> None:
+    """`ADCC` is a prefix of every other tag in the table. Substring matching here would drag
+    the whole 2022 cycle into the Worlds bucket the moment the year happened to be in range."""
+    assert adcc_corpus_of("  ADCC 2024  ", 2024) == ADCC_WORLDS_LABEL
+    assert adcc_corpus_of("ADCC 2024 Trials Wildcard", 2024) is None
+    assert adcc_corpus_of("Pre-ADCC 2024", 2024) is None
+
+
+def test_the_three_corpus_labels_are_distinct() -> None:
+    assert len({ADCC_TRIALS_LABEL, ADCC_WORLDS_LABEL, ADCC_CYCLE_LABEL}) == 3
