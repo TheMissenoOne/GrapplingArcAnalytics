@@ -1,9 +1,20 @@
-# Lamas' chain, per bracket division — ADCC 2026 women's 65 kg and +65 kg
+# Lamas' chain — ADCC 2026 women's brackets, and the ADCC 2023-24 cycle
 
 Runner: `analysis/lamas_chain.py` (mapping, chain, estimation) via `scripts/bracket_export.py`
-(`markov_layer` → `data.json`'s `markov` key). Tests: `tests/test_lamas_chain.py`. Numbers
-below were produced from `data/scouting/adcc_2026_women_sequences.json` on **2026-08-25**;
-re-running the exporter regenerates them.
+— `markov_layer` → `data.json`'s `markov` key (§§2–6, the two women's bracket divisions) and
+`adcc_layer` → the `adcc` key (§7, one whole ADCC qualifying cycle). Tests:
+`tests/test_lamas_chain.py` and `tests/test_bracket_export.py`.
+
+§§2–6 come from `data/scouting/adcc_2026_women_sequences.json` (58 bouts, 54 with events); §7
+reads `matches` directly. Both regenerated **2026-08-25**; re-running the exporter reproduces
+every number below.
+
+> **Numbers move when the corpus does.** §§2–6 were first written against a 40-bout scouting
+> corpus and every table in them changed when it grew to 58. What did NOT change is every
+> conclusion: guard-pass still recovers under the collapsed state space (§4.1), back-control is
+> still explained by re-entry (§4.2), and still nothing separates the two divisions (§5.6). One
+> decimal that was flagged in advance as a coincidence duly stopped being one — see the note in
+> §4.2. That is the intended failure mode of stating which digits are load-bearing.
 
 Source paper: **Lamas, L., et al. (2024). *No-gi Brazilian jiu-jitsu: a Markovian analysis of
 elite-level combat dynamics.* International Journal of Sports Science & Coaching,
@@ -14,7 +25,7 @@ paper and the only external transition matrix this corpus can be checked against
 **This is descriptive scouting analysis, not a pre-registered PoC.** Nothing here is a
 held-out prediction, nothing here selects a production value, and no site or App metric moves
 on it (ADR-03). Spread between the two divisions is *not* evidence that they play differently
-— with 19 and 23 bouts, most cells overlap by construction, and where they do not the
+— with 29 and 32 bouts, most cells overlap by construction, and where they do not the
 coverage gate usually says why.
 
 ---
@@ -24,7 +35,8 @@ coverage gate usually says why.
 ### 1.1 The state space
 
 Twelve states, six of them an attempt/success pair. Codes and definitions are fixed in
-`analysis.lamas_chain.STATES` / `STATE_DEFS` and ship inside the export, so a renderer cannot
+`analysis.lamas_chain.STATES` / `STATE_DEFS` and ship inside the export (identically in
+`markov` and in `adcc`), so a renderer cannot
 carry a glossary that disagrees with the mapping that produced the number.
 
 | code | definition |
@@ -89,12 +101,12 @@ Four rules, pre-declared in the module docstring before any number was read.
 
 1. **Unmapped events are passed over, not broken into.** The chain links the *surviving*
    actions in bout order — the paper's chains are action-to-action, so a guard posture between
-   two actions is the pause between them, not a state. 92 events (65 kg) and 61 (+65 kg) were
+   two actions is the pause between them, not a state. 108 events (65 kg) and 76 (+65 kg) were
    passed over; the top skipped labels are `guard/Half Guard`, `control/Mount`,
    `guard/Deep Half Guard`, `guard/Closed Guard`, `control/Escape to Turtle`, i.e. exactly the
    postures and dwell states the paper's action space has no code for.
-2. **Chronology is array order.** Measured: 39 of the 40 scouting bouts carry `ts` on every
-   event and *none* disagrees with the array; the fortieth carries no `ts` at all. Array order
+2. **Chronology is array order.** Measured: 57 of the 58 scouting bouts carry `ts` on every
+   event and *none* disagrees with the array; the fifty-eighth carries no `ts` at all. Array order
    is also what `analysis/attribution.py` reads (`rule_code: consecutive_only_array_order`), so
    the two layers cannot drift apart.
 3. **Self-loops survive.** `network_from_sequences` drops the A → A edge and `normalize_chain`
@@ -105,13 +117,13 @@ Four rules, pre-declared in the module docstring before any number was read.
    reading — PoC-E4's `own_transitions` convention — is kept on every transition
    (`same_actor`) and reported in the anchor, but it is not the spine: `docs/match_event_model.md`
    records **307 of 700** corpus bouts filing every event under one athlete, so `actor_id` is
-   not trustworthy enough to build a matrix on. 135 of 180 transitions (65 kg) and 144 of 181
+   not trustworthy enough to build a matrix on. 169 of 232 transitions (65 kg) and 175 of 226
    (+65 kg) happen to be within-actor anyway.
 
 ### 1.4 Attempt vs success, and the bias this creates
 
 `successful: true` → success code; **`false` OR ABSENT → attempt**. `successful` is present on
-28.9% of corpus events (34.2% of the scouting subset, 166/486).
+28.9% of corpus events (43.7% of the scouting subset, 251/574).
 
 **Every success rate below is a LOWER BOUND**, and the distortion is not spread evenly.
 `control/Back Control` carries 77 absent, 12 false and 2 true in the scouting subset, so **89
@@ -129,7 +141,7 @@ the counter-example is not hypothetical: a bout Amy Campo *lost on DECISION* car
 the flag would have cut that bout at event 0.
 
 So: **the chain truncates at the first `SUB` only when the bout's `win_type` is SUBMISSION.**
-That drops 29 events in 7 bouts (65 kg) and 30 in 9 (+65 kg) — post-finish duplicates, the
+That drops 2 events in 6 bouts (65 kg) and 15 in 10 (+65 kg) — post-finish duplicates, the
 corpus routinely logging one finish as `Tap` → `Submission` → `Triangle Choke`. A `SUB` in a
 bout that ended any other way keeps its outgoing transitions; there is 1 such transition in
 65 kg and 2 in +65 kg (`absorbed.sub_outgoing`), reported rather than hidden.
@@ -155,65 +167,65 @@ resampling.
 The bout sets are **exactly** the ones the sequence layer already uses —
 `scripts/bracket_export.division_bouts` was factored out of `sequence_layer` and is now the
 single definition, so the two blocks cannot describe different universes under one heading:
-every corpus bout with event data that either corner belongs to. 19 bouts in 65 kg, 23 in
+every corpus bout with event data that either corner belongs to. 29 bouts in 65 kg, 32 in
 +65 kg; six bouts have a rostered athlete in both corners and appear in both divisions (the
 fight itself sitting in two categories, not a duplicate).
 
 The `markov` block declares `kind: category` in `SCOPES` and ignores the uniform / ruleset /
 since axes, with the measurement behind the refusal shipped in `ignored_measured`: at full
-division size only 6 and 5 of twelve rows clear the gate, and across the ten non-trivial
-points of the uniform × since space **170 of 240 rows are refused outright** for about 780 KB
+division size only 8 and 7 of twelve rows clear the gate, and across the ten non-trivial
+points of the uniform × since space **164 of 240 rows are refused outright** for about 980 KB
 of extra payload. The reason code is `cuts_refuse_most_rows`, deliberately *not*
 `gate_refuses_every_cell` — some cuts do produce estimable rows, and a reason code that
 overstates its evidence is the defect this layer exists to prevent.
 
 ---
 
-## 2. 65 kg — 19 bouts, 199 mapped events, 92 skipped, 180 transitions
+## 2. 65 kg — 29 bouts, 261 mapped events, 108 skipped, 232 transitions
 
 Cell = row-normalised probability (count). `n` is the row denominator, `lutas` the number of
 bouts contributing to it, `gate` whether the row earns an interval at all.
 
 | from \ to | CDP | PGD | SWPA | SWP | TKDA | TKD | GPSA | GPS | BTKA | BTK | SUBA | SUB | n | lutas | gate |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **CDP** | — | — | — | — | — | — | — | — | 0.50 (1) | — | 0.50 (1) | — | 2 | 2 | no |
-| **PGD** | — | — | — | 0.17 (1) | 0.17 (1) | — | — | — | 0.17 (1) | — | **0.50 (3)** | — | 6 | 6 | yes |
-| **SWPA** | — | — | — | — | 1.00 (1) | — | — | — | — | — | — | — | 1 | 1 | no |
-| **SWP** | — | 0.40 (2) | — | — | — | 0.20 (1) | 0.20 (1) | — | — | — | — | 0.20 (1) | 5 | 5 | yes |
-| **TKDA** | — | 0.02 (1) | — | — | **0.34 (16)** | — | 0.02 (1) | 0.02 (1) | **0.43 (20)** | — | 0.17 (8) | — | 47 | 6 | yes |
-| **TKD** | — | — | — | 0.20 (1) | — | — | — | 0.20 (1) | 0.20 (1) | — | 0.40 (2) | — | 5 | 4 | no |
-| **GPSA** | — | — | — | 0.09 (1) | 0.45 (5) | — | 0.27 (3) | — | — | — | 0.18 (2) | — | 11 | 4 | no |
-| **GPS** | — | — | — | — | — | — | 0.17 (1) | — | 0.17 (1) | — | 0.33 (2) | 0.33 (2) | 6 | 5 | yes |
-| **BTKA** | 0.02 (1) | — | 0.02 (1) | 0.02 (1) | **0.30 (17)** | — | 0.04 (2) | — | **0.39 (22)** | 0.02 (1) | 0.18 (10) | 0.02 (1) | 56 | 10 | yes |
-| **BTK** | — | — | — | — | — | — | — | — | 1.00 (1) | — | — | — | 1 | 1 | no |
-| **SUBA** | — | 0.03 (1) | — | 0.05 (2) | 0.15 (6) | 0.05 (2) | 0.03 (1) | 0.08 (3) | 0.15 (6) | — | **0.41 (16)** | 0.05 (2) | 39 | 10 | yes |
-| **SUB** | — | — | — | — | — | — | — | — | — | — | — | 1.00 (1) | 1 | 1 | no |
+| **CDP** | 0.14 (1) | — | — | — | 0.14 (1) | 0.14 (1) | — | — | **0.29** (2) | — | **0.29** (2) | — | 7 | 4 | no |
+| **PGD** | 0.06 (1) | 0.06 (1) | — | **0.44** (7) | 0.06 (1) | — | — | 0.06 (1) | 0.12 (2) | — | 0.19 (3) | — | 16 | 14 | yes |
+| **SWPA** | — | — | — | — | **1.00** (1) | — | — | — | — | — | — | — | 1 | 1 | no |
+| **SWP** | 0.11 (1) | **0.22** (2) | — | — | — | **0.22** (2) | 0.11 (1) | — | — | 0.11 (1) | — | **0.22** (2) | 9 | 9 | yes |
+| **TKDA** | 0.04 (2) | 0.02 (1) | — | 0.02 (1) | **0.31** (17) | — | 0.02 (1) | 0.02 (1) | **0.42** (23) | 0.02 (1) | 0.15 (8) | — | 55 | 7 | yes |
+| **TKD** | — | — | — | 0.17 (1) | — | — | — | **0.33** (2) | 0.17 (1) | — | **0.33** (2) | — | 6 | 5 | yes |
+| **GPSA** | — | — | — | 0.08 (1) | **0.38** (5) | — | **0.23** (3) | — | 0.15 (2) | — | 0.15 (2) | — | 13 | 4 | no |
+| **GPS** | — | — | — | — | — | — | 0.14 (1) | — | 0.14 (1) | — | **0.43** (3) | **0.29** (2) | 7 | 6 | yes |
+| **BTKA** | 0.01 (1) | — | 0.01 (1) | 0.01 (1) | **0.32** (22) | — | 0.06 (4) | 0.01 (1) | **0.37** (25) | 0.01 (1) | 0.16 (11) | 0.01 (1) | 68 | 10 | yes |
+| **BTK** | — | — | — | — | — | — | — | — | **0.67** (2) | — | — | **0.33** (1) | 3 | 3 | no |
+| **SUBA** | — | 0.05 (2) | — | 0.05 (2) | 0.17 (7) | 0.05 (2) | 0.02 (1) | 0.05 (2) | 0.17 (7) | — | **0.39** (16) | 0.05 (2) | 41 | 11 | yes |
+| **SUB** | 0.17 (1) | — | — | — | — | — | — | — | 0.17 (1) | — | — | **0.67** (4) | 6 | 5 | yes |
 
-**Top cells that carry an interval.** `TKDA → BTKA` 0.43 [0.29, 0.57] is the division's
-signature transition: a failed or contested takedown attempt turns into a back exposure more
-often than into anything else, including another takedown attempt (0.34). `BTKA → TKDA` 0.30
-runs the same loop backwards — the two states account for 105 of 199 mapped events between
-them. `SUBA → SUBA` 0.41 is re-attempt behaviour, and `PGD → SUBA` 0.50 (3 of 6, wide) is the
-guard-pull-to-attack pattern the +65 kg matrix shows far more strongly.
+**Top cells that carry an interval.** `TKDA → BTKA` 0.42 (23) is the division's signature
+transition: a contested takedown attempt turns into a back exposure more often than into
+anything else, including another takedown attempt (0.31). `BTKA → TKDA` 0.32 runs the same loop
+backwards — the two states hold 125 of 261 mapped events between them. `SUBA → SUBA` 0.39 is
+re-attempt behaviour, and `PGD → SWP` 0.44 (7 of 16, over 14 distinct bouts) is the cleanest new
+cell in this division: a guard pull here leads to a sweep more often than to anything else.
 
 ### Occupancy
 
 | state | k | bouts | share | 95% CI |
 |---|---|---|---|---|
-| CDP | 2 | 2 | 0.010 | withheld (`few_clusters`) |
-| PGD | 6 | 6 | 0.030 | 0.014–0.064 |
-| SWPA | 1 | 1 | 0.005 | withheld (`few_clusters`) |
-| SWP | 8 | 6 | 0.040 | 0.021–0.077 |
-| **TKDA** | 47 | 6 | 0.236 | 0.183–0.300 |
-| TKD | 5 | 4 | 0.025 | withheld (`few_clusters`) |
-| GPSA | 11 | 4 | 0.055 | withheld (`few_clusters`) |
-| GPS | 6 | 5 | 0.030 | 0.014–0.064 |
-| **BTKA** | 58 | 10 | 0.291 | 0.233–0.358 |
-| BTK | 1 | 1 | 0.005 | withheld (`few_clusters`) |
-| **SUBA** | 44 | 12 | 0.221 | 0.169–0.284 |
-| SUB | 10 | 9 | 0.050 | 0.028–0.090 |
+| CDP | 7 | 4 | 0.027 | withheld (`few_clusters`) |
+| **PGD** | 16 | 14 | 0.061 | 0.038–0.097 |
+| SWPA | 1 | 1 | 0.004 | withheld (`few_clusters`) |
+| **SWP** | 16 | 14 | 0.061 | 0.038–0.097 |
+| **TKDA** | 55 | 7 | 0.211 | 0.166–0.264 |
+| **TKD** | 8 | 7 | 0.031 | 0.016–0.059 |
+| GPSA | 13 | 4 | 0.050 | withheld (`few_clusters`) |
+| **GPS** | 8 | 7 | 0.031 | 0.016–0.059 |
+| **BTKA** | 70 | 10 | 0.268 | 0.218–0.325 |
+| BTK | 3 | 3 | 0.011 | withheld (`few_clusters`) |
+| **SUBA** | 47 | 13 | 0.180 | 0.138–0.231 |
+| **SUB** | 17 | 13 | 0.065 | 0.041–0.102 |
 
-Note `TKDA`'s share of 0.236 comes from **6 bouts** while `SUBA`'s 0.221 comes from 12. Both
+Note `TKDA`'s share of 0.211 comes from **7 bouts** while `SUBA`'s 0.180 comes from 13. Both
 clear the gate; they are not equally distributed evidence, and the `bouts` column is there so
 that is visible rather than implied.
 
@@ -221,11 +233,11 @@ that is visible rather than implied.
 
 | path | k | bouts | p (first-order) | bout rate 95% CI |
 |---|---|---|---|---|
-| SUBA → SUBA → SUBA | 8 | 2/19 | 0.168 | 0.03–0.31 |
-| BTKA → BTKA → SUBA | 5 | 4/19 | 0.070 | 0.09–0.43 |
-| TKDA → TKDA → SUBA | 5 | 4/19 | 0.058 | 0.09–0.43 |
-| BTKA → SUBA → SUBA | 4 | 3/19 | 0.073 | 0.06–0.38 |
-| GPSA → TKDA → SUBA | 2 | 2/19 | 0.077 | 0.03–0.31 |
+| SUBA → SUBA → SUBA | 8 | 2/29 | 0.152 | 0.02–0.22 |
+| TKDA → TKDA → SUBA | 5 | 4/29 | 0.045 | 0.05–0.31 |
+| BTKA → SUBA → SUBA | 4 | 3/29 | 0.063 | 0.04–0.26 |
+| BTKA → BTKA → SUBA | 4 | 3/29 | 0.059 | 0.04–0.26 |
+| TKDA → BTKA → SUBA | 2 | 1/29 | 0.068 | 0.01–0.17 |
 
 Length 2 is deliberately not listed — it *is* the matrix's own `SUB`/`SUBA` column, and
 printing it twice would let a reader take one table as corroboration of the other. The
@@ -234,64 +246,63 @@ terminal admits `SUBA` because §1.4 puts most real finishes there; requiring `S
 
 ---
 
-## 3. +65 kg — 23 bouts, 204 mapped events, 61 skipped, 181 transitions
+## 3. +65 kg — 32 bouts, 258 mapped events, 76 skipped, 226 transitions
 
 | from \ to | CDP | PGD | SWPA | SWP | TKDA | TKD | GPSA | GPS | BTKA | BTK | SUBA | SUB | n | lutas | gate |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **CDP** | — | — | — | 0.33 (2) | — | — | — | — | 0.17 (1) | — | **0.50 (3)** | — | 6 | 5 | yes |
-| **PGD** | 0.12 (1) | — | — | — | 0.12 (1) | — | — | 0.12 (1) | — | — | **0.62 (5)** | — | 8 | 8 | yes |
-| **SWPA** | — | — | 0.74 (14) | — | — | — | — | — | 0.16 (3) | — | 0.05 (1) | 0.05 (1) | 19 | 2 | no |
-| **SWP** | 0.17 (1) | — | — | 0.17 (1) | — | — | 0.17 (1) | — | — | — | 0.33 (2) | 0.17 (1) | 6 | 4 | no |
-| **TKDA** | — | 0.05 (1) | — | — | 0.20 (4) | — | 0.05 (1) | — | 0.40 (8) | — | 0.30 (6) | — | 20 | 3 | no |
-| **TKD** | — | — | — | — | — | — | 0.50 (1) | — | — | — | — | 0.50 (1) | 2 | 2 | no |
-| **GPSA** | — | — | — | 0.05 (1) | **0.26 (5)** | 0.05 (1) | **0.26 (5)** | — | 0.05 (1) | — | **0.26 (5)** | 0.05 (1) | 19 | 11 | yes |
-| **GPS** | — | — | — | — | — | — | 0.67 (2) | — | 0.33 (1) | — | — | — | 3 | 3 | no |
-| **BTKA** | 0.03 (1) | — | 0.08 (3) | — | 0.13 (5) | — | 0.05 (2) | — | **0.46 (18)** | 0.03 (1) | 0.15 (6) | 0.08 (3) | 39 | 8 | yes |
-| **BTK** | — | — | — | — | — | — | — | — | 1.00 (1) | — | — | — | 1 | 1 | no |
-| **SUBA** | — | 0.04 (2) | 0.02 (1) | 0.02 (1) | 0.07 (4) | — | 0.07 (4) | 0.04 (2) | 0.16 (9) | — | **0.54 (30)** | 0.05 (3) | 56 | 13 | yes |
-| **SUB** | — | — | — | — | — | — | — | — | — | — | 0.50 (1) | 0.50 (1) | 2 | 2 | no |
+| **CDP** | 0.08 (1) | 0.08 (1) | — | 0.17 (2) | 0.08 (1) | 0.08 (1) | — | — | 0.17 (2) | — | **0.33** (4) | — | 12 | 8 | yes |
+| **PGD** | 0.14 (2) | — | — | 0.07 (1) | 0.07 (1) | 0.07 (1) | — | 0.14 (2) | — | — | **0.36** (5) | 0.14 (2) | 14 | 14 | yes |
+| **SWPA** | — | — | **0.74** (14) | — | — | — | — | — | 0.16 (3) | — | 0.05 (1) | 0.05 (1) | 19 | 2 | no |
+| **SWP** | **0.25** (2) | — | — | 0.12 (1) | — | 0.12 (1) | 0.12 (1) | — | — | — | **0.25** (2) | 0.12 (1) | 8 | 6 | yes |
+| **TKDA** | 0.07 (2) | 0.04 (1) | — | 0.04 (1) | 0.18 (5) | — | 0.04 (1) | — | **0.39** (11) | 0.04 (1) | **0.21** (6) | — | 28 | 4 | no |
+| **TKD** | — | — | — | — | — | — | **0.33** (1) | **0.33** (1) | — | — | — | **0.33** (1) | 3 | 3 | no |
+| **GPSA** | — | — | — | 0.05 (1) | **0.24** (5) | 0.05 (1) | **0.24** (5) | — | 0.14 (3) | — | **0.24** (5) | 0.05 (1) | 21 | 11 | yes |
+| **GPS** | — | — | — | — | — | — | **0.50** (2) | **0.25** (1) | **0.25** (1) | — | — | — | 4 | 4 | no |
+| **BTKA** | 0.02 (1) | — | 0.06 (3) | — | 0.20 (10) | — | 0.08 (4) | — | **0.41** (21) | 0.02 (1) | 0.16 (8) | 0.06 (3) | 51 | 8 | yes |
+| **BTK** | — | — | — | — | — | — | — | — | **1.00** (2) | — | — | — | 2 | 2 | no |
+| **SUBA** | — | 0.03 (2) | 0.02 (1) | 0.02 (1) | 0.09 (5) | — | 0.07 (4) | 0.03 (2) | 0.17 (10) | — | **0.52** (30) | 0.05 (3) | 58 | 14 | yes |
+| **SUB** | 0.17 (1) | — | — | — | — | — | — | — | 0.17 (1) | — | 0.17 (1) | **0.50** (3) | 6 | 5 | yes |
 
-**Top cells that carry an interval.** `PGD → SUBA` 0.62 [0.31, 0.86] over 8 bouts: in this
-division a guard pull is followed by a submission attempt more often than by anything else,
-and it is one of the few cells here drawn from eight distinct fights rather than two.
-`SUBA → SUBA` 0.54 [0.41, 0.66] is the highest-confidence cell in either matrix.
-`GPSA → {TKDA, GPSA, SUBA}` splits almost evenly at 0.26 each over 11 bouts — a passing
-exchange in +65 kg has no dominant continuation.
+**Top cells that carry an interval.** `SUBA → SUBA` 0.52 (30 over 14 bouts) is the
+highest-confidence cell in either matrix. `BTKA → BTKA` 0.41 and `PGD → SUBA` 0.36 (5 of 14,
+over 14 distinct bouts) follow. `GPSA → {TKDA, GPSA, SUBA}` splits evenly at 0.24 each over 11
+bouts — a passing exchange in +65 kg has no dominant continuation.
 
 `SWPA → SWPA` 0.74 (14 of 19) is the clearest illustration of why the gate exists: it comes
 from **2 bouts**, so it is one athlete's repeated sweep attempts wearing a division's name.
-The count is published; the interval is not.
+The count is published; the interval is not — and note the cell did not move at all when the
+corpus grew from 40 bouts to 58. It is still exactly those two fights.
 
 ### Occupancy
 
 | state | k | bouts | share | 95% CI |
 |---|---|---|---|---|
-| CDP | 6 | 5 | 0.029 | 0.014–0.063 |
-| PGD | 8 | 8 | 0.039 | 0.020–0.075 |
-| SWPA | 19 | 2 | 0.093 | withheld (`few_clusters`) |
-| SWP | 6 | 4 | 0.029 | withheld (`few_clusters`) |
-| TKDA | 20 | 3 | 0.098 | withheld (`few_clusters`) |
-| TKD | 3 | 2 | 0.015 | withheld (`few_clusters`) |
-| **GPSA** | 21 | 12 | 0.103 | 0.068–0.152 |
-| GPS | 3 | 3 | 0.015 | withheld (`few_clusters`) |
-| **BTKA** | 42 | 8 | 0.206 | 0.156–0.267 |
-| BTK | 1 | 1 | 0.005 | withheld (`few_clusters`) |
-| **SUBA** | 61 | 15 | 0.299 | 0.240–0.365 |
-| SUB | 14 | 12 | 0.069 | 0.041–0.112 |
+| **CDP** | 12 | 8 | 0.047 | 0.027–0.080 |
+| **PGD** | 15 | 15 | 0.058 | 0.036–0.094 |
+| SWPA | 19 | 2 | 0.074 | withheld (`few_clusters`) |
+| **SWP** | 8 | 6 | 0.031 | 0.016–0.060 |
+| TKDA | 28 | 4 | 0.109 | withheld (`few_clusters`) |
+| **TKD** | 7 | 6 | 0.027 | 0.013–0.055 |
+| **GPSA** | 23 | 12 | 0.089 | 0.060–0.130 |
+| **GPS** | 6 | 5 | 0.023 | 0.011–0.050 |
+| **BTKA** | 54 | 8 | 0.209 | 0.164–0.263 |
+| BTK | 2 | 2 | 0.008 | withheld (`few_clusters`) |
+| **SUBA** | 64 | 16 | 0.248 | 0.199–0.304 |
+| **SUB** | 20 | 16 | 0.078 | 0.051–0.117 |
 
 ### Routes into a submission
 
 | path | k | bouts | p (first-order) | bout rate 95% CI |
 |---|---|---|---|---|
-| SUBA → SUBA → SUBA | 16 | 5/23 | 0.287 | 0.10–0.42 |
-| PGD → SUBA → SUBA | 4 | 4/23 | 0.335 | 0.07–0.37 |
-| BTKA → BTKA → SUBA | 4 | 2/23 | 0.071 | 0.02–0.27 |
-| BTKA → SUBA → SUBA | 3 | 2/23 | 0.082 | 0.02–0.27 |
-| TKDA → TKDA → SUBA | 3 | 2/23 | 0.060 | 0.02–0.27 |
+| SUBA → SUBA → SUBA | 16 | 5/32 | 0.267 | 0.07–0.32 |
+| PGD → SUBA → SUBA | 4 | 4/32 | 0.185 | 0.05–0.28 |
+| BTKA → BTKA → SUBA | 4 | 2/32 | 0.065 | 0.02–0.20 |
+| BTKA → SUBA → SUBA | 3 | 2/32 | 0.081 | 0.02–0.20 |
+| TKDA → TKDA → SUBA | 3 | 2/32 | 0.038 | 0.02–0.20 |
 
-`PGD → SUBA → SUBA` has the highest first-order chain probability of any route in either
-division (0.335) and comes from four distinct bouts — the strongest scouting signal these two
-tables carry.
+`PGD → SUBA → SUBA` remains the highest-probability non-degenerate route in either division
+(0.185) over four distinct bouts — one of the few readings that survived the corpus growing by
+45%, which is most of the reason to trust it.
 
 ---
 
@@ -305,16 +316,26 @@ never published.
 Reference values are read from `analysis/poc/e4_ptv_eval.LAMAS_PUBLISHED`, so the two runners
 cannot drift.
 
-| cell | Lamas | 65 kg cross | agrees | +65 kg cross | agrees |
-|---|---|---|---|---|---|
-| back control → submission | 0.45 | 0.193 [0.111, 0.313] (11/57) | **NO** | 0.225 [0.123, 0.375] (9/40) | **NO** |
-| takedown → submission | 0.15 | 0.192 [0.108, 0.319] (10/52) | yes | 0.318 [0.164, 0.527] (7/22) | **NO** |
-| guard pass → guard pass | 0.30 | 0.235 [0.096, 0.473] (4/17) | yes | 0.318 [0.164, 0.527] (7/22) | yes |
+**65 kg**
 
-Within-actor arm (PoC-E4's convention), same order: 0.214 / 0.194 / 0.214 in 65 kg and 0.219 /
-0.316 / 0.333 in +65 kg — every cell within a few points of the cross-actor reading, and no
-agreement verdict changes. Whichever convention the chain uses, the answer is the same;
-that is the most useful thing the `same_actor` flag has to say.
+| cell | Lamas | cross | agrees | within | no-reentry |
+|---|---|---|---|---|---|
+| back control → submission | 0.45 | 0.183 [0.110, 0.288] (13/71) | **NO** | 0.200 | 0.302 [0.186, 0.451] **covers** |
+| takedown → submission | 0.15 | 0.164 [0.092, 0.276] (10/61) | yes | 0.159 | 0.227 [0.128, 0.370] **covers** |
+| guard pass → guard pass | 0.30 | 0.200 [0.081, 0.416] (4/20) | yes | 0.188 | n/a |
+
+**+65 kg**
+
+| cell | Lamas | cross | agrees | within | no-reentry |
+|---|---|---|---|---|---|
+| back control → submission | 0.45 | 0.208 [0.120, 0.335] (11/53) | **NO** | 0.205 | 0.379 [0.227, 0.560] **covers** |
+| takedown → submission | 0.15 | 0.226 [0.114, 0.398] (7/31) | yes | 0.222 | 0.269 [0.137, 0.461] **covers** |
+| guard pass → guard pass | 0.30 | 0.320 [0.172, 0.516] (8/25) | yes | 0.350 | n/a |
+
+The within-actor arm (PoC-E4's convention) sits within a few points of the cross-actor reading
+in every cell of both divisions, and **no agreement verdict changes between the two**.
+Whichever convention the chain uses, the answer is the same; that is the most useful thing the
+`same_actor` flag has to say.
 
 ### 4.1 The guard-pass cell: PoC-E4's structural explanation, confirmed
 
@@ -325,15 +346,15 @@ PoC-E4 measured these three cells on the **raw label vocabulary** and got 0.210 
 > state space mechanically DILUTES every single transition probability […] the anchor cannot
 > validate at face value **without a state-space mapping nobody has written**.
 
-That mapping is what §1.2 is. Under it, guard pass → guard pass moves **0.079 → 0.235 and
-0.318**, and both intervals now cover the published 0.30. The dilution argument was right, and
-this is the measurement that shows it — on the one cell where dilution was the whole story.
+That mapping is what §1.2 is. Under it, guard pass → guard pass moves **0.079 → 0.200 and
+0.320**, and both intervals cover the published 0.30. The dilution argument was right, and this
+is the measurement that shows it — on the one cell where dilution was the whole story.
 
 ### 4.2 The back-control cell: not dilution, state re-entry
 
-Back control → submission did **not** recover: 0.19 and 0.23 against 0.45, out of interval in
+Back control → submission did **not** recover: 0.183 and 0.208 against 0.45, out of interval in
 both divisions and barely moved from PoC-E4's corpus-wide 0.21. So dilution is not the
-explanation there, and the matrix says what is: **0.39 and 0.46 of everything leaving a
+explanation there, and the matrix says what is: **0.37 and 0.41 of everything leaving a
 back-control goes to another back-control event.** Our corpus logs a *held* position
 repeatedly; Lamas' coding occupies the state once and moves on.
 
@@ -342,13 +363,18 @@ denominator — the closest thing to his coding our events can be read into:
 
 | cell | Lamas | 65 kg no-reentry | +65 kg no-reentry |
 |---|---|---|---|
-| back control → submission | 0.45 | 0.333 [0.198, 0.504] — **covers 0.45** (11/33) | **0.450** [0.258, 0.658] — **covers 0.45** (9/20) |
-| takedown → submission | 0.15 | 0.278 [0.158, 0.440] — no | 0.389 [0.203, 0.614] — no |
+| back control → submission | 0.45 | 0.302 [0.186, 0.451] — **covers** (13/43) | 0.379 [0.227, 0.560] — **covers** (11/29) |
+| takedown → submission | 0.15 | 0.227 [0.128, 0.370] — **covers** (10/44) | 0.269 [0.137, 0.461] — **covers** (7/26) |
 
-+65 kg lands on 0.450 against a published 0.45. That is a coincidence at this n and should be
-read as one — but the direction is not: both divisions move from *out of interval* to *covering
-the published value* once state re-entry is removed, which identifies the gap as an **event-
-logging convention**, not a difference in how these athletes fight from the back.
+Both divisions move from *out of interval* to *covering the published value* once state
+re-entry is removed, which identifies the gap as an **event-logging convention**, not a
+difference in how these athletes fight from the back.
+
+> This section previously reported 0.333 and **0.450** on the 40-bout corpus, and read the
+> +65 kg figure landing exactly on 0.45 as "a coincidence at this n". The corpus has since grown
+> to 58 bouts and the figure moved to 0.379 — so it *was* a coincidence, and saying so in
+> advance is the only reason that is legible now rather than embarrassing. The direction is what
+> replicated; the decimal was never the finding.
 
 The arm is undefined for guard pass → guard pass, because the paper's own cell there *is* the
 re-entry (`reason_code: published_cell_is_the_reentry`). It is a diagnostic on the gap, never
@@ -356,9 +382,11 @@ a competing estimate, and it never enters a criterion.
 
 ### 4.3 The takedown cell
 
-`takedown → submission` is the one cell that agrees at face value in 65 kg (0.192, covering
-0.15) and disagrees in +65 kg (0.318 from **3 bouts**, gate refused). The refusal is the
-finding: +65 kg's `TKDA` row is not a division estimate.
+`takedown → submission` now agrees at face value in **both** divisions (0.164 and 0.226, both
+covering 0.15) — on the 40-bout corpus +65 kg missed at 0.318 off three bouts. That row is
+still gate-refused in +65 kg (4 bouts), so the agreement is not yet a division estimate; what
+changed is that the disagreement did not survive more evidence, which is what a three-bout cell
+should be expected to do in either direction.
 
 ---
 
@@ -380,7 +408,7 @@ The repo already has a reward-risk convention and this does not invent a second 
 What changes is the *event class*, not the structure. `build_graph` anchors both arms on a
 **finished submission**: reward = the fighter's own next action is a landed sub, risk = the very
 next event is the *opponent's* landed sub. That anchor does not survive the move to this state
-space. §1.4 puts almost every real finish in `SUBA`, leaving **10 and 14 `SUB` events** per
+space. §1.4 puts almost every real finish in `SUBA`, leaving **17 and 20 `SUB` events** per
 division, so a submission-anchored numerator would sit at 0–3 for nearly every state and the
 table would be measuring the corpus's `successful` coverage rather than the grappling.
 
@@ -409,13 +437,13 @@ they enter:
 | refusal | rule | 65 kg | +65 kg |
 |---|---|---|---|
 | `one_sided` | `attribution.bout_flags(...)["perspective_reliable"]` — the corpus's own verdict | 1 | 3 |
-| `single_actor` | the mapped chain names fewer than two athletes | **7** | **8** |
-| **usable** | | **11 / 19** | **12 / 23** |
+| `single_actor` | the mapped chain names fewer than two athletes | **11** | **11** |
+| **usable** | | **17 / 29** | **18 / 32** |
 
 The second rule is not redundant with the first, and the numbers say why: `bout_flags` only
 calls a bout one-sided at ≥6 events, so a *short* bout filed under one name passes it while
-scoring reward 1.00 by construction. It catches seven and eight bouts against the first rule's
-one and three — the bigger hole by far.
+scoring reward 1.00 by construction. It catches eleven bouts in each division against the first
+rule's one and three — the bigger hole by far, and it stayed the bigger hole as the corpus grew.
 
 **The residual error this cannot fix.** The corpus's ownership convention is `actor` = the
 athlete whose *game* the node belongs to, not who is winning the exchange
@@ -436,48 +464,57 @@ alike (`bootstrap_ci`'s own docstring: gate first, it is not a rescue).
 Rows are ranked **estimable-first, then by score, then by the fixed state order** — a state with
 denom 1 scoring +1.000 would otherwise top a table the gate exists to keep it off.
 
-### 5.4 65 kg — 11 usable bouts, 164 scored appearances
+### 5.4 65 kg — 17 usable bouts, 216 scored appearances
 
 | # | state | n | bouts | reward | risk | score | score 95% CI (bout-clustered) | gate |
 |---|---|---|---|---|---|---|---|---|
-| 1 | `SUBA` | 35 | 8 | 0.77 [0.61, 0.88] | 0.23 [0.12, 0.39] | **+0.543** | [+0.200, +1.000] | yes |
-| 2 | `BTKA` | 53 | 8 | 0.72 [0.58, 0.82] | 0.28 [0.18, 0.42] | **+0.434** | [+0.333, +0.615] | yes |
-| 3 | `TKDA` | 47 | 6 | 0.70 [0.56, 0.81] | 0.30 [0.19, 0.44] | **+0.404** | [+0.077, +0.739] | yes |
-| 4 | `CDP` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
-| 5 | `SWPA` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
-| 6 | `SWP` | 4 | 4 | 1.00 | 0.00 | +1.000 | withheld | no |
-| 7 | `GPS` | 3 | 2 | 1.00 | 0.00 | +1.000 | withheld | no |
-| 8 | `BTK` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
-| 9 | `GPSA` | 10 | 3 | 0.70 | 0.30 | +0.400 | withheld | no |
-| 10 | `PGD` | 4 | 4 | 0.50 | 0.50 | +0.000 | withheld | no |
-| 11 | `TKD` | 4 | 3 | 0.50 | 0.50 | +0.000 | withheld | no |
-| 12 | `SUB` | 1 | 1 | 0.00 | 1.00 | −1.000 | withheld | no |
+| 1 | `SWP` | 8 | 8 | 1.00 [0.68, 1.00] | 0.00 [0.00, 0.32] | **+1.000** | [+1.000, +1.000] | yes |
+| 2 | `BTKA` | 65 | 8 | 0.75 [0.64, 0.84] | 0.25 [0.16, 0.36] | **+0.508** | [+0.355, +0.704] | yes |
+| 3 | `SUBA` | 38 | 10 | 0.74 [0.58, 0.85] | 0.26 [0.15, 0.42] | **+0.474** | [+0.067, +0.800] | yes |
+| 4 | `TKDA` | 55 | 7 | 0.73 [0.60, 0.83] | 0.27 [0.17, 0.40] | **+0.455** | [+0.062, +0.773] | yes |
+| 5 | `PGD` | 12 | 10 | 0.25 [0.09, 0.53] | 0.75 [0.47, 0.91] | **−0.500** | [−1.000, +0.000] | yes |
+| 6 | `SUB` | 6 | 5 | 0.17 [0.03, 0.56] | 0.83 [0.44, 0.97] | **−0.667** | [−1.000, +0.200] | yes |
+| 7 | `SWPA` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 8 | `GPS` | 5 | 4 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 9 | `BTK` | 3 | 3 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 10 | `CDP` | 7 | 4 | 0.71 | 0.29 | +0.429 | withheld | no |
+| 11 | `GPSA` | 12 | 3 | 0.67 | 0.33 | +0.333 | withheld | no |
+| 12 | `TKD` | 4 | 3 | 0.50 | 0.50 | +0.000 | withheld | no |
 
-Rows 4–12 are the gate doing its job: five states show a perfect +1.000 off one to four
-appearances. None of them is a finding, and none of them outranks a gated row.
+`SWP` at +1.000 over 8 bouts is the one row where the interval is degenerate for a real reason
+rather than a thin one: every single sweep in this division is followed by the sweeper's own
+next action. Eight bouts clears the gate, so the interval is published — but a bootstrap of a
+constant is a constant, and `[+1.000, +1.000]` should be read as "no counter-example yet", not
+as precision.
 
-### 5.5 +65 kg — 12 usable bouts, 147 scored appearances
+**The genuinely new rows are the negative ones.** `PGD` −0.500 and `SUB` −0.667 both clear the
+gate now and both were refused or absent on the 40-bout corpus. A guard pull in 65 kg hands the
+exchange to the opponent three times in four — which is the same fact the matrix states as
+`PGD → SWP` 0.44, since the sweep that follows a pull belongs to the guard player's *opponent*
+only when the pull failed. The two tables agree, and they agree because they are two views of
+one thing (§5.6).
+
+### 5.5 +65 kg — 18 usable bouts, 189 scored appearances
 
 | # | state | n | bouts | reward | risk | score | score 95% CI (bout-clustered) | gate |
 |---|---|---|---|---|---|---|---|---|
-| 1 | `BTKA` | 37 | 7 | 0.78 [0.63, 0.89] | 0.22 [0.11, 0.37] | **+0.568** | [+0.467, +0.750] | yes |
-| 2 | `GPSA` | 15 | 7 | 0.73 [0.48, 0.89] | 0.27 [0.11, 0.52] | **+0.467** | [+0.067, +1.000] | yes |
-| 3 | `SUBA` | 47 | 9 | 0.68 [0.54, 0.80] | 0.32 [0.20, 0.46] | **+0.362** | [−0.167, +0.706] | yes |
-| 4 | `PGD` | 6 | 6 | 0.67 [0.30, 0.90] | 0.33 [0.10, 0.70] | **+0.333** | [−0.333, +1.000] | yes |
-| 5 | `SWP` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
-| 6 | `GPS` | 2 | 2 | 1.00 | 0.00 | +1.000 | withheld | no |
-| 7 | `BTK` | 1 | 1 | 1.00 | 0.00 | +1.000 | withheld | no |
-| 8 | `TKDA` | 20 | 3 | 0.85 | 0.15 | +0.700 | withheld | no |
-| 9 | `SWPA` | 14 | 1 | 0.79 | 0.21 | +0.571 | withheld | no |
-| 10 | `CDP` | 3 | 3 | 0.67 | 0.33 | +0.333 | withheld | no |
-| 11 | `SUB` | 1 | 1 | 0.00 | 1.00 | −1.000 | withheld | no |
+| 1 | `BTKA` | 49 | 7 | 0.82 [0.69, 0.90] | 0.18 [0.10, 0.31] | **+0.633** | [+0.490, +0.771] | yes |
+| 2 | `GPSA` | 17 | 7 | 0.71 [0.47, 0.87] | 0.29 [0.13, 0.53] | **+0.412** | [+0.067, +0.750] | yes |
+| 3 | `SUBA` | 49 | 10 | 0.67 [0.53, 0.79] | 0.33 [0.21, 0.47] | **+0.347** | [−0.189, +0.688] | yes |
+| 4 | `CDP` | 9 | 6 | 0.56 [0.27, 0.81] | 0.44 [0.19, 0.73] | **+0.111** | [−0.333, +0.667] | yes |
+| 5 | `PGD` | 10 | 10 | 0.40 [0.17, 0.69] | 0.60 [0.31, 0.83] | **−0.200** | [−0.800, +0.400] | yes |
+| 6 | `SWP` | 3 | 3 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 7 | `GPS` | 3 | 3 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 8 | `BTK` | 2 | 2 | 1.00 | 0.00 | +1.000 | withheld | no |
+| 9 | `TKDA` | 28 | 4 | 0.86 | 0.14 | +0.714 | withheld | no |
+| 10 | `SWPA` | 14 | 1 | 0.79 | 0.21 | +0.571 | withheld | no |
+| 11 | `SUB` | 5 | 4 | 0.20 | 0.80 | −0.600 | withheld | no |
 | 12 | `TKD` | 0 | 0 | — | — | — | withheld | no |
 
-Two rows are worth naming even though they are refused. `SWPA` at +0.571 over **1 bout** is the
-sweep-attempt spam already visible as the matrix's `SWPA → SWPA` 0.74 — the same single athlete,
-seen through a second statistic, which is exactly why a reader must not treat the two tables as
-independent corroboration. And `SUB` at −1.000 is one escaped submission whose opponent acted
-next; every other `SUB` in the division ended its bout and left the denominator (§1.5).
+`SWPA` at +0.571 over **1 bout** is the sweep-attempt spam already visible as the matrix's
+`SWPA → SWPA` 0.74 — the same single athlete seen through a second statistic, which is exactly
+why a reader must not treat the two tables as independent corroboration. `BTKA` is the
+division's strongest row and the narrowest interval in the document.
 
 ### 5.6 The comparison
 
@@ -487,44 +524,53 @@ both divisions clear the gate.
 
 | state | 65 kg | +65 kg | delta | both estimable | reward diff (AC 95%) | p |
 |---|---|---|---|---|---|---|
-| `CDP` | +1.000 (n=1, 1b) | +0.333 (n=3, 3b) | +0.667 | no | — | — |
-| `PGD` | +0.000 (n=4, 4b) | +0.333 (n=6, 6b) | −0.333 | no | — | — |
+| `CDP` | +0.429 (n=7, 4b) | +0.111 (n=9, 6b) | +0.318 | no | — | — |
+| `PGD` | −0.500 (n=12, 10b) | −0.200 (n=10, 10b) | −0.300 | **yes** | −0.150 [−0.497, +0.235] | 0.652 |
 | `SWPA` | +1.000 (n=1, 1b) | +0.571 (n=14, 1b) | +0.429 | no | — | — |
-| `SWP` | +1.000 (n=4, 4b) | +1.000 (n=1, 1b) | +0.000 | no | — | — |
-| `TKDA` | +0.404 (n=47, 6b) | +0.700 (n=20, 3b) | −0.296 | no | — | — |
+| `SWP` | +1.000 (n=8, 8b) | +1.000 (n=3, 3b) | +0.000 | no | — | — |
+| `TKDA` | +0.455 (n=55, 7b) | +0.714 (n=28, 4b) | −0.260 | no | — | — |
 | `TKD` | +0.000 (n=4, 3b) | — | — | no | — | — |
-| `GPSA` | +0.400 (n=10, 3b) | +0.467 (n=15, 7b) | −0.067 | no | — | — |
-| `GPS` | +1.000 (n=3, 2b) | +1.000 (n=2, 2b) | +0.000 | no | — | — |
-| `BTKA` | +0.434 (n=53, 8b) | +0.568 (n=37, 7b) | −0.134 | **yes** | −0.067 [−0.239, +0.118] | 0.639 |
-| `BTK` | +1.000 (n=1, 1b) | +1.000 (n=1, 1b) | +0.000 | no | — | — |
-| `SUBA` | +0.543 (n=35, 8b) | +0.362 (n=47, 9b) | +0.181 | **yes** | +0.091 [−0.107, +0.274] | 0.513 |
-| `SUB` | −1.000 (n=1, 1b) | −1.000 (n=1, 1b) | +0.000 | no | — | — |
+| `GPSA` | +0.333 (n=12, 3b) | +0.412 (n=17, 7b) | −0.079 | no | — | — |
+| `GPS` | +1.000 (n=5, 4b) | +1.000 (n=3, 3b) | +0.000 | no | — | — |
+| `BTKA` | +0.508 (n=65, 8b) | +0.633 (n=49, 7b) | −0.125 | **yes** | −0.062 [−0.208, +0.093] | 0.569 |
+| `BTK` | +1.000 (n=3, 3b) | +1.000 (n=2, 2b) | +0.000 | no | — | — |
+| `SUBA` | +0.474 (n=38, 10b) | +0.347 (n=49, 10b) | +0.127 | **yes** | +0.063 [−0.131, +0.248] | 0.686 |
+| `SUB` | −0.667 (n=6, 5b) | −0.600 (n=5, 4b) | −0.067 | no | — | — |
 
-**The reading: nothing separates the two divisions.** Exactly two states clear the gate on both
-sides, and both contrasts cover zero comfortably (p = 0.639 and p = 0.513). The eye-catching
-deltas — `TKDA` at −0.296, `CDP` at +0.667 — sit on refused cells, and `TKDA` in +65 kg is three
-bouts. Per §0, spread between the two matrices is not evidence that the divisions play
-differently, and the reward-risk comparison is the clearest illustration in this document: the
-one place a difference *could* have been established, it was not.
+**The reading: nothing separates the two divisions.** Three states now clear the gate on both
+sides — one more than on the 40-bout corpus — and all three contrasts cover zero comfortably
+(p = 0.652, 0.569, 0.686). The eye-catching deltas (`SWPA` +0.429, `CDP` +0.318, `TKDA` −0.260)
+all sit on refused cells. Per §0, spread between the two matrices is not evidence that the
+divisions play differently, and this is the clearest illustration in the document: 45% more
+evidence bought a third comparable state and moved no verdict.
 
 **What does survive, in both divisions and with an interval:** every gated state is positive.
 Attacking actions in this corpus are followed by the *same* athlete's next action roughly 70–78%
 of the time. `BTKA` is the most reliable of them (+0.434 [+0.333, +0.615] and +0.568 [+0.467,
 +0.750], the two narrowest intervals in either table) — once someone gets to the back, they keep
-working there. That is consistent with the matrix's `BTKA → BTKA` 0.39 / 0.46 and with §4.2's
+working there. That is consistent with the matrix's `BTKA → BTKA` 0.37 / 0.41 and with §4.2's
 finding, and it is the same underlying fact seen three ways, not three findings.
+
+The one thing that is NOT uniformly positive any more, and this is new evidence rather than a
+rewording: **`PGD` is negative in both divisions** (−0.500 and −0.200), and gated in both. A
+guard pull hands the exchange over more often than it keeps it. On the 40-bout corpus `PGD` was
++0.000 and +0.333 with only one side gated, so the sign flipped when the evidence grew — which
+is exactly the kind of row that should not have been read before the gate passed, and was not.
 
 ---
 
 ## 6. Caveats (these ship inside the export, `markov[div].caveats`)
 
+The `adcc` corpora carry all of these plus three of their own — see §7.1–7.2 and
+`adcc.corpora[*].caveats`.
+
 1. **`successful` is present on 28.9% of corpus events; absent reads as attempt.** Every
    success rate here is a floor, and the distortion is uneven — 89 of 91 back-controls fall in
    `BTKA`.
 2. **`SUB` absorbs by the bout's result, not by the flag** (§1.5). `sub_outgoing` counts the
-   submissions that were locked and escaped: 1 and 2.
+   submissions that were locked and escaped: 6 in each division.
 3. **Unmapped events are passed over** (§1.3 rule 1); `n_events_skipped` and `skipped_top` say
-   how much of the stream that is — 92 of 291 and 61 of 265.
+   how much of the stream that is — 108 of 369 and 76 of 334.
 4. **`Front Headlock` is the largest unresolvable ambiguity in the mapping.** At 139 corpus
    events it is the second biggest contributor to `CDP`, and it can be standing *or* over a
    turtled opponent. The corpus does not record the distinction, so the inclusion cannot be
@@ -533,7 +579,7 @@ finding, and it is the same underlying fact seen three ways, not three findings.
    published cells are same-athlete statements.
 6. **First order, no smoothing.** A low-`n` cell has a wide interval by construction, and below
    the bout-cluster gate no interval is published at all.
-7. **19 and 23 bouts.** Do not read a difference between the two matrices as a difference
+7. **29 and 32 bouts.** Do not read a difference between the two matrices as a difference
    between the divisions unless the intervals say so — and most of them do not.
 
 Reward-risk carries five more of its own (`markov[div].reward_risk.caveats`), all of §5: it is
@@ -542,7 +588,229 @@ uncorrectable error; a terminal appearance is out of the denominator; unknown at
 neutral and never charged; the composite's interval is a bout-clustered bootstrap and is
 withheld entirely below the gate.
 
-## 7. What this does not do
+## 7. The ADCC 2023-24 cycle — the same machinery on a different corpus
+
+Everything above is scoped to sixteen women across two bracket divisions. This section runs the
+identical code — `markov_block` and `reward_risk_comparison`, unchanged — over one whole ADCC
+qualifying cycle, read straight from `matches`: **every division, both sexes, absolute
+included.** Exporter: `scripts/bracket_export.py:adcc_layer` → `data.json`'s `adcc` key.
+
+**It is a different population, not a cut of the one above.** `SCOPES["adcc"]` says `global`
+where `markov` says `category`. Comparing `BTKA` here against `BTKA` in §2 compares 86 bouts of
+mixed-division ADCC against 29 bouts of one women's bracket.
+
+### 7.1 Corpus selection
+
+Three corpora, from the tags in `matches.event`. The SQL is deliberately dumb
+(`event ilike '%adcc%'`); every decision lives in the pure, tested `adcc_corpus_of`.
+
+| corpus | bouts w/ events | tags |
+|---|---|---|
+| **Trials 2023-24** | 53 | EC-2023 (16), WC-2024 (8), EU-2024 (6), SA2-2024 (6), Asia-2024 (5), SA1-2024 (5), Asia-2023 (4), EU-2023 (3) |
+| **ADCC 2024** (Worlds) | 33 | `ADCC 2024` (30), `ADCC World Championship` (2), `ADCC` (1) |
+| **Ciclo completo** | 86 | the two above, pooled |
+
+`ADCC Trials 2023 East Coast` covers finals **and** semis — one tag, both dumps, so the semis
+are included by construction rather than by a second rule that could drift.
+
+**The ambiguous `ADCC` tag: decided, not assumed.** It holds 18 bouts spanning 2017–2024, of
+which exactly **one** in-cycle row carries a sequence — Gordon Ryan × Felipe Pena 2024, the
+Worlds superfight, 22 events. `ADCC World Championship` holds three, of which two are 2024
+(Ethan Crelinsten, 7 and 5 events). Both tags *name the World Championship*, so they resolve to
+the Worlds bucket, admitted **only** when the row's own `year` is 2023 or 2024. Checked for
+double-counting against `ADCC 2024` by canonical athlete pair: **zero duplicates**, so these
+three bouts are additions rather than copies. `ADCC WC Trials` is deliberately absent from the
+undated list — it names a *trials*, so admitting it by year would file a qualifier under the
+World Championship (its one row is 2017 with no events, so this costs nothing today and is
+correct by name rather than by luck).
+
+**Excluded, and counted** (`adcc.excluded`): `ADCC 2022` (53 bouts with events),
+`ADCC Trials 2022 South America` (6), `ADCC` at 2017/2019/2022 (4),
+`ADCC World Championship` 2022 (1). That is the previous cycle, refused by the year gate.
+
+### 7.2 ⚠️ The two corpora were not annotated the same way
+
+**This governs how everything below may be read, so it ships as numbers** (`adcc.annotation`),
+not as a footnote.
+
+| corpus | events | `successful` present | `successful: true` |
+|---|---|---|---|
+| Trials 2023-24 | 466 | **100.0%** | **79.8%** |
+| ADCC 2024 | 457 | 34.8% | 12.0% |
+| Ciclo completo | 923 | 67.7% | 46.3% |
+
+Per type it is starker. The trials dumps mark `guard` 68/68 and `escape` 17/17 successful; the
+ADCC 2024 dumps mark `guard` 0/70, `pass` 0/17, `transition` 0/20, `control` 3/139. Per tag,
+every trials event runs 70–100% `true` while `ADCC 2024` runs 13% and `ADCC` runs 0%. These are
+two annotation conventions in one table, not two ways of grappling.
+
+**What it invalidates.** Rule 3 (§1.4) sends `successful is True` to the success state and
+everything else to the attempt state, so the attempt/success split *tracks the dump batch*:
+
+| | Trials | Worlds |
+|---|---|---|
+| takedowns | TKD 40 / TKDA 24 | TKDA 75 / TKD 7 |
+| back-takes | BTK 26 / BTKA 4 | BTKA 93 / BTK 2 |
+| sweeps | SWPA **0** | GPS **0** |
+
+Reporting that as "qualifiers land more takedowns than the Worlds" would be reporting the dump
+batch. `annotation.state_split_comparable` is **false**, in the export, where a renderer can
+see it.
+
+**What only *looks* like it survives.** `reward_risk` is immune in its *question* (who acts
+next) but **not in its partition**: its rows are keyed by state, and the annotation decides
+which events land in which state. `TKDA` in the trials corpus means "a takedown explicitly
+marked unsuccessful" (21 appearances beside 16 `TKD`); in the Worlds corpus it means "a
+takedown, mostly unmarked" (70 beside 3). Those are different subsets under one label. The
+comparison duly finds `TKDA` −0.143 vs +0.486 excluding zero (p=0.015) and `SUBA` +0.143 vs
++0.818 (p=0.029) — **which is exactly what the annotation gap predicts**, since a takedown
+*known* to have failed should hand the exchange over more often than an unmarked one. Those two
+p-values are evidence about the dumps. `annotation.reward_risk_cross_corpus_comparable` is
+**false** too.
+
+**What genuinely survives across corpora:** the family-level `anchor`, which collapses attempt
+and success and therefore cannot see the annotation at all. Within a single corpus, everything
+is comparable as usual.
+
+### 7.3 Ciclo completo — 86 bouts, 593 mapped, 270 skipped, 508 transitions
+
+The headline corpus, and the only one where **all twelve states clear the bout-cluster gate**.
+
+| from \ to | CDP | PGD | SWPA | SWP | TKDA | TKD | GPSA | GPS | BTKA | BTK | SUBA | SUB | n | lutas | gate |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **CDP** | 0.08 (5) | 0.20 (12) | 0.02 (1) | — | **0.23** (14) | **0.26** (16) | — | — | 0.05 (3) | — | 0.15 (9) | 0.02 (1) | 61 | 39 | yes |
+| **PGD** | 0.18 (4) | — | 0.05 (1) | 0.05 (1) | 0.18 (4) | 0.05 (1) | 0.05 (1) | 0.09 (2) | 0.05 (1) | 0.09 (2) | 0.14 (3) | 0.09 (2) | 22 | 20 | yes |
+| **SWPA** | **0.23** (3) | — | — | — | **0.23** (3) | — | 0.08 (1) | — | 0.15 (2) | — | 0.08 (1) | **0.23** (3) | 13 | 9 | yes |
+| **SWP** | 0.17 (2) | — | — | — | — | **0.25** (3) | 0.17 (2) | 0.08 (1) | — | — | — | **0.33** (4) | 12 | 12 | yes |
+| **TKDA** | 0.06 (6) | 0.04 (4) | 0.02 (2) | 0.01 (1) | **0.37** (36) | 0.06 (6) | 0.02 (2) | 0.01 (1) | **0.30** (29) | 0.01 (1) | 0.10 (10) | — | 98 | 24 | yes |
+| **TKD** | 0.09 (3) | 0.03 (1) | — | 0.03 (1) | — | 0.18 (6) | 0.09 (3) | 0.12 (4) | 0.06 (2) | 0.12 (4) | 0.12 (4) | 0.18 (6) | 34 | 26 | yes |
+| **GPSA** | — | 0.04 (1) | — | 0.08 (2) | 0.15 (4) | 0.08 (2) | 0.04 (1) | 0.04 (1) | 0.12 (3) | — | 0.08 (2) | **0.38** (10) | 26 | 21 | yes |
+| **GPS** | 0.12 (1) | 0.12 (1) | — | — | — | 0.12 (1) | — | 0.12 (1) | — | 0.12 (1) | **0.25** (2) | 0.12 (1) | 8 | 7 | yes |
+| **BTKA** | 0.02 (2) | 0.01 (1) | 0.04 (4) | — | **0.30** (28) | — | 0.05 (5) | — | **0.34** (32) | 0.02 (2) | 0.16 (15) | 0.04 (4) | 93 | 18 | yes |
+| **BTK** | — | 0.04 (1) | — | — | — | 0.04 (1) | — | — | 0.04 (1) | **0.62** (15) | — | **0.25** (6) | 24 | 11 | yes |
+| **SUBA** | 0.06 (4) | — | 0.01 (1) | 0.03 (2) | 0.11 (8) | — | 0.03 (2) | 0.04 (3) | 0.17 (12) | 0.04 (3) | **0.43** (30) | 0.07 (5) | 70 | 26 | yes |
+| **SUB** | 0.09 (4) | 0.02 (1) | 0.09 (4) | 0.02 (1) | — | 0.13 (6) | 0.09 (4) | — | 0.04 (2) | — | — | **0.53** (25) | 47 | 19 | yes |
+
+**Top cells.** `BTK → BTK` 0.62 and `SUB → SUB` 0.53 are re-entry/duplicate-logging, not
+grappling (§4.2, §1.5). The substantive ones: `TKDA → TKDA` 0.37 and `TKDA → BTKA` 0.30 — the
+same takedown↔back loop the 65 kg division shows, now over 24 bouts; `GPSA → SUB` 0.38 over 21
+bouts, the strongest pass-to-finish cell anywhere in this document; `CDP → TKD` 0.26 and
+`CDP → TKDA` 0.23 over 39 bouts, i.e. a clinch dispute resolves into a takedown roughly half
+the time.
+
+**Occupancy** (all twelve gated):
+
+| state | k | bouts | share | 95% CI |
+|---|---|---|---|---|
+| CDP | 63 | 40 | 0.106 | 0.084–0.134 |
+| PGD | 25 | 21 | 0.042 | 0.029–0.061 |
+| SWPA | 15 | 11 | 0.025 | 0.015–0.041 |
+| SWP | 14 | 14 | 0.024 | 0.014–0.039 |
+| **TKDA** | 99 | 24 | 0.167 | 0.139–0.199 |
+| TKD | 47 | 32 | 0.079 | 0.060–0.104 |
+| GPSA | 27 | 22 | 0.046 | 0.031–0.065 |
+| GPS | 13 | 12 | 0.022 | 0.013–0.037 |
+| **BTKA** | 97 | 18 | 0.164 | 0.136–0.195 |
+| BTK | 28 | 12 | 0.047 | 0.033–0.067 |
+| **SUBA** | 80 | 29 | 0.135 | 0.110–0.165 |
+| **SUB** | 85 | 49 | 0.143 | 0.117–0.174 |
+
+**Routes into a submission:**
+
+| path | k | bouts | p (first-order) | bout rate 95% CI |
+|---|---|---|---|---|
+| SUBA → SUBA → SUBA | 21 | 5/86 | 0.184 | 0.03–0.13 |
+| SUB → SUB → SUB | 7 | 5/86 | 0.283 | 0.03–0.13 |
+| BTK → BTK → SUB | 6 | 6/86 | 0.156 | 0.03–0.14 |
+| BTKA → BTKA → SUBA | 6 | 5/86 | 0.056 | 0.03–0.13 |
+| TKDA → TKDA → SUBA | 6 | 5/86 | 0.037 | 0.03–0.13 |
+
+Four of five are re-entry chains. `BTK → BTK → SUB` (6 bouts) is the only one naming two
+distinct actions, and it is the cycle's signature finishing route: take the back, hold it,
+finish.
+
+### 7.4 The three corpora against Lamas 2024
+
+The one cross-corpus reading the annotation permits.
+
+| corpus | back control → sub (0.45) | takedown → sub (0.15) | guard pass → guard pass (0.30) |
+|---|---|---|---|
+| Trials 2023-24 | 0.259 [0.132, 0.447] — no | **0.212 [0.122, 0.340] — yes** | **0.111 [0.031, 0.328] — yes** |
+| ADCC 2024 | 0.200 [0.130, 0.294] — no | **0.113 [0.060, 0.200] — yes** | 0.062 [0.011, 0.283] — no |
+| **Ciclo completo** | 0.214 [0.149, 0.296] — no | **0.152 [0.100, 0.222] — yes** | 0.088 [0.030, 0.230] — no |
+| 65 kg (§4) | 0.183 — no | 0.164 — yes | 0.200 — yes |
+| +65 kg (§4) | 0.208 — no | 0.226 — yes | 0.320 — yes |
+
+**`takedown → submission` agrees in all five corpora**, and the 86-bout cycle lands on
+**0.152** against a published 0.15 with the tightest interval any corpus here has produced
+([0.100, 0.222], 20/132). That is the strongest external agreement in this document.
+
+`back control → submission` misses in all five and misses the same way, and the `no_reentry`
+diagnostic explains it the same way everywhere: 0.636 (Trials), 0.321 (Worlds), **0.373**
+(cycle) — the cycle's interval [0.267, 0.493] covers 0.45. §4.2's conclusion replicates on a
+corpus three times the size and of a different population, which is the best evidence in this
+document that it is a logging convention rather than a quirk of one bracket.
+
+`guard pass → guard pass` is the interesting split: it agrees in the women's divisions (0.200,
+0.320) and in the Trials (0.111), and **misses in the Worlds corpus (0.062, 1/16)**. With
+n=16 that is a thin cell, and the `GPS` state has **zero** occupancy in the Worlds corpus
+because no pass there is marked successful — so this cell is annotation-bound too, and should
+not be read as ADCC-level passing being less repeatable.
+
+### 7.5 Sample size — the E9 context
+
+PoC-E9's ADCC kernel lost for **sample** reasons at 42 train bouts. This corpus is 86 bouts
+with events, and the difference is visible in exactly the place sample size should show up:
+
+| corpus | bouts | states clearing the bout-cluster gate | reward-risk states gated |
+|---|---|---|---|
+| 65 kg (§2) | 29 | 8 / 12 | 6 / 12 |
+| +65 kg (§3) | 32 | 7 / 12 | 5 / 12 |
+| Trials 2023-24 | 53 | 10 / 12 | 10 / 12 |
+| ADCC 2024 | 33 | 7 / 12 | 5 / 12 |
+| **Ciclo completo** | **86** | **12 / 12** | **12 / 12** |
+
+At 86 bouts the coverage gate stops refusing: every state earns an interval, on both the matrix
+rows and the reward-risk table. That is a statement about *estimability*, not about a verdict —
+E9's kernel is not re-run here and nothing above re-opens it. What this says is that the corpus
+has passed the size where the honest answer to most questions was "not enough independent
+fights", which is the precondition E9 lacked, not a result.
+
+### 7.6 Reward-risk, Ciclo completo
+
+Within-corpus, so the annotation caveat does not bite. All twelve gated.
+
+| # | state | n | bouts | reward | risk | score | score 95% CI (bout-clustered) |
+|---|---|---|---|---|---|---|---|
+| 1 | `BTK` | 19 | 9 | 0.95 [0.75, 0.99] | 0.05 [0.01, 0.25] | **+0.895** | [+0.727, +1.000] |
+| 2 | `GPS` | 6 | 5 | 0.83 [0.44, 0.97] | 0.17 [0.03, 0.56] | **+0.667** | [−0.200, +1.000] |
+| 3 | `SUBA` | 43 | 20 | 0.74 [0.60, 0.85] | 0.26 [0.15, 0.40] | **+0.488** | [+0.158, +0.762] |
+| 4 | `BTKA` | 78 | 11 | 0.73 [0.62, 0.82] | 0.27 [0.18, 0.38] | **+0.462** | [+0.255, +0.609] |
+| 5 | `SWPA` | 10 | 6 | 0.70 [0.40, 0.89] | 0.30 [0.11, 0.60] | **+0.400** | [+0.111, +1.000] |
+| 6 | `TKD` | 19 | 13 | 0.68 [0.46, 0.85] | 0.32 [0.15, 0.54] | **+0.368** | [−0.067, +0.765] |
+| 7 | `TKDA` | 91 | 18 | 0.67 [0.57, 0.76] | 0.33 [0.24, 0.43] | **+0.341** | [−0.100, +0.605] |
+| 8 | `SWP` | 6 | 6 | 0.67 [0.30, 0.90] | 0.33 [0.10, 0.70] | **+0.333** | [−0.333, +1.000] |
+| 9 | `GPSA` | 19 | 14 | 0.58 [0.36, 0.77] | 0.42 [0.23, 0.64] | **+0.158** | [−0.429, +0.571] |
+| 10 | `SUB` | 33 | 15 | 0.55 [0.38, 0.70] | 0.45 [0.30, 0.62] | **+0.091** | [−0.391, +0.442] |
+| 11 | `CDP` | 48 | 27 | 0.54 [0.40, 0.67] | 0.46 [0.33, 0.60] | **+0.083** | [−0.200, +0.333] |
+| 12 | `PGD` | 18 | 16 | 0.44 [0.25, 0.66] | 0.56 [0.34, 0.75] | **−0.111** | [−0.625, +0.400] |
+
+Only **four** rows have intervals excluding zero: `BTK` +0.895, `SUBA` +0.488, `BTKA` +0.462,
+`SWPA` +0.400. Everything else is compatible with a coin flip once the bout is the resampling
+unit — including `CDP` (+0.083 over 27 bouts), which says a clinch dispute is genuinely
+even-money for who acts next. That is the most defensible single sentence in this section.
+
+**`PGD` is negative here too** (−0.111), as in both women's divisions (−0.500, −0.200). The
+cycle's interval covers zero, so it is agreement in sign rather than a confirmed effect — but
+three independent corpora putting guard-pull on the negative side is worth a look at footage.
+
+Bouts refused by the actor gate: 33 `single_actor` + 13 `one_sided` = 40 of 86 usable. That
+refusal rate (53%) is worse than the divisions' (17/29, 18/32) and is the main thing limiting
+this table.
+
+---
+
+## 8. What this does not do
 
 - No second-order / semi-Markov check. PoC-E4 already measured second order losing materially
   on the raw label space (Δ per-step log-likelihood −0.203 [−0.258, −0.133], bout-clustered);
@@ -553,17 +821,28 @@ withheld entirely below the gate.
   scouting tables above.
 - Reward-risk is not weighted. `build_graph` takes an optional `weight_fn` so a corpus can be
   confidence-weighted per athlete (`analysis/confidence_weight.py`); this does not, because
-  with 11 and 12 usable bouts the weighting would be estimated from fewer athletes than it
+  with 17 and 18 usable bouts the weighting would be estimated from fewer athletes than it
   reweights. Add it when the usable set outgrows the gate, not before.
 - Reward-risk does not distinguish `TKDA → TKD` from `TKDA → TKDA`. Both are the same athlete
   acting again, and both count as reward. A landed-only refinement is one predicate away, and
   it is deliberately not taken: §1.4 means "landed" is a statement about `successful` coverage
   as much as about the grappling.
 - No production value moves. ADR-03: this is a report, not a calibration.
+- **It does not repair the annotation split found in §7.2.** The right fix is upstream — one
+  documented convention for `successful` across every dump batch, and a re-refine of the ADCC
+  2024 events under it. Until then the attempt/success axis of any cross-batch comparison is
+  uninterpretable, and no amount of statistics downstream can recover it. That is a data
+  ticket, not an analysis one.
+- No per-division read of the ADCC cycle. The corpus holds every weight class and both sexes;
+  slicing it by division is possible and was not done, because §7.5's whole point is that 86
+  bouts is the first size at which the gate stops refusing — cutting it back into eights
+  would undo exactly that.
 
 ---
 
-*Provenance: written 2026-08-25 against `analysis/lamas_chain.py` and
-`scripts/bracket_export.py:markov_layer`. Corpus label counts come from a read-only census of
-`matches.sequence` on the same date. If a number here disagrees with the exporter, the
-exporter is right — regenerate and fix this file in the same push.*
+*Provenance: written 2026-08-25 against `analysis/lamas_chain.py`,
+`scripts/bracket_export.py:markov_layer` (§§2–6) and `:adcc_layer` (§7). Corpus label counts and
+the ADCC event-tag census come from read-only queries against `matches` on the same date. If a
+number here disagrees with the exporter, the exporter is right — regenerate and fix this file in
+the same push. §§2–6 have already been through that once: they were rewritten when the scouting
+corpus went from 40 bouts to 58, and the header note records what moved.*

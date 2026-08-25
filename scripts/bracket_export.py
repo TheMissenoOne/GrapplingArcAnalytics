@@ -197,6 +197,12 @@ SCOPES: dict[str, dict[str, Any]] = {
     # block exists to avoid.
     "markov": {"kind": CATEGORY, "respects": [], "ignores": list(ALL_AXES),
                "ignored_reason_code": "cuts_refuse_most_rows", "unit": "transições"},
+    # The ADCC cycle is a DIFFERENT population, not a cut of this one: every division, both
+    # sexes, one qualifying cycle. It shares the twelve-state machinery with `markov` and
+    # nothing else, so a badge saying `category` here would be a lie about which universe the
+    # numbers describe. `global` with the axes it cannot honour named.
+    "adcc": {"kind": GLOBAL, "respects": [], "ignores": list(ALL_AXES),
+             "ignored_reason_code": "corpus_is_the_cycle", "unit": "transições"},
     "radar": {"kind": FILTERED, "respects": ["uniform", "since"], "ignores": ["ruleset"],
               "ignored_reason_code": "gate_refuses_every_cell", "unit": "eventos"},
     "athlete": {"kind": FILTERED, "respects": list(ALL_AXES), "ignores": [], "unit": "lutas"},
@@ -1970,6 +1976,247 @@ def data_quality(conn: Any, roster: Mapping[str, str],
                                          if k in display})}}
 
 
+# ── layer 9: the ADCC 2023-24 cycle ─────────────────────────────────────────────
+# A DIFFERENT corpus through the SAME machinery. Everything above this line is scoped to
+# sixteen women across two bracket divisions; this block is one qualifying cycle of ADCC, every
+# division and both sexes, read straight from `matches`. It reuses `analysis/lamas_chain.py`'s
+# public functions unchanged -- `markov_block` and `reward_risk_comparison` -- so a number here
+# and a number in `markov` are produced by the same code or they are not comparable at all.
+ADCC_CYCLE = "2023-24"
+# The eight qualifiers of the cycle. Every one of these tags names its own year, so no date
+# reasoning is involved: the tag IS the evidence.
+ADCC_TRIALS_2023_24: tuple[str, ...] = (
+    "ADCC Trials 2023 East Coast",        # finals AND semis -- one tag covers both dumps
+    "ADCC Trials 2023 European",
+    "ADCC Trials 2023 Asia & Oceania",
+    "ADCC Trials 2024 West Coast",
+    "ADCC Trials 2024 European",
+    "ADCC Trials 2024 Asia & Oceania",
+    "ADCC Trials 2024 South American 1",
+    "ADCC Trials 2024 South American 2",
+)
+ADCC_WORLDS_2024: tuple[str, ...] = ("ADCC 2024",)
+# Tags that name NO year, so the row's own `year` decides. Measured 2026-08-25 (read-only, all
+# 339 ADCC-tagged rows): `ADCC` holds 18 bouts spanning 2017-2024 of which exactly one in-cycle
+# row carries a sequence (Gordon Ryan x Felipe Pena 2024, the Worlds superfight, 22 events), and
+# `ADCC World Championship` holds three of which two are 2024 (Ethan Crelinsten, 7 and 5
+# events). Both tags NAME the World Championship, which is why they resolve to the Worlds bucket
+# and not the trials one. Checked for double-counting against `ADCC 2024` by canonical athlete
+# pair: **zero** duplicates, so these three bouts are additions, not copies.
+#
+# `ADCC WC Trials` is deliberately NOT here. It names a trials, so it could not join this
+# bucket, and its single row is 2017 with no sequence -- listing it would be dead code that
+# reads like a decision.
+ADCC_UNDATED: tuple[str, ...] = ("ADCC", "ADCC World Championship")
+ADCC_CYCLE_YEARS: tuple[int, ...] = (2023, 2024)
+ADCC_TRIALS_LABEL = "Trials 2023-24"
+ADCC_WORLDS_LABEL = "ADCC 2024"
+ADCC_CYCLE_LABEL = "Ciclo completo"
+
+
+def adcc_corpus_of(event: str | None, year: Any) -> str | None:
+    """Which corpus of the 2023-24 cycle a bout belongs to, or ``None`` for out-of-cycle.
+
+    Pure, so the whole selection is testable without a database — the SQL that feeds it is
+    deliberately dumb (`event ilike '%adcc%'`) and every decision lives here. That is what makes
+    the exclusion of the PREVIOUS cycle (`ADCC 2022`, `ADCC Trials 2022 South America`, 61 bouts)
+    an assertion in `tests/test_bracket_export.py` rather than a shape of a WHERE clause nobody
+    reads.
+    """
+    e = (event or "").strip()
+    if e in ADCC_TRIALS_2023_24:
+        return ADCC_TRIALS_LABEL
+    if e in ADCC_WORLDS_2024:
+        return ADCC_WORLDS_LABEL
+    if e in ADCC_UNDATED and _as_year(year) in ADCC_CYCLE_YEARS:
+        return ADCC_WORLDS_LABEL
+    return None
+
+
+def _as_year(year: Any) -> int | None:
+    try:
+        return int(year)
+    except (TypeError, ValueError):
+        return None
+
+
+def _adcc_annotation(buckets: Mapping[str, Sequence[Mapping[str, Any]]],
+                     tags: Mapping[str, Counter[str]]) -> dict[str, Any]:
+    """How each corpus was ANNOTATED, measured — because the two were not annotated alike.
+
+    This is the finding that decides how the rest of the block may be read, so it ships as
+    numbers rather than as a sentence. Measured 2026-08-25:
+
+        Trials 2023-24   `successful` present on 100.0% of events, `true` on 79.8%
+        ADCC 2024        present on  34.8%,                        `true` on 12.0%
+
+    Per type it is starker still. The trials dumps mark `guard` 68/68 and `escape` 17/17 as
+    successful; the ADCC 2024 dumps mark `guard` 0/70, `pass` 0/17, `transition` 0/20 and
+    `control` 3/139. These are two different annotation conventions in one table, not two
+    different ways of grappling.
+
+    **What it invalidates.** `lamas_chain`'s rule 3 sends `successful is True` to the success
+    state and everything else to the attempt state, so the attempt/success SPLIT of the state
+    space tracks the annotation batch: the trials corpus reads TKD 40 / TKDA 24 and BTK 26 /
+    BTKA 4, the Worlds corpus reads TKDA 75 / TKD 7 and BTKA 93 / BTK 2. Reporting that as
+    "qualifiers land more takedowns than the Worlds" would be reporting the dump batch.
+    `state_split_comparable` is therefore **false**, in the export, where a renderer can see it.
+
+    **What survives, and what only LOOKS like it survives.** The family-level `anchor` collapses
+    attempt and success, so it is genuinely immune and is the one cross-corpus reading this
+    block supports.
+
+    `reward_risk` is immune in its QUESTION (who acts next) but **not in its PARTITION**, and
+    the difference matters. Its rows are keyed by state, and the annotation decides which events
+    land in which state: `TKDA` in the trials corpus is "a takedown explicitly marked
+    unsuccessful" (21 appearances beside 16 `TKD`), while `TKDA` in the Worlds corpus is
+    "a takedown, mostly unmarked" (70 beside 3). Comparing those two rows compares two different
+    subsets of events under one label. The comparison duly finds `TKDA` −0.143 against +0.486
+    with a difference excluding zero (p=0.015) and `SUBA` +0.143 against +0.818 (p=0.029) --
+    which is precisely what the annotation gap predicts, since a takedown KNOWN to have failed
+    should hand the exchange over more often than an unmarked one. Those two p-values are
+    evidence about the dumps, not about qualifiers versus the Worlds.
+
+    So `reward_risk` is comparable WITHIN a corpus and refused ACROSS them, and
+    `reward_risk_cross_corpus_comparable` says so next to the numbers.
+    """
+    out: dict[str, Any] = {}
+    for label, bouts in buckets.items():
+        evs = [e for b in bouts for e in b["seq"]]
+        n = len(evs)
+        present = sum(1 for e in evs if "successful" in e)
+        landed = sum(1 for e in evs if e.get("successful") is True)
+        out[label] = {
+            "events": n,
+            "present": present, "present_pct": round(100 * present / n, 1) if n else 0.0,
+            "true": landed, "true_pct": round(100 * landed / n, 1) if n else 0.0,
+            "by_tag": {t: _tag_true_rate(bouts, t) for t in sorted(tags[label])},
+        }
+    cyc = [e for bs in buckets.values() for b in bs for e in b["seq"]]
+    out[ADCC_CYCLE_LABEL] = {
+        "events": len(cyc),
+        "present": sum(1 for e in cyc if "successful" in e),
+        "present_pct": round(100 * sum(1 for e in cyc if "successful" in e) / len(cyc), 1)
+        if cyc else 0.0,
+        "true": sum(1 for e in cyc if e.get("successful") is True),
+        "true_pct": round(100 * sum(1 for e in cyc if e.get("successful") is True) / len(cyc), 1)
+        if cyc else 0.0,
+        "by_tag": {},
+        "pools_two_conventions": True,
+    }
+    a, b = out[ADCC_TRIALS_LABEL], out[ADCC_WORLDS_LABEL]
+    return {
+        "corpora": out,
+        "state_split_comparable": False,
+        # The partition, not the question. `reward_risk` asks who acts next, which the
+        # annotation cannot touch -- but its ROWS are keyed by state, and the annotation decides
+        # which events land in which state. See `_adcc_annotation`'s docstring.
+        "reward_risk_cross_corpus_comparable": False,
+        "comparable": ["anchor (nível de família)"],
+        "comparable_within_corpus": ["reward_risk", "matriz", "occupancy", "pathways_to_sub"],
+        "warning": (
+            f"⚠️ OS DOIS RECORTES NÃO FORAM ANOTADOS DO MESMO JEITO. `successful` aparece em "
+            f"{a['present_pct']}% dos eventos das Trials (e é `true` em {a['true_pct']}%) contra "
+            f"{b['present_pct']}% no ADCC 2024 (`true` em {b['true_pct']}%). Como a regra 3 "
+            f"manda `successful` ausente para o estado de TENTATIVA, a divisão "
+            f"tentativa/sucesso da matriz acompanha o LOTE DE ANOTAÇÃO, não o jiu-jitsu: ler "
+            f"'as Trials acertam mais quedas que o Mundial' seria ler o lote. Isso vale também "
+            f"para o `reward_risk` COMPARADO ENTRE RECORTES — a pergunta dele (quem age em "
+            f"seguida) é imune, mas as linhas são por estado, e `TKDA` nas Trials é 'queda "
+            f"marcada como falha' enquanto `TKDA` no Mundial é 'queda, quase sempre sem marca': "
+            f"são subconjuntos diferentes com o mesmo nome. Dentro de um recorte, tudo vale; "
+            f"ENTRE recortes, só o `anchor`, que colapsa tentativa e sucesso. O recorte "
+            f"`{ADCC_CYCLE_LABEL}` MISTURA as duas convenções e herda o mesmo limite."),
+    }
+
+
+def _tag_true_rate(bouts: Sequence[Mapping[str, Any]], tag: str) -> dict[str, int | float]:
+    evs = [e for b in bouts if b.get("event") == tag for e in b["seq"]]
+    landed = sum(1 for e in evs if e.get("successful") is True)
+    return {"events": len(evs), "true": landed,
+            "true_pct": round(100 * landed / len(evs), 1) if evs else 0.0}
+
+
+def adcc_layer(conn: Any) -> dict[str, Any]:
+    """One ADCC cycle through the division machinery: trials, Worlds, and the two together.
+
+    Each corpus is EXACTLY `markov_block`'s shape so the BracketAnalysis renderers built for
+    `markov[div]` draw these without a second implementation — same twelve states in the same
+    fixed order, same bout-cluster gating, same `reward_risk` sub-block. The only additions are
+    caveats, and they are additions rather than replacements: `lamas_chain.CAVEATS` describes the
+    method and stays true, while the cycle-specific ones describe THIS corpus.
+
+    `reward_risk.comparison` is Trials against Worlds — qualifier level against the top of the
+    sport, which is the contrast worth drawing here. It keeps the `d65`/`d65p` keys the division
+    comparison uses (the renderer reads `comparison_sides` for the labels, and always did), so
+    the same component renders both.
+    """
+    rows = conn.execute(text("""
+        select m.id::text, m.event, m.year, m.win_type,
+               m.athlete_a_id::text, m.athlete_b_id::text, m.sequence
+          from matches m
+         where m.status = 'final'
+           and m.event ilike '%adcc%'
+           and jsonb_array_length(coalesce(m.sequence, '[]'::jsonb)) > 0
+    """)).fetchall()
+
+    buckets: dict[str, list[dict[str, Any]]] = {ADCC_TRIALS_LABEL: [], ADCC_WORLDS_LABEL: []}
+    tags: dict[str, Counter[str]] = {k: Counter() for k in buckets}
+    excluded: Counter[str] = Counter()
+    for mid, event, year, win_type, a_id, b_id, seq in rows:
+        corpus = adcc_corpus_of(event, year)
+        if corpus is None:
+            excluded[str(event)] += 1
+            continue
+        buckets[corpus].append({"id": mid, "win_type": win_type, "a_id": a_id, "b_id": b_id,
+                                "seq": list(seq or []), "event": event, "year": year})
+        tags[corpus][str(event)] += 1
+
+    cycle = buckets[ADCC_TRIALS_LABEL] + buckets[ADCC_WORLDS_LABEL]
+    sets = ((ADCC_TRIALS_LABEL, buckets[ADCC_TRIALS_LABEL]),
+            (ADCC_WORLDS_LABEL, buckets[ADCC_WORLDS_LABEL]),
+            (ADCC_CYCLE_LABEL, cycle))
+    ann = _adcc_annotation(buckets, tags)
+    corpora: dict[str, Any] = {}
+    for label, bouts in sets:
+        block = markov_block(bouts)
+        cov = ann["corpora"][label]
+        corpora[label] = {**block, "annotation": cov, "caveats": [
+            *block["caveats"],
+            f"CICLO INTEIRO, TODAS AS DIVISÕES. Este recorte é o ciclo ADCC {ADCC_CYCLE} "
+            f"completo — masculino e feminino, todas as faixas de peso, absoluto incluído. NÃO é "
+            f"uma leitura por divisão: o bloco `markov` é que tem escopo de categoria. Comparar "
+            f"um estado daqui com o mesmo estado de uma divisão compara populações diferentes.",
+            f"Cobertura de `successful` MEDIDA aqui: {cov['present_pct']}% dos "
+            f"{cov['events']} eventos trazem o campo e {cov['true_pct']}% trazem `true`, contra "
+            f"28,9% de cobertura no corpus inteiro.",
+            ann["warning"],
+        ]}
+    cmp_rows = reward_risk_comparison(corpora[ADCC_TRIALS_LABEL]["reward_risk"]["rows"],
+                                      corpora[ADCC_WORLDS_LABEL]["reward_risk"]["rows"])
+    for label in corpora:
+        corpora[label]["reward_risk"]["comparison"] = cmp_rows
+        corpora[label]["reward_risk"]["comparison_sides"] = {"d65": ADCC_TRIALS_LABEL,
+                                                             "d65p": ADCC_WORLDS_LABEL}
+    return {
+        "cycle": ADCC_CYCLE,
+        "corpora": corpora,
+        "order": [ADCC_TRIALS_LABEL, ADCC_WORLDS_LABEL, ADCC_CYCLE_LABEL],
+        "comparison_of": [ADCC_TRIALS_LABEL, ADCC_WORLDS_LABEL],
+        # The measurement that governs how everything above may be read. Top level because it
+        # is a fact ABOUT the pair of corpora, not about either one of them.
+        "annotation": ann,
+        # Provenance of the selection, so a reader can audit which tag contributed what without
+        # the database. `excluded` is every ADCC-tagged bout WITH events that this cycle refuses
+        # -- overwhelmingly the 2022 cycle, and saying so beats implying nothing was left out.
+        "tags": {k: dict(sorted(v.items())) for k, v in tags.items()},
+        "excluded": dict(sorted(excluded.items())),
+        "selection": {"trials": list(ADCC_TRIALS_2023_24), "worlds": list(ADCC_WORLDS_2024),
+                      "undated_admitted_by_year": list(ADCC_UNDATED),
+                      "cycle_years": list(ADCC_CYCLE_YEARS)},
+    }
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--records", type=Path, default=RECORDS,
@@ -2012,6 +2259,7 @@ def main() -> int:
         rating = rating_layer(conn, roster)
         radar = radar_layer(conn, bouts, roster)
         dq_ = data_quality(conn, roster, display)
+        adcc = adcc_layer(conn)
 
     doc = {
         "generated": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -2046,6 +2294,7 @@ def main() -> int:
         "athletes": athlete_layer(records, rating, bouts),
         "sequence": seq,
         "markov": markov,
+        "adcc": adcc,
         "embedding": emb,
         "baseline": baseline_layer(bouts, roster_ids, seq),
         "videos": vids,
@@ -2081,6 +2330,16 @@ def main() -> int:
               f"anchor {agree}/{len(m['anchor'])} agree with Lamas 2024")
         print(f"    reward-risk: {rr['bouts_used']}/{m['n_bouts']} bouts usable "
               f"({rr['bouts_refused'] or 'none refused'}), "
+              f"{sum(1 for r in rr['rows'] if r['gated'])}/{len(rr['rows'])} states estimable")
+    print(f"  ADCC cycle {adcc['cycle']} (all divisions, from the DB):")
+    for name in adcc["order"]:
+        c = adcc["corpora"][name]
+        rr = c["reward_risk"]
+        agree = sum(1 for a in c["anchor"] if a["cross"]["agrees"])
+        print(f"    {name}: {c['n_bouts']} bouts, {c['n_transitions']} transitions, "
+              f"{c['n_events_mapped']} mapped / {c['n_events_skipped']} skipped, "
+              f"anchor {agree}/{len(c['anchor'])}, "
+              f"reward-risk {rr['bouts_used']}/{c['n_bouts']} usable, "
               f"{sum(1 for r in rr['rows'] if r['gated'])}/{len(rr['rows'])} states estimable")
     print(f"  videos: {len(vids)}   embedded graphs: "
           f"{sum(v['usable'] for v in emb['divisions'].values())}")
