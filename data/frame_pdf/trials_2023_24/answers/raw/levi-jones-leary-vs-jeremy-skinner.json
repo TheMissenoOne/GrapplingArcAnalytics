@@ -1,0 +1,100 @@
+{
+ "bout": {
+  "athlete_a": "Levi Jones-Leary",
+  "athlete_b": "Jeremy Skinner",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Levi Jones-Leary",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 29215,
+  "bout_end_seconds": 29680,
+  "identity_discriminator": "Levi Jones-Leary in black short-sleeve rashguard and black shorts; Jeremy Skinner in red long-sleeve rashguard and black shorts",
+  "final_score": {
+   "Levi Jones-Leary": 3,
+   "Jeremy Skinner": 0
+  },
+  "notes": "Frames 29200-29205 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 29215,
+   "label": "Collar Tie",
+   "actor": "Levi Jones-Leary",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 29370,
+   "label": "Guard Pull",
+   "actor": "Jeremy Skinner",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 29375,
+   "label": "Open Guard",
+   "actor": "Jeremy Skinner",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 29405,
+   "label": "Body Lock Pass",
+   "actor": "Levi Jones-Leary",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 29485,
+   "label": "Side Control",
+   "actor": "Levi Jones-Leary",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 29505,
+   "label": "Turtle Position",
+   "actor": "Jeremy Skinner",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 29510,
+   "label": "Guard Recovery",
+   "actor": "Jeremy Skinner",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 29545,
+   "label": "Top Half Guard",
+   "actor": "Levi Jones-Leary",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 29585,
+   "label": "Jump Guard",
+   "actor": "Jeremy Skinner",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 29605,
+   "label": "Top Control",
+   "actor": "Levi Jones-Leary",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "77kg",
+  "source_file": "bouts bout athlete a.txt",
+  "curated_start": 29200,
+  "curated_end": 29700,
+  "gemini_winner": "Levi Jones-Leary",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

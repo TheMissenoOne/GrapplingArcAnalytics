@@ -1,0 +1,114 @@
+{
+ "bout": {
+  "athlete_a": "Owen Jones",
+  "athlete_b": "Cammy Donnelly",
+  "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+  "winner": "Owen Jones",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 2350,
+  "bout_end_seconds": 2860,
+  "identity_discriminator": "identity_discriminator confirmed in frames: Owen Jones wears a BLACK rashguard with a Texas flag graphic visible on the BACK (clearly seen at ts2705, frame owen-jones-vs-cammy-donnelly-17.jpg) and black shorts; Cammy Donnelly wears a RED sleeveless rashguard, black leggings, blonde hair (visible throughout). Note: scoreboard row colour (O.Jones=red row, C.Donnelly=blue row) is a UI convention unrelated to kit colour -- identity was bound to kit/back-graphic, not scoreboard row colour. No winner-swap flag (gemini_winner=Owen Jones matches published winner). Scoreboard read 0-0 until ts~2755 then jumped to 3-0 (Owen), matching the ts2750 Guard Pass points=3 exactly.",
+  "final_score": {
+   "Owen Jones": 3,
+   "Cammy Donnelly": 0
+  },
+  "notes": "Frames 2330-2340 show the conclusion of the previous match. | All 13 Gemini events kept, no corrections or drops. The mid-match guard-variant sequence (half guard 2460 / butterfly guard 2535 / k-guard 2605 / top control 2710) sits in a fast continuous scramble where single 5s frames make top/bottom orientation genuinely hard to pin at every tick; kept on the strength of the surrounding clear anchor events (guard pull 2375, sweep 2640, scored pass+3pts 2750) which form an internally consistent guard-retention-then-sweep-then-pass narrative and the scoreboard jump (0-0 -> 3-0) that independently corroborates the 2750 pass. No off-library labels; all labels present verbatim in the vocabulary pages. Final score/decision consistent with published Owen Jones win by points.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 2355,
+   "label": "Collar Tie",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2375,
+   "label": "Guard Pull",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 2385,
+   "label": "Open Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2460,
+   "label": "Half Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2535,
+   "label": "Butterfly Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2605,
+   "label": "K-Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2640,
+   "label": "Sweep",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "sweep"
+  },
+  {
+   "ts": 2710,
+   "label": "Top Control",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2750,
+   "label": "Guard Pass",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 2765,
+   "label": "Side Control",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2790,
+   "label": "Escape to Standing",
+   "actor": "Cammy Donnelly",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 2800,
+   "label": "Guard Pull",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 2835,
+   "label": "Open Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 13/13) 2026-08-25"
+}

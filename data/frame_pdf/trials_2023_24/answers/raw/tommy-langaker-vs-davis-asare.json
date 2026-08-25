@@ -1,0 +1,107 @@
+{
+ "bout": {
+  "athlete_a": "Tommy Langaker",
+  "athlete_b": "Davis Asare",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Tommy Langaker",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 19660,
+  "bout_end_seconds": 20010,
+  "identity_discriminator": "Tommy Langaker in black Wulfing / Level Black rashguard, black shorts, blonde hair and beard; Davis Asare in black rashguard with Japanese kanji and black shorts",
+  "final_score": {
+   "Tommy Langaker": 3,
+   "Davis Asare": 0
+  },
+  "notes": "Frames 19600-19655 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 19665,
+   "label": "Collar Tie",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 19675,
+   "label": "Guard Pull",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 19680,
+   "label": "Open Guard",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19705,
+   "label": "Leg Entanglement",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19840,
+   "label": "Top Control",
+   "actor": "Davis Asare",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 19880,
+   "label": "50/50 Guard",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19965,
+   "label": "Back Take",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 19990,
+   "label": "Back Control",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 19990,
+   "label": "Body Triangle",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 20005,
+   "label": "Rear Naked Choke",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 20010,
+   "label": "Tap",
+   "actor": "Davis Asare",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "77kg",
+  "source_file": "bouts bout athlete aaaa.txt",
+  "curated_start": 19600,
+  "curated_end": 20050,
+  "gemini_winner": "Tommy Langaker",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

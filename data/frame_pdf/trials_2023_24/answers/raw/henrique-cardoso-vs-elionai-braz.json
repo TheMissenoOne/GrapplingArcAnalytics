@@ -1,0 +1,101 @@
+{
+ "bout": {
+  "athlete_a": "Henrique Cardoso",
+  "athlete_b": "Elionai Braz",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Henrique Cardoso",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 13385,
+  "bout_end_seconds": 13935,
+  "identity_discriminator": "Henrique Cardoso in black rashguard with Vulkan branding and black shorts; Elionai Braz shirtless with black shorts",
+  "final_score": {
+   "Henrique Cardoso": 6,
+   "Elionai Braz": 0
+  },
+  "notes": "Frames 13360-13375 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 13395,
+   "label": "Collar Tie",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 13520,
+   "label": "Suplex",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 13645,
+   "label": "Back Take",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 13645,
+   "label": "Back Control",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 13740,
+   "label": "Suplex",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 13750,
+   "label": "Back Take",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 13765,
+   "label": "Back Control",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 13825,
+   "label": "Guard Pull",
+   "actor": "Elionai Braz",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 13845,
+   "label": "Top Control",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 13930,
+   "label": "Single Leg Takedown",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "takedown"
+  }
+ ],
+ "audit": {
+  "division": "99kg",
+  "source_file": "ai_studio_code-5.txt",
+  "curated_start": 13360,
+  "curated_end": 13940,
+  "gemini_winner": "Henrique Cardoso",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

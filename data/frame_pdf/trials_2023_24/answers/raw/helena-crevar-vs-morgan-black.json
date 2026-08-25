@@ -1,0 +1,135 @@
+{
+ "bout": {
+  "athlete_a": "Helena Crevar",
+  "athlete_b": "Morgan Black",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Helena Crevar",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 21735,
+  "bout_end_seconds": 22215,
+  "identity_discriminator": "Helena Crevar in blue/white/red stars-and-stripes rashguard and spats; Morgan Black in all-black rashguard and shorts",
+  "final_score": {
+   "Helena Crevar": 2,
+   "Morgan Black": 0
+  },
+  "notes": "Frames 21600-21730 are walkouts and introductions; frames 22260-22295 are replays."
+ },
+ "events": [
+  {
+   "ts": 21755,
+   "label": "Collar Tie",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21765,
+   "label": "Two-on-One Control",
+   "actor": "Morgan Black",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21780,
+   "label": "Underhook",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 21805,
+   "label": "Guillotine Choke",
+   "actor": "Morgan Black",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 21875,
+   "label": "Uchi Mata",
+   "actor": "Helena Crevar",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 21920,
+   "label": "Russian Tie",
+   "actor": "Morgan Black",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21945,
+   "label": "Uchi Mata",
+   "actor": "Helena Crevar",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 21965,
+   "label": "Leg Entry",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 21975,
+   "label": "Open Guard",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 22020,
+   "label": "Sweep",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 22025,
+   "label": "Front Headlock Control",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 22085,
+   "label": "Turtle Position",
+   "actor": "Morgan Black",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 22085,
+   "label": "Turtle Control",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 22180,
+   "label": "Wrestle-Up",
+   "actor": "Morgan Black",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 22200,
+   "label": "Snap Down",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "takedown"
+  }
+ ],
+ "audit": {
+  "division": "65kg F",
+  "source_file": "ai_studio_code(20).txt",
+  "curated_start": 21600,
+  "curated_end": 22320,
+  "gemini_winner": "Helena Crevar",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,77 @@
+{
+ "bout": {
+  "athlete_a": "Anna Rodrigues",
+  "athlete_b": "Franciele Santos",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Anna Rodrigues",
+  "year": 2024,
+  "penalties": "Franciele Santos ~t11890 (Caution / Penalty)"
+ },
+ "events": [
+  {
+   "ts": 11275,
+   "label": "Collar Tie",
+   "actor": "Anna Rodrigues",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11370,
+   "label": "Underhook",
+   "actor": "Anna Rodrigues",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 11600,
+   "label": "Kimura Grip",
+   "actor": "Anna Rodrigues",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11640,
+   "label": "Turtle Control",
+   "actor": "Anna Rodrigues",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11675,
+   "label": "Front Headlock Control",
+   "actor": "Anna Rodrigues",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11715,
+   "label": "Escape to Standing",
+   "actor": "Franciele Santos",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 11770,
+   "label": "Takedown",
+   "actor": "Franciele Santos",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 12095,
+   "label": "Guillotine Choke",
+   "actor": "Anna Rodrigues",
+   "successful": false,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "55kg F",
+  "source_file": "ai_studio_code (2).txt",
+  "curated_start": 11230,
+  "curated_end": 12145,
+  "gemini_winner": null,
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

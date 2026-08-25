@@ -1,0 +1,78 @@
+{
+ "bout": {
+  "athlete_a": "Josh Saunders",
+  "athlete_b": "Ricky Luzny",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Josh Saunders",
+  "year": 2023,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 6075,
+  "bout_end_seconds": 6335,
+  "identity_discriminator": "Scoreboard consistently reads 'J. Saunders' (red, top) / 'R. Luzny' (blue, bottom) throughout, clock counting down monotonically from 8:00 to the finish with no cut/reset, confirming a single continuous bout. Kit matches meta exactly: Josh Saunders in a dark green rashguard, Ricky Luzny in a bright pink rashguard, both black shorts, visible from the walkout frames (page 05) onward. Note: from ts~6310 to the finish Saunders' top reads as pale/white rather than green in the frames (likely sweat-soaked fabric or lighting under a different camera badge 'Finals'), but the scoreboard names and monotonic clock rule out a bout switch.",
+  "final_score": {
+   "Josh Saunders": 0,
+   "Ricky Luzny": 0
+  },
+  "notes": "Frames 6040-6070 are introductions and referee instructions. | No drops; all 8 events verified concordant, 0 corrections. Single continuous bout confirmed by monotonic countdown clock despite a wardrobe/lighting change on Saunders' rashguard appearance in the closing frames.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 6075,
+   "label": "Collar Tie",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6125,
+   "label": "Single Leg Takedown",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 6130,
+   "label": "Top Control",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6205,
+   "label": "Turtle Control",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6240,
+   "label": "Back Take",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 6255,
+   "label": "Back Control",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6310,
+   "label": "Rear Naked Choke",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 6335,
+   "label": "Tap",
+   "actor": "Ricky Luzny",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 8/8) 2026-08-25"
+}

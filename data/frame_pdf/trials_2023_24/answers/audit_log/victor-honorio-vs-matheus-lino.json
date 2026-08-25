@@ -1,0 +1,86 @@
+{
+ "log": [
+  {
+   "ts": 12825,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Standing hand-fighting/collar-tie exchange visible ts12820-12870; no narration contradiction."
+  },
+  {
+   "ts": 12880,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts12885: 'Veronario [Honorio] taking Matelino down. Not scoring a takedown, but bringing him to the ground' -- textbook description of a snap down, not a scored takedown."
+  },
+  {
+   "ts": 12945,
+   "label": "Double Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts12945: 'Oni [Honorio] was able to take it down and I think he's going to score. He got it. He's secure in the back.' confirms a Honorio takedown at this ts."
+  },
+  {
+   "ts": 12985,
+   "label": "Half Guard (Lino)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts12985: 'now Lo's [Lino] playing half guard. This is what he could do.'"
+  },
+  {
+   "ts": 12995,
+   "label": "Top Control (Half Guard)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame + narration ts12995 ('Under hook right there... that's a pretty good situation') show Honorio controlling from top half guard."
+  },
+  {
+   "ts": 13075,
+   "label": "Side Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts13075: 'Matt's [Lino] opening up the half guard to release... He [Honorio] got the side control.'"
+  },
+  {
+   "ts": 13125,
+   "label": "Mount",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts13125: 'Now there's a mount. Now he's going to collect his points for the mount. Two points.' Exact match including the points value."
+  },
+  {
+   "ts": 13140,
+   "label": "Half Guard (Lino)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts13140: 'He got back to the half [guard]... Onori is a heavy guy there with the pressure.'"
+  },
+  {
+   "ts": 13205,
+   "label": "Guard Pass",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "Gemini placed this at ts13205, but the scoreboard shows V.Honorio still at 2 points through ts13175 and already at 5 points by ts13180 -- the 3-point pass that explains the jump happened in the 13175-13180 window, not at 13205 (where the frames instead show Honorio hunting for a second mount and Lino recovering closed guard, per narration 'Onari got to the close guard'). Second look: corrected ts to 13178 (midpoint of the only window where the score could have changed); label/actor/points kept, all otherwise consistent with a completed guard pass on a half-guard opponent.",
+   "corrections": {
+    "ts": 13178
+   }
+  },
+  {
+   "ts": 13225,
+   "label": "Half Guard (Lino)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts13225: 'half guard again. It seems like Onado [Honorio] has cracked the code for that half guard.'"
+  },
+  {
+   "ts": 13340,
+   "label": "Top Control (Half Guard)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame + narration ts13340 ('He's not stalling. He's just pressuring all the time') show Honorio in top control pressure through the final seconds; match ends ts13355 with Honorio declared winner, consistent with the 5-0 final score."
+  }
+ ],
+ "identity_check": "Scoreboard lower-third 'V. HONORIO' (red row, top) / 'M. Lino' (blue row, bottom) present on every live frame from ts12820 onward. Honorio shirtless with plain black shorts; Lino in a dark grey rashguard printed 'ZONA' and black shorts, matching identity_discriminator exactly. Frames ts12800-12815 (before bout_start_seconds=12820) show an unrelated prior match's lower-third ('M. Ruffatto' vs 'K. Silva Ramos') -- excluded as not-this-bout per the frame_pdf cutaway warning; first genuine frame of this bout is ts12820.",
+ "notes": "Single meaningful finding: the 3-point Guard Pass event's timestamp was ~27s late in the Gemini read, landing after the scoreboard had already updated -- corrected to the actual scoring window (13175-13180) rather than dropped, since label/actor/points are all independently well-supported. No off-library labels, no winner contradiction. Curated range (12800-13360) opens with 15s of an unrelated prior bout's scorecard, excluded per protocol."
+}

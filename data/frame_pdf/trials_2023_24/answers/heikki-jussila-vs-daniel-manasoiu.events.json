@@ -1,0 +1,57 @@
+{
+ "bout": {
+  "athlete_a": "Heikki Jussila",
+  "athlete_b": "Daniel Manasoiu",
+  "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+  "winner": "Heikki Jussila",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 15,
+  "bout_end_seconds": 805,
+  "identity_discriminator": "Matches bout.identity_discriminator: Heikki Jussila in blue Pitbull/Helsinki rashguard, Daniel Manasoiu in black Future Kimonos/Daruma rashguard. Confirmed via scoreboard 'D. Manasoiu (red row) / H. Jussila (blue row)' from bout start (0s) onward, held consistent through all kept frames.",
+  "final_score": {
+   "Heikki Jussila": 0,
+   "Daniel Manasoiu": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "audit.flags empty, no off-library labels, no winner contradiction (Jussila won, matches bout.winner). This is a sparse event log relative to the 0-830s curated range -- fine, no invented events added. bout.final_score (0-0) is stale relative to the frames (scoreboard shows Jussila 1-0 by 270s); not something the audit corrects since final_score is a bout-level field outside the per-event schema this audit touches."
+ },
+ "events": [
+  {
+   "ts": 25,
+   "label": "Collar Tie",
+   "actor": "Heikki Jussila",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 165,
+   "label": "Guard Pull",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 185,
+   "label": "Half Guard",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 270,
+   "label": "Top Control (Half Guard)",
+   "actor": "Heikki Jussila",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 570,
+   "label": "Collar Tie",
+   "actor": "Heikki Jussila",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 5/5) 2026-08-25"
+}

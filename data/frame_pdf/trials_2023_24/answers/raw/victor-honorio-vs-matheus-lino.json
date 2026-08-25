@@ -1,0 +1,108 @@
+{
+ "bout": {
+  "athlete_a": "Victor Honorio",
+  "athlete_b": "Matheus Lino",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Victor Honorio",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 12820,
+  "bout_end_seconds": 13350,
+  "identity_discriminator": "Victor Honorio shirtless with black shorts; Matheus Lino in dark grey Zona rashguard and black shorts",
+  "final_score": {
+   "Victor Honorio": 5,
+   "Matheus Lino": 0
+  },
+  "notes": "Frames 12800-12815 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 12825,
+   "label": "Collar Tie",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 12880,
+   "label": "Snap Down",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 12945,
+   "label": "Double Leg Takedown",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 12985,
+   "label": "Half Guard",
+   "actor": "Matheus Lino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 12995,
+   "label": "Top Control (Half Guard)",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 13075,
+   "label": "Side Control",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 13125,
+   "label": "Mount",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control",
+   "points": 2
+  },
+  {
+   "ts": 13140,
+   "label": "Half Guard",
+   "actor": "Matheus Lino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 13205,
+   "label": "Guard Pass",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 13225,
+   "label": "Half Guard",
+   "actor": "Matheus Lino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 13340,
+   "label": "Top Control (Half Guard)",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "+99kg",
+  "source_file": "bouts bout athlete aaaa.txt",
+  "curated_start": 12800,
+  "curated_end": 13360,
+  "gemini_winner": "Victor Honorio",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,134 @@
+{
+ "bout": {
+  "athlete_a": "Michael Pixley",
+  "athlete_b": "Adam Bradley",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Michael Pixley",
+  "year": 2024,
+  "win_type": "DECISION",
+  "bout_start_seconds": 24185,
+  "bout_end_seconds": 24940,
+  "identity_discriminator": "Michael Pixley in black rashguard with Daisy Fresh branding and black shorts; Adam Bradley in blue/red USA rashguard, bald head, black shorts",
+  "final_score": {
+   "Michael Pixley": 0,
+   "Adam Bradley": 0
+  },
+  "notes": "Frames 24120-24180 are walkouts and introductions; frames 25000-25015 are replays."
+ },
+ "events": [
+  {
+   "ts": 24190,
+   "label": "Collar Tie",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 24220,
+   "label": "Foot Sweep",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 24245,
+   "label": "North-South Position",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 24310,
+   "label": "North South Choke",
+   "actor": "Michael Pixley",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 24345,
+   "label": "Escape to Standing",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 24370,
+   "label": "Seated Guard",
+   "actor": "Adam Bradley",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 24575,
+   "label": "Knee Cut Pass",
+   "actor": "Michael Pixley",
+   "successful": false,
+   "type": "pass"
+  },
+  {
+   "ts": 24585,
+   "label": "Turtle Position",
+   "actor": "Adam Bradley",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 24585,
+   "label": "Turtle Control",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 24625,
+   "label": "Deep Half Guard",
+   "actor": "Adam Bradley",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 24695,
+   "label": "Collar Tie",
+   "actor": "Adam Bradley",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 24865,
+   "label": "Foot Sweep",
+   "actor": "Adam Bradley",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 24880,
+   "label": "Single Leg Takedown",
+   "actor": "Adam Bradley",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 24890,
+   "label": "Darce Choke",
+   "actor": "Michael Pixley",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 24930,
+   "label": "Single Leg Takedown",
+   "actor": "Adam Bradley",
+   "successful": false,
+   "type": "takedown"
+  }
+ ],
+ "audit": {
+  "division": "99kg",
+  "source_file": "bouts bout athlete aa.txt",
+  "curated_start": 24120,
+  "curated_end": 25020,
+  "gemini_winner": "Michael Pixley",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

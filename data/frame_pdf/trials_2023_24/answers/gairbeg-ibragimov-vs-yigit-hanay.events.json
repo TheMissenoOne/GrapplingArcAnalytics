@@ -1,0 +1,64 @@
+{
+ "bout": {
+  "athlete_a": "Gairbeg Ibragimov",
+  "athlete_b": "Yigit Hanay",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Gairbeg Ibragimov",
+  "year": 2024,
+  "win_type": "DECISION",
+  "bout_start_seconds": 20060,
+  "bout_end_seconds": 20835,
+  "identity_discriminator": "Confirmed via the scoreboard graphic ('G. Ibragimov' red / 'Y. Hanay' blue) present from 20060s onward, plus kit: Gairbeg Ibragimov solid black rashguard+shorts; Yigit Hanay grey/white rashguard with a legible 'UF / Universal Fighters' team logo on the back. The UF logo is unambiguous and was used as the anchor to re-verify actor assignment mid-match (see notes -- 3 of 6 events had the actor backwards relative to who was actually on top/bottom).",
+  "final_score": {
+   "Gairbeg Ibragimov": 0,
+   "Yigit Hanay": 0
+  },
+  "notes": "Frames 20040-20055 show the conclusion of the previous match. | This bout has a recurring actor-attribution pattern, not a full match-wide swap: Gemini got the standing/opening events and the clean 20630 takedown right (kit colors match), but for the extended half-guard exchanges (20430-20460 and 20640-20755) it appears to have consistently named the athlete who was NOT on top as the 'controller' and the one who WAS on top as the 'guard player' -- backwards in both directions depending on which label was used. Corrected using the unambiguous grey/white kit with visible 'UF / Universal Fighters' team logo as the Hanay anchor, cross-checked against the clean 20630 takedown (black=Ibragimov=attacker, confirmed unambiguously) and against the scramble visible between 20635-20640 that flips top/bottom. Final score in the source bout JSON is 0-0 (win_type DECISION) so no points fields were ever expected here.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 20070,
+   "label": "Collar Tie",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 20290,
+   "label": "Closed Guard",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 20445,
+   "label": "Half Guard",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 20630,
+   "label": "Double Leg Takedown",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 20645,
+   "label": "Top Half Guard",
+   "actor": "Yigit Hanay",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 20755,
+   "label": "Half Guard",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 6/6) 2026-08-25"
+}

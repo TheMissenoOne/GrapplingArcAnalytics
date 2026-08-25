@@ -1,0 +1,69 @@
+{
+ "log": [
+  {
+   "ts": 12590,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "opening standing grip exchange right after the bow (frame -06.jpg)"
+  },
+  {
+   "ts": 12645,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at ts12645: \"...They want to take each other down. Attack the legs\" immediately preceding the leg-entanglement sequence (frame -07.jpg)"
+  },
+  {
+   "ts": 12650,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: \"Crossing the legs in there...\" with both athletes tangled on the ground (frame -07.jpg)"
+  },
+  {
+   "ts": 12660,
+   "label": "Heel Hook",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Now Kawwani's heel did get exposed for a quick second there\" (ts12660) and \"seems like Maria is looking for a leg attack in there\" (ts12665) (frame -08.jpg)"
+  },
+  {
+   "ts": 12715,
+   "label": "50/50 Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"They're exchanging a little 50/50. Try to maybe expose the hill or maybe get out\" (frame -09.jpg)"
+  },
+  {
+   "ts": 12725,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"...Now she's on top. Seems like Maria wants it back\" -- 'she' = Kauane per the leg-entanglement context just described (frame -10.jpg)"
+  },
+  {
+   "ts": 12735,
+   "label": "Knee Bar",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration ts12735 references an '[k]nee bar' attempt in a leg-attack scramble, and ts12755 confirms \"once she got her knee attacked she was able to defend\" (frame -10.jpg/-11.jpg)"
+  },
+  {
+   "ts": 12775,
+   "label": "Straight Ankle Lock",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"She got a leg lock. Oh, she tapped\" at ts12775 (frame -11.jpg)"
+  },
+  {
+   "ts": 12785,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"And she got the tap. She collects the tap. Maria is going to Vegas with a leg lock\"; frame shows Kauane covering her face having tapped and Maria celebrating with a raised fist (frame -12.jpg)"
+  }
+ ],
+ "identity_check": "Maria Ruffatto in black rashguard with 'ROLL A LOT' printed on the back (clearly visible at ts12585/12650/12710/12730, e.g. frame maria-ruffatto-vs-kauane-silva-07.jpg); Kauane Silva Ramos in yellow shirt + blue shorts throughout. Matches identity_discriminator and scoreboard ('M. Ruffatto' / 'K. Silva Ramos'). No winner-swap flag; gemini_winner=Maria Ruffatto matches published winner, submission finish confirmed on frame (Kauane tapping, Maria celebrating at ts12785, frame -12.jpg).",
+ "notes": "All 9 Gemini events audited and kept as-is, no corrections needed. This bout has the cleanest audio/frame corroboration of the batch -- nearly every event has a verbatim narration match. Submission finish (Straight Ankle Lock -> Tap) is directly visible on frame and matches the published win_type=SUBMISSION."
+}

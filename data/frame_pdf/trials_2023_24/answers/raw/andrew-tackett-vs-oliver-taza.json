@@ -1,0 +1,112 @@
+{
+ "bout": {
+  "athlete_a": "Andrew Tackett",
+  "athlete_b": "Oliver Taza",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Andrew Tackett",
+  "year": 2024
+ },
+ "events": [
+  {
+   "ts": 25565,
+   "label": "Clinch",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 25665,
+   "label": "Leg Entry",
+   "actor": "Oliver Taza",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 25725,
+   "label": "Double Leg Takedown",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 25730,
+   "label": "Side Control",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 25770,
+   "label": "Back Take",
+   "actor": "Andrew Tackett",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 25775,
+   "label": "Half Guard",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 25805,
+   "label": "Stand Up",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 25820,
+   "label": "Single Leg Takedown",
+   "actor": "Oliver Taza",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 25845,
+   "label": "Single Leg Takedown",
+   "actor": "Oliver Taza",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 25875,
+   "label": "Guard Pass",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 25895,
+   "label": "Back Control",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 25985,
+   "label": "Body Triangle",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 26060,
+   "label": "Mount",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "77kg",
+  "source_file": "ai_studio_code.txt",
+  "curated_start": 25540,
+  "curated_end": 26080,
+  "gemini_winner": null,
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

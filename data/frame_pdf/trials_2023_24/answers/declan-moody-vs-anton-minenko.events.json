@@ -1,0 +1,52 @@
+{
+ "bout": {
+  "athlete_a": "Declan Moody",
+  "athlete_b": "Anton Minenko",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Declan Moody",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 6385,
+  "bout_end_seconds": 6885,
+  "identity_discriminator": "Declan Moody = plain solid black rashguard/shorts; Anton Minenko = black rashguard/shorts with a visible green/yellow band on one sleeve and camo-pattern shorts, both matching identity_discriminator. Held consistent from the opening stand-up through the final takedown, confirmed by the scoreboard jumping to 'D. Moody: 4' at the exact moment the black-plain athlete secures the back-exposure takedown (6855-6865), matching the published 4-0 final score for Declan Moody.",
+  "final_score": {
+   "Declan Moody": 4,
+   "Anton Minenko": 0
+  },
+  "notes": "Frames 6350-6370 show the conclusion of the prior match. | Very sparse event log for a 500s bout (long feeling-out/wrestling stalemate 6390-6750 with nothing else logged, consistent with a slow POINTS win) -- nothing found in the unlogged stretch that looked like a missed high-confidence event worth adding. Only correction: the opening Collar Tie's timestamp, moved ~35s later to where the grip is actually visible.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 6425,
+   "label": "Collar Tie",
+   "actor": "Declan Moody",
+   "successful": true,
+   "type": "control",
+   "note": "Gemini logged ts=6390 (bout start); the frames at 6380-6400 show only pre-contact circling, the actual tie-up grip is first clearly visible at 6415-6425. Timestamp corrected to the frame where the technique is actually visible; label/actor/type unchanged."
+  },
+  {
+   "ts": 6750,
+   "label": "Duck Under",
+   "actor": "Declan Moody",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 6855,
+   "label": "Takedown (Back Exposure)",
+   "actor": "Declan Moody",
+   "successful": true,
+   "type": "takedown",
+   "points": 4
+  },
+  {
+   "ts": 6865,
+   "label": "Top Control",
+   "actor": "Declan Moody",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 4/4) 2026-08-25"
+}

@@ -1,0 +1,83 @@
+{
+ "bout": {
+  "athlete_a": "Adele Fornarino",
+  "athlete_b": "Kanae Yamada",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Adele Fornarino",
+  "year": 2024
+ },
+ "events": [
+  {
+   "ts": 26925,
+   "label": "Clinch",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27035,
+   "label": "Guard Pull",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27055,
+   "label": "Seated Guard",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27080,
+   "label": "Shin to Shin Guard",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27215,
+   "label": "Leg Entanglement Entry",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27275,
+   "label": "Guard Recovery",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 27300,
+   "label": "Closed Guard",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27365,
+   "label": "Armbar",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 27375,
+   "label": "Tap",
+   "actor": "Kanae Yamada",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "55kg F",
+  "source_file": "ai_studio_code(1).txt",
+  "curated_start": 26880,
+  "curated_end": 27380,
+  "gemini_winner": null,
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

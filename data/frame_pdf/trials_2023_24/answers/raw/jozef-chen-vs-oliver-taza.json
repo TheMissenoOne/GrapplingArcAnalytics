@@ -1,0 +1,109 @@
+{
+ "bout": {
+  "athlete_a": "Jozef Chen",
+  "athlete_b": "Oliver Taza",
+  "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+  "winner": "Jozef Chen",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 1465,
+  "bout_end_seconds": 2320,
+  "identity_discriminator": "Jozef Chen in beige/purple B-Team rashguard and purple shorts; Oliver Taza in black rashguard with yellow graphics and black shorts",
+  "final_score": {
+   "Jozef Chen": 3,
+   "Oliver Taza": 0
+  },
+  "notes": "Frames 1450-1460 show athlete introductions."
+ },
+ "events": [
+  {
+   "ts": 1470,
+   "label": "Collar Tie",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 1525,
+   "label": "Guard Pull",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 1535,
+   "label": "Half Guard",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 1585,
+   "label": "Butterfly Half Guard",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 1645,
+   "label": "Head-Arm Control (Top)",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 1740,
+   "label": "Guard Pass",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 1765,
+   "label": "Side Control",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 1815,
+   "label": "Half Guard",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2095,
+   "label": "Top Control (Half Guard)",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2155,
+   "label": "Body Triangle (Bottom)",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2275,
+   "label": "Guard Retention",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "audit": {
+  "division": "77kg",
+  "source_file": "ai_studio_code-5.txt",
+  "curated_start": 1450,
+  "curated_end": 2330,
+  "gemini_winner": "Jozef Chen",
+  "flags": [
+   "ts 1645: label 'Head-Arm Control (Top)' off-library -> audit must snap or drop"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

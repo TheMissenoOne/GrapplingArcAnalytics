@@ -1,0 +1,114 @@
+{
+ "log": [
+  {
+   "ts": 24190,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "grip-fighting exchange visible at frame, consistent with actor/kit"
+  },
+  {
+   "ts": 24220,
+   "label": "Foot Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at 24275 explicitly: 'Beautiful foot sweep to put Bradley to the mat'"
+  },
+  {
+   "ts": 24245,
+   "label": "North-South Position",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at 24240: 'North South again... if you're Pixley'; frame shows Pixley north-south on Bradley"
+  },
+  {
+   "ts": 24310,
+   "label": "North South Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at 24310-24315: 'Looking on a north south choke here... you see Bradley trying to turn his head in'; unresolved, matches successful=false"
+  },
+  {
+   "ts": 24345,
+   "label": "Escape to Standing",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at 24345: 'release it. Pixley back to the feet'; frame shows referee restart, Pixley standing, Bradley seated"
+  },
+  {
+   "ts": 24370,
+   "label": "Seated Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frames 24370-24385 show standard ADCC seated restart (Bradley seated, Pixley standing gripping ankle)"
+  },
+  {
+   "ts": 24575,
+   "label": "Knee Cut Pass",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "second look: narration 'Nice cut through... Tommy doing the knee' then 'Oh, he's through' at 24580 and Bradley forced to turtle at 24585 -- pass demonstrably landed",
+   "corrections": {
+    "successful": true
+   }
+  },
+  {
+   "ts": 24585,
+   "label": "Turtle Position",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Forcing Adam out of Bradley to turtle'"
+  },
+  {
+   "ts": 24585,
+   "label": "Turtle Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'looking for the hooks... Michael Pixley has one hook in'"
+  },
+  {
+   "ts": 24625,
+   "label": "Deep Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at 24625 verbatim: 'Now Adam Bradley finds up in the deep half guard'"
+  },
+  {
+   "ts": 24695,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frames show mutual grip-fighting clinch in overtime consistent with a collar tie by Bradley"
+  },
+  {
+   "ts": 24865,
+   "label": "Foot Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim at 24865: 'Bradley throw by foot sweep attempt. Big swing and a miss.'"
+  },
+  {
+   "ts": 24880,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: 'single by Adam Bradley. Single leg attempt.'; no completion shown"
+  },
+  {
+   "ts": 24890,
+   "label": "Darce Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration ('Darth situation... clearing his left arm all the way out') is a mis-transcription of Darce; Bradley shown defending/clearing the arm, i.e. Pixley's attempt failed"
+  },
+  {
+   "ts": 24930,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim across 24930/24935: 'Another attempt from Bradley to get in on a leg... In on a leg again is Bradley'"
+  }
+ ],
+ "identity_check": "Lower-third walkout graphic (page 08, 6:42:50) reads 'ADAM BRADLEY -99kg FINALS MICHAEL PIXLEY'; scoreboard overlay throughout shows 'A. Bradley' (red row) / 'M. Pixley' (blue row). Adam Bradley confirmed in blue/red USA rashguard, bald; Michael Pixley in black/white Daisy Fresh rashguard. Verified against page 08 frame 24175 (both athletes walking onto mat individually named by commentary) and consistent kit colors through all subsequent frames including overtime (TB1 clock).",
+ "notes": "Bout went to overtime (TB1 clock visible from ~24660s on) after a scoreless regulation period; final_score 0-0 and win_type DECISION in the source meta are consistent with this. No drops -- all 15 Gemini events verified concordant or resolved with high confidence; one successful-flag correction on the 24575 knee cut pass."
+}

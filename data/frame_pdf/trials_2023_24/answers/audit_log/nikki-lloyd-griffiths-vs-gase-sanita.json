@@ -1,0 +1,62 @@
+{
+ "log": [
+  {
+   "ts": 27940,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame at bout start (27940) shows exact collar-tie clinch"
+  },
+  {
+   "ts": 27990,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 27990 shows Griffiths pulling Sanita's head/neck down to the mat, consistent with a snap down"
+  },
+  {
+   "ts": 28015,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 28010-28015 shows Griffiths on top controlling Sanita on the ground"
+  },
+  {
+   "ts": 28045,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 28045 shows Sanita on the bottom with Griffiths engaged from a guard-range position, consistent with closed guard"
+  },
+  {
+   "ts": 28080,
+   "label": "Escape to Standing",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 28080 shows both fighters scrambling back up to their feet"
+  },
+  {
+   "ts": 28160,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 28160-28165 shows a takedown scramble to the ground initiated by Griffiths"
+  },
+  {
+   "ts": 28165,
+   "label": "Armbar",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 28165 shows Griffiths isolating/extending Sanita's arm on the ground immediately after the takedown"
+  },
+  {
+   "ts": 28175,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 28175 shows the match stopped, Sanita seated on the mat and Griffiths walking away -- consistent with a finish by tap; bout.winner=Nikki Lloyd-Griffiths and win_type=SUBMISSION match"
+  }
+ ],
+ "identity_check": "Matches bout.identity_discriminator: Nikki Lloyd-Griffiths in black rashguard, Gase Sanita in white SWA rashguard/black leggings. Confirmed via scoreboard 'N. GRIFFITHS (red row) / G. SANTA (blue row)' from 27940s onward, held consistent through all kept frames. Frames 27920-27935 (previous bout S.Loewenthal vs N.Naomi Schultz) correctly excluded per bout.notes.",
+ "notes": "audit.flags empty, no off-library labels, no winner contradiction. final_score 0-0 for a submission win is consistent -- no points were scored before the finish."
+}

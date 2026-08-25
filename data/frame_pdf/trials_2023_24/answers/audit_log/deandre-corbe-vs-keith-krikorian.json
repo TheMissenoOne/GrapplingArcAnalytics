@@ -1,0 +1,70 @@
+{
+ "log": [
+  {
+   "ts": 26300,
+   "label": "Clinch",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "opening tie-up frames at 26300-26315 show both engaging in hand-fighting/collar-tie right at match start; no contradicting evidence on actor"
+  },
+  {
+   "ts": 26375,
+   "label": "Guard Pull",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "initial frames at 26380-26405 were ambiguous on who was top/bottom; resolved via later narration: negative/stalling point issued to Krikorian (guard-puller must attack within 3s per 80CC rule) and at 26445 'arm trapped to Correoran [Corbe] on the lock down' confirms Krikorian applying a bottom half-guard lockdown on Corbe, consistent with Krikorian having pulled guard at 26375",
+   "corrections": {}
+  },
+  {
+   "ts": 26445,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'arm trapped to Correoran on the lock down and he's got both hand clasped around' confirms Krikorian in bottom half guard/lockdown"
+  },
+  {
+   "ts": 26500,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'trying to get that foot hidden but Keith this is where Keith wants to be' -- leg entanglement position"
+  },
+  {
+   "ts": 26540,
+   "label": "50/50 Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Now he's 5050 off here'"
+  },
+  {
+   "ts": 26560,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Trying to spin for the back. DeAndre Corb. Oh, and he's got the seat belt.'"
+  },
+  {
+   "ts": 26595,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'he does get his three. What a moment for DeAndre Corb.'; scoreboard confirms 3-0 at this timestamp"
+  },
+  {
+   "ts": 26675,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'he's going to be up six points... So he's up seven right now [incl. Krikorian's -1 penalty]'; scoreboard shows 6-0 shortly after, matching a second +3 back control"
+  },
+  {
+   "ts": 26730,
+   "label": "Body Triangle",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "frames at 26725-26735 are too dark to visually confirm a locked figure-4 body triangle vs. generic back control; narration at 26730 describes 'the body lock is on the outside... wrapped in a seat belt' -- names Body Lock, not Body Triangle specifically -- residual doubt, dropped per protocol"
+  }
+ ],
+ "identity_check": "Deandre Corbe wears black Parry Athletics kit with white circular logos (visible walkout at 26290s 'PARRY' text, and 'P P' circular logos on shirt at 26150-26350s frames); Keith Krikorian wears black kit with a yellow circular 10th Planet logo (visible from ~26355s onward, yellow shoulder patch). Confirmed by lower-third at 26305s: 'DEANDRE CORBE Standard BJJ -66kg | Keith Krikorian 10thplanet JJ FINALS' and scoreboard 'D. Corbe' (red) / 'K. Krikorian' (blue) held consistently through the bout, matching final_score 6-0 Corbe.",
+ "notes": "8 of 9 events kept as concordant; 1 dropped (Body Triangle, label-precision doubt in a dark stretch of frames -- the underlying back-control/seatbelt position at that time is real, just not confirmable as specifically a locked body triangle). No off-library labels. gemini_winner (Deandre Corbe) matches published winner; final scoreboard total (6-0) is fully accounted for by the two +3 Back Control events, consistent with final_score in the bout record."
+}

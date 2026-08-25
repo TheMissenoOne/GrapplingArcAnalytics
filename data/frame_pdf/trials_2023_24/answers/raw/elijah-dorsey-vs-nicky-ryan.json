@@ -1,0 +1,162 @@
+{
+ "bout": {
+  "athlete_a": "Elijah Dorsey",
+  "athlete_b": "Nicky Ryan",
+  "event": "East Coast Trials 2023 (Atlantic City)",
+  "winner": "Elijah Dorsey",
+  "year": 2023,
+  "win_type": "DECISION",
+  "bout_start_seconds": 4485,
+  "bout_end_seconds": 5220,
+  "identity_discriminator": "Nicky Ryan in blue/black rashguard with N. RYAN / TALK LESS on back; Elijah Dorsey in black rashguard with gold patterns and Moya branding",
+  "final_score": {
+   "Elijah Dorsey": 0,
+   "Nicky Ryan": 0
+  },
+  "notes": "Frames 4370-4480 are walkouts and introductions."
+ },
+ "events": [
+  {
+   "ts": 4490,
+   "label": "Collar Tie",
+   "actor": "Elijah Dorsey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 4510,
+   "label": "Foot Sweep",
+   "actor": "Elijah Dorsey",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 4520,
+   "label": "Single Leg Takedown",
+   "actor": "Elijah Dorsey",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 4560,
+   "label": "Takedown",
+   "actor": "Elijah Dorsey",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 4580,
+   "label": "Open Guard",
+   "actor": "Nicky Ryan",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4645,
+   "label": "Butterfly Guard",
+   "actor": "Nicky Ryan",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4655,
+   "label": "Outside Ashi Garami",
+   "actor": "Nicky Ryan",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 4700,
+   "label": "Inversion",
+   "actor": "Nicky Ryan",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4765,
+   "label": "Hip Switch Pass",
+   "actor": "Elijah Dorsey",
+   "successful": false,
+   "type": "pass"
+  },
+  {
+   "ts": 4865,
+   "label": "X-Guard",
+   "actor": "Nicky Ryan",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4910,
+   "label": "Knee on Belly",
+   "actor": "Elijah Dorsey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 5000,
+   "label": "Shoot",
+   "actor": "Elijah Dorsey",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 5040,
+   "label": "Single Leg Takedown",
+   "actor": "Nicky Ryan",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 5040,
+   "label": "Front Headlock",
+   "actor": "Elijah Dorsey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 5080,
+   "label": "Foot Sweep",
+   "actor": "Elijah Dorsey",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 5095,
+   "label": "Single Leg Takedown",
+   "actor": "Elijah Dorsey",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 5110,
+   "label": "Single Leg Takedown",
+   "actor": "Nicky Ryan",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 5130,
+   "label": "Escape to Turtle",
+   "actor": "Nicky Ryan",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 5155,
+   "label": "Seatbelt Control",
+   "actor": "Elijah Dorsey",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "77kg",
+  "source_file": "ai_studio_code-3.txt",
+  "curated_start": 4370,
+  "curated_end": 5270,
+  "gemini_winner": "Elijah Dorsey",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

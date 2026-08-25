@@ -1,0 +1,62 @@
+{
+ "log": [
+  {
+   "ts": 11275,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "match clock reads 00:00 at this frame (bout just starting); by 11280 (+5s) the two are already engaged in a standing tie-up, well within tolerance"
+  },
+  {
+   "ts": 11370,
+   "label": "Underhook",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'a little bit of Anna is trying to go for the underhook in there... but she's keeping her hips away' -- explicit attempt/defended"
+  },
+  {
+   "ts": 11600,
+   "label": "Kimura Grip",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Wanna [Anna] seems like she got a lock on her shoulder in there, but still no points got worded because she's on her four' -- shoulder lock/kimura grip landed"
+  },
+  {
+   "ts": 11640,
+   "label": "Turtle Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration around 11640-11645 describes continued top control over a turtled/sprawled opponent ('mostly like doing a little sprawl')"
+  },
+  {
+   "ts": 11675,
+   "label": "Front Headlock Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Now she released the shoulder. She's going a little bit for the neck.'"
+  },
+  {
+   "ts": 11715,
+   "label": "Escape to Standing",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'And then she's able to stand up... crowd just went crazy here'"
+  },
+  {
+   "ts": 11770,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: '3 seconds. Oh, an attempt for taked down there.' at the buzzer ending regulation 0-0, unsuccessful (match goes to overtime)"
+  },
+  {
+   "ts": 12095,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Anna Rodriguez tries a flying guillotine. Now tries a take down from [sprawl] defense as well.' -- attempt, unsuccessful"
+  }
+ ],
+ "identity_check": "Anna Rodrigues wears a teal/grey long-sleeve rashguard (lighter/blonde hair); Franciele Santos wears a black kit (dark hair). Confirmed via narration at 11600s ('Wanna [Anna] seems like she got a lock on her shoulder in there... she's on her four') identifying Anna as the top player in teal applying the shoulder lock on the black-kitted Franciele, consistent with the teal-kit competitor being the aggressor/control player through 11275-11715s (collar tie, kimura grip, turtle control, front headlock -> Franciele's escape to standing).",
+ "notes": "All 8 events concordant; no off-library labels; gemini_winner null, published winner Anna Rodrigues not contradicted by any event (no actor-swap needed). Match went 0-0 through regulation into overtime; the penalty on Franciele Santos noted in bout.penalties (~11890s) falls in a gap with no corresponding Gemini event and needed no action."
+}

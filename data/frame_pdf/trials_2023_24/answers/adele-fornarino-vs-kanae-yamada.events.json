@@ -1,0 +1,78 @@
+{
+ "bout": {
+  "athlete_a": "Adele Fornarino",
+  "athlete_b": "Kanae Yamada",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Adele Fornarino",
+  "year": 2024,
+  "identity_discriminator": "Adele Fornarino wears a WHITE/grey top with black leggings (back text 'ADELE F...' legible at 27325); Kanae Yamada wears an all-black rashguard/shorts kit. Confirmed at the finish: the white-topped athlete is on top locking the armbar at 27365-27375 while the black-topped athlete taps, matching the published winner Adele Fornarino. Scoreboard reads 'A. FORNARINO' / 'K. YAMADA' (order not treated as mat position, per protocol). Mapping held consistent from the opening clinch through the finish.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "This raw file has no win_type/final_score/bout_start fields (sparser than the other bouts in this batch) and gemini_winner is null, but the events[] sequence is internally consistent and the finish visually confirms Adele Fornarino as winner by armbar, matching bout.winner. Nothing dropped -- every event held up against the frames."
+ },
+ "events": [
+  {
+   "ts": 26925,
+   "label": "Clinch",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27035,
+   "label": "Guard Pull",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27055,
+   "label": "Seated Guard",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27080,
+   "label": "Shin to Shin Guard",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27215,
+   "label": "Leg Entanglement Entry",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27275,
+   "label": "Guard Recovery",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 27300,
+   "label": "Closed Guard",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27365,
+   "label": "Armbar",
+   "actor": "Adele Fornarino",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 27375,
+   "label": "Tap",
+   "actor": "Kanae Yamada",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 9/9) 2026-08-25"
+}

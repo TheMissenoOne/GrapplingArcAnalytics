@@ -1,0 +1,63 @@
+{
+ "bout": {
+  "athlete_a": "Heikki Jussila",
+  "athlete_b": "Daniel Manasoiu",
+  "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+  "winner": "Heikki Jussila",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 15,
+  "bout_end_seconds": 805,
+  "identity_discriminator": "Heikki Jussila in blue Pitbull / Helsinki rashguard and blue shorts; Daniel Manasoiu in black Future Kimonos / Daruma rashguard and shorts",
+  "final_score": {
+   "Heikki Jussila": 0,
+   "Daniel Manasoiu": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 25,
+   "label": "Collar Tie",
+   "actor": "Heikki Jussila",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 165,
+   "label": "Guard Pull",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 185,
+   "label": "Half Guard",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 270,
+   "label": "Top Control (Half Guard)",
+   "actor": "Heikki Jussila",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 570,
+   "label": "Collar Tie",
+   "actor": "Heikki Jussila",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "+99kg",
+  "source_file": "ai_studio_code(20).txt",
+  "curated_start": 0,
+  "curated_end": 830,
+  "gemini_winner": "Heikki Jussila",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

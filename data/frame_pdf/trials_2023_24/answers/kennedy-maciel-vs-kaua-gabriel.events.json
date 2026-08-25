@@ -1,0 +1,107 @@
+{
+ "bout": {
+  "athlete_a": "Kennedy Maciel",
+  "athlete_b": "Kaua Gabriel",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Kennedy Maciel",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 10755,
+  "bout_end_seconds": 11225,
+  "identity_discriminator": "Kennedy Maciel = blue/white/red Alliance kit ('VITAL' sponsor patch), walks out ts10740; Kaua Gabriel = all-black kit, walks out ts10745. Scoreboard order K.MACIEL(red)/K.Gabriel(blue) fixed throughout, and its point flip (0-0 -> 3-0 for Maciel at ts11160) matches bout.final_score exactly, cross-confirming identity+winner. Note: frames 10730-10739 still show the PRIOR bout's scorecard ('J. Pontas vs L. Medeiros') as a cutaway before this bout's walkout -- excluded from consideration. Matches Gemini's identity_discriminator; no flags on this bout.",
+  "final_score": {
+   "Kennedy Maciel": 3,
+   "Kaua Gabriel": 0
+  },
+  "notes": "Frames 10730-10750 show walkouts and introductions. | No drops, no corrections -- every event landed on or within a few seconds of a matching caption/frame. Final scoreboard read (K.Maciel 3, K.Gabriel 0) cross-validates bout.final_score and confirms no identity swap. Only wrinkle: the 11045 50/50 Guard actor call rests on inferring which mangled name the auto-caption meant rather than a clean textual match -- flagged in the log reason, not dropped, because the frame position and the surrounding leg-attack sequence both point to Gabriel.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 10760,
+   "label": "Collar Tie",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10830,
+   "label": "Guard Pull",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 10845,
+   "label": "Straight Ankle Lock",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 10885,
+   "label": "Top Control",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11030,
+   "label": "Toe Hold",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 11045,
+   "label": "50/50 Guard",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 11060,
+   "label": "Heel Hook",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 11075,
+   "label": "Foot Lock",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 11145,
+   "label": "Side Control",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11160,
+   "label": "Guard Pass",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 11190,
+   "label": "Mount",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11200,
+   "label": "Arm Triangle Choke",
+   "actor": "Kennedy Maciel",
+   "successful": false,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 12/12) 2026-08-25"
+}

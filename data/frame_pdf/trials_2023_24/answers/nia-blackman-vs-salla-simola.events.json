@@ -1,0 +1,86 @@
+{
+ "bout": {
+  "athlete_a": "Nia Blackman",
+  "athlete_b": "Salla Simola",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Nia Blackman",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 17740,
+  "bout_end_seconds": 18550,
+  "identity_discriminator": "Scoreboard lower-third 'N. BLACKMAN' (red row) / 'S. SIMOLA' (blue row) present on every live frame from bout start (ts17740). Blackman in green/brown camo top, black shorts; Simola in black Pitbull kit, blonde hair -- matches identity_discriminator exactly and stays consistent through every frame examined (17730-18445).",
+  "final_score": {
+   "Nia Blackman": 2,
+   "Salla Simola": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "Clean read, all 9 events kept as-is, no corrections needed. All labels verbatim from the vocabulary. No off-library labels, no winner contradiction. Curated range 17730-18560 fully within this bout; no cutaway/replay contamination observed in the frames examined."
+ },
+ "events": [
+  {
+   "ts": 17745,
+   "label": "Collar Tie",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 17865,
+   "label": "Snap Down",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 17875,
+   "label": "Seated Guard",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 18015,
+   "label": "Closed Guard",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 18105,
+   "label": "Inversion",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 18115,
+   "label": "Escape to Standing",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 18330,
+   "label": "Collar Tie",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 18420,
+   "label": "Double Leg Takedown",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  },
+  {
+   "ts": 18435,
+   "label": "Top Control",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 9/9) 2026-08-25"
+}

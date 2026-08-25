@@ -1,0 +1,69 @@
+{
+ "log": [
+  {
+   "ts": 25185,
+   "label": "Knee Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at ts, verbatim: 'immediately looking for that knee pick is William Tackett' -- an attempt, not landed, matching successful=false."
+  },
+  {
+   "ts": 25215,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at ts, verbatim: 'Big snap down' -- direct match to label/actor/success."
+  },
+  {
+   "ts": 25230,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration: 'this is what William Tackett wants in on the power half now' (25230) followed by 'try to use this to put the hook in, sliding off the back a little bit' (25235) -- attempt that slides off, matching successful=false."
+  },
+  {
+   "ts": 25260,
+   "label": "X-Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration: 'Nice rest off that X again' explicitly names the X-guard position; the surrounding restart language matches Rodriguez holding it from bottom."
+  },
+  {
+   "ts": 25285,
+   "label": "Body Lock Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at ts, verbatim: 'William Tackett now has the body lock... he's already passed outside control' -- as direct a match as it gets."
+  },
+  {
+   "ts": 25300,
+   "label": "North-South Position",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Tackett (camo) perpendicular on top of Rodriguez (white); narration moments later (25340) explicitly says 'staying north south' -- matches."
+  },
+  {
+   "ts": 25360,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at ts: 'he's in on the legs now, possibly looking for a toe hold, crossed off on the feet' -- matches Tackett in a leg entanglement setting up the finish."
+  },
+  {
+   "ts": 25370,
+   "label": "Toe Hold",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at 25370 raises the toe-hold submission and narration at 25385 confirms directly: 'land that toe hold' -- matches label/actor/success despite an intervening ambiguous 'heel hook' aside."
+  },
+  {
+   "ts": 25375,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames immediately show the referee raising Tackett's arm and both corners celebrating -- matches the published SUBMISSION win for Tackett."
+  }
+ ],
+ "identity_check": "Trivial to tell apart by kit: William Tackett in grey/camo rashguard and dark shorts (confirmed in the walkout narration 'JRod... white camo for Tacket' and lower-third graphic 'WILLIAM TACKETT' at 25185); Jacob Rodriguez in all-white rashguard and white shorts (lower-third 'JAY RODRIGUEZ'). Scoreboard 'W. Tackett' / 'J. Rodriguez' held throughout, matched consistently by kit colour at every checked frame.",
+ "notes": "No off-library labels, no winner contradiction, no identity ambiguity given the stark grey/camo vs all-white kits. Nothing dropped."
+}

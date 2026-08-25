@@ -1,0 +1,141 @@
+{
+ "bout": {
+  "athlete_a": "Fabricio Andrey",
+  "athlete_b": "Kaua Gabriel",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Fabricio Andrey",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 15990,
+  "bout_end_seconds": 16795,
+  "identity_discriminator": "Fabricio Andrey in black rashguard with BLACK BELT branding; Kaua Gabriel in yellow/green Brazil graphic rashguard and shorts",
+  "final_score": {
+   "Fabricio Andrey": 0,
+   "Kaua Gabriel": 0
+  },
+  "notes": "Frames 15950-15975 show celebration of prior match."
+ },
+ "events": [
+  {
+   "ts": 15990,
+   "label": "Collar Tie",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16065,
+   "label": "Single Leg Takedown",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 16075,
+   "label": "Inversion",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 16145,
+   "label": "Kimura Trap",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16275,
+   "label": "Back Take",
+   "actor": "Fabricio Andrey",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 16345,
+   "label": "Single Leg X",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 16390,
+   "label": "Top Control",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16525,
+   "label": "Collar Tie",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16550,
+   "label": "Ankle Pick",
+   "actor": "Fabricio Andrey",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 16600,
+   "label": "Ankle Pick",
+   "actor": "Fabricio Andrey",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 16620,
+   "label": "Single Leg Takedown",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 16705,
+   "label": "Back Take",
+   "actor": "Fabricio Andrey",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 16745,
+   "label": "Back Take",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 16755,
+   "label": "Back Control",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16760,
+   "label": "Back Triangle",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 16795,
+   "label": "Tap",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "66kg",
+  "source_file": "ai_studio_code-3.txt",
+  "curated_start": 15950,
+  "curated_end": 16830,
+  "gemini_winner": "Fabricio Andrey",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

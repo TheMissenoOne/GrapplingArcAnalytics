@@ -1,0 +1,86 @@
+{
+ "bout": {
+  "athlete_a": "Luiz Paulo",
+  "athlete_b": "Jefferson Pontes",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Luiz Paulo",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 10370,
+  "bout_end_seconds": 10705,
+  "identity_discriminator": "Kit-based ID: the dark-rashguard/red-white-blue-shoulder-accent athlete (blue corner throughout) = Luiz Paulo; the shirtless black-shorts athlete (red corner, 'J. Pontas') = Jefferson Pontes. Note: the broadcast lower-third labels the blue corner 'L. MEDEIROS', not 'L. PAULO' -- almost certainly his full/legal surname vs. competition name, since the kit description matches Gemini's identity_discriminator exactly and stays consistent for the entire bout (no swap). Confirmed at the finish: caption at ts10705 announces 'Luis Paulo is your champion... punches his ticket to Vegas', matching bout.winner and win_type=SUBMISSION. No flags on this bout.",
+  "final_score": {
+   "Luiz Paulo": 0,
+   "Jefferson Pontes": 0
+  },
+  "notes": "Frames 10350-10360 show the conclusion of the previous match; frames 10610-10650 cover an injury timeout for an eye poke. | No drops, no corrections. This bout also had an injury-timeout window (~10610-10650, eye poke) per bout.notes/penalties, which produced no Gemini events and needed no audit action. Scoreboard surname mismatch (L. MEDEIROS vs Luiz Paulo) is worth the assembler knowing about but did not affect actor attribution since it tracked by kit/corner consistently.",
+  "penalties": "Luiz Paulo ~t10620 (Injury Timeout)",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 10375,
+   "label": "Collar Tie",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10420,
+   "label": "Double Underhooks",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10445,
+   "label": "Arm Drag",
+   "actor": "Luiz Paulo",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 10675,
+   "label": "Single Leg Takedown",
+   "actor": "Jefferson Pontes",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 10680,
+   "label": "Guillotine Choke",
+   "actor": "Luiz Paulo",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 10690,
+   "label": "Back Take",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 10695,
+   "label": "Back Control",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10700,
+   "label": "Rear Naked Choke",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 10705,
+   "label": "Tap",
+   "actor": "Jefferson Pontes",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 9/9) 2026-08-25"
+}

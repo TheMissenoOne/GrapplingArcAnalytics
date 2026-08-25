@@ -1,0 +1,29 @@
+{
+ "bout": {
+  "athlete_a": "Aurelie Le Vern",
+  "athlete_b": "Nadia Frankland",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Aurelie Le Vern",
+  "year": 2024,
+  "identity_discriminator": "Wide, distant static camera for the whole clip (no identity_discriminator field in the raw file, no close-up walkout available) -- both athletes are similarly light-kitted and hard to resolve individually frame-by-frame. Identity is anchored on the aftermath instead: at 17710-17725 one athlete (olive/green top) is standing and walking away while the other (dark shorts) remains down on the mat being checked/attended -- the standard post-submission winner/loser tableau. That matches the published winner Aurelie Le Vern (olive/green, standing) over Nadia Frankland (down, tapped). The whole clip is one continuous uncut scene on the mat with no camera changes, so there is no risk of a cutaway/wrong-bout mixup per the protocol's replay/cutaway warning.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "Lowest-confidence identity check in this batch: the camera is a single wide static shot throughout and never gets close enough to read kit branding or faces clearly, so actor identity rests on the post-finish winner/loser body language rather than a clean walkout/scoreboard-color anchor like the other bouts. Both events kept because the sequence is short, uncut, and internally consistent with the published winner; nothing contradicted it. As the task note anticipated, this really is a clean 2-event semifinal capture -- no additional events found hiding in the frames."
+ },
+ "events": [
+  {
+   "ts": 17665,
+   "label": "Armbar",
+   "actor": "Aurelie Le Vern",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 17705,
+   "label": "Tap",
+   "actor": "Nadia Frankland",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 2/2) 2026-08-25"
+}

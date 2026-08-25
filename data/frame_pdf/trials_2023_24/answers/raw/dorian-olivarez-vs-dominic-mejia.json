@@ -1,0 +1,135 @@
+{
+ "bout": {
+  "athlete_a": "Dorian Olivarez",
+  "athlete_b": "Dominic Mejia",
+  "event": "East Coast Trials 2023 (Atlantic City)",
+  "winner": "Dorian Olivarez",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 5445,
+  "bout_end_seconds": 5960,
+  "identity_discriminator": "Dorian Olivarez in black short-sleeve rashguard and dark shorts; Dominic Mejia in white rashguard with red/brown trim and dark shorts",
+  "final_score": {
+   "Dorian Olivarez": 3,
+   "Dominic Mejia": 0
+  },
+  "notes": "Frames 5320-5440 are walkouts and introductions; frames 6000-6035 are slow-motion replays."
+ },
+ "events": [
+  {
+   "ts": 5460,
+   "label": "Collar Tie",
+   "actor": "Dominic Mejia",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 5465,
+   "label": "Single Leg Takedown",
+   "actor": "Dominic Mejia",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 5640,
+   "label": "Double Leg Takedown",
+   "actor": "Dominic Mejia",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 5650,
+   "label": "Escape to Standing",
+   "actor": "Dorian Olivarez",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 5655,
+   "label": "Guard Pull",
+   "actor": "Dominic Mejia",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 5670,
+   "label": "North-South Position",
+   "actor": "Dorian Olivarez",
+   "successful": false,
+   "type": "control"
+  },
+  {
+   "ts": 5685,
+   "label": "Armbar",
+   "actor": "Dominic Mejia",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 5705,
+   "label": "Front Headlock",
+   "actor": "Dorian Olivarez",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 5720,
+   "label": "Triangle Choke",
+   "actor": "Dominic Mejia",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 5750,
+   "label": "Seated Guard",
+   "actor": "Dominic Mejia",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 5820,
+   "label": "Turtle Position",
+   "actor": "Dominic Mejia",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 5835,
+   "label": "Half Guard",
+   "actor": "Dominic Mejia",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 5850,
+   "label": "Front Headlock",
+   "actor": "Dorian Olivarez",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 5915,
+   "label": "Guard Pass",
+   "actor": "Dorian Olivarez",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 5930,
+   "label": "North South Choke",
+   "actor": "Dorian Olivarez",
+   "successful": false,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "66kg",
+  "source_file": "ai_studio_code-2.txt",
+  "curated_start": 5320,
+  "curated_end": 6040,
+  "gemini_winner": "Dorian Olivarez",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,78 @@
+{
+ "bout": {
+  "athlete_a": "Nikki Lloyd-Griffiths",
+  "athlete_b": "Gase Sanita",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Nikki Lloyd-Griffiths",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 27935,
+  "bout_end_seconds": 28175,
+  "identity_discriminator": "Matches bout.identity_discriminator: Nikki Lloyd-Griffiths in black rashguard, Gase Sanita in white SWA rashguard/black leggings. Confirmed via scoreboard 'N. GRIFFITHS (red row) / G. SANTA (blue row)' from 27940s onward, held consistent through all kept frames. Frames 27920-27935 (previous bout S.Loewenthal vs N.Naomi Schultz) correctly excluded per bout.notes.",
+  "final_score": {
+   "Nikki Lloyd-Griffiths": 0,
+   "Gase Sanita": 0
+  },
+  "notes": "Frames 27920-27930 show the conclusion of the previous match. | audit.flags empty, no off-library labels, no winner contradiction. final_score 0-0 for a submission win is consistent -- no points were scored before the finish.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 27940,
+   "label": "Collar Tie",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 27990,
+   "label": "Snap Down",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 28015,
+   "label": "Top Control",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 28045,
+   "label": "Closed Guard",
+   "actor": "Gase Sanita",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 28080,
+   "label": "Escape to Standing",
+   "actor": "Gase Sanita",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 28160,
+   "label": "Single Leg Takedown",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 28165,
+   "label": "Armbar",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 28175,
+   "label": "Tap",
+   "actor": "Gase Sanita",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 8/8) 2026-08-25"
+}

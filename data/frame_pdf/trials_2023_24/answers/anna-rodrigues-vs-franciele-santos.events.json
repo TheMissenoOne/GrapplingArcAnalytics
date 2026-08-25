@@ -1,0 +1,72 @@
+{
+ "bout": {
+  "athlete_a": "Anna Rodrigues",
+  "athlete_b": "Franciele Santos",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Anna Rodrigues",
+  "year": 2024,
+  "penalties": "Franciele Santos ~t11890 (Caution / Penalty)",
+  "identity_discriminator": "Anna Rodrigues wears a teal/grey long-sleeve rashguard (lighter/blonde hair); Franciele Santos wears a black kit (dark hair). Confirmed via narration at 11600s ('Wanna [Anna] seems like she got a lock on her shoulder in there... she's on her four') identifying Anna as the top player in teal applying the shoulder lock on the black-kitted Franciele, consistent with the teal-kit competitor being the aggressor/control player through 11275-11715s (collar tie, kimura grip, turtle control, front headlock -> Franciele's escape to standing).",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "All 8 events concordant; no off-library labels; gemini_winner null, published winner Anna Rodrigues not contradicted by any event (no actor-swap needed). Match went 0-0 through regulation into overtime; the penalty on Franciele Santos noted in bout.penalties (~11890s) falls in a gap with no corresponding Gemini event and needed no action."
+ },
+ "events": [
+  {
+   "ts": 11275,
+   "label": "Collar Tie",
+   "actor": "Anna Rodrigues",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11370,
+   "label": "Underhook",
+   "actor": "Anna Rodrigues",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 11600,
+   "label": "Kimura Grip",
+   "actor": "Anna Rodrigues",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11640,
+   "label": "Turtle Control",
+   "actor": "Anna Rodrigues",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11675,
+   "label": "Front Headlock Control",
+   "actor": "Anna Rodrigues",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11715,
+   "label": "Escape to Standing",
+   "actor": "Franciele Santos",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 11770,
+   "label": "Takedown",
+   "actor": "Franciele Santos",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 12095,
+   "label": "Guillotine Choke",
+   "actor": "Anna Rodrigues",
+   "successful": false,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 8/8) 2026-08-25"
+}

@@ -1,0 +1,114 @@
+{
+ "bout": {
+  "athlete_a": "Jasmine Rocha",
+  "athlete_b": "Alex Enriquez",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Jasmine Rocha",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 21025,
+  "bout_end_seconds": 21510,
+  "identity_discriminator": "Jasmine Rocha in white/blue/red Tatami rashguard and white shorts; Alex Enriquez in all-black Atos rashguard and shorts",
+  "final_score": {
+   "Jasmine Rocha": 3,
+   "Alex Enriquez": 0
+  },
+  "notes": "Frames 20880-21020 are walkouts and introductions; frames 21565-21600 are replays."
+ },
+ "events": [
+  {
+   "ts": 21030,
+   "label": "Collar Tie",
+   "actor": "Alex Enriquez",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21045,
+   "label": "Snap Down",
+   "actor": "Alex Enriquez",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 21055,
+   "label": "Closed Guard",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 21140,
+   "label": "K-Guard",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 21170,
+   "label": "Leg Entanglement",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 21230,
+   "label": "Arm Drag",
+   "actor": "Jasmine Rocha",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 21260,
+   "label": "Guillotine Choke",
+   "actor": "Alex Enriquez",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 21340,
+   "label": "Back Take",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 21385,
+   "label": "Back Control",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 21390,
+   "label": "Body Triangle",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21505,
+   "label": "Rear Naked Choke",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 21510,
+   "label": "Tap",
+   "actor": "Alex Enriquez",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "55kg F",
+  "source_file": "ai_studio_code-5.txt",
+  "curated_start": 20860,
+  "curated_end": 21605,
+  "gemini_winner": "Jasmine Rocha",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

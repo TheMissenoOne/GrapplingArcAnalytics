@@ -160,6 +160,12 @@ not to decide whose game the event belongs to. Reprocessing a currently one-side
 plan should correct its attribution rather than reproduce it, provided the anchoring rule in §4
 is actually enforced (frames decide the position, narration only supplies the name).
 
+**Measured QA step (2026-08-25).** `docs/gemini_concordance_audit.md` is now the measured
+implementation of this plan's model step: canonical prompt, normalize → concordance audit →
+assemble → DB cross-reference → dump/enrich pipeline, with batch 1's numbers (41 bouts / 401
+events, 397 kept, 4 dropped, 0 assemble-validation problems). Treat it as this doc's §3/§4 made
+concrete, not a separate process.
+
 ## 6. Open decisions for the owner
 
 - **Gemini API wiring.** No key, no SDK dependency, no client code exists in this repo yet

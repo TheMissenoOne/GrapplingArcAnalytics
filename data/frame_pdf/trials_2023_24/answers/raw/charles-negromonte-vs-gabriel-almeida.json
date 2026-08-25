@@ -1,0 +1,113 @@
+{
+ "bout": {
+  "athlete_a": "Charles Negromonte",
+  "athlete_b": "Gabriel Almeida",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Charles Negromonte",
+  "year": 2024,
+  "penalties": "Gabriel Almeida ~t10125 (Caution / Penalty)"
+ },
+ "events": [
+  {
+   "ts": 9555,
+   "label": "Collar Tie",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 9690,
+   "label": "Low Single Leg",
+   "actor": "Charles Negromonte",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 9710,
+   "label": "Double Underhooks",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 9750,
+   "label": "Guillotine Choke",
+   "actor": "Gabriel Almeida",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 9915,
+   "label": "Fireman's Carry",
+   "actor": "Gabriel Almeida",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 9945,
+   "label": "Single Leg Takedown",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 9945,
+   "label": "Guillotine Choke",
+   "actor": "Gabriel Almeida",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 9965,
+   "label": "Half Guard",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 10145,
+   "label": "Back Take",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 10155,
+   "label": "Back Control",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 10155,
+   "label": "Body Triangle",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10305,
+   "label": "Rear Naked Choke",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 10310,
+   "label": "Tap",
+   "actor": "Gabriel Almeida",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "88kg",
+  "source_file": "ai_studio_code(1) (2).txt",
+  "curated_start": 9550,
+  "curated_end": 10350,
+  "gemini_winner": null,
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

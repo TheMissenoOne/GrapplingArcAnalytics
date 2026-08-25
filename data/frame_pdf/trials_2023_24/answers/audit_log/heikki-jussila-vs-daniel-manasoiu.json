@@ -1,0 +1,41 @@
+{
+ "log": [
+  {
+   "ts": 25,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame at 25s (right after the referee's 'Fight' call at 10s) shows both fighters clinched in a collar tie"
+  },
+  {
+   "ts": 165,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 165 shows Manasoiu (black) seated pulling guard on Jussila (blue) who is on top"
+  },
+  {
+   "ts": 185,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 185 shows the two engaged on the ground with legs entangled, consistent with half guard"
+  },
+  {
+   "ts": 270,
+   "label": "Top Control (Half Guard)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 270 shows Jussila on top of Manasoiu in control; scoreboard flips to Jussila 1 exactly here, and narration 'points. Points points.' at the same window confirms scoring for this top-control action"
+  },
+  {
+   "ts": 570,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 570 shows Jussila re-engaging Manasoiu in a clinch/collar-tie over a bent-over Manasoiu, after both had returned to standing"
+  }
+ ],
+ "identity_check": "Matches bout.identity_discriminator: Heikki Jussila in blue Pitbull/Helsinki rashguard, Daniel Manasoiu in black Future Kimonos/Daruma rashguard. Confirmed via scoreboard 'D. Manasoiu (red row) / H. Jussila (blue row)' from bout start (0s) onward, held consistent through all kept frames.",
+ "notes": "audit.flags empty, no off-library labels, no winner contradiction (Jussila won, matches bout.winner). This is a sparse event log relative to the 0-830s curated range -- fine, no invented events added. bout.final_score (0-0) is stale relative to the frames (scoreboard shows Jussila 1-0 by 270s); not something the audit corrects since final_score is a bout-level field outside the per-event schema this audit touches."
+}

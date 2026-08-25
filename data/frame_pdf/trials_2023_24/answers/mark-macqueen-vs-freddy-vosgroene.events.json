@@ -1,0 +1,65 @@
+{
+ "bout": {
+  "athlete_a": "Mark Macqueen",
+  "athlete_b": "Freddy Vosgroene",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Mark Macqueen",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 18585,
+  "bout_end_seconds": 19085,
+  "identity_discriminator": "Scoreboard reads 'F. Vosgroene' (red, top) / 'M. Macqueen' (blue, bottom) throughout. Kit matches meta exactly and is visually distinct: Freddy Vosgroene in a black t-shirt, green/camo shorts, blonde hair; Mark Macqueen in a blue/red patterned rashguard with white/patterned shorts. Verified from the pre-bout referee-instruction frames (page 07, ts 18580-18615) through the finish.",
+  "final_score": {
+   "Mark Macqueen": 3,
+   "Freddy Vosgroene": 0
+  },
+  "notes": "Frames 18560-18580 show the conclusion of the previous match. | No drops; all 6 events verified concordant, 0 corrections. Final score 3-0 Macqueen by points, matching meta win_type POINTS and final_score.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 18590,
+   "label": "Collar Tie",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 18685,
+   "label": "Snap Down",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 18695,
+   "label": "Half Guard",
+   "actor": "Freddy Vosgroene",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 18705,
+   "label": "Top Control (Half Guard)",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 19050,
+   "label": "Guard Pass",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 19070,
+   "label": "Side Control",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 6/6) 2026-08-25"
+}

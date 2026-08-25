@@ -1,0 +1,37 @@
+{
+ "log": [
+  {
+   "ts": 6390,
+   "label": "Collar Tie",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "corrections": {
+    "ts": 6425
+   },
+   "reason": "No contact visible in the +-10s window around 6390 (both athletes still circling pre-clinch); a clear collar-tie grip by Declan on Anton IS visible at 6415-6425, same actor/label/type, so kept with the timestamp corrected rather than dropped."
+  },
+  {
+   "ts": 6750,
+   "label": "Duck Under",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows a scramble with Anton (camo shorts) inverted/off-balance and Declan driving in, both still standing/scrambling afterward with no completed takedown -- matches successful=false."
+  },
+  {
+   "ts": 6855,
+   "label": "Takedown (Back Exposure)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Scoreboard itself flips from 0-0 to 'D. Moody: 4' exactly at this point in the sequence (visible by 6870-6875) -- matches actor/label/points=4 as directly as evidence gets."
+  },
+  {
+   "ts": 6865,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Declan maintaining top position over Anton immediately after the takedown, with the score already showing 4-0 and Declan riding out the position to the finish."
+  }
+ ],
+ "identity_check": "Declan Moody = plain solid black rashguard/shorts; Anton Minenko = black rashguard/shorts with a visible green/yellow band on one sleeve and camo-pattern shorts, both matching identity_discriminator. Held consistent from the opening stand-up through the final takedown, confirmed by the scoreboard jumping to 'D. Moody: 4' at the exact moment the black-plain athlete secures the back-exposure takedown (6855-6865), matching the published 4-0 final score for Declan Moody.",
+ "notes": "Very sparse event log for a 500s bout (long feeling-out/wrestling stalemate 6390-6750 with nothing else logged, consistent with a slow POINTS win) -- nothing found in the unlogged stretch that looked like a missed high-confidence event worth adding. Only correction: the opening Collar Tie's timestamp, moved ~35s later to where the grip is actually visible."
+}

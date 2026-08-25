@@ -1,0 +1,72 @@
+{
+ "log": [
+  {
+   "ts": 7500,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "clinch engagement visible entering frame 7505, Iwamoto initiating"
+  },
+  {
+   "ts": 7585,
+   "label": "Double Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "level-change/shot visible at 7575, opponent grounded with Iwamoto in control by 7580-7585"
+  },
+  {
+   "ts": 7600,
+   "label": "Top Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "continued ground top position visible, consistent with takedown at 7585"
+  },
+  {
+   "ts": 7615,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Allan working guard from bottom in continuous ground sequence"
+  },
+  {
+   "ts": 7660,
+   "label": "Body Lock Pass",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "technique/actor confirmed (dominant top-pass position at 7660, corner praise 'that's it, beautiful, there you go' right at this ts) but the claimed points:3 is NOT verifiable -- the on-screen scoreboard reads 0-0 in every sampled frame from 7485 through 7885s and only flips to K.Iwamoto=3 at the very final frame (8015s, clock at 0:00, hand raised). Per protocol only report points you can see change on the board; corrected by dropping the points field rather than guessing which action earned it.",
+   "corrections": {
+    "points": "removed -- unverifiable from sampled frames, board static 0-0 through nearly the whole match"
+   }
+  },
+  {
+   "ts": 7740,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "corner audio 'on top, we're doing very good here' at matching ts, frame shows continued top position"
+  },
+  {
+   "ts": 7765,
+   "label": "Turtle Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "corner audio 'nice job on the hook, beautiful, anticipate a turtle from here' at matching ts"
+  },
+  {
+   "ts": 7840,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "standing exchange transitions to Iwamoto grounding Allan by 7840-7850 ('holding down' at 7830); generic 'Takedown' label appropriately used since the exact entry isn't clearly resolvable"
+  },
+  {
+   "ts": 7860,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "continued ground top position in the same sequence as the 7840 takedown"
+  }
+ ],
+ "identity_check": "Confirmed via the persistent scoreboard graphic ('R. Allan' red row / 'K. Iwamoto' blue row) visible from 7485s onward and matching kit throughout: Kenta Iwamoto black long-sleeve rashguard + black shorts; Rhys Allan shirtless with black shorts + red ankle tape. Consistent across the whole match, no swap.",
+ "notes": "This broadcast feed carries corner-coach audio bleeding through the mic (not commentator narration) for nearly the whole bout -- used as a secondary confirmation signal same as narration per protocol. The overlay scoreboard does not visibly update points during live action in this feed; it only shows the true 3-0 final tally once the clock hits 0:00 (8010-8015s). This means the points:3 originally attached to the ts7660 Body Lock Pass could not be confirmed as the scoring action -- kept the event (technique/actor well supported) but dropped the points field per the protocol's rule that points require a visible board change. If the assembler wants a points-bearing event at all, none of the 9 Gemini events in this bout can be safely credited with the scoreboard's final 3 points from these frames alone."
+}

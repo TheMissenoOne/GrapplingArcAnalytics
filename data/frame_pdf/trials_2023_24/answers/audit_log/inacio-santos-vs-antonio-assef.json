@@ -1,0 +1,55 @@
+{
+ "log": [
+  {
+   "ts": 8530,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame at 8530-8535 shows the shirtless Assef engaging Santos in a standing head/collar tie right after the bout begins"
+  },
+  {
+   "ts": 8760,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'okay take down already attacking the neck'"
+  },
+  {
+   "ts": 8785,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at 8780: 'Oh beautiful he got the corner nice take down'; at 8790: 'that was absolutely beautiful... he's going to try to take him down again' -- a second, distinct takedown from the first at 8760"
+  },
+  {
+   "ts": 8875,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'okay half guard All right. Well, Antonio was playing guard.'"
+  },
+  {
+   "ts": 8915,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Oh, that was a good take down' / 'Good take down, but no points' -- third takedown by Santos, no points scored, consistent with the event carrying no points field"
+  },
+  {
+   "ts": 8970,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Santos moving to Assef's back; narration shortly after (8990) confirms 'He's going for the back... Points. Three points.'"
+  },
+  {
+   "ts": 8990,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'I think he got the points now... Yeah. Points. Three points. He's going for the real naked choke.'; final scoreboard at 9010-9025s confirms 3-0 Santos, matching final_score"
+  }
+ ],
+ "identity_check": "Inacio Santos wears a yellow rashguard with patterned (checkered) shorts; Antonio Assef is shirtless with plain black shorts. Confirmed consistently from match start (8520s) through the final scoreboard shot (9010-9025s, 'J. Inacio Dos Santos' in yellow, standing with hand raised as champion) matching scoreboard 'A. Assef' (red) / 'J. Inacio Dos Santos' (blue) and final_score 3-0 Santos.",
+ "notes": "All 7 events concordant; no off-library labels. gemini_winner (Inacio Santos) matches published winner. None of the three takedowns scored points on the board (Assef even picked up a stalling/negative point along the way, visible in frames but not a logged Gemini event) -- the only positive points came from the single Back Control, consistent with final_score 3-0."
+}

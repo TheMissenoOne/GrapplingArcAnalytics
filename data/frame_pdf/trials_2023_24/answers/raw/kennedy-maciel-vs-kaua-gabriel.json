@@ -1,0 +1,114 @@
+{
+ "bout": {
+  "athlete_a": "Kennedy Maciel",
+  "athlete_b": "Kaua Gabriel",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Kennedy Maciel",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 10755,
+  "bout_end_seconds": 11225,
+  "identity_discriminator": "Kennedy Maciel in blue/white/red Alliance rashguard and blue shorts; Kaua Gabriel in black rashguard and black shorts",
+  "final_score": {
+   "Kennedy Maciel": 3,
+   "Kaua Gabriel": 0
+  },
+  "notes": "Frames 10730-10750 show walkouts and introductions."
+ },
+ "events": [
+  {
+   "ts": 10760,
+   "label": "Collar Tie",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10830,
+   "label": "Guard Pull",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 10845,
+   "label": "Straight Ankle Lock",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 10885,
+   "label": "Top Control",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11030,
+   "label": "Toe Hold",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 11045,
+   "label": "50/50 Guard",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 11060,
+   "label": "Heel Hook",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 11075,
+   "label": "Foot Lock",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 11145,
+   "label": "Side Control",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11160,
+   "label": "Guard Pass",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 11190,
+   "label": "Mount",
+   "actor": "Kennedy Maciel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 11200,
+   "label": "Arm Triangle Choke",
+   "actor": "Kennedy Maciel",
+   "successful": false,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "66kg",
+  "source_file": "ai_studio_code-5.txt",
+  "curated_start": 10730,
+  "curated_end": 11230,
+  "gemini_winner": "Kennedy Maciel",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

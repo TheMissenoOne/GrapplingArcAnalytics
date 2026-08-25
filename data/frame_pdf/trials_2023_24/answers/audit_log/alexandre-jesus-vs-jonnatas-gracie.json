@@ -1,0 +1,104 @@
+{
+ "log": [
+  {
+   "ts": 15125,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "opening clinch exchange at ts~15125 frame, consistent with control grip; generic opening move, no discordant evidence"
+  },
+  {
+   "ts": 15210,
+   "label": "Single Leg X",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Ooh, Jonathan's go for the single X. It seems like deep in there\" (frame -08.jpg)"
+  },
+  {
+   "ts": 15215,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "continuation of ts15210 single-leg-X entanglement into a completed takedown by same actor; narration \"by the single is able to take down\" and frame shows completed ground position (frame -08.jpg)"
+  },
+  {
+   "ts": 15245,
+   "label": "Escape to Standing",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frames 15240->15245 show transition from ground scramble back to standing clinch (frame -10.jpg); consistent with Alexandre regaining feet after the entanglement exchange"
+  },
+  {
+   "ts": 15300,
+   "label": "Shoot",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Habin goes and shoot for the under hook into counters\" -- Habin = Alexandre Jesus nickname established at ts15270 (frame -11.jpg)"
+  },
+  {
+   "ts": 15375,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: \"he goes in for the guillotine and he get it... let's see if he's able to escape\"; Jonnatas established as guillotine specialist earlier (ts15240 narration); frame shows standing front-headlock setup (frame -14.jpg)"
+  },
+  {
+   "ts": 15390,
+   "label": "Guillotine Escape",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame at 15390 shows athletes separating from the guillotine clinch to a scramble, directly following the ts15375 attempt (frame -14.jpg)"
+  },
+  {
+   "ts": 15430,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: \"...he goes for the leg entanglements\" following Alexandre trying to come up off bottom (frame -16.jpg)"
+  },
+  {
+   "ts": 15445,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Jonathan Gracie just aggressively coming into that pass\" (frame -16.jpg); unsuccessful matches Alexandre still fighting from bottom at 15450"
+  },
+  {
+   "ts": 15495,
+   "label": "Escape to Standing",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: \"He just comes up. Oh, he gets a little bit on the body lock there, but he misses it\" -- 'comes up' = escape to standing, leads directly into next event (frame -18.jpg)"
+  },
+  {
+   "ts": 15500,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Jonathan's in in guillotine position, but Habin seems to have it defended pretty well\" (frame -18.jpg)"
+  },
+  {
+   "ts": 15515,
+   "label": "Guillotine Escape",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame at 15510-15515 shows both athletes back to neutral standing after the ts15500 guillotine attempt, consistent with a successful escape (frame -18.jpg)"
+  },
+  {
+   "ts": 15725,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Gracie right there... Oh, he gets the take now. Almost\" -- 'almost' matches successful=false (frame -25.jpg)"
+  },
+  {
+   "ts": 15810,
+   "label": "Wrist Lock",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"...He goes for a rear wrist lock\" at ts15805-15810, label present verbatim in vocabulary (frame -28.jpg); attacker not named in caption but no counter-evidence to Gemini's Alexandre Jesus attribution"
+  }
+ ],
+ "identity_check": "Lower-third scoreboard reads 'J. Gracie' (red, top row) / 'A. Joaquim De Jesus' (blue, bottom row) from ts~15115 onward -- matches Gemini's Jonnatas Gracie / Alexandre Jesus naming. Commentary nicknames 'Habinho'/'Hab'/'Habin' for Alexandre Jesus and 'Jonathan'/\"Jonathan's Grace(ie)\" for Jonnatas Gracie recur across the whole bout and consistently corroborate actor attribution frame-by-frame (verified frames: alexandre-jesus-vs-jonnatas-gracie-05.jpg through -10.jpg, -14/-15.jpg, -25.jpg, -28.jpg). No winner-swap flag on this bout (audit.flags=[], gemini_winner=null); ends 0-0 decision, published winner Alexandre Jesus, consistent with no submissions landing.",
+ "notes": "All 14 Gemini events audited and kept as-is, no corrections needed. Bout runs 0-0 to a judges' decision (no scored points visible on scoreboard throughout the sampled range, matching the absence of `points` fields). Penalty note in bout meta (Alexandre Jesus ~t15655 Caution/Penalty) has no corresponding event in events[] and was not audited (not a Gemini event)."
+}

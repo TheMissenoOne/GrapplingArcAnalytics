@@ -1,0 +1,121 @@
+{
+ "bout": {
+  "athlete_a": "Helena Crevar",
+  "athlete_b": "Morgan Black",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Helena Crevar",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 21735,
+  "bout_end_seconds": 22215,
+  "identity_discriminator": "Helena Crevar = blue/white/red stars-and-stripes rashguard+spats, 'HELENA' lettered on back (walkout frame 21605, confirmed again 21720/21735 close-ups); Morgan Black = all-black kit, 'TABS BJJ' branding, lower-third graphic 'MORGAN BLACK' at 21615/21620. Scoreboard order M.Black(red)/H.Crevar(blue) consistent throughout. Matches Gemini's identity_discriminator exactly; no flags on this bout.",
+  "final_score": {
+   "Helena Crevar": 2,
+   "Morgan Black": 0
+  },
+  "notes": "Frames 21600-21730 are walkouts and introductions; frames 22260-22295 are replays. | Only one event dropped (21780 Underhook, actor mismatch of grip type between caption and my second-look read of the frame — DROP per residual-doubt rule). No off-library labels; 'Uchi Mata' and 'Wrestle-Up' are both valid closed-vocab entries verbatim (not to be confused with 'Uchi Mata Throw' / 'Wrestle Up to Top', which describe completed variants and were not what the frames showed). No identity flag on this bout.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 21755,
+   "label": "Collar Tie",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21765,
+   "label": "Two-on-One Control",
+   "actor": "Morgan Black",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21805,
+   "label": "Guillotine Choke",
+   "actor": "Morgan Black",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 21875,
+   "label": "Uchi Mata",
+   "actor": "Helena Crevar",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 21920,
+   "label": "Russian Tie",
+   "actor": "Morgan Black",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21945,
+   "label": "Uchi Mata",
+   "actor": "Helena Crevar",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 21965,
+   "label": "Leg Entry",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 21975,
+   "label": "Open Guard",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 22020,
+   "label": "Sweep",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  },
+  {
+   "ts": 22025,
+   "label": "Front Headlock Control",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 22085,
+   "label": "Turtle Position",
+   "actor": "Morgan Black",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 22085,
+   "label": "Turtle Control",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 22180,
+   "label": "Wrestle-Up",
+   "actor": "Morgan Black",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 22200,
+   "label": "Snap Down",
+   "actor": "Helena Crevar",
+   "successful": true,
+   "type": "takedown"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 14/15) 2026-08-25"
+}

@@ -1,0 +1,65 @@
+{
+ "bout": {
+  "athlete_a": "Felipe Costa",
+  "athlete_b": "Elionai Braz",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Felipe Costa",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 9055,
+  "bout_end_seconds": 9540,
+  "identity_discriminator": "White/light-topped kit (visible 'Six Blades'-style branding on shorts) = Felipe Costa, consistently the guard player/bottom in the opening sequence; black-kitted, shaved-head, bearded athlete = Elionai Braz. Scoreboard graphic reads 'E. JULIO Braz' / 'C. Costa' (Braz's full name likely 'Elionai Julio Braz'). Pre-fight commentary at ts9035-9040 explicitly discusses Costa's 'Six Blades' team affiliation, cross-confirming the kit-to-name mapping in bout.identity_discriminator. No flags on this bout.",
+  "final_score": {
+   "Felipe Costa": 2,
+   "Elionai Braz": 0
+  },
+  "notes": "Frames 9030-9040 show the conclusion of the previous match. | No drops, no corrections. One scoreboard oddity noted for the assembler: a secondary numeric column next to 'E. JULIO Braz' reads a static '2' from ts9480 through the end of the sampled window, which looks like it could be misread as a live point score -- but it never changes even across the ts9530 scoring event, so it is not the live match score (likely a seed/bracket number or unrelated broadcast stat). The Sweep/points=2 call instead relies on the caption ('two points') and bout.final_score, which agree with Gemini's event.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 9060,
+   "label": "Guard Pull",
+   "actor": "Felipe Costa",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 9065,
+   "label": "Closed Guard",
+   "actor": "Felipe Costa",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 9185,
+   "label": "Body Lock",
+   "actor": "Elionai Braz",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 9330,
+   "label": "Straight Armbar",
+   "actor": "Felipe Costa",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 9505,
+   "label": "Guard Break",
+   "actor": "Elionai Braz",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 9530,
+   "label": "Sweep",
+   "actor": "Felipe Costa",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 6/6) 2026-08-25"
+}

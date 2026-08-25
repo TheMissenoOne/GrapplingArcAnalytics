@@ -1,0 +1,79 @@
+{
+ "log": [
+  {
+   "ts": 29215,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame at bout start (29215) shows exact collar-tie clinch between Leary and Skinner"
+  },
+  {
+   "ts": 29370,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 29370-29375 shows Skinner pulling guard on Leary"
+  },
+  {
+   "ts": 29375,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 29375 shows Skinner on his back with open guard immediately after the pull"
+  },
+  {
+   "ts": 29405,
+   "label": "Body Lock Pass",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "frame at 29405 (+-15s) shows only an unresolved guard-retention scramble, no completed pass and scoreboard still 0-0; the scoreboard doesn't move to 3 until 29480-29485. Corrected ts to 29480 where the score change is directly visible -- label/actor/type/points otherwise concordant with the body-lock-pass technique visible throughout the 29405-29480 scramble",
+   "corrections": {
+    "ts": 29480
+   }
+  },
+  {
+   "ts": 29485,
+   "label": "Side Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 29485 shows Leary having established side control on Skinner right after the pass lands, scoreboard already 3-0"
+  },
+  {
+   "ts": 29505,
+   "label": "Turtle Position",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 29505-29510 shows Skinner turtled/scrambling to recover position under continued pressure from Leary"
+  },
+  {
+   "ts": 29510,
+   "label": "Guard Recovery",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "same scramble window, Skinner shown working back to a guard-retention position"
+  },
+  {
+   "ts": 29545,
+   "label": "Top Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 29540-29545 shows Leary maintaining top position in a half-guard-passing exchange over Skinner"
+  },
+  {
+   "ts": 29585,
+   "label": "Jump Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 29585 shows Skinner (red) jumping to wrap around a standing Leary (black), consistent with a jump-guard pull"
+  },
+  {
+   "ts": 29605,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 29605 shows continued groundwork with Leary maintaining top position, consistent with the match ending 3-0 in his favor"
+  }
+ ],
+ "identity_check": "Matches bout.identity_discriminator: Levi Jones-Leary in black short-sleeve rashguard/black shorts; Jeremy Skinner in red long-sleeve rashguard/black shorts. Confirmed via scoreboard 'J. SKINNER (red row) / L. LEARY (blue row)' appearing at 29215s and held consistent through all kept frames. Frames 29200-29205 (previous bout L.Kanard vs W.Dias) correctly excluded per bout.notes.",
+ "notes": "audit.flags empty, no off-library labels, gemini_winner (Levi Jones-Leary) matches bout.winner and final_score (3-0). Only correction is the Body Lock Pass timestamp -- moved to where the scoreboard visibly changes. This also fixes an implicit points-timing error that would otherwise misplace the 3-point action by ~75s in the graph."
+}

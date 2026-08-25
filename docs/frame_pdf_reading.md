@@ -50,7 +50,9 @@ set, cross-referenced against the published finals of all 8 trials events in the
 cycle; see that file's `_comment` and the set's own `README.md` for provenance). This
 replaced the v1 set of 6 header-named bouts + 50 blind 600s windows, which split fights
 across files and carried no athlete names. They carry per-window narration captions sourced
-from the event transcript (`--transcript`, §2 in the script's own docstring).
+from the event transcript (`--transcript`, §2 in the script's own docstring). Gemini answers
+for this set live at `data/frame_pdf/trials_2023_24/answers/` — reading + QA procedure is
+`docs/gemini_concordance_audit.md`, not the registrar loop above.
 
 **`--orientation landscape`** (added 2026-08-25): rotates the sheet to A4 landscape and, unless
 `--grid` is given explicitly, switches the default grid from 2x3 (portrait, 6 frames/page) to

@@ -1,0 +1,57 @@
+{
+ "log": [
+  {
+   "ts": 20070,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 20075 shows the black-kit athlete (Ibragimov) with an arm around the grey-kit athlete's head/neck at the opening exchange"
+  },
+  {
+   "ts": 20290,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "black-kit athlete (Ibragimov) clearly on bottom playing guard, grey/UF-kit (Hanay) on top passing, across frames 20290-20305"
+  },
+  {
+   "ts": 20445,
+   "label": "Half Guard",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "Gemini credited Yigit Hanay with playing Half Guard (a bottom position, type=guard), but frames 20430-20450 show the grey/UF-logo kit (Hanay) consistently ON TOP and the black-kit athlete (Ibragimov) underneath -- i.e. Ibragimov is the one actually playing the guard here.",
+   "corrections": {
+    "actor": "Gairbeg Ibragimov (was Yigit Hanay)"
+   }
+  },
+  {
+   "ts": 20630,
+   "label": "Double Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 20620 shows the black-kit athlete (Ibragimov) shooting/driving into the grey-kit athlete's legs; by 20630-20635 Ibragimov is on top -- clean, unambiguous"
+  },
+  {
+   "ts": 20645,
+   "label": "Top Half Guard",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "Gemini credited Ibragimov with Top Half Guard (a top-control position), but a scramble between 20635 and 20640 flipped the position -- frames 20640-20665 show the grey/UF-logo kit (Hanay) clearly on top with the black-kit athlete (Ibragimov) underneath, so Hanay is the one controlling from top here, not Ibragimov.",
+   "corrections": {
+    "actor": "Yigit Hanay (was Gairbeg Ibragimov)"
+   }
+  },
+  {
+   "ts": 20755,
+   "label": "Half Guard",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "same pattern as ts20445 -- frames 20730-20755 show the grey/UF-logo kit (Hanay) on top and the black-kit athlete (Ibragimov) underneath playing the guard, so the guard-player is Ibragimov, not Hanay as Gemini had it.",
+   "corrections": {
+    "actor": "Gairbeg Ibragimov (was Yigit Hanay)"
+   }
+  }
+ ],
+ "identity_check": "Confirmed via the scoreboard graphic ('G. Ibragimov' red / 'Y. Hanay' blue) present from 20060s onward, plus kit: Gairbeg Ibragimov solid black rashguard+shorts; Yigit Hanay grey/white rashguard with a legible 'UF / Universal Fighters' team logo on the back. The UF logo is unambiguous and was used as the anchor to re-verify actor assignment mid-match (see notes -- 3 of 6 events had the actor backwards relative to who was actually on top/bottom).",
+ "notes": "This bout has a recurring actor-attribution pattern, not a full match-wide swap: Gemini got the standing/opening events and the clean 20630 takedown right (kit colors match), but for the extended half-guard exchanges (20430-20460 and 20640-20755) it appears to have consistently named the athlete who was NOT on top as the 'controller' and the one who WAS on top as the 'guard player' -- backwards in both directions depending on which label was used. Corrected using the unambiguous grey/white kit with visible 'UF / Universal Fighters' team logo as the Hanay anchor, cross-checked against the clean 20630 takedown (black=Ibragimov=attacker, confirmed unambiguously) and against the scramble visible between 20635-20640 that flips top/bottom. Final score in the source bout JSON is 0-0 (win_type DECISION) so no points fields were ever expected here."
+}

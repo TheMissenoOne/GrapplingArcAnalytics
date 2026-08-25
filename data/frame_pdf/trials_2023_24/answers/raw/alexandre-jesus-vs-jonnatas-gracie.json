@@ -1,0 +1,119 @@
+{
+ "bout": {
+  "athlete_a": "Alexandre Jesus",
+  "athlete_b": "Jonnatas Gracie",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Alexandre Jesus",
+  "year": 2024,
+  "penalties": "Alexandre Jesus ~t15655 (Caution / Penalty)"
+ },
+ "events": [
+  {
+   "ts": 15125,
+   "label": "Collar Tie",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 15210,
+   "label": "Single Leg X",
+   "actor": "Jonnatas Gracie",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 15215,
+   "label": "Single Leg Takedown",
+   "actor": "Jonnatas Gracie",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 15245,
+   "label": "Escape to Standing",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 15300,
+   "label": "Shoot",
+   "actor": "Alexandre Jesus",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 15375,
+   "label": "Guillotine Choke",
+   "actor": "Jonnatas Gracie",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 15390,
+   "label": "Guillotine Escape",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 15430,
+   "label": "Leg Entanglement",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 15445,
+   "label": "Guard Pass",
+   "actor": "Jonnatas Gracie",
+   "successful": false,
+   "type": "pass"
+  },
+  {
+   "ts": 15495,
+   "label": "Escape to Standing",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 15500,
+   "label": "Guillotine Choke",
+   "actor": "Jonnatas Gracie",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 15515,
+   "label": "Guillotine Escape",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 15725,
+   "label": "Takedown",
+   "actor": "Jonnatas Gracie",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 15810,
+   "label": "Wrist Lock",
+   "actor": "Alexandre Jesus",
+   "successful": false,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "77kg",
+  "source_file": "ai_studio_code(2).txt",
+  "curated_start": 15100,
+  "curated_end": 15950,
+  "gemini_winner": null,
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

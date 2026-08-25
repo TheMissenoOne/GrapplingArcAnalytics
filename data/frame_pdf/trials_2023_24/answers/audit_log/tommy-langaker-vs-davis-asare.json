@@ -1,0 +1,83 @@
+{
+ "log": [
+  {
+   "ts": 19665,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame at ts shows the pair already clinched with Tommy's (pale-skinned) arm around Davis's neck pulling his head down -- matches label/actor/type, and feeds coherently into Tommy's own guard pull moments later."
+  },
+  {
+   "ts": 19675,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "One athlete drops to the mat immediately after the tie while the other stays standing; consistent with Tommy going to bottom voluntarily. No narration in this window, position/timing support the call."
+  },
+  {
+   "ts": 19680,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Continuous ground engagement right after the guard pull, both players working legs/hips from the same bottom/top arrangement established at 19675."
+  },
+  {
+   "ts": 19705,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows both players' legs interlocked on the mat, consistent with a leg entanglement guard continuing from the open guard sequence."
+  },
+  {
+   "ts": 19840,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Davis (dark-skinned) on top holding a leg/control position over Tommy; narration at ts: 'fighters on top on top on top, he's still on top' -- matches actor/type."
+  },
+  {
+   "ts": 19880,
+   "label": "50/50 Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows both entangled with interlocked legs perpendicular to each other, the classic 50/50 shape, following directly from Davis's leg-control period -- matches Tommy re-establishing guard."
+  },
+  {
+   "ts": 19965,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows the pale-skinned athlete (Tommy) wrapped around the dark-skinned athlete's (Davis) back/torso from behind; crowd reaction ('Hallelujah! [Applause]') at 19975 fits a significant positional gain."
+  },
+  {
+   "ts": 19990,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Scoreboard itself changes to 'T. LILLESKOG LANGAK: 3' exactly at this ts, matching the logged points=3 for back control -- as direct as evidence gets."
+  },
+  {
+   "ts": 19990,
+   "label": "Body Triangle",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Same frame as Back Control shows Tommy's legs locked around Davis's body from the back -- consistent with a simultaneous body triangle."
+  },
+  {
+   "ts": 20005,
+   "label": "Rear Naked Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame at ts shows Tommy's arm across Davis's neck/jaw from the back-control position established at 19990, immediately preceding the tap and match end -- matches the published SUBMISSION win type."
+  },
+  {
+   "ts": 20010,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Match visibly ends: by 20005-20015 both corners are on the mat and Tommy is celebrating; final scoreboard 0-3 and win_type=SUBMISSION for Tommy match the published record."
+  }
+ ],
+ "identity_check": "Both athletes wear plain black rashguards during live action, so identity is anchored on skin tone + pre-bout branded shirts: Tommy Langaker = pale/white skin, blonde hair, seen alone at 19670 wearing a 'WULFING' branded shirt (matches identity_discriminator); Davis Asare = dark skin, seen at 19660 in a 'CXB' branded shirt during walk-out. Scoreboard confirms 'D. ASARE' / 'T. LILLESKOG LANGAK'. Final score 0-3 (Tommy) matches bout.final_score and the published SUBMISSION win for Tommy via rear naked choke, confirmed by the scoreboard itself flipping to 'T. LILLESKOG LANGAK: 3' at ts=19990 (Back Control/Body Triangle) and staying there through the finish. No reversal found -- events[] actors match the stated identity_discriminator throughout.",
+ "notes": "No off-library labels, no winner contradiction. Extended silent/no-narration stretch 19705-19960 (guard/leg-entanglement/top-control exchange) had to be read from frames alone; all calls there are lower-confidence positional reads but nothing contradicted them, so all were kept."
+}

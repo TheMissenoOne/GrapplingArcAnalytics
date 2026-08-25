@@ -1,0 +1,92 @@
+{
+ "bout": {
+  "athlete_a": "William Tackett",
+  "athlete_b": "Jacob Rodriguez",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "William Tackett",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 25185,
+  "bout_end_seconds": 25375,
+  "identity_discriminator": "William Tackett in grey/camo Level Black rashguard and dark shorts; Jacob Rodriguez in all-white rashguard and white shorts",
+  "final_score": {
+   "William Tackett": 0,
+   "Jacob Rodriguez": 0
+  },
+  "notes": "Frames 25100-25180 are walkouts and introductions; frames 25415-25425 are replays."
+ },
+ "events": [
+  {
+   "ts": 25185,
+   "label": "Knee Tap",
+   "actor": "William Tackett",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 25215,
+   "label": "Snap Down",
+   "actor": "William Tackett",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 25230,
+   "label": "Back Take",
+   "actor": "William Tackett",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 25260,
+   "label": "X-Guard",
+   "actor": "Jacob Rodriguez",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 25285,
+   "label": "Body Lock Pass",
+   "actor": "William Tackett",
+   "successful": true,
+   "type": "pass"
+  },
+  {
+   "ts": 25300,
+   "label": "North-South Position",
+   "actor": "William Tackett",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 25360,
+   "label": "Leg Entanglement",
+   "actor": "William Tackett",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 25370,
+   "label": "Toe Hold",
+   "actor": "William Tackett",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 25375,
+   "label": "Tap",
+   "actor": "Jacob Rodriguez",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "88kg",
+  "source_file": "bouts bout athlete aaaa.txt",
+  "curated_start": 25100,
+  "curated_end": 25430,
+  "gemini_winner": "William Tackett",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

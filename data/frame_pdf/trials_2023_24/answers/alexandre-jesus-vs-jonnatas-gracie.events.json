@@ -1,0 +1,114 @@
+{
+ "bout": {
+  "athlete_a": "Alexandre Jesus",
+  "athlete_b": "Jonnatas Gracie",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Alexandre Jesus",
+  "year": 2024,
+  "penalties": "Alexandre Jesus ~t15655 (Caution / Penalty)",
+  "identity_discriminator": "Lower-third scoreboard reads 'J. Gracie' (red, top row) / 'A. Joaquim De Jesus' (blue, bottom row) from ts~15115 onward -- matches Gemini's Jonnatas Gracie / Alexandre Jesus naming. Commentary nicknames 'Habinho'/'Hab'/'Habin' for Alexandre Jesus and 'Jonathan'/\"Jonathan's Grace(ie)\" for Jonnatas Gracie recur across the whole bout and consistently corroborate actor attribution frame-by-frame (verified frames: alexandre-jesus-vs-jonnatas-gracie-05.jpg through -10.jpg, -14/-15.jpg, -25.jpg, -28.jpg). No winner-swap flag on this bout (audit.flags=[], gemini_winner=null); ends 0-0 decision, published winner Alexandre Jesus, consistent with no submissions landing.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "All 14 Gemini events audited and kept as-is, no corrections needed. Bout runs 0-0 to a judges' decision (no scored points visible on scoreboard throughout the sampled range, matching the absence of `points` fields). Penalty note in bout meta (Alexandre Jesus ~t15655 Caution/Penalty) has no corresponding event in events[] and was not audited (not a Gemini event)."
+ },
+ "events": [
+  {
+   "ts": 15125,
+   "label": "Collar Tie",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 15210,
+   "label": "Single Leg X",
+   "actor": "Jonnatas Gracie",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 15215,
+   "label": "Single Leg Takedown",
+   "actor": "Jonnatas Gracie",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 15245,
+   "label": "Escape to Standing",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 15300,
+   "label": "Shoot",
+   "actor": "Alexandre Jesus",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 15375,
+   "label": "Guillotine Choke",
+   "actor": "Jonnatas Gracie",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 15390,
+   "label": "Guillotine Escape",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 15430,
+   "label": "Leg Entanglement",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 15445,
+   "label": "Guard Pass",
+   "actor": "Jonnatas Gracie",
+   "successful": false,
+   "type": "pass"
+  },
+  {
+   "ts": 15495,
+   "label": "Escape to Standing",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 15500,
+   "label": "Guillotine Choke",
+   "actor": "Jonnatas Gracie",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 15515,
+   "label": "Guillotine Escape",
+   "actor": "Alexandre Jesus",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 15725,
+   "label": "Takedown",
+   "actor": "Jonnatas Gracie",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 15810,
+   "label": "Wrist Lock",
+   "actor": "Alexandre Jesus",
+   "successful": false,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 14/14) 2026-08-25"
+}

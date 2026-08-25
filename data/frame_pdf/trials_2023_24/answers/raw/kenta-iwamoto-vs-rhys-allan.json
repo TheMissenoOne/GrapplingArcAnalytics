@@ -1,0 +1,93 @@
+{
+ "bout": {
+  "athlete_a": "Kenta Iwamoto",
+  "athlete_b": "Rhys Allan",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Kenta Iwamoto",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 7490,
+  "bout_end_seconds": 8015,
+  "identity_discriminator": "Kenta Iwamoto in black rashguard and black shorts; Rhys Allan shirtless with black shorts",
+  "final_score": {
+   "Kenta Iwamoto": 3,
+   "Rhys Allan": 0
+  },
+  "notes": "Frames 7470-7480 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 7500,
+   "label": "Collar Tie",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7585,
+   "label": "Double Leg Takedown",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 7600,
+   "label": "Top Half Guard",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7615,
+   "label": "Half Guard",
+   "actor": "Rhys Allan",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 7660,
+   "label": "Body Lock Pass",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 7740,
+   "label": "Top Control",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7765,
+   "label": "Turtle Control",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7840,
+   "label": "Takedown",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 7860,
+   "label": "Top Control",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "77kg",
+  "source_file": "bouts bout athlete a.txt",
+  "curated_start": 7470,
+  "curated_end": 8030,
+  "gemini_winner": "Kenta Iwamoto",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,86 @@
+{
+ "bout": {
+  "athlete_a": "Ethan Thomas",
+  "athlete_b": "Minoru Takeuchi",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Ethan Thomas",
+  "year": 2023,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 8040,
+  "bout_end_seconds": 8475,
+  "identity_discriminator": "Minoru Takeuchi in black rashguard with ALL LEONE / BRAVE graphics and black shorts; Ethan Thomas in dark rashguard with grey/green trim",
+  "final_score": {
+   "Ethan Thomas": 0,
+   "Minoru Takeuchi": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 8040,
+   "label": "Collar Tie",
+   "actor": "Minoru Takeuchi",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 8140,
+   "label": "Guard Pull",
+   "actor": "Ethan Thomas",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 8145,
+   "label": "Closed Guard",
+   "actor": "Ethan Thomas",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 8180,
+   "label": "Leg Entanglement",
+   "actor": "Ethan Thomas",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 8255,
+   "label": "Top Control",
+   "actor": "Minoru Takeuchi",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 8370,
+   "label": "Guard Pass",
+   "actor": "Minoru Takeuchi",
+   "successful": false,
+   "type": "pass"
+  },
+  {
+   "ts": 8470,
+   "label": "Armbar",
+   "actor": "Minoru Takeuchi",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 8475,
+   "label": "Tap",
+   "actor": "Ethan Thomas",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "66kg",
+  "source_file": "ai_studio_code-3.txt",
+  "curated_start": 8030,
+  "curated_end": 8490,
+  "gemini_winner": "Minoru Takeuchi",
+  "flags": [
+   "gemini winner 'Minoru Takeuchi' CONTRADICTS published winner 'Ethan Thomas' -- identity of every actor in this bout is suspect"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

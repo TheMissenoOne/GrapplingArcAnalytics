@@ -1,0 +1,100 @@
+{
+ "bout": {
+  "athlete_a": "Jozef Chen",
+  "athlete_b": "Oliver Taza",
+  "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+  "winner": "Jozef Chen",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 1465,
+  "bout_end_seconds": 2320,
+  "identity_discriminator": "No lower-third walkout in curated range (starts mid-bout-intro at 1450s). Identity established from kit: Jozef Chen wears a light beige/tan patterned rashguard with 'B-TEAM' / 'JOZEF CHEN' branding and purple shorts; Oliver Taza wears a plain black rashguard. Verified across pages 05-11 (e.g. frames 1465, 1550-1565, 1600-1615) where Chen (patterned) is consistently the top/passing player and Taza (black) the guard player, matching the scoreboard order (J. Chen row1 / O. Taza row2) and the final_score/points (3-0 Chen, points appear on scoreboard exactly at ts~1745, matching Chen's Guard Pass).",
+  "final_score": {
+   "Jozef Chen": 3,
+   "Oliver Taza": 0
+  },
+  "notes": "Frames 1450-1460 show athlete introductions. | The audit.flags off-library warning on the 1645 'Head-Arm Control (Top)' event did not hold up: that exact string is listed verbatim in the CONTROL section of the current Allowed-labels vocabulary page (376-technique snapshot 2026-08-25), and the frame supports it. No snap or drop was needed -- kept as Gemini reported it. No drops; all 11 events verified concordant, 0 corrections.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 1470,
+   "label": "Collar Tie",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 1525,
+   "label": "Guard Pull",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 1535,
+   "label": "Half Guard",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 1585,
+   "label": "Butterfly Half Guard",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 1645,
+   "label": "Head‑Arm Control (Top)",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 1740,
+   "label": "Guard Pass",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 1765,
+   "label": "Side Control",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 1815,
+   "label": "Half Guard",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2095,
+   "label": "Top Control (Half Guard)",
+   "actor": "Jozef Chen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2155,
+   "label": "Body Triangle (Bottom)",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2275,
+   "label": "Guard Retention",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 11/11) 2026-08-25"
+}

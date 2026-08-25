@@ -1,0 +1,111 @@
+{
+ "log": [
+  {
+   "ts": 3025,
+   "label": "Clinch",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Manasoiu clinching Ramos's neck, narration matches walkout ID"
+  },
+  {
+   "ts": 3040,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Ramos immediately takes the match to the ground'"
+  },
+  {
+   "ts": 3050,
+   "label": "False Reap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'False reap. And nice job by Ramos clearing the knee' (Manasoiu attempt defended)"
+  },
+  {
+   "ts": 3075,
+   "label": "Body Lock",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Big Dan, he let go of the body lock' confirms he had landed it"
+  },
+  {
+   "ts": 3085,
+   "label": "Knee Shield Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Ramos creating a knee shield here'"
+  },
+  {
+   "ts": 3110,
+   "label": "Aoki Lock",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Ramos testing out this AO lock' + 'he sat back quick' = defended"
+  },
+  {
+   "ts": 3150,
+   "label": "Double Underhooks",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'He's got the under hook now. Working into double under hooks'"
+  },
+  {
+   "ts": 3185,
+   "label": "Dogbar",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Dan loves that dog bar knee bar' then 'Ramos again saves that pass' (attempt failed)"
+  },
+  {
+   "ts": 3240,
+   "label": "Mount",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Stepping over clears it into the mount'"
+  },
+  {
+   "ts": 3245,
+   "label": "Arm Triangle Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Thinking about the arm triangle' (attempt, not finish)"
+  },
+  {
+   "ts": 3300,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Big Dan up three-0 off of that guard pass'; scoreboard 0->3 confirms points=3"
+  },
+  {
+   "ts": 3335,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Ramos switching off to the lock down' (half guard variant), score still 3-0"
+  },
+  {
+   "ts": 3350,
+   "label": "Guard Pass to Mount",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'He'll get three more for that pass'; scoreboard 3->6 confirms points=3"
+  },
+  {
+   "ts": 3370,
+   "label": "Smother",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration: 'Dan Monosoyu hits a smother in the finals of ADCC East Coast Trials'"
+  },
+  {
+   "ts": 3375,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "corresponds to Ramos tapping to the smother that ended the match"
+  }
+ ],
+ "identity_check": "D. Manasoiu wears black/dark kit, D. Ramos wears blue kit; confirmed by scoreboard lower-third (Manasoiu=red/NEW, Ramos=blue/HERO) visible together with bodies at 3030s-3055s, and by walkout narration naming Ramos in blue at 3010s. Consistent throughout.",
+ "notes": "All 15 events concordant; no off-library labels; no gemini/published winner conflict (gemini_winner null); no replay/cutaway frames encountered in this bout."
+}

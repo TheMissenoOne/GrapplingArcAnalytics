@@ -1,0 +1,92 @@
+{
+ "bout": {
+  "athlete_a": "Nia Blackman",
+  "athlete_b": "Salla Simola",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Nia Blackman",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 17740,
+  "bout_end_seconds": 18550,
+  "identity_discriminator": "Nia Blackman in green/brown camouflage rashguard and black shorts; Salla Simola in black Pitbull rashguard and black shorts with blonde hair",
+  "final_score": {
+   "Nia Blackman": 2,
+   "Salla Simola": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 17745,
+   "label": "Collar Tie",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 17865,
+   "label": "Snap Down",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 17875,
+   "label": "Seated Guard",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 18015,
+   "label": "Closed Guard",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 18105,
+   "label": "Inversion",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 18115,
+   "label": "Escape to Standing",
+   "actor": "Salla Simola",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 18330,
+   "label": "Collar Tie",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 18420,
+   "label": "Double Leg Takedown",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  },
+  {
+   "ts": 18435,
+   "label": "Top Control",
+   "actor": "Nia Blackman",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "+65kg F",
+  "source_file": "bouts bout athlete aaa.txt",
+  "curated_start": 17730,
+  "curated_end": 18560,
+  "gemini_winner": "Nia Blackman",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

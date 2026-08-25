@@ -1,0 +1,90 @@
+{
+ "log": [
+  {
+   "ts": 21030,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'heavy on the head early for Enriquez... looking to pull to a front head'"
+  },
+  {
+   "ts": 21045,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'snaps to try to get to the back here'; Rocha reversal at next frame confirms Enriquez had top pressure from the snap"
+  },
+  {
+   "ts": 21055,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'able to get to the mat safely off the takedown and immediately getting that guard high'"
+  },
+  {
+   "ts": 21140,
+   "label": "K-Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration transcribed 'Kang off to her right side' = mis-caption of 'K-guard'; frame shows Rocha's legs in K-guard shape, Enriquez passing"
+  },
+  {
+   "ts": 21170,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration explicitly 'leg entanglement of some sort like you see Jasmine Roachcha threatening right here'"
+  },
+  {
+   "ts": 21230,
+   "label": "Arm Drag",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Arm drag attempt' at matching ts; Rocha working from bottom guard"
+  },
+  {
+   "ts": 21260,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Another guillotine attempt' / 'this guillotine by Alex Enriquez', unfinished"
+  },
+  {
+   "ts": 21340,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'What a move from Roacha, spinning for the back... one hook in now'"
+  },
+  {
+   "ts": 21385,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'control of the back in 2 minutes 30 seconds, got her three'; scoreboard J.Rocha jumps to 3 exactly on this frame"
+  },
+  {
+   "ts": 21390,
+   "label": "Body Triangle",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'once again locking it in' right after the back-control score, frame shows legs wrapped continuing back control"
+  },
+  {
+   "ts": 21505,
+   "label": "Rear Naked Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'it's underneath the chin... Jasmine Roachcha wins ADCC Trials' at this exact frame"
+  },
+  {
+   "ts": 21510,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "immediately follows the confirmed RNC finish narration ('wins ADCC Trials'); match ends by submission per bout meta (win_type SUBMISSION), tap itself off-frame in the walk-off shot but strongly implied by context"
+  }
+ ],
+ "identity_check": "Confirmed via walkout lower-third 'ALEX ENRIQUEZ / ATOS' (20900-20905s) and repeated narration naming ('Roachcha' = mangled 'Rocha', 'Enriquez'). Kit: Jasmine Rocha white/blue/red Tatami rashguard + white shorts; Alex Enriquez all-black. Cross-checked against scoreboard: J.Rocha's score visibly ticks 0->2->3 in frames 21380-21385 exactly as the white-kit athlete secures back control, matching the Back Control event actor.",
+ "notes": "Frames 20860-20880 (before this bout's own walkout) show the tail end of an unrelated prior bout (Gairbeg Ibragimov vs Yigit Hanay celebration, scoreboard 'G. Ibragimov / Y. Hanay') per the protocol's not-this-bout warning; excluded from consideration, first true Rocha/Enriquez walkout frame is ~20890-20900 ('Alex Enriquez making her way to the ring... taking on Jasmine Roachcha')."
+}

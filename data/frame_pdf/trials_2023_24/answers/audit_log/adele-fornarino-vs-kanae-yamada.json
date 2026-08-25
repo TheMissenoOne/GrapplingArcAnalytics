@@ -1,0 +1,69 @@
+{
+ "log": [
+  {
+   "ts": 26925,
+   "label": "Clinch",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows the white-topped athlete (Adele) reaching in to engage the black-topped athlete (Kanae) in a standing clinch -- matches actor/label."
+  },
+  {
+   "ts": 27035,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows a fall to the ground right out of the clinch, immediately followed by Adele seated playing guard at 27055 -- consistent chain even though the exact instant of the pull itself is a blur at 5s sampling."
+  },
+  {
+   "ts": 27055,
+   "label": "Seated Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Adele (white) seated on the mat with Kanae (black) standing/kneeling in front of her -- a clean match for Seated Guard."
+  },
+  {
+   "ts": 27080,
+   "label": "Shin to Shin Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Adele seated with legs extended toward Kanae in continued open-guard leg contact, directly following the seated guard position -- matches the guard family and actor."
+  },
+  {
+   "ts": 27215,
+   "label": "Leg Entanglement Entry",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows both athletes seated with legs interlocked at knee level -- matches a leg entanglement entry by Adele from her ongoing guard game."
+  },
+  {
+   "ts": 27275,
+   "label": "Guard Recovery",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Adele scrambling from underneath Kanae's pressure, with corner narration 'we go, keep it down' consistent with a contested guard-recovery moment."
+  },
+  {
+   "ts": 27300,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Adele underneath with her legs wrapped around Kanae from below -- a clean closed guard shape, following directly from the recovery at 27275."
+  },
+  {
+   "ts": 27365,
+   "label": "Armbar",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Adele (white) on top isolating Kanae's arm across her hips in a clear armbar shape, right before the match ends."
+  },
+  {
+   "ts": 27375,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Applause and match-end frames immediately follow the armbar, consistent with Kanae tapping and the published winner Adele Fornarino."
+  }
+ ],
+ "identity_check": "Adele Fornarino wears a WHITE/grey top with black leggings (back text 'ADELE F...' legible at 27325); Kanae Yamada wears an all-black rashguard/shorts kit. Confirmed at the finish: the white-topped athlete is on top locking the armbar at 27365-27375 while the black-topped athlete taps, matching the published winner Adele Fornarino. Scoreboard reads 'A. FORNARINO' / 'K. YAMADA' (order not treated as mat position, per protocol). Mapping held consistent from the opening clinch through the finish.",
+ "notes": "This raw file has no win_type/final_score/bout_start fields (sparser than the other bouts in this batch) and gemini_winner is null, but the events[] sequence is internally consistent and the finish visually confirms Adele Fornarino as winner by armbar, matching bout.winner. Nothing dropped -- every event held up against the frames."
+}

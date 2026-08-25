@@ -1,0 +1,93 @@
+{
+ "bout": {
+  "athlete_a": "Deandre Corbe",
+  "athlete_b": "Keith Krikorian",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Deandre Corbe",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 26300,
+  "bout_end_seconds": 26780,
+  "identity_discriminator": "Deandre Corbe in black Parry Athletics kit with white circular logos down the side; Keith Krikorian in black kit with yellow circular 10th Planet logo",
+  "final_score": {
+   "Deandre Corbe": 6,
+   "Keith Krikorian": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 26300,
+   "label": "Clinch",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 26375,
+   "label": "Guard Pull",
+   "actor": "Keith Krikorian",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 26445,
+   "label": "Half Guard",
+   "actor": "Keith Krikorian",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 26500,
+   "label": "Leg Entanglement",
+   "actor": "Keith Krikorian",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 26540,
+   "label": "50/50 Guard",
+   "actor": "Keith Krikorian",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 26560,
+   "label": "Back Take",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 26595,
+   "label": "Back Control",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 26675,
+   "label": "Back Control",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 26730,
+   "label": "Body Triangle",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "66kg",
+  "source_file": "ai_studio_code-2.txt",
+  "curated_start": 26290,
+  "curated_end": 26790,
+  "gemini_winner": "Deandre Corbe",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,92 @@
+{
+ "bout": {
+  "athlete_a": "Maria Ruffatto",
+  "athlete_b": "Kauane Silva",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Maria Ruffatto",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 12585,
+  "bout_end_seconds": 12785,
+  "identity_discriminator": "Maria Ruffatto in black rashguard with ROLL A LOT on back; Kauane Silva in yellow t-shirt/rashguard and blue shorts",
+  "final_score": {
+   "Maria Ruffatto": 0,
+   "Kauane Silva": 0
+  },
+  "notes": "Frames 12570-12580 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 12590,
+   "label": "Collar Tie",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 12645,
+   "label": "Snap Down",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 12650,
+   "label": "Leg Entanglement",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 12660,
+   "label": "Heel Hook",
+   "actor": "Maria Ruffatto",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 12715,
+   "label": "50/50 Guard",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 12725,
+   "label": "Top Control",
+   "actor": "Kauane Silva",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 12735,
+   "label": "Knee Bar",
+   "actor": "Maria Ruffatto",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 12775,
+   "label": "Straight Ankle Lock",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 12785,
+   "label": "Tap",
+   "actor": "Kauane Silva",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "+65kg F",
+  "source_file": "bouts bout athlete aa.txt",
+  "curated_start": 12570,
+  "curated_end": 12800,
+  "gemini_winner": "Maria Ruffatto",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

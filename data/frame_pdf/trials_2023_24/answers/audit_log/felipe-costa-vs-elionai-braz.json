@@ -1,0 +1,48 @@
+{
+ "log": [
+  {
+   "ts": 9060,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "first live frame after bout start already shows the white-kitted athlete (Costa) on the ground with legs wrapped/up -- consistent with a pull right at the opening exchange"
+  },
+  {
+   "ts": 9065,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 5s later shows the same tight closed-guard shape held"
+  },
+  {
+   "ts": 9185,
+   "label": "Body Lock",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'he tried to connect the boardlock' (ASR mis-hearing of 'body lock'), reinforced by the following frame's caption 'trying to connect the body lock and then try to pass'"
+  },
+  {
+   "ts": 9330,
+   "label": "Straight Armbar",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Got a straight arm lock right there. That was a good attempt, but so far unsuccessful.'"
+  },
+  {
+   "ts": 9505,
+   "label": "Guard Break",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: '...Eli is able to open that guard and operate all' ('Eli' = Elionai)"
+  },
+  {
+   "ts": 9530,
+   "label": "Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'All right, he gets up. Okay, two points.'; frame shows a reversal/stand-up consistent with a sweep, and points=2 matches bout.final_score (Costa 2 - Braz 0)"
+  }
+ ],
+ "identity_check": "White/light-topped kit (visible 'Six Blades'-style branding on shorts) = Felipe Costa, consistently the guard player/bottom in the opening sequence; black-kitted, shaved-head, bearded athlete = Elionai Braz. Scoreboard graphic reads 'E. JULIO Braz' / 'C. Costa' (Braz's full name likely 'Elionai Julio Braz'). Pre-fight commentary at ts9035-9040 explicitly discusses Costa's 'Six Blades' team affiliation, cross-confirming the kit-to-name mapping in bout.identity_discriminator. No flags on this bout.",
+ "notes": "No drops, no corrections. One scoreboard oddity noted for the assembler: a secondary numeric column next to 'E. JULIO Braz' reads a static '2' from ts9480 through the end of the sampled window, which looks like it could be misread as a live point score -- but it never changes even across the ts9530 scoring event, so it is not the live match score (likely a seed/bracket number or unrelated broadcast stat). The Sweep/points=2 call instead relies on the caption ('two points') and bout.final_score, which agree with Gemini's event."
+}

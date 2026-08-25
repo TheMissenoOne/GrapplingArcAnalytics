@@ -1,0 +1,57 @@
+{
+ "bout": {
+  "athlete_a": "Lucas Kanard",
+  "athlete_b": "William Dias",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Lucas Kanard",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 28985,
+  "bout_end_seconds": 29190,
+  "identity_discriminator": "Lucas Kanard in black rashguard with JMC branding; William Dias in solid black rashguard and shorts",
+  "final_score": {
+   "Lucas Kanard": 0,
+   "William Dias": 0
+  },
+  "notes": "Frames 28970-28975 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 28990,
+   "label": "Collar Tie",
+   "actor": "Lucas Kanard",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 29155,
+   "label": "Guard Pull",
+   "actor": "William Dias",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 29180,
+   "label": "Guillotine Choke",
+   "actor": "Lucas Kanard",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 29190,
+   "label": "Tap",
+   "actor": "William Dias",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "88kg",
+  "source_file": "bouts bout athlete a.txt",
+  "curated_start": 28970,
+  "curated_end": 29200,
+  "gemini_winner": "Lucas Kanard",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

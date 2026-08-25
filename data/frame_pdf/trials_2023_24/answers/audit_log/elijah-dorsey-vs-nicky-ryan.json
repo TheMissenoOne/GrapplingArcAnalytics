@@ -1,0 +1,139 @@
+{
+ "log": [
+  {
+   "ts": 4490,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Clinch entry visible ts4490-4495; no narration confirmation of actor but frames show a mutual grip exchange consistent with Dorsey's usual wrestling entries."
+  },
+  {
+   "ts": 4510,
+   "label": "Foot Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4515: 'that little reaction he had against the foot sweep there where he just kind of let the foot go with it and kept his balance' — attempt, defended."
+  },
+  {
+   "ts": 4520,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4520: 'Dorsy reaches for the single. Tries to shut by.' explicit."
+  },
+  {
+   "ts": 4560,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4560-4580 sequence: 'nice entry by Dorsy. And Nikki accepts, goes down'; ts4580: 'a way to get around that is by conceding a takedown, and that's what you saw Nikki Ryan do right there' — no-guard-pull rule explained, takedown credited to Dorsey."
+  },
+  {
+   "ts": 4580,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts4580 shows Ryan on bottom immediately after the conceded takedown, playing open guard."
+  },
+  {
+   "ts": 4645,
+   "label": "Butterfly Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4645: 'Nikki working into the butterfly hook. Wants to make an entry on the legs here.'"
+  },
+  {
+   "ts": 4655,
+   "label": "Outside Ashi Garami",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4655: 'we've seen him work effectively from the double outside Ashi position a couple of times this weekend.'"
+  },
+  {
+   "ts": 4700,
+   "label": "Inversion",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4700: 'Dorsy nearly slips around to the Ryan inverts, saves it.'"
+  },
+  {
+   "ts": 4765,
+   "label": "Hip Switch Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4765: 'There's the hip switch. Nikki saves it...' matches attempted-and-defended pass."
+  },
+  {
+   "ts": 4865,
+   "label": "X-Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4865: 'And you see the X... Nikki almost inverted right there.'"
+  },
+  {
+   "ts": 4910,
+   "label": "Knee on Belly",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts4910: 'Dorsy with that heavy knee right there on the sternum of Nikki Ryan.'"
+  },
+  {
+   "ts": 5000,
+   "label": "Shoot",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts5000: 'Elijah shooting in. rejected by Ryan though.'"
+  },
+  {
+   "ts": 5040,
+   "label": "Single Leg Takedown (Ryan)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts5040: 'Nikki tries to take the single leg. Dorsy grabs onto the front head.' — confirms both this event and the paired Front Headlock event below."
+  },
+  {
+   "ts": 5040,
+   "label": "Front Headlock (Dorsey)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Same narration line confirms Dorsey secured front headlock off Ryan's single-leg attempt."
+  },
+  {
+   "ts": 5080,
+   "label": "Foot Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts5080: 'Foot sweep attempt. Again, Nikki does a good job of just letting his foot flow with that position.'"
+  },
+  {
+   "ts": 5095,
+   "label": "Single Leg Takedown (Dorsey)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts5095: 'Here's Dorsy in on a single. Nikki shuts him out. That was a good shot.'"
+  },
+  {
+   "ts": 5110,
+   "label": "Single Leg Takedown (Ryan)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts5115: 'single leg attempts, one from each guy as we approach a minute and a half to go' — pairs with the ts5095 Dorsey attempt, confirming a Ryan attempt too."
+  },
+  {
+   "ts": 5130,
+   "label": "Escape to Turtle",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts5130: 'Here we go. Nikki has the turtle in response.'"
+  },
+  {
+   "ts": 5155,
+   "label": "Seatbelt Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration ts5155: 'Dorsy now moving to the seat belt. One minute remains. Nice Elijah.'"
+  }
+ ],
+ "identity_check": "Walkout lower-third 'NICKOLAS RYAN / B-TEAM' (pages 05-06, ts~4380-4390) confirms Ryan wears the dark rashguard printed 'N. RYAN / TALK LESS' on the back, plain-dark shorts. Elijah Dorsey wears gold-star-patterned shorts, plain dark top, no back text. In-match scoreboard lower-third ('N. Ryan' red row / 'E. Dorsey' blue row) present on every live frame and consistent with this kit assignment throughout — Dorsey is the leg-attacker (shoots, single legs, foot sweeps) matching narration naming 'Dorsy'/'Elijah' explicitly at several points (ts 4520, 4560, 4910, 5000, 5040, 5095, 5150-5165). No gemini/published-winner contradiction; no swap needed.",
+ "notes": "Unusually clean read — every event lines up with an explicit narration cue naming the athlete and action, on top of frame confirmation. No off-library labels, no winner contradiction, no replay/cutaway contamination observed in the covered range (curated_start/end 4370-5270). Kept all 19 events with no corrections."
+}

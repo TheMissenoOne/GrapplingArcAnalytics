@@ -1,0 +1,34 @@
+{
+ "log": [
+  {
+   "ts": 28990,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts28990-28995 show a standing clinch/hand-fighting exchange between the two right after the bow."
+  },
+  {
+   "ts": 29155,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts29155 shows Dias down on the mat pulling into a seated/guard position with Kanard standing over him, a clean guard-pull picture."
+  },
+  {
+   "ts": 29180,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts29180-29185 show Kanard on top wrapping his arm around Dias's neck from the front in a clear guillotine grip; narration ts29180 ('Heavy Let's get it') matches an escalating finishing sequence."
+  },
+  {
+   "ts": 29190,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts29190 shows Dias flat with an outstretched tapping motion while Kanard holds the choke; by ts29195 both are back on their feet in a post-match embrace, consistent with the bout having just ended by submission -- matches the recorded win_type SUBMISSION and gemini_winner Kanard."
+  }
+ ],
+ "identity_check": "Scoreboard lower-third 'L. KANARD' (red row) / 'W. DIAS' (blue row) present on every live frame from ts28980 onward. Kanard's kit shows 'JMC' branding visible on the shorts at multiple frames (e.g. ts28995, ts29165); Dias in plain solid black -- matches identity_discriminator. Frames ts28970-28975 (before this bout) show the prior match's scorecard ('D. Schuardt' vs 'A. Orazbek'), excluded per the notes and the frame_pdf cutaway warning.",
+ "notes": "Small, clean 4-event bout; every event confirmed against frames (and narration where present). No corrections, no drops. All labels verbatim from the vocabulary. Curated range 28970-29200 opens with ~10s of the prior bout's scorecard, excluded per protocol."
+}

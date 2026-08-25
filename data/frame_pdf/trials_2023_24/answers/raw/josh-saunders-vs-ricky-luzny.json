@@ -1,0 +1,85 @@
+{
+ "bout": {
+  "athlete_a": "Josh Saunders",
+  "athlete_b": "Ricky Luzny",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Josh Saunders",
+  "year": 2023,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 6075,
+  "bout_end_seconds": 6335,
+  "identity_discriminator": "Josh Saunders in dark green rashguard and black shorts; Ricky Luzny in bright pink rashguard and black shorts",
+  "final_score": {
+   "Josh Saunders": 0,
+   "Ricky Luzny": 0
+  },
+  "notes": "Frames 6040-6070 are introductions and referee instructions."
+ },
+ "events": [
+  {
+   "ts": 6075,
+   "label": "Collar Tie",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6125,
+   "label": "Single Leg Takedown",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 6130,
+   "label": "Top Control",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6205,
+   "label": "Turtle Control",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6240,
+   "label": "Back Take",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 6255,
+   "label": "Back Control",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6310,
+   "label": "Rear Naked Choke",
+   "actor": "Josh Saunders",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 6335,
+   "label": "Tap",
+   "actor": "Ricky Luzny",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "+99kg",
+  "source_file": "ai_studio_code-5.txt",
+  "curated_start": 6040,
+  "curated_end": 6350,
+  "gemini_winner": "Josh Saunders",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

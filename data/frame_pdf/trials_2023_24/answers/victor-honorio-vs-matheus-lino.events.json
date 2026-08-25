@@ -1,0 +1,102 @@
+{
+ "bout": {
+  "athlete_a": "Victor Honorio",
+  "athlete_b": "Matheus Lino",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Victor Honorio",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 12820,
+  "bout_end_seconds": 13350,
+  "identity_discriminator": "Scoreboard lower-third 'V. HONORIO' (red row, top) / 'M. Lino' (blue row, bottom) present on every live frame from ts12820 onward. Honorio shirtless with plain black shorts; Lino in a dark grey rashguard printed 'ZONA' and black shorts, matching identity_discriminator exactly. Frames ts12800-12815 (before bout_start_seconds=12820) show an unrelated prior match's lower-third ('M. Ruffatto' vs 'K. Silva Ramos') -- excluded as not-this-bout per the frame_pdf cutaway warning; first genuine frame of this bout is ts12820.",
+  "final_score": {
+   "Victor Honorio": 5,
+   "Matheus Lino": 0
+  },
+  "notes": "Frames 12800-12815 show the conclusion of the previous match. | Single meaningful finding: the 3-point Guard Pass event's timestamp was ~27s late in the Gemini read, landing after the scoreboard had already updated -- corrected to the actual scoring window (13175-13180) rather than dropped, since label/actor/points are all independently well-supported. No off-library labels, no winner contradiction. Curated range (12800-13360) opens with 15s of an unrelated prior bout's scorecard, excluded per protocol.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 12825,
+   "label": "Collar Tie",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 12880,
+   "label": "Snap Down",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 12945,
+   "label": "Double Leg Takedown",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 12985,
+   "label": "Half Guard",
+   "actor": "Matheus Lino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 12995,
+   "label": "Top Control (Half Guard)",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 13075,
+   "label": "Side Control",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 13125,
+   "label": "Mount",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control",
+   "points": 2
+  },
+  {
+   "ts": 13140,
+   "label": "Half Guard",
+   "actor": "Matheus Lino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 13178,
+   "label": "Guard Pass",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "pass",
+   "points": 3,
+   "note": "ts corrected from Gemini's 13205 -- see log"
+  },
+  {
+   "ts": 13225,
+   "label": "Half Guard",
+   "actor": "Matheus Lino",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 13340,
+   "label": "Top Control (Half Guard)",
+   "actor": "Victor Honorio",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 11/11) 2026-08-25"
+}

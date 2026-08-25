@@ -1,0 +1,48 @@
+{
+ "log": [
+  {
+   "ts": 18590,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Macqueen (blue) gripping Vosgroene's collar/head in the standing clinch"
+  },
+  {
+   "ts": 18685,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Vosgroene forced down to all fours with Macqueen standing over him, classic snap-down shape"
+  },
+  {
+   "ts": 18695,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Macqueen on top with Vosgroene's legs entangling one of his from underneath"
+  },
+  {
+   "ts": 18705,
+   "label": "Top Control (Half Guard)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "continuation of the same top-half-guard position from the prior frame"
+  },
+  {
+   "ts": 19050,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "scoreboard shows M. Macqueen jump from 0 to 3 between the 19055 and 19060 frames, exactly matching a 3pt guard pass claimed at ts 19050"
+  },
+  {
+   "ts": 19070,
+   "label": "Side Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Macqueen maintaining top side-control position on Vosgroene immediately after the pass, score holding at 3-0"
+  }
+ ],
+ "identity_check": "Scoreboard reads 'F. Vosgroene' (red, top) / 'M. Macqueen' (blue, bottom) throughout. Kit matches meta exactly and is visually distinct: Freddy Vosgroene in a black t-shirt, green/camo shorts, blonde hair; Mark Macqueen in a blue/red patterned rashguard with white/patterned shorts. Verified from the pre-bout referee-instruction frames (page 07, ts 18580-18615) through the finish.",
+ "notes": "No drops; all 6 events verified concordant, 0 corrections. Final score 3-0 Macqueen by points, matching meta win_type POINTS and final_score."
+}

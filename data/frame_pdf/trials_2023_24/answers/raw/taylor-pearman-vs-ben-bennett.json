@@ -1,0 +1,73 @@
+{
+ "bout": {
+  "athlete_a": "Taylor Pearman",
+  "athlete_b": "Ben Bennett",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Taylor Pearman",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 19345,
+  "bout_end_seconds": 19580,
+  "identity_discriminator": "Ben Bennett in black Progress rashguard and black shorts with beard; Taylor Pearman in dark rashguard and dark shorts",
+  "final_score": {
+   "Ben Bennett": 0,
+   "Taylor Pearman": 0
+  },
+  "notes": "Frames 19320-19340 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 19345,
+   "label": "Seated Guard",
+   "actor": "Taylor Pearman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19360,
+   "label": "Half Guard",
+   "actor": "Taylor Pearman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19435,
+   "label": "Top Control (Half Guard)",
+   "actor": "Ben Bennett",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 19485,
+   "label": "Leg Entanglement",
+   "actor": "Taylor Pearman",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19575,
+   "label": "Straight Ankle Lock",
+   "actor": "Ben Bennett",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 19580,
+   "label": "Tap",
+   "actor": "Taylor Pearman",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "88kg",
+  "source_file": "bouts bout athlete aaaa.txt",
+  "curated_start": 19320,
+  "curated_end": 19610,
+  "gemini_winner": "Ben Bennett",
+  "flags": [
+   "gemini winner 'Ben Bennett' CONTRADICTS published winner 'Taylor Pearman' -- identity of every actor in this bout is suspect"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,80 @@
+{
+ "bout": {
+  "athlete_a": "Deandre Corbe",
+  "athlete_b": "Keith Krikorian",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Deandre Corbe",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 26300,
+  "bout_end_seconds": 26780,
+  "identity_discriminator": "Deandre Corbe wears black Parry Athletics kit with white circular logos (visible walkout at 26290s 'PARRY' text, and 'P P' circular logos on shirt at 26150-26350s frames); Keith Krikorian wears black kit with a yellow circular 10th Planet logo (visible from ~26355s onward, yellow shoulder patch). Confirmed by lower-third at 26305s: 'DEANDRE CORBE Standard BJJ -66kg | Keith Krikorian 10thplanet JJ FINALS' and scoreboard 'D. Corbe' (red) / 'K. Krikorian' (blue) held consistently through the bout, matching final_score 6-0 Corbe.",
+  "final_score": {
+   "Deandre Corbe": 6,
+   "Keith Krikorian": 0
+  },
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "8 of 9 events kept as concordant; 1 dropped (Body Triangle, label-precision doubt in a dark stretch of frames -- the underlying back-control/seatbelt position at that time is real, just not confirmable as specifically a locked body triangle). No off-library labels. gemini_winner (Deandre Corbe) matches published winner; final scoreboard total (6-0) is fully accounted for by the two +3 Back Control events, consistent with final_score in the bout record."
+ },
+ "events": [
+  {
+   "ts": 26300,
+   "label": "Clinch",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 26375,
+   "label": "Guard Pull",
+   "actor": "Keith Krikorian",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 26445,
+   "label": "Half Guard",
+   "actor": "Keith Krikorian",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 26500,
+   "label": "Leg Entanglement",
+   "actor": "Keith Krikorian",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 26540,
+   "label": "50/50 Guard",
+   "actor": "Keith Krikorian",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 26560,
+   "label": "Back Take",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 26595,
+   "label": "Back Control",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 26675,
+   "label": "Back Control",
+   "actor": "Deandre Corbe",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 8/9) 2026-08-25"
+}

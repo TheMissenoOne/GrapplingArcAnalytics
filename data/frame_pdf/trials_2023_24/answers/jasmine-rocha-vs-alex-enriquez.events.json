@@ -1,0 +1,107 @@
+{
+ "bout": {
+  "athlete_a": "Jasmine Rocha",
+  "athlete_b": "Alex Enriquez",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Jasmine Rocha",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 21025,
+  "bout_end_seconds": 21510,
+  "identity_discriminator": "Confirmed via walkout lower-third 'ALEX ENRIQUEZ / ATOS' (20900-20905s) and repeated narration naming ('Roachcha' = mangled 'Rocha', 'Enriquez'). Kit: Jasmine Rocha white/blue/red Tatami rashguard + white shorts; Alex Enriquez all-black. Cross-checked against scoreboard: J.Rocha's score visibly ticks 0->2->3 in frames 21380-21385 exactly as the white-kit athlete secures back control, matching the Back Control event actor.",
+  "final_score": {
+   "Jasmine Rocha": 3,
+   "Alex Enriquez": 0
+  },
+  "notes": "Frames 20880-21020 are walkouts and introductions; frames 21565-21600 are replays. | Frames 20860-20880 (before this bout's own walkout) show the tail end of an unrelated prior bout (Gairbeg Ibragimov vs Yigit Hanay celebration, scoreboard 'G. Ibragimov / Y. Hanay') per the protocol's not-this-bout warning; excluded from consideration, first true Rocha/Enriquez walkout frame is ~20890-20900 ('Alex Enriquez making her way to the ring... taking on Jasmine Roachcha').",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 21030,
+   "label": "Collar Tie",
+   "actor": "Alex Enriquez",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21045,
+   "label": "Snap Down",
+   "actor": "Alex Enriquez",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 21055,
+   "label": "Closed Guard",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 21140,
+   "label": "K-Guard",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 21170,
+   "label": "Leg Entanglement",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 21230,
+   "label": "Arm Drag",
+   "actor": "Jasmine Rocha",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 21260,
+   "label": "Guillotine Choke",
+   "actor": "Alex Enriquez",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 21340,
+   "label": "Back Take",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 21385,
+   "label": "Back Control",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 21390,
+   "label": "Body Triangle",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 21505,
+   "label": "Rear Naked Choke",
+   "actor": "Jasmine Rocha",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 21510,
+   "label": "Tap",
+   "actor": "Alex Enriquez",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 12/12) 2026-08-25"
+}

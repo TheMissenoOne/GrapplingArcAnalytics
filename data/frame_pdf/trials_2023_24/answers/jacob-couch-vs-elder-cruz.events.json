@@ -1,0 +1,78 @@
+{
+ "bout": {
+  "athlete_a": "Jacob Couch",
+  "athlete_b": "Elder Cruz",
+  "event": "East Coast Trials 2023 (Atlantic City)",
+  "winner": "Jacob Couch",
+  "year": 2023,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 4005,
+  "bout_end_seconds": 4240,
+  "identity_discriminator": "Confirmed via walkout lower-third 'ELDER CRUZ / CHECKMAT' (3910s) and match nameplate 'JACOB COUCH -88 KG ELDER CRUZ' (3975s), then cross-checked against the opening exchange: narration at ts4015 'Cruz quickly onto the single leg... Couch happy to play with his guard' matches the black-kit athlete taking down the red-shorts athlete. Kit: Jacob Couch black rashguard + pink/red shorts; Elder Cruz all-black. Consistent throughout, no swap.",
+  "final_score": {
+   "Jacob Couch": 0,
+   "Elder Cruz": 0
+  },
+  "notes": "Frames 3870-3995 are walkouts and introductions. | Frames 3870-3895 (before the walkout) show the tail end of an unrelated prior bout ('Winner by Submission - Paul Ardila'); excluded per the not-this-bout rule. All 8 Gemini events had clear, on-topic broadcast commentary landing within a few seconds of each ts, so confidence is high across the board.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 4015,
+   "label": "Single Leg Takedown",
+   "actor": "Elder Cruz",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 4025,
+   "label": "Half Guard",
+   "actor": "Jacob Couch",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4130,
+   "label": "Top Control (Half Guard)",
+   "actor": "Elder Cruz",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 4195,
+   "label": "Closed Guard",
+   "actor": "Jacob Couch",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4210,
+   "label": "Arm Drag",
+   "actor": "Jacob Couch",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 4225,
+   "label": "K-Guard",
+   "actor": "Jacob Couch",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4235,
+   "label": "Heel Hook",
+   "actor": "Jacob Couch",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 4240,
+   "label": "Tap",
+   "actor": "Elder Cruz",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 8/8) 2026-08-25"
+}

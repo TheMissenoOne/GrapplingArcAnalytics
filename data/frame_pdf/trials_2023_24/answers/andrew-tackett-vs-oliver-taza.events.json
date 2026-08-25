@@ -1,0 +1,107 @@
+{
+ "bout": {
+  "athlete_a": "Andrew Tackett",
+  "athlete_b": "Oliver Taza",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Andrew Tackett",
+  "year": 2024,
+  "identity_discriminator": "Walkout lower-third at 25565s ('OLIVER TAZA -77kg Andrew Tackett') confirms Taza wears yellow/black leopard-print rashguard+pants, Tackett wears plain black 'LXB Level Black' t-shirt/shorts. Held consistent through all kept frames; scoreboard row order (O.Taza/A.Tackett) not used as a position cue per protocol.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "audit.flags was empty; no off-library labels, no winner contradiction (Tackett won, matches bout.winner). A single-leg takedown by Taza that the commentator calls 'the third successful' single leg (~25865) is not logged by Gemini at all -- an omission, not touched per protocol (never invent events)."
+ },
+ "events": [
+  {
+   "ts": 25565,
+   "label": "Clinch",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 25665,
+   "label": "Leg Entry",
+   "actor": "Oliver Taza",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 25725,
+   "label": "Double Leg Takedown",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 25730,
+   "label": "Side Control",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 25770,
+   "label": "Back Take",
+   "actor": "Andrew Tackett",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 25775,
+   "label": "Half Guard",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 25805,
+   "label": "Stand Up",
+   "actor": "Oliver Taza",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 25820,
+   "label": "Single Leg Takedown",
+   "actor": "Oliver Taza",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 25845,
+   "label": "Single Leg Takedown",
+   "actor": "Oliver Taza",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 25875,
+   "label": "Guard Pass",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 25895,
+   "label": "Back Control",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 25985,
+   "label": "Body Triangle",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 26060,
+   "label": "Mount",
+   "actor": "Andrew Tackett",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 13/13) 2026-08-25"
+}

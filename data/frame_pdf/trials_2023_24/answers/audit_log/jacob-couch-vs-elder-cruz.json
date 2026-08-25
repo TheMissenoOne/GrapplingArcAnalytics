@@ -1,0 +1,62 @@
+{
+ "log": [
+  {
+   "ts": 4015,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Cruz quickly onto the single leg, not much resistance from Couch, happy to play with his guard' exactly at this ts"
+  },
+  {
+   "ts": 4025,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'guard absolutely incredible, great leg attacks, great close guard as well' immediately following the takedown, Couch working guard from bottom"
+  },
+  {
+   "ts": 4130,
+   "label": "Top Control (Half Guard)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'got the traditional half, but Couch all the way up on his side, Cruz trying to get that right hand into position so he can cross face' at matching ts"
+  },
+  {
+   "ts": 4195,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Couch works back into his closed guard and he's very good here, let's break this guard' at matching ts"
+  },
+  {
+   "ts": 4210,
+   "label": "Arm Drag",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'couch going into the arm drag on the far side' at matching ts"
+  },
+  {
+   "ts": 4225,
+   "label": "K-Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Couch digging under the leg, very good on this Kg Guard, making the entry' (mis-caption of 'K-guard') at matching ts"
+  },
+  {
+   "ts": 4235,
+   "label": "Heel Hook",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'this is exactly where Jacob Couch wants to be, outside heel attempt, and that's it' -- finish confirmed"
+  },
+  {
+   "ts": 4240,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Jacob Couch, East Coast Trials Champion' immediately after the heel hook finish confirms the submission ended the match"
+  }
+ ],
+ "identity_check": "Confirmed via walkout lower-third 'ELDER CRUZ / CHECKMAT' (3910s) and match nameplate 'JACOB COUCH -88 KG ELDER CRUZ' (3975s), then cross-checked against the opening exchange: narration at ts4015 'Cruz quickly onto the single leg... Couch happy to play with his guard' matches the black-kit athlete taking down the red-shorts athlete. Kit: Jacob Couch black rashguard + pink/red shorts; Elder Cruz all-black. Consistent throughout, no swap.",
+ "notes": "Frames 3870-3895 (before the walkout) show the tail end of an unrelated prior bout ('Winner by Submission - Paul Ardila'); excluded per the not-this-bout rule. All 8 Gemini events had clear, on-topic broadcast commentary landing within a few seconds of each ts, so confidence is high across the board."
+}

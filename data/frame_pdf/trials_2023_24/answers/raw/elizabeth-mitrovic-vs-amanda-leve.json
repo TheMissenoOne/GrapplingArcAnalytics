@@ -1,0 +1,114 @@
+{
+ "bout": {
+  "athlete_a": "Elizabeth Mitrovic",
+  "athlete_b": "Amanda Leve",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Elizabeth Mitrovic",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 22435,
+  "bout_end_seconds": 23050,
+  "identity_discriminator": "Amanda Leve in grey and black rashguard; Elizabeth Mitrovic in solid black t-shirt and black shorts",
+  "final_score": {
+   "Elizabeth Mitrovic": 0,
+   "Amanda Leve": 0
+  },
+  "notes": "Frames 22320-22430 are walkouts and introductions; frames 23120-23145 are replays."
+ },
+ "events": [
+  {
+   "ts": 22440,
+   "label": "Collar Tie",
+   "actor": "Amanda Leve",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 22470,
+   "label": "Two-on-One Control",
+   "actor": "Amanda Leve",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 22510,
+   "label": "Takedown",
+   "actor": "Amanda Leve",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 22540,
+   "label": "Closed Guard",
+   "actor": "Elizabeth Mitrovic",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 22670,
+   "label": "Kimura",
+   "actor": "Elizabeth Mitrovic",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 22700,
+   "label": "Shin to Shin Guard",
+   "actor": "Elizabeth Mitrovic",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 22720,
+   "label": "Double Under Pass",
+   "actor": "Amanda Leve",
+   "successful": false,
+   "type": "pass"
+  },
+  {
+   "ts": 22750,
+   "label": "Closed Guard",
+   "actor": "Elizabeth Mitrovic",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 22855,
+   "label": "Inversion",
+   "actor": "Elizabeth Mitrovic",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 22875,
+   "label": "Armbar",
+   "actor": "Elizabeth Mitrovic",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 23020,
+   "label": "Arm Drag",
+   "actor": "Amanda Leve",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 23050,
+   "label": "Tap",
+   "actor": "Amanda Leve",
+   "successful": true,
+   "type": "submission",
+   "note": "Tap due to knee injury sustained during takedown attempt"
+  }
+ ],
+ "audit": {
+  "division": "+65kg F",
+  "source_file": "ai_studio_code-3.txt",
+  "curated_start": 22320,
+  "curated_end": 23160,
+  "gemini_winner": "Elizabeth Mitrovic",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

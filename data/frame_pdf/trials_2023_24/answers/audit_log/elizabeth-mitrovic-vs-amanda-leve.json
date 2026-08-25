@@ -1,0 +1,90 @@
+{
+ "log": [
+  {
+   "ts": 22440,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows standing hand-fighting/collar tie; narration 'very good wrestler is Levy... hand fighting'"
+  },
+  {
+   "ts": 22470,
+   "label": "Two-on-One Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Two on one here from Levy' (mis-transcribed 'Twoon one')"
+  },
+  {
+   "ts": 22510,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Big take down from Amanda Levy and immediately trying to pass the guard'"
+  },
+  {
+   "ts": 22540,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Mrovic is probably so much more comfortable now... Closed guard'"
+  },
+  {
+   "ts": 22670,
+   "label": "Kimura",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'this little kimora sweep attempt... that'll get Levy up to her feet' = attempt, unsuccessful, actor is bottom guard player Mitrovic"
+  },
+  {
+   "ts": 22700,
+   "label": "Shin to Shin Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Shinto to shin here. Trying to step back over trying to get underneath the leg'"
+  },
+  {
+   "ts": 22720,
+   "label": "Double Under Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'allowed Levy to get a double under here... it looked like perhaps she had a shot at the triangle' -> pass countered, unsuccessful"
+  },
+  {
+   "ts": 22750,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Chova gets her guard closed off again' (Mitrovic re-closes guard)"
+  },
+  {
+   "ts": 22855,
+   "label": "Inversion",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Trovic so comfortable with the inversion... heavy over top on the guillotine here again'"
+  },
+  {
+   "ts": 22875,
+   "label": "Armbar",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at 22895 'that armbar came off of Amanda trying to pass' confirms an unsuccessful armbar attempt by Mitrovic"
+  },
+  {
+   "ts": 23020,
+   "label": "Arm Drag",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Arm drag. The drag. Arm drag attempt.'"
+  },
+  {
+   "ts": 23050,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Something happened to her knee for sure. She shoots in, but immediately is forced. She has to tap... Amanda Levy. Unfortunate.' matches injury-tap note"
+  }
+ ],
+ "identity_check": "Amanda Leve wears grey/lighter top with black shorts (red corner, scoreboard 'A. Leve'); Elizabeth Mitrovic wears solid black t-shirt/shorts (blue corner, scoreboard 'E. Mitrovic'). Confirmed by walkout narration at 22385s ('Amanda Leve[r] in the gray and black, all black for Mitrovic') matching identity_discriminator, and consistent kit colors held vs scoreboard through the whole bout.",
+ "notes": "All 12 events concordant; no off-library labels; gemini_winner (Elizabeth Mitrovic) matches published winner, no reassignment needed. Match ended by injury tap, not a technical submission finish -- frames/narration corroborate the note already present."
+}

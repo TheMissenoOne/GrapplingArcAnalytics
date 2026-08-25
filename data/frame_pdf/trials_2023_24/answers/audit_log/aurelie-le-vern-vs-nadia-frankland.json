@@ -1,0 +1,20 @@
+{
+ "log": [
+  {
+   "ts": 17665,
+   "label": "Armbar",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Continuous ground submission sequence visible from 17665 through the finish at 17700-17705, ending in the standard winner-standing/loser-down tableau consistent with an armbar finish by the eventual winner."
+  },
+  {
+   "ts": 17705,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Immediately after the finish, the athlete with the olive/green top (matching the winner) stands and moves away while the other athlete stays down being attended -- matches Nadia Frankland tapping and the published winner Aurelie Le Vern."
+  }
+ ],
+ "identity_check": "Wide, distant static camera for the whole clip (no identity_discriminator field in the raw file, no close-up walkout available) -- both athletes are similarly light-kitted and hard to resolve individually frame-by-frame. Identity is anchored on the aftermath instead: at 17710-17725 one athlete (olive/green top) is standing and walking away while the other (dark shorts) remains down on the mat being checked/attended -- the standard post-submission winner/loser tableau. That matches the published winner Aurelie Le Vern (olive/green, standing) over Nadia Frankland (down, tapped). The whole clip is one continuous uncut scene on the mat with no camera changes, so there is no risk of a cutaway/wrong-bout mixup per the protocol's replay/cutaway warning.",
+ "notes": "Lowest-confidence identity check in this batch: the camera is a single wide static shot throughout and never gets close enough to read kit branding or faces clearly, so actor identity rests on the post-finish winner/loser body language rather than a clean walkout/scoreboard-color anchor like the other bouts. Both events kept because the sequence is short, uncut, and internally consistent with the published winner; nothing contradicted it. As the task note anticipated, this really is a clean 2-event semifinal capture -- no additional events found hiding in the frames."
+}

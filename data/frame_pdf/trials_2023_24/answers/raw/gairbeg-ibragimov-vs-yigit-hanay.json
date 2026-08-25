@@ -1,0 +1,71 @@
+{
+ "bout": {
+  "athlete_a": "Gairbeg Ibragimov",
+  "athlete_b": "Yigit Hanay",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Gairbeg Ibragimov",
+  "year": 2024,
+  "win_type": "DECISION",
+  "bout_start_seconds": 20060,
+  "bout_end_seconds": 20835,
+  "identity_discriminator": "Gairbeg Ibragimov in all-black rashguard and shorts; Yigit Hanay in grey/white rashguard with UF branding and compression tights with red ankle wrap",
+  "final_score": {
+   "Gairbeg Ibragimov": 0,
+   "Yigit Hanay": 0
+  },
+  "notes": "Frames 20040-20055 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 20070,
+   "label": "Collar Tie",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 20290,
+   "label": "Closed Guard",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 20445,
+   "label": "Half Guard",
+   "actor": "Yigit Hanay",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 20630,
+   "label": "Double Leg Takedown",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 20645,
+   "label": "Top Half Guard",
+   "actor": "Gairbeg Ibragimov",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 20755,
+   "label": "Half Guard",
+   "actor": "Yigit Hanay",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "audit": {
+  "division": "66kg",
+  "source_file": "ai_studio_code(20).txt",
+  "curated_start": 20040,
+  "curated_end": 20870,
+  "gemini_winner": "Gairbeg Ibragimov",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

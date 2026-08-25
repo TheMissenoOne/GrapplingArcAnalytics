@@ -1,0 +1,72 @@
+{
+ "bout": {
+  "athlete_a": "Inacio Santos",
+  "athlete_b": "Antonio Assef",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Inacio Santos",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 8520,
+  "bout_end_seconds": 9005,
+  "identity_discriminator": "Inacio Santos wears a yellow rashguard with patterned (checkered) shorts; Antonio Assef is shirtless with plain black shorts. Confirmed consistently from match start (8520s) through the final scoreboard shot (9010-9025s, 'J. Inacio Dos Santos' in yellow, standing with hand raised as champion) matching scoreboard 'A. Assef' (red) / 'J. Inacio Dos Santos' (blue) and final_score 3-0 Santos.",
+  "final_score": {
+   "Inacio Santos": 3,
+   "Antonio Assef": 0
+  },
+  "notes": "Frames 8490-8515 show the conclusion of the previous match. | All 7 events concordant; no off-library labels. gemini_winner (Inacio Santos) matches published winner. None of the three takedowns scored points on the board (Assef even picked up a stalling/negative point along the way, visible in frames but not a logged Gemini event) -- the only positive points came from the single Back Control, consistent with final_score 3-0.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 8530,
+   "label": "Collar Tie",
+   "actor": "Antonio Assef",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 8760,
+   "label": "Takedown",
+   "actor": "Inacio Santos",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 8785,
+   "label": "Takedown",
+   "actor": "Inacio Santos",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 8875,
+   "label": "Half Guard",
+   "actor": "Antonio Assef",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 8915,
+   "label": "Takedown",
+   "actor": "Inacio Santos",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 8970,
+   "label": "Back Take",
+   "actor": "Inacio Santos",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 8990,
+   "label": "Back Control",
+   "actor": "Inacio Santos",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 7/7) 2026-08-25"
+}

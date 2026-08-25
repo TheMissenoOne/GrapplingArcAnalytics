@@ -1,0 +1,93 @@
+{
+ "bout": {
+  "athlete_a": "Luiz Paulo",
+  "athlete_b": "Jefferson Pontes",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Luiz Paulo",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 10370,
+  "bout_end_seconds": 10705,
+  "identity_discriminator": "Luiz Paulo in dark rashguard with red/white/blue shoulder accents; Jefferson Pontes shirtless with black shorts",
+  "final_score": {
+   "Luiz Paulo": 0,
+   "Jefferson Pontes": 0
+  },
+  "notes": "Frames 10350-10360 show the conclusion of the previous match; frames 10610-10650 cover an injury timeout for an eye poke.",
+  "penalties": "Luiz Paulo ~t10620 (Injury Timeout)"
+ },
+ "events": [
+  {
+   "ts": 10375,
+   "label": "Collar Tie",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10420,
+   "label": "Double Underhooks",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10445,
+   "label": "Arm Drag",
+   "actor": "Luiz Paulo",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 10675,
+   "label": "Single Leg Takedown",
+   "actor": "Jefferson Pontes",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 10680,
+   "label": "Guillotine Choke",
+   "actor": "Luiz Paulo",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 10690,
+   "label": "Back Take",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 10695,
+   "label": "Back Control",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10700,
+   "label": "Rear Naked Choke",
+   "actor": "Luiz Paulo",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 10705,
+   "label": "Tap",
+   "actor": "Jefferson Pontes",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "77kg",
+  "source_file": "bouts bout athlete a.txt",
+  "curated_start": 10350,
+  "curated_end": 10730,
+  "gemini_winner": "Luiz Paulo",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

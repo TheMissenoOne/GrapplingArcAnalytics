@@ -21,6 +21,7 @@ from scripts.frame_answer_to_dump import (
 
 REVIEWED = "frame_registrar (human review over model reading)"
 UNREVIEWED = "frame_answer_import (returned reading, not yet human-reviewed)"
+AUDITED = "gemini reading, concordance-audited (kept 13/13) 2026-08-25"
 
 
 def _write(d: Path, bout: dict[str, Any], events: list[dict[str, Any]], source: str) -> Path:
@@ -156,6 +157,48 @@ def test_convert_all_over_real_corpus_converts_zero_today() -> None:
         # is the normal state, not a missing corpus.
         pytest.skip("no bout folders under data/frame_pdf/out/ (archived)")
     assert all(r.status == "skipped_unreviewed" for r in reports)
+    assert blocks == []
+
+
+def test_audited_file_is_refused_without_allow_audited_flag(tmp_path: Path) -> None:
+    f = _write(tmp_path / "bout1", _bout(), [], AUDITED)
+    report, block = convert_file(f)
+    assert report.status == "skipped_unreviewed"
+    assert block is None
+
+
+def test_audited_file_converts_with_allow_audited_flag(tmp_path: Path) -> None:
+    f = _write(tmp_path / "bout1", _bout(), [], AUDITED)
+    report, block = convert_file(f, allow_audited=True)
+    assert report.status == "converted"
+    assert block is not None
+
+
+def test_from_answers_reads_flat_slug_events_json(tmp_path: Path) -> None:
+    events = [{"ts": 10, "label": "Pull Guard", "actor": "Anabel Lopez", "successful": True,
+               "type": "guard"}]
+    d = tmp_path / "answers"
+    d.mkdir()
+    (d / "anabel-lopez-vs-aurelie-le-vern.events.json").write_text(
+        json.dumps({"bout": _bout(), "events": events, "source": REVIEWED}), encoding="utf-8"
+    )
+    reports, blocks = convert_all(from_answers=d)
+    assert len(reports) == 1
+    assert reports[0].slug == "anabel-lopez-vs-aurelie-le-vern"
+    assert reports[0].status == "converted"
+    assert len(blocks) == 1
+
+
+def test_from_answers_honors_exclude(tmp_path: Path) -> None:
+    d = tmp_path / "answers"
+    d.mkdir()
+    (d / "anabel-lopez-vs-aurelie-le-vern.events.json").write_text(
+        json.dumps({"bout": _bout(), "events": [], "source": REVIEWED}), encoding="utf-8"
+    )
+    reports, blocks = convert_all(
+        from_answers=d, exclude={"anabel-lopez-vs-aurelie-le-vern"}
+    )
+    assert reports == []
     assert blocks == []
 
 

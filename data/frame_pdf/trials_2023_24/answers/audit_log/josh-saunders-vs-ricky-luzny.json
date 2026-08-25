@@ -1,0 +1,62 @@
+{
+ "log": [
+  {
+   "ts": 6075,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows green/pink grip-fighting clinch right after the standing engagement began"
+  },
+  {
+   "ts": 6125,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame at 6125 shows Luzny (pink) down on the mat with Saunders (green) in control immediately after a standing exchange"
+  },
+  {
+   "ts": 6130,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Saunders on top of Luzny on the ground, referee standing over checking position"
+  },
+  {
+   "ts": 6205,
+   "label": "Turtle Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Luzny turtled with Saunders controlling from on top"
+  },
+  {
+   "ts": 6240,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frames 6240-6245 show Saunders attached to Luzny's back"
+  },
+  {
+   "ts": 6255,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim at exactly ts 6255: 'Back.'"
+  },
+  {
+   "ts": 6310,
+   "label": "Rear Naked Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration at 6310 ('Don't get your arms out here') and 6320 ('lift up') describe a choke being fought and secured from the back, ending in applause at 6335 consistent with the meta's SUBMISSION win_type"
+  },
+  {
+   "ts": 6335,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration '[Applause]' at exactly ts 6335 and the very next frames (6340-6345) show the match over, referee raising an arm -- consistent with a tap ending the bout"
+  }
+ ],
+ "identity_check": "Scoreboard consistently reads 'J. Saunders' (red, top) / 'R. Luzny' (blue, bottom) throughout, clock counting down monotonically from 8:00 to the finish with no cut/reset, confirming a single continuous bout. Kit matches meta exactly: Josh Saunders in a dark green rashguard, Ricky Luzny in a bright pink rashguard, both black shorts, visible from the walkout frames (page 05) onward. Note: from ts~6310 to the finish Saunders' top reads as pale/white rather than green in the frames (likely sweat-soaked fabric or lighting under a different camera badge 'Finals'), but the scoreboard names and monotonic clock rule out a bout switch.",
+ "notes": "No drops; all 8 events verified concordant, 0 corrections. Single continuous bout confirmed by monotonic countdown clock despite a wardrobe/lighting change on Saunders' rashguard appearance in the closing frames."
+}

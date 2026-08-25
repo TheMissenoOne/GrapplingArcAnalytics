@@ -1,0 +1,85 @@
+{
+ "bout": {
+  "athlete_a": "Paul Ardila",
+  "athlete_b": "Alex Grandy",
+  "event": "East Coast Trials 2023 (Atlantic City)",
+  "winner": "Paul Ardila",
+  "year": 2023,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 3615,
+  "bout_end_seconds": 3840,
+  "identity_discriminator": "Paul Ardila in black American Top Team rashguard and black shorts; Alex Grandy in dark green 10th Planet rashguard and beige shorts",
+  "final_score": {
+   "Paul Ardila": 0,
+   "Alex Grandy": 0
+  },
+  "notes": "Frames 3560-3610 are walkouts and introductions."
+ },
+ "events": [
+  {
+   "ts": 3620,
+   "label": "Collar Tie",
+   "actor": "Paul Ardila",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 3660,
+   "label": "Guard Pull",
+   "actor": "Paul Ardila",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 3665,
+   "label": "Seated Guard",
+   "actor": "Paul Ardila",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 3745,
+   "label": "Collar Tie",
+   "actor": "Alex Grandy",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 3755,
+   "label": "Arm Drag",
+   "actor": "Paul Ardila",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 3815,
+   "label": "Triangle Choke",
+   "actor": "Paul Ardila",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 3835,
+   "label": "Heel Hook",
+   "actor": "Paul Ardila",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 3840,
+   "label": "Tap",
+   "actor": "Alex Grandy",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "99kg",
+  "source_file": "bouts bout athlete aaa.txt",
+  "curated_start": 3560,
+  "curated_end": 3880,
+  "gemini_winner": "Paul Ardila",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

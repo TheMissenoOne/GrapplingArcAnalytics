@@ -1,0 +1,85 @@
+{
+ "bout": {
+  "athlete_a": "Kenta Iwamoto",
+  "athlete_b": "Rhys Allan",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Kenta Iwamoto",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 7490,
+  "bout_end_seconds": 8015,
+  "identity_discriminator": "Confirmed via the persistent scoreboard graphic ('R. Allan' red row / 'K. Iwamoto' blue row) visible from 7485s onward and matching kit throughout: Kenta Iwamoto black long-sleeve rashguard + black shorts; Rhys Allan shirtless with black shorts + red ankle tape. Consistent across the whole match, no swap.",
+  "final_score": {
+   "Kenta Iwamoto": 3,
+   "Rhys Allan": 0
+  },
+  "notes": "Frames 7470-7480 show the conclusion of the previous match. | This broadcast feed carries corner-coach audio bleeding through the mic (not commentator narration) for nearly the whole bout -- used as a secondary confirmation signal same as narration per protocol. The overlay scoreboard does not visibly update points during live action in this feed; it only shows the true 3-0 final tally once the clock hits 0:00 (8010-8015s). This means the points:3 originally attached to the ts7660 Body Lock Pass could not be confirmed as the scoring action -- kept the event (technique/actor well supported) but dropped the points field per the protocol's rule that points require a visible board change. If the assembler wants a points-bearing event at all, none of the 9 Gemini events in this bout can be safely credited with the scoreboard's final 3 points from these frames alone.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 7500,
+   "label": "Collar Tie",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7585,
+   "label": "Double Leg Takedown",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 7600,
+   "label": "Top Half Guard",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7615,
+   "label": "Half Guard",
+   "actor": "Rhys Allan",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 7660,
+   "label": "Body Lock Pass",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "pass"
+  },
+  {
+   "ts": 7740,
+   "label": "Top Control",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7765,
+   "label": "Turtle Control",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7840,
+   "label": "Takedown",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 7860,
+   "label": "Top Control",
+   "actor": "Kenta Iwamoto",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 9/9) 2026-08-25"
+}

@@ -1,0 +1,100 @@
+{
+ "bout": {
+  "athlete_a": "Tommy Langaker",
+  "athlete_b": "Davis Asare",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Tommy Langaker",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 19660,
+  "bout_end_seconds": 20010,
+  "identity_discriminator": "Both athletes wear plain black rashguards during live action, so identity is anchored on skin tone + pre-bout branded shirts: Tommy Langaker = pale/white skin, blonde hair, seen alone at 19670 wearing a 'WULFING' branded shirt (matches identity_discriminator); Davis Asare = dark skin, seen at 19660 in a 'CXB' branded shirt during walk-out. Scoreboard confirms 'D. ASARE' / 'T. LILLESKOG LANGAK'. Final score 0-3 (Tommy) matches bout.final_score and the published SUBMISSION win for Tommy via rear naked choke, confirmed by the scoreboard itself flipping to 'T. LILLESKOG LANGAK: 3' at ts=19990 (Back Control/Body Triangle) and staying there through the finish. No reversal found -- events[] actors match the stated identity_discriminator throughout.",
+  "final_score": {
+   "Tommy Langaker": 3,
+   "Davis Asare": 0
+  },
+  "notes": "Frames 19600-19655 show the conclusion of the previous match. | No off-library labels, no winner contradiction. Extended silent/no-narration stretch 19705-19960 (guard/leg-entanglement/top-control exchange) had to be read from frames alone; all calls there are lower-confidence positional reads but nothing contradicted them, so all were kept.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 19665,
+   "label": "Collar Tie",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 19675,
+   "label": "Guard Pull",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 19680,
+   "label": "Open Guard",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19705,
+   "label": "Leg Entanglement",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19840,
+   "label": "Top Control",
+   "actor": "Davis Asare",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 19880,
+   "label": "50/50 Guard",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 19965,
+   "label": "Back Take",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 19990,
+   "label": "Back Control",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 19990,
+   "label": "Body Triangle",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 20005,
+   "label": "Rear Naked Choke",
+   "actor": "Tommy Langaker",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 20010,
+   "label": "Tap",
+   "actor": "Davis Asare",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 11/11) 2026-08-25"
+}

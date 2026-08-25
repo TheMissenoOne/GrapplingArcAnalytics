@@ -1,0 +1,130 @@
+{
+ "bout": {
+  "athlete_a": "Michael Pixley",
+  "athlete_b": "Adam Bradley",
+  "event": "West Coast Trials 2024 (Las Vegas)",
+  "winner": "Michael Pixley",
+  "year": 2024,
+  "win_type": "DECISION",
+  "bout_start_seconds": 24185,
+  "bout_end_seconds": 24940,
+  "identity_discriminator": "Lower-third walkout graphic (page 08, 6:42:50) reads 'ADAM BRADLEY -99kg FINALS MICHAEL PIXLEY'; scoreboard overlay throughout shows 'A. Bradley' (red row) / 'M. Pixley' (blue row). Adam Bradley confirmed in blue/red USA rashguard, bald; Michael Pixley in black/white Daisy Fresh rashguard. Verified against page 08 frame 24175 (both athletes walking onto mat individually named by commentary) and consistent kit colors through all subsequent frames including overtime (TB1 clock).",
+  "final_score": {
+   "Michael Pixley": 0,
+   "Adam Bradley": 0
+  },
+  "notes": "Frames 24120-24180 are walkouts and introductions; frames 25000-25015 are replays. | Bout went to overtime (TB1 clock visible from ~24660s on) after a scoreless regulation period; final_score 0-0 and win_type DECISION in the source meta are consistent with this. No drops -- all 15 Gemini events verified concordant or resolved with high confidence; one successful-flag correction on the 24575 knee cut pass.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 24190,
+   "label": "Collar Tie",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 24220,
+   "label": "Foot Sweep",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 24245,
+   "label": "North-South Position",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 24310,
+   "label": "North South Choke",
+   "actor": "Michael Pixley",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 24345,
+   "label": "Escape to Standing",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "escape",
+   "note": "restart to feet after a called break, not a live escape from bottom"
+  },
+  {
+   "ts": 24370,
+   "label": "Seated Guard",
+   "actor": "Adam Bradley",
+   "successful": true,
+   "type": "guard",
+   "note": "ADCC seated-guard restart position, not a guard pull"
+  },
+  {
+   "ts": 24575,
+   "label": "Knee Cut Pass",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "pass",
+   "note": "corrected from successful=false; narration at 24580 'Oh, he's through' plus 24585 frame showing Bradley forced to turtle confirms the pass landed"
+  },
+  {
+   "ts": 24585,
+   "label": "Turtle Position",
+   "actor": "Adam Bradley",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 24585,
+   "label": "Turtle Control",
+   "actor": "Michael Pixley",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 24625,
+   "label": "Deep Half Guard",
+   "actor": "Adam Bradley",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 24695,
+   "label": "Collar Tie",
+   "actor": "Adam Bradley",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 24865,
+   "label": "Foot Sweep",
+   "actor": "Adam Bradley",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 24880,
+   "label": "Single Leg Takedown",
+   "actor": "Adam Bradley",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 24890,
+   "label": "Darce Choke",
+   "actor": "Michael Pixley",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 24930,
+   "label": "Single Leg Takedown",
+   "actor": "Adam Bradley",
+   "successful": false,
+   "type": "takedown"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 15/15) 2026-08-25"
+}

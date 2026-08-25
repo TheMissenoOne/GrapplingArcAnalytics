@@ -94,3 +94,4 @@ docs/raw/
 # frame_pdf.py output — contact sheets are regenerable from data/frame_pdf/*.json and
 # each one is megabytes of JPEG. The manifest is the artefact worth versioning, not the PDF.
 data/frame_pdf/out/
+data/frame_pdf/trials_2023_24/*.pdf

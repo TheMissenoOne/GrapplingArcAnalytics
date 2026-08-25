@@ -1,0 +1,55 @@
+{
+ "log": [
+  {
+   "ts": 28470,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts28470-28480 show a standing hand-fight/collar-tie clinch between the two, within tolerance."
+  },
+  {
+   "ts": 28625,
+   "label": "Standing Guillotine",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts28625 shows Schuardt bent over with Orazbek's head/neck trapped under his arm while lifting -- a clean standing guillotine picture; fight continues after, consistent with unsuccessful."
+  },
+  {
+   "ts": 28680,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts28680-28685 show Schuardt controlling Orazbek from top position on the ground."
+  },
+  {
+   "ts": 28740,
+   "label": "Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts28735-28745 show a stand-up/scramble sequence with Schuardt reaching in on Orazbek who is scrambling on the ground; no score change follows, consistent with an unsuccessful generic takedown attempt (correctly using the generic 'Takedown' label rather than a specific one, per the vocabulary's own generic-label guidance for ambiguous entries)."
+  },
+  {
+   "ts": 28860,
+   "label": "Double Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts28860 shows a standing clinch/lift entry; by ts28865 Orazbek is down on the mat with Schuardt standing over him, consistent with a completed double leg in this window."
+  },
+  {
+   "ts": 28885,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Scoreboard reads 'D. Schuardt 0' at ts28880 and 'D. Schuardt 3' at ts28885 -- the exact ts of this event -- with the frame at 28885 showing Schuardt having passed to a dominant top position. Points attribution is precisely on the money here, unlike a similar pass in a different bout in this batch where the score lagged the logged ts."
+  },
+  {
+   "ts": 28905,
+   "label": "Side Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts28900-28905 show Schuardt holding Orazbek in side control on the ground, score steady at 3-0."
+  }
+ ],
+ "identity_check": "Scoreboard lower-third 'D. SCHUARDT' (red row) / 'A. ORAZBEK' (blue row) present on every live frame from ts28445 onward. Schuardt in all-black kit; Orazbek in a blue/white Kazakhstan-graphic rashguard and shorts -- matches identity_discriminator exactly, consistent throughout. Frames ts28430-28440 (before this bout) show an unrelated prior match's scorecard ('D. Terei' vs 'M. Makhmakhano'), excluded per the frame_pdf cutaway warning; this bout's first genuine frame is ts28445.",
+ "notes": "Clean read, all 7 events kept as-is, no corrections needed. All labels verbatim from the vocabulary. No off-library labels, no winner contradiction. Curated range 28430-28960 opens with 15s of an unrelated prior bout's scorecard, excluded per protocol; the rest is entirely this bout with no replay contamination observed in the frames examined."
+}

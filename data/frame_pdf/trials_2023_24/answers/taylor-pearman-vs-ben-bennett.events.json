@@ -1,0 +1,70 @@
+{
+ "bout": {
+  "athlete_a": "Taylor Pearman",
+  "athlete_b": "Ben Bennett",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Taylor Pearman",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 19345,
+  "bout_end_seconds": 19580,
+  "identity_discriminator": "FLAGGED bout: gemini_winner='Ben Bennett' contradicts published winner 'Taylor Pearman' (win_type=SUBMISSION). Both athletes wear near-identical black kits with no colour discriminator, so Gemini's bout.identity_discriminator itself ('Ben Bennett...Progress rashguard...beard; Taylor Pearman in dark rashguard') is suspect, not just the per-event actor field -- and frame evidence PROVES it is inverted: at ts19645 (frame taylor-pearman-vs-ben-bennett-14.jpg, 5:26:45) the referee raises the arm of the bearded athlete wearing the 'Progress' logo -- the standard post-match winner declaration. Since the published winner is Taylor Pearman (ground truth per protocol), the Progress-logo/bearded athlete is actually TAYLOR PEARMAN, not Ben Bennett as Gemini's discriminator claimed. This also matches the celebration frame at ts19580 (frame -13.jpg) where the same Progress/bearded athlete is seen roaring/fist-raised immediately after the finish -- consistent with him being the submission's winner, not its victim. Conclusion: Gemini swapped the two athletes' names throughout the entire bout (discriminator AND every event's actor field). Correction applied: every actor is reassigned to the OTHER name Gemini used (Ben Bennett <-> Taylor Pearman), for all 6 events uniformly. This produces an internally coherent narrative (Ben Bennett plays guard from seated/half guard early, Taylor Pearman collects top control, Ben re-establishes a leg entanglement guard, Taylor finishes with a straight ankle lock, Ben taps) that matches the published winner and win_type exactly. Confidence: HIGH for the swap direction (frame-proven via the hand-raise), based on the reasonable premise that the swap is a single global name transposition rather than a per-event error -- individual early-bout frames (both athletes in identical black kit) could not be independently kit-verified event-by-event.",
+  "final_score": {
+   "Ben Bennett": 0,
+   "Taylor Pearman": 0
+  },
+  "notes": "Frames 19320-19340 show the conclusion of the previous match. | All 6 events kept with actor corrected via a bout-wide name swap (see identity_check). This is the flagged bout: Gemini's stated winner (Ben Bennett) contradicted the published winner (Taylor Pearman); root cause traced to Gemini transposing the two athletes' names from the very first field (bout.identity_discriminator) onward, not just in the final two events. The swap direction is proven by a clean piece of frame evidence: the referee raises the Progress-logo/bearded athlete's arm at ts19645, and the published winner is Taylor Pearman -- so that athlete is Taylor Pearman, contradicting Gemini's own discriminator text (which called him Ben Bennett). No events were dropped; all 6 were resolvable with high confidence once the swap was identified, because it explains the winner contradiction exactly and produces an internally consistent guard/control/submission narrative when applied uniformly.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 19345,
+   "label": "Seated Guard",
+   "actor": "Ben Bennett",
+   "successful": true,
+   "type": "guard",
+   "note": "actor corrected: Gemini said Taylor Pearman"
+  },
+  {
+   "ts": 19360,
+   "label": "Half Guard",
+   "actor": "Ben Bennett",
+   "successful": true,
+   "type": "guard",
+   "note": "actor corrected: Gemini said Taylor Pearman"
+  },
+  {
+   "ts": 19435,
+   "label": "Top Control (Half Guard)",
+   "actor": "Taylor Pearman",
+   "successful": true,
+   "type": "control",
+   "note": "actor corrected: Gemini said Ben Bennett"
+  },
+  {
+   "ts": 19485,
+   "label": "Leg Entanglement",
+   "actor": "Ben Bennett",
+   "successful": true,
+   "type": "guard",
+   "note": "actor corrected: Gemini said Taylor Pearman"
+  },
+  {
+   "ts": 19575,
+   "label": "Straight Ankle Lock",
+   "actor": "Taylor Pearman",
+   "successful": true,
+   "type": "submission",
+   "note": "actor corrected: Gemini said Ben Bennett"
+  },
+  {
+   "ts": 19580,
+   "label": "Tap",
+   "actor": "Ben Bennett",
+   "successful": true,
+   "type": "submission",
+   "note": "actor corrected: Gemini said Taylor Pearman"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 6/6) 2026-08-25"
+}

@@ -1,0 +1,69 @@
+{
+ "log": [
+  {
+   "ts": 10375,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows opening clinch/tie-up between the two at the exact ts"
+  },
+  {
+   "ts": 10420,
+   "label": "Double Underhooks",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'trying to get double under. Oh, nice.'"
+  },
+  {
+   "ts": 10445,
+   "label": "Arm Drag",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Look at that. It's a good arm drag right there.' -- grip landed but no takedown followed, matching successful=false"
+  },
+  {
+   "ts": 10675,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts truncates to '...S leg. Nice' (single leg), consistent with Pontes' established wrestling game"
+  },
+  {
+   "ts": 10680,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'guillotine attempt. Let's see how...' countering Pontes' shot"
+  },
+  {
+   "ts": 10690,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'going for the back. One hook inside. ... Paulo wastes no time trying to get back control'"
+  },
+  {
+   "ts": 10695,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows established back position with hooks continuing from prior event"
+  },
+  {
+   "ts": 10700,
+   "label": "Rear Naked Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts is a garbled ASR mis-transcription of 'rear naked choke' (offensive misheard word is an auto-caption artifact, not a real statement); frame shows the choke locked from the back"
+  },
+  {
+   "ts": 10705,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts announces 'Luis Paulo is your champion', confirming the finish/tap and matching bout.winner + win_type=SUBMISSION"
+  }
+ ],
+ "identity_check": "Kit-based ID: the dark-rashguard/red-white-blue-shoulder-accent athlete (blue corner throughout) = Luiz Paulo; the shirtless black-shorts athlete (red corner, 'J. Pontas') = Jefferson Pontes. Note: the broadcast lower-third labels the blue corner 'L. MEDEIROS', not 'L. PAULO' -- almost certainly his full/legal surname vs. competition name, since the kit description matches Gemini's identity_discriminator exactly and stays consistent for the entire bout (no swap). Confirmed at the finish: caption at ts10705 announces 'Luis Paulo is your champion... punches his ticket to Vegas', matching bout.winner and win_type=SUBMISSION. No flags on this bout.",
+ "notes": "No drops, no corrections. This bout also had an injury-timeout window (~10610-10650, eye poke) per bout.notes/penalties, which produced no Gemini events and needed no audit action. Scoreboard surname mismatch (L. MEDEIROS vs Luiz Paulo) is worth the assembler knowing about but did not affect actor attribution since it tracked by kit/corner consistently."
+}

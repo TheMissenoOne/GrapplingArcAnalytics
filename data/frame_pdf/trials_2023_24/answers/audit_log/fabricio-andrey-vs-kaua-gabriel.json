@@ -1,0 +1,118 @@
+{
+ "log": [
+  {
+   "ts": 15990,
+   "label": "Collar Tie",
+   "verdict": "UNVERIFIABLE",
+   "kept": false,
+   "reason": "Frame at 15990 shows both athletes still 2m apart pre-contact; grip forms ~16000-16005 as a mutual hand-fight/clinch entry with no clear single initiator visible at 5s sampling -- actor cannot be confidently assigned to either fighter."
+  },
+  {
+   "ts": 16065,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at ts explicitly: 'he goes for the takedown and takes Fabricio down on the single leg, Fabricio accepts it' -- black (Kaua) executes on green/yellow (Fabricio), matches actor/label/success."
+  },
+  {
+   "ts": 16075,
+   "label": "Inversion",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows Fabricio (green/yellow) scrambling underneath immediately after the takedown; narration 'playing inverted guard' matches Inversion/guard."
+  },
+  {
+   "ts": 16145,
+   "label": "Kimura Trap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at 16155 directly: 'Fabric[io] was trying to trap the arm of Kawhan there' -- matches Fabricio on top with an arm-trap grip."
+  },
+  {
+   "ts": 16275,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration: 'he's going for the back there, but I think it's a little slippery and hard to get it... might be able to get out of there' -- attempted, unsuccessful, matches successful=false."
+  },
+  {
+   "ts": 16345,
+   "label": "Single Leg X",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration describes a leg entanglement holding the top player, and the very next window (16350) has Fabricio escaping ('Fabris is able to get the leg entangle out'), implying Kaua held the Single Leg X -- matches actor/type."
+  },
+  {
+   "ts": 16390,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration 'He's going to came on top. He came on top... so strong, so powerful' at ts, following Fabricio's escape moments earlier -- matches Fabricio gaining top control."
+  },
+  {
+   "ts": 16525,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at ts, verbatim: 'Kawwan very heavy on the col[l]ar ties' -- matches Kaua/Collar Tie/control directly."
+  },
+  {
+   "ts": 16550,
+   "label": "Ankle Pick",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration: 'trying to get a little bit of range to do that ankle pick that he does and Kawa[n] is not allowing him to' -- Fabricio attempts, defended, matches successful=false."
+  },
+  {
+   "ts": 16600,
+   "label": "Ankle Pick",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame shows both still standing in a tie-up with no takedown completion visible; surrounding narration ('Kawan is going to attack, he's not letting free') supports the attempt being neutralised -- matches successful=false."
+  },
+  {
+   "ts": 16620,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at 16630, right after: 'He gets out. Fabris is not trying to engage into that takedown defense... already trying to look to be away from Kawwan' -- confirms the single leg did not land cleanly, matches successful=false."
+  },
+  {
+   "ts": 16705,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at ts: 'to the back... he's going to defend the back' -- attempt defended, matches successful=false."
+  },
+  {
+   "ts": 16745,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration at ts: 'Fisa[Fabricio] got an action once again to the back' -- matches successful=true, feeding directly into the Back Control/Back Triangle finish sequence that follows."
+  },
+  {
+   "ts": 16755,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration: 'Got one hook inside... trying to get a free arm in there' -- matches Fabricio consolidating back control before the finish."
+  },
+  {
+   "ts": 16760,
+   "label": "Back Triangle",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Narration: 'He got the triangle in' with frames showing Fabricio (green/yellow) on top locking a triangle/choke on Kaua (black) from the back -- matches label/actor/type/success."
+  },
+  {
+   "ts": 16795,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Match ends immediately after; aftermath frames (16800-16815) show only Fabricio standing and celebrating in front of the crowd, consistent with the published winner (Fabricio, by submission) and Kaua tapping."
+  }
+ ],
+ "identity_check": "Scoreboard reads F. JUNIOR (red) / K. Gabriel De Araujo B (blue) but that order is not mat position (per protocol warning). Kit colour resolved via the finish + celebration: the athlete who lands the winning Back Triangle at 16760 and stands celebrating alone in a green/yellow Brazil-flag rashguard (BRAZIL on the back) at 16795-16815 is the published winner Fabricio Andrey by submission -> GREEN/YELLOW kit = Fabricio Andrey, BLACK kit = Kaua Gabriel. This is the OPPOSITE of the raw file's bout.identity_discriminator text (which says black=Fabricio, green/yellow=Kaua) -- that field is reversed/wrong. The events[] actor tags themselves already use the correct real mapping throughout (cross-checked against narration at 16065/16075/16145/16155/16350/16525/16550/16620/16705/16745/16755 which repeatedly name 'Fabricio'/'Fisu'/'Fisa' doing back-take/kimura-trap/ankle-pick work matching the green/yellow athlete, and 'Kawan'/'Kawwan' matching the black athlete's collar-tie/single-leg work), so no per-event actor corrections were needed -- only the bout-level discriminator text is unreliable.",
+ "notes": "audit.flags was empty for this bout but the bout-level identity_discriminator string is reversed from the real kit colours (see identity_check) -- if any downstream code reads that field directly (rather than the events[] actor names) it will mislabel the athletes. Only one event dropped: the very first (Collar Tie @15990), a pre-contact/mutual-grip opening exchange with no clear single actor visible at 5s sampling."
+}

@@ -1,0 +1,69 @@
+{
+ "log": [
+  {
+   "ts": 17745,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts17750 shows the two clinched in a collar-tie-style grip immediately after the ts17745 approach; within tolerance."
+  },
+  {
+   "ts": 17865,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts17820-17860 show continuous standing pressure/hand-fighting ('Keep that pressure. Go through there.'); by ts17865 Simola is down on the mat with Blackman standing over her and the referee gesturing at the boundary -- consistent with a snap down that carried them toward the mat edge."
+  },
+  {
+   "ts": 17875,
+   "label": "Seated Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts17870-17875 show Simola seated on the mat with Blackman standing in front of her, textbook seated guard entry."
+  },
+  {
+   "ts": 18015,
+   "label": "Closed Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts18015 shows Simola on her back with Blackman postured inside her guard on the ground."
+  },
+  {
+   "ts": 18105,
+   "label": "Inversion",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts18100-18105 show Simola inverted, legs up and rotating, a clean visual match."
+  },
+  {
+   "ts": 18115,
+   "label": "Escape to Standing",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts18110-18115 show Simola coming up off the mat to a seated-then-standing position with both athletes back on their feet by 18115."
+  },
+  {
+   "ts": 18330,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frames ts18330-18335 show a standing clinch/collar-tie exchange."
+  },
+  {
+   "ts": 18420,
+   "label": "Double Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts18420 shows Blackman already driving Simola to the mat; scoreboard reads 'N. Blackman 2' by ts18430, confirming the takedown scored 2 points in this window (within the 5s sampling gap)."
+  },
+  {
+   "ts": 18435,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Frame ts18435 shows Blackman on top controlling Simola on the ground, scoreboard already 2-0."
+  }
+ ],
+ "identity_check": "Scoreboard lower-third 'N. BLACKMAN' (red row) / 'S. SIMOLA' (blue row) present on every live frame from bout start (ts17740). Blackman in green/brown camo top, black shorts; Simola in black Pitbull kit, blonde hair -- matches identity_discriminator exactly and stays consistent through every frame examined (17730-18445).",
+ "notes": "Clean read, all 9 events kept as-is, no corrections needed. All labels verbatim from the vocabulary. No off-library labels, no winner contradiction. Curated range 17730-18560 fully within this bout; no cutaway/replay contamination observed in the frames examined."
+}

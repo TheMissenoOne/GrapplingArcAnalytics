@@ -1,0 +1,72 @@
+{
+ "bout": {
+  "athlete_a": "Daniel Schuardt",
+  "athlete_b": "Alibi Orazbek",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Daniel Schuardt",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 28465,
+  "bout_end_seconds": 28955,
+  "identity_discriminator": "Scoreboard lower-third 'D. SCHUARDT' (red row) / 'A. ORAZBEK' (blue row) present on every live frame from ts28445 onward. Schuardt in all-black kit; Orazbek in a blue/white Kazakhstan-graphic rashguard and shorts -- matches identity_discriminator exactly, consistent throughout. Frames ts28430-28440 (before this bout) show an unrelated prior match's scorecard ('D. Terei' vs 'M. Makhmakhano'), excluded per the frame_pdf cutaway warning; this bout's first genuine frame is ts28445.",
+  "final_score": {
+   "Daniel Schuardt": 3,
+   "Alibi Orazbek": 0
+  },
+  "notes": "Frames 28430-28440 show the conclusion of the previous match. | Clean read, all 7 events kept as-is, no corrections needed. All labels verbatim from the vocabulary. No off-library labels, no winner contradiction. Curated range 28430-28960 opens with 15s of an unrelated prior bout's scorecard, excluded per protocol; the rest is entirely this bout with no replay contamination observed in the frames examined.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 28470,
+   "label": "Collar Tie",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 28625,
+   "label": "Standing Guillotine",
+   "actor": "Daniel Schuardt",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 28680,
+   "label": "Top Control",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 28740,
+   "label": "Takedown",
+   "actor": "Daniel Schuardt",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 28860,
+   "label": "Double Leg Takedown",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 28885,
+   "label": "Guard Pass",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 28905,
+   "label": "Side Control",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 7/7) 2026-08-25"
+}

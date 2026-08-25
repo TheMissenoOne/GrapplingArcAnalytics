@@ -1,0 +1,58 @@
+{
+ "bout": {
+  "athlete_a": "Declan Moody",
+  "athlete_b": "Anton Minenko",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Declan Moody",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 6385,
+  "bout_end_seconds": 6885,
+  "identity_discriminator": "Declan Moody in black B-Team rashguard and black shorts; Anton Minenko in black rashguard with yellow/green trim",
+  "final_score": {
+   "Declan Moody": 4,
+   "Anton Minenko": 0
+  },
+  "notes": "Frames 6350-6370 show the conclusion of the prior match."
+ },
+ "events": [
+  {
+   "ts": 6390,
+   "label": "Collar Tie",
+   "actor": "Declan Moody",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 6750,
+   "label": "Duck Under",
+   "actor": "Declan Moody",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 6855,
+   "label": "Takedown (Back Exposure)",
+   "actor": "Declan Moody",
+   "successful": true,
+   "type": "takedown",
+   "points": 4
+  },
+  {
+   "ts": 6865,
+   "label": "Top Control",
+   "actor": "Declan Moody",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "99kg",
+  "source_file": "ai_studio_code-2.txt",
+  "curated_start": 6350,
+  "curated_end": 6890,
+  "gemini_winner": "Declan Moody",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,94 @@
+{
+ "bout": {
+  "athlete_a": "Henrique Cardoso",
+  "athlete_b": "Elionai Braz",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Henrique Cardoso",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 13385,
+  "bout_end_seconds": 13935,
+  "identity_discriminator": "No lower-third walkout in curated range; both athletes wrestle bare-chested in black shorts (contradicts the meta identity_discriminator's claim of a black Vulkan rashguard for Cardoso -- the frame wins per protocol). On-screen scoreboard reads 'E. JULIO Braz' (top/red) and 'H. Ceconi' (bottom/blue) throughout -- NOT the exact meta names, but commentary repeatedly and phonetically names the blue athlete 'Second'/'Secone'/'Sakone'/'Sakonei' (all clearly mishearings of Ceconi) as the aggressor scoring all points via suplex/back-takes, and the running scoreboard total for H.Ceconi climbs 0->3->6 exactly matching meta final_score {Henrique Cardoso: 6, Elionai Braz: 0}. Identity bound to this narration+score trail rather than kit color (kit is identical/uninformative here): H. Ceconi row = Henrique Cardoso, E. Julio Braz row = Elionai Braz.",
+  "final_score": {
+   "Henrique Cardoso": 6,
+   "Elionai Braz": 0
+  },
+  "notes": "Frames 13360-13375 show the conclusion of the previous match. | IDENTITY CAVEAT for the assembler: the on-screen broadcast graphic names the athletes 'E. JULIO Braz' and 'H. Ceconi', not 'Elionai Braz' / 'Henrique Cardoso' verbatim, and neither athlete wears the rashguard described in the source meta's identity_discriminator (both are shirtless, black shorts only). The mapping to the meta's Henrique Cardoso / Elionai Braz names is inferred from the running scoreboard score trail (0->3->6 for the blue row) matching final_score exactly, not from a walkout graphic -- flagging this in case the meta's surname 'Cardoso' is itself a database error and should read 'Ceconi'. No drops; all 10 events verified concordant, 0 corrections needed.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 13395,
+   "label": "Collar Tie",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 13520,
+   "label": "Suplex",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 13645,
+   "label": "Back Take",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 13645,
+   "label": "Back Control",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 13740,
+   "label": "Suplex",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 13750,
+   "label": "Back Take",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 13765,
+   "label": "Back Control",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 13825,
+   "label": "Guard Pull",
+   "actor": "Elionai Braz",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 13845,
+   "label": "Top Control",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 13930,
+   "label": "Single Leg Takedown",
+   "actor": "Henrique Cardoso",
+   "successful": true,
+   "type": "takedown"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 10/10) 2026-08-25"
+}

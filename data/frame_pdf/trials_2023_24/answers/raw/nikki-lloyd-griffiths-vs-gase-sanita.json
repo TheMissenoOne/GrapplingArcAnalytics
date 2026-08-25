@@ -1,0 +1,85 @@
+{
+ "bout": {
+  "athlete_a": "Nikki Lloyd-Griffiths",
+  "athlete_b": "Gase Sanita",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Nikki Lloyd-Griffiths",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 27935,
+  "bout_end_seconds": 28175,
+  "identity_discriminator": "Nikki Lloyd-Griffiths in black rashguard with purple/white trim and blonde hair; Gase Sanita in white SWA rashguard and black leggings",
+  "final_score": {
+   "Nikki Lloyd-Griffiths": 0,
+   "Gase Sanita": 0
+  },
+  "notes": "Frames 27920-27930 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 27940,
+   "label": "Collar Tie",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 27990,
+   "label": "Snap Down",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 28015,
+   "label": "Top Control",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 28045,
+   "label": "Closed Guard",
+   "actor": "Gase Sanita",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 28080,
+   "label": "Escape to Standing",
+   "actor": "Gase Sanita",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 28160,
+   "label": "Single Leg Takedown",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 28165,
+   "label": "Armbar",
+   "actor": "Nikki Lloyd-Griffiths",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 28175,
+   "label": "Tap",
+   "actor": "Gase Sanita",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "+65kg F",
+  "source_file": "bouts bout athlete aaa.txt",
+  "curated_start": 27920,
+  "curated_end": 28240,
+  "gemini_winner": "Nikki Lloyd-Griffiths",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

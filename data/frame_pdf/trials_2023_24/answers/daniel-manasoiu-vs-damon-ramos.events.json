@@ -1,0 +1,122 @@
+{
+ "bout": {
+  "athlete_a": "Daniel Manasoiu",
+  "athlete_b": "Damon Ramos",
+  "event": "East Coast Trials 2023 (Atlantic City)",
+  "winner": "Daniel Manasoiu",
+  "year": 2023,
+  "identity_discriminator": "D. Manasoiu wears black/dark kit, D. Ramos wears blue kit; confirmed by scoreboard lower-third (Manasoiu=red/NEW, Ramos=blue/HERO) visible together with bodies at 3030s-3055s, and by walkout narration naming Ramos in blue at 3010s. Consistent throughout.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "All 15 events concordant; no off-library labels; no gemini/published winner conflict (gemini_winner null); no replay/cutaway frames encountered in this bout."
+ },
+ "events": [
+  {
+   "ts": 3025,
+   "label": "Clinch",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 3040,
+   "label": "Guard Pull",
+   "actor": "Damon Ramos",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 3050,
+   "label": "False Reap",
+   "actor": "Daniel Manasoiu",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 3075,
+   "label": "Body Lock",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 3085,
+   "label": "Knee Shield Half Guard",
+   "actor": "Damon Ramos",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 3110,
+   "label": "Aoki Lock",
+   "actor": "Damon Ramos",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 3150,
+   "label": "Double Underhooks",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 3185,
+   "label": "Dogbar",
+   "actor": "Daniel Manasoiu",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 3240,
+   "label": "Mount",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 3245,
+   "label": "Arm Triangle Choke",
+   "actor": "Daniel Manasoiu",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 3300,
+   "label": "Guard Pass",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 3335,
+   "label": "Half Guard",
+   "actor": "Damon Ramos",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 3350,
+   "label": "Guard Pass to Mount",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 3370,
+   "label": "Smother",
+   "actor": "Daniel Manasoiu",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 3375,
+   "label": "Tap",
+   "actor": "Damon Ramos",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 15/15) 2026-08-25"
+}

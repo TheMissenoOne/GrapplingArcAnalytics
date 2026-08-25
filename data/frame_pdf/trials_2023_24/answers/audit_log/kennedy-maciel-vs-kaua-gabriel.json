@@ -1,0 +1,90 @@
+{
+ "log": [
+  {
+   "ts": 10760,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Maciel grip near Gabriel's head/neck at first exchange"
+  },
+  {
+   "ts": 10830,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Gabriel already seated/pulled with Maciel standing over him; caption same window discusses him wanting to 'play guard'"
+  },
+  {
+   "ts": 10845,
+   "label": "Straight Ankle Lock",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'K is very good on leg attacks ... we see a very tight foot lock'"
+  },
+  {
+   "ts": 10885,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Securing top position', frame shows Maciel on top with hooks"
+  },
+  {
+   "ts": 11030,
+   "label": "Toe Hold",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Look at Kawwan looking for a toe hold. Really attacking.'"
+  },
+  {
+   "ts": 11045,
+   "label": "50/50 Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts references 50/50 entanglement continuing Gabriel's leg-attack sequence (auto-caption garbles his name as 'Ken'/'Kawwan' inconsistently throughout this bout, consistent with the ongoing leg-lock narrative rather than a Maciel action)"
+  },
+  {
+   "ts": 11060,
+   "label": "Heel Hook",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'We see the heel there. Very nice defense from Kennedy' (Gabriel attacking, Maciel defending)"
+  },
+  {
+   "ts": 11075,
+   "label": "Foot Lock",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Foot lock. I don't know if he's trying to foot lock the same foot on the other foot.'"
+  },
+  {
+   "ts": 11145,
+   "label": "Side Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Maciel pinning Gabriel chest-to-chest/perpendicular just before the scored pass 15s later"
+  },
+  {
+   "ts": 11160,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "scoreboard flips 0-0 -> 3-0 for K.MACIEL exactly at this frame, matching points=3"
+  },
+  {
+   "ts": 11190,
+   "label": "Mount",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: '40 seconds left Kenji retains the control heavy mount'"
+  },
+  {
+   "ts": 11200,
+   "label": "Arm Triangle Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'the katagatami to get some smoother tap there' (kata-gatame = arm-triangle family); bout ended by POINTS so unsuccessful is correct"
+  }
+ ],
+ "identity_check": "Kennedy Maciel = blue/white/red Alliance kit ('VITAL' sponsor patch), walks out ts10740; Kaua Gabriel = all-black kit, walks out ts10745. Scoreboard order K.MACIEL(red)/K.Gabriel(blue) fixed throughout, and its point flip (0-0 -> 3-0 for Maciel at ts11160) matches bout.final_score exactly, cross-confirming identity+winner. Note: frames 10730-10739 still show the PRIOR bout's scorecard ('J. Pontas vs L. Medeiros') as a cutaway before this bout's walkout -- excluded from consideration. Matches Gemini's identity_discriminator; no flags on this bout.",
+ "notes": "No drops, no corrections -- every event landed on or within a few seconds of a matching caption/frame. Final scoreboard read (K.Maciel 3, K.Gabriel 0) cross-validates bout.final_score and confirms no identity swap. Only wrinkle: the 11045 50/50 Guard actor call rests on inferring which mangled name the auto-caption meant rather than a clean textual match -- flagged in the log reason, not dropped, because the frame position and the surrounding leg-attack sequence both point to Gabriel."
+}

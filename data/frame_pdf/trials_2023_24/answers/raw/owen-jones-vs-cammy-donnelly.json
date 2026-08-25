@@ -1,0 +1,121 @@
+{
+ "bout": {
+  "athlete_a": "Owen Jones",
+  "athlete_b": "Cammy Donnelly",
+  "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+  "winner": "Owen Jones",
+  "year": 2023,
+  "win_type": "POINTS",
+  "bout_start_seconds": 2350,
+  "bout_end_seconds": 2860,
+  "identity_discriminator": "Owen Jones in black B-Team rashguard with Texas graphic on back and black shorts; Cammy Donnelly in red sleeveless rashguard and black leggings with blonde hair",
+  "final_score": {
+   "Owen Jones": 3,
+   "Cammy Donnelly": 0
+  },
+  "notes": "Frames 2330-2340 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 2355,
+   "label": "Collar Tie",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2375,
+   "label": "Guard Pull",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 2385,
+   "label": "Open Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2460,
+   "label": "Half Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2535,
+   "label": "Butterfly Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2605,
+   "label": "K-Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 2640,
+   "label": "Sweep",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "sweep"
+  },
+  {
+   "ts": 2710,
+   "label": "Top Control",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2750,
+   "label": "Guard Pass",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 2765,
+   "label": "Side Control",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 2790,
+   "label": "Escape to Standing",
+   "actor": "Cammy Donnelly",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 2800,
+   "label": "Guard Pull",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 2835,
+   "label": "Open Guard",
+   "actor": "Owen Jones",
+   "successful": true,
+   "type": "guard"
+  }
+ ],
+ "audit": {
+  "division": "66kg",
+  "source_file": "bouts bout athlete aaa.txt",
+  "curated_start": 2330,
+  "curated_end": 2890,
+  "gemini_winner": "Owen Jones",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,72 @@
+{
+ "bout": {
+  "athlete_a": "Felipe Costa",
+  "athlete_b": "Elionai Braz",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Felipe Costa",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 9055,
+  "bout_end_seconds": 9540,
+  "identity_discriminator": "Felipe Costa in white/black rashguard with Six Blades / Stupid Grapplers branding; Elionai Braz in black rashguard with shaved head and beard",
+  "final_score": {
+   "Felipe Costa": 2,
+   "Elionai Braz": 0
+  },
+  "notes": "Frames 9030-9040 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 9060,
+   "label": "Guard Pull",
+   "actor": "Felipe Costa",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 9065,
+   "label": "Closed Guard",
+   "actor": "Felipe Costa",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 9185,
+   "label": "Body Lock",
+   "actor": "Elionai Braz",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 9330,
+   "label": "Straight Armbar",
+   "actor": "Felipe Costa",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 9505,
+   "label": "Guard Break",
+   "actor": "Elionai Braz",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 9530,
+   "label": "Sweep",
+   "actor": "Felipe Costa",
+   "successful": true,
+   "type": "sweep",
+   "points": 2
+  }
+ ],
+ "audit": {
+  "division": "99kg",
+  "source_file": "ai_studio_code(20).txt",
+  "curated_start": 9030,
+  "curated_end": 9550,
+  "gemini_winner": "Felipe Costa",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

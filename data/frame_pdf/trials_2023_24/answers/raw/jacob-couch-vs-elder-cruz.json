@@ -1,0 +1,85 @@
+{
+ "bout": {
+  "athlete_a": "Jacob Couch",
+  "athlete_b": "Elder Cruz",
+  "event": "East Coast Trials 2023 (Atlantic City)",
+  "winner": "Jacob Couch",
+  "year": 2023,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 4005,
+  "bout_end_seconds": 4240,
+  "identity_discriminator": "Jacob Couch in black rashguard with pink/red shorts; Elder Cruz in all-black rashguard and shorts",
+  "final_score": {
+   "Jacob Couch": 0,
+   "Elder Cruz": 0
+  },
+  "notes": "Frames 3870-3995 are walkouts and introductions."
+ },
+ "events": [
+  {
+   "ts": 4015,
+   "label": "Single Leg Takedown",
+   "actor": "Elder Cruz",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 4025,
+   "label": "Half Guard",
+   "actor": "Jacob Couch",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4130,
+   "label": "Top Control (Half Guard)",
+   "actor": "Elder Cruz",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 4195,
+   "label": "Closed Guard",
+   "actor": "Jacob Couch",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4210,
+   "label": "Arm Drag",
+   "actor": "Jacob Couch",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 4225,
+   "label": "K-Guard",
+   "actor": "Jacob Couch",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 4235,
+   "label": "Heel Hook",
+   "actor": "Jacob Couch",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 4240,
+   "label": "Tap",
+   "actor": "Elder Cruz",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "88kg",
+  "source_file": "ai_studio_code-5.txt",
+  "curated_start": 3870,
+  "curated_end": 4280,
+  "gemini_winner": "Jacob Couch",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

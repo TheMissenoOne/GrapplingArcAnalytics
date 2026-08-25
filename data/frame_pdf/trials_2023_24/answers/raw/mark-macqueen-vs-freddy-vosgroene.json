@@ -1,0 +1,72 @@
+{
+ "bout": {
+  "athlete_a": "Mark Macqueen",
+  "athlete_b": "Freddy Vosgroene",
+  "event": "EU/Africa/ME Trials 2024 (Zagreb)",
+  "winner": "Mark Macqueen",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 18585,
+  "bout_end_seconds": 19085,
+  "identity_discriminator": "Mark Macqueen in blue/red rashguard and patterned shorts; Freddy Vosgroene in black t-shirt and green/camo shorts with blonde hair",
+  "final_score": {
+   "Mark Macqueen": 3,
+   "Freddy Vosgroene": 0
+  },
+  "notes": "Frames 18560-18580 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 18590,
+   "label": "Collar Tie",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 18685,
+   "label": "Snap Down",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 18695,
+   "label": "Half Guard",
+   "actor": "Freddy Vosgroene",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 18705,
+   "label": "Top Control (Half Guard)",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 19050,
+   "label": "Guard Pass",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 19070,
+   "label": "Side Control",
+   "actor": "Mark Macqueen",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "+99kg",
+  "source_file": "bouts bout athlete aa.txt",
+  "curated_start": 18560,
+  "curated_end": 19090,
+  "gemini_winner": "Mark Macqueen",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

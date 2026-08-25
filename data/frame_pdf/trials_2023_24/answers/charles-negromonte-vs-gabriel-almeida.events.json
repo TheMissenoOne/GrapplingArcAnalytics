@@ -1,0 +1,109 @@
+{
+ "bout": {
+  "athlete_a": "Charles Negromonte",
+  "athlete_b": "Gabriel Almeida",
+  "event": "South American Trials 1 2024 (Belo Horizonte)",
+  "winner": "Charles Negromonte",
+  "year": 2024,
+  "penalties": "Gabriel Almeida ~t10125 (Caution / Penalty)",
+  "identity_discriminator": "Charles Negromonte = tan/white rashguard, red wrist tape; Gabriel Almeida = black shirt. Verified at 9700-9710s where narration 'Charles just got double unders...Charles just got double unders. Oh, nice' lines up exactly with the tan-shirt fighter driving in and taking the black-shirt fighter down; identity held consistent through all kept frames. Scoreboard row order (C. Negromonte/G. Almeida) NOT used as a position cue per protocol.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "audit.flags was empty for this bout, no off-library labels, no winner contradiction. All 13 Gemini events verified against frames+narration; only correction is the actor swap on the 9965 Half Guard event."
+ },
+ "events": [
+  {
+   "ts": 9555,
+   "label": "Collar Tie",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 9690,
+   "label": "Low Single Leg",
+   "actor": "Charles Negromonte",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 9710,
+   "label": "Double Underhooks",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 9750,
+   "label": "Guillotine Choke",
+   "actor": "Gabriel Almeida",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 9915,
+   "label": "Fireman's Carry",
+   "actor": "Gabriel Almeida",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 9945,
+   "label": "Single Leg Takedown",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 9945,
+   "label": "Guillotine Choke",
+   "actor": "Gabriel Almeida",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 9965,
+   "label": "Half Guard",
+   "actor": "Gabriel Almeida",
+   "successful": true,
+   "type": "guard",
+   "note": "corrected actor: narration at 9965 explicitly says 'we see Gabriel trying for the half', i.e. Almeida (bottom) establishing half guard, not Negromonte"
+  },
+  {
+   "ts": 10145,
+   "label": "Back Take",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 10155,
+   "label": "Back Control",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "control",
+   "points": 3
+  },
+  {
+   "ts": 10155,
+   "label": "Body Triangle",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 10305,
+   "label": "Rear Naked Choke",
+   "actor": "Charles Negromonte",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 10310,
+   "label": "Tap",
+   "actor": "Gabriel Almeida",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 13/13) 2026-08-25"
+}

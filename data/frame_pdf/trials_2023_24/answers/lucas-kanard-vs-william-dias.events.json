@@ -1,0 +1,50 @@
+{
+ "bout": {
+  "athlete_a": "Lucas Kanard",
+  "athlete_b": "William Dias",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Lucas Kanard",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 28985,
+  "bout_end_seconds": 29190,
+  "identity_discriminator": "Scoreboard lower-third 'L. KANARD' (red row) / 'W. DIAS' (blue row) present on every live frame from ts28980 onward. Kanard's kit shows 'JMC' branding visible on the shorts at multiple frames (e.g. ts28995, ts29165); Dias in plain solid black -- matches identity_discriminator. Frames ts28970-28975 (before this bout) show the prior match's scorecard ('D. Schuardt' vs 'A. Orazbek'), excluded per the notes and the frame_pdf cutaway warning.",
+  "final_score": {
+   "Lucas Kanard": 0,
+   "William Dias": 0
+  },
+  "notes": "Frames 28970-28975 show the conclusion of the previous match. | Small, clean 4-event bout; every event confirmed against frames (and narration where present). No corrections, no drops. All labels verbatim from the vocabulary. Curated range 28970-29200 opens with ~10s of the prior bout's scorecard, excluded per protocol.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 28990,
+   "label": "Collar Tie",
+   "actor": "Lucas Kanard",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 29155,
+   "label": "Guard Pull",
+   "actor": "William Dias",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 29180,
+   "label": "Guillotine Choke",
+   "actor": "Lucas Kanard",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 29190,
+   "label": "Tap",
+   "actor": "William Dias",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 4/4) 2026-08-25"
+}

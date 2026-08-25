@@ -1,0 +1,79 @@
+{
+ "bout": {
+  "athlete_a": "Daniel Schuardt",
+  "athlete_b": "Alibi Orazbek",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Daniel Schuardt",
+  "year": 2024,
+  "win_type": "POINTS",
+  "bout_start_seconds": 28465,
+  "bout_end_seconds": 28955,
+  "identity_discriminator": "Daniel Schuardt in all-black rashguard and shorts; Alibi Orazbek in blue/white Kazakhstan graphic rashguard and shorts",
+  "final_score": {
+   "Daniel Schuardt": 3,
+   "Alibi Orazbek": 0
+  },
+  "notes": "Frames 28430-28440 show the conclusion of the previous match."
+ },
+ "events": [
+  {
+   "ts": 28470,
+   "label": "Collar Tie",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 28625,
+   "label": "Standing Guillotine",
+   "actor": "Daniel Schuardt",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 28680,
+   "label": "Top Control",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 28740,
+   "label": "Takedown",
+   "actor": "Daniel Schuardt",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 28860,
+   "label": "Double Leg Takedown",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 28885,
+   "label": "Guard Pass",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 28905,
+   "label": "Side Control",
+   "actor": "Daniel Schuardt",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "99kg",
+  "source_file": "ai_studio_code-2.txt",
+  "curated_start": 28430,
+  "curated_end": 28960,
+  "gemini_winner": "Daniel Schuardt",
+  "flags": [],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

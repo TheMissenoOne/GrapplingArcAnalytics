@@ -1,0 +1,98 @@
+{
+ "log": [
+  {
+   "ts": 2355,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "opening standing clinch exchange, both athletes engage hands-to-collar (frame -06.jpg)"
+  },
+  {
+   "ts": 2375,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "black-kit Owen seen sitting to the mat as red-kit Cammy remains upright, classic guard-pull entry (frame -06.jpg)"
+  },
+  {
+   "ts": 2385,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "both athletes engaged on the ground immediately after the guard pull, Owen bottom (frame -06.jpg)"
+  },
+  {
+   "ts": 2460,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "continuous ground guard-retention scramble; specific top/bottom orientation hard to pin from a single 5s frame, but bracketed by clear guard-pull (2375, Owen bottom) and sweep (2640, requires Owen bottom) anchors that corroborate Owen playing guard through this stretch (frame -09.jpg)",
+   "corrections": {}
+  },
+  {
+   "ts": 2535,
+   "label": "Butterfly Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "same continuous guard-retention scramble as above, no clear contradiction, consistent with the guard-pull-to-sweep narrative arc (frame -11.jpg)"
+  },
+  {
+   "ts": 2605,
+   "label": "K-Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "leg-entangled scramble immediately preceding the sweep at 2640; consistent with a guard evolving toward a leg-based sweep entry (frame -14.jpg)"
+  },
+  {
+   "ts": 2640,
+   "label": "Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows a clear inversion/roll -- Cammy (red) rolled over Owen (black), matching a completed sweep to top position (frame -15.jpg)"
+  },
+  {
+   "ts": 2710,
+   "label": "Top Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frames 2700-2715 show a contested scramble (some moments Cammy appears to posture/scramble on top); overall position is bracketed by the 2640 sweep (Owen to top) and the 2750 successful pass (Owen top, scored), supporting Owen held top-side control through most of this window despite a transient scramble (frame -17.jpg)"
+  },
+  {
+   "ts": 2750,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Owen driving a side-control-style pass on Cammy; scoreboard changes from 0-0 to 3-0 (Owen) between the 2750 and 2755 frames, exactly matching Gemini's points=3 (frame -19.jpg) -- strongest evidence in the bout"
+  },
+  {
+   "ts": 2765,
+   "label": "Side Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Owen maintaining a pinning top position on Cammy immediately after the scored pass, scoreboard still 3-0 (frame -19.jpg)"
+  },
+  {
+   "ts": 2790,
+   "label": "Escape to Standing",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Cammy (red) upright/on her knees rising while Owen remains low, referee adjusting position -- consistent with Cammy escaping to standing (frame -20.jpg)"
+  },
+  {
+   "ts": 2800,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Cammy standing over a seated Owen, consistent with Owen re-pulling guard after both reset to standing (frame -20.jpg)"
+  },
+  {
+   "ts": 2835,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frames show Owen on the ground playing an open guard with Cammy standing/posturing over him toward the end of the sampled window (frame -21.jpg)"
+  }
+ ],
+ "identity_check": "identity_discriminator confirmed in frames: Owen Jones wears a BLACK rashguard with a Texas flag graphic visible on the BACK (clearly seen at ts2705, frame owen-jones-vs-cammy-donnelly-17.jpg) and black shorts; Cammy Donnelly wears a RED sleeveless rashguard, black leggings, blonde hair (visible throughout). Note: scoreboard row colour (O.Jones=red row, C.Donnelly=blue row) is a UI convention unrelated to kit colour -- identity was bound to kit/back-graphic, not scoreboard row colour. No winner-swap flag (gemini_winner=Owen Jones matches published winner). Scoreboard read 0-0 until ts~2755 then jumped to 3-0 (Owen), matching the ts2750 Guard Pass points=3 exactly.",
+ "notes": "All 13 Gemini events kept, no corrections or drops. The mid-match guard-variant sequence (half guard 2460 / butterfly guard 2535 / k-guard 2605 / top control 2710) sits in a fast continuous scramble where single 5s frames make top/bottom orientation genuinely hard to pin at every tick; kept on the strength of the surrounding clear anchor events (guard pull 2375, sweep 2640, scored pass+3pts 2750) which form an internally consistent guard-retention-then-sweep-then-pass narrative and the scoreboard jump (0-0 -> 3-0) that independently corroborates the 2750 pass. No off-library labels; all labels present verbatim in the vocabulary pages. Final score/decision consistent with published Owen Jones win by points."
+}

@@ -1,0 +1,111 @@
+{
+ "log": [
+  {
+   "ts": 21755,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption 'heavy emphasis on the collar tie' matches Helena's grip at ts"
+  },
+  {
+   "ts": 21765,
+   "label": "Two-on-One Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption 'Black twoon one and immediately switching' confirms actor+label"
+  },
+  {
+   "ts": 21780,
+   "label": "Underhook",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "frame shows an over-the-shoulder tie, caption says 'over hook' not underhook; second look could not confirm underarm penetration with confidence -> drop"
+  },
+  {
+   "ts": 21805,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at same ts: 'Oh, look at this guillotine'; frame shows head-in-arm attempt, unsuccessful"
+  },
+  {
+   "ts": 21875,
+   "label": "Uchi Mata",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption 'positioning her hips to look for that Uchima' at same ts"
+  },
+  {
+   "ts": 21920,
+   "label": "Russian Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption 5s later 'Twoon one again into that Russian' confirms Black's Russian tie"
+  },
+  {
+   "ts": 21945,
+   "label": "Uchi Mata",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption 'we talked about that Uchima attempt' at same ts, second unsuccessful attempt"
+  },
+  {
+   "ts": 21965,
+   "label": "Leg Entry",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'this is what Helena wants in on a leg'"
+  },
+  {
+   "ts": 21975,
+   "label": "Open Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Helena Crabar to adopt the bottom position'; frame shows Helena on bottom, guard-shaped"
+  },
+  {
+   "ts": 22020,
+   "label": "Sweep",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Sweep points for Curvar'; scoreboard flips to H.Crevar 2 immediately after, points=2 confirmed on board"
+  },
+  {
+   "ts": 22025,
+   "label": "Front Headlock Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Still controlling that front head'"
+  },
+  {
+   "ts": 22085,
+   "label": "Turtle Position",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Black turns to Turtle'"
+  },
+  {
+   "ts": 22085,
+   "label": "Turtle Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "same frame/caption: 'First hook is in' by Helena on Black's turtle"
+  },
+  {
+   "ts": 22180,
+   "label": "Wrestle-Up",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Black on the wrestle up ... going to be up on the feet'"
+  },
+  {
+   "ts": 22200,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "caption at exact ts: 'Helena Crabar just continually trying to snap her down to the ground'; match ends shortly after by points decision, consistent with a landed control-oriented takedown"
+  }
+ ],
+ "identity_check": "Helena Crevar = blue/white/red stars-and-stripes rashguard+spats, 'HELENA' lettered on back (walkout frame 21605, confirmed again 21720/21735 close-ups); Morgan Black = all-black kit, 'TABS BJJ' branding, lower-third graphic 'MORGAN BLACK' at 21615/21620. Scoreboard order M.Black(red)/H.Crevar(blue) consistent throughout. Matches Gemini's identity_discriminator exactly; no flags on this bout.",
+ "notes": "Only one event dropped (21780 Underhook, actor mismatch of grip type between caption and my second-look read of the frame — DROP per residual-doubt rule). No off-library labels; 'Uchi Mata' and 'Wrestle-Up' are both valid closed-vocab entries verbatim (not to be confused with 'Uchi Mata Throw' / 'Wrestle Up to Top', which describe completed variants and were not what the frames showed). No identity flag on this bout."
+}

@@ -1,0 +1,83 @@
+{
+ "log": [
+  {
+   "ts": 1470,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Control' at exactly this timestamp; frame shows grip-fighting clinch"
+  },
+  {
+   "ts": 1525,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows scramble to the ground right after standing exchange, consistent with a guard pull by Taza, followed by the half-guard sequence"
+  },
+  {
+   "ts": 1535,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frames 1550-1565 confirm Taza (black) underneath in half guard, Chen (patterned) on top, matching the sequence started by the 1525 guard pull"
+  },
+  {
+   "ts": 1585,
+   "label": "Butterfly Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frames 1600-1615 show Taza underneath elevating/hooking Chen, consistent with butterfly half guard; narration 'if you can grab, you can elevator again' at 1595"
+  },
+  {
+   "ts": 1645,
+   "label": "Head-Arm Control (Top)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "flag resolved: label IS present verbatim in the current vocabulary (CONTROL section, page 03); narration 'Hold him there. Hold him there.' at 1645 and frame shows Chen on top wrapping Taza's head/arm -- kept as-is, no snap or drop needed"
+  },
+  {
+   "ts": 1740,
+   "label": "Guard Pass",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration '10 seconds. Still point. Stay on the side' at 1740 and 'Points. Points. Okay.' at 1750; scoreboard shows J. Chen 3 by ts 2105, consistent with a 3pt pass landing here"
+  },
+  {
+   "ts": 1765,
+   "label": "Side Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Chen kneeling over Taza in a side-control-type position immediately after the pass"
+  },
+  {
+   "ts": 1815,
+   "label": "Half Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Chen on top with Taza's legs entangling one of his from below, standard half-guard shape"
+  },
+  {
+   "ts": 2095,
+   "label": "Top Control (Half Guard)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Chen maintaining top position with half-guard leg entanglement, consistent with the label"
+  },
+  {
+   "ts": 2155,
+   "label": "Body Triangle (Bottom)",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim at 2155: 'Okay. 2 minutes 22. Okay. Lock the triangle again.' -- directly names the triangle/body-triangle control"
+  },
+  {
+   "ts": 2275,
+   "label": "Guard Retention",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows a tight ground scramble consistent with Taza fighting to keep/regain guard; generic guard-family label appropriate at this resolution"
+  }
+ ],
+ "identity_check": "No lower-third walkout in curated range (starts mid-bout-intro at 1450s). Identity established from kit: Jozef Chen wears a light beige/tan patterned rashguard with 'B-TEAM' / 'JOZEF CHEN' branding and purple shorts; Oliver Taza wears a plain black rashguard. Verified across pages 05-11 (e.g. frames 1465, 1550-1565, 1600-1615) where Chen (patterned) is consistently the top/passing player and Taza (black) the guard player, matching the scoreboard order (J. Chen row1 / O. Taza row2) and the final_score/points (3-0 Chen, points appear on scoreboard exactly at ts~1745, matching Chen's Guard Pass).",
+ "notes": "The audit.flags off-library warning on the 1645 'Head-Arm Control (Top)' event did not hold up: that exact string is listed verbatim in the CONTROL section of the current Allowed-labels vocabulary page (376-technique snapshot 2026-08-25), and the frame supports it. No snap or drop was needed -- kept as Gemini reported it. No drops; all 11 events verified concordant, 0 corrections."
+}

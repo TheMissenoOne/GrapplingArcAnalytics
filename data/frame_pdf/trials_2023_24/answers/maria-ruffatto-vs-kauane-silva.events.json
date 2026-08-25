@@ -1,0 +1,85 @@
+{
+ "bout": {
+  "athlete_a": "Maria Ruffatto",
+  "athlete_b": "Kauane Silva",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Maria Ruffatto",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 12585,
+  "bout_end_seconds": 12785,
+  "identity_discriminator": "Maria Ruffatto in black rashguard with 'ROLL A LOT' printed on the back (clearly visible at ts12585/12650/12710/12730, e.g. frame maria-ruffatto-vs-kauane-silva-07.jpg); Kauane Silva Ramos in yellow shirt + blue shorts throughout. Matches identity_discriminator and scoreboard ('M. Ruffatto' / 'K. Silva Ramos'). No winner-swap flag; gemini_winner=Maria Ruffatto matches published winner, submission finish confirmed on frame (Kauane tapping, Maria celebrating at ts12785, frame -12.jpg).",
+  "final_score": {
+   "Maria Ruffatto": 0,
+   "Kauane Silva": 0
+  },
+  "notes": "Frames 12570-12580 show the conclusion of the previous match. | All 9 Gemini events audited and kept as-is, no corrections needed. This bout has the cleanest audio/frame corroboration of the batch -- nearly every event has a verbatim narration match. Submission finish (Straight Ankle Lock -> Tap) is directly visible on frame and matches the published win_type=SUBMISSION.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 12590,
+   "label": "Collar Tie",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 12645,
+   "label": "Snap Down",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 12650,
+   "label": "Leg Entanglement",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 12660,
+   "label": "Heel Hook",
+   "actor": "Maria Ruffatto",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 12715,
+   "label": "50/50 Guard",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 12725,
+   "label": "Top Control",
+   "actor": "Kauane Silva",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 12735,
+   "label": "Knee Bar",
+   "actor": "Maria Ruffatto",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 12775,
+   "label": "Straight Ankle Lock",
+   "actor": "Maria Ruffatto",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 12785,
+   "label": "Tap",
+   "actor": "Kauane Silva",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 9/9) 2026-08-25"
+}

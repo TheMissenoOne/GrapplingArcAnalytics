@@ -32,6 +32,12 @@ reads ``events.json`` files and (with ``--write``) writes a plain ``.py`` dump l
     uv run python -m scripts.frame_answer_to_dump              # report only (default)
     uv run python -m scripts.frame_answer_to_dump --dry-run    # same, explicit
     uv run python -m scripts.frame_answer_to_dump --write      # also write the dump file
+
+``--from-answers <dir>`` reads flat ``<slug>.events.json`` files (e.g. concordance-audited
+batches) instead of the default ``out/<slug>/events.json`` folders. ``--allow-audited``
+additionally accepts a ``source`` containing "concordance-audited" -- WITHOUT it, audited
+files are still refused (the default review gate is unchanged). ``--exclude <path>`` skips
+the slugs listed in that JSON file (e.g. bouts already imported through another path).
 """
 from __future__ import annotations
 
@@ -56,6 +62,10 @@ DUMP_PATH = REPO / "scripts" / "dumps" / "frame_pdf_data.py"
 EVENT_KEEP = ("label", "type", "actor", "ts", "successful", "points")
 
 REVIEWED_MARK = "human review"
+# --allow-audited additionally accepts this stamp (frame_answer.py's concordance-audit
+# provenance, e.g. "gemini reading, concordance-audited (kept N/M) 2026-08-25"). Without the
+# flag these files are still refused -- the default gate is unchanged.
+AUDITED_MARK = "concordance-audited"
 
 
 @dataclass
@@ -81,16 +91,22 @@ def _resolve(name: str, a_key: str, b_key: str, a_name: str, b_name: str) -> str
     return None
 
 
-def convert_file(path: Path) -> tuple[FileReport, DumpBlock | None]:
-    """One ``events.json`` -> (report, dump block) or (report, None) if not convertible."""
-    slug = path.parent.name
+def convert_file(
+    path: Path, *, slug: str | None = None, allow_audited: bool = False
+) -> tuple[FileReport, DumpBlock | None]:
+    """One ``events.json`` -> (report, dump block) or (report, None) if not convertible.
+
+    ``slug`` defaults to ``path.parent.name`` (the ``out/<slug>/events.json`` folder shape);
+    pass it explicitly for a flat ``<slug>.events.json`` file (``--from-answers``)."""
+    slug = slug if slug is not None else path.parent.name
     try:
         answer = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
         return FileReport(slug, "invalid_json", reason=str(exc)), None
 
     source = str(answer.get("source") or "")
-    if REVIEWED_MARK not in source:
+    accepted = REVIEWED_MARK in source or (allow_audited and AUDITED_MARK in source)
+    if not accepted:
         return FileReport(slug, "skipped_unreviewed", reason=source), None
 
     bout = answer.get("bout") or {}
@@ -143,35 +159,70 @@ def convert_file(path: Path) -> tuple[FileReport, DumpBlock | None]:
     return report, {(a_name, year): m}
 
 
-def convert_all(out_dir: Path = OUT) -> tuple[list[FileReport], list[DumpBlock]]:
+def convert_all(
+    out_dir: Path = OUT,
+    *,
+    from_answers: Path | None = None,
+    allow_audited: bool = False,
+    exclude: set[str] | None = None,
+) -> tuple[list[FileReport], list[DumpBlock]]:
+    """Default: scan ``out_dir/<slug>/events.json`` folders. ``from_answers``: scan flat
+    ``<slug>.events.json`` files in that directory instead (no per-folder frame lookups
+    exist to degrade -- the only per-folder thing this module ever read was the slug
+    itself, now passed explicitly). ``exclude`` skips slugs by name either way."""
+    exclude = exclude or set()
     reports: list[FileReport] = []
     blocks: list[DumpBlock] = []
+
+    if from_answers is not None:
+        if not from_answers.exists():
+            return reports, blocks
+        for f in sorted(from_answers.glob("*.events.json")):
+            slug = f.name[: -len(".events.json")]
+            if slug in exclude:
+                continue
+            report, block = convert_file(f, slug=slug, allow_audited=allow_audited)
+            reports.append(report)
+            if block is not None:
+                blocks.append(block)
+        return reports, blocks
+
     if not out_dir.exists():
         return reports, blocks
     for d in sorted(p for p in out_dir.iterdir() if p.is_dir()):
+        if d.name in exclude:
+            continue
         f = d / "events.json"
         if not f.exists():
             continue
-        report, block = convert_file(f)
+        report, block = convert_file(f, allow_audited=allow_audited)
         reports.append(report)
         if block is not None:
             blocks.append(block)
     return reports, blocks
 
 
-def render_dump(blocks: list[DumpBlock]) -> str:
+def render_dump(blocks: list[DumpBlock], *, header: str | None = None) -> str:
     """Consolidated ``.py`` literal matching the shape ``scripts/dumps/*_data.py`` already
     uses -- a single ``RAW`` list holding one dict of every converted ``(athlete_a_name,
-    year)`` block, which is what ``scripts.dump_import.build_matches`` consumes."""
+    year)`` block, which is what ``scripts.dump_import.build_matches`` consumes.
+
+    ``header``, if given, replaces the default module docstring verbatim (a caller-supplied
+    triple-quoted string ending in ``\\n``) -- lets a batch-specific caller (e.g. a
+    concordance-audited event split) document its own provenance instead of the generic
+    "human-reviewed .../out/<slug>/events.json" text, which would be wrong for it."""
     merged: dict[tuple[str, int | None], dict[str, Any]] = {}
     for b in blocks:
         merged.update(b)
-    return (
+    doc = header if header is not None else (
         '"""Frame-read match dump -- reviewed events converted for import.\n\n'
         "Generated from human-reviewed data/frame_pdf/out/<slug>/events.json by "
         "scripts/frame_answer_to_dump.py; keyed by (athlete_a_name, year).\n"
         'Do not edit by hand."""\n'
-        "# ruff: noqa: E501  (single-line serialized data literal)\n\n"
+    )
+    return (
+        doc
+        + "# ruff: noqa: E501  (single-line serialized data literal)\n\n"
         "from __future__ import annotations\n\n"
         "from typing import Any\n\n"
         f"RAW: list[dict[tuple[str, int | None], dict[str, Any]]] = [{merged!r}]\n"
@@ -200,9 +251,24 @@ def main() -> int:
                      help="report only, no write (default)")
     ap.add_argument("--write", action="store_true",
                      help="write the consolidated dump to scripts/dumps/frame_pdf_data.py")
+    ap.add_argument("--from-answers", type=Path, default=None,
+                     help="read flat <slug>.events.json files from this dir instead of "
+                          "out/<slug>/events.json folders")
+    ap.add_argument("--allow-audited", action="store_true",
+                     help="also accept source containing 'concordance-audited' "
+                          "(refused by default)")
+    ap.add_argument("--exclude", type=Path, default=None,
+                     help="JSON file holding a list of slugs to skip")
     a = ap.parse_args()
 
-    reports, blocks = convert_all()
+    exclude: set[str] = set()
+    if a.exclude:
+        data = json.loads(a.exclude.read_text(encoding="utf-8"))
+        exclude = set(data)
+
+    reports, blocks = convert_all(
+        from_answers=a.from_answers, allow_audited=a.allow_audited, exclude=exclude
+    )
     print_report(reports)
 
     if a.write:

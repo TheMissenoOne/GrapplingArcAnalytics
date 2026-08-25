@@ -1,0 +1,127 @@
+{
+ "bout": {
+  "athlete_a": "Fabricio Andrey",
+  "athlete_b": "Kaua Gabriel",
+  "event": "South American Trials 2 2024 (Sao Paulo)",
+  "winner": "Fabricio Andrey",
+  "year": 2024,
+  "win_type": "SUBMISSION",
+  "bout_start_seconds": 15990,
+  "bout_end_seconds": 16795,
+  "identity_discriminator": "Scoreboard reads F. JUNIOR (red) / K. Gabriel De Araujo B (blue) but that order is not mat position (per protocol warning). Kit colour resolved via the finish + celebration: the athlete who lands the winning Back Triangle at 16760 and stands celebrating alone in a green/yellow Brazil-flag rashguard (BRAZIL on the back) at 16795-16815 is the published winner Fabricio Andrey by submission -> GREEN/YELLOW kit = Fabricio Andrey, BLACK kit = Kaua Gabriel. This is the OPPOSITE of the raw file's bout.identity_discriminator text (which says black=Fabricio, green/yellow=Kaua) -- that field is reversed/wrong. The events[] actor tags themselves already use the correct real mapping throughout (cross-checked against narration at 16065/16075/16145/16155/16350/16525/16550/16620/16705/16745/16755 which repeatedly name 'Fabricio'/'Fisu'/'Fisa' doing back-take/kimura-trap/ankle-pick work matching the green/yellow athlete, and 'Kawan'/'Kawwan' matching the black athlete's collar-tie/single-leg work), so no per-event actor corrections were needed -- only the bout-level discriminator text is unreliable.",
+  "final_score": {
+   "Fabricio Andrey": 0,
+   "Kaua Gabriel": 0
+  },
+  "notes": "Frames 15950-15975 show celebration of prior match. | audit.flags was empty for this bout but the bout-level identity_discriminator string is reversed from the real kit colours (see identity_check) -- if any downstream code reads that field directly (rather than the events[] actor names) it will mislabel the athletes. Only one event dropped: the very first (Collar Tie @15990), a pre-contact/mutual-grip opening exchange with no clear single actor visible at 5s sampling.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)"
+ },
+ "events": [
+  {
+   "ts": 16065,
+   "label": "Single Leg Takedown",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 16075,
+   "label": "Inversion",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 16145,
+   "label": "Kimura Trap",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16275,
+   "label": "Back Take",
+   "actor": "Fabricio Andrey",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 16345,
+   "label": "Single Leg X",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 16390,
+   "label": "Top Control",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16525,
+   "label": "Collar Tie",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16550,
+   "label": "Ankle Pick",
+   "actor": "Fabricio Andrey",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 16600,
+   "label": "Ankle Pick",
+   "actor": "Fabricio Andrey",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 16620,
+   "label": "Single Leg Takedown",
+   "actor": "Kaua Gabriel",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 16705,
+   "label": "Back Take",
+   "actor": "Fabricio Andrey",
+   "successful": false,
+   "type": "transition"
+  },
+  {
+   "ts": 16745,
+   "label": "Back Take",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 16755,
+   "label": "Back Control",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 16760,
+   "label": "Back Triangle",
+   "actor": "Fabricio Andrey",
+   "successful": true,
+   "type": "submission"
+  },
+  {
+   "ts": 16795,
+   "label": "Tap",
+   "actor": "Kaua Gabriel",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 15/16) 2026-08-25"
+}

@@ -1,0 +1,62 @@
+{
+ "log": [
+  {
+   "ts": 3620,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "opening standing engagement right after the bow/referee start (frame -07.jpg); generic opening move, no discordant evidence"
+  },
+  {
+   "ts": 3660,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration ts3630 sets up 'Ardella offering the foot, asking Grandandy to take the single leg', then ts3660: 'Grandandy takes that ankle, rips it out from underneath and ball right where he seemingly wanted to be' -- describes Paul intentionally baiting the leg and going to the ground, i.e. pulling guard (frame -08.jpg)"
+  },
+  {
+   "ts": 3665,
+   "label": "Seated Guard",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame shows Paul seated on the mat with Alex standing/kneeling over his leg immediately following the guard pull (frame -08.jpg)"
+  },
+  {
+   "ts": 3745,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Granny true to form keeping the heavy collar ties active even from this top position\" (frame -11.jpg)"
+  },
+  {
+   "ts": 3755,
+   "label": "Arm Drag",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Our dealer working the arm drag. Randy ripping out of there...\" -- Paul's arm drag countered/escaped by Alex, matching successful=false (frame -11.jpg)"
+  },
+  {
+   "ts": 3815,
+   "label": "Triangle Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Ardilla tries to drag him in with a triangle attack. Grandy, good pot... gets his hands clashed together\" -- clear defended triangle attempt (frame -13.jpg)"
+  },
+  {
+   "ts": 3835,
+   "label": "Heel Hook",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Kneeline appears to be secured. Here's the outside heel. He got it. That's it.\" (frame -14.jpg)"
+  },
+  {
+   "ts": 3840,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration verbatim: \"Paul Ardella once again an ADCC Trials champion\" immediately following the heel hook finish; frame shows referee stopping the match (frame -14.jpg)"
+  }
+ ],
+ "identity_check": "Lower-third graphic at ts3580-3615 reads 'PAUL ARDILA -- American Top Team' / 'ALEX GRANDY -- 10th Planet' (frame paul-ardila-vs-alex-grandy-06.jpg), confirmed against identity_discriminator (Paul: black ATT rashguard/shorts; Alex: dark rashguard, beige shorts -- beige shorts visible on the same athlete throughout, e.g. frames -07/-08/-11/-13/-14.jpg). Commentary consistently uses 'Ardilla/Ardella' for Paul and 'Grandandy/Granny/Randy' (mangled auto-caption forms of Grandy) for Alex, corroborating actor attribution frame by frame. No winner-swap flag; gemini_winner=Paul Ardila matches published winner, submission finish (heel hook) directly confirmed on frame and narration.",
+ "notes": "All 8 Gemini events audited and kept as-is, no corrections needed. Strong verbatim narration corroboration throughout, including the submission finish sequence (triangle defended -> heel hook -> tap), matching the published win_type=SUBMISSION."
+}

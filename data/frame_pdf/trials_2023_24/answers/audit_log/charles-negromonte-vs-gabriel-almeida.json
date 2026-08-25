@@ -1,0 +1,100 @@
+{
+ "log": [
+  {
+   "ts": 9555,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 9555 shows exact collar-tie clinch exchange between the two"
+  },
+  {
+   "ts": 9690,
+   "label": "Low Single Leg",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame 9690 shows Negromonte shooting on Almeida's leg, no completion shown, matches successful:false"
+  },
+  {
+   "ts": 9710,
+   "label": "Double Underhooks",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Charles just got double unders' at 9705-9710 matches frame exactly"
+  },
+  {
+   "ts": 9750,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Gabriel counteratt attacked the single leg and then went on top went for the guillotine' at 9750 matches frame (Almeida standing guillotine on Negromonte)"
+  },
+  {
+   "ts": 9915,
+   "label": "Fireman's Carry",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Gabriel just tried a fireman carry throw right there' at 9915 matches exactly"
+  },
+  {
+   "ts": 9945,
+   "label": "Single Leg Takedown",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Nice single leg attack for Charles' at 9945 + frame shows Negromonte having taken Almeida down"
+  },
+  {
+   "ts": 9945,
+   "label": "Guillotine Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "same narration continues '...trying for the guillotine', frame shows Almeida attacking guillotine from bottom after the takedown"
+  },
+  {
+   "ts": 9965,
+   "label": "Half Guard",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "narration at 9965 'we see Gabriel trying for the half' names Almeida as establishing half guard, not Negromonte; actor corrected, label/type/ts otherwise concordant",
+   "corrections": {
+    "actor": "Gabriel Almeida"
+   }
+  },
+  {
+   "ts": 10145,
+   "label": "Back Take",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Shan's going for the back...Gabriel has a good defense' at 10145 matches frame"
+  },
+  {
+   "ts": 10155,
+   "label": "Back Control",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'belt control...got body triangle locked' at 10155, scoreboard shows Negromonte 0->3 by 10175, matches points:3"
+  },
+  {
+   "ts": 10155,
+   "label": "Body Triangle",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "same narration window explicitly says 'got body triangle locked'"
+  },
+  {
+   "ts": 10305,
+   "label": "Rear Naked Choke",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'he's trying to do the face rear naked choke' at 10305 matches frame"
+  },
+  {
+   "ts": 10310,
+   "label": "Tap",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Oh, that's a T. That's that he's got it' at 10310 + referee stopping match at 10315 confirms tap; bout.winner=Charles Negromonte matches"
+  }
+ ],
+ "identity_check": "Charles Negromonte = tan/white rashguard, red wrist tape; Gabriel Almeida = black shirt. Verified at 9700-9710s where narration 'Charles just got double unders...Charles just got double unders. Oh, nice' lines up exactly with the tan-shirt fighter driving in and taking the black-shirt fighter down; identity held consistent through all kept frames. Scoreboard row order (C. Negromonte/G. Almeida) NOT used as a position cue per protocol.",
+ "notes": "audit.flags was empty for this bout, no off-library labels, no winner contradiction. All 13 Gemini events verified against frames+narration; only correction is the actor swap on the 9965 Half Guard event."
+}
