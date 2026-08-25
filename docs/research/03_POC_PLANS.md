@@ -245,6 +245,37 @@ is the harness PoC-E4 inherits.
 "Path-to-Victory" name — the value model and the greedy walk must never share a
 label (folded into PoC-E4's scope).
 
+### PoC-E9 · State space, Markov order, event kernels, history-dependent absorption
+
+**Claim (the owner's, four of them):** (1) 294 distinct labels are too sparse for a usable
+chain and the 8 event types are not; (2) a third space — the 8 types with `control` exploded
+into positions of absolute dominance — beats both; (3) there is a maximum estimable Markov
+order and it differs per state space; (4) an ADCC-family kernel measurably diverges from the
+global one; (5) entry into the "time expired / points" terminal is *history-dependent*.
+**Literature:** Lamas 2024 (the one peer-reviewed BJJ Markov paper); the semi-Markov critique
+(Sci Rep 2026) for why dwell must not be folded away; Decroos 2019 / Singh 2019 for the value
+limb. **Inherits:** PoC-E8's `Kernel`/`temporal_split`/`evaluate_kernels`/`paired_delta_auc`,
+PoC-E4's `dedupe_by_key`/`markov_order`, `stats_rigor` for every interval.
+
+The methodological crux, pre-registered: **per-step log-likelihood is a function of vocabulary
+size**, so an 8-state chain beats a 226-state chain before any data is read. Every arm is
+therefore scored on ONE fixed 9-symbol target (the 8 `EVENT_TYPES` + `other`), reached by
+marginalising each arm's next-state distribution through a train-estimated `P(category|state)`.
+Second crux: **repeats are not folded** (E4/E8 fold `A→A` only because a graph refuses a
+self-edge), which keeps the scored-step set identical across state spaces and makes the
+cross-space deltas paired.
+
+**Accept criterion:** held-out mean log-likelihood of the next event's category, bout-clustered
+paired bootstrap; A beats B iff the paired Δ excludes 0. Order k+1 is estimable iff its paired
+Δ against k excludes 0. Secondary: paired ΔAUC on held-out finish prediction (E8/E4 harness,
+PtV γ=0.8, shaping off for every arm). Arm 4 gated on ≥10 eval bouts / ≥100 steps /
+`coverage.estimable`, else UNDERPOWERED with no verdict.
+
+**Status (2026-08-25): RUN.** Module `analysis/poc/e9_markov.py`, tests `tests/test_poc_e9.py`,
+pre-registration `docs/research/poc/e9_prereg.md`, results + verdicts in
+`docs/research/poc/e9.md` (generated — do not hand-edit). The runner self-checks its gate
+against PoC-E8's published 429 bouts and reproduces PoC-E4's order parity row.
+
 ### PoC-E7 · Replace the tech-library effectiveness composite
 
 **Claim:** the 0.35/0.25/0.15/0.15/0.10 composite should be replaced by a model

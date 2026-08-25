@@ -150,7 +150,11 @@ def test_convert_all_over_real_corpus_converts_zero_today() -> None:
     if not OUT.exists():
         pytest.skip("data/frame_pdf/out/ not present on this checkout")
     reports, blocks = convert_all()
-    assert reports  # the real corpus fixtures actually exist
+    if not reports:
+        # 2026-08-25 archive policy: bout folders are dropped after render (PDFs +
+        # events.json sidecars live in out/processed/), so an out/ with no bout dirs
+        # is the normal state, not a missing corpus.
+        pytest.skip("no bout folders under data/frame_pdf/out/ (archived)")
     assert all(r.status == "skipped_unreviewed" for r in reports)
     assert blocks == []
 
