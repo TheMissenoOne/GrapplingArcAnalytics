@@ -102,6 +102,101 @@ def _name(side_block: dict[str, Any]) -> str:
     return str(side_block.get("name", "?"))
 
 
+# Short bilingual glosses for the Lamas action codes (analysis/lamas_chain.STATES), trimmed
+# from analysis.lamas_chain.STATE_DEFS for a dossier sentence rather than a glossary entry.
+_LAMAS_GLOSS: dict[str, tuple[str, str]] = {
+    "CDP": ("a standing grip dispute", "uma disputa de pegada em pé"),
+    "PGD": ("a guard pull", "uma puxada de guarda"),
+    "SWPA": ("a sweep attempt", "uma tentativa de raspagem"),
+    "SWP": ("a sweep", "uma raspagem"),
+    "TKDA": ("a takedown attempt", "uma tentativa de queda"),
+    "TKD": ("a takedown", "uma queda"),
+    "GPSA": ("a guard-pass attempt", "uma tentativa de passagem de guarda"),
+    "GPS": ("a guard pass", "uma passagem de guarda"),
+    "BTKA": ("a back-take attempt", "uma tentativa de pegada de costas"),
+    "BTK": ("a back take", "uma pegada de costas"),
+    "SUBA": ("a submission attempt", "uma tentativa de finalização"),
+    "SUB": ("a submission", "uma finalização"),
+}
+
+
+def _progression_section(p: dict[str, Any], lang: str = "en") -> Section | None:
+    """RRB-progression prose (``analysis/rrb_progression.py``).
+
+    DESCRIPTIVE ONLY, never a prediction and never a per-athlete significance claim: only
+    17 of 441 athletes clear the corpus's gates, and of those, bootstrap CIs excluding zero
+    sit at chance level (2/17) — see ``docs/research/rrb_progression.md`` §2.3. So this never
+    says "improving", "getting better at" or attaches a confidence word to the direction; it
+    describes where the sequences this corpus has moved him, nothing more.
+
+    ``p["_progression"]`` is set by ``export/site_data.py`` from
+    ``analysis.rrb_progression.athlete_progression``'s row for this athlete, present ONLY when
+    that row is gated — an ungated athlete gets no section at all, not a filler sentence
+    (root CLAUDE.md: honest absence over manufactured content).
+
+    When the row's value table fell back to the reward-risk tier (``_mixed_source``), the
+    prose drops the submission-anchored gloss and states the mechanism plainly instead, per
+    the fallback chain's own rule that magnitudes/mechanism differ across tiers even though
+    signs stay comparable.
+    """
+    prog = p.get("_progression")
+    if not prog:
+        return None
+    name = p["fighter"]["name"]
+    per_action = prog.get("per_action")
+    off_p = (prog.get("off_share") or {}).get("p")
+    def_p = (prog.get("def_share") or {}).get("p")
+    if per_action is None or (off_p is None and def_p is None):
+        return None
+
+    basis_en, basis_pt = (
+        ("a blended read of how much initiative each action carries in this corpus",
+         "uma leitura mista de quanta iniciativa cada ação carrega neste acervo")
+        if prog.get("_mixed_source") else
+        ("a read of how close each action leaves him to eventually finishing",
+         "uma leitura de quão perto cada ação o deixa de uma eventual finalização")
+    )
+    if per_action > 0.005:
+        dir_en, dir_pt = "climbed, on balance", "subiu, no saldo"
+    elif per_action < -0.005:
+        dir_en, dir_pt = "slipped, on balance", "recuou, no saldo"
+    else:
+        dir_en, dir_pt = "held roughly flat", "ficou praticamente estável"
+    sentences = [_t(
+        lang,
+        f"Across the sequences this corpus has for {name} — {basis_en} — his standing "
+        f"{dir_en} over the course of his logged fights.",
+        f"Nas sequências que este acervo tem de {name} — {basis_pt} — a posição dele "
+        f"{dir_pt} ao longo das lutas registradas.")]
+
+    dominant = "off" if (off_p or 0) >= (def_p or 0) else "def"
+    mean_len = prog.get(f"mean_{dominant}_cycle_len")
+    ground_en = "offensive" if dominant == "off" else "defensive"
+    ground_pt = "ofensivo" if dominant == "off" else "defensivo"
+    len_r = round(mean_len) if mean_len else None
+    sentences.append(_t(
+        lang,
+        f"He holds {ground_en} ground more often than not"
+        + (f", cycling back to it roughly every {len_r} action{'s' if len_r != 1 else ''}."
+           if len_r else "."),
+        f"Ele fica mais tempo em terreno {ground_pt}"
+        + (f", voltando a ele a cada {len_r} {'ação' if len_r == 1 else 'ações'} em média."
+           if len_r else ".")))
+
+    example = prog.get("_example")
+    if example:
+        from_en, from_pt = _LAMAS_GLOSS.get(
+            example["from_state"], (example["from_state"], example["from_state"]))
+        to_en, to_pt = _LAMAS_GLOSS.get(
+            example["to_state"], (example["to_state"], example["to_state"]))
+        sentences.append(_t(
+            lang,
+            f"The sharpest single move in that reading runs from {from_en} into {to_en}.",
+            f"A virada mais nítida dessa leitura vai de {from_pt} para {to_pt}."))
+
+    return (_t(lang, "Progression", "Progressão"), [" ".join(sentences)])
+
+
 def _chain(sequence: list[dict[str, Any]], side: str, limit: int = 5) -> list[str]:
     """Distinct consecutive labels a side ran, most recent ``limit`` (the finishing path)."""
     labels: list[str] = []
@@ -393,6 +488,12 @@ def profile_narrative(p: dict[str, Any], lang: str = "en") -> list[Section]:
                            f" Secondary forks: {others}.",
                            f" Bifurcações secundárias: {others}.")
             sections.append((_t(lang, "The dilemmas", "Os dilemas"), [line]))
+
+    # Progression — RRB-derived positional movement (rrb_progression.py), present only for
+    # the athletes whose row cleared the corpus's gates; see _progression_section's docstring.
+    prog_section = _progression_section(p, lang)
+    if prog_section is not None:
+        sections.append(prog_section)
 
     return sections
 

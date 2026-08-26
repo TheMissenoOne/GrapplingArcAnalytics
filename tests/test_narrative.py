@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from export.narrative import match_narrative, profile_narrative, render_markdown
@@ -171,6 +172,97 @@ class TestProfileNarrative:
 
     def test_dilemma_prose_absent_without_data(self) -> None:
         assert "The dilemmas" not in [h for h, _ in profile_narrative(_profile())]
+
+
+def _gated_progression_row(**overrides: Any) -> dict[str, Any]:
+    """A hand-built ``analysis.rrb_progression.athlete_progression`` row shaped the way
+    ``export/site_data.py`` stashes it on ``profile["_progression"]`` — a gate-clearing
+    athlete, `off` the dominant phase, `recovery_degenerate` True (the corpus's ordinary
+    case, per rrb_progression.py section 5)."""
+    row: dict[str, Any] = {
+        "athlete": "x", "bouts": 6, "n_valued_transitions": 40,
+        "net_total": 0.6, "per_action": 0.015, "per_action_lo": -0.01, "per_action_hi": 0.05,
+        "off_share": {"k": 24, "n": 40, "p": 0.6, "lo": 0.44, "hi": 0.74, "half": 0.15,
+                      "grade": "moderate", "estimable": True, "coverage": "adequate"},
+        "def_share": {"k": 16, "n": 40, "p": 0.4, "lo": 0.26, "hi": 0.56, "half": 0.15,
+                      "grade": "moderate", "estimable": True, "coverage": "adequate"},
+        "recovery_rate": {"k": 5, "n": 5, "p": 1.0, "lo": None, "hi": None, "half": None,
+                          "grade": "none", "estimable": True, "coverage": "adequate"},
+        "collapse_rate": {"k": 4, "n": 4, "p": 1.0, "lo": None, "hi": None, "half": None,
+                          "grade": "none", "estimable": True, "coverage": "adequate"},
+        "recovery_degenerate": True,
+        "off_cycles": 6, "def_cycles": 5,
+        "mean_off_cycle_len": 2.5, "mean_def_cycle_len": 1.3,
+        "valued_steps": 40, "unvalued_steps": 3,
+        "gated": True, "coverage": {},
+        "_mixed_source": False,
+        "_example": {"from_state": "PGD", "to_state": "BTK"},
+    }
+    row.update(overrides)
+    return row
+
+
+def _prog_text(secs: list[tuple[str, list[str]]], heading: str = "Progression") -> str:
+    return next(p[0] for h, p in secs if h == heading)
+
+
+class TestProgressionSection:
+    def test_gate_clearing_athlete_gets_the_block(self) -> None:
+        p = _profile()
+        p["_progression"] = _gated_progression_row()
+        secs = profile_narrative(p)
+        assert "Progression" in [h for h, _ in secs]
+        text = _prog_text(secs)
+        assert "guard pull" in text and "back take" in text
+
+    def test_below_gate_athlete_gets_no_block(self) -> None:
+        """No `_progression` key (never computed a row, or the athlete's row wasn't
+        gated) -> no section. Honest absence, never a filler sentence."""
+        assert "Progression" not in [h for h, _ in profile_narrative(_profile())]
+        p = _profile()
+        p["_progression"] = None
+        assert "Progression" not in [h for h, _ in profile_narrative(p)]
+
+    def test_no_banned_vocabulary(self) -> None:
+        p = _profile()
+        p["_progression"] = _gated_progression_row()
+        for lang in ("en", "pt"):
+            body = _flat(profile_narrative(p, lang=lang)).lower()
+            assert "atriz" not in body
+            assert "uniforme" not in body
+
+    def test_never_a_significance_or_prediction_claim(self) -> None:
+        """Only 17/441 athletes clear the gate, and of those 2/17 CIs exclude zero — chance
+        level. So this prose must never say the trend is significant, predicts anything, or
+        quote the raw per_action/CI numbers."""
+        p = _profile()
+        p["_progression"] = _gated_progression_row()
+        text = _prog_text(profile_narrative(p)).lower()
+        for banned in ("significant", "predict", "0.015", "-0.01", "0.05", "confidence"):
+            assert banned not in text
+
+    def test_recovery_degenerate_rate_never_quoted_as_a_finding(self) -> None:
+        """recovery_rate is 1.00 by construction whenever recovery_degenerate is True
+        (rrb_progression.py section 5) — this prose must not surface it at all."""
+        p = _profile()
+        p["_progression"] = _gated_progression_row(recovery_degenerate=True)
+        text = _prog_text(profile_narrative(p)).lower()
+        assert "recover" not in text and "100%" not in text and "1.00" not in text
+
+    def test_mixed_source_drops_the_submission_anchored_gloss(self) -> None:
+        """When the value table fell back to reward_risk_centered for this row's states, the
+        prose must not pretend the reading is submission-anchored (root task constraint 3)."""
+        p = _profile()
+        p["_progression"] = _gated_progression_row(_mixed_source=True)
+        text = _prog_text(profile_narrative(p)).lower()
+        assert "finish" not in text
+
+    def test_two_to_four_sentences(self) -> None:
+        p = _profile()
+        p["_progression"] = _gated_progression_row()
+        text = _prog_text(profile_narrative(p))
+        sentences = [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s]
+        assert 2 <= len(sentences) <= 4
 
 
 def test_every_section_differs_between_languages() -> None:

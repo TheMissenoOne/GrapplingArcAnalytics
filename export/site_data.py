@@ -653,6 +653,76 @@ def _fighter_forks(aid: str, athlete_matches: list[Any], session: Session,
     return {"dilemmas": dilemmas_list, "counters": counters_list, "defense": defense}
 
 
+def _bout_dict(m: Any) -> dict[str, Any]:
+    """A ``Match`` ORM row as the plain dict ``analysis.lamas_chain.chain_of`` expects."""
+    return {"id": m.id, "win_type": m.win_type, "winner": m.winner_id,
+            "a_id": m.athlete_a_id, "b_id": m.athlete_b_id, "seq": m.sequence or []}
+
+
+def _rrb_progression_rows(all_finals: list[Any]) -> tuple[dict[str, dict[str, Any]], Any]:
+    """Per-athlete RRB progression (``analysis/rrb_progression.py``), computed once over the
+    WHOLE final-bout corpus — the same corpus and the same ``value_table`` construction as
+    ``scripts/build_markov_action_weights.block``, kept in sync with it deliberately (n_boot=0
+    for the corpus-wide value table; the per-athlete bootstrap only runs for athletes that
+    clear the coverage gate, ~17 of 441 measured 2026-08-26).
+
+    Returns ``({athlete_id: row}, values)`` — only rows with ``gated`` True are kept, so a
+    dossier for anyone else finds nothing here and gets no section (honest absence, per root
+    CLAUDE.md). ``values`` (the corpus value table) is returned alongside so a caller can pull
+    one concrete state-pair example off the athlete's own bouts without recomputing it.
+
+    ponytail: re-derives the value table from ``matches`` instead of reading the committed
+    ``data/rating/markov_action_weights.json`` artifact, so this can never drift out of sync
+    with a stale artifact file. If this pass becomes a measurable share of export time, cache
+    it by the same corpus digest the artifact already carries.
+    """
+    from analysis.lamas_chain import chain_of, reward_risk, rrb
+    from analysis.rrb_progression import athlete_progression, value_table
+
+    chains = [chain_of(_bout_dict(m)) for m in all_finals]
+    values = value_table(rrb(chains, n_boot=0), reward_risk(chains, n_boot=0))
+    pairs = [(ref, ch) for m, ch in zip(all_finals, chains)
+             for ref in (m.athlete_a_id, m.athlete_b_id) if ref]
+    agg = athlete_progression(pairs, values)
+    rows = {r["athlete"]: {**r, "_mixed_source": bool(values.get("mixed_source"))}
+            for r in agg["rows"] if r["gated"]}
+    return rows, values
+
+
+def _progression_example(
+    aid: str, athlete_matches: list[Any], values: Any
+) -> dict[str, Any] | None:
+    """One concrete state-pair from this athlete's OWN bouts — the single largest-magnitude
+    transition in their signed RRB position, read against the corpus-wide ``values`` table.
+    Descriptive illustration only (narrative.py never quotes the delta itself), so picking the
+    biggest swing rather than a "typical" one is the honest choice: it is the one transition a
+    reader can actually verify against a real bout."""
+    from analysis.lamas_chain import chain_of
+    from analysis.rrb_progression import trajectory
+
+    best: tuple[float, dict[str, Any]] | None = None
+    for m in athlete_matches:
+        ch = chain_of(_bout_dict(m))
+        if not ch.actor_reliable:
+            continue
+        t = trajectory(ch, aid, values)
+        steps = t["steps"]
+        for i, d in enumerate(t["deltas"]):
+            if d is None:
+                continue
+            s0, s1 = steps[i]["state"], steps[i + 1]["state"]
+            # SUB carries by far the largest magnitude (rrb_progression.py: its value is
+            # "partly circular", mostly the chain's OWN terminal step) and would otherwise
+            # dominate every max-|delta| search — turning "concrete example" into "he
+            # finished" for anyone with a submission win. Excluded so the example actually
+            # illustrates a mid-fight swing.
+            if "SUB" in (s0, s1):
+                continue
+            if best is None or abs(d) > abs(best[0]):
+                best = (d, {"from_state": s0, "to_state": s1})
+    return best[1] if best else None
+
+
 def build_fighters(
     session: Session,
     cache: ItemCache | None = None,
@@ -679,6 +749,9 @@ def build_fighters(
     for _m in all_finals:
         matches_by_athlete.setdefault(_m.athlete_a_id, []).append(_m)
         matches_by_athlete.setdefault(_m.athlete_b_id, []).append(_m)
+    # Corpus-wide once, not per fighter — see _rrb_progression_rows docstring. Only the ~17
+    # gated athletes carry a row; everyone else's dossier gets no Progression section at all.
+    progression_rows, progression_values = _rrb_progression_rows(all_finals)
     for match in all_finals:
         for aid in (match.athlete_a_id, match.athlete_b_id):
             if aid in seen:
@@ -758,6 +831,14 @@ def build_fighters(
                 forks = _fighter_forks(aid, athlete_matches, session, _net())
                 videos = _node_video_refs(aid, athlete_matches, session)
 
+            # RRB progression — only the gated ~17/441 carry a row (see _rrb_progression_rows);
+            # the one-example lookup is cheap enough to skip caching for that small a set.
+            progression = None
+            prog_row = progression_rows.get(aid)
+            if prog_row is not None:
+                example = _progression_example(aid, athlete_matches, progression_values)
+                progression = {**prog_row, "_example": example}
+
             details[slug] = {
                 "athlete": athlete,
                 "profile": profile,
@@ -767,6 +848,7 @@ def build_fighters(
                 "_counters": forks["counters"],
                 "_defense": forks["defense"],
                 "_videos": videos,
+                "_progression": progression,
             }
 
     # Compute N×N nearest analogues per athlete
@@ -1556,6 +1638,19 @@ document.addEventListener('DOMContentLoaded', function(){{
   <p class="graph-hint">Ranked by Path-to-Victory value of where the response lands.</p>
 </div></section>"""
 
+    # Progression — RRB-derived positional movement (analysis/rrb_progression.py). Present
+    # only for the ~17/441 athletes whose row clears the corpus's gates; absent is the honest
+    # answer for everyone else, not a filler section (root CLAUDE.md).
+    progression_html = ""
+    prog_sec = next((sec for sec in sections if sec[0] == "Progression"), None)
+    prog_sec_pt = next((sec for sec in sections_pt if sec[0] == "Progressão"), None)
+    if prog_sec and prog_sec_pt:
+        progression_html = f"""<section class="mod"><div class="wrap">
+  <div class="sec-head"><span class="eyebrow">Progression</span>
+    <h2 class="h-lg mt16">Where his sequences move him</h2></div>
+  <div class="editorial"><p>{_bi(prog_sec[1][0], prog_sec_pt[1][0])}</p></div>
+</div></section>"""
+
     body = f"""{_nav('grapple')}
 <section class="dossier">
   <div class="hero-bg" style="{hero_bg}"></div>
@@ -1596,6 +1691,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 </div></section>
 {defense_html}
 {counters_html}
+{progression_html}
 <section class="mod"><div class="wrap">
   <div class="sec-head flex jb ac wrap-fx" style="gap:14px"><div>
     <span class="eyebrow">From abstract to concrete</span>
@@ -2047,6 +2143,7 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
         profile["_videos"] = d.get("_videos") or {}
         profile["_counters"] = d.get("_counters") or []
         profile["_defense"] = d.get("_defense") or None
+        profile["_progression"] = d.get("_progression") or None
         (out / f"grapple-{slug}.html").write_text(
             render_profile_page(profile), encoding="utf-8")
         if _pc() - _s > slow[1]:
