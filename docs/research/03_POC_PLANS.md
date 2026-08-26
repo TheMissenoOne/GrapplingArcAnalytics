@@ -373,6 +373,52 @@ whose weights are fitted. **Literature:** Terner & Franks 2021 (framing);
 
 **Effort:** 2 days + App coordination.
 
+### PoC-E13 · GraphSAGE — inductive link prediction on athlete ActionFlow graphs
+
+**Claim (the owner's):** an *inductive* graph model — one that learns an aggregation
+function rather than a per-node lookup table — predicts held-out transitions in the
+graphs of athletes it never saw. Everything vector-shaped in these repos today is
+transductive (`technique_nodes.embedding` is one fixed mpnet vector per label), so the
+question is whether GraphSAGE earns a place beside `analysis/embeddings.py`.
+**Literature:** Hamilton, Ying & Leskovec 2017 (arXiv:1706.02216 — GraphSAGE and its PPI
+*multi-graph* protocol, copied here); Zhang & Chen 2018 (arXiv:1802.09691 — why
+node-embedding + dot decoder is the WEAK form of GNN link prediction); Ma et al. 2024
+(arXiv:2411.03845 — a well-tuned trivial model matches sophisticated ones, so the
+baselines decide); Kumar et al. 2025 (doi:10.1007/s11227-025-07882-8, survey).
+
+1. One graph per athlete from their OWN events (`transitions/build_graph`), node features
+   = the production 768-d `technique_nodes.embedding` ‖ three observed-degree terms.
+2. Athlete-disjoint AND temporal split (latest-debuting quarter = eval), plus a **bout
+   quarantine**: every gated bout an eval athlete appears in is removed from the training
+   graphs and from the corpus prior, because two athletes in one bout are not independent.
+3. Arm A (primary) = seeded edge holdout with the observed graph rebuilt from the observed
+   edges alone; Arm B (secondary) = chronological bout holdout. All ordered non-edge pairs
+   among observed nodes are scored — no negative sampling.
+4. **Accept criterion:** athlete-clustered paired ΔAUC against six comparators (corpus
+   prior, popularity, mpnet text cosine, Adamic-Adar, preferential attachment, and the
+   **same decoder with 0 aggregation layers**). ACCEPT = beats all six; PARTIAL = beats
+   the prior AND the no-aggregation ablation; REJECT = fails either.
+
+**Framework decision (measured, not assumed):** no `torch-geometric`. `torch` is already
+installed transitively via the core `sentence-transformers` (0 marginal footprint), and on
+≤60-node graphs the mean aggregator is a dense row-normalised matmul.
+
+**Status (2026-08-25): RUN.** Runner `analysis/poc/e13_graphsage.py`, tests
+`tests/test_poc_e13.py` (28), pre-registration `docs/research/poc/e13_prereg.md`, results +
+verdict in `docs/research/poc/e13.md` (generated — do not hand-edit). Outcome: **REJECT on
+Arm A, UNDERPOWERED on Arm B.** GraphSAGE beats every non-learned comparator, the corpus
+prior included (ΔAUC +0.0498 [+0.0084, +0.1174]) — so an athlete's own graph does carry
+signal the corpus kernel lacks — but it LOSES to the no-aggregation ablation (ΔAUC −0.0593
+[−0.0804, −0.0298]): a single `Linear(771→32)` on the same features scores 0.8690 against
+0.8096. Message passing added nothing beyond node-level features and cost accuracy, which
+is the direction Zhang & Chen predicts for this model class. Arm B (7 eval athletes, 27
+positives) is below its pre-registered power floor and gets no verdict. Side result worth
+its own cell: the production mpnet vectors are a measured link predictor (`text` alone AUC
+0.6738 [0.6132, 0.7131]) — the first predictive evidence for the pgvector layer, which had
+only ever been evaluated descriptively. No production change.
+
+**Effort:** 2 days. **Risk:** none (read-only, writes no vector).
+
 ---
 
 ## X-series — experimental spikes from recent papers

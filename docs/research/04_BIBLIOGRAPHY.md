@@ -247,6 +247,35 @@ this review.
 - Kipf, T., Welling, M. (2017). **Semi-Supervised Classification with Graph
   Convolutional Networks.** ICLR 2017. arXiv:1609.02907. **[in-code**,
   `analysis/gnn_predictor.py`'s actual primary source**]**
+- Hamilton, W.L., Ying, R., Leskovec, J. (2017). **Inductive Representation Learning on
+  Large Graphs.** NIPS 2017. arXiv:1706.02216. https://arxiv.org/abs/1706.02216
+  **[in-code**, `analysis/poc/e13_graphsage.py`**]** — GraphSAGE. Learns an *aggregation
+  function* over a node's neighbourhood instead of one embedding per node, which is what
+  makes it apply to graphs never seen in training; the PPI *multi-graph* experiment (train
+  on some graphs, generalise to entirely unseen ones) is the protocol PoC-E13 copies onto
+  per-athlete ActionFlow graphs. The direct contrast with `analysis/embeddings.py`, which
+  is transductive by construction: one fixed vector per canonical label, none at all for a
+  label the library has not seen.
+- Zhang, M., Chen, Y. (2018). **Link Prediction Based on Graph Neural Networks.** NIPS
+  2018 (spotlight). arXiv:1802.09691. https://arxiv.org/abs/1802.09691 **[in-code**,
+  `analysis/poc/e13_graphsage.py`**]** — SEAL. Its γ-decaying heuristic theory shows a
+  local enclosing subgraph approximates a wide family of heuristics, and the corollary is
+  the one PoC-E13 pre-registered against itself: an encoder that computes each node's
+  embedding independently of the target pair cannot represent a pair-specific structural
+  feature. Cited BEFORE the run as the reason its model class is the weak form; the run's
+  REJECT is consistent with the prediction.
+- Ma, W., Wang, Y., Wang, X., Zhang, M. (2024). **Reconsidering the Performance of GAE in
+  Link Prediction.** CIKM 2025. arXiv:2411.03845. https://arxiv.org/abs/2411.03845 — a
+  well-tuned graph autoencoder matches recent sophisticated models (SOTA on ogbl-ppa) at a
+  fraction of the cost; the methodological point is that link-prediction progress is
+  measured against baselines nobody bothered to tune. It is why PoC-E13's verdict turns on
+  a no-aggregation ablation trained with the same budget rather than on a heuristic table.
+- Kumar, A., et al. (2025). **A comprehensive survey on link prediction: from heuristics
+  to graph transformers.** The Journal of Supercomputing. doi:10.1007/s11227-025-07882-8.
+  https://link.springer.com/article/10.1007/s11227-025-07882-8 — current survey of the
+  task, its evaluation protocol and the accuracy/scalability/interpretability trade-offs;
+  its practical recommendation (calibrated heuristic baselines first, GNNs when attributes
+  are informative) is the shape of PoC-E13's comparator set.
 
 ## J. BJJ / grappling sports science
 
