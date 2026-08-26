@@ -19,9 +19,18 @@ attached to a full-event stream puts every event in the opening minutes of a dif
 which looks entirely plausible and is entirely wrong (docs/analytics_audit/AA-010). The
 context page says so in the prompt, in both directions, so the answer cannot be ambiguous.
 
-**Already-processed fights are skipped.** A video whose id already backs a final match with a
-non-empty sequence is not re-rendered — re-deriving a sequence that a human already reviewed
-is how a reviewed corpus quietly regresses. ``--force`` overrides, per video id.
+**Already-processed fights are skipped, per BOUT.** A multi-bout upload backs several DB rows
+under one video id, so the skip is decided against the entry's OWN bout -- matched by
+``video_start_seconds`` (and the athlete pair, when the label parses as one) via
+``_own_bout()`` -- not "does ANY bout on this video have a sequence". That distinction is load-
+bearing: it used to be per-video, and a multi-bout event with even one sequenced sibling would
+silently skip every OTHER bout on the same upload regardless of that bout's own state (measured
+2026-08-26 on the refinement queue: 104 of 108 entries self-skipped this way). Only an entry
+with no ``start`` at all -- a whole-video render with nothing to disambiguate against -- still
+falls back to the old "does any bout on this video have a sequence" rule. ``--force`` overrides
+entirely, per video id; for a manifest whose every entry legitimately wants a re-render (e.g.
+enrichment of an already-thin sequence — see ``docs/frame_pdf_reading.md``), running that
+manifest with ``--force`` is scoped to exactly its own entries and touches nothing else.
 
 Privacy class: **A, public competition data.** Published broadcasts of published bouts, the
 same class as everything else in ``matches``. No user-fed data is read, written or implied.
@@ -1060,6 +1069,27 @@ def _bout_names(label: str) -> tuple[str, str] | None:
     return (m.group("a").strip(), m.group("b").strip()) if m else None
 
 
+def _own_bout(entry: Entry, known: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Which row of ``known`` (DB bouts already backed by this video id) is THIS entry's own
+    bout, not a sibling that happens to share the video. Matched on ``video_start_seconds`` --
+    the one field an ``Entry`` and a DB row share unambiguously -- with the athlete pair as a
+    sanity check when the label parses as one. ``None`` when the entry carries no start (a
+    whole-video render with nothing to disambiguate against) or nothing in ``known`` lines up;
+    the caller falls back to the old whole-video rule in that case.
+    """
+    if entry.start is None:
+        return None
+    wanted = _bout_names(entry.label) if entry.label else None
+    wanted_folded = {_fold(n) for n in wanted} if wanted else None
+    for b in known:
+        if b["start"] is None or abs(float(b["start"]) - entry.start) > 1.0:
+            continue
+        if wanted_folded is not None and {_fold(b["a"]), _fold(b["b"])} != wanted_folded:
+            continue
+        return b
+    return None
+
+
 def _same_person(a: str, b: str) -> bool:
     """Do these two spellings name the same competitor?
 
@@ -1281,7 +1311,18 @@ def process(entry: Entry, db: DbContext, out_dir: Path, step: float,
 
     known = db.bouts_for(entry.vid)
     if known and not force:
-        with_seq = [b for b in known if b["events"]]
+        own = _own_bout(entry, known)
+        # A multi-bout upload backs several DB rows for one video id -- own is which ONE of
+        # them this entry is. `own is None` with entry.start set means no DB row lines up
+        # (a bout not yet in the corpus): render it, siblings' sequences are irrelevant. Only
+        # when the entry carries no start at all (a whole-video render, nothing to
+        # disambiguate against) do we fall back to the old "any sibling has a sequence" rule.
+        if own is not None:
+            with_seq = [own] if own["events"] else []
+        elif entry.start is None:
+            with_seq = [b for b in known if b["events"]]
+        else:
+            with_seq = []
         if with_seq:
             return (f"skip {entry.vid}: already in the corpus with a reviewed sequence "
                     f"({with_seq[0]['a']} vs {with_seq[0]['b']}, {with_seq[0]['events']} events)")
@@ -1433,8 +1474,14 @@ def main() -> int:
     if a.dry_run:
         for e in entries:
             known = db.bouts_for(e.vid)
-            state = ("already reviewed" if any(b["events"] for b in known)
-                     else "linked, no sequence" if known else "new")
+            own = _own_bout(e, known)
+            if own is not None:
+                state = "already reviewed" if own["events"] else "linked, no sequence"
+            elif e.start is not None:
+                state = "new"  # own bout not yet in the corpus -- siblings don't count
+            else:
+                state = ("already reviewed" if any(b["events"] for b in known)
+                         else "linked, no sequence" if known else "new")
             print(f"  {e.vid}  {state:20s}  {e.label or '(no label)'}")
         return 0
 

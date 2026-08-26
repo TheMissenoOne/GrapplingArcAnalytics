@@ -72,6 +72,20 @@ def slugify(label: str) -> str:
 def readings(payload: Any) -> list[tuple[dict[str, Any], list[dict[str, Any]]]]:
     """Every (bout_meta, events) pair a parsed file contains, whatever its wrapper shape."""
     if isinstance(payload, list):
+        # Batch-3 variant: an array of BOUT OBJECTS (each carrying its own 'events' and a
+        # 'competitors' pair) rather than a bare events array. Detect by the 'events' key.
+        if payload and all(isinstance(b, dict) and "events" in b for b in payload):
+            out = []
+            for b in payload:
+                meta = {k: v for k, v in b.items() if k != "events"}
+                comp = meta.pop("competitors", None)
+                if isinstance(comp, list) and len(comp) == 2:
+                    meta.setdefault("athlete_a", comp[0])
+                    meta.setdefault("athlete_b", comp[1])
+                if "win_method" in meta:
+                    meta.setdefault("method", meta.pop("win_method"))
+                out.append((meta, b.get("events") or []))
+            return out
         return [({}, payload)]
     if isinstance(payload, dict) and "bouts" in payload:
         return [(b.get("bout") or {}, b.get("events") or []) for b in payload["bouts"]]
@@ -130,6 +144,11 @@ def normalize_one(bout_meta: dict[str, Any], events: list[dict[str, Any]],
     for k in ("win_type", "bout_start_seconds", "bout_end_seconds",
               "identity_discriminator", "final_score", "advantages", "notes"):
         if bout_meta.get(k):
+            # final_score/advantages must be name->points maps; a string ("0-3") has no
+            # declared orientation (the frame_answer scar) -- drop it rather than carry it.
+            if k in ("final_score", "advantages") and not isinstance(bout_meta[k], dict):
+                flags.append(f"{k} was a string ({bout_meta[k]!r}) -- dropped, orientation undeclared")
+                continue
             bout[k] = bout_meta[k]
     if penalties:
         bout["penalties"] = "; ".join(penalties)
@@ -169,7 +188,9 @@ def main() -> int:
                 problems += 1
                 continue
             slug = slugify(curated["label"])
-            sig = json.dumps(sorted((e.get("ts"), e.get("label")) for e in events))
+            # ts can be absent on a raw reading; sort None-safe (batch 3 crashed here).
+            sig = json.dumps(sorted((e.get("ts") if isinstance(e.get("ts"), int) else -1,
+                                     str(e.get("label"))) for e in events))
             if slug in seen:
                 if seen[slug] == sig:
                     dup += 1

@@ -307,6 +307,26 @@ did not have anywhere to put them, `CanonicalMatch`/`build_matches`/`run_dump` w
 with two new optional fields to carry them onto `matches.ts_origin`/`video_start_seconds`
 (alembic `0047_match_video_clock`) — every other dump source leaves them `None`, unchanged.
 
+### 4.7b Per-bout dedup skip — fixed 2026-08-26
+
+The dedup that protects a reviewed sequence from being re-derived (module docstring) used to
+skip a whole VIDEO when any bout sharing that video id had a non-empty sequence. Measured on
+the first refinement batch: 104 of 108 manifest entries self-skipped, because most refinement
+targets sit on multi-bout event videos whose SIBLINGS already carry sequences — the skip never
+looked at the target bout's own state. Fixed to match the entry against its own DB row via
+``video_start_seconds`` (`_own_bout()` in `scripts/frame_pdf.py`); a bout not yet in the corpus
+now renders regardless of its siblings.
+
+That fix alone does not unblock every refinement target: the refinement queue's whole premise
+(`scripts/build_refinement_manifest.py`) is bouts whose OWN sequence already has events but no
+`points` field — thin, not empty — so the "own bout already has a sequence" branch still (by
+design) treats them as reviewed. Measured 2026-08-26: 90 of 108 targets carry a non-empty
+sequence already (`note` field's `sequence=N events`), 18 carry zero. Running the refinement
+manifest with `--force` is the deliberate way to say "re-render anyway, I'm enriching" — scoped
+to exactly that manifest's own entries (nothing outside the file is ever passed to `process()`
+in that run), so it is not the blast-radius risk `--force` carries on an ad-hoc manifest mixing
+reviewed and unreviewed bouts.
+
 ### 4.8 `--status` for the sheet backlog
 
 `frame_pdf.py` already skips fights whose video backs a reviewed sequence, but that check is a DB

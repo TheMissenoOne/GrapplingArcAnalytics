@@ -17,7 +17,9 @@ from scripts.frame_pdf import (
     DEFAULT_GRID,
     DEFAULT_GRID_LANDSCAPE,
     PAD,
+    Entry,
     _bout_names,
+    _own_bout,
     _result_line,
     _same_person,
     build_windows,
@@ -277,3 +279,33 @@ def test_registrar_save_preserves_model_provenance() -> None:
     assert stamp_source(reviewed) == reviewed  # sticky across repeated saves
     assert stamp_source("") == "frame_registrar (human)"
     assert stamp_source("frame_registrar (human)") == "frame_registrar (human)"
+
+
+# ── per-bout dedup skip (2026-08-26: was per-video, sibling sequences self-skipped 104/108) ──
+_SIBLING_KNOWN = [
+    {"start": 0.0, "a": "Ana Lopez", "b": "Maca Vicentini", "events": 12},
+    {"start": 900.0, "a": "Jasmine Rocha", "b": "Alex Enriquez", "events": 0},
+]
+
+
+def test_own_bout_matches_by_start_ignoring_a_sequenced_sibling() -> None:
+    """The target bout (empty sequence) sits on the same video as a fully-sequenced sibling
+    at a different start -- the bug this fixes would have let the sibling's sequence block it."""
+    entry = Entry(url="https://youtu.be/x", start=900.0, label="Jasmine Rocha vs Alex Enriquez")
+    own = _own_bout(entry, _SIBLING_KNOWN)
+    assert own is not None
+    assert own["events"] == 0
+
+
+def test_own_bout_none_when_this_bout_is_not_in_the_corpus_yet() -> None:
+    """A start that matches nothing in `known` is a new bout -- must not fall back to
+    treating a sibling's sequence as this entry's own state."""
+    entry = Entry(url="https://youtu.be/x", start=300.0, label="Someone vs Someone Else")
+    assert _own_bout(entry, _SIBLING_KNOWN) is None
+
+
+def test_own_bout_none_without_a_start_falls_back_to_whole_video_rule() -> None:
+    """No start = nothing to disambiguate against (e.g. a highlight reel render); the caller
+    is expected to fall back to the old whole-video rule in this case, not this function."""
+    entry = Entry(url="https://youtu.be/x", label="Ana Lopez vs Maca Vicentini")
+    assert _own_bout(entry, _SIBLING_KNOWN) is None
