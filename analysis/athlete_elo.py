@@ -11,6 +11,21 @@ manually typed value) is only used as the *opponent's* input rating.
 
 This module is pure: no DB and no file IO.  Everything (matches, target,
 per-match opponent ratings) is passed in, so it is unit-testable in isolation.
+
+⚠️ **The per-node ``computed_elo`` this module produces is OVERWRITTEN before it is
+persisted** (ADR-16, 2026-08-26). ``db.repository.replay_and_persist_athlete`` runs this
+replay for the graph it derives — nodes, edges, counts and the per-bout provenance in
+``graph_edge_bouts``, none of which the rating layer knows how to build — and then projects
+per-node Glicko-2 ratings from ``analysis/rating_v2/node_rating.py`` onto the same field,
+re-deriving edge ELO and ``user_elo`` from them. Same trick the App plays with
+``ratingV2Projection.ts``: cut over at the producer, and every consumer moves at once.
+
+So ``_node_shares`` and the Markov split below no longer decide any published number. They
+are kept because they are the App-facing half of the ``markov_weights.relative_shares``
+contract and because the graph structure this replay derives is still load-bearing. The
+``k_factor``/``rank_target`` convergence machinery likewise still runs — it is what
+``elo_series`` used to be and what an unprojectable athlete (no V2 state: MMA/wrestling by
+ADR-05) still falls back to.
 """
 
 from __future__ import annotations

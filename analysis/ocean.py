@@ -303,10 +303,18 @@ def elo_distribution(session: Any) -> dict[str, Any]:
     per-athlete deviance already stands on, so this map cannot drift from that population.
     """
     from analysis.deviance import TYPES, grappling_nodes, node_population_stats
-    from db.repository import graphs_for_clustering
+    from analysis.rating_v2.config import SITE_RATING_RUN_ID
+    from db.repository import graphs_for_clustering, rated_athlete_graph_ids
 
     graphs = graphs_for_clustering(session, owner_kind="athlete")
-    rows = [(gid, gn) for gid, raw in graphs if len(gn := grappling_nodes(raw)) >= 3]
+    # Rated grapplers only: this panel IS a population baseline, and ADR-16 leaves athletes
+    # the V2 run does not cover on the V1 ELO scale (`rated_athlete_graph_ids`).
+    rated = rated_athlete_graph_ids(session, SITE_RATING_RUN_ID)
+    rows = [
+        (gid, gn)
+        for gid, raw in graphs
+        if (not rated or gid in rated) and len(gn := grappling_nodes(raw)) >= 3
+    ]
     if not rows:
         return {"buckets": [], "types": TYPES}
     _by_key, by_type = node_population_stats(rows)

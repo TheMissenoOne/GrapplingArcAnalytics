@@ -64,6 +64,7 @@ def main() -> None:
 
     load_dotenv()
 
+    from analysis.rating_v2.node_rating import build_corpus_node_ratings
     from db.base import get_session_factory
     from db.models import Athlete, GraphEdgeBout
     from db.repository import replay_and_persist_athlete
@@ -72,6 +73,11 @@ def main() -> None:
 
     with session_factory() as session:
         before = session.execute(select(func.count()).select_from(GraphEdgeBout)).scalar_one()
+        # ADR-16: ONE corpus-wide Glicko-2 node replay for the whole batch. Built here rather
+        # than per athlete because it reads every match — per-athlete it would be a full
+        # corpus pass times 1300.
+        corpus = build_corpus_node_ratings(session)
+        logger.info("node rating corpus: %s", corpus.coverage)
         # Ordered so a `--limit` run is reproducible and a resumed run covers the same prefix.
         athletes = list(
             session.execute(select(Athlete).order_by(Athlete.id)).scalars()
@@ -89,7 +95,7 @@ def main() -> None:
                 # away up to `--batch` athletes that had already replayed fine — and "silently"
                 # is what this entire fix exists to stop happening.
                 with session.begin_nested():
-                    replay_and_persist_athlete(athlete, session)
+                    replay_and_persist_athlete(athlete, session, node_ratings=corpus)
             except Exception as exc:  # noqa: BLE001 - one bad athlete must not end the corpus run
                 # Recorded and reported rather than raised: this is a long write over the whole
                 # corpus, and losing 1300 replays to one malformed sequence is the worst outcome.

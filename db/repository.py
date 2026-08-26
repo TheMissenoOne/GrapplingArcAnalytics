@@ -6,7 +6,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import delete, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -16,6 +16,7 @@ from analysis.names import _normalize_name
 from db.models import (
     Archetype,
     Athlete,
+    AthleteRatingStateV2,
     Graph,
     GraphEdge,
     GraphEdgeBout,
@@ -25,6 +26,9 @@ from db.models import (
     UserSession,
     UserSyncMeta,
 )
+
+if TYPE_CHECKING:  # import cycle: analysis.rating_v2 reads db.models
+    from analysis.rating_v2.node_rating import CorpusNodeRatings
 
 
 @dataclass
@@ -541,12 +545,26 @@ def _perspective_view(match: Match, athlete_id: str) -> _PerspectiveMatch:
     )
 
 
-def replay_and_persist_athlete(athlete: Athlete, session: Session) -> list[float]:
+def replay_and_persist_athlete(
+    athlete: Athlete,
+    session: Session,
+    node_ratings: CorpusNodeRatings | None = None,
+) -> list[float]:
     """Replay every FINAL match this athlete participates in, FROM THEIR SIDE; persist
     the grown graph + ``athlete.elo`` + ``athlete.elo_series``. Returns the snapshots.
-    Draft matches are held out until approved."""
+    Draft matches are held out until approved.
+
+    ``node_ratings`` (ADR-16) is one corpus-wide Glicko-2 node replay. V1 still runs — it is
+    what derives the graph's nodes, edges, counts and bout provenance — and its per-node ELO
+    is then OVERWRITTEN by the projection, exactly as the App overwrites ``computedElo`` at
+    its two producers. Omitting the argument makes this function build the corpus replay
+    itself, which is correct but pays for a full-corpus pass per athlete; every caller that
+    loops over athletes should build it once with
+    ``analysis.rating_v2.node_rating.build_corpus_node_ratings(session)`` and pass it down.
+    """
     from analysis.athlete_elo import COMPETITIVE_K_MULT, replay_matches  # local: avoid import cycle
     from analysis.markov_weights import block_for_family, load_markov_weights
+    from analysis.rating_v2.node_rating import build_corpus_node_ratings, project_onto_graph
     from analysis.ruleset_scoring import family_of
 
     target = rank_elo_for_athlete(athlete.name)
@@ -575,6 +593,21 @@ def replay_and_persist_athlete(athlete: Athlete, session: Session) -> list[float
         athlete.name, views, target, opp_elos, belt=athlete.belt or "black",
         competitive_mult=comp_mult, action_weights=action_weights,
     )
+
+    # ── ADR-16 cutover: per-node Glicko-2 replaces V1's delta split ──────────────────────
+    # Projected onto the SAME ``computed_elo`` field so node ELO, edge ELO, ``user_elo`` and
+    # every consumer that reconstructs a node from an edge move in one step. An athlete with
+    # no state in the V2 run (out-of-discipline per ADR-05, or every bout excluded by ADR-06)
+    # is left on V1 — there is nothing to project, and a half-projected graph is the one
+    # thing that must never reach the DB.
+    corpus = node_ratings if node_ratings is not None else build_corpus_node_ratings(session)
+    projection = project_onto_graph(
+        graph, athlete.id, corpus.node_ratings, corpus.rating_for(athlete.id)
+    )
+    if projection.evidenced or projection.seeded:
+        # The series has to move with ``athlete.elo`` or the row carries two scales (ADR-02).
+        snapshots = corpus.series_for(athlete.id, [m.year for m in final])
+
     upsert_graph_from_athlete_graph(graph, athlete.id, session)
     if graph.user_elo is not None:
         athlete.elo = graph.user_elo
@@ -584,10 +617,15 @@ def replay_and_persist_athlete(athlete: Athlete, session: Session) -> list[float
 
 def replay_participants(match: Match, session: Session) -> None:
     """Rebuild BOTH athletes' graphs after a match changes — the double pass."""
+    from analysis.rating_v2.node_rating import build_corpus_node_ratings
+
+    # One corpus node replay for both sides. Built here, after the match change is visible to
+    # this session, so the two athletes are rated against the same corpus as each other.
+    corpus = build_corpus_node_ratings(session)
     for aid in (match.athlete_a_id, match.athlete_b_id):
         athlete = session.get(Athlete, aid)
         if athlete is not None:
-            replay_and_persist_athlete(athlete, session)
+            replay_and_persist_athlete(athlete, session, node_ratings=corpus)
 
 
 def approve_match(match_id: str, session: Session) -> Match:
@@ -609,6 +647,32 @@ def delete_match(match_id: str, session: Session) -> None:
         session.flush()
 
 
+def rated_athlete_graph_ids(session: Session, run_id: str | None) -> set[str]:
+    """``graph_id`` of every athlete graph whose owner has a state in rating_v2 ``run_id``.
+
+    The population filter ADR-16 needs. Only these graphs carry V2-scale ``computed_elo``
+    (``replay_and_persist_athlete`` leaves an athlete the run does not cover on V1), so any
+    BASELINE built without this filter mixes two units inside one ``node_key`` and every
+    z-score in ``deviance.node_population_stats`` starts measuring which corpus an athlete is
+    in rather than how strong the node is. Measured 2026-08-26: 451 athlete graphs with edges
+    are covered by the pinned run and 86 are not (Chimaev, Khabib, St-Pierre, Prochazka… —
+    MMA, correctly out of the grappling corpus by ADR-05), and the two sides share 104
+    node_keys.
+
+    ``None`` run_id → empty set, and every caller treats "no filter available" as "do not
+    filter" rather than "exclude everything".
+    """
+    if run_id is None:
+        return set()
+    rated = select(AthleteRatingStateV2.athlete_id).where(AthleteRatingStateV2.run_id == run_id)
+    return {
+        gid
+        for gid in session.execute(
+            select(Graph.id).where(Graph.owner_kind == "athlete", Graph.owner_id.in_(rated))
+        ).scalars()
+    }
+
+
 def graphs_for_clustering(
     session: Session, owner_kind: str | None = None
 ) -> list[tuple[str, list[DerivedNode]]]:
@@ -618,7 +682,10 @@ def graphs_for_clustering(
     ``technique_nodes`` library (graph_nodes is dropped): the node set is the
     edge endpoints, ``node_type`` comes from the library, and ``computed_elo``
     is derived as the strongest incident edge ELO. Pass ``owner_kind='athlete'`` to
-    restrict to pro-athlete graphs (the archetype population)."""
+    restrict to pro-athlete graphs (the archetype population).
+
+    Baselines computed over the athlete population must additionally be narrowed by
+    ``rated_athlete_graph_ids`` — see that function for why."""
     node_types: dict[str, str] = {
         row[0]: row[1]
         for row in session.execute(

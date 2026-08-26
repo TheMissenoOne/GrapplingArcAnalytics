@@ -181,6 +181,28 @@ frames they describe (written by `scripts/frame_answer_import.py`, reviewed in p
 
 ## ELO Engine
 
+⚠️ **The per-node number an athlete graph publishes is Glicko-2, not this V1 engine**
+(ADR-16, 2026-08-26 — `docs/rating_v2/01_DECISOES.md`). `analysis/rating_v2/node_rating.py`
+replays one Glicko-2 state per `(athlete, node_key)` — observations are the athlete's own
+sequence EVENTS, scored by `successful` (NULL ⇒ no observation, ADR-06 one level down),
+weighted by the Markov action block (family-aware: `adcc` when `ruleset_scoring.family_of`
+says so, `global` otherwise) normalised to mean 1, scored against **the athlete's OWN**
+pre-period global state (E = 0.5 on a node's first sighting) and re-anchored on their final
+global at the end. Anchoring on the OPPONENT was tried and measured biased — `corr(athlete
+rating, node offset) = −0.790`, so every technique of a dominant athlete read below their own
+level; own-anchor plus re-anchoring takes it to +0.109. Opponent strength is what the GLOBAL
+track measures; the node is expressed relative to it. Same convention as the App's
+`ratingV2Evidence.ts`. `db.repository.replay_and_persist_athlete` projects it onto `computed_elo` at the
+PRODUCER, so node ELO, `graph_edges.elo`, `graphs.user_elo`, `athletes.elo` and
+`elo_series` all move together — `athletes.elo` is now the same number the public Grappling
+ELO board publishes. `analysis/athlete_elo.py` still derives the GRAPH (nodes, edges,
+counts, `graph_edge_bouts` provenance) and still rates athletes the V2 run does not cover
+(MMA/wrestling, ADR-05). Any population BASELINE over athlete graphs must filter through
+`repository.rated_athlete_graph_ids` or it mixes the two scales inside one `node_key`.
+**Changing the node engine requires a full replay** — runbook in
+`docs/rating_v2/08_ESTADO_DO_CUTOVER.md`, and never `scripts.reprocess_all`.
+
+The V1 math below is still what `score_from_match`/`k_factor` use.
 From `felixgnwn/adcc_elo_engine/elo_engine.py`:
 - K = 40 × win_type_mult × stage_mult
 - win_type_mult: SUB=1.15, DECISION=0.85, POINTS=1.0

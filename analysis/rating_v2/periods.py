@@ -45,21 +45,34 @@ class Bout:
     score_a: float
 
 
-def run_periods(
+def run_periods_with_snapshots(
     seeds: Mapping[str, RatingState],
     bouts: Sequence[Bout],
     config: EngineConfig,
-) -> dict[str, RatingState]:
-    """Advance every seeded athlete through every period the bouts span."""
+) -> tuple[dict[str, RatingState], dict[int, dict[str, RatingState]]]:
+    """``run_periods``, plus the PRE-period state of every athlete in every period.
+
+    The snapshots are what a second track needs in order to read this one without replaying
+    it again: the node-rating layer (:mod:`analysis.rating_v2.node_rating`) seeds a new node
+    at its athlete's pre-period global rating and scores every node observation against the
+    OPPONENT's pre-period global state. Both readings must be the same numbers this loop used,
+    which is why they are handed out rather than recomputed — a second implementation of
+    "the state at the start of period P" is a second answer waiting to drift.
+
+    ``snapshots[period][athlete_id]`` is the state that period's bouts were scored against;
+    the value after the last period is the return's first element.
+    """
     if not bouts:
-        return dict(seeds)
+        return dict(seeds), {}
 
     periods = sorted({b.period for b in bouts})
     states: dict[str, RatingState] = dict(seeds)
+    snapshots: dict[int, dict[str, RatingState]] = {}
 
     for period in periods:
         period_bouts = [b for b in bouts if b.period == period]
         pre_period = dict(states)  # snapshot — every bout this period reads this, not `states`
+        snapshots[period] = pre_period
         observations: dict[str, list[Observation]] = defaultdict(list)
 
         for b in period_bouts:
@@ -79,4 +92,13 @@ def run_periods(
                 state, observations.get(athlete_id, []), tau=config.tau
             )
 
-    return states
+    return states, snapshots
+
+
+def run_periods(
+    seeds: Mapping[str, RatingState],
+    bouts: Sequence[Bout],
+    config: EngineConfig,
+) -> dict[str, RatingState]:
+    """Advance every seeded athlete through every period the bouts span."""
+    return run_periods_with_snapshots(seeds, bouts, config)[0]

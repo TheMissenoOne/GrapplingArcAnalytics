@@ -148,10 +148,16 @@ def test_headline_athlete_elo_is_invariant_across_a_whole_career() -> None:
     converge-clamp. The whole trajectory is therefore identical: ``athlete.elo`` and
     ``athlete.elo_series`` do not move. Only the split ACROSS nodes does.
 
-    This is what bounds a full replay: the leaderboard, the ELO series on every dossier and
-    every athlete-level number on the public site are untouched; per-node ratings, the edge
-    ELOs derived from them, and everything downstream of those (``analysis/deviance`` →
-    ``export/tech_library``'s ``eloPercentile``, ``athlete_systems``) are not.
+    This is what bounded the Markov replay: the leaderboard, the ELO series on every dossier
+    and every athlete-level number on the public site were untouched; per-node ratings, the
+    edge ELOs derived from them, and everything downstream of those (``analysis/deviance`` →
+    ``export/tech_library``'s ``eloPercentile``, ``athlete_systems``) were not.
+
+    ⚠️ That bound described THE MARKOV CHANGE, and it still describes this function exactly —
+    but it no longer describes a full replay. ADR-16 (2026-08-26) projects Glicko-2 per-node
+    ratings over this replay's output and takes ``athletes.elo``/``elo_series`` from the V2
+    global track, so those DO move now — for an unrelated reason, and by a different
+    mechanism. The invariant asserted here is what proves the two changes are separable.
     """
     seqs: list[list[dict[str, Any]]] = [
         [{"label": "Single Leg", "type": "takedown", "actor": "you", "successful": True},

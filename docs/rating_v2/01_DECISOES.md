@@ -512,3 +512,125 @@ tempo": com RD ≤ 200 sozinho, o board publicado sentava atletas de 3, 4 e 4 lu
 #1 tinha 114. Daí `MIN_BOARD_BOUTS` em `export/site_data.py` — um piso de registro, editorial e
 separado do RD, que vale **só para ranking publicado**: nunca para página de dossiê, nunca para
 denominador de percentil, nunca para peso de análise.
+
+---
+
+## ADR-16 — A camada de nó sai da sombra por decisão do dono, com o peso Markov como evidência
+
+**Contexto.** O ADR-03 deixou a camada de nó em sombra e nomeou as condições de reabertura
+(mediana de lutas por nó acima de 1, nós com RD < 150 em número suficiente para testar
+calibração). Em 2026-08-26 o dono decidiu, explicitamente, que a nota por técnica passa a ser
+Glicko-2 **dos dois lados** — nó de atleta no Analytics, nó de usuário no App — e que os pesos
+Markov (RRB) substituem a contribuição por pontos de regulamento. Isto reabre o ADR-03 por
+decisão, não por medição.
+
+**O que é diferente do que o ADR-03 mediu.** O sweep da wave 5 pontuava cada nó pelo RESULTADO
+DA LUTA: uma observação por nó por luta. Este modelo pontua cada **evento** da sequência pelo
+`successful` do próprio evento. São fontes de evidência diferentes, e o sweep não transfere.
+
+**Escolhas, e por quê.**
+
+1. **`successful` nulo não gera observação.** Medido no corpus de 2026-08-26: **6818 de 10075**
+   eventos próprios rotulados (67,7%) não carregam a flag; 1762 são `False`, 1495 `True`. Ler
+   nulo como acerto pontuaria 82,5% do corpus como sucesso; ler como erro pontuaria 85% como
+   falha; ler como 0,5 fabricaria confiança sem evidência. É o **ADR-06 um nível abaixo** —
+   resultado ausente é cobertura perdida, nunca resultado inventado. O App mantém a convenção
+   oposta (`undefined` = acertou) porque lá a ausência significa "o usuário não marcou como
+   erro", que é outra coisa.
+2. **Âncora da observação = o global PRÉ-período do PRÓPRIO atleta** (`E = 0,5` na primeira
+   observação de cada nó), e **re-ancoragem no global final** ao fim do replay, preservando o
+   termo de evidência: `rating = final + (replayed − seed)`. As duas metades foram MEDIDAS,
+   não escolhidas — ver o quadro abaixo. A força do oponente não foi descartada: é exatamente
+   o que o track GLOBAL mede, e o nó é expresso em relação a ele. Mesma leitura que o App já
+   usava (`ratingV2Evidence.ts` centra o parceiro virtual no global corrente do usuário), então
+   os dois motores passam a responder a mesma pergunta.
+3. **Peso da observação = `NODE_EVENT_WEIGHT × n × share`**, com `share` de
+   `markov_weights.relative_shares` sobre os eventos pontuados do lado, bloco por família
+   (`adcc` quando `ruleset_scoring.family_of` diz ADCC, `global` no resto). Normalização
+   **média 1**: a informação TOTAL da luta não muda, só a divisão entre ações. É o mesmo
+   invariante que a linha "Markov action weights" do `CLAUDE.md` raiz já declara.
+4. **Por que um peso ainda é Glicko-2.** `update_period` multiplica o termo de informação
+   (`g²·E·(1−E)`) e o resíduo (`g·(s−E)`) pelo MESMO fator, então peso inteiro é
+   aritmeticamente idêntico a repetir a observação — o caso fracionário é a extensão contínua
+   dessa identidade. Travado por
+   `test_weight_is_repeat_count_expansion_for_an_integer_weight`. O App aplica o mesmo campo
+   com a mesma leitura em `glicko2.ts`.
+5. **Nó nunca visto é semeado no global corrente do atleta**, e o corte é no PRODUTOR
+   (`computed_elo`), como o App fez. Cobertura parcial num campo de rating não é menos dado, é
+   duas unidades numa distribuição: o App mediu σ 354 / 0 assinaturas sem semear contra σ 31,9
+   / 1 assinatura semeando.
+
+**O que a V1 continua fazendo.** Tudo menos a nota do nó: `athlete_elo.replay_matches` ainda
+deriva nós, arestas, contagens e a proveniência por luta em `graph_edge_bouts`, e continua
+sendo a única coisa que escreve `graph_edges`. Só o `computed_elo` (e, por derivação, `edge.elo`,
+`graphs.user_elo`, `athletes.elo` e `elo_series`) passa a vir do Glicko. `POINT_MAP` segue vivo
+em `score_from_match`, que é o S da luta, não a divisão entre nós — trocá-lo é outra decisão,
+com outro raio de explosão, e não faz parte desta.
+
+> **Medido em 2026-08-26, antes de qualquer replay (leitura pura do banco).**
+>
+> | | |
+> |---|---|
+> | Corpus | 913 lutas, 721 elegíveis, 548 com evidência de nó |
+> | Estados de nó | 1984 pares (atleta, node_key) |
+> | Observações por nó | mediana **1**, média 1,40, máx 15 |
+> | RD dos nós | mín 190, mediana 326 contra semente 350 — **nenhum nó abaixo de 150** |
+> | Taxa de acerto do corpus | 1495/3257 = 0,459 |
+> | Cobertura por grafo | Gordon Ryan 23 evidenciados / 22 semeados; Kade Ruotolo 14/17; Helena Crevar 30/29 |
+> | Track global recomputado × run fixado `694579a2` | 675 atletas, `max |diff| = 0,000000` |
+>
+> **As duas condições que o ADR-03 nomeou continuam NÃO satisfeitas** — mediana de 1 observação
+> por nó e zero nós com RD < 150. A camada sai da sombra porque o dono decidiu, e este quadro
+> fica registrado para que ninguém cite o ADR-03 como se ele tivesse sido superado por medição.
+> O que o número honestamente diz hoje: com RD ~326 sobre 350, o rating de nó é quase todo
+> prior. `NodeRating` carrega `observations`/`bouts`/`deviation` justamente para que um
+> consumidor consiga separar "medido" de "semeado".
+
+> **A âncora: duas hipóteses testadas, uma refutada, e o viés fechado.** Métrica em todos os
+> casos: `corr(rating global do atleta, deslocamento médio dos seus nós)`, sobre os 271 atletas
+> com ≥3 nós evidenciados. O ideal é ZERO — o nó deve falar da técnica, não de quem a usou.
+>
+> | Âncora da observação | corr | global < 1700 | global > 1950 |
+> |---|---:|---:|---:|
+> | Global do OPONENTE (primeira tentativa) | **−0,790** | +84,0 | −152,0 |
+> | Global do PRÓPRIO atleta | −0,763 | +80,5 | −141,0 |
+> | Próprio atleta **+ re-ancoragem no global final** | **+0,109** | −9,9 | −5,5 |
+>
+> **A âncora do oponente estava errada e a medição a reprovou.** Pontuar "a técnica encaixou"
+> contra "a luta foi vencida" são variáveis diferentes: um atleta dominante vence ~90% das lutas
+> e encaixa 46% das tentativas anotadas, então TODA técnica dele lia abaixo do próprio nível, e
+> todo nó COM evidência caía abaixo de todo nó semeado — o que inverte qualquer leitura de
+> "melhor técnica deste atleta".
+>
+> **Mas trocar a âncora sozinha quase não mexeu (−0,790 → −0,763), e o porquê é a lição.**
+> Decompondo o deslocamento em (a) semente velha = `seed − global final` e (b) termo de
+> evidência = `replayed − seed`: **(a) correlaciona −0,855 e (b) apenas +0,109**. Ou seja, a
+> troca de âncora JÁ tinha resolvido o que era do modelo; o que sobrava era a semente
+> envelhecendo. Um nó é ancorado no global que o atleta tinha quando aquele nó apareceu pela
+> primeira vez, e depois comparado com o global final — então um atleta que EVOLUIU lia todas as
+> suas técnicas abaixo do nível atual, por nada além da passagem do tempo. E o
+> `project_onto_graph` já colocava os nós NUNCA vistos no global FINAL: duas âncoras no mesmo
+> grafo, que é exatamente a mistura de unidades que esta camada existe para evitar.
+>
+> **Não pare na primeira correlação.** Uma medição agregada apontava para a âncora; decompor o
+> número em duas parcelas mostrou que a maior parte vinha de outro lugar. Se a troca de âncora
+> tivesse sido reportada como "resolvido" sem re-medir, o defeito principal teria ficado.
+>
+> Resultado final: nós agora se distribuem dos dois lados do global do atleta por MÉRITO —
+> 948 acima, 1031 abaixo (o corpus encaixa 45,9% das tentativas anotadas, então mais abaixo do
+> que acima é o esperado). Gordon Ryan 8 acima / 15 abaixo, Kade Ruotolo 4/10, Helena Crevar
+> 16/14. RD não muda com a re-ancoragem: é troca de âncora, não de informação.
+
+**Consequência operacional.** Mudança de engine de nota ⇒ **replay completo** (nunca
+`reprocess_all`, que reimporta os dumps e reviveria os fantasmas da AA-011). Runbook no
+`08_ESTADO_DO_CUTOVER.md`. E como `athletes.elo` passa a ser o rating global V2,
+`build_corpus_node_ratings` compara o hash do corpus com o `source_hash` do
+`SITE_RATING_RUN_ID` e **avisa** quando divergem: enquanto divergirem, o grafo e o board
+publicado respondem a mesma pergunta com números diferentes.
+
+**População de baseline.** Só metade dos grafos de atleta é projetável (675 de 1347 têm estado
+no run V2; 451 contra 86 entre os que têm aresta), então toda baseline populacional passou a
+filtrar por `repository.rated_athlete_graph_ids` — sem isso, `node_population_stats` mistura
+escala V2 e V1 dentro do mesmo `node_key` e o z-score começa a medir de qual corpus o atleta é.
+Os 86 são majoritariamente MMA (Chimaev, Khabib, St-Pierre, Prochazka), que o ADR-05 já mandava
+manter fora. Os grafos continuam sendo POSICIONADOS contra a baseline; só não a definem.

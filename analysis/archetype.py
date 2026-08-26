@@ -337,10 +337,12 @@ def run_archetype_pipeline(session: object, k: int = 6) -> None:
     (the real-grappler population); clusters are named from their dominant deviance types.
     """
     from analysis.deviance import node_population_stats
+    from analysis.rating_v2.config import SITE_RATING_RUN_ID
     from db.repository import (
         assign_archetype_to_graph,
         clear_archetypes,
         graphs_for_clustering,
+        rated_athlete_graph_ids,
         save_archetypes,
     )
 
@@ -356,7 +358,13 @@ def run_archetype_pipeline(session: object, k: int = 6) -> None:
         logger.warning("No non-empty athlete graphs found for clustering")
         return
 
-    by_key, by_type = node_population_stats(rows)
+    # The BASELINE is rated-grappler-only (ADR-16: only those graphs carry V2-scale
+    # ``computed_elo``); the graphs being PLACED are still every athlete graph, so an MMA
+    # fighter keeps an archetype — measured against a single-scale grappling population
+    # instead of helping define one out of two units.
+    rated_ids = rated_athlete_graph_ids(session, SITE_RATING_RUN_ID)  # type: ignore[arg-type]
+    baseline_rows = [r for r in rows if r[0] in rated_ids] or rows
+    by_key, by_type = node_population_stats(baseline_rows)
     graph_ids = [r[0] for r in rows]
     vectors = np.array([graph_feature_vector(r[1], by_key, by_type) for r in rows])
     km = fit_archetypes(vectors, k=k)

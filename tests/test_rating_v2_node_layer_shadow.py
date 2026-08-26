@@ -27,6 +27,15 @@ Este teste é o que impede a ambiguidade de voltar. Se alguém ligar um produtor
 reabrir a camada de nó vira decisão explícita com o ADR-03 na mão — o que exige o corpus ter
 crescido: mediana de lutas por nó acima de 1 e nós com RD < 150 em número suficiente para
 testar calibração de verdade.
+
+⚠️ **Atualização 2026-08-26 (ADR-16).** A camada de RATING por nó saiu da sombra por decisão do
+dono, e produz ``computed_elo`` nos grafos de atleta via
+``analysis/rating_v2/node_rating.py`` — outro modelo de observação (pontuado por EVENTO, pelo
+``successful`` de cada um), medido e registrado no ADR-16. As duas condições que o ADR-03
+nomeia continuam NÃO satisfeitas, e este teste continua valendo sem uma linha alterada, porque
+o que ele guarda são as TABELAS da alembic 0036: elas seguem esquema reservado, sem produtor
+fora de ``persist.py``. Ligar um produtor delas continua exigindo reabrir o ADR-03 com dado
+novo. Não relaxe este teste por causa do ADR-16 — ele não o contradiz.
 """
 
 from __future__ import annotations

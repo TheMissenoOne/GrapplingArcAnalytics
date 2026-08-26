@@ -38,14 +38,23 @@ def run(dry_run: bool = False, embed: bool = False) -> int:
     from analysis.archetype import assign_user_archetype
     from analysis.deviance import node_population_stats
     from analysis.embeddings import backfill_graph_embeddings
+    from analysis.rating_v2.config import SITE_RATING_RUN_ID
     from db.base import db_session
     from db.models import Graph, GraphEdge
-    from db.repository import archetype_refs, assign_user_archetype_to_graph, graphs_for_clustering
+    from db.repository import (
+        archetype_refs,
+        assign_user_archetype_to_graph,
+        graphs_for_clustering,
+        rated_athlete_graph_ids,
+    )
 
     with db_session() as session:
+        # ADR-16: rated grapplers only — the athlete population is a BASELINE here, and an
+        # athlete the V2 run does not cover still carries V1-scale `computed_elo`.
+        rated = rated_athlete_graph_ids(session, SITE_RATING_RUN_ID)
         athlete_rows = [
             (gid, nodes) for gid, nodes in graphs_for_clustering(session, owner_kind="athlete")
-            if len(nodes) >= MIN_GRAPH_NODES
+            if len(nodes) >= MIN_GRAPH_NODES and (not rated or gid in rated)
         ]
         if not athlete_rows:
             logger.warning("No athlete graphs — population baseline unavailable; aborting")

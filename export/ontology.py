@@ -169,6 +169,7 @@ def build_ontology_seed() -> dict[str, Any]:
             signature_nodes,
             type_deviance_vector,
         )
+        from analysis.rating_v2.config import SITE_RATING_RUN_ID
         from db.base import db_session
         from db.models import (
             Archetype,
@@ -186,7 +187,7 @@ def build_ontology_seed() -> dict[str, Any]:
             SystemPrinciple,
             TechniqueNode,
         )
-        from db.repository import graphs_for_clustering
+        from db.repository import graphs_for_clustering, rated_athlete_graph_ids
         from export.match_breakdown import slugify
     except Exception as exc:  # import/config failure → offline-safe empty seed
         logger.info("Ontology seed: DB unavailable (%s) — emitting empty seed", exc)
@@ -319,7 +320,12 @@ def build_ontology_seed() -> dict[str, Any]:
                 graphs_for_clustering(session, owner_kind="athlete")
             )
             if rows:
-                by_key, by_type = node_population_stats(rows)
+                # ADR-16: the deviance BASELINE reads rated grapplers only (the athletes whose
+                # `computed_elo` the V2 node track projected); the profiles themselves are
+                # still emitted for every eligible graph, placed against that one scale.
+                rated = rated_athlete_graph_ids(session, SITE_RATING_RUN_ID)
+                baseline = [r for r in rows if r[0] in rated] or rows
+                by_key, by_type = node_population_stats(baseline)
                 graph_owner = _athlete_graph_owner_map(session, Graph)
                 owner_ids = {graph_owner[gid][0] for gid, _ in rows if gid in graph_owner}
                 ath_name = {
