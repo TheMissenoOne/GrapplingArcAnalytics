@@ -1,0 +1,675 @@
+{
+  "version": 1,
+  "rules_applied": "Precedence, first match wins. (1) non_grappling: name starts with 'UFC' or 'NCAA' -- these are MMA/wrestling cards and carry no grappling ruleset (analysis/discipline.py ADR-05); the one exception is the named override 'UFC BJJ 4', a UFC-hosted pure-grappling card. (2) adcc: contains 'adcc'. (3) cji: contains 'cji' or 'combat jiu-jitsu'. (4) ibjjf: contains 'ibjjf', or is one of the IBJJF-run championship names listed in MANUAL_OVERRIDES -- the promotion's own championships ('World No-Gi 2024', 'Pan No-Gi 2025', 'European No-Gi 2024') do not carry the letters IBJJF and a keyword cannot reach them. (5) other: every remaining named event -- a residual, NOT a ruleset. (6) unknown: NULL/empty event (career dumps carry no event name, so no ruleset).",
+  "snapshot_note": "The only VERIFIED ADCC presets in data/scouting/rulesets.json are a 2026-08-13 snapshot, and every ADCC bout in the corpus is from 2017-2024 (measured: 2017 n=8, 2019 n=8, 2022 n=63, 2023 n=26, 2024 n=76). The snapshot is applied on the assumption that ADCC's match durations and half-time points structure have been stable across that span; the assumption is NOT verified against period rule books and is the reason every ADCC row here carries ruleset_confidence='snapshot_assumed_stable' rather than 'verified'.",
+  "families": [
+    "adcc",
+    "ibjjf",
+    "cji",
+    "other",
+    "non_grappling",
+    "unknown"
+  ],
+  "manual_overrides": {
+    "World No-Gi 2024": "ibjjf",
+    "World No-Gi 2025": "ibjjf",
+    "NoGi Worlds": "ibjjf",
+    "European No-Gi 2024": "ibjjf",
+    "European No-Gi 2025": "ibjjf",
+    "Pan No-Gi 2024": "ibjjf",
+    "Pan No-Gi 2025": "ibjjf",
+    "No Gi Pan Am.": "ibjjf",
+    "UFC BJJ 4": "other"
+  },
+  "events": {
+    "ACBJJ 13": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "ADCC": {
+      "family": "adcc",
+      "ruleset_id": "adcc-worlds-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC 2022": {
+      "family": "adcc",
+      "ruleset_id": "adcc-worlds-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC 2024": {
+      "family": "adcc",
+      "ruleset_id": "adcc-worlds-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2022 South America": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2023 Asia & Oceania": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2023 East Coast": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2023 European": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2024 Asia & Oceania": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2024 European": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2024 South American 1": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2024 South American 2": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC Trials 2024 West Coast": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC WC Trials": {
+      "family": "adcc",
+      "ruleset_id": "adcc-trials-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "ADCC World Championship": {
+      "family": "adcc",
+      "ruleset_id": "adcc-worlds-current-2026-08-13",
+      "ruleset_confidence": "snapshot_assumed_stable"
+    },
+    "BJJ Fanatics GP": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "CJI": {
+      "family": "cji",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset_submission_only"
+    },
+    "CJI 2 - Day 1": {
+      "family": "cji",
+      "ruleset_id": "cji-2025-women",
+      "ruleset_confidence": "verified"
+    },
+    "CJI 2 - Day 2": {
+      "family": "cji",
+      "ruleset_id": "cji-2025-women",
+      "ruleset_confidence": "verified"
+    },
+    "Combat Jiu-Jitsu Worlds": {
+      "family": "cji",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset_submission_only"
+    },
+    "EBI 11": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "EBI 14": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "EBI 6": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "EBI 8": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "European No-Gi 2024": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "European No-Gi 2025": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "F2W 30": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "F2W 34": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Goodfight Pro": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Grappling Ind.": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "IBJJF 2025 Top 10": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "IBJJF No-Gi Worlds 2021": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "IBJJF Worlds 2023": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "Kasai Dallas": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Kasai Pro": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Kinektic 1": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Metamoris": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Musumeci": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "NCAA 2024": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "NCAA 2025": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "NCAA 2026": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "No Gi Pan Am.": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "NoGi Worlds": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "Onnit Inv. 2": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "PGF World 2026": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "PGF World Season 9": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "PTL Sunday Open": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Pan No-Gi 2024": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "Pan No-Gi 2025": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "Polaris 1": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 16: Squads 3": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 18": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 25": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 25: Absolute GP": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 26": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 28": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 29": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 30": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 31": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 32": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 33": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 34": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 35": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 36": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 37": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 37: Polaris vs BJJ Stars": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 38": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris 4": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris BJJ Squads": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Polaris Pro 1": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Quintet 3": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Quintet Ultra": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "SUG 10": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "SUG 3": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Sapateiro 2": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Sapateiro 6": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Sapateiro Inv.": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Spyder: King of Kings": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Studio 540 SPF": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Sub Stars": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Team BJJ Stars vs Polaris": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Third Coast III": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 260": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 269": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 276": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 280": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 284": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 292": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 296": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 299": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 300": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 315": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 320": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 324": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 327": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC 328": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC BJJ 4": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC Copenhagen": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC FP Inv.": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "UFC Fight Night": {
+      "family": "non_grappling",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 12": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 13": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 14": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 20": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 22": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 24": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 25": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 27": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 30": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 31": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 4": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 6": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO 7": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "WNO Championship": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Women Who Fight Invitational": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Women Who Fight Invitational 2": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "Women Who Fight Invitational 2024": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "World Festival": {
+      "family": "other",
+      "ruleset_id": null,
+      "ruleset_confidence": "no_preset"
+    },
+    "World No-Gi 2024": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    },
+    "World No-Gi 2025": {
+      "family": "ibjjf",
+      "ruleset_id": "ibjjf-v6-no-gi",
+      "ruleset_confidence": "verified"
+    }
+  },
+  "null_event": {
+    "family": "unknown",
+    "ruleset_id": null,
+    "ruleset_confidence": "no_event_name"
+  },
+  "points": {
+    "ibjjf": {
+      "CDP": 0,
+      "PGD": 0,
+      "SWP": 2,
+      "TKD": 2,
+      "GPS": 3,
+      "BTK": 4,
+      "SUB": 0
+    },
+    "adcc": {
+      "CDP": 0,
+      "PGD": 0,
+      "SWP": 2,
+      "TKD": 2,
+      "GPS": 3,
+      "BTK": 3,
+      "SUB": 0
+    },
+    "cji": null,
+    "other": null,
+    "non_grappling": null,
+    "unknown": null
+  },
+  "points_sources": {
+    "ibjjf": {
+      "source_url": "https://ibjjf.com/books-videos",
+      "preset": "ibjjf-v6-no-gi",
+      "captured_on": "2026-08-25",
+      "note": "Rule book v6 positional points: takedown 2, sweep 2, knee-on-belly 2, guard pass 3, mount 4, back control with hooks 4. Knee-on-belly and mount have no Lamas symbol and are therefore unrepresentable here."
+    },
+    "adcc": {
+      "source_url": "https://adcombat.com/adcc-rules-regulations/",
+      "preset": "adcc-worlds-current-2026-08-13",
+      "captured_on": "2026-08-25",
+      "note": "Takedown ending guard/half-guard 2, sweep 2, passing the guard 3, back mount with hooks 3, mount 2, knee-on-belly 2; negative -1 for pulling guard / fleeing during the negative phase. The 4-point takedown-that-passes and every negative are unrepresentable here: the first needs a landing position the event carries no field for, the second needs the match clock."
+    }
+  },
+  "adcc_guard_pull_penalty": -1
+}
