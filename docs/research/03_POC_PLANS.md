@@ -184,6 +184,36 @@ the training kernel (gap #2) or the calibration inherits the attribution noise.
 
 **Effort:** 3 days.
 
+**Status (2026-08-25): RUN.** Runner `analysis/poc/e5_grapple_like.py`, library
+`analysis/poc/signatures.py`, tests `tests/test_poc_e5.py` + `tests/test_poc_signatures.py`,
+pre-registration `docs/research/poc/e5_prereg.md`, results + verdict in
+`docs/research/poc/e5.md` (generated — do not hand-edit). **NetLSD (Tsitsulin 2018) added to
+the candidate set** before the run; (c) graphlets and (e) graph2vec deferred with a stated
+reason. Two corrections registered before any arm was scored:
+
+* **The plan's baseline was not the shipped method.** "Grapples most like NN%" comes from
+  `athlete_systems.match_systems` over a career graph **truncated to 12 nodes**
+  (`site_data.py:778`/`1433`), not from the ELO-weighted mpnet centroid —
+  `embeddings.nearest_graphs` has zero callers anywhere. The production arm is the former.
+* The ELO weighting is **not evaluable** under a half-split criterion (`graph_edges.elo` is
+  a career-level replay artefact); an occurrence-weighted centroid stands in, labelled.
+
+Outcome: **REJECT — no challenger clears production AND both nulls; the shipped method
+stands, now measured.** Three findings beyond the verdict. (1) The shipped percentage
+recognises an athlete's own half at MRR 0.250 [0.143, 0.367] over 33 candidates against a
+chance floor of 0.124 — but a **three-number size descriptor (log n, log m, mean degree)
+scores 0.269**, and the paired Δ covers 0. The dossier number is defined now, and its
+defined value is not separable from how much tape an athlete has. (2) **NetLSD and portrait
+divergence are a null on this corpus** (0.220 / 0.221, both below the size null): the median
+half-career ActionFlow graph is 11 nodes / 11 edges, which carries almost no spectral or
+shortest-path structure. A corpus verdict, not a method verdict. (3) The occurrence-weighted
+mpnet centroid leads every table (0.364; 0.603 at the ≥6-bout floor) and is the only arm
+that beats production under the **leakage probe** (chronological halves: +0.203
+[+0.077, +0.330]) — refused by the criterion, recorded as the hypothesis for a follow-up.
+The synthetic fixtures pin *why*: `system_similarity` is 0.50·type-share cosine +
+0.20·hub-type, so four **disjoint technique vocabularies sharing a type mix score
+identically** — the shipped similarity reads the type profile, not the techniques.
+
 ### PoC-E6 · Archetype k and stability (run the machinery that already exists)
 
 **Claim:** k=6 must be selected, not assumed. **Literature:** Hennig 2007.
@@ -275,6 +305,55 @@ PtV γ=0.8, shaping off for every arm). Arm 4 gated on ≥10 eval bouts / ≥100
 pre-registration `docs/research/poc/e9_prereg.md`, results + verdicts in
 `docs/research/poc/e9.md` (generated — do not hand-edit). The runner self-checks its gate
 against PoC-E8's published 429 bouts and reproduces PoC-E4's order parity row.
+
+### PoC-E11 · The high-confidence action chain — does data quality beat data quantity?
+
+**Claim (the owner's):** a Markov chain over Lamas 2024's twelve ACTIONS, trained on the
+*high-confidence* part of the corpus, predicts held-out bouts better than one trained on
+everything; and there is a measurable point at which more training data stops helping.
+**Literature:** Lamas 2024 (doi:10.1177/17479541231210979 — the twelve-action space, already
+implemented in `analysis/lamas_chain.py`); the semi-Markov critique (Sci Rep 2026) for why
+dwell must not be folded; Decroos 2019 for the held-out framing. **Inherits:** PoC-E9's
+fixed-target estimator (`Backoff`/`score_order`/`paired_delta`/`wins` — its target alphabet
+became a parameter for this cell), PoC-E8's `temporal_split`, `stats_rigor` for every interval.
+
+The methodological crux, pre-registered and MEASURED before any arm ran: `successful` is
+annotated **per ingest batch**, not per corpus (BTKA→BTK lands 4.2% of the time across the
+full training window and 88.0% inside the annotation-complete subset). The twelve-action space
+splits every family on that flag, so a twelve-symbol target would turn the quality arms into a
+measurement of annotation policy — PoC-E9's vocabulary trap in a new dress. **The primary
+target is therefore the seven-symbol, annotation-invariant family alphabet**
+(`CDP · PGD · SWP* · TKD* · GPS* · BTK* · SUB*`); the twelve-symbol target runs as an
+explicitly-labelled secondary. Order is fixed at 1 (PoC-E4 and PoC-E9 closed the order
+question; re-running it would re-litigate a closed cell) with the order-0 marginal as the
+mandatory floor.
+
+"High confidence" is defined measurably in two named limbs, because `matches` has no `source`
+column and provenance is not stored per bout: **HC-A** = `perspective_reliable` ∧ ≥2 named
+actors in the action chain ∧ chain ≥4 (`lamas_chain._actor_reliability`'s own double refusal);
+**HC-B** = HC-A ∧ `successful` present on ≥90% of the bout's events (the machine-checkable
+proxy for a frame-read/concordance-audited pipeline). Both subset sizes and the `event` tags
+they select are published, because HC-B turns out to be almost entirely ADCC Trials 2023/24 —
+confounded with event family and era, and the report says so.
+
+**Accept criteria (six, verbatim in `docs/research/poc/e11_prereg.md`):** C1 the order-1 chain
+must beat its own order-0 marginal or everything below is demoted to descriptive; C2 each HC
+set against FULL, three pre-declared outcomes with the interval half-width printed on a null;
+**C3 the same contrast SIZE-MATCHED** (FULL subsampled to |HC| bouts, R=20 seeded draws) —
+without it C2 rediscovers PoC-E9's ADCC finding that a small specialised kernel loses on
+variance alone; C4 the context vocabulary (A-12 vs A-7 vs S-type vs S-label) with the
+attempt/success split as a named row; C5 a train-size sweep, recency-nested AND random, with a
+pre-registered stabilisation rule; C6 the house graph techniques (PageRank, reward-risk,
+communities) at action level against the shipped label-level ActionFlow graph — descriptive,
+with three honesty gates including "density > 0.9 ⇒ the partition is not interpretable".
+
+**Status (2026-08-25): RUN.** Module `analysis/poc/e11_action_chain.py`, tests
+`tests/test_poc_e11.py`, pre-registration `docs/research/poc/e11_prereg.md`, results +
+verdicts in `docs/research/poc/e11.md` (generated — do not hand-edit), PDF deliverable in
+`reports/e11/` (gitignored). The runner reports its own gate against PoC-E8/E9's published 429
+rather than assuming it; the corpus has since grown to 466 gated bouts.
+
+**Effort:** 2 days. **Risk:** none (read-only, no production export touched).
 
 ### PoC-E7 · Replace the tech-library effectiveness composite
 

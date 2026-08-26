@@ -243,6 +243,10 @@ class Backoff:
     # degenerate: one code path, and it absorbs the 3.3% of labels filed under >1 type.
     cat_given_state: dict[str, dict[str, float]]
     cat_marginal: dict[str, float]
+    # The fixed target alphabet this model marginalises onto. A PARAMETER rather than the
+    # module constant since PoC-E11, which scores the same estimator onto Lamas' action
+    # families; the default is E9's own 9-symbol alphabet, so every E9 number is unchanged.
+    alphabet: tuple[str, ...] = CAT_ALPHABET
 
     @property
     def v(self) -> int:
@@ -272,19 +276,25 @@ class Backoff:
     def category_dist(self, ctx: Sequence[str]) -> dict[str, float]:
         """The next event's CATEGORY — the common target every arm is scored on."""
         ps = self.state_dist(ctx)
-        out = dict.fromkeys(CAT_ALPHABET, 0.0)
+        out = dict.fromkeys(self.alphabet, 0.0)
         for z, pz in ps.items():
             if pz <= 0.0:
                 continue
             pc = self.cat_given_state.get(z, self.cat_marginal)
-            for c in CAT_ALPHABET:
+            for c in self.alphabet:
                 out[c] += pz * pc[c]
         tot = sum(out.values()) or 1.0
         return {c: v / tot for c, v in out.items()}
 
 
-def fit_backoff(chains: Sequence[Sequence[Step]], order: int, alpha: float) -> Backoff:
-    """Fit every level 0..order on train chains. ``UNK`` is always in the vocabulary."""
+def fit_backoff(chains: Sequence[Sequence[Step]], order: int, alpha: float,
+                alphabet: tuple[str, ...] = CAT_ALPHABET) -> Backoff:
+    """Fit every level 0..order on train chains. ``UNK`` is always in the vocabulary.
+
+    ``alphabet`` is the fixed target symbol set every arm is scored on; it defaults to E9's
+    own 9-symbol category alphabet and is a parameter only so PoC-E11 can score the SAME
+    estimator onto Lamas' action families without a second copy of it.
+    """
     marginal: Counter[str] = Counter()
     cat_counts: defaultdict[str, Counter[str]] = defaultdict(Counter)
     cat_marg: Counter[str] = Counter()
@@ -304,17 +314,17 @@ def fit_backoff(chains: Sequence[Sequence[Step]], order: int, alpha: float) -> B
     for j in range(1, order + 1):
         levels[j] = dict(lvl[j])
     vocab = (*sorted(marginal), UNK)
-    n_cat = len(CAT_ALPHABET)
+    n_cat = len(alphabet)
     cat_given = {
-        s: {c: (cnt[c] + alpha) / (sum(cnt.values()) + alpha * n_cat) for c in CAT_ALPHABET}
+        s: {c: (cnt[c] + alpha) / (sum(cnt.values()) + alpha * n_cat) for c in alphabet}
         for s, cnt in cat_counts.items()
     }
     tot_cat = sum(cat_marg.values())
     cat_marginal = {
-        c: (cat_marg[c] + alpha) / (tot_cat + alpha * n_cat) for c in CAT_ALPHABET
+        c: (cat_marg[c] + alpha) / (tot_cat + alpha * n_cat) for c in alphabet
     }
     return Backoff(order, alpha, vocab, levels, marginal, sum(marginal.values()),
-                   cat_given, cat_marginal)
+                   cat_given, cat_marginal, alphabet)
 
 
 def _map_unknown(chain: Sequence[Step], known: frozenset[str]) -> list[Step]:
@@ -349,14 +359,20 @@ def score_order(
     space: str,
     chain: str,
     n_boot: int = N_BOOT,
+    alphabet: tuple[str, ...] = CAT_ALPHABET,
+    min_index: int = MIN_SCORED_INDEX,
 ) -> OrderRow:
     """Held-out per-step log-likelihood of the next event's CATEGORY, at one order.
 
-    Scored steps start at ``MIN_SCORED_INDEX`` so k=1..3 see identical steps; because
-    repeats are not folded, the step set is identical across state spaces too, which is
-    what makes the cross-space deltas paired.
+    Scored steps start at ``min_index`` so k=1..3 see identical steps; because repeats are
+    not folded, the step set is identical across state spaces too, which is what makes the
+    cross-space deltas paired.
+
+    ``alphabet``/``min_index`` are parameters (defaults = E9's own) only so PoC-E11 can run
+    the identical estimator on Lamas' action families at order 1, where a floor of 3 would
+    throw away a third of a corpus whose median action chain is six long.
     """
-    m = fit_backoff(train, order, alpha)
+    m = fit_backoff(train, order, alpha, alphabet)
     known = frozenset(m.marginal)
     level = m.levels[order] if order else {}
     seen_ctx = set(level)
@@ -367,7 +383,7 @@ def score_order(
     for key, raw in held:
         c = _map_unknown(raw, known)
         states = [s for s, _ in c]
-        for t in range(MIN_SCORED_INDEX, len(c)):
+        for t in range(min_index, len(c)):
             ctx = states[max(0, t - order):t] if order else []
             if order and tuple(states[t - order:t]) in seen_ctx:
                 covered += 1
