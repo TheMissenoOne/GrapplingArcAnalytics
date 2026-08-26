@@ -25,6 +25,8 @@ from analysis.network_metrics import (
     route_to_submission,
 )
 from analysis.path_to_victory import control_score, dilemmas, path_to_victory
+from analysis.systems_path_strength import rank_systems
+from analysis.systems_path_strength import to_dict as system_to_dict
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +47,10 @@ def generate_insights(session: Any) -> dict[str, Any]:
     # routes to a finish" and the PtV section below is a different model entirely
     # (`network_metrics.route_to_submission`'s docstring; PoC-E4's naming rider).
     routes = {n: route_to_submission(g, n) for n, _, _ in rr_rows[:6]}
+    family_members = detect_communities(g, min_occ=3)[:_COMMUNITIES]
     communities = [
         {"size": len(c), "type_lead": _lead_type(g, c), "members": c[:12]}
-        for c in detect_communities(g, min_occ=3)[:_COMMUNITIES]
+        for c in family_members
     ]
 
     ids, mat = athlete_style_vectors(session)
@@ -64,6 +67,17 @@ def generate_insights(session: Any) -> dict[str, Any]:
         [(n, control[n]) for n in control], key=lambda x: x[1], reverse=True
     )[:10]
 
+    # The SAME member sets the "Game families" section above lists, now valued as absorbing
+    # Markov chains toward each family's desired node — absorption probability × usage ×
+    # directionality × PtV prize (analysis/systems_path_strength.py, docs/systems_path_strength.md).
+    # `v` is passed in so the graph is valued once, not twice.
+    # ponytail: corpus-level systems, because that is the system set this report already
+    # publishes. The module takes any (graph, member set), so per-athlete systems are one
+    # different `g` away; that surface waits on `actor_id` reliability, which
+    # docs/match_event_model.md measures at 307 of 700 bouts filing every event under one
+    # athlete — a per-athlete system built on that would be a data claim, not a metric.
+    system_strength = [system_to_dict(s) for s in rank_systems(g, family_members, v=v)]
+
     return {
         "network": {
             "nodes": g.number_of_nodes(),
@@ -75,6 +89,7 @@ def generate_insights(session: Any) -> dict[str, Any]:
         "reward_risk": reward_risk,
         "routes": routes,
         "communities": communities,
+        "system_path_strength": system_strength,
         "similarity": similarity,
         "path_to_victory": [[n, v] for n, v in ptv_ranking],
         "dilemmas": dilemmas_found,
@@ -111,6 +126,43 @@ def _notable_names(session: Any, ids: list[tuple[str, str]]) -> list[str]:
 
 
 # ── rendering ────────────────────────────────────────────────────────────────
+def _render_system_strength(systems: list[dict[str, Any]]) -> list[str]:
+    """Section for ``analysis.systems_path_strength`` — the families above, valued.
+
+    A gated system still prints its numbers with its reason attached; the gate refuses the
+    interpretation, not the measurement (same convention as
+    ``category_constellations.gate_text``).
+    """
+    if not systems:
+        return []
+    out = [
+        "## System path strength — absorbing-Markov route to the desired node",
+        "",
+        "_Per family: P(reaching the desired node before leaving the system or being "
+        "finished), weighted by usage and by the directed-edge contract, scaled by the "
+        "goal's Path-to-Victory. See `docs/systems_path_strength.md`._",
+        "",
+        "| # | Desired node | Strength | Prize | Direction | Members | Gate |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    out += [
+        f"| {i} | {s['desired']} | {s['strength']:.4f} | {s['prize']:.3f} | "
+        f"{s['direction']:.3f} | {len(s['members'])} | {s['gate_reason'] or '—'} |"
+        for i, s in enumerate(systems, 1)
+    ]
+    out.append("")
+    for s in systems:
+        if not s["paths"]:
+            continue
+        out.append(f"**→ {s['desired']}** — strongest routes:")
+        out += [
+            f"- {p['label']} · p_chain {p['p_chain']:.3f} · strength {p['strength']:.4f}"
+            for p in s["paths"]
+        ]
+        out.append("")
+    return out
+
+
 def render_markdown(r: dict[str, Any]) -> str:
     net = r["network"]
     out: list[str] = [
@@ -157,6 +209,7 @@ def render_markdown(r: dict[str, Any]) -> str:
         out.append(f"**Family {i}** ({c['size']} positions, mostly _{c['type_lead']}_): "
                    + ", ".join(c["members"]) + ".")
         out.append("")
+    out += _render_system_strength(r.get("system_path_strength", []))
     out += ["## Fighter DNA — stylistically closest athletes", ""]
     for name, neighbours in r["similarity"].items():
         if neighbours:

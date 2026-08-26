@@ -56,6 +56,9 @@ validates the archetypes; divergence is a finding.
   learner/process transition graphs; general network-science community detection.
 - Reuse: `network_metrics.detect_communities`.
 - Content: "the families of grappling", archetype validation.
+- **Valued** by `analysis/systems_path_strength.py` — 1 and 4 crossed: an absorbing Markov chain
+  per community toward its desired node (absorption probability × usage × directionality ×
+  PtV prize), with the top routes to that node. Method note: `docs/systems_path_strength.md`.
 
 ## Competitive landscape (prior art / inspiration)
 - **bjjgraph.org** — BJJ as a graph of positions/principles (Submission Chains, Risk Assessment).
