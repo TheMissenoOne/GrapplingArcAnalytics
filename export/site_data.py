@@ -1237,16 +1237,43 @@ _PROFILE_JS = """
   }
   draw();new ResizeObserver(draw).observe(wrap);
 })();
-// click a career node → play the first filmed use of that position (P.videos: key→{vid,ts,slug})
+// click a career node → play the first filmed use of that position (P.videos: key→{vid,ts,slug}).
+// Same video already loaded → seek via the YT iframe API (postMessage), no new embed. A fresh
+// iframe/src swap re-triggers YouTube's pre-roll ad, so only a genuinely different video id
+// tears down and rebuilds the player.
+var gaDsPlayer=null,gaDsReady=false,gaDsVid=null,gaDsPending=null;
+function gaDsSeek(t){
+  if(gaDsReady){gaDsPlayer.seekTo(t,true);gaDsPlayer.playVideo();}else gaDsPending=t;
+}
+window.onYouTubeIframeAPIReady=function(){
+  if(gaDsVid&&!gaDsPlayer&&document.getElementById('dsFrame')){
+    gaDsPlayer=new YT.Player('dsFrame',{events:{onReady:function(){
+      gaDsReady=true;if(gaDsPending!=null){gaDsSeek(gaDsPending);gaDsPending=null;}
+    }}});
+  }
+};
 function gaWatch(ref){
   const wrap=document.getElementById('dossierVideo'); if(!wrap||!ref) return;
   wrap.style.display='block';
+  const start=Math.max(0,ref.ts|0);
+  if(ref.vid===gaDsVid&&gaDsPlayer){
+    gaDsSeek(start);
+    wrap.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  gaDsVid=ref.vid;gaDsReady=false;gaDsPlayer=null;gaDsPending=null;
   wrap.innerHTML='<div style="position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:inherit">'
-    +'<iframe src="https://www.youtube-nocookie.com/embed/'+ref.vid+'?start='+Math.max(0,ref.ts|0)+'&autoplay=1"'
+    +'<iframe id="dsFrame" src="https://www.youtube-nocookie.com/embed/'+ref.vid+'?start='+start+'&autoplay=1&enablejsapi=1"'
     +' title="Technique footage" frameborder="0" style="position:absolute;inset:0;width:100%;height:100%"'
     +' allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>'
     +(ref.slug?'<p class="graph-hint" style="padding:8px 12px;margin:0">Footage from <a href="breakdown-'+ref.slug+'.html" style="color:var(--ink-2);text-decoration:underline">this bout</a></p>':'');
   wrap.scrollIntoView({behavior:'smooth',block:'center'});
+  if(window.YT&&window.YT.Player){
+    gaDsPlayer=new YT.Player('dsFrame',{events:{onReady:function(){gaDsReady=true;}}});
+  }else if(!window.__gaYtApiLoading){
+    window.__gaYtApiLoading=true;
+    var tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);
+  }
 }
 // career graph
 GAGraph.mount(document.getElementById('careerGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:P.graph.nodes,links:P.graph.links,
