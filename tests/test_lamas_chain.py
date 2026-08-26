@@ -10,6 +10,7 @@ read-only, 2026-08-25), the bouts around them are invented.
 """
 from __future__ import annotations
 
+import json
 from typing import Any
 
 import pytest
@@ -19,12 +20,14 @@ from analysis.lamas_chain import (
     STATE_DEFS,
     STATES,
     anchor,
+    chain_factor,
     chain_of,
     lamas_state,
     markov_block,
     pathways_to_sub,
     reward_risk,
     reward_risk_comparison,
+    rrb,
     transitions,
 )
 
@@ -491,3 +494,314 @@ def test_comparison_skips_a_state_missing_from_one_side() -> None:
     a = reward_risk([chain_of(two_sided(ev("takedown", "Trip", actor="X"),
                                         ev("pass", "Pass", actor="Y")))], n_boot=200)["rows"]
     assert reward_risk_comparison(a, []) == []
+
+
+# ── RRB: two-sided submission absorption ────────────────────────────────────────
+def finished(*events: dict[str, Any], winner: str = "X", id_: str = "f") -> dict[str, Any]:
+    """A bout the corpus records as WON BY SUBMISSION, with the winner named.
+
+    `winner` is what decides which absorbing state the chain falls into — never the finishing
+    event's own `actor_id`, which the corpus files under the loser in seven of the ADCC cycle's
+    twenty-four flagged finishes.
+    """
+    d = two_sided(*events, id_=id_, win_type="SUBMISSION")
+    d["winner"] = winner
+    return d
+
+
+def _rrb(*bouts: dict[str, Any], n_boot: int = 0) -> dict[str, Any]:
+    return rrb([chain_of(b) for b in bouts], n_boot=n_boot)
+
+
+def _by(block: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {r["state"]: r for r in block["rows"]}
+
+
+# The deterministic fixture every absorption assertion below is read off: Y clinches, then X
+# takes down, passes and finishes. One path, no branching, so every absorption probability is
+# exactly 0 or 1 and can be checked by eye rather than by re-running the solver.
+def _one_path(winner: str = "X", id_: str = "f") -> dict[str, Any]:
+    return finished(ev("control", "Collar Tie", actor="Y"),
+                    ev("takedown", "Trip", actor="X"),
+                    ev("pass", "Pass", actor="X"),
+                    ev("submission", "RNC", successful=True, actor="X"),
+                    winner=winner, id_=id_)
+
+
+def test_absorption_is_hand_computable_on_a_single_deterministic_chain() -> None:
+    by = _by(_rrb(_one_path()))
+    # CDP is Y's action and X wins: from CDP the finish is the OPPONENT's, with certainty.
+    assert (by["CDP"]["p_sub_own"]["p"], by["CDP"]["p_sub_opp"]["p"]) == (0.0, 1.0)
+    assert by["CDP"]["balance"] == -1.0 and by["CDP"]["sub_share"] == 0.0
+    # TKDA and GPSA are X's, and X finishes.
+    for s in ("TKDA", "GPSA"):
+        assert (by[s]["p_sub_own"]["p"], by[s]["p_sub_opp"]["p"]) == (1.0, 0.0), s
+        assert by[s]["balance"] == 1.0 and by[s]["sub_share"] == 1.0
+
+
+def test_the_side_of_the_finish_comes_from_the_winner_not_from_the_event_actor() -> None:
+    """The same four events, with only `winner` changed, must flip every row.
+
+    This is the rule that matters most in practice: the finishing event is filed under the
+    LOSER in a third of the ADCC cycle's flagged finishes, so an implementation that read the
+    side off `actor_id` would pass every other test in this file and still be wrong there.
+    """
+    x_won, y_won = _by(_rrb(_one_path("X"))), _by(_rrb(_one_path("Y")))
+    for s in ("CDP", "TKDA", "GPSA"):
+        assert x_won[s]["p_sub_own"]["p"] == y_won[s]["p_sub_opp"]["p"], s
+        assert x_won[s]["balance"] == -y_won[s]["balance"], s
+
+
+def test_a_bout_not_won_by_submission_absorbs_into_the_no_sub_end() -> None:
+    """The third absorbing state is what makes the rows honest — and it is the DEFAULT."""
+    d = two_sided(ev("control", "Collar Tie", actor="Y"), ev("takedown", "Trip", actor="X"),
+                  ev("submission", "RNC", successful=True, actor="X"), win_type="DECISION")
+    d["winner"] = "X"
+    block = _rrb(d)
+    assert block["absorption"]["absorbing_bouts"] == 0
+    assert block["absorption"]["reason_code"] == "no_absorbing_bouts"
+    for r in block["rows"]:
+        assert r["p_sub_own"]["p"] is None and r["p_sub_opp"]["p"] is None
+        assert r["balance"] is None and r["sub_share"] is None
+
+
+def test_a_submission_win_with_no_flagged_sub_still_absorbs() -> None:
+    """Rule 4 carried one step further: the tap marker is the BOUT. A bout won by submission
+    whose chain never reached a flagged `SUB` absorbs at its last step anyway."""
+    b = finished(ev("control", "Collar Tie", actor="Y"), ev("takedown", "Trip", actor="X"),
+                 winner="X")
+    block = _rrb(b)
+    assert block["absorption"]["absorbing_bouts"] == 1
+    assert block["absorption"]["absorbed_without_flagged_sub"] == 1
+    assert _by(block)["CDP"]["p_sub_opp"]["p"] == 1.0
+
+
+def test_a_submission_win_with_no_recorded_winner_does_not_absorb() -> None:
+    """A missing fact is never read as a finish."""
+    b = two_sided(ev("control", "Collar Tie", actor="Y"), ev("takedown", "Trip", actor="X"),
+                  win_type="SUBMISSION")
+    assert _rrb(b)["absorption"]["absorbing_bouts"] == 0
+
+
+def test_rows_are_a_proper_distribution_over_the_three_absorbing_states() -> None:
+    """own + opp + no-sub-end = 1 for every state that appears, on a branching corpus."""
+    bs = [_one_path("X", f"w{i}") for i in range(4)]
+    bs += [two_sided(ev("control", "Collar Tie", actor="Y"), ev("takedown", "Trip", actor="X"),
+                     ev("control", "Back Control", actor="Y"), id_=f"d{i}") for i in range(4)]
+    for r in _by(_rrb(*bs)).values():
+        if not r["n"]:
+            continue
+        own, opp = r["p_sub_own"]["p"], r["p_sub_opp"]["p"]
+        assert 0.0 <= own + opp <= 1.0 + 1e-9, r
+        assert r["balance"] == round(own - opp, 4)
+        assert r["sub_share"] == round(own / (own + opp), 4) if own + opp else True
+
+
+def test_by_next_mover_splits_the_row_on_who_acts_next() -> None:
+    """From `CDP`, handing off to the finisher and keeping the exchange must differ.
+
+    Both arms come from one state so the split cannot be an artefact of two populations: in
+    `keep` the clincher goes on to finish, in `hand` she is finished by the athlete she hands
+    to.
+    """
+    keep = [finished(ev("guard", "Guard Pull", actor="Y"), ev("control", "Collar Tie", actor="X"),
+                     ev("takedown", "Trip", actor="X"),
+                     ev("submission", "RNC", successful=True, actor="X"),
+                     winner="X", id_=f"k{i}") for i in range(3)]
+    hand = [finished(ev("guard", "Guard Pull", actor="Y"), ev("control", "Collar Tie", actor="X"),
+                     ev("takedown", "Trip", actor="Y"),
+                     ev("submission", "RNC", successful=True, actor="Y"),
+                     winner="Y", id_=f"h{i}") for i in range(3)]
+    arms = _by(_rrb(*keep, *hand))["CDP"]["by_next_mover"]
+    assert arms["own"]["n"] == 3 and arms["opp"]["n"] == 3
+    assert arms["own"]["balance"] == 1.0            # kept it, and finished
+    assert arms["opp"]["balance"] == -1.0           # handed it over, and was finished
+
+
+def test_by_next_mover_excludes_the_appearance_that_is_itself_the_last_step() -> None:
+    """Both arms condition on HAVING a successor, so a terminal appearance is in neither."""
+    row = _by(_rrb(_one_path()))["SUB"]
+    assert row["n"] == 1 and row["n_terminal"] == 1
+    for arm in row["by_next_mover"].values():
+        assert arm["n"] == 0 and arm["balance"] is None
+        assert arm["reason_code"] == "no_transitions"
+
+
+def test_the_absorbing_bout_gate_withholds_every_interval_below_five_finishes() -> None:
+    """The gate this layer ADDS. A row can rest on ten bouts of appearances while all of its
+    absorbing mass traces to four finishes, and nothing else in the block would say so."""
+    bs = [_one_path("X", f"w{i}") for i in range(4)]
+    bs += [two_sided(ev("control", "Collar Tie", actor="Y"), ev("takedown", "Trip", actor="X"),
+                     ev("pass", "Pass", actor="X"), id_=f"d{i}") for i in range(8)]
+    block = _rrb(*bs, n_boot=200)
+    assert block["absorption"]["absorbing_bouts"] == 4
+    assert block["absorption"]["estimable"] is False
+    assert block["absorption"]["reason_code"] == "few_absorbing_bouts"
+    cdp = _by(block)["CDP"]
+    assert cdp["coverage"]["estimable"] is True and cdp["gated"] is False
+    assert cdp["balance"] is not None                      # the point estimate survives
+    assert cdp["balance_lo"] is None and cdp["balance_hi"] is None
+    assert cdp["p_sub_own"]["lo"] is None and cdp["sub_share"] is not None
+    assert cdp["share_lo"] is None
+    assert all(a["balance_lo"] is None for a in cdp["by_next_mover"].values())
+
+
+def test_the_gate_passes_at_five_finishes_and_yields_a_clustered_interval() -> None:
+    bs = [_one_path("X", f"w{i}") for i in range(5)]
+    bs += [two_sided(ev("control", "Collar Tie", actor="Y"), ev("takedown", "Trip", actor="X"),
+                     ev("pass", "Pass", actor="X"), id_=f"d{i}") for i in range(8)]
+    block = _rrb(*bs, n_boot=400)
+    assert block["absorption"]["estimable"] is True
+    cdp = _by(block)["CDP"]
+    assert cdp["gated"] is True
+    assert cdp["balance_lo"] is not None and cdp["balance_hi"] is not None
+    assert cdp["balance_lo"] <= cdp["balance"] <= cdp["balance_hi"]
+    assert cdp["p_sub_own"]["grade"] != "none"
+
+
+def test_rrb_refuses_the_same_bouts_the_reward_risk_gate_does() -> None:
+    """More actor-dependent, never less: the side of every transition is that field."""
+    single = finished(ev("control", "Collar Tie", actor="X"),
+                      ev("submission", "RNC", successful=True, actor="X"))
+    block = _rrb(single)
+    assert block["absorption"]["usable_bouts"] == 0
+    assert block["absorption"]["bouts_refused"] == {"single_actor": 1}
+    assert all(r["n"] == 0 for r in block["rows"])
+
+
+def test_rrb_rows_are_the_twelve_states_in_the_fixed_order() -> None:
+    """Fixed order, not ranked — a reader compares a state across five corpora, and a table
+    that re-sorts itself per corpus turns that into a search."""
+    for block in (_rrb(_one_path()), _rrb()):
+        assert [r["state"] for r in block["rows"]] == list(STATES)
+
+
+def test_rrb_is_deterministic() -> None:
+    bs = [_one_path("X", f"w{i}") for i in range(5)]
+    bs += [two_sided(ev("control", "Collar Tie", actor="Y"), ev("takedown", "Trip", actor="X"),
+                     ev("pass", "Pass", actor="X"), id_=f"d{i}") for i in range(8)]
+    a = _rrb(*bs, n_boot=300)
+    b = _rrb(*bs, n_boot=300)
+    assert json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True)
+
+
+def test_expected_actions_to_absorption_is_published() -> None:
+    """The diagnostic that explains why `balance` is flat: how far the chain runs before it
+    ends. Without it a reader has no way to tell a mixed-out zero from a measured one."""
+    row = _by(_rrb(_one_path()))["CDP"]
+    # Actions from this one until the bout ends, INCLUSIVE: CDP, TKDA, GPSA, SUB.
+    assert row["expected_actions"] == 4.0
+
+
+# ── chain factor ────────────────────────────────────────────────────────────────
+def _cf(*bouts: dict[str, Any], n_boot: int = 0) -> dict[str, dict[str, Any]]:
+    return {r["state"]: r
+            for r in chain_factor([chain_of(b) for b in bouts], n_boot=n_boot)["rows"]}
+
+
+def test_chain_factor_counts_a_run_of_the_same_athlete_at_depth_two() -> None:
+    by = _cf(two_sided(ev("control", "Collar Tie", actor="X"),
+                       ev("takedown", "Trip", actor="X"),
+                       ev("pass", "Pass", actor="X"),
+                       ev("control", "Back Control", actor="Y")))
+    assert (by["CDP"]["n"], by["CDP"]["k"], by["CDP"]["factor"]["p"]) == (1, 1, 1.0)
+    # TKDA's window is X, X, Y — the run breaks on the second step.
+    assert (by["TKDA"]["n"], by["TKDA"]["k"]) == (1, 0)
+
+
+def test_chain_factor_breaks_on_the_first_step_too() -> None:
+    by = _cf(two_sided(ev("control", "Collar Tie", actor="X"),
+                       ev("takedown", "Trip", actor="Y"),
+                       ev("pass", "Pass", actor="Y")))
+    assert (by["CDP"]["n"], by["CDP"]["k"]) == (1, 0)
+
+
+def test_an_appearance_without_two_following_actions_is_out_of_the_denominator() -> None:
+    """build_graph's rule at depth two, and the drop is COUNTED rather than implied."""
+    by = _cf(two_sided(ev("control", "Collar Tie", actor="X"),
+                       ev("takedown", "Trip", actor="X"),
+                       ev("pass", "Pass", actor="Y")))
+    assert (by["TKDA"]["n"], by["TKDA"]["n_short"]) == (0, 1)
+    assert (by["GPSA"]["n"], by["GPSA"]["n_short"]) == (0, 1)
+    assert by["CDP"]["n"] == 1
+
+
+def test_a_window_with_an_unknown_actor_leaves_the_denominator_and_is_counted() -> None:
+    """A two-valued statistic has no neutral outcome, so an unknown cannot be parked at 0 the
+    way `reward_risk` parks it — scoring it a failure would measure annotation coverage."""
+    mid = ev("takedown", "Trip", actor="X")
+    mid["actor_id"] = None
+    by = _cf(two_sided(ev("control", "Collar Tie", actor="X"), mid,
+                       ev("pass", "Pass", actor="X"),
+                       ev("control", "Back Control", actor="Y")))
+    assert (by["CDP"]["n"], by["CDP"]["n_unknown_actor"]) == (0, 1)
+
+
+def test_chain_factor_gate_withholds_both_intervals_together() -> None:
+    by = _cf(two_sided(ev("control", "Collar Tie", actor="X"),
+                       ev("takedown", "Trip", actor="X"),
+                       ev("pass", "Pass", actor="X"),
+                       ev("control", "Back Control", actor="Y")), n_boot=200)
+    r = by["CDP"]
+    assert r["gated"] is False
+    assert r["factor"]["lo"] is None and r["factor_lo"] is None and r["factor_hi"] is None
+
+
+def test_chain_factor_gate_passes_over_five_bouts_and_publishes_both() -> None:
+    bs = [two_sided(ev("control", "Collar Tie", actor="X"), ev("takedown", "Trip", actor="X"),
+                    ev("pass", "Pass", actor="X"), ev("control", "Back Control", actor="Y"),
+                    id_=f"b{i}") for i in range(6)]
+    by = _cf(*bs, n_boot=400)
+    r = by["CDP"]
+    assert (r["n"], r["k"], r["bouts"]) == (6, 6, 6) and r["gated"] is True
+    assert r["factor"]["lo"] is not None
+    assert r["factor_lo"] is not None and r["factor_hi"] is not None
+
+
+def test_chain_factor_refuses_the_actor_gated_bouts() -> None:
+    single = two_sided(ev("control", "Collar Tie", actor="X"),
+                       ev("takedown", "Trip", actor="X"), ev("pass", "Pass", actor="X"))
+    by = _cf(single)
+    assert all(r["n"] == 0 for r in by.values())
+
+
+def test_chain_factor_rows_are_the_twelve_states_in_the_fixed_order() -> None:
+    assert list(_cf(two_sided(ev("control", "Collar Tie", actor="X"),
+                              ev("takedown", "Trip", actor="Y")))) == list(STATES)
+
+
+def test_chain_factor_is_deterministic() -> None:
+    bs = [two_sided(ev("control", "Collar Tie", actor="X"), ev("takedown", "Trip", actor="X"),
+                    ev("pass", "Pass", actor="X"), ev("control", "Back Control", actor="Y"),
+                    id_=f"b{i}") for i in range(6)]
+    chains = [chain_of(b) for b in bs]
+    assert json.dumps(chain_factor(chains, n_boot=300), sort_keys=True) == \
+        json.dumps(chain_factor(chains, n_boot=300), sort_keys=True)
+
+
+# ── both blocks inside the division block ───────────────────────────────────────
+def test_markov_block_carries_both_new_blocks_in_the_shape_the_page_reads() -> None:
+    b = markov_block([_one_path("X", f"w{i}") for i in range(2)])
+    for key in ("rrb", "chain_factor"):
+        assert len(b[key]["rows"]) == len(STATES), key
+        assert b[key]["caveats"], key
+    assert b["rrb"]["method"] and b["chain_factor"]["definition"]
+    assert b["rrb"]["absorption"]["absorbing_states"] == ["SUB_OWN", "SUB_OPP", "NO_SUB_END"]
+
+
+def test_n_boot_zero_skips_every_bootstrap_and_still_ships_the_full_shape() -> None:
+    """`markov_layer` rebuilds this block once per cut only to COUNT refused rows."""
+    bs = [_one_path("X", f"w{i}") for i in range(6)]
+    b = markov_block(bs, n_boot=0)
+    assert len(b["rrb"]["rows"]) == len(STATES)
+    assert b["rrb"]["absorption"]["boot"]["n"] == 0
+    assert all(r["balance_lo"] is None for r in b["rrb"]["rows"])
+    assert all(r["factor_lo"] is None for r in b["chain_factor"]["rows"])
+    assert all(r["score_lo"] is None for r in b["reward_risk"]["rows"])
+
+
+def test_an_empty_division_still_produces_twelve_rows_in_both_blocks() -> None:
+    b = markov_block([])
+    assert [r["state"] for r in b["rrb"]["rows"]] == list(STATES)
+    assert [r["state"] for r in b["chain_factor"]["rows"]] == list(STATES)
+    assert b["rrb"]["absorption"]["reason_code"] == "no_absorbing_bouts"

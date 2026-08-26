@@ -73,6 +73,17 @@ composite = reward − risk. What is translated is the event class, not the stru
 function's docstring. Because the metric stands entirely on the actor field, bouts are REFUSED
 before they enter it (``_actor_reliability``), which the matrix never needs to do.
 
+Two more layers stand on the same chain and answer different questions off it. **RRB**
+(``rrb``) restores Lamas' original submission anchor by PROPAGATING it: the twelve states are
+lifted by side (24 sided states, the side flipping exactly when the exchange changes hands),
+and the chain is solved as an absorbing one with three destinations -- her finish, the
+opponent's finish, and no finish at all -- so a state is scored by where its chains END rather
+than by one sparse immediate cell. **``chain_factor``** asks whether an action induces a RUN:
+the probability that the two actions after it are both hers. Both depend on ``actor_id`` at
+least as heavily as ``reward_risk`` does and pass through the same refusal, and ``rrb`` adds a
+gate of its own on the number of bouts that actually absorb -- four to six per corpus, and
+ZERO in the ADCC 2024 corpus, which is why that corpus publishes no absorption estimate at all.
+
 **Cross-actor by default.** ``chain_of`` links the bout's actions whoever produced them,
 because the paper's chain is the MATCH's flow: CDP is dyadic by definition (both athletes are
 standing and disputing), and the dominance states carry their actor implicitly. The
@@ -99,6 +110,7 @@ from analysis.stats_rigor import (
     bootstrap_ci,
     compare_proportions,
     coverage,
+    grade,
     wilson,
 )
 
@@ -318,6 +330,44 @@ class Chain(NamedTuple):
     # field. `None` when the bout carried no `a_id`/`b_id` to check against.
     actor_reliable: bool | None = None
     actor_refusal: str | None = None
+    # How this bout ENDED, relative to the chain's last actor -- `"self"` when the athlete who
+    # produced the last action is the one who won by submission, `"other"` when the finish is
+    # the opponent's, `None` when the bout did not end in a submission (or the result is not
+    # readable). Only `rrb` reads it; see `_absorbing_side`.
+    absorbs: str | None = None
+
+
+def _absorbing_side(bout: Mapping[str, Any], steps: Sequence[Step]) -> str | None:
+    """Did this bout end in a submission, and was it the LAST ACTOR's or the opponent's?
+
+    Rule 4 of the module docstring says the tap marker is the BOUT, not the event. This is that
+    rule carried one step further, to the question the matrix never had to ask -- *whose*
+    finish. Two decisions, both measured on this corpus (read-only, 2026-08-25):
+
+    **The side comes from ``winner``, never from the finishing event's ``actor_id``.** Of the 24
+    chains the ADCC cycle truncates at a flagged ``SUB``, **seven** file that submission under
+    the athlete who LOST the bout (six of them in the Trials corpus alone; two in +65 kg, one in
+    the Worlds corpus, none in 65 kg). Reading the side off the event would hand a third of the
+    cycle's finishes to the wrong athlete. The bout result is the least actor-dependent evidence
+    available and it decides.
+
+    **A submission-won bout absorbs even when the chain never reached a flagged ``SUB``.** The
+    absorbing transition hangs on the chain's LAST step whatever that step is, because the fact
+    being recorded is "this bout ended in a submission by W", which is true of the bout and not
+    of any one event. Measured: 2 such bouts in 65 kg, 1 in +65 kg, 2 in the Worlds corpus, 0 in
+    the Trials corpus. Excluding them would systematically undercount finishes, and the
+    alternative -- requiring the flag -- is exactly the naive rule §1.5 already refused.
+
+    ``None`` (i.e. absorb into the third state, "no-sub end") whenever the bout was not won by
+    submission, carries no ``winner``, or ends on a step with no actor. A missing fact is never
+    read as a finish.
+    """
+    if str(bout.get("win_type") or "").strip().upper() != "SUBMISSION":
+        return None
+    winner = bout.get("winner")
+    if winner is None or not steps or steps[-1].actor_id is None:
+        return None
+    return "self" if str(steps[-1].actor_id) == str(winner) else "other"
 
 
 def chain_of(bout: Mapping[str, Any]) -> Chain:
@@ -346,7 +396,7 @@ def chain_of(bout: Mapping[str, Any]) -> Chain:
             break
     reliable, refusal = _actor_reliability(bout, steps)
     return Chain(str(bout.get("id")), steps, mapped, skipped, skipped_labels, after, truncated,
-                 reliable, refusal)
+                 reliable, refusal, _absorbing_side(bout, steps))
 
 
 def _actor_reliability(bout: Mapping[str, Any],
@@ -534,7 +584,7 @@ def reward_risk(chains: Sequence[Chain], n_boot: int = N_BOOT) -> dict[str, Any]
         score = round((r_k - k_k) / denom, 4) if denom else None
         lo: float | None = None
         hi: float | None = None
-        if cov.estimable and denom:
+        if cov.estimable and denom and n_boot:
             _, b_lo, b_hi = bootstrap_ci(scored, fmean, n_boot=n_boot, groups=bl)
             lo, hi = round(b_lo, 4), round(b_hi, 4)
         rows.append({
@@ -597,6 +647,565 @@ def reward_risk_comparison(a_rows: Sequence[Mapping[str, Any]],
                 ra["reward"]["k"], ra["n"], rb["reward"]["k"], rb["n"]).to_dict()
         out.append(row)
     return out
+
+
+# ── RRB: two-sided submission absorption ────────────────────────────────────────
+# `reward_risk` above answers "who acts next". This answers "who FINISHES", propagated through
+# the chain instead of read off one cell -- Lamas' reward-risk question with its original
+# submission anchor restored, which the one-step reading had to give up (see `reward_risk`'s
+# docstring: 10-20 `SUB` events per division make a one-step submission numerator 0-3 nearly
+# everywhere). Propagation is what buys the anchor back: every appearance of a state contributes
+# through the routes leaving it, not only through its own immediate successor.
+#
+# The state space is LIFTED BY SIDE. Lamas' twelve states carry no owner, so "own submission"
+# has no meaning in them; each state is split into (state, side) with side relative to the
+# athlete who performed the state we started from -- 24 transient states. A transition keeps the
+# side when `same_actor` and flips it otherwise, which is the only thing the side coordinate
+# ever does, so the sided kernel is fully determined by the 12x12x2 array of (src, dst,
+# same/switch) counts.
+N_SIDED = 2 * len(STATES)
+_OWN, _OPP, _END = N_SIDED, N_SIDED + 1, N_SIDED + 2
+N_COLS = N_SIDED + 3
+# The three absorbing states, in column order. Published so a renderer names them from the
+# export rather than from its own glossary.
+ABSORBING_STATES: tuple[str, ...] = ("SUB_OWN", "SUB_OPP", "NO_SUB_END")
+# `stats_rigor.bootstrap_ci`'s own default seed. One seed across the report, and `random.Random`
+# rather than numpy's Generator because numpy does not promise a stable stream across versions
+# and this report claims a rebuild reproduces every number.
+SEED = 20260820
+
+RRB_CAVEATS: tuple[str, ...] = (
+    "O LADO da finalização vem de `winner`, nunca do `actor_id` do evento de finalização. "
+    "Das 24 cadeias que o ciclo ADCC trunca numa SUB marcada, SETE arquivam essa finalização "
+    "sob a atleta que PERDEU. Medido também o efeito hoje: entre as lutas que passam pela "
+    "recusa por atribuição, as duas regras concordam em CEM POR CENTO dos casos (zero "
+    "divergências de lado nos cinco recortes) — as sete mal-arquivadas estão justamente nas "
+    "lutas que o portão recusa. A regra é uma garantia contra o portão afrouxar, não um "
+    "conserto de números atuais.",
+    "Uma luta vencida por finalização absorve MESMO quando a cadeia nunca chegou a uma SUB "
+    "marcada: a transição absorvente é pendurada no último passo da cadeia, porque o fato "
+    "registrado é 'esta luta acabou em finalização de W', que é da LUTA e não de um evento. "
+    "ESTE braço da regra move número: ele traz 1 luta em 65 kg e 1 em +65 kg, e é essa "
+    "segunda que leva +65 kg de 4 para 5 lutas absorventes, ou seja, do lado recusado para o "
+    "lado estimável do portão.",
+    "Esta camada depende de `actor_id` MAIS que o `reward_risk`: o campo decide o lado de cada "
+    "transição (o levantamento por lado) E de quem é a aparição de partida. As lutas passam "
+    "pela MESMA recusa (`one_sided` + `single_actor`) antes de entrar, e a taxa de recusa é a "
+    "mesma do bloco `reward_risk`.",
+    "A EVIDÊNCIA ABSORVENTE VEM DE POUQUÍSSIMAS LUTAS. Depois da recusa por atribuição sobram "
+    "4 lutas com finalização em 65 kg, 5 em +65 kg, 6 nas Trials, 6 no ciclo completo e ZERO "
+    "no Mundial 2024. `absorption.absorbing_bouts` é o número que governa a tabela inteira: "
+    "abaixo do corte de cobertura nenhum intervalo é publicado, e em zero nem as estimativas "
+    "pontuais são — doze `0,000` diriam 'medimos risco nenhum' quando o certo é 'não medimos'.",
+    "A PROPAGAÇÃO ACHATA O SINAL, e isso é uma propriedade da cadeia, não um defeito da "
+    "implementação. O lado troca em 22% a 47% das transições, enquanto a absorção leva de 4,6 a "
+    "13,9 ações nas linhas que passam pelo portão (`expected_actions`): a cadeia esquece de "
+    "quem era a iniciativa muito antes de acabar. Fora de `SUB`, nenhum estado passa de "
+    "±0,074 de `balance` em recorte nenhum. É a resposta, não um ruído a ser removido — quem "
+    "quiser o sinal de um passo tem o `reward_risk` ao lado e o `by_next_mover` aqui dentro.",
+    "A linha `SUB` é a exceção, e por construção: boa parte das aparições de SUB É o passo "
+    "terminal que absorve (`n_terminal`), então o valor dela reafirma a regra de truncamento "
+    "do §1.5 mais do que faz uma afirmação prospectiva.",
+    "Comparável DENTRO de um recorte, não ENTRE recortes. O resultado absorvente (`win_type` + "
+    "`winner`) é imune ao lote de anotação, mas as LINHAS são por estado e a regra 3 manda "
+    "`successful` ausente para o estado de tentativa — então a partição das aparições segue o "
+    "lote, exatamente como no `reward_risk`.",
+)
+
+CHAIN_FACTOR_CAVEATS: tuple[str, ...] = (
+    "PROFUNDIDADE 2 é deliberada. A profundidade 1 — 'a próxima ação é da mesma atleta' — já "
+    "está publicada: é literalmente o braço `reward` do `reward_risk`. Um fator de "
+    "encadeamento que parasse no primeiro passo seria esse número com outro nome.",
+    "Aparição com menos de duas ações seguintes na cadeia fica FORA do denominador "
+    "(`n_short`), a mesma convenção de `analysis/transitions/build_graph.py` que o "
+    "`reward_risk` herda: aparição sem sucessora não é pontuada. O viés que isso cria está "
+    "nomeado — as cadeias que acabam rápido são justamente as que uma finalização encerrou, "
+    "então o fator descreve o fluxo que sobreviveu.",
+    "Janela com atriz desconhecida em qualquer um dos três passos sai do denominador "
+    "(`n_unknown_actor`), porque uma proporção de duas saídas não tem valor neutro: contá-la "
+    "como falha faria o fator medir a cobertura da anotação. Medido: ZERO janelas assim nos "
+    "cinco recortes, já que a recusa por atribuição entra antes.",
+    "Intervalo duplo pelo mesmo motivo do `reward_risk`: Wilson sobre as aparições (a "
+    "convenção de toda célula deste bloco) e bootstrap percentil AGRUPADO POR LUTA sobre os "
+    "valores 0/1, cuja média É o fator. Abaixo do corte de cobertura por luta os dois são "
+    "retirados.",
+    "Comparável DENTRO de um recorte, não ENTRE recortes: as linhas são por estado e a "
+    "partição segue o lote de anotação (§7.2).",
+)
+
+CHAIN_FACTOR_DEPTH = 2
+
+
+def _sided(state: str, side: int) -> int:
+    """Row/column index of ``(state, side)``; side 0 is the reference athlete, 1 the opponent."""
+    return 2 * STATE_INDEX[state] + side
+
+
+def _chain_counts(ch: Chain) -> tuple[Any, int]:
+    """One chain's ``(24, 27)`` sided transition + absorption counts, and what it dropped.
+
+    Every appearance contributes exactly one unit of row mass: a transition when it has a
+    successor, an absorbing transition when it is the chain's last step. That is what makes the
+    rows honest -- the three absorbing columns are not an afterthought, they are where the
+    appearances that end the fight go.
+
+    Both sides of every appearance are counted (the row for ``(s, own)`` and the row for
+    ``(s, opp)``), because the kernel is a statement about the ACTION, not about which athlete
+    is being followed. Reading it from the opponent's side is the same evidence mirrored, which
+    is what makes the two rows exact mirrors of each other -- asserted in the tests.
+
+    A transition whose own or whose successor's actor is unknown carries no side and is
+    DROPPED, not neutralised: `reward_risk` can leave an unknown at 0 because its score is
+    signed, but a sided kernel has no neutral side to put it on and inventing one would be
+    worse than losing it. The count comes back so the loss is published (measured: zero in all
+    five corpora -- the actor gate removes those bouts first).
+    """
+    import numpy as np
+
+    m = np.zeros((N_SIDED, N_COLS))
+    st = ch.steps
+    dropped = 0
+    for a, b in zip(st, st[1:]):
+        if a.actor_id is None or b.actor_id is None:
+            dropped += 1
+            continue
+        same = a.actor_id == b.actor_id
+        for side in (0, 1):
+            m[_sided(a.state, side), _sided(b.state, side if same else 1 - side)] += 1
+    if st:
+        last = st[-1].state
+        for side in (0, 1):
+            if ch.absorbs is None:
+                col = _END
+            elif (ch.absorbs == "self") == (side == 0):
+                col = _OWN
+            else:
+                col = _OPP
+            m[_sided(last, side), col] += 1
+    return m, dropped
+
+
+def _absorption(counts: Any) -> tuple[Any, Any, Any, Any]:
+    """Absorption probabilities, both next-mover arms, and expected actions, for a batch.
+
+    ``counts`` is ``(D, 24, 27)``. Returns ``(B, arm_own, arm_opp, steps)`` where ``B`` is
+    ``(D, 24, 3)`` -- the probability of each absorbing outcome from each sided state -- and the
+    two arms are ``(D, 12, 3)``, the same thing conditioned on who moves next.
+
+    **The solve.** Row-normalise, split into the transient block ``Q`` (24x24) and the absorbing
+    block ``R`` (24x3), and take the fundamental-matrix answer ``B = (I - Q)^-1 R``. Exact, not
+    iterated: `path_to_victory`'s value iteration is the right tool when a discount factor makes
+    the operator a contraction, and here there is no discount -- the contraction comes from
+    absorption itself, which in this corpus takes 5 to 14 steps, so iterating to a useful
+    tolerance would cost hundreds of sweeps per bootstrap draw for an answer linear algebra
+    gives in one.
+
+    **Why this does not call `analysis/systems_path_strength.absorption`,** which is the repo's
+    other absorbing-chain solver and was checked before this one was written. Two reasons, both
+    concrete. It is built for **exactly two** absorbing states -- one named `desired`, absorbing
+    at 1, and one implicit EXIT taking whatever a row does not account for -- so three outcomes
+    with three separate probabilities would mean running it twice and reinterpreting EXIT
+    differently on each pass. And it is a pure-Python Gauss-Seidel iteration to 1e-9, which is
+    the right shape for the handful of solves a systems report needs and the wrong one for the
+    **ten thousand** this layer runs (2000 bootstrap draws x 5 corpora). The two agree on the
+    mathematics and on the honesty rule -- a third state for "did not get there" -- and they
+    should stay two functions.
+
+    **``I - Q`` cannot be singular here, and the reason is structural rather than lucky.** Every
+    state that appears at all appears inside some chain, and every chain ENDS -- its last step
+    carries an absorbing transition by construction. So from any appearing state there is a
+    positive-probability path, along the very chain the appearance sits in, to an absorbing
+    column; a closed recurrent class among the transient states is therefore impossible. A state
+    that does NOT appear has an all-zero row, which leaves ``I - Q``'s row as the identity's:
+    still non-singular, and its answer is the zero vector, which is never read because such a
+    state is refused upstream for having no appearances at all.
+
+    **The arms.** ``by_next_mover`` conditions on the first step: the own arm re-weights the
+    successors reached WITHOUT changing hands and reads their ``(t, own)`` rows; the opp arm
+    takes the successors that changed hands and reads their ``(t, opp)`` rows. Both are
+    conditional on the appearance HAVING a successor, so the immediate finish -- an appearance
+    that is itself the last step -- is out of both by construction. Said plainly in the method
+    text, because it is the one way the arms can fail to average back to the unconditional row.
+    """
+    import numpy as np
+
+    tot = counts.sum(-1, keepdims=True)
+    p = np.divide(counts, tot, out=np.zeros_like(counts), where=tot > 0)
+    q, r = p[..., :N_SIDED], p[..., N_SIDED:]
+    fundamental = np.linalg.inv(np.eye(N_SIDED) - q)
+    b = fundamental @ r
+    steps = fundamental.sum(-1)
+    # (D, 12, 12, 2): from each sided row, the successor counts split by state and by whether
+    # the exchange changed hands. Only the reference-side rows (even indices) start an arm.
+    split = counts[..., :N_SIDED].reshape(counts.shape[0], N_SIDED, len(STATES), 2)[:, ::2]
+    arms = []
+    for side in (0, 1):
+        w = split[..., side]                                   # (D, 12, 12)
+        denom = w.sum(-1, keepdims=True)
+        w = np.divide(w, denom, out=np.zeros_like(w), where=denom > 0)
+        arms.append(w @ b[:, side::2, :])                       # rows (t, side)
+    return b, arms[0], arms[1], steps
+
+
+def _cluster_weights(n_bouts: int, n_boot: int, seed: int = SEED) -> Any:
+    """``(n_boot, n_bouts)`` multiplicities of a bout-clustered bootstrap.
+
+    Drawing multiplicities instead of gathering rows is the same resample -- a bout drawn twice
+    contributes twice -- and it is what keeps the memory flat: the alternative materialises
+    ``n_boot x n_bouts`` count matrices, 400 MB at 40 bouts and 2000 draws, for an answer that
+    is one 2000x40 matrix product away.
+    """
+    import random
+
+    import numpy as np
+
+    rng = random.Random(seed)
+    w = np.zeros((n_boot, n_bouts))
+    for d in range(n_boot):
+        for _ in range(n_bouts):
+            w[d, rng.randrange(n_bouts)] += 1
+    return w
+
+
+def _p(x: float) -> float:
+    return round(max(0.0, min(1.0, float(x))), 4)
+
+
+def _absorption_estimate(p: float | None, lo: float | None, hi: float | None,
+                         n: int) -> dict[str, Any]:
+    """`Estimate`-shaped, with ``k`` explicitly null and ``kind`` naming what it is.
+
+    A renderer reads ``p``/``lo``/``hi``/``grade`` off this exactly as it reads a Wilson cell,
+    which is the point -- but there is no ``k`` here and putting the appearance count in that
+    field would make a solved quantity look like a counted one. The grade comes from
+    `stats_rigor.grade` on the bootstrap half-width, so a confidence badge means the same thing
+    on this table as on every other one in the report.
+    """
+    half = None if lo is None or hi is None else round((hi - lo) / 2, 4)
+    return {"k": None, "n": n, "p": p, "lo": lo, "hi": hi, "half": half,
+            "grade": grade(n, half), "kind": "absorption"}
+
+
+def _pct(draws: Any, keep: Any) -> tuple[float | None, float | None]:
+    """2.5/97.5 percentiles over the draws where the state was present at all."""
+    import numpy as np
+
+    if keep.sum() < MIN_BOOT_DRAWS:
+        return None, None
+    lo, hi = np.percentile(draws[keep], [2.5, 97.5])
+    return round(float(lo), 4), round(float(hi), 4)
+
+
+# A percentile over a handful of surviving draws is noise wearing an interval. Draws in which a
+# state never appears carry no information about it and are dropped; if that leaves too few, the
+# interval is withheld like any other ungated one.
+MIN_BOOT_DRAWS = 100
+
+
+def rrb(chains: Sequence[Chain], n_boot: int = N_BOOT) -> dict[str, Any]:
+    """Reward-risk BALANCE: the probability each side finishes, propagated through the chain.
+
+    Per state ``s``, taken as performed by the reference athlete:
+
+        p_sub_own(s)  = P(the bout ends in a submission BY HER      | an appearance of s)
+        p_sub_opp(s)  = P(the bout ends in a submission by the OTHER| an appearance of s)
+        balance(s)    = p_sub_own - p_sub_opp
+        sub_share(s)  = p_sub_own / (p_sub_own + p_sub_opp)
+
+    plus a third absorbing outcome, no-sub end, which is not published as a column because it is
+    ``1 - own - opp`` and a renderer that prints all three invites a reader to check arithmetic
+    instead of reading the finding.
+
+    **Why two relations and not one.** ``balance`` is pre-registered as the PRIMARY, for one
+    reason that is about this repo and not about statistics: `reward_risk` already composes its
+    two arms as a difference (`build_graph`'s convention, kept verbatim), and a second composite
+    on the same page composing them a different way would make the two tables silently
+    incomparable. ``sub_share`` is the SECONDARY and answers the question the difference cannot:
+    at ``own = 0.05, opp = 0.01`` the difference is +0.04, which reads as nothing, while the
+    share is 0.83, which reads as the state being five times likelier to end in her finish than
+    the opponent's. **The plain ratio is rejected**: it is unbounded, undefined wherever
+    ``p_sub_opp`` is zero -- the common case in this data -- and the share is its bounded
+    monotone transform ``r / (1 + r)``, so nothing is lost but the blow-up.
+
+    **Three gates, in order.**
+
+    ``absorbing_bouts == 0``   no estimate at all. Every probability is ``null`` with
+                               ``reason_code: no_absorbing_bouts``. Twelve zeroes would say
+                               "we measured no risk"; the truth is "we measured nothing", and
+                               this is the case in the ADCC 2024 corpus, where the actor gate
+                               and the finish rule leave zero submission-won bouts.
+    corpus coverage refused    the point estimates survive -- they are a deterministic function
+                               of the counts, like ``pathways_to_sub``' ``p_chain`` -- and every
+                               interval is withheld with ``reason_code: few_absorbing_bouts``.
+                               This is `bootstrap_ci`'s own instruction taken seriously: with a
+                               handful of clusters it is unstable in both directions, and here
+                               the clusters that matter are the FINISHES, not the appearances.
+                               65 kg has four of them and is refused by this gate.
+    row coverage refused       the usual per-row bout-cluster gate, same rule as the matrix.
+
+    The two outer gates are the ones this layer adds, and they are the ones that matter: a row
+    can sit on ten bouts' worth of appearances while every gram of its absorbing mass traces
+    back to the same four finishes, and nothing else in the report would have said so.
+
+    **What it does NOT do.** It does not answer "what actually happened after this state" -- the
+    empirical forward-looking version of the same question, which credits every appearance in a
+    bout with that bout's own ending. That reading discriminates far more sharply (65 kg `PGD`
+    -0.500 against this table's -0.029) and is not published, because its effective sample is
+    the number of absorbing BOUTS, four to six, wearing an appearance count of up to sixty-seven
+    as its n. Every row of it is refused by the same gate as soon as the gate is applied to the
+    right unit. It is named here so the omission is a decision.
+    """
+    import numpy as np
+
+    usable = [ch for ch in chains if ch.actor_reliable]
+    refused: Counter[str] = Counter()
+    for ch in chains:
+        if not ch.actor_reliable:
+            refused[ch.actor_refusal or "unknown"] += 1
+
+    per_state: dict[str, Counter[str]] = defaultdict(Counter)
+    arm_bouts: dict[tuple[str, int], Counter[str]] = defaultdict(Counter)
+    terminal: Counter[str] = Counter()
+    mats = np.zeros((max(1, len(usable)), N_SIDED, N_COLS))
+    dropped = 0
+    for i, ch in enumerate(usable):
+        mats[i], d = _chain_counts(ch)
+        dropped += d
+        for st in ch.steps:
+            per_state[st.state][ch.bout_id] += 1
+        for a, b in zip(ch.steps, ch.steps[1:]):
+            if a.actor_id is not None and b.actor_id is not None:
+                arm_bouts[(a.state, 0 if a.actor_id == b.actor_id else 1)][ch.bout_id] += 1
+        if ch.steps:
+            terminal[ch.steps[-1].state] += 1
+
+    absorbing = [ch for ch in usable if ch.absorbs is not None]
+    # One absorption per bout, so the counts ARE ones and `effective_n` is the bout count. That
+    # is the honest shape of this evidence: a fight contributes one ending, however many
+    # appearances it also contributed.
+    cov_abs = coverage([1] * len(absorbing))
+    have_any = bool(len(absorbing))
+    corpus_reason = (None if cov_abs.estimable
+                     else ("no_absorbing_bouts" if not have_any else "few_absorbing_bouts"))
+
+    total = mats.sum(0)[None]
+    b_abs, arm_own, arm_opp, steps = _absorption(total)
+    appear = total[0].sum(-1)
+
+    d_b: Any = None       # (n_boot, 24, 3) absorption per draw, or None when nothing was drawn
+    d_own: Any = None
+    d_opp: Any = None
+    d_app: Any = None
+    if n_boot and cov_abs.estimable and usable:
+        drawn = np.tensordot(_cluster_weights(len(usable), n_boot), mats, axes=(1, 0))
+        d_b, d_own, d_opp, _ = _absorption(drawn)
+        d_app = drawn.sum(-1)
+
+    rows: list[dict[str, Any]] = []
+    for s in STATES:
+        i = _sided(s, 0)
+        n = int(appear[i])
+        cov = coverage(list(per_state[s].values()))
+        gated = bool(cov.estimable and cov_abs.estimable and n)
+        row: dict[str, Any] = {
+            "state": s, "n": n, "bouts": len(per_state[s]),
+            "n_terminal": terminal[s],
+            # Actions from this one until the bout ends, INCLUSIVE -- (I - Q)^-1 . 1 counts
+            # the visit to the starting state too. This is the number that makes a flat
+            # `balance` legible: a chain that runs fifteen more actions has forgotten whose
+            # initiative it started on long before it absorbs.
+            "expected_actions": round(float(steps[0, i]), 2) if n else None,
+            "gated": gated, "coverage": cov.to_dict(),
+            "reason_code": corpus_reason or cov.reason_code,
+        }
+        if not have_any or not n:
+            row.update({"p_sub_own": _absorption_estimate(None, None, None, n),
+                        "p_sub_opp": _absorption_estimate(None, None, None, n),
+                        "balance": None, "balance_lo": None, "balance_hi": None,
+                        "sub_share": None, "share_lo": None, "share_hi": None,
+                        "by_next_mover": {a: _arm_row(None, 0, Counter(), False, None, None)
+                                          for a in ("own", "opp")},
+                        "reason_code": row["reason_code"] or "no_appearances"})
+            rows.append(row)
+            continue
+
+        own, opp = _p(b_abs[0, i, 0]), _p(b_abs[0, i, 1])
+        keep = None if d_app is None else d_app[:, i] > 0
+        blo = bhi = slo = shi = olo = ohi = plo = phi = None
+        if d_b is not None and keep is not None and gated:
+            olo, ohi = _pct(d_b[:, i, 0], keep)
+            plo, phi = _pct(d_b[:, i, 1], keep)
+            blo, bhi = _pct(d_b[:, i, 0] - d_b[:, i, 1], keep)
+            tot_d = d_b[:, i, 0] + d_b[:, i, 1]
+            slo, shi = _pct(np.divide(d_b[:, i, 0], tot_d, out=np.zeros(len(tot_d)),
+                                      where=tot_d > 0), keep & (tot_d > 0))
+        row.update({
+            "p_sub_own": _absorption_estimate(own, olo, ohi, n),
+            "p_sub_opp": _absorption_estimate(opp, plo, phi, n),
+            "balance": round(own - opp, 4),
+            "balance_lo": blo, "balance_hi": bhi,
+            "sub_share": round(own / (own + opp), 4) if own + opp > 0 else None,
+            "share_lo": slo, "share_hi": shi,
+            "by_next_mover": {
+                name: _arm_row(
+                    (arm_own if side == 0 else arm_opp)[0, STATE_INDEX[s]],
+                    sum(arm_bouts[(s, side)].values()), arm_bouts[(s, side)],
+                    cov_abs.estimable,
+                    None if d_own is None else (d_own if side == 0 else d_opp)[
+                        :, STATE_INDEX[s]],
+                    keep)
+                for side, name in ((0, "own"), (1, "opp"))},
+        })
+        rows.append(row)
+
+    return {
+        "rows": rows,
+        "method": (
+            "Absorção em cadeia com o espaço de estados LEVANTADO POR LADO: cada uma das doze "
+            "ações vira (ação, lado) relativo à atleta que a executou — 24 estados transitórios "
+            "— e a transição mantém o lado quando é da mesma atleta e o inverte quando troca de "
+            "mãos. Três destinos absorventes: finalização PRÓPRIA, finalização da ADVERSÁRIA e "
+            "fim SEM finalização, de modo que cada linha soma 1. `p_sub_own`/`p_sub_opp` são "
+            "as probabilidades de absorção partindo do estado, pela matriz fundamental "
+            "(I − Q)⁻¹R; `balance` = own − opp (primário, mesma composição por diferença do "
+            "`reward_risk`); `sub_share` = own / (own + opp) (secundário — a razão pura foi "
+            "REJEITADA por ser ilimitada e indefinida onde `p_sub_opp` é zero). O lado da "
+            "absorção é decidido pelo `winner` da luta, nunca pelo `actor_id` do evento. "
+            "`by_next_mover` condiciona no primeiro passo e por isso exclui, nos dois braços, a "
+            "aparição que É o passo terminal."),
+        "absorption": {
+            "usable_bouts": len(usable),
+            "bouts_refused": dict(refused),
+            "absorbing_bouts": len(absorbing),
+            "absorbed_self": sum(1 for ch in absorbing if ch.absorbs == "self"),
+            "absorbed_other": sum(1 for ch in absorbing if ch.absorbs == "other"),
+            "absorbed_without_flagged_sub": sum(1 for ch in absorbing if not ch.truncated),
+            "coverage": cov_abs.to_dict(),
+            "estimable": cov_abs.estimable,
+            "reason_code": corpus_reason,
+            "unknown_actor_transitions": dropped,
+            "absorbing_states": list(ABSORBING_STATES),
+            "side_rule_code": "winner_decides_side_never_event_actor",
+            "solve": "fundamental matrix (I - Q)^-1 R, 24 transient states",
+            "boot": {"n": n_boot if d_b is not None else 0, "unit": "bout",
+                     "kind": "cluster percentile", "seed": SEED,
+                     "min_draws": MIN_BOOT_DRAWS},
+        },
+        "caveats": list(RRB_CAVEATS),
+    }
+
+
+def _arm_row(vec: Any, n: int, bouts: Counter[str], corpus_ok: bool,
+             draws: Any, keep: Any) -> dict[str, Any]:
+    """One ``by_next_mover`` arm: the absorption vector reached through that first step."""
+    cov = coverage(list(bouts.values()))
+    gated = bool(corpus_ok and cov.estimable and n)
+    if vec is None or not n:
+        return {"n": n, "bouts": len(bouts), "p_sub_own": None, "p_sub_opp": None,
+                "balance": None, "balance_lo": None, "balance_hi": None, "gated": False,
+                "coverage": cov.to_dict(),
+                "reason_code": "no_transitions" if not n else cov.reason_code}
+    own, opp = _p(vec[0]), _p(vec[1])
+    lo = hi = None
+    if gated and draws is not None and keep is not None:
+        lo, hi = _pct(draws[:, 0] - draws[:, 1], keep)
+    return {"n": n, "bouts": len(bouts), "p_sub_own": own, "p_sub_opp": opp,
+            "balance": round(own - opp, 4), "balance_lo": lo, "balance_hi": hi,
+            "gated": gated, "coverage": cov.to_dict(),
+            "reason_code": None if gated else cov.reason_code}
+
+
+def chain_factor(chains: Sequence[Chain], n_boot: int = N_BOOT) -> dict[str, Any]:
+    """How much an action INDUCES a sequential run of the same athlete's own actions.
+
+    Pre-registered definition, one line and no alternatives applied per state::
+
+        chain_factor(s) = P(the TWO actions following an appearance of s are BOTH by the
+                            athlete who performed s | that appearance has two following actions)
+
+    **Why depth two and not one.** Depth one is already published: "the next action is by the
+    same athlete" is literally `reward_risk`'s ``reward`` arm, and a chain factor that stopped
+    there would be that number wearing a second name. Depth two is the shortest window that says
+    something the initiative table does not -- whether the exchange KEEPS going -- and the two
+    are meant to be read side by side: measured on the whole ADCC cycle, `CDP` retains at 0.54
+    for one step and chains at 0.32 for two, while `BTK` retains at 0.95 and chains at 0.64.
+
+    **Why the joint and not the expected run length.** The alternative pre-registration -- mean
+    length of the same-actor run following the action -- is an expectation over a heavy right
+    tail, where one bout's run of eight moves the state's number more than the other bouts
+    together, and the bout is exactly the unit this corpus cannot spare. The joint probability
+    is bounded, is a proportion, and drops straight into the gating and interval machinery every
+    other cell in this block already uses. The run length is one accumulator away if anyone ever
+    needs a magnitude rather than a rate.
+
+    **The denominator.** Appearances with fewer than two following actions are OUT
+    (``n_short``), which is `build_graph`'s own rule -- an appearance with no successor is not
+    scored -- carried to depth two. The bias it creates is named rather than corrected: chains
+    that end quickly are disproportionately the ones a submission ended, so this describes the
+    flow that survived. Windows with an unknown actor are also out (``n_unknown_actor``, and
+    measured zero in every corpus, because the actor gate removes those bouts first): a
+    two-valued statistic has no neutral outcome to park an unknown on, and scoring it as a
+    failure would turn the factor into a measure of annotation coverage.
+
+    Intervals are the same pair `reward_risk` publishes -- Wilson over appearances for the cell,
+    bout-clustered percentile bootstrap for the same quantity -- and both are withheld together
+    below the bout-cluster gate.
+    """
+    from statistics import fmean
+
+    usable = [ch for ch in chains if ch.actor_reliable]
+    vals: dict[str, list[float]] = defaultdict(list)
+    bl: dict[str, list[str]] = defaultdict(list)
+    short: Counter[str] = Counter()
+    unknown: Counter[str] = Counter()
+    for ch in usable:
+        st = ch.steps
+        for i, step in enumerate(st):
+            window = st[i:i + CHAIN_FACTOR_DEPTH + 1]
+            if len(window) <= CHAIN_FACTOR_DEPTH:
+                short[step.state] += 1
+                continue
+            if any(w.actor_id is None for w in window):
+                unknown[step.state] += 1
+                continue
+            vals[step.state].append(
+                1.0 if all(w.actor_id == window[0].actor_id for w in window[1:]) else 0.0)
+            bl[step.state].append(ch.bout_id)
+
+    rows: list[dict[str, Any]] = []
+    for s in STATES:
+        v, g = vals[s], bl[s]
+        n, k = len(v), int(sum(v))
+        cov = coverage(list(Counter(g).values()))
+        lo: float | None = None
+        hi: float | None = None
+        if cov.estimable and n and n_boot:
+            _, b_lo, b_hi = bootstrap_ci(v, fmean, n_boot=n_boot, groups=g)
+            lo, hi = round(b_lo, 4), round(b_hi, 4)
+        rows.append({
+            "state": s, "n": n, "bouts": len(set(g)), "k": k,
+            "factor": _cell(k, n, cov),
+            "factor_lo": lo, "factor_hi": hi,
+            "n_short": short[s], "n_unknown_actor": unknown[s],
+            "gated": bool(cov.estimable and n),
+            "coverage": cov.to_dict(),
+        })
+    return {
+        "rows": rows,
+        "definition": (
+            f"fator de encadeamento(s) = P(as {CHAIN_FACTOR_DEPTH} ações seguintes à aparição "
+            f"de s são TODAS da mesma atleta que executou s | a aparição tem pelo menos "
+            f"{CHAIN_FACTOR_DEPTH} ações seguintes na cadeia). Profundidade "
+            f"{CHAIN_FACTOR_DEPTH} porque a profundidade 1 já é o braço `reward` do "
+            f"`reward_risk`. Aparição rasa demais e janela com atriz desconhecida ficam fora do "
+            f"denominador (`n_short`, `n_unknown_actor`), a convenção de "
+            f"analysis/transitions/build_graph.py levada a duas ações."),
+        "depth": CHAIN_FACTOR_DEPTH,
+        "usable_bouts": len(usable),
+        "windows": sum(len(v) for v in vals.values()),
+        "boot": {"n": n_boot, "unit": "bout", "kind": "cluster percentile", "seed": SEED},
+        "caveats": list(CHAIN_FACTOR_CAVEATS),
+    }
 
 
 def pathways_to_sub(chains: Sequence[Chain], probs: Sequence[Sequence[float | None]],
@@ -695,12 +1304,17 @@ def anchor(trans: Sequence[Transition]) -> list[dict[str, Any]]:
     return out
 
 
-def markov_block(bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+def markov_block(bouts: Sequence[Mapping[str, Any]], n_boot: int = N_BOOT) -> dict[str, Any]:
     """Everything one division publishes: the matrix, its occupancy, its routes, its anchor.
 
     ``bouts`` is a division's bout set as the caller already built it -- this module does not
     select fights, so the markov section can never describe a different universe from the
     sequence section beside it.
+
+    ``n_boot = 0`` skips every bootstrap and publishes the counts with their intervals withheld.
+    That is not a quality knob: `scripts/bracket_export.markov_layer` rebuilds this block once
+    per point of the cut space purely to COUNT how many rows the gate would refuse there, and
+    paying for three bootstraps per rebuild bought nothing but runtime.
     """
     chains = [chain_of(b) for b in bouts]
     trans = transitions(chains)
@@ -720,7 +1334,13 @@ def markov_block(bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
         "anchor": anchor(trans),
         # `comparison` is filled in by the caller that holds BOTH divisions
         # (`scripts/bracket_export.markov_layer`); one division cannot compare itself.
-        "reward_risk": {**reward_risk(chains), "comparison": []},
+        "reward_risk": {**reward_risk(chains, n_boot), "comparison": []},
+        # Who FINISHES, propagated (`rrb`), and how much an action induces a run of the same
+        # athlete's own actions (`chain_factor`). Both sit beside `reward_risk` rather than
+        # inside it because all three answer different questions off one chain: who acts next,
+        # who taps whom in the end, and whether the exchange keeps going.
+        "rrb": rrb(chains, n_boot),
+        "chain_factor": chain_factor(chains, n_boot),
         "n_bouts": len(bouts),
         "n_transitions": len(trans),
         "n_events_mapped": sum(ch.mapped for ch in chains),
@@ -775,6 +1395,30 @@ def _demo() -> None:
     assert by["GPSA"]["score"] == 1.0                                          # GPSA → same
     assert by["SUBA"]["n"] == 0                                                # no successor
     assert rr["bouts_used"] == 1
+
+    # RRB, hand-computable. Y clinches; X then takes down, passes and submits, and X WINS.
+    # The single chain is deterministic, so every absorption probability is 0 or 1: from CDP
+    # (Y's action) the finish is the OPPONENT's, from TKDA (X's) it is her own.
+    won = {"id": "w", "win_type": "SUBMISSION", "winner": "X", "a_id": "X", "b_id": "Y", "seq": [
+        ev("control", "Collar Tie", "Y"), ev("takedown", "Trip", "X"),
+        ev("pass", "Knee Cut", "X"),
+        {"type": "submission", "label": "RNC", "actor_id": "X", "successful": True},
+    ]}
+    block = rrb([chain_of(won)])
+    by_s = {r["state"]: r for r in block["rows"]}
+    assert block["absorption"]["absorbing_bouts"] == 1, block["absorption"]
+    assert (by_s["CDP"]["p_sub_own"]["p"], by_s["CDP"]["p_sub_opp"]["p"]) == (0.0, 1.0)
+    assert (by_s["TKDA"]["p_sub_own"]["p"], by_s["TKDA"]["p_sub_opp"]["p"]) == (1.0, 0.0)
+    assert by_s["TKDA"]["balance"] == 1.0 and by_s["SUB"]["n_terminal"] == 1
+    # Same events, opposite result: the side comes from `winner`, so every row flips.
+    by_l = {r["state"]: r for r in rrb([chain_of({**won, "winner": "Y"})])["rows"]}
+    assert (by_l["CDP"]["p_sub_own"]["p"], by_l["CDP"]["p_sub_opp"]["p"]) == (1.0, 0.0)
+
+    # chain factor: CDP's window is Y, X, X -- not a run; TKDA's is X, X, X -- one.
+    cf = {r["state"]: r for r in chain_factor([chain_of(won)])["rows"]}
+    assert (cf["CDP"]["n"], cf["CDP"]["k"]) == (1, 0), cf["CDP"]
+    assert (cf["TKDA"]["n"], cf["TKDA"]["k"]) == (1, 1), cf["TKDA"]
+    assert cf["GPSA"]["n"] == 0 and cf["GPSA"]["n_short"] == 1
     print("lamas_chain self-check ok")
 
 

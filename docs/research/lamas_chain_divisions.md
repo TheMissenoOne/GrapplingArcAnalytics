@@ -5,6 +5,17 @@ Runner: `analysis/lamas_chain.py` (mapping, chain, estimation) via `scripts/brac
 `adcc_layer` → the `adcc` key (§7, one whole ADCC qualifying cycle). Tests:
 `tests/test_lamas_chain.py` and `tests/test_bracket_export.py`.
 
+Four layers stand on one chain, and they answer four different questions off it:
+
+| § | block | question |
+|---|---|---|
+| §§2–4 | `markov[div]` / `adcc.corpora[*]` — matrix, occupancy, routes, anchor | where does the action go next |
+| §5 | `reward_risk` | who ACTS next — retention of the initiative |
+| **§8** | **`rrb`** | who FINISHES, propagated to the end of the chain |
+| **§9** | **`chain_factor`** | does the action start a RUN of her own actions |
+
+§§8–9 are reported for all five corpora, so they sit after §7 rather than beside §5.
+
 §§2–6 come from `data/scouting/adcc_2026_women_sequences.json` (58 bouts, 54 with events); §7
 reads `matches` directly. Both regenerated **2026-08-25**; re-running the exporter reproduces
 every number below.
@@ -583,10 +594,16 @@ The `adcc` corpora carry all of these plus three of their own — see §7.1–7.
    between the divisions unless the intervals say so — and most of them do not.
 
 Reward-risk carries five more of its own (`markov[div].reward_risk.caveats`), all of §5: it is
-the only layer standing on `actor_id`; the guard/pass ownership convention is its largest
-uncorrectable error; a terminal appearance is out of the denominator; unknown attribution is
-neutral and never charged; the composite's interval is a bout-clustered bootstrap and is
-withheld entirely below the gate.
+the layer standing most directly on `actor_id`; the guard/pass ownership convention is its
+largest uncorrectable error; a terminal appearance is out of the denominator; unknown
+attribution is neutral and never charged; the composite's interval is a bout-clustered bootstrap
+and is withheld entirely below the gate.
+
+`rrb` carries seven of its own (`…rrb.caveats`, all of §8) and `chain_factor` five
+(`…chain_factor.caveats`, §9) — including the two that govern how either may be read at all:
+the absorbing evidence is four to six bouts per corpus and zero in one of them (§8.4), and
+propagation flattens the balance to near zero in eleven of twelve states because the chain mixes
+faster than it absorbs (§8.6).
 
 ## 7. The ADCC 2023-24 cycle — the same machinery on a different corpus
 
@@ -810,15 +827,383 @@ this table.
 
 ---
 
-## 8. What this does not do
+## 8. RRB — reward-risk balance by two-sided submission absorption
+
+`reward_risk` (§5) asks **who acts next**. This asks **who finishes**, and asks it of the whole
+chain rather than of one cell. Runner: `analysis/lamas_chain.rrb`, exported at
+`markov[div].rrb` and `adcc.corpora[*].rrb` — the same sub-block in both, like everything else
+in this document.
+
+### 8.1 Pre-registered definitions, before any number below
+
+Per state `s`, taken as performed by a reference athlete:
+
+```
+p_sub_own(s) = P(the bout ends in a submission BY HER          | an appearance of s)
+p_sub_opp(s) = P(the bout ends in a submission BY THE OPPONENT | an appearance of s)
+balance(s)   = p_sub_own(s) − p_sub_opp(s)                 ← PRIMARY relation
+sub_share(s) = p_sub_own(s) / (p_sub_own(s) + p_sub_opp(s)) ← SECONDARY relation
+by_next_mover(s).own / .opp = the same two probabilities, conditioned on whether the NEXT
+                              action is hers or the opponent's
+```
+
+A third absorbing outcome, **no-sub end**, takes everything else, so the three sum to exactly 1
+per state. It is not published as a column — it is `1 − own − opp`, and printing it invites a
+reader to check arithmetic instead of reading the finding.
+
+**Why `balance` is primary, stated before the numbers.** Not because a difference is better
+statistics than a ratio, but because §5's composite is already a difference (`build_graph`'s
+convention, kept verbatim), and two composites on the same page composing two arms two
+different ways would make the tables silently incomparable.
+
+**Why `sub_share` at all.** The difference cannot separate "nothing happens here" from
+"something one-sided happens here": at `own = 0.05, opp = 0.01` the difference is +0.04, which
+reads as nothing, and the share is 0.83, which reads as five-to-one. Both ship.
+
+**The plain ratio is rejected** — unbounded, and undefined wherever `p_sub_opp` is zero, which
+is the ordinary case in this data. The share is its bounded monotone transform `r / (1 + r)`, so
+nothing is lost but the blow-up.
+
+### 8.2 The state space, lifted by side
+
+Lamas' twelve states carry no owner, so "her submission" has no meaning in them. Each state is
+split into **(state, side)** relative to the athlete who performed the appearance we start
+from — 24 transient states. A transition **keeps** the side when it is the same athlete's and
+**flips** it otherwise, which is the only thing the side coordinate ever does; the sided kernel
+is therefore completely determined by the 12 × 12 × 2 array of (from, to, same/switch) counts
+the matrix already implies. Reading the same evidence from the opponent's side is the same
+kernel mirrored, so the two rows of a state are exact mirrors of each other — asserted in
+`tests/test_lamas_chain.py`, not assumed.
+
+Every appearance contributes exactly one unit of row mass: a transition when it has a
+successor, an **absorbing** transition when it is the chain's last step. That is what makes the
+rows honest.
+
+Solved as a fundamental matrix, `B = (I − Q)⁻¹R`, not iterated. `path_to_victory`'s value
+iteration is the right tool when a discount makes the operator a contraction; here there is no
+discount and absorption takes 5–14 actions, so iterating to a useful tolerance would cost
+hundreds of sweeps per bootstrap draw for what one linear solve gives exactly.
+
+> **Why this is a second solver and not a call into `analysis/systems_path_strength.absorption`**
+> — the repo's other absorbing chain, and the first thing checked here. That one is built for
+> exactly *two* absorbing states (one named `desired` at 1, one implicit EXIT taking the
+> remainder), so three outcomes would mean two passes with EXIT reinterpreted on each; and it is
+> a pure-Python Gauss-Seidel iteration, right for the handful of solves a systems report needs
+> and wrong for the **ten thousand** this layer runs (2000 draws × 5 corpora). They agree on the
+> mathematics and on the honesty rule — a third state for *did not get there* — and they should
+> stay two functions.
+
+> **`I − Q` cannot be singular here, and the reason is structural.** Every state that appears at
+> all appears inside some chain, and every chain ENDS — its last step carries an absorbing
+> transition by construction. So from any appearing state there is a positive-probability route,
+> along the very chain the appearance sits in, to an absorbing column, and a closed recurrent
+> class among the transient states is impossible. A state that does *not* appear has an all-zero
+> row, which leaves `I − Q`'s row as the identity's: still non-singular, answer zero, and never
+> read because such a state is refused for having no appearances.
+
+### 8.3 The absorbing rule: the bout's result, never the finishing event
+
+§1.5 already refused the naive rule for the *matrix*. This layer needs one thing more — not just
+*whether* a submission finished the bout but *whose* it was — and the same principle answers it:
+
+> **A bout absorbs into a submission iff `win_type` is SUBMISSION. The absorbing transition
+> hangs on the chain's LAST step, and the side comes from `winner`.**
+
+One sentence, two consequences, both measured (read-only, 2026-08-25):
+
+| | measured |
+|---|---|
+| Finishing events filed under the **loser**, among the ADCC cycle's 24 truncated chains | **7** (6 of them in the Trials corpus) |
+| …of those 7, how many are in a bout the actor gate lets through | **0** — the gate refuses exactly those bouts |
+| Bouts won by submission whose chain never reached a flagged `SUB` | 2 in 65 kg, 1 in +65 kg, 2 in the Worlds corpus, 0 in the Trials |
+| …how many of those the actor gate lets through | **1 in 65 kg, 1 in +65 kg** |
+
+So the two arms of the rule do different work, and it is worth being exact about which:
+
+- **The side arm changes no number today.** Among bouts that clear the actor gate, `winner` and
+  the finishing event's `actor_id` agree in **100%** of cases, in all five corpora. The rule is
+  a guarantee against the gate ever being loosened, not a repair of a current figure — and
+  it is also a second, independent piece of evidence that the actor gate is catching the right
+  bouts.
+- **The unflagged-finish arm moves the tables.** It is what takes +65 kg from **4 to 5**
+  absorbing bouts, i.e. from the refused side of the coverage gate to the estimable side. One
+  bout decides whether that division publishes an interval at all.
+
+A submission win with no recorded `winner`, or a chain whose last step has no actor, does **not**
+absorb. A missing fact is never read as a finish.
+
+### 8.4 Estimation, and the third gate
+
+Two gates already exist in this document. RRB adds one, and it is the binding one.
+
+| gate | unit | what it refuses |
+|---|---|---|
+| row coverage (§1.6) | bouts contributing **appearances** of `s` | the row's interval |
+| **absorbing-bout coverage** | bouts that actually **absorb into a submission** | **the whole corpus's intervals** |
+| zero absorbing bouts | — | **the point estimates too** |
+
+The middle one is the layer's own, and it exists because nothing else in the report would have
+caught the failure. A row can rest on ten bouts' worth of appearances while every gram of its
+absorbing mass traces back to the same four finishes; the row-coverage gate sees ten clusters
+and says "estimable". Each bout contributes exactly one ending, so the absorbing counts are ones
+and `effective_n` is the bout count — the honest shape of that evidence.
+
+The bottom one matters because **zero is not a measurement**. Twelve rows of `0.000` read as "we
+measured no submission risk here"; the truth is "we measured nothing". Where there are no
+absorbing bouts every probability ships as `null` with `reason_code: no_absorbing_bouts`.
+
+Intervals are a **bout-clustered percentile bootstrap**: whole bouts are resampled with
+replacement, the kernel and the absorbing block are rebuilt from the resample, and the chain is
+re-solved — 2000 draws, seeded (`random.Random(20260820)`, stdlib rather than numpy's Generator,
+which does not promise a stable stream across versions). Draws in which a state never appears
+carry no information about it and are dropped; below 100 surviving draws the interval is
+withheld like any other ungated one.
+
+**Where each corpus lands:**
+
+| corpus | usable bouts | absorbing bouts | verdict |
+|---|---|---|---|
+| 65 kg | 17 / 29 | **4** | **REFUSED** — `few_absorbing_bouts`; point estimates only |
+| +65 kg | 18 / 32 | **5** | estimable (by one bout, and by the unflagged-finish arm of §8.3) |
+| Trials 2023-24 | 28 / 53 | **6** | estimable |
+| ADCC 2024 | 12 / 33 | **0** | **NO ESTIMATE** — `no_absorbing_bouts`; every probability `null` |
+| Ciclo completo | 40 / 86 | **6** | estimable |
+
+That ADCC 2024 row is not a thin cell, it is an empty one: the actor gate removes 21 of 33
+bouts, and none of the twelve that survive was won by submission. It is the single most
+important thing this section has to say about that corpus.
+
+### 8.5 Ciclo completo — the only corpus where all twelve rows are estimable
+
+`n` is appearances, `lutas` the bouts behind them, `term` how many of those appearances are the
+chain's last step. Intervals are bout-clustered.
+
+| state | n | lutas | term | p_sub_own | p_sub_opp | balance | balance 95% CI | share | ações até absorver |
+|---|---|---|---|---|---|---|---|---|---|
+| CDP | 49 | 27 | 1 | 0.061 | 0.063 | −0.002 | [−0.009, +0.007] | 0.493 | 12.09 |
+| PGD | 19 | 16 | 1 | 0.063 | 0.068 | −0.005 | [−0.037, +0.013] | 0.482 | 11.14 |
+| SWPA | 10 | 6 | 0 | 0.088 | 0.064 | +0.024 | [−0.001, +0.083] | 0.578 | 12.04 |
+| SWP | 7 | 7 | 1 | 0.076 | 0.076 | −0.001 | [−0.063, +0.068] | 0.498 | 9.63 |
+| TKDA | 92 | 18 | 1 | 0.060 | 0.060 | +0.000 | [−0.005, +0.004] | 0.502 | 12.97 |
+| TKD | 24 | 15 | 5 | 0.065 | 0.053 | +0.012 | [−0.020, +0.040] | 0.549 | 8.74 |
+| GPSA | 20 | 15 | 1 | 0.072 | 0.074 | −0.002 | [−0.031, +0.039] | 0.493 | 10.85 |
+| GPS | 8 | 7 | 2 | 0.068 | 0.042 | +0.026 | [−0.000, +0.080] | 0.619 | 8.12 |
+| BTKA | 82 | 11 | 4 | 0.061 | 0.058 | +0.003 | [−0.000, +0.013] | 0.511 | 12.61 |
+| **BTK** | 22 | 9 | 3 | **0.096** | 0.046 | **+0.049** | **[+0.005, +0.140]** | **0.674** | 8.35 |
+| SUBA | 49 | 21 | 6 | 0.063 | 0.057 | +0.006 | [−0.006, +0.030] | 0.526 | 10.58 |
+| **SUB** | 48 | 23 | 15 | **0.191** | 0.072 | **+0.119** | **[+0.036, +0.242]** | **0.726** | 7.25 |
+
+**+65 kg** (5 absorbing bouts, 6 of 12 rows gated): `SUB` +0.287 [+0.059, +0.727], `BTKA` +0.023
+[+0.000, +0.123], `SUBA` +0.029 [−0.019, +0.072], `GPSA` +0.006 [−0.005, +0.020], `CDP` +0.011
+[−0.003, +0.055], `PGD` −0.048 [−0.172, +0.006].
+
+**Trials 2023-24** (6 absorbing, 10 of 12 gated): `SUB` +0.162 [+0.048, +0.335], `BTK` +0.073
+[+0.008, +0.202], `GPS` +0.033 [−0.007, +0.103], everything else covering zero, and `SWP`
+−0.027, `PGD` −0.011, `TKDA` −0.003, `CDP` −0.002 on the negative side.
+
+**65 kg** publishes twelve point estimates and no interval at all. For the record, its ordering
+is the same shape: `SUB` +0.187, `BTK` +0.069, `GPS` +0.065, `SUBA` +0.043, `SWP` +0.042, down to
+`PGD` −0.029 and `TKD` −0.005. **Nothing in that list may be read as a division estimate.**
+
+### 8.6 The reading, and the honest disappointment in it
+
+**Propagation flattens the signal, and that IS the finding.** Outside `SUB`, **no state's
+balance exceeds ±0.074 in any corpus** — the extreme is `BTK` at +0.073 in the Trials — and 7 to
+10 of the eleven remaining states in each corpus sit inside ±0.03. This is not an implementation
+defect and it is not noise to be filtered: it is what an absorbing chain must produce when its
+**mixing time is shorter than its absorption time**. The side flips on 22%–47% of transitions,
+and among the rows that clear the gate absorption takes **4.6 to 13.9 further actions**
+(`expected_actions`, published per row for exactly this reason). After five or six changes of
+hands the chain has forgotten whose initiative it started on, so `p_sub_own` and `p_sub_opp`
+both converge on the corpus's own base finish rate and their difference goes to zero.
+
+Read plainly: **in this corpus, the action you are in tells you almost nothing about who
+eventually taps.** That is a real answer to the owner's question, and it is one the sparse
+immediate cell could not have given — a submission-anchored one-step numerator would have been
+0–3 for nearly every state (§5.1) and would have looked like noise rather than like mixing.
+
+**Two states survive the flattening, and they are the same story twice.** `BTK` — a *landed*
+back-take — is the **only non-SUB state whose interval excludes zero**, and it does so in both
+corpora where it is estimable: +0.073 [+0.008, +0.202] in the Trials and +0.049 [+0.005, +0.140]
+in the cycle, share 0.68 and 0.67. Getting to the back is the one place in this state space
+where the chain does not forget. That is §4.2's finding and Lamas' published back-control →
+submission 0.45 arriving through a third, independent statistic. `SUB` is the other, and it is
+**circular by construction**: 15 of its 48 cycle appearances ARE the terminal step, so its value
+mostly restates §1.5's truncation rule. `n_terminal` is in the export so a reader can see that
+rather than take it for a finding.
+
+**`by_next_mover` is where the one-step signal still lives**, and it behaves with almost boring
+consistency: `balance | next mover is hers` sits above `balance | next mover is the opponent's`
+in **12 of 12 states on the cycle, 8 of 8 in each division, and 10 of 11 in the Trials**,
+counting every row where both arms exist. On the cycle: `SUBA` +0.017
+[+0.002, +0.053] against −0.022 [−0.056, −0.003], `BTK` +0.060 [+0.007, +0.156] against +0.005,
+`SUB` +0.050 [+0.009, +0.119] against −0.080 [−0.172, −0.024]. That is the sign of §5 restated
+one step further out, and it brackets the whole layer: the conditional arms are the k = 1
+answer, `balance` is the k = ∞ answer, and `expected_actions` says how far apart those two
+horizons are.
+
+**`PGD` is negative in all four corpora that produce an estimate** (−0.029, −0.048, −0.011,
+−0.005). Every interval covers zero, so this is agreement in sign, not a confirmed effect — but
+it is the third statistic in this document to put guard-pull on the negative side (§5.6, §7.6),
+and three of them agreeing is worth a look at footage.
+
+### 8.7 The alternative that was measured and NOT shipped
+
+The **empirical forward-looking** version of the same question — credit every appearance in a
+bout with that bout's own ending, no Markov assumption — was computed during the design and
+discriminates far more sharply. 65 kg `PGD` reads −0.500 there against this table's −0.029;
+`GPS` +0.600; `SUBA` +0.372.
+
+It is not published, and the reason is a denominator, not a preference. Its effective sample is
+the number of absorbing **bouts** — four to six — while it wears an appearance count of up to
+sixty-seven as its `n`, because every appearance inside one fight carries that fight's identical
+outcome. Apply this document's own gate to the right unit and every row of it is refused, in
+every corpus. The gap between it and §8.5 is therefore not evidence that first order is losing
+signal; it is what a bout-level statistic looks like when it is printed at appearance
+resolution. Naming it here makes the omission a decision.
+
+---
+
+## 9. The chain factor — does an action start a combination?
+
+Runner: `analysis/lamas_chain.chain_factor`, exported at `markov[div].chain_factor` and
+`adcc.corpora[*].chain_factor`.
+
+### 9.1 The pre-registered definition, and the two that were rejected
+
+```
+chain_factor(s) = P( the TWO actions following an appearance of s are BOTH by the athlete
+                     who performed s | that appearance has two following actions )
+```
+
+**Rejected: depth one.** "The next action is by the same athlete" is already published — it is
+literally `reward_risk`'s `reward` arm (§5.1). A chain factor that stopped at one step would be
+that number wearing a second name, and the two tables would sit on the same page pretending to
+be independent. Depth two is the shortest window that says something the initiative table does
+not: whether the exchange **keeps going**. The two are meant to be read together, and the gap
+between them is the point — on the whole cycle, `CDP` retains at 0.54 for one step and chains at
+0.32 for two, while `BTK` retains at 0.95 and chains at 0.64.
+
+**Rejected: expected run length.** The intuitive "how long a run does this start" is an
+expectation over a heavy right tail, where one bout's run of eight moves a state's number more
+than every other bout together — and the bout is exactly the unit this corpus cannot spare. The
+joint probability is bounded, is a proportion, and drops straight into the gating and interval
+machinery every other cell in this block already uses. The run length is one accumulator away
+if anyone ever needs a magnitude rather than a rate.
+
+### 9.2 The denominator, and what leaves it
+
+| leaves the denominator | rule | measured |
+|---|---|---|
+| appearances with fewer than two following actions | `n_short` — `build_graph`'s "an appearance without a successor is not scored", carried to depth two | 0–23 per state on the cycle; `SUB` is the extreme (23 of its 48 appearances), as it should be |
+| windows containing an unknown actor | `n_unknown_actor` | **0 in all five corpora** |
+| every bout the actor gate refuses | `one_sided` + `single_actor`, §5.2, unchanged | 12/29, 14/32, 25/53, 21/33, 46/86 |
+
+The unknown-actor rule differs from `reward_risk`'s on purpose. That layer can leave an unknown
+at 0 because its score is *signed* and 0 is genuinely neutral; a two-valued proportion has no
+neutral outcome, and scoring an unknown as a failure would turn the factor into a measure of
+annotation coverage. It is dropped and counted instead. That the count is zero everywhere is a
+consequence of the actor gate running first, not an assurance.
+
+The bias `n_short` creates is named rather than corrected: **chains that end quickly are
+disproportionately the ones a submission ended**, so the factor describes the flow that
+survived. That is the same trade §5 makes and it is made the same way.
+
+Intervals are the pair §5.3 publishes — Wilson over appearances for the cell, bout-clustered
+percentile bootstrap over the 0/1 values (whose mean *is* the factor) — and both are withheld
+together below the bout-cluster gate.
+
+### 9.3 Results
+
+⚠️ **Do not read across corpora.** The rows are keyed by state and §7.2's annotation split
+decides which events land in which state. `adcc.annotation.chain_factor_cross_corpus_comparable`
+is `false` in the export.
+
+**Ciclo completo** — 40 usable bouts, 350 windows, 11 of 12 rows gated.
+
+| state | k / n | lutas | fator | Wilson 95% | bootstrap 95% (luta) | n_short |
+|---|---|---|---|---|---|---|
+| **BTK** | 9 / 14 | 7 | **0.643** | [0.388, 0.837] | [0.500, 0.818] | 8 |
+| SWPA | 6 / 10 | 6 | 0.600 | [0.313, 0.832] | [0.375, 1.000] | 0 |
+| **SUBA** | 23 / 39 | 18 | 0.590 | [0.434, 0.729] | [0.382, 0.750] | 10 |
+| **BTKA** | 44 / 75 | 11 | 0.587 | [0.474, 0.691] | [0.426, 0.718] | 7 |
+| **TKDA** | 49 / 86 | 16 | 0.570 | [0.464, 0.669] | [0.278, 0.745] | 6 |
+| TKD | 9 / 16 | 12 | 0.562 | [0.332, 0.769] | [0.250, 0.800] | 8 |
+| GPSA | 8 / 15 | 10 | 0.533 | [0.301, 0.752] | [0.200, 0.733] | 5 |
+| PGD | 6 / 13 | 11 | 0.462 | [0.232, 0.709] | [0.091, 0.737] | 6 |
+| SUB | 11 / 25 | 12 | 0.440 | [0.267, 0.629] | [0.217, 0.632] | 23 |
+| SWP | 2 / 5 | 5 | 0.400 | [0.118, 0.769] | [0.000, 0.800] | 2 |
+| **CDP** | 15 / 47 | 27 | **0.319** | [0.204, 0.462] | [0.195, 0.463] | 2 |
+| GPS | 2 / 5 | 4 | 0.400 | withheld (`few_clusters`) | withheld | 3 |
+
+**65 kg** — 17 usable bouts, 199 windows, 5 rows gated: `SWP` 0.833 [0.500, 1.000] (5/6, 6
+bouts), `SUBA` 0.622 [0.452, 0.778] (23/37, 10), `BTKA` 0.617 [0.429, 0.773] (37/60, 7), `TKDA`
+0.604 [0.364, 0.827] (32/53, 7), `PGD` 0.182 [0.000, 0.455] (2/11, 9).
+
+**+65 kg** — 18 usable, 171 windows, 5 rows gated: `BTKA` 0.674 [0.474, 0.829] (29/43, 5),
+`SUBA` 0.609 [0.357, 0.809] (28/46, 10), `GPSA` 0.467 [0.111, 0.643] (7/15, 6), `CDP` 0.429
+[0.091, 1.000] (3/7, 5), `PGD` 0.222 [0.000, 0.556] (2/9, 9). `TKDA` 0.786 is **refused** — 4
+bouts, the same concentration §3 flags.
+
+**Trials 2023-24** — 28 usable, 143 windows, 9 rows gated: `BTK` 0.692 [0.579, 0.875] (9/13, 6),
+`TKD` 0.643 [0.333, 0.882] (9/14, 10), then a long tail near a third — `SWP` 0.400, `CDP` 0.333
+(13/39, 24 bouts, the tightest row in the corpus), `GPSA` 0.333, `SUBA` 0.333, `SUB` 0.231,
+`TKDA` 0.211 [0.053, 0.381], `PGD` 0.125 [0.000, 0.375].
+
+**ADCC 2024** — 12 usable, 207 windows, 4 rows gated: `SUBA` 0.810 [0.625, 0.938] (17/21, 9),
+`TKDA` 0.672 [0.345, 0.848] (45/67, 8), `SWPA` 0.600 [0.375, 1.000] (6/10, 6), `BTKA` 0.597
+[0.426, 0.742] (43/72, 9).
+
+### 9.4 The reading
+
+**Within the cycle, the spread is ordered the way a coach would guess.** A *landed* back-take
+chains at 0.643 and a clinch dispute at 0.319 — the widest gap in the table, and the one worth
+naming: **a clinch exchange in this corpus does not start combinations; a back-take does.**
+`CDP` is also the corpus's most evidence-rich row (27 bouts, the widest cluster base here), so
+the low end is the well-measured end, which is unusual in this document.
+
+**It is a difference worth naming and not a difference that has been established, and the
+distinction is not pedantry.** The bout-clustered intervals do not overlap ([0.500, 0.818]
+against [0.195, 0.463]); the Wilson ones *just* do (0.388 against 0.462). Where the two
+disagree, the clustered one is not automatically the better witness — `stats_rigor.bootstrap_ci`
+warns in its own docstring that with a handful of clusters it can come back NARROWER than the
+naive interval because it is resampling few things, and `BTK` here has seven bouts. Reading the
+non-overlap as a result would be using exactly the interval that warning is about.
+
+**The attacking middle is flat.** `SUBA`, `BTKA`, `TKDA`, `TKD`, `GPSA` all sit between 0.53 and
+0.59 with heavily overlapping intervals. Nothing separates them, and reading an order into those
+five would be reading noise.
+
+**`PGD` is the low end in both divisions** (0.182 and 0.222, both gated, both intervals touching
+zero at the bottom) and mid-pack in the cycle (0.462). A guard pull, in the women's bracket
+corpus, does not begin a run of her own actions — the fourth statistic in this document to put
+guard-pull on the unfavourable side, after §5.4, §5.6 and §8.6.
+
+**What the `SUB` row is.** 23 of its 48 cycle appearances have no two-action future, which is
+exactly what a terminal state should look like; the 0.440 describes the quarter of submission
+events that were locked, escaped and followed by more grappling. It is not a statement about
+finishing.
+
+---
+
+## 10. What this does not do
 
 - No second-order / semi-Markov check. PoC-E4 already measured second order losing materially
   on the raw label space (Δ per-step log-likelihood −0.203 [−0.258, −0.133], bout-clustered);
   whether that survives the collapse to twelve states is unmeasured and would need its own
   pre-registered plan.
-- No held-out evaluation, no stationary distribution, no absorbing-chain expected-steps
-  arithmetic. All three are cheap to add once anyone needs them; none is needed to draw the
-  scouting tables above.
+- No held-out evaluation and no stationary distribution. Both are cheap to add once anyone needs
+  them; neither is needed to draw the tables above. The absorbing-chain arithmetic that used to
+  be listed here alongside them **is** now done — §8, including the expected actions to
+  absorption, which is what makes §8.6's flatness legible.
+- **No empirical forward-looking absorption** (§8.7). Measured, sharper, and refused by this
+  document's own gate in every corpus once the gate is applied to the bout rather than to the
+  appearance.
+- **No expected same-actor run length** (§9.1). Rejected for the tail, not forgotten.
+- **RRB is not published for two of the five corpora.** 65 kg carries point estimates and no
+  interval (4 absorbing bouts); ADCC 2024 carries nothing at all (0). The remedy is corpus size
+  or a looser actor gate, and the second is not available — this layer depends on `actor_id`
+  more heavily than §5 does, not less.
 - Reward-risk is not weighted. `build_graph` takes an optional `weight_fn` so a corpus can be
   confidence-weighted per athlete (`analysis/confidence_weight.py`); this does not, because
   with 17 and 18 usable bouts the weighting would be estimated from fewer athletes than it
@@ -841,7 +1226,9 @@ this table.
 ---
 
 *Provenance: written 2026-08-25 against `analysis/lamas_chain.py`,
-`scripts/bracket_export.py:markov_layer` (§§2–6) and `:adcc_layer` (§7). Corpus label counts and
+`scripts/bracket_export.py:markov_layer` (§§2–6) and `:adcc_layer` (§7); §§8–9 added the same
+day, with every definition in §8.1 and §9.1 written before the corpus numbers under them were
+read. Corpus label counts and
 the ADCC event-tag census come from read-only queries against `matches` on the same date. If a
 number here disagrees with the exporter, the exporter is right — regenerate and fix this file in
 the same push. §§2–6 have already been through that once: they were rewritten when the scouting

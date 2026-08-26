@@ -922,7 +922,10 @@ def markov_layer(bouts: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
                 if not sub or len(sub) == len(full):
                     continue
                 cuts += 1
-                estimable_cut_rows += sum(1 for r in markov_block(sub)["rows"]
+                # `n_boot=0`: this rebuild exists to COUNT refused rows, and the three
+                # bootstraps inside a full block are pure runtime here -- nothing below reads an
+                # interval off `markov_block(sub)`.
+                estimable_cut_rows += sum(1 for r in markov_block(sub, n_boot=0)["rows"]
                                           if r["coverage"]["estimable"])
         rows_across_cuts = cuts * len(block["rows"])
         out[div] = {**block, "ignores": list(ALL_AXES),
@@ -2112,8 +2115,18 @@ def _adcc_annotation(buckets: Mapping[str, Sequence[Mapping[str, Any]]],
         # annotation cannot touch -- but its ROWS are keyed by state, and the annotation decides
         # which events land in which state. See `_adcc_annotation`'s docstring.
         "reward_risk_cross_corpus_comparable": False,
+        # `rrb` and `chain_factor` inherit that limit for exactly the same reason and for that
+        # reason ONLY -- both are keyed by state. Their questions are, if anything, further from
+        # the annotation than `reward_risk`'s: `rrb`'s absorbing outcome is `win_type` +
+        # `winner`, which no dump batch touches, and `chain_factor` reads actor identity alone.
+        # It is the partition of appearances into rows that follows the batch, and that is
+        # enough to refuse the cross-corpus reading.
+        "rrb_cross_corpus_comparable": False,
+        "chain_factor_cross_corpus_comparable": False,
+        "partition_bound": ["reward_risk", "rrb", "chain_factor"],
         "comparable": ["anchor (nível de família)"],
-        "comparable_within_corpus": ["reward_risk", "matriz", "occupancy", "pathways_to_sub"],
+        "comparable_within_corpus": ["reward_risk", "rrb", "chain_factor", "matriz", "occupancy",
+                                     "pathways_to_sub"],
         "warning": (
             f"⚠️ OS DOIS RECORTES NÃO FORAM ANOTADOS DO MESMO JEITO. `successful` aparece em "
             f"{a['present_pct']}% dos eventos das Trials (e é `true` em {a['true_pct']}%) contra "
@@ -2151,8 +2164,13 @@ def adcc_layer(conn: Any) -> dict[str, Any]:
     comparison uses (the renderer reads `comparison_sides` for the labels, and always did), so
     the same component renders both.
     """
+    # `winner_id` is selected for ONE consumer: `lamas_chain._absorbing_side`, which decides
+    # whose submission absorbed the chain from the bout RESULT rather than from the finishing
+    # event's `actor_id` (seven of the cycle's twenty-four flagged finishes are filed under the
+    # loser). It arrives as `winner`, the key the scouting corpus file already uses, so the
+    # analysis module reads one field name and never a fallback chain.
     rows = conn.execute(text("""
-        select m.id::text, m.event, m.year, m.win_type,
+        select m.id::text, m.event, m.year, m.win_type, m.winner_id::text,
                m.athlete_a_id::text, m.athlete_b_id::text, m.sequence
           from matches m
          where m.status = 'final'
@@ -2163,12 +2181,13 @@ def adcc_layer(conn: Any) -> dict[str, Any]:
     buckets: dict[str, list[dict[str, Any]]] = {ADCC_TRIALS_LABEL: [], ADCC_WORLDS_LABEL: []}
     tags: dict[str, Counter[str]] = {k: Counter() for k in buckets}
     excluded: Counter[str] = Counter()
-    for mid, event, year, win_type, a_id, b_id, seq in rows:
+    for mid, event, year, win_type, winner, a_id, b_id, seq in rows:
         corpus = adcc_corpus_of(event, year)
         if corpus is None:
             excluded[str(event)] += 1
             continue
-        buckets[corpus].append({"id": mid, "win_type": win_type, "a_id": a_id, "b_id": b_id,
+        buckets[corpus].append({"id": mid, "win_type": win_type, "winner": winner,
+                                "a_id": a_id, "b_id": b_id,
                                 "seq": list(seq or []), "event": event, "year": year})
         tags[corpus][str(event)] += 1
 
@@ -2215,6 +2234,22 @@ def adcc_layer(conn: Any) -> dict[str, Any]:
                       "undated_admitted_by_year": list(ADCC_UNDATED),
                       "cycle_years": list(ADCC_CYCLE_YEARS)},
     }
+
+
+def _rrb_line(block: Mapping[str, Any]) -> str:
+    """One line per corpus for the two layers a run should be able to fail loudly on.
+
+    ``absorbing_bouts`` is the number that governs the whole RRB table -- four to six per
+    corpus, ZERO in one of them -- so a run that does not print it hides the one fact a reader
+    of `data.json` needs before reading any of its probabilities.
+    """
+    a = block["rrb"]["absorption"]
+    cf = block["chain_factor"]
+    return (f"rrb: {a['absorbing_bouts']} absorbing bouts of {a['usable_bouts']} usable"
+            f"{'' if a['estimable'] else f' — REFUSED ({a['reason_code']})'}, "
+            f"{sum(1 for r in block['rrb']['rows'] if r['gated'])}/{len(block['rrb']['rows'])} "
+            f"states estimable; chain factor: {cf['windows']} windows, "
+            f"{sum(1 for r in cf['rows'] if r['gated'])}/{len(cf['rows'])} estimable")
 
 
 def main() -> int:
@@ -2331,6 +2366,7 @@ def main() -> int:
         print(f"    reward-risk: {rr['bouts_used']}/{m['n_bouts']} bouts usable "
               f"({rr['bouts_refused'] or 'none refused'}), "
               f"{sum(1 for r in rr['rows'] if r['gated'])}/{len(rr['rows'])} states estimable")
+        print(f"    {_rrb_line(m)}")
     print(f"  ADCC cycle {adcc['cycle']} (all divisions, from the DB):")
     for name in adcc["order"]:
         c = adcc["corpora"][name]
@@ -2341,6 +2377,7 @@ def main() -> int:
               f"anchor {agree}/{len(c['anchor'])}, "
               f"reward-risk {rr['bouts_used']}/{c['n_bouts']} usable, "
               f"{sum(1 for r in rr['rows'] if r['gated'])}/{len(rr['rows'])} states estimable")
+        print(f"      {_rrb_line(c)}")
     print(f"  videos: {len(vids)}   embedded graphs: "
           f"{sum(v['usable'] for v in emb['divisions'].values())}")
     return 0
