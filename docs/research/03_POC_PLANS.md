@@ -419,6 +419,37 @@ only ever been evaluated descriptively. No production change.
 
 **Effort:** 2 days. **Risk:** none (read-only, writes no vector).
 
+### PoC-E14 · δ-temporal motifs — does TIMING carry information beyond ORDER?
+
+**Claim:** every graph in this repository is built from event order; `ts` is on 94.7% of
+events and is read by exactly one thing (PoC-E9's elapsed-time hazard). If time-respecting
+motif counts predict finishes better than the same motifs counted over an index window, the
+clock is being wasted. **Literature:** Paranjape, Benson & Leskovec 2017 (*Motifs in
+Temporal Networks*, WSDM '17, arXiv:1612.09259). **Inherits:** PoC-E8's `temporal_split` /
+`eval_rows` / `rank_auc` / bout-clustered paired bootstrap.
+
+The design is ONE paired difference: same edges, same motif alphabet, same counter, same
+rows, same model, same seed. The only free variable is whether the window is measured in
+seconds or in events. **AA-010 is absolute** — only bouts with `ts` on EVERY event enter,
+the excluded are counted, and every time is a within-bout difference.
+
+**Accept criterion:** paired ΔAUC (δ-window − index-window) excludes 0 in the δ arm's
+favour with a non-degenerate width. Power gate: ≥ 200 held-out rows carrying a δ-motif AND
+≥ 20 motif ids, else UNDERPOWERED with no verdict.
+
+**Status (2026-08-25): RUN.** Runner `analysis/poc/e14_temporal_motifs.py`, counter
+`analysis/poc/signatures.py`, tests `tests/test_poc_e14.py` + `tests/test_poc_signatures.py`,
+pre-registration `docs/research/poc/e14_prereg.md`, results in `docs/research/poc/e14.md`
+(generated — do not hand-edit). Outcome: **REJECT, and a null worth having.** Slice: 418 of
+466 gated bouts carry `ts` on every event. At the primary δ=120 s the two arms land at
+0.6447 (seconds) and 0.6507 (events) against 0.6502 for the state alone — paired Δ
+−0.0060 [−0.0152, +0.0040], and the motif family does not beat the current state either
+(−0.0055 [−0.0157, +0.0046]). **On this corpus the clock carries nothing the event order
+does not already carry**, which retroactively justifies every ts-free structure here.
+Corpus fact that bounds the reading: own-actor edges are 24 s apart at the median, the
+median bout perspective yields only 3 own edges, and every timestamp is a human reading a
+video clock.
+
 ---
 
 ## X-series — experimental spikes from recent papers
@@ -450,6 +481,32 @@ BH across the pattern family — the pattern-level version of the question
 survives BH at q≤0.10, publish the null exactly as `decision_criteria_findings.md`
 did (that is a respectable second null, and evidence the corpus is still too thin
 for tactical claims — itself worth stating on the-data.html). **Effort:** 2 days.
+
+**Status (2026-08-25): RUN, with a second limb added before the run.** Runner
+`analysis/poc/x3_sequence_mining.py`, miner `analysis/poc/signatures.prefixspan`, tests
+`tests/test_poc_x3.py` + `tests/test_poc_signatures.py`, pre-registration
+`docs/research/poc/x3_prereg.md`, results in `docs/research/poc/x3.md` (generated — do not
+hand-edit). Limb A is the plan as written (lift + BH). **Limb B, registered before the run
+and made the deciding limb:** do the mined patterns, AS FEATURES, beat the Markov baseline
+on held-out finishes — PoC-E8's `eval_rows` / `rank_auc` / bout-clustered paired bootstrap,
+reused verbatim. Mining space is `clean_label`, justified by PoC-E9's measurement that the
+label space wins on exactly this criterion (AUC 0.689 vs 0.629 / 0.638).
+
+Outcome: **REJECT the cell — limb A passes and limb B fails, which is the dissociation the
+pre-registration named in advance.** At the primary 10% support, 47 patterns are mined from
+524 train chains and **13 survive BH at q ≤ 0.10**; but adding all 47 as features moves
+held-out AUC from 0.6385 to 0.6533, paired Δ **+0.0148 [−0.0050, +0.0334]**. The patterns
+describe the corpus; they do not predict out of it. Consistent with PoC-E4 (second-order
+memory LOSES, Δ logL/step −0.203) and PoC-E9 (the first-order kernel is not the defect) —
+a mined subsequence is higher-order memory under another name.
+
+**Post-hoc catch, recorded not patched:** every one of the 13 survivors has a risk ratio
+BELOW 1. Chains are truncated at the finish, so a chain that finished early is short (mean
+6.9 items against 9.0 for chains that did not finish), a longer pattern needs a longer chain
+to match, and pattern length tracks the risk ratio at **ρ = −0.696 [−0.819, −0.511]**. Limb
+A's survivors are a **length artefact** of the truncation the design needed for a different
+reason. The fix (length matching, or scoring at a fixed step index) changes the criterion
+and belongs to a re-registered run.
 
 ### PoC-X4 · ST-GCN position classifier on ViCoS (Yan 2018)
 

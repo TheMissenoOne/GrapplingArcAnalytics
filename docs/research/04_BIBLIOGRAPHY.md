@@ -146,9 +146,21 @@ this review.
   application to rugby union.** PLOS ONE 16(9):e0256329. doi:10.1371/journal.pone.0256329,
   arXiv:2010.15377. https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0256329
   — PrefixSpan/CM-SPAM plus outcome-supervised importance; the same family (CM-SPAM) has
-  been applied to judo technical-tactical analysis.
+  been applied to judo technical-tactical analysis. **[framing adopted by PoC-X3** — the
+  "supervised" half (patterns scored against an outcome, not merely mined) is what limb B
+  operationalises as held-out prediction rather than in-sample lift.**]**
 - Pei, J., Han, J., et al. (2004). **Mining Sequential Patterns by Pattern-Growth: The
   PrefixSpan Approach.** IEEE TKDE 16(11):1424–1440. doi:10.1109/TKDE.2004.77.
+- Pei, J., Han, J., Mortazavi-Asl, B., Pinto, H., Chen, Q., Dayal, U., Hsu, M.-C. (2001).
+  **PrefixSpan: Mining Sequential Patterns Efficiently by Prefix-Projected Pattern Growth.**
+  ICDE '01, 215–224. doi:10.1109/ICDE.2001.914830.
+  **[in-code**, `analysis/poc/signatures.py:prefixspan` — the original statement of the
+  prefix-projection recursion this repo implements for the single-item-per-position case;
+  `prefixspan` on PyPI was not adopted because it pulls `extratools` to do 25 lines of
+  projection. Pinned by hand-computed support counts in `tests/test_poc_signatures.py`.
+  Run in **PoC-X3** (`docs/research/poc/x3.md`): 13 of 47 mined patterns survive BH at
+  q ≤ 0.10, and adding all 47 as features moves held-out finish AUC by +0.0148
+  [−0.0050, +0.0334] — a corpus description, not a predictor.**]**
 
 ## F. Graph similarity and embeddings
 
@@ -162,8 +174,41 @@ this review.
 - Narayanan, A., et al. (2017). **graph2vec: Learning Distributed Representations of
   Graphs.** arXiv:1707.05005. https://arxiv.org/abs/1707.05005
 - Bagrow, J.P., Bollt, E.M. (2019). **An information-theoretic, all-scales approach to
-  comparing networks.** Applied Network Science 4:45. doi:10.1007/s41109-019-0156-x
-  (network portrait divergence).
+  comparing networks.** Applied Network Science 4:45. doi:10.1007/s41109-019-0156-x,
+  arXiv:1804.03665. https://arxiv.org/abs/1804.03665 (network portrait divergence).
+  **[in-code**, `analysis/poc/signatures.py:portrait_divergence` — the B-matrix
+  (`B[ℓ,k]` = nodes with exactly k nodes in their ℓ-th shell), the pair weighting
+  `P(k,ℓ) ∝ k·B[ℓ,k]`, and the base-2 JSD, all as in the author's reference script.
+  Implemented rather than installed: `netrd` carries it alongside ~30 other distances and
+  an optimal-transport dependency tree nothing here would use. Pinned by a hand-computed
+  K₃-vs-P₃ divergence of 0.3060986 bits in `tests/test_poc_signatures.py`.
+  Run in **PoC-E5** (`docs/research/poc/e5.md`): self-recognition MRR 0.221, BELOW a
+  three-number size null (0.269) — a null on this corpus, whose median half-career graph
+  is 11 nodes / 11 edges.**]**
+- Tsitsulin, A., Mottin, D., Karras, P., Bronstein, A., Müller, E. (2018). **NetLSD:
+  Hearing the Shape of a Graph.** KDD '18, 2347–2356. doi:10.1145/3219819.3219991,
+  arXiv:1805.10712. https://arxiv.org/abs/1805.10712
+  **[in-code**, `analysis/poc/signatures.py:netlsd` — the heat trace
+  `h(t) = Σ_j exp(−λ_j t)` over the normalised Laplacian spectrum at 250 log-spaced scales,
+  with §4.3's empty-graph normalisation (`h(t)/n`) so the signature of any edgeless graph is
+  the all-ones vector. The PyPI `netlsd` package is unmaintained since 2018 and pins its own
+  numpy; on ≤60-node graphs one dense `eigvalsh` is exact and instant. Pinned by the closed
+  forms of K₂ (`1 + e^{−2t}`) and P₃ (`1 + e^{−t} + e^{−2t}`) in
+  `tests/test_poc_signatures.py`. Run in **PoC-E5**: MRR 0.220, also below the size null.**]**
+- Paranjape, A., Benson, A.R., Leskovec, J. (2017). **Motifs in Temporal Networks.**
+  WSDM '17, 601–610. doi:10.1145/3018661.3018731, arXiv:1612.09259.
+  https://arxiv.org/abs/1612.09259
+  **[in-code**, `analysis/poc/signatures.py:motif_counts` / `index_motif_counts` — δ-windowed
+  ordered 3-edge patterns on ≤3 nodes, identified by first-appearance node relabelling (their
+  6×6 grid's equivalence classes under our own numbering). **Declared deviation:** these are
+  NOT *induced* temporal motifs — the paper requires the k edges to be consecutive among all
+  edges touching the motif's nodes; this counts every ordered k-tuple in the window, a
+  superset. Acceptable only because the counts are used as predictive features and always
+  compared against themselves under a different window, so the superset cancels in the paired
+  difference. Brute force, not their linear-time counter: a bout yields ~18 temporal edges.
+  Run in **PoC-E14** (`docs/research/poc/e14.md`): δ-window motifs do not beat the same
+  motifs over a width-matched index window, paired ΔAUC −0.0060 [−0.0152, +0.0040] — on this
+  corpus the clock carries nothing the event order does not.**]**
 - Tantardini, M., Ieva, F., Tajoli, L., Piccardi, C. (2019). **Comparing methods for
   comparing networks.** Scientific Reports 9:17557. doi:10.1038/s41598-019-53708-y.
   https://www.nature.com/articles/s41598-019-53708-y — graphlet-based distances win at

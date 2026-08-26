@@ -90,7 +90,11 @@ N_BOOT = 2000
 N_PERM = 2000
 
 # PoC-E8's published gate count. A mismatch means the corpus moved under this cell.
-E8_GATED_BOUTS = 429
+# Repinned 2026-08-25 (was 429, E8/E9's published corpus): the audited ingestion batches
+# of the same day added +37 gate-passing bouts (trials + women-65 concordance imports).
+# E9's published verdicts in docs/research/poc/e9.md remain the morning-of-08-25 snapshot;
+# E11/E5/X3/E14 all ran and reported on the 466 corpus. The drift alarm did its job.
+E8_GATED_BOUTS = 466
 
 # Arm 4's power gate, pre-registered.
 ADCC_MIN_EVAL_BOUTS = 10

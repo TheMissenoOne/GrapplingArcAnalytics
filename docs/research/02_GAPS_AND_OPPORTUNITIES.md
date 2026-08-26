@@ -31,7 +31,7 @@ literature says, and the disposition — **FIXED** (on branch
 | 12 | ~~**PtV's γ=0.8 and shaping weights unvalidated**; first-order memorylessness untested.~~ **CLOSED 2026-08-24** — swept and measured, no production change. | Analytics | Decroos 2019; semi-Markov critique | **PoC-E4 RUN** → `docs/research/poc/e4.md`: γ non-critical over the non-saturating range, shaping a wash at γ=0.8 and harmful above it (±1 clamp), second order LOSES materially so the first-order kernel stands. |
 | 12b | **The chain's STATE SPACE was never chosen either** — every Markov-shaped object in the repo (`network_from_sequences`, PtV's kernel, `reward_risk`) uses the raw `clean_label` vocabulary because that is what the events carry, not because it was compared against anything. Nor was the order question ever asked on a *small* state space (PoC-E4 closed it at label level only). | Analytics | Lamas 2024; semi-Markov critique (Sci Rep 2026) | **PoC-E9 RUN** → `docs/research/poc/e9.md`: three state spaces (226 / 8 / 12 states) on one common target, order k∈{0..3} with support coverage, an ADCC-family kernel, and absorbing terminals from `win_type`. |
 | 13 | **k=6 archetypes never selected by the stability machinery the file ships**; bootstrap mapping majority-vote-only (docstring claims Hungarian); duplicate-index Jaccard inflation. | Analytics | Hennig 2007 | **PoC-E6** (run the machinery; fix the two bootstrap defects while touching it) |
-| 14 | **"Grapples most like" is an undefined percentage**; ELO-weighted semantic centroid mixes incommensurables with no ablation. | Analytics + site | Tantardini 2019; ACM SAC '22 | **PoC-E5** |
+| 14 | ~~**"Grapples most like" is an undefined percentage**~~ — **MEASURED 2026-08-25, and the gap as written named the wrong method.** The dossier percentage is `athlete_systems.match_systems`'s `aggregate_similarity` over a **12-node-truncated** career graph, not the ELO-weighted mpnet centroid (`embeddings.nearest_graphs` has zero callers anywhere). | Analytics + site | Tantardini 2019; Bagrow & Bollt 2019; Tsitsulin 2018; ACM SAC '22 | **PoC-E5 RUN** → `docs/research/poc/e5.md`: the shipped method recognises an athlete's own half at MRR 0.250 [0.143, 0.367] over 33 candidates (chance 0.124) — but a **three-number size descriptor scores 0.269** and the paired Δ covers 0. It is defined now, and its defined value is not separable from how much tape an athlete has. NetLSD and portrait divergence are both **below** that size null. The occurrence-weighted mpnet centroid leads (0.364) and is the only arm surviving the chronological leakage probe, but is refused by the pre-registered criterion. |
 | 15 | **`tech_library` effectiveness composite** (0.35/0.25/0.15/0.15/0.10, ordinal-as-ratio, discontinuous at n=3) is the App's primary technique sort key. | Analytics → App | Terner & Franks 2021 (metric-validation framing) | **PoC-E7** |
 | 16 | **`benchmark.py` user-vs-pro 2×/0.5× emphasis with no interval** — the only App-facing comparison without uncertainty; baseline quartiles degenerate (escape median 0.0); self-logged training shares compared to event-coded bout shares. | Analytics → App | Wilson/Agresti-Caffo machinery already in-repo | **flagged** — small fix (route through `stats_rigor`), measurement-process mismatch needs a caveat string in the App UI |
 
@@ -56,9 +56,18 @@ literature says, and the disposition — **FIXED** (on branch
 - **Athlete-level PageRank on the bout graph** (Radicchi 2011) — a second ranking,
   methodologically independent of Glicko-2; their disagreement is itself a
   data-quality instrument. (PoC-X1.)
-- **Sequence mining** (Bunker 2021) for "patterns that precede finishes" — the
-  supervised-SPM frame answers the question `decision_criteria` asked and honestly
-  failed to answer at triad level, at pattern level instead. (PoC-X3.)
+- ~~**Sequence mining** (Bunker 2021) for "patterns that precede finishes"~~ — **CLOSED
+  2026-08-25 as a null.** (PoC-X3 RUN → `docs/research/poc/x3.md`.) 13 of 47 mined patterns
+  survive BH at q ≤ 0.10, and adding all 47 as features moves held-out finish AUC by
+  +0.0148 [−0.0050, +0.0334]: they describe the corpus, they do not predict out of it. The
+  13 survivors are additionally a **length artefact** (pattern length vs risk ratio,
+  ρ = −0.696 [−0.819, −0.511]). Third null in the same direction, after PoC-E4's
+  second-order loss and `decision_criteria_findings.md`.
+- ~~**Time-respecting structure** — `ts` is on 94.7% of events and nothing but PoC-E9's
+  hazard reads it.~~ **CLOSED 2026-08-25 as a null.** (PoC-E14 RUN →
+  `docs/research/poc/e14.md`, Paranjape 2017.) δ-temporal motifs do not beat the same
+  motifs over a width-matched index window: paired ΔAUC −0.0060 [−0.0152, +0.0040]. Every
+  order-only structure in this repository is, by this measurement, not the weak link.
 - **Bracket advancement probabilities with uncertainty propagation** (Brandes 2025 +
   Glicko-2 RD), if the head-to-head refusal is ever consciously relaxed. (PoC-X5.)
 - **TacticAI-style guided generation** — long-horizon; grappling's discrete position
