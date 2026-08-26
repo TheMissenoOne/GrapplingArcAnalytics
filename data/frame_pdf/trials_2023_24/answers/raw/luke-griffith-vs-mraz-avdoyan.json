@@ -1,0 +1,91 @@
+{
+ "bout": {
+  "athlete_a": "Luke Griffith",
+  "athlete_b": "Mraz Avdoyan",
+  "event": "EU/ME/Africa Trials 2023 (Warsaw)",
+  "winner": "Luke Griffith",
+  "year": 2023
+ },
+ "events": [
+  {
+   "competitor_1": "Mraz Avdoyan",
+   "competitor_2": "Luke Griffith",
+   "event_name": "ADCC EU/ME/Africa Trials 2023 (Warsaw)",
+   "year": 2023,
+   "winner": "Luke Griffith",
+   "win_method": "Submission",
+   "bout_start_seconds": 815,
+   "final_score": "0-0"
+  },
+  {
+   "ts": 820,
+   "label": "Collar Tie",
+   "actor": "Luke Griffith",
+   "successful": true,
+   "type": "control",
+   "note": "identity_verified_by: 13:50 (830s) shows Luke Griffith in the white rashguard with his Instagram handle on the back."
+  },
+  {
+   "ts": 825,
+   "label": "Jump Guard",
+   "actor": "Luke Griffith",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 835,
+   "label": "Stand Up",
+   "actor": "Luke Griffith",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 840,
+   "label": "Collar Tie",
+   "actor": "Luke Griffith",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 850,
+   "label": "Guard Pull",
+   "actor": "Luke Griffith",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 885,
+   "label": "Leg Entanglement Entry",
+   "actor": "Luke Griffith",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 900,
+   "label": "Sweep",
+   "actor": "Luke Griffith",
+   "successful": true,
+   "type": "sweep"
+  },
+  {
+   "ts": 905,
+   "label": "Submission",
+   "actor": "Luke Griffith",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "99kg",
+  "source_file": "gemini-code-1787706750366.json",
+  "curated_start": 810,
+  "curated_end": 955,
+  "gemini_winner": null,
+  "flags": [
+   "ts None: label '' off-library -> audit must snap or drop",
+   "ts None: type None invalid -> audit must fix or drop",
+   "ts None: actor None is neither competitor"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

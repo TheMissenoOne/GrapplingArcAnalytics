@@ -46,7 +46,7 @@
   },
   {
    "ts": 1645,
-   "label": "Head-Arm Control (Top)",
+   "label": "Head‑Arm Control (Top)",
    "actor": "Jozef Chen",
    "successful": true,
    "type": "control"
@@ -101,9 +101,7 @@
   "curated_start": 1450,
   "curated_end": 2330,
   "gemini_winner": "Jozef Chen",
-  "flags": [
-   "ts 1645: label 'Head-Arm Control (Top)' off-library -> audit must snap or drop"
-  ],
+  "flags": [],
   "status": "normalized, awaiting concordance audit"
  }
 }

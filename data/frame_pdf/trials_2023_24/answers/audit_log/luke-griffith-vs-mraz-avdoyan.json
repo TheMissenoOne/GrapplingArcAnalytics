@@ -1,0 +1,72 @@
+{
+ "log": [
+  {
+   "ts": null,
+   "label": "",
+   "verdict": "DROP (malformed)",
+   "kept": false,
+   "reason": "first array entry is bout-meta fields (competitor_1/competitor_2/event_name/win_method/etc) mistakenly shaped as an event, with no ts/label/type/actor -- matches the bout-specific instruction to drop this entry"
+  },
+  {
+   "ts": 820,
+   "label": "Collar Tie",
+   "verdict": "DISCORDANT (wrong bout)",
+   "kept": false,
+   "reason": "the 820s frame is the tail end of the PRIOR bout on this mat (Manaspiu/Jussila hand-raise), not Griffith/Avdoyan at all -- this bout's walkout starts at ~825s"
+  },
+  {
+   "ts": 825,
+   "label": "Jump Guard",
+   "verdict": "UNVERIFIABLE",
+   "kept": false,
+   "reason": "825s frame shows the two competitors and referee mid pre-fight instructions ('Rumos' narration = positions), fight clock has not started; no jump guard visible or plausible pre-start"
+  },
+  {
+   "ts": 835,
+   "label": "Stand Up",
+   "verdict": "UNVERIFIABLE",
+   "kept": false,
+   "reason": "835s frame is simply the opening standing bout position at the very start of the match clock (8:00), not a transition up from the ground; no prior ground contact to stand up from"
+  },
+  {
+   "ts": 840,
+   "label": "Collar Tie",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "grip-fighting position visible in window matches"
+  },
+  {
+   "ts": 850,
+   "label": "Guard Pull",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "Griffith down / Avdoyan standing at 850, consistent with a guard pull"
+  },
+  {
+   "ts": 885,
+   "label": "Leg Entanglement Entry",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "legs-focused scramble position visible"
+  },
+  {
+   "ts": 900,
+   "label": "Sweep",
+   "verdict": "UNVERIFIABLE (weak support)",
+   "kept": true,
+   "reason": "no single frame shows the sweep motion itself, but a clear position change to Griffith-on-top is visible around this window; kept at moderate confidence, no contradicting evidence"
+  },
+  {
+   "ts": 905,
+   "label": "Submission",
+   "verdict": "DISCORDANT (timing)",
+   "kept": true,
+   "reason": "submission grip is visible building from 905 but the actual finish (referee stoppage, Griffith's celebration) is only visible at 935-940; ts corrected forward to reflect where it lands",
+   "corrections": [
+    "ts: 905 -> 930"
+   ]
+  }
+ ],
+ "identity_check": "Confirmed via scoreboard from 825s onward: 'M. Avdoyan' (top/red) vs 'L. Griffith' (bottom/blue). Explicit note from raw file confirmed: 830s frame shows Griffith in white rashguard with 'luke griffith' Instagram handle printed on the back (clearly visible again at 905-920s). Frames 810-820s belong to a DIFFERENT, prior bout on the same mat (scoreboard reads 'D. Manaspiu' / 'H. Jussila', ending in a hand-raise celebration at 820s) -- excluded. Bout_start_seconds=815 in meta does not match video: actual walkout for this bout is ~825s, fight clock starts at 8:00 by 835s. Match ends by submission: referee stops action and Griffith raises his arm in celebration at 935-940s (score stays 0-0 throughout, consistent with a submission-only finish, matching meta win_method='Submission', winner='Luke Griffith').",
+ "notes": "Read 9 raw entries (1 malformed meta-as-event, 8 real ts-events). Kept 5, corrected 1 (submission ts nudge), dropped 4 (1 malformed, 3 wrong-bout/pre-fight/unverifiable). This is a genuinely short clip (~2.5min sampled window per the bout notes) -- most of the actual match (835-935, 100s of live action) is captured, but the two earliest claimed events (820, 825) fall in the pre-fight/prior-bout portion of the sampled range and could not be salvaged even with a coarser generic label, since no matching action of any kind is visible on this bout at those timestamps."
+}

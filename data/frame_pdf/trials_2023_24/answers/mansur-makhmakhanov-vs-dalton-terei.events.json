@@ -1,0 +1,79 @@
+{
+ "bout": {
+  "athlete_a": "Mansur Makhmakhanov",
+  "athlete_b": "Dalton Terei",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Mansur Makhmakhanov",
+  "year": 2024,
+  "identity_discriminator": "Confirmed via scoreboard from 28245s onward: 'D. Terei' (top/red) vs 'M. Makhmakhano' (bottom/blue). 28240s frame is the tail of a DIFFERENT prior bout on this mat (scoreboard 'N. Griffiths' vs 'G. Santa'), excluded. Physical kit discrimination is weak: both wear near-identical plain dark rashguards/shorts; one competitor's shirt reads 'TUKAHA' (team name, legible 28275-28325 and again at 28425) and is the one generally on top attempting guard passes through that window, consistent with the raw file's claim that Terei is passing while Makhmakhanov plays guard from the bottom -- used as the working identity anchor for this bout, but confidence is moderate (small-thumbnail read, not a name-on-back confirmation like the other two bouts in this batch).",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "Read 8 raw events (all had valid ts/label/actor; only the ts28415 type was flagged invalid). Kept all 8, corrected 1 invalid type, corrected 0 actors (identity uncertainty noted but not resolved cleanly enough to justify a flip). No submission/finish or score change is visible anywhere in this curated window (28240-28430) -- this looks like a mid-match segment, not the bout's conclusion; bout.winner='Mansur Makhmakhanov' in the meta cannot be corroborated or contradicted from this clip alone. Overall confidence in this bout's audit is lower than the other two in this batch: kit is nearly identical between the two competitors and only one intermittently-legible team logo ('TUKAHA') was available as an identity anchor, versus a clear scoreboard-name-on-back shot in the other bouts."
+ },
+ "events": [
+  {
+   "ts": 28245,
+   "label": "Clinch",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "transition",
+   "note": "frame directly shows standing hand-fighting/clinch"
+  },
+  {
+   "ts": 28270,
+   "label": "Guard Pull",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "transition",
+   "note": "moderate confidence; transition from standing engagement (28270) to both on the ground (28275) is consistent with a guard pull, exact instant not crisply captured"
+  },
+  {
+   "ts": 28275,
+   "label": "Closed Guard",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "guard",
+   "note": "moderate confidence; frame shows a bottom/top ground position matching a guard scenario"
+  },
+  {
+   "ts": 28315,
+   "label": "Seated Guard",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "guard",
+   "note": "moderate confidence; part of the same continuous 28275-28325 guard-passing exchange, specific guard variant (closed/seated/open) not individually distinguishable frame-by-frame at this resolution but the overall guard-retention sequence is clearly live and ongoing"
+  },
+  {
+   "ts": 28325,
+   "label": "Open Guard",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "guard",
+   "note": "moderate confidence; same sequence as Seated Guard above"
+  },
+  {
+   "ts": 28385,
+   "label": "Wrestle-Up",
+   "actor": "Mansur Makhmakhanov",
+   "successful": false,
+   "type": "transition",
+   "note": "moderate confidence; continuous close-quarters struggle visible 28380-28410 ('Push it. Push it.' narration at 28410) consistent with a contested stand-up attempt"
+  },
+  {
+   "ts": 28415,
+   "label": "Sprawl",
+   "actor": "Dalton Terei",
+   "successful": true,
+   "type": "escape",
+   "note": "type corrected from invalid 'defensive' to 'escape' (closest valid type for a takedown/wrestle-up defensive action; 'Sprawl' itself is valid vocab, listed under the DEFENSIVE heading). Frame shows one competitor curled/covering low with the other person attending close -- plausible defensive sprawl posture but could also be a brief pause; kept at moderate-low confidence, no contradicting evidence"
+  },
+  {
+   "ts": 28425,
+   "label": "Stand Up",
+   "actor": "Dalton Terei",
+   "successful": true,
+   "type": "transition",
+   "note": "residual identity doubt: at 28425 the 'TUKAHA'-branded competitor (the working identity anchor for Terei) is the one still down on all fours, while the OTHER competitor is already upright/walking away in the background -- this could mean it was actually Makhmakhanov who stood up, not Terei. Kept with the Gemini-claimed actor per the protocol's guidance to prefer the claim absent a clearly resolved contradiction, but flagged here as the weakest-confidence event in this bout"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 8/8) 2026-08-25"
+}

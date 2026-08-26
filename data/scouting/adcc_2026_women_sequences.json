@@ -2407,6 +2407,108 @@
   ]
  },
  {
+  "id": "97624d9c-8382-41cc-8386-604d4ca4ecb7",
+  "a": "Sula Loewenthal",
+  "b": "Nadia Frankland",
+  "a_key": "sula loewenthal",
+  "b_key": "nadia frankland",
+  "div_a": null,
+  "div_b": "65 kg",
+  "event": "ADCC Trials 2024 Asia & Oceania",
+  "year": 2024,
+  "winner": "2d89bf4e-ef34-43cf-9b00-78639b076290",
+  "a_id": "2d89bf4e-ef34-43cf-9b00-78639b076290",
+  "b_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 27435,
+    "type": "transition",
+    "label": "Guard Pull",
+    "actor_id": "2d89bf4e-ef34-43cf-9b00-78639b076290",
+    "successful": true
+   },
+   {
+    "ts": 27570,
+    "type": "guard",
+    "label": "Leg Entanglement Entry",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 27585,
+    "type": "submission",
+    "label": "Leg Lock",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": false
+   },
+   {
+    "ts": 27605,
+    "type": "escape",
+    "label": "Leg Lock Escape",
+    "actor_id": "2d89bf4e-ef34-43cf-9b00-78639b076290",
+    "successful": true
+   },
+   {
+    "ts": 27615,
+    "type": "guard",
+    "label": "Guard",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 27655,
+    "type": "guard",
+    "label": "Inversion",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 27680,
+    "type": "transition",
+    "label": "Stand Up",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 27715,
+    "type": "transition",
+    "label": "Guard Pull",
+    "actor_id": "2d89bf4e-ef34-43cf-9b00-78639b076290",
+    "successful": true
+   },
+   {
+    "ts": 27840,
+    "type": "pass",
+    "label": "Guard Pass",
+    "points": 3,
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 27845,
+    "type": "control",
+    "label": "Side Control",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   },
+   {
+    "ts": 27880,
+    "type": "escape",
+    "label": "Escape to Turtle",
+    "actor_id": "2d89bf4e-ef34-43cf-9b00-78639b076290",
+    "successful": true
+   },
+   {
+    "ts": 27885,
+    "type": "control",
+    "label": "Turtle Control",
+    "actor_id": "a1b9f11b-26ba-4e24-9c01-021c93852679",
+    "successful": true
+   }
+  ]
+ },
+ {
   "id": "b85383fb-1a94-491f-9945-09a7fce75564",
   "a": "Ana Carolina Vieira",
   "b": "Amanda Leve",
@@ -3208,6 +3310,67 @@
     "type": "control",
     "label": "Body Triangle",
     "actor_id": "3a768c61-13c9-4c0f-85cc-c1f7ff8d1bf2"
+   }
+  ]
+ },
+ {
+  "id": "3e4175f4-d632-458b-8056-31032c35efe6",
+  "a": "Katie Bohan",
+  "b": "Jocelyn Molina",
+  "a_key": "katie bohan",
+  "b_key": "joslyn molina",
+  "div_a": null,
+  "div_b": "65 kg",
+  "event": "WNO 31",
+  "year": 2025,
+  "winner": "60c19002-9fb6-4567-90bd-9ea08a2e4f49",
+  "a_id": "90766ff9-121d-4cb4-85c3-e38f1421eb46",
+  "b_id": "60c19002-9fb6-4567-90bd-9ea08a2e4f49",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "type": "transition",
+    "label": "Guard Pull",
+    "actor_id": "90766ff9-121d-4cb4-85c3-e38f1421eb46",
+    "successful": true
+   },
+   {
+    "type": "control",
+    "label": "Top Control (Half Guard)",
+    "actor_id": "60c19002-9fb6-4567-90bd-9ea08a2e4f49"
+   },
+   {
+    "type": "pass",
+    "label": "Leg Drag to Straddle",
+    "actor_id": "60c19002-9fb6-4567-90bd-9ea08a2e4f49"
+   },
+   {
+    "type": "control",
+    "label": "Side Control",
+    "actor_id": "60c19002-9fb6-4567-90bd-9ea08a2e4f49"
+   },
+   {
+    "type": "control",
+    "label": "Mount",
+    "actor_id": "60c19002-9fb6-4567-90bd-9ea08a2e4f49",
+    "successful": false
+   },
+   {
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "60c19002-9fb6-4567-90bd-9ea08a2e4f49"
+   },
+   {
+    "type": "submission",
+    "label": "Katagatame / Darce",
+    "actor_id": "60c19002-9fb6-4567-90bd-9ea08a2e4f49",
+    "successful": false
+   },
+   {
+    "type": "submission",
+    "label": "D'Arce Choke",
+    "actor_id": "60c19002-9fb6-4567-90bd-9ea08a2e4f49",
+    "successful": true
    }
   ]
  },

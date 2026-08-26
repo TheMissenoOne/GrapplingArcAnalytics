@@ -1,0 +1,88 @@
+{
+ "log": [
+  {
+   "ts": 6945,
+   "label": "Double Leg Takedown",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "actor name-variant flag; technique not crisply visible but plausible given continuous wrestling exchange and unchanged score",
+   "corrections": [
+    "actor: 'Roberto Dib Frias' -> 'Roberto Dib'"
+   ]
+  },
+  {
+   "ts": 6960,
+   "label": "Single Leg Takedown",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "actor name-variant flag; narration 'Down.' at 6965 supports a contact/shot moment nearby",
+   "corrections": [
+    "actor: 'Roberto Dib Frias' -> 'Roberto Dib'"
+   ]
+  },
+  {
+   "ts": 7065,
+   "label": "Snap Down",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "narration 'Snapping with the assist' at 7060 directly matches"
+  },
+  {
+   "ts": 7225,
+   "label": "Double Leg Takedown",
+   "verdict": "DISCORDANT",
+   "kept": true,
+   "reason": "actor name-variant flag; shot/landing visible in 7220-7250 window, ts leads visible landing by ~15-20s (sampling resolution)",
+   "corrections": [
+    "actor: 'Roberto Dib Frias' -> 'Roberto Dib'"
+   ]
+  },
+  {
+   "ts": 7280,
+   "label": "Leg Entanglement",
+   "verdict": "CONCORDANT",
+   "kept": true,
+   "reason": "frame directly shows entangled-legs position"
+  },
+  {
+   "ts": 7310,
+   "label": "Sweep",
+   "verdict": "UNVERIFIABLE (weak support)",
+   "kept": true,
+   "reason": "no single frame shows a clean sweep motion, but position/control changes across 7280-7325 are consistent with one occurring between samples; kept at moderate confidence given no contradicting evidence"
+  },
+  {
+   "ts": 7325,
+   "label": "Guard Pass",
+   "verdict": "DISCORDANT (timing)",
+   "kept": true,
+   "reason": "scoreboard confirms a 3-point pass occurred, but visible only by ts~7340-7345 rather than exactly 7325",
+   "corrections": [
+    "none applied to ts, noted lag"
+   ]
+  },
+  {
+   "ts": 7365,
+   "label": "Back Take",
+   "verdict": "UNVERIFIABLE (weak support)",
+   "kept": true,
+   "reason": "referee restart call and general position-building visible in surrounding frames, but exact back-take moment not crisply captured at a sampled frame"
+  },
+  {
+   "ts": 7370,
+   "label": "Back Control",
+   "verdict": "UNVERIFIABLE (weak support)",
+   "kept": true,
+   "reason": "same as Back Take; kept together as a coherent late-match sequence"
+  },
+  {
+   "ts": 7405,
+   "label": "Rear Naked Choke",
+   "verdict": "DISCORDANT",
+   "kept": false,
+   "reason": "contradicted by hard evidence: the live match clock (top-right overlay) counts down continuously and visibly from 00:57 (7400s) to 00:04 (7460s) with the score frozen at 3-0 the entire time and no stoppage/tap/hand-raise-for-submission visible before the video's last sampled frame (7465s, = curated_end). A finish would stop the clock. The 'final_score was a string (3-0)' audit flag independently supports a POINTS DECISION, not a submission. Frame at 7405 itself shows a scramble/back-exposure position, not a completed choke. Dropped rather than corrected to successful:false because no submission attempt is clearly identifiable at all in this window distinct from the kept Back Take/Back Control events."
+  }
+ ],
+ "identity_check": "Confirmed via scoreboard lower-third from 6920s onward: 'I. Michell' (red slot) vs 'R. D-Frias' (blue slot). 6890-6915s frames are a DIFFERENT bout (D. Manaspiu/Moody vs A. Minenko/Jussila-style scorecard) on the same mat, excluded. Walkout/handshake at 6920-6925 confirms bout_start_seconds=6925. Winner arc internally consistent: Dib takedown ~7225-7245 -> Michell leg entanglement/sweep/3pt guard pass by 7345 (score 3-0) -> back take/control 7365-7395 -> match runs to clock expiry at ~7460-7465 (countdown visible 00:57->00:04) with score frozen 3-0. No stoppage/tap visible before video ends. Published winner Izaak Michell matches final scoreboard lead.",
+ "notes": "Read 10 raw events (all had valid ts/label/type). Kept 9, corrected 3 actor name-variants (Roberto Dib Frias -> Roberto Dib), dropped 1 (fabricated submission finish -- see log). This bout very likely ended by points decision 3-0 for Izaak Michell (match clock runs to expiry, not stoppage), contradicting the raw file's implied submission win; win_method should be treated as unknown/decision downstream, not 'Submission'. Frames 6890-6915 belong to a prior bout on the same mat and were excluded from identity/verification work entirely."
+}

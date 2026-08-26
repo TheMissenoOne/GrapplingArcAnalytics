@@ -1,0 +1,94 @@
+{
+ "bout": {
+  "athlete_a": "Izaak Michell",
+  "athlete_b": "Roberto Dib",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Izaak Michell",
+  "year": 2023,
+  "bout_start_seconds": 6925,
+  "identity_discriminator": "Confirmed via scoreboard lower-third from 6920s onward: 'I. Michell' (red slot) vs 'R. D-Frias' (blue slot). 6890-6915s frames are a DIFFERENT bout (D. Manaspiu/Moody vs A. Minenko/Jussila-style scorecard) on the same mat, excluded. Walkout/handshake at 6920-6925 confirms bout_start_seconds=6925. Winner arc internally consistent: Dib takedown ~7225-7245 -> Michell leg entanglement/sweep/3pt guard pass by 7345 (score 3-0) -> back take/control 7365-7395 -> match runs to clock expiry at ~7460-7465 (countdown visible 00:57->00:04) with score frozen 3-0. No stoppage/tap visible before video ends. Published winner Izaak Michell matches final scoreboard lead.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "Read 10 raw events (all had valid ts/label/type). Kept 9, corrected 3 actor name-variants (Roberto Dib Frias -> Roberto Dib), dropped 1 (fabricated submission finish -- see log). This bout very likely ended by points decision 3-0 for Izaak Michell (match clock runs to expiry, not stoppage), contradicting the raw file's implied submission win; win_method should be treated as unknown/decision downstream, not 'Submission'. Frames 6890-6915 belong to a prior bout on the same mat and were excluded from identity/verification work entirely. | win_type corrected to POINTS by audit: clock ran out at 3-0, no stoppage; the raw RNC finish claim was dropped.",
+  "win_type": "POINTS",
+  "final_score": {
+   "Izaak Michell": 3,
+   "Roberto Dib": 0
+  }
+ },
+ "events": [
+  {
+   "ts": 6945,
+   "label": "Double Leg Takedown",
+   "actor": "Roberto Dib",
+   "successful": false,
+   "type": "takedown",
+   "note": "actor corrected from name-variant 'Roberto Dib Frias'; frames show hand-fighting/clinch engagement in window, not a crisp shot -- moderate confidence, score stayed 0-0 consistent with failed attempt"
+  },
+  {
+   "ts": 6960,
+   "label": "Single Leg Takedown",
+   "actor": "Roberto Dib",
+   "successful": false,
+   "type": "takedown",
+   "note": "actor corrected from name-variant; narration 'Down.' at 6965 aligns with a shot/contact moment; score 0-0 consistent with failed attempt"
+  },
+  {
+   "ts": 7065,
+   "label": "Snap Down",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "takedown",
+   "note": "narration 'Snapping with the assist' at 7060 matches frame showing Michell with control over Dib's neck/head, bent forward"
+  },
+  {
+   "ts": 7225,
+   "label": "Double Leg Takedown",
+   "actor": "Roberto Dib",
+   "successful": true,
+   "type": "takedown",
+   "note": "actor corrected from name-variant; shot visible building 7220-7240 ('Now it's time.' narration at 7235), landing to groundwork by 7245-7250"
+  },
+  {
+   "ts": 7280,
+   "label": "Leg Entanglement",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "guard",
+   "note": "frame shows entangled-legs ground position matching label"
+  },
+  {
+   "ts": 7310,
+   "label": "Sweep",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "sweep",
+   "note": "moderate confidence; continuous ground scramble 7280-7325 consistent with a positional reversal preceding the scored guard pass"
+  },
+  {
+   "ts": 7325,
+   "label": "Guard Pass",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "pass",
+   "points": 3,
+   "note": "scoreboard jumps 0-0 -> 3-0 visible by 7345, consistent with this pass; ts slightly leads the visible score change (sampling lag)"
+  },
+  {
+   "ts": 7365,
+   "label": "Back Take",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "transition",
+   "note": "moderate confidence; referee 'fight' restart call at 7365, back-exposure position visible building through 7385-7395"
+  },
+  {
+   "ts": 7370,
+   "label": "Back Control",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "control",
+   "note": "moderate confidence, same position-building window as Back Take"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 9/10) 2026-08-25"
+}

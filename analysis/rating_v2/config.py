@@ -90,7 +90,10 @@ class EngineConfig:
 # join silently missed her). Measured on the roster: rated 9 -> 13, passing the RD<=200 gate
 # 8 -> 11 (Frankland 1660/RD147 and Anabel Lopez 1779/RD138 enter passing; Svendsen 1642/RD220
 # and Molina 1858/RD220 rated but honestly failing the gate on one bout each).
-SITE_RATING_RUN_ID: str | None = "bacf04ed-1469-42c5-84bc-df2410b2a700"
+# Seventh pin, 2026-08-26: batch-3 audited imports (+4 bouts, 913 matches) — incl. one more
+# Nadia Frankland bout (Bangkok 65kg final vs Loewenthal) and the Michell win_type corrected
+# to POINTS by the audit. Same corpus discipline as the sixth pin.
+SITE_RATING_RUN_ID: str | None = "694579a2-469d-4f30-bed8-9fce6b6ac071"
 
 # Publish-confidence cut. An editorial decision calibrated against measured impact
 # (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87

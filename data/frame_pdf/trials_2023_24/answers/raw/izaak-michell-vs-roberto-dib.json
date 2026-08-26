@@ -1,0 +1,97 @@
+{
+ "bout": {
+  "athlete_a": "Izaak Michell",
+  "athlete_b": "Roberto Dib",
+  "event": "Asia & Oceania Trials 2023 (Singapore)",
+  "winner": "Izaak Michell",
+  "year": 2023,
+  "bout_start_seconds": 6925
+ },
+ "events": [
+  {
+   "ts": 6945,
+   "label": "Double Leg Takedown",
+   "actor": "Roberto Dib Frias",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 6960,
+   "label": "Single Leg Takedown",
+   "actor": "Roberto Dib Frias",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 7065,
+   "label": "Snap Down",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 7225,
+   "label": "Double Leg Takedown",
+   "actor": "Roberto Dib Frias",
+   "successful": true,
+   "type": "takedown"
+  },
+  {
+   "ts": 7280,
+   "label": "Leg Entanglement",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 7310,
+   "label": "Sweep",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "sweep"
+  },
+  {
+   "ts": 7325,
+   "label": "Guard Pass",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 7365,
+   "label": "Back Take",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 7370,
+   "label": "Back Control",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 7405,
+   "label": "Rear Naked Choke",
+   "actor": "Izaak Michell",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "audit": {
+  "division": "88kg",
+  "source_file": "bout competitor 1 Izaak.txt",
+  "curated_start": 6890,
+  "curated_end": 7470,
+  "gemini_winner": "Izaak Michell",
+  "flags": [
+   "ts 6945: actor 'Roberto Dib Frias' is neither competitor",
+   "ts 6960: actor 'Roberto Dib Frias' is neither competitor",
+   "ts 7225: actor 'Roberto Dib Frias' is neither competitor",
+   "final_score was a string ('3-0') -- dropped, orientation undeclared"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

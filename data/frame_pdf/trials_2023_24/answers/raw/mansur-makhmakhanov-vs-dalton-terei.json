@@ -1,0 +1,86 @@
+{
+ "bout": {
+  "athlete_a": "Mansur Makhmakhanov",
+  "athlete_b": "Dalton Terei",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Mansur Makhmakhanov",
+  "year": 2024
+ },
+ "events": [
+  {
+   "ts": 28245,
+   "label": "Clinch",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "transition",
+   "note": "Both athletes engage in a standing clinch.[cite: 1]"
+  },
+  {
+   "ts": 28270,
+   "label": "Guard Pull",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "transition",
+   "note": "Makhmakhanov initiates a drop to the mat to pull guard.[cite: 1]"
+  },
+  {
+   "ts": 28275,
+   "label": "Closed Guard",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "guard",
+   "note": "Makhmakhanov establishes closed guard on the bottom.[cite: 1]"
+  },
+  {
+   "ts": 28315,
+   "label": "Seated Guard",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "guard",
+   "note": "Makhmakhanov transitions to a seated guard posture as Terei stands.[cite: 1]"
+  },
+  {
+   "ts": 28325,
+   "label": "Open Guard",
+   "actor": "Mansur Makhmakhanov",
+   "successful": true,
+   "type": "guard",
+   "note": "Playing open guard off his back while Terei attempts to pass.[cite: 1]"
+  },
+  {
+   "ts": 28385,
+   "label": "Wrestle-Up",
+   "actor": "Mansur Makhmakhanov",
+   "successful": false,
+   "type": "transition",
+   "note": "Makhmakhanov attempts to wrestle up from the bottom position.[cite: 1]"
+  },
+  {
+   "ts": 28415,
+   "label": "Sprawl",
+   "actor": "Dalton Terei",
+   "successful": true,
+   "type": "defensive",
+   "note": "Terei defends the wrestle-up attempt by sprawling.[cite: 1]"
+  },
+  {
+   "ts": 28425,
+   "label": "Stand Up",
+   "actor": "Dalton Terei",
+   "successful": true,
+   "type": "transition",
+   "note": "Terei breaks the engagement and stands completely back up.[cite: 1]"
+  }
+ ],
+ "audit": {
+  "division": "+99kg",
+  "source_file": "gemini-code-1787706824552.json",
+  "curated_start": 28240,
+  "curated_end": 28430,
+  "gemini_winner": null,
+  "flags": [
+   "ts 28415: type 'defensive' invalid -> audit must fix or drop"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -1,0 +1,118 @@
+{
+ "bout": {
+  "athlete_a": "Sula Loewenthal",
+  "athlete_b": "Nadia Frankland",
+  "event": "Asia & Oceania Trials 2 2024 (Bangkok)",
+  "winner": "Sula Loewenthal",
+  "year": 2024,
+  "bout_start_seconds": 27410
+ },
+ "events": [
+  {
+   "ts": 27435,
+   "label": "Guard Pull",
+   "actor": "Sula Loewenthal",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27570,
+   "label": "Leg Entanglement Entry",
+   "actor": "Naomi Schultz",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27585,
+   "label": "Leg Lock",
+   "actor": "Naomi Schultz",
+   "successful": false,
+   "type": "submission"
+  },
+  {
+   "ts": 27605,
+   "label": "Leg Lock Escape",
+   "actor": "Sula Loewenthal",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 27615,
+   "label": "Guard",
+   "actor": "Naomi Schultz",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27655,
+   "label": "Inversion",
+   "actor": "Naomi Schultz",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 27680,
+   "label": "Stand Up",
+   "actor": "Naomi Schultz",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27715,
+   "label": "Guard Pull",
+   "actor": "Sula Loewenthal",
+   "successful": true,
+   "type": "transition"
+  },
+  {
+   "ts": 27840,
+   "label": "Guard Pass",
+   "actor": "Naomi Schultz",
+   "successful": true,
+   "type": "pass",
+   "points": 3,
+   "note": "The scoreboard updates to 3 points for N. Naomi Schultz. Identity verified: the athlete in the long-sleeved rashguard executes the guard pass and secures side control, confirming she is Naomi Schultz[cite: 1]."
+  },
+  {
+   "ts": 27845,
+   "label": "Side Control",
+   "actor": "Naomi Schultz",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 27880,
+   "label": "Escape to Turtle",
+   "actor": "Sula Loewenthal",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 27885,
+   "label": "Turtle Control",
+   "actor": "Naomi Schultz",
+   "successful": true,
+   "type": "control"
+  }
+ ],
+ "audit": {
+  "division": "65kg F",
+  "source_file": "gemini-code-1787707086498.json",
+  "curated_start": 27390,
+  "curated_end": 27920,
+  "gemini_winner": "Unknown",
+  "flags": [
+   "ts 27570: actor 'Naomi Schultz' is neither competitor",
+   "ts 27585: actor 'Naomi Schultz' is neither competitor",
+   "ts 27615: actor 'Naomi Schultz' is neither competitor",
+   "ts 27655: actor 'Naomi Schultz' is neither competitor",
+   "ts 27680: actor 'Naomi Schultz' is neither competitor",
+   "ts 27840: actor 'Naomi Schultz' is neither competitor",
+   "ts 27845: actor 'Naomi Schultz' is neither competitor",
+   "ts 27885: actor 'Naomi Schultz' is neither competitor",
+   "gemini winner 'Unknown' CONTRADICTS published winner 'Sula Loewenthal' -- identity of every actor in this bout is suspect",
+   "final_score was a string ('0-3') -- dropped, orientation undeclared"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}
