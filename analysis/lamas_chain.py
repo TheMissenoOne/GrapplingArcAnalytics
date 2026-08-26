@@ -721,7 +721,7 @@ CHAIN_FACTOR_CAVEATS: tuple[str, ...] = (
     "`reward_risk` herda: aparição sem sucessora não é pontuada. O viés que isso cria está "
     "nomeado — as cadeias que acabam rápido são justamente as que uma finalização encerrou, "
     "então o fator descreve o fluxo que sobreviveu.",
-    "Janela com atriz desconhecida em qualquer um dos três passos sai do denominador "
+    "Janela com atleta desconhecida em qualquer um dos três passos sai do denominador "
     "(`n_unknown_actor`), porque uma proporção de duas saídas não tem valor neutro: contá-la "
     "como falha faria o fator medir a cobertura da anotação. Medido: ZERO janelas assim nos "
     "cinco recortes, já que a recusa por atribuição entra antes.",
@@ -1197,7 +1197,7 @@ def chain_factor(chains: Sequence[Chain], n_boot: int = N_BOOT) -> dict[str, Any
             f"de s são TODAS da mesma atleta que executou s | a aparição tem pelo menos "
             f"{CHAIN_FACTOR_DEPTH} ações seguintes na cadeia). Profundidade "
             f"{CHAIN_FACTOR_DEPTH} porque a profundidade 1 já é o braço `reward` do "
-            f"`reward_risk`. Aparição rasa demais e janela com atriz desconhecida ficam fora do "
+            f"`reward_risk`. Aparição rasa demais e janela com atleta desconhecida ficam fora do "
             f"denominador (`n_short`, `n_unknown_actor`), a convenção de "
             f"analysis/transitions/build_graph.py levada a duas ações."),
         "depth": CHAIN_FACTOR_DEPTH,
