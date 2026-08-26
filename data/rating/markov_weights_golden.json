@@ -1,0 +1,385 @@
+{
+  "cases": [
+    {
+      "block": {
+        "BTK": 1.6,
+        "BTKA": 1.45,
+        "CDP": 0.25,
+        "GPS": 1.3,
+        "GPSA": 1.15,
+        "PGD": 0.4,
+        "SUB": 1.9,
+        "SUBA": 1.75,
+        "SWP": 0.7,
+        "SWPA": 0.55,
+        "TKD": 1.0,
+        "TKDA": 0.85
+      },
+      "events": [
+        {
+          "label": "Single Leg",
+          "successful": true,
+          "type": "takedown"
+        },
+        {
+          "label": "Single Leg",
+          "type": "takedown"
+        },
+        {
+          "label": "Butterfly Sweep",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "label": "Leg Drag",
+          "successful": false,
+          "type": "pass"
+        },
+        {
+          "label": "Rear Naked Choke",
+          "successful": true,
+          "type": "submission"
+        }
+      ],
+      "expected_codes": [
+        "TKD",
+        "TKDA",
+        "SWP",
+        "GPSA",
+        "SUB"
+      ],
+      "expected_shares": [
+        0.178571428571,
+        0.151785714286,
+        0.125,
+        0.205357142857,
+        0.339285714286
+      ],
+      "name": "type_families_attempt_and_success"
+    },
+    {
+      "block": {
+        "BTK": 1.6,
+        "BTKA": 1.45,
+        "CDP": 0.25,
+        "GPS": 1.3,
+        "GPSA": 1.15,
+        "PGD": 0.4,
+        "SUB": 1.9,
+        "SUBA": 1.75,
+        "SWP": 0.7,
+        "SWPA": 0.55,
+        "TKD": 1.0,
+        "TKDA": 0.85
+      },
+      "events": [
+        {
+          "label": "Back Control",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "label": "Back Control",
+          "type": "control"
+        },
+        {
+          "label": "Guard Pull",
+          "type": "guard"
+        },
+        {
+          "label": "Front Headlock",
+          "type": "control"
+        },
+        {
+          "label": "Arm Drag",
+          "type": "transition"
+        }
+      ],
+      "expected_codes": [
+        "BTK",
+        "BTKA",
+        "PGD",
+        "CDP",
+        "CDP"
+      ],
+      "expected_shares": [
+        0.405063291139,
+        0.367088607595,
+        0.101265822785,
+        0.063291139241,
+        0.063291139241
+      ],
+      "name": "label_paths_back_pull_clinch"
+    },
+    {
+      "block": {
+        "BTK": 1.6,
+        "BTKA": 1.45,
+        "CDP": 0.25,
+        "GPS": 1.3,
+        "GPSA": 1.15,
+        "PGD": 0.4,
+        "SUB": 1.9,
+        "SUBA": 1.75,
+        "SWP": 0.7,
+        "SWPA": 0.55,
+        "TKD": 1.0,
+        "TKDA": 0.85
+      },
+      "events": [
+        {
+          "label": "Top Control Body Lock",
+          "type": "control"
+        },
+        {
+          "label": "Body Triangle (Bottom)",
+          "type": "control"
+        },
+        {
+          "label": "Body Triangle",
+          "type": "control"
+        },
+        {
+          "label": "Back Escape",
+          "type": "escape"
+        },
+        {
+          "label": "Closed Guard",
+          "type": "guard"
+        }
+      ],
+      "expected_codes": [
+        null,
+        null,
+        "BTKA",
+        null,
+        null
+      ],
+      "expected_shares": [
+        0.186956521739,
+        0.186956521739,
+        0.252173913043,
+        0.186956521739,
+        0.186956521739
+      ],
+      "name": "overrides_and_type_gate"
+    },
+    {
+      "block": {
+        "BTK": 1.6,
+        "BTKA": 1.45,
+        "CDP": 0.25,
+        "GPS": 1.3,
+        "GPSA": 1.15,
+        "PGD": 0.4,
+        "SUB": 1.9,
+        "SUBA": 1.75,
+        "SWP": 0.7,
+        "SWPA": 0.55,
+        "TKD": 1.0,
+        "TKDA": 0.85
+      },
+      "events": [
+        {
+          "label": "Bôdy Triângle",
+          "type": "control"
+        },
+        {
+          "label": "Back-Take!",
+          "type": "transition"
+        },
+        {
+          "label": "Pull  Guard / Inversion",
+          "type": "guard"
+        }
+      ],
+      "expected_codes": [
+        "BTKA",
+        null,
+        "PGD"
+      ],
+      "expected_shares": [
+        0.495726495726,
+        0.367521367521,
+        0.136752136752
+      ],
+      "name": "accents_and_punctuation"
+    },
+    {
+      "block": {
+        "BTK": 1.6,
+        "BTKA": 1.45,
+        "CDP": 0.25,
+        "GPS": 1.3,
+        "GPSA": 1.15,
+        "PGD": 0.4,
+        "SUB": 1.9,
+        "SUBA": 1.75,
+        "SWP": 0.7,
+        "SWPA": 0.55,
+        "TKD": 1.0,
+        "TKDA": 0.85
+      },
+      "events": [
+        {
+          "label": "Half Guard",
+          "type": "guard"
+        },
+        {
+          "label": "Escape to Turtle",
+          "type": "escape"
+        },
+        {
+          "label": "Pressure",
+          "type": "concept"
+        }
+      ],
+      "expected_codes": [
+        null,
+        null,
+        null
+      ],
+      "expected_shares": [
+        0.333333333333,
+        0.333333333333,
+        0.333333333333
+      ],
+      "name": "all_unmapped_is_uniform"
+    },
+    {
+      "block": {
+        "BTK": 2.0,
+        "BTKA": 2.0,
+        "CDP": 2.0,
+        "GPS": 2.0,
+        "GPSA": 2.0,
+        "PGD": 2.0,
+        "SUB": 2.0,
+        "SUBA": 2.0,
+        "SWP": 2.0,
+        "SWPA": 2.0,
+        "TKD": 2.0,
+        "TKDA": 2.0
+      },
+      "events": [
+        {
+          "label": "Heel Hook",
+          "successful": true,
+          "type": "submission"
+        },
+        {
+          "label": "Half Guard",
+          "type": "guard"
+        },
+        {
+          "label": "Leg Drag",
+          "type": "pass"
+        }
+      ],
+      "expected_codes": [
+        "SUB",
+        null,
+        "GPSA"
+      ],
+      "expected_shares": [
+        0.333333333333,
+        0.333333333333,
+        0.333333333333
+      ],
+      "name": "flat_block_is_uniform"
+    },
+    {
+      "block": {
+        "GPS": 3.0,
+        "SUB": 5.0,
+        "TKD": 1.0
+      },
+      "events": [
+        {
+          "label": "Heel Hook",
+          "successful": true,
+          "type": "submission"
+        },
+        {
+          "label": "Butterfly Sweep",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "label": "Half Guard",
+          "type": "guard"
+        }
+      ],
+      "expected_codes": [
+        "SUB",
+        "SWP",
+        null
+      ],
+      "expected_shares": [
+        0.454545454545,
+        0.272727272727,
+        0.272727272727
+      ],
+      "name": "partial_block_falls_back_to_mean"
+    },
+    {
+      "block": null,
+      "events": [
+        {
+          "label": "Heel Hook",
+          "successful": true,
+          "type": "submission"
+        },
+        {
+          "label": "Half Guard",
+          "type": "guard"
+        }
+      ],
+      "expected_codes": [
+        "SUB",
+        null
+      ],
+      "expected_shares": [
+        0.5,
+        0.5
+      ],
+      "name": "absent_block_is_uniform"
+    },
+    {
+      "block": {
+        "BTK": 1.6,
+        "BTKA": 1.45,
+        "CDP": 0.25,
+        "GPS": 1.3,
+        "GPSA": 1.15,
+        "PGD": 0.4,
+        "SUB": 1.9,
+        "SUBA": 1.75,
+        "SWP": 0.7,
+        "SWPA": 0.55,
+        "TKD": 1.0,
+        "TKDA": 0.85
+      },
+      "events": [],
+      "expected_codes": [],
+      "expected_shares": [],
+      "name": "empty_sequence"
+    }
+  ],
+  "contract": "lamas_state(type,label,successful) -> code | null; relative_shares(codes, block) -> vector summing to 1. The per-engine scalar applied to that vector is NOT part of this contract.",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_markov_weight_fixtures.py",
+  "states": [
+    "CDP",
+    "PGD",
+    "SWPA",
+    "SWP",
+    "TKDA",
+    "TKD",
+    "GPSA",
+    "GPS",
+    "BTKA",
+    "BTK",
+    "SUBA",
+    "SUB"
+  ]
+}

@@ -119,12 +119,25 @@ class TestProfileNarrative:
         assert "submission hunter" in body
         assert "#1 by Grappling ELO" in body
 
-    def test_response_and_finishing(self) -> None:
+    def test_response_patterns_removed(self) -> None:
+        """Response-pattern prose (owner-distrusted, small-sample) is gone entirely —
+        both the section heading and its per-situation sentence."""
+        secs = profile_narrative(_profile())
+        assert "How he responds" not in [h for h, _ in secs]
+        body = _flat(secs)
+        assert "most often answers with" not in body
+
+    def test_finishing(self) -> None:
         body = _flat(profile_narrative(_profile()))
-        assert "When taken down, Gordon Ryan most often answers with Open Guard" in body
         assert "60%" in body
         assert "strangles" in body
         assert "3–0 against top-tier" in body
+
+    def test_signature_entries_have_no_percentage(self) -> None:
+        """Per-technique conversion-rate-style claims are stripped — names only."""
+        body = _flat(profile_narrative(_profile()))
+        assert "Back Take" in body
+        assert "10%" not in body and "7%" not in body
 
     def test_no_template_leftovers(self) -> None:
         body = _flat(profile_narrative(_profile()))

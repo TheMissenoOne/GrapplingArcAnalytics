@@ -16,11 +16,14 @@ per-match opponent ratings) is passed in, so it is unit-testable in isolation.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping, Sequence
 from datetime import date
 from typing import Any
 
 from analysis.athlete_graph import AthleteEdge, AthleteGraph, AthleteNode
 from analysis.elo_calibration import _expected
+from analysis.lamas_chain import lamas_state
+from analysis.markov_weights import relative_shares
 from analysis.names import _normalize_name, canonicalize
 
 # ── Belt-base ladder ────────────────────────────────────────────────────────
@@ -39,6 +42,13 @@ BELT_BASE_ELO: dict[str, float] = {
 # ── Sequence point-map ──────────────────────────────────────────────────────
 # Keyword → IBJJF-ish point value, matched against a move's normalized
 # label/type.  Ported from the app ``eloService.ts`` point map.  Tunable.
+#
+# ⚠️ This table feeds the MATCH-LEVEL score ``S`` only (``score_from_match``), and even
+# there it is result-anchored and sign-clamped — it is NOT what distributes the move
+# across the athlete's nodes. That distribution lives in ``_node_shares`` and is the
+# thing the Markov action weights replace. Swapping this table for a Markov one is a
+# separate decision with a separate blast radius (it moves every S, and therefore every
+# delta's MAGNITUDE, not just its split) and is deliberately not part of that change.
 POINT_MAP: dict[str, int] = {
     "takedown": 2,
     "sweep": 2,
@@ -196,6 +206,54 @@ def _your_entries(match: Any) -> list[dict[str, Any]]:
     return out
 
 
+def _node_shares(
+    unique: Sequence[str],
+    participating: Sequence[str],
+    codes: Sequence[str | None],
+    block: Mapping[str, float] | None,
+) -> list[float]:
+    """How much of this match's move each participating node takes. Mean 1, always.
+
+    **The invariant this preserves.** Before Markov weights existed, every unique
+    participating node took the FULL ``delta * scale`` — the delta is not split here, it is
+    applied once per node, and the converge-clamp above depends on that: it predicts the
+    graph mean landing at ``graph_elo + delta * len(unique) / n_total``. So the weighting
+    must leave the SUM of the shares at ``len(unique)``, i.e. their mean at exactly 1.0.
+    Turning the delta into a probability split (shares summing to 1) instead would shrink
+    every athlete's ELO movement by a factor of ``len(unique)`` — a different engine, not a
+    different weighting, and every convergence test would be measuring the shrink.
+
+    So this takes ``markov_weights.relative_shares`` (which sums to 1 — the cross-module
+    contract the App reproduces) and multiplies by ``len(unique)``. The App applies the
+    same vector against its own scalar; only the scalar differs, and that difference is
+    documented on both sides rather than papered over.
+
+    **A repeated node is not a heavier node here.** ``participating`` carries one entry per
+    event, so a technique used three times in a bout appears three times; its weight is the
+    MEAN of its entries' weights, not their sum. Summing would make repetition move the
+    rating, which is a change nobody asked for and which would break the equal-weights
+    identity below. (The App aggregates per ENTRY, deliberately — its rounds already count
+    repetition, and matching it here would change athlete numbers.)
+
+    **Equal weights are the identity.** With every weight in the block equal — and with no
+    block at all — every share is exactly 1.0 and the loop above does precisely what it did
+    before this function existed.
+    """
+    if not unique:
+        return []
+    shares = relative_shares(codes, block)
+    if not shares:
+        return [1.0] * len(unique)
+    per_node: dict[str, list[float]] = {}
+    for norm, share in zip(participating, shares):
+        per_node.setdefault(norm, []).append(share)
+    weights = [sum(per_node[n]) / len(per_node[n]) for n in unique]
+    total = sum(weights)
+    if total <= 0:
+        return [1.0] * len(unique)
+    return [len(unique) * w / total for w in weights]
+
+
 def _mean_elo(graph: AthleteGraph) -> float | None:
     elos = [n.computed_elo for n in graph.nodes.values() if n.computed_elo is not None]
     if not elos:
@@ -226,6 +284,7 @@ def replay_matches(
     opp_elos: list[float],
     belt: str | None = "black",
     competitive_mult: float = COMPETITIVE_K_MULT,
+    action_weights: Sequence[Mapping[str, float] | None] | None = None,
 ) -> tuple[AthleteGraph, list[float]]:
     """Replay matches chronologically, growing per-node ELO toward ``rank_target``.
 
@@ -241,6 +300,12 @@ def replay_matches(
         Per-match opponent rating, parallel to ``matches``.
     belt : str | None
         Athlete belt → newly-seen node seed ELO (defaults to black / 800).
+    action_weights : sequence, optional
+        Per-match Markov action-weight block, parallel to ``matches`` exactly as
+        ``opp_elos`` is — one entry per match, ``None`` where the match has no block.
+        Resolved by the CALLER (``db.repository.replay_and_persist_athlete``) because
+        picking a block needs the match's ``event`` and the versioned ruleset map, and
+        this module stays pure. Absent (the default) → the historical uniform split.
 
     Returns
     -------
@@ -266,6 +331,11 @@ def replay_matches(
 
         # Seed / count participating nodes.
         participating: list[str] = []
+        # This match's Lamas action code per participating entry, parallel to
+        # ``participating``. Read once here rather than in the distribution block below so
+        # ``lamas_state`` sees the raw corpus event (``type``/``label``/``successful``) and
+        # not a reconstruction of it.
+        codes: list[str | None] = []
         for entry in your:
             label = str(entry.get("label", ""))
             typ = str(entry.get("type", ""))
@@ -276,6 +346,7 @@ def replay_matches(
                 graph.nodes[norm] = node
             node.count += 1
             participating.append(norm)
+            codes.append(lamas_state(entry))
 
         # Consecutive-pair edges (skip self-loops), mirroring build_athlete_graph.
         #
@@ -329,10 +400,11 @@ def replay_matches(
             denom = prospective_mean - graph_elo
             if denom != 0:
                 scale = (rank_target - graph_elo) / denom
-        for norm in unique:
+        block = action_weights[i] if action_weights and i < len(action_weights) else None
+        for norm, share in zip(unique, _node_shares(unique, participating, codes, block)):
             graph.nodes[norm].computed_elo = (
                 graph.nodes[norm].computed_elo or base
-            ) + delta * scale
+            ) + delta * scale * share
 
         # Derive edge ELO from endpoint node ELO.
         for (src, tgt), edge in graph.edges.items():

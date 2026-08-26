@@ -82,6 +82,83 @@ def test_ocean_collapses_reciprocal_pairs_and_orients_the_arrow() -> None:
     assert pair_links[0]["from"] == bc and pair_links[0]["to"] == rnc and pair_links[0]["arrow"]
 
 
+def test_top_importance_filter_reduces_large_corpus_and_floors_small_ones() -> None:
+    import math
+
+    from analysis.ocean import MIN_KEEP_NODES, TOP_IMPORTANCE_PCT, _filter_top_importance
+
+    # small corpus (below the floor): keep everyone, same as before the refurbish
+    small = [{"node_key": f"n{i}", "occ": i + 1, "pagerank": (i + 1) / 10,
+              "betweenness": 0.0, "reward_risk": 0.0} for i in range(5)]
+    relativize(small, eff_index={})
+    assert len(_filter_top_importance(small)) == 5
+
+    # large corpus: the percentage bites, ranked by composite importance
+    big = [{"node_key": f"n{i}", "occ": i + 1, "pagerank": (i + 1) / 200,
+            "betweenness": (i + 1) / 200, "reward_risk": 0.0} for i in range(200)]
+    relativize(big, eff_index={})
+    kept = _filter_top_importance(big)
+    assert len(kept) == max(MIN_KEEP_NODES, math.ceil(200 * TOP_IMPORTANCE_PCT / 100))
+    kept_keys = {n["node_key"] for n in kept}
+    assert "n199" in kept_keys  # highest occ/pagerank/betweenness → most important
+    assert "n0" not in kept_keys  # lowest → filtered out
+
+
+def test_radial_layout_is_deterministic_and_centers_the_most_important() -> None:
+    import math
+
+    from analysis.ocean import _radial_layout
+
+    def _mk() -> list[dict[str, Any]]:
+        return [{"id": i, "metrics": {"centrality": {"pct": p}, "bridging": {"pct": p},
+                                       "frequency": {"pct": p}}}
+                for i, p in enumerate((90, 10, 50, 70))]
+
+    a, b = _mk(), _mk()
+    _radial_layout(a)
+    _radial_layout(b)
+    by_a, by_b = {n["id"]: n for n in a}, {n["id"]: n for n in b}
+    assert by_a[0]["x"] == by_b[0]["x"] and by_a[0]["y"] == by_b[0]["y"]  # no per-run RNG
+
+    def radius(n: dict[str, Any]) -> float:
+        return math.hypot(n["x"], n["y"])
+
+    assert by_a[0]["imp"] == 1.0  # highest composite pct = most important
+    assert radius(by_a[0]) < radius(by_a[1])  # most important sits nearer the centre
+
+
+def test_top_transitions_orders_by_count() -> None:
+    from analysis.lamas_chain import STATES
+    from analysis.ocean import _top_transitions
+
+    n = len(STATES)
+    counts = [[0] * n for _ in range(n)]
+    probs = [[0.0] * n for _ in range(n)]
+    counts[0][1], probs[0][1] = 5, 0.5
+    counts[2][3], probs[2][3] = 20, 0.8
+    counts[4][4], probs[4][4] = 1, 1.0
+    top = _top_transitions({"counts": counts, "probs": probs}, top_n=2)
+    assert len(top) == 2
+    assert top[0] == {"from": STATES[2], "to": STATES[3], "n": 20, "prob": 0.8}
+    assert top[1]["n"] == 5
+
+
+def test_elo_buckets_are_relative_not_raw() -> None:
+    from analysis.ocean import _elo_buckets
+
+    by_type = {
+        "guard": (1200.0, 60.0, 10),
+        "submission": (800.0, 40.0, 10),
+        "escape": (1000.0, 0.0, 1),  # below MIN_POP → excluded
+    }
+    buckets = _elo_buckets(by_type)
+    assert {b["type"] for b in buckets} == {"guard", "submission"}
+    by_t = {b["type"]: b for b in buckets}
+    assert by_t["guard"]["ratio"] == 1.2 and by_t["submission"]["ratio"] == 0.8  # vs grand mean
+    assert by_t["guard"]["spread"] == 0.05  # std/mean, dimensionless — never a raw rating
+    assert buckets[0]["type"] == "guard"  # highest ratio first
+
+
 def test_ocean_dashes_low_landing_edges() -> None:
     # Fixed rule: dash iff weight >= 5, target type gated, and success < 0.40.
     # CG -> TRI five times, only one landing → success 0.2 → dashed.

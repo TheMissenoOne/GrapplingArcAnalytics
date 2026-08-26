@@ -16,6 +16,7 @@ wrapper that also attaches semantic+structural neighbours.
 from __future__ import annotations
 
 import json
+import math
 import statistics
 from collections import defaultdict
 from pathlib import Path
@@ -33,6 +34,16 @@ _REGION_PALETTE = ["#4d86ff", "#fc4c02", "#2dd4bf", "#a78bfa", "#fbbf24",
 _NO_REGION = "#5b5b66"
 _METRIC_SRC = {"frequency": "occ", "centrality": "pagerank",
                "bridging": "betweenness", "favorability": "reward_risk"}
+
+# The page used to dump all 272 observed positions on one force-sim canvas with no
+# hierarchy — it read as noise, not a map. Keep only the top slice by importance (owner's
+# verdict, 2026-08-26); 25% of a ~272-node corpus lands at ~68, inside the 60-70 the owner
+# asked to tune toward. MIN_KEEP_NODES is a floor so a small/test corpus is never gutted by
+# the percentage (a 4-node fixture keeps all 4, not 1).
+TOP_IMPORTANCE_PCT = 25
+MIN_KEEP_NODES = 40
+_GOLDEN_ANGLE = math.pi * (3 - math.sqrt(5))  # phyllotaxis: even angular spread, no RNG
+_LAYOUT_R = 150.0  # px-ish spread, matches the old cos(i)*120 random-init scale
 
 
 def _effectiveness_index() -> dict[str, float]:
@@ -135,20 +146,62 @@ def _direct_map_links(
     return out
 
 
+def _importance(n: dict[str, Any]) -> float:
+    """Composite 0..100 importance: how central + how bridging + how often played.
+
+    Favorability is deliberately excluded — that metric says whether a position is GOOD for
+    the athlete in it, not whether the position matters to the map's structure."""
+    m = n["metrics"]
+    return (m["centrality"]["pct"] + m["bridging"]["pct"] + m["frequency"]["pct"]) / 3
+
+
+def _radial_layout(nodes: list[dict[str, Any]]) -> None:
+    """Stamp deterministic sunflower-spiral ``x``/``y``/``imp`` by importance rank (mutates).
+
+    Rank 0 (most important) sits nearest the centre; radius grows with ``sqrt(rank)`` so ring
+    density stays roughly uniform instead of crowding the middle (standard phyllotaxis
+    spacing). No RNG anywhere — the exporter runs once and the browser must draw the same map
+    on every load (`site/graph.js` uses these coordinates as its seed instead of
+    ``Math.random()`` when a node carries them).
+    """
+    total = len(nodes)
+    ranked = sorted(nodes, key=lambda n: -_importance(n))
+    for rank, n in enumerate(ranked):
+        n["imp"] = 1.0 if total <= 1 else round(1 - rank / (total - 1), 3)
+        radius = _LAYOUT_R * math.sqrt((rank + 0.5) / total)
+        angle = rank * _GOLDEN_ANGLE
+        n["x"] = round(radius * math.cos(angle), 1)
+        n["y"] = round(radius * math.sin(angle), 1)
+
+
+def _filter_top_importance(
+    nodes: list[dict[str, Any]], pct: int = TOP_IMPORTANCE_PCT,
+) -> list[dict[str, Any]]:
+    """Keep the top ``pct``% of ``nodes`` by :func:`_importance`, floored at
+    :data:`MIN_KEEP_NODES`, then lay the survivors out radially (mutates + returns a subset).
+    """
+    ranked = sorted(nodes, key=lambda n: -_importance(n))
+    keep_n = min(len(ranked), max(MIN_KEEP_NODES, math.ceil(len(ranked) * pct / 100)))
+    kept = ranked[:keep_n]
+    _radial_layout(kept)
+    return kept
+
+
 def ocean_from_map(
     gmap: dict[str, Any], eff_index: dict[str, float] | None = None,
 ) -> dict[str, Any]:
-    """Pure: assembled map → The Ocean payload (observed nodes only, with relative metrics)."""
+    """Pure: assembled map → The Ocean payload (top-importance nodes only, relative metrics)."""
     nodes = [n for n in gmap["nodes"].values() if n.get("observed")]
+    total_observed = len(nodes)
     relativize(nodes, eff_index)
-    regions = name_regions(nodes)
+    regions = name_regions(nodes)  # names/colours off the FULL population's communities
+    nodes = _filter_top_importance(nodes)
     keep = {n["node_key"] for n in nodes}
     node_type = {n["node_key"]: n["type"] for n in nodes}
-    pr_max = max((n["pagerank"] for n in nodes), default=0.0) or 1.0
     out_nodes = [{
         "id": n["node_key"], "label": n["label"], "pt": n.get("pt", ""), "type": n["type"],
         "region": n["region"], "color": n["color"],
-        "size": 1 + round(2 * n["pagerank"] / pr_max),
+        "size": 1 + round(3 * n["imp"]), "x": n["x"], "y": n["y"], "imp": n["imp"],
         "occ": n["occ"], "community": n.get("community"),
         "metrics": n["metrics"],
         "neighbours": [nb for nb in n.get("neighbours", []) if nb["node_key"] in keep][:6],
@@ -157,11 +210,112 @@ def ocean_from_map(
                   if not e["suggested"] and e["source"] in keep and e["target"] in keep]
     out_links = _direct_map_links(qualifying, node_type)
     return {"nodes": out_nodes, "links": out_links, "regions": regions,
-            "meta": {"positions": len(out_nodes), "transitions": len(out_links)}}
+            "meta": {"positions": len(out_nodes), "transitions": len(out_links),
+                     "total_positions": total_observed}}
+
+
+# ── Markov backbone panel (global Lamas-chain transitions) ──────────────────────
+_MARKOV_NOTE = (
+    "`successful` está ausente na maior parte do corpus e é lida como tentativa — toda "
+    "probabilidade aqui é um piso, não uma estimativa (ver analysis/lamas_chain.py)."
+)
+
+
+def _top_transitions(block: dict[str, Any], top_n: int) -> list[dict[str, Any]]:
+    """Pure: a ``markov_block`` payload → its ``top_n`` biggest counted routes.
+
+    Reads the same ``counts``/``probs`` matrices ``markov_block`` already publishes; this
+    just picks the routes worth drawing on a compact panel instead of the full 12x12 grid.
+    """
+    from analysis.lamas_chain import STATES
+
+    top: list[dict[str, Any]] = []
+    for i, src in enumerate(STATES):
+        for j, dst in enumerate(STATES):
+            n = block["counts"][i][j]
+            if n > 0:
+                top.append({"from": src, "to": dst, "n": n, "prob": block["probs"][i][j]})
+    top.sort(key=lambda t: -t["n"])
+    return top[:top_n]
+
+
+def markov_backbone(session: Any, top_n: int = 10) -> dict[str, Any]:
+    """Global Lamas-chain transition backbone, off every final ``matches`` row.
+
+    Public competition data only — ``matches`` has no owner_kind split, it IS the public
+    corpus (see this module's file header / the repo's public-vs-private rule). Bootstrap
+    intervals are skipped (``n_boot=0``, `lamas_chain.markov_block`'s own cheap mode): this
+    panel names the biggest counted routes, not a confidence claim.
+    """
+    from sqlalchemy import select
+
+    from analysis.lamas_chain import STATE_DEFS, STATES, markov_block
+    from db.models import Match
+
+    rows = session.execute(
+        select(Match.id, Match.sequence, Match.win_type, Match.winner_id,
+               Match.athlete_a_id, Match.athlete_b_id)
+        .where(Match.status == "final", Match.sequence.isnot(None))
+    ).all()
+    bouts = [{"id": r[0], "seq": r[1], "win_type": r[2], "winner": r[3],
+              "a_id": r[4], "b_id": r[5]} for r in rows]
+    if not bouts:
+        return {"states": [], "top": [], "n_bouts": 0, "note": _MARKOV_NOTE}
+    block = markov_block(bouts, n_boot=0)
+    return {
+        "states": [{"code": s, "definition": STATE_DEFS[s]} for s in STATES],
+        "top": _top_transitions(block, top_n),
+        "n_bouts": block["n_bouts"],
+        "note": _MARKOV_NOTE,
+    }
+
+
+# ── ELO distribution panel (per-position-family spread, athlete corpus) ─────────
+def _elo_buckets(by_type: dict[str, tuple[float, float, int]]) -> list[dict[str, Any]]:
+    """Pure: ``node_population_stats``' by-type stats → relative, sorted buckets.
+
+    Never a raw rating (Grappling ELO presentation convention, see `domain-reference`): each
+    bucket is a ratio against the corpus's own grand mean, plus a coefficient of variation
+    (``std/mean``) as the "spread" signal, both dimensionless.
+    """
+    from analysis.deviance import MIN_POP
+
+    usable = {t: v for t, v in by_type.items() if v[2] >= MIN_POP}
+    means = [mean for mean, _std, _n in usable.values()]
+    grand_mean = statistics.fmean(means) if means else 0.0
+    if not grand_mean:
+        return []
+    buckets = [
+        {"type": t, "n": n, "ratio": round(mean / grand_mean, 2),
+         "spread": round(std / mean, 2) if mean else 0.0}
+        for t, (mean, std, n) in usable.items()
+    ]
+    buckets.sort(key=lambda b: -b["ratio"])
+    return buckets
+
+
+def elo_distribution(session: Any) -> dict[str, Any]:
+    """Per-position-family Grappling ELO spread across the athlete corpus.
+
+    ``owner_kind='athlete'`` is MANDATORY — this feeds the public site (public/private data
+    rule, root CLAUDE.md). Reuses `db.repository.graphs_for_clustering` +
+    `analysis.deviance.node_population_stats`, the same pair `export/ontology.py`'s
+    per-athlete deviance already stands on, so this map cannot drift from that population.
+    """
+    from analysis.deviance import TYPES, grappling_nodes, node_population_stats
+    from db.repository import graphs_for_clustering
+
+    graphs = graphs_for_clustering(session, owner_kind="athlete")
+    rows = [(gid, gn) for gid, raw in graphs if len(gn := grappling_nodes(raw)) >= 3]
+    if not rows:
+        return {"buckets": [], "types": TYPES}
+    _by_key, by_type = node_population_stats(rows)
+    return {"buckets": _elo_buckets(by_type), "types": TYPES}
 
 
 def build_ocean(session: Any) -> dict[str, Any]:
-    """Session wrapper: assemble the map, attach hybrid neighbours, build the Ocean payload."""
+    """Session wrapper: assemble the map, attach hybrid neighbours, build the Ocean payload
+    plus the Markov backbone and ELO distribution panels."""
     from analysis.embeddings import semantic_neighbours_fn
     from analysis.grappling_map import attach_neighbors, build_grappling_map
     from analysis.vector_store import structural_neighbours_fn
@@ -169,4 +323,7 @@ def build_ocean(session: Any) -> dict[str, Any]:
     gmap = build_grappling_map(session)
     graph = gmap.pop("_graph")
     attach_neighbors(gmap, semantic_neighbours_fn(session), structural_neighbours_fn(graph))
-    return ocean_from_map(gmap)
+    ocean = ocean_from_map(gmap)
+    ocean["markov"] = markov_backbone(session)
+    ocean["elo"] = elo_distribution(session)
+    return ocean

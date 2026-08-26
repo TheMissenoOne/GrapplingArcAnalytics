@@ -546,6 +546,8 @@ def replay_and_persist_athlete(athlete: Athlete, session: Session) -> list[float
     the grown graph + ``athlete.elo`` + ``athlete.elo_series``. Returns the snapshots.
     Draft matches are held out until approved."""
     from analysis.athlete_elo import COMPETITIVE_K_MULT, replay_matches  # local: avoid import cycle
+    from analysis.markov_weights import block_for_family, load_markov_weights
+    from analysis.ruleset_scoring import family_of
 
     target = rank_elo_for_athlete(athlete.name)
     is_competitive = target is not None or athlete.source == "leaderboard"
@@ -560,9 +562,18 @@ def replay_and_persist_athlete(athlete: Athlete, session: Session) -> list[float
     )
     views = [_perspective_view(m, athlete.id) for m in final]
     opp_elos = [opponent_input_elo(m, athlete.id, session) for m in final]
+    # Per-match Markov action-weight block. Resolved HERE and not inside the replay because
+    # it needs the match's own `event` tag plus the versioned ruleset map, and `athlete_elo`
+    # is pure by contract. `None` everywhere while the artefact is absent, which is exactly
+    # the pre-Markov uniform split — nothing moves until the file ships and a full replay is
+    # run (see `analysis/markov_weights.py` rule 3).
+    weights_doc = load_markov_weights()
+    action_weights = [
+        block_for_family(family_of(m.event), weights_doc) for m in final
+    ]
     graph, snapshots = replay_matches(
         athlete.name, views, target, opp_elos, belt=athlete.belt or "black",
-        competitive_mult=comp_mult,
+        competitive_mult=comp_mult, action_weights=action_weights,
     )
     upsert_graph_from_athlete_graph(graph, athlete.id, session)
     if graph.user_elo is not None:

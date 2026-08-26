@@ -41,13 +41,6 @@ _BUCKET_PT: dict[str, str] = {
 }
 
 
-# The recurring problems style_profile tracks, as a Brazilian reader would say them.
-_SITUATION_PT: dict[str, str] = {
-    "taken down": "é derrubado", "guard passed": "tem a guarda passada",
-    "back taken": "tem as costas tomadas", "swept": "é raspado",
-}
-
-
 # Archetype names are generated in English by analysis.archetype.name_archetype and
 # persisted, so translate the pieces back rather than storing a second column.
 _ARCH_WORD_PT: dict[str, str] = {
@@ -320,7 +313,9 @@ def profile_narrative(p: dict[str, Any], lang: str = "en") -> list[Section]:
     sig = p.get("signature_techniques", [])[:3]
     trans = p.get("signature_transitions", [])[:2]
     if sig:
-        entries = ", ".join(f"{s['label']} ({_pct(s['pct'])})" for s in sig)
+        # ponytail: names only, no per-entry percentage — a %-of-8-events "conversion" claim
+        # from a thin sample reads as more precise than the data supports (owner distrust).
+        entries = ", ".join(s["label"] for s in sig)
         line = _t(lang,
                   f"His most-traveled entries: {entries}.",
                   f"As entradas mais percorridas dele: {entries}.")
@@ -330,23 +325,6 @@ def profile_narrative(p: dict[str, Any], lang: str = "en") -> list[Section]:
                        f" The spine of the game runs {spine}.",
                        f" A espinha do jogo passa por {spine}.")
         sections.append((_t(lang, "Signature game", "Jogo de assinatura"), [line]))
-
-    # Response patterns.
-    resp = p.get("responses", {})
-    if resp:
-        lines = []
-        for sit, data in resp.items():
-            if not data["moves"]:
-                continue
-            top = data["moves"][0]
-            lines.append(_t(
-                lang,
-                f"When {sit}, {name} most often answers with {top['move']} "
-                f"({_pct(top['pct'])} of the time).",
-                f"Quando {_SITUATION_PT.get(sit, sit)}, {name} responde mais com {top['move']} "
-                f"({_pct(top['pct'])} das vezes)."))
-        if lines:
-            sections.append((_t(lang, "How he responds", "Como ele responde"), lines))
 
     # Finishing.
     fin = p.get("finishing", {})

@@ -1284,14 +1284,12 @@ document.getElementById('legend').innerHTML=lg.map(([k,l])=>'<span><span class="
 document.getElementById('sigFreq').innerHTML=P.signature.map(s=>{const pct=Math.round(s.pct*100);
   return '<div class="freq-row"><div class="top"><span class="name">'+s.label+'</span><span class="pct">'+pct+'%</span></div>'
     +'<div class="freq-track"><div class="freq-fill" style="width:'+Math.max(6,pct)+'%"></div></div></div>';}).join('');
-// response tree
-document.getElementById('tree').innerHTML=P.responses.map(b=>{
-  const resp=b.moves.map(r=>'<div class="resp"><span class="pct">'+Math.round(r.pct*100)+'%</span>'
-    +'<span class="rtxt">'+r.move+'</span><span class="rbar"><span class="rfill" style="width:'+Math.max(6,Math.round(r.pct*100))+'%"></span></span></div>').join('');
-  return '<div class="branch"><div class="q"><span class="ic">'+b.icon+'</span><span class="qt">When '+b.situation+'…</span></div>'+resp+'</div>';}).join('') || '<p class="editorial">Not enough mapped exchanges yet.</p>';
-// linked matches
-document.getElementById('linked').innerHTML=P.bouts.slice(0,3).map(m=>
-  '<a class="mcard" href="breakdown-'+m.slug+'.html"><div class="ev">'+(m.year||'')+'</div><div class="op">'+m.result+'</div><div class="rs">'+(m.win_type||'')+'</div></a>').join('');
+// linked matches — result colored win/loss (draws/NC stay neutral); "result" is always
+// "def. <opp>" / "lost to <opp>" / "drew <opp>" (analysis/style_profile.py), so a prefix
+// check is enough, no separate outcome field needed.
+document.getElementById('linked').innerHTML=P.bouts.slice(0,3).map(m=>{
+  const cls=m.result.indexOf('def. ')===0?'win':(m.result.indexOf('lost to ')===0?'loss':'');
+  return '<a class="mcard" href="breakdown-'+m.slug+'.html"><div class="ev">'+(m.year||'')+'</div><div class="op '+cls+'">'+m.result+'</div><div class="rs">'+(m.win_type||'')+'</div></a>';}).join('');
 if(document.body.classList.contains('lang-pt')) GALang.set('pt');
 """
 
@@ -1304,7 +1302,6 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     sections_pt = profile_narrative(profile, lang="pt")
     rec = f["record"]
     rank = f.get("elo_rank")
-    icons = {"taken down": "T", "guard passed": "P", "back taken": "B", "swept": "S"}
     mix = profile["style_mix"]
     # Radar values per axis = the move-mix share, but an axis with NO node populated is
     # assumed by the fighter's Grappling ELO (their overall level) rather than plotted as
@@ -1319,14 +1316,31 @@ def render_profile_page(profile: dict[str, Any]) -> str:
         if v <= 0:
             v = round(mean_pop * elo_strength, 3)  # assume by grappler ELO
         radar_values.append(round(v, 3))
+    # Colour career-graph nodes by detected system (constellation) — additive: a node dict
+    # only gets a "color" key when it's a member of one of the top systems, graph.js already
+    # prefers `n.color` over its category palette (see the ocean map for the same convention),
+    # so this needs no graph.js change. New node dicts only — never mutate profile["_career_gv"]
+    # in place, since its node objects are shared (by reference) with the GA_FIGHTERS card graph
+    # already written to fighters-data.js.
+    _system_color: dict[str, str] = {}
+    for i, s in enumerate((profile.get("_systems") or {}).get("systems") or []):
+        if i >= 6:  # matches the systems_html card cap below
+            break
+        col = f"hsl({(i * 57) % 360},70%,64%)"
+        for m in s.get("members", []):
+            _system_color.setdefault(str(m).lower().strip(), col)
+    career_gv = profile["_career_gv"]
+    graph_payload = career_gv
+    if _system_color:
+        graph_payload = {**career_gv, "nodes": [
+            {**n, "color": _system_color[str(n["id"]).lower().strip()]}
+            if str(n["id"]).lower().strip() in _system_color else n
+            for n in career_gv["nodes"]
+        ]}
     payload = {
         "radar": {"labels": _RADAR_LABELS, "values": radar_values},
-        "graph": profile["_career_gv"],
+        "graph": graph_payload,
         "signature": profile["signature_techniques"],
-        "responses": [
-            {"situation": sit, "icon": icons.get(sit, "?"), "moves": data["moves"]}
-            for sit, data in profile["responses"].items()
-        ],
         # link each bout to the page that was actually written, not the slug the profile
         # computed — they differ when a pair met twice in one year. Every one of THIS
         # (trusted, or this dossier wouldn't exist) athlete's own bouts trivially has
@@ -1576,11 +1590,6 @@ document.addEventListener('DOMContentLoaded', function(){{
   <div class="freq" id="sigFreq"></div>
 </div></div></section>
 <section class="mod"><div class="wrap">
-  <div class="sec-head"><span class="eyebrow orange">Response patterns</span>
-    <h2 class="h-lg mt16">How he reacts when the position changes</h2></div>
-  <div class="tree" id="tree"></div>
-</div></section>
-<section class="mod"><div class="wrap">
   <div class="sec-head"><span class="eyebrow">Finishing profile</span>
     <h2 class="h-lg mt16">Where the matches end</h2></div>
   <div class="fingrid">{fincards}</div>
@@ -1743,9 +1752,19 @@ _OCEAN_STYLE = """<style>
 .op-sec{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin:18px 0 8px}
 .op-tags{display:flex;flex-wrap:wrap;gap:6px}
 .muted{color:var(--ink-3);font-size:12px}
+.ocean-signals{position:absolute;bottom:18px;left:18px;z-index:2;display:flex;flex-direction:column;gap:10px;max-width:280px;pointer-events:none}
+.ocean-signals>*{pointer-events:auto}
+.sig-block{background:rgba(12,12,17,.85);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.sig-block h3{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-3);margin:0 0 8px}
+.sig-row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11.5px;padding:3px 0}
+.sig-row .arrow{color:var(--ink-3)}
+.sig-row .delta{font-family:var(--mono)}
+.sig-row .up{color:var(--good)}.sig-row .down{color:var(--bad)}
+.sig-note{font-size:10px;color:var(--ink-3);margin-top:6px;line-height:1.4}
 @media(max-width:600px){
   .ocean-panel{top:auto;bottom:0;height:auto;max-height:52vh;width:100%;border-left:none;border-top:1px solid var(--line);box-shadow:0 -22px 44px rgba(0,0,0,.4)}
   .ocean-hud{max-width:none;right:18px}
+  .ocean-signals{display:none}
 }
 </style>"""
 
@@ -1756,6 +1775,7 @@ _OCEAN_BODY = """<section class="ocean-stage">
     <input id="oceanSearch" class="ocean-search" placeholder="find a technique…" autocomplete="off"/>
     <div id="oceanLegend" class="ocean-legend"></div>
   </div>
+  <div id="oceanSignals" class="ocean-signals"></div>
   <aside id="oceanPanel" class="ocean-panel" hidden>
     <button id="oceanClose" class="ocean-close" aria-label="close">&times;</button>
     <h2 id="opName"></h2><div id="opMeta"></div>
@@ -1765,19 +1785,42 @@ _OCEAN_BODY = """<section class="ocean-stage">
 </section>"""
 
 _OCEAN_JS = """
-var O = window.GA_OCEAN || {nodes:[],links:[],regions:[],meta:{}};
+var O = window.GA_OCEAN || {nodes:[],links:[],regions:[],meta:{},markov:{},elo:{}};
 var byId = {}; O.nodes.forEach(function(n){ byId[n.id]=n; });
 document.getElementById('oceanMeta').textContent =
-  (O.meta.positions||0)+' techniques · '+(O.meta.transitions||0)+' transitions · '+(O.regions||[]).length+' regions';
+  (O.meta.positions||0)+' of '+(O.meta.total_positions||O.meta.positions||0)+' techniques (top slice) · '+
+  (O.meta.transitions||0)+' transitions · '+(O.regions||[]).length+' regions';
 document.getElementById('oceanLegend').innerHTML = (O.regions||[]).map(function(r){
   return '<span class="ocean-chip"><i style="background:'+r.color+'"></i>'+r.name+'</span>'; }).join('');
 var panel = document.getElementById('oceanPanel');
 var g = GAGraph.mount(document.getElementById('oceanGraph'), {mode:'map',
-  nodes:O.nodes.map(function(n){return {id:n.id,label:n.label,cat:n.type,size:n.size,color:n.color};}),
+  // x/y/imp: the importance-radial seed from export/ocean.py — deterministic across loads,
+  // and imp (0..1) also scales gravity pull so the big central nodes stay central (graph.js).
+  nodes:O.nodes.map(function(n){return {id:n.id,label:n.label,cat:n.type,size:n.size,color:n.color,
+    x:n.x,y:n.y,imp:n.imp};}),
   links:O.links, onSelect:onSelect,
   pan:true, zoom:true, zoomOnSelect:true,        // drag to pan, wheel to zoom, click zooms in
   collide:true, swim:true,                       // no node overlap; mobile = zoomed-in thick-water nav
   charge:7000, linkDist:64, gravity:0.0009, bounded:false});  // spread out, no border tension
+// Markov backbone + ELO distribution — the two corpus-wide signals the map itself can't show.
+(function renderSignals(){
+  var host = document.getElementById('oceanSignals');
+  var M = O.markov || {}, E = O.elo || {};
+  var mv = (M.top||[]).slice(0, 6).map(function(t){
+    return '<div class="sig-row"><span>'+t.from+' <span class="arrow">&rarr;</span> '+t.to+'</span>'+
+      '<span class="muted">'+Math.round((t.prob||0)*100)+'%</span></div>'; }).join('');
+  // ratios cluster tight (the corpus's own real spread, ~±5%) — a signed delta reads that
+  // honestly; a proportional bar would make every row look the same length.
+  var ev = (E.buckets||[]).map(function(b){
+    var pct = Math.round((b.ratio - 1) * 100), cls = pct >= 0 ? 'up' : 'down';
+    return '<div class="sig-row"><span>'+b.type+'</span><span class="delta '+cls+'">'+
+      (pct >= 0 ? '▲ +' : '▼ ')+pct+'%</span></div>'; }).join('');
+  host.innerHTML =
+    (mv ? '<div class="sig-block"><h3>Markov backbone</h3>'+mv+
+      '<div class="sig-note">'+(M.n_bouts||0)+' bouts · action-level, corpus-wide (Lamas et al. 2024 states)</div></div>' : '') +
+    (ev ? '<div class="sig-block"><h3>Grappling ELO · relative spread</h3>'+ev+
+      '<div class="sig-note">ratio vs. corpus mean, athlete graphs only — never a raw rating</div></div>' : '');
+})();
 function bar(title, m){
   if(!m) return '';
   var top = 100 - m.pct;

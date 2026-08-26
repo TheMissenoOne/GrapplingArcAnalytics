@@ -1,0 +1,397 @@
+{
+  "version": 1,
+  "generated": "2026-08-26T14:44:05Z",
+  "action_space": "lamas12",
+  "action_codes": [
+    "CDP",
+    "PGD",
+    "SWPA",
+    "SWP",
+    "TKDA",
+    "TKD",
+    "GPSA",
+    "GPS",
+    "BTKA",
+    "BTK",
+    "SUBA",
+    "SUB"
+  ],
+  "method": "weight(action) = sub_share(action) = p_sub_own / (p_sub_own + p_sub_opp), the absorbing-chain share of reachable submissions that are the acting athlete's, from analysis/lamas_chain.rrb over analysis/lamas_chain.chain_of chains. Bounded in [0, 1] by construction, floored at WEIGHT_FLOOR so that any non-empty subset renormalises safely. NOT pre-normalised: the consumer renormalises over the actions present in the sequence it is scoring. Fallback chain per action, in order: rrb_sub_share -> reward_risk centred on the corpus's pooled retention, mapped to share space -> NEUTRAL_SHARE (no evidence). Definitions are pre-registered in analysis/rrb_progression.py and docs/research/rrb_progression.md; the chain, the state space and the gates are analysis/lamas_chain.py's.",
+  "transform": {
+    "value_function": "V(action) = 2 * sub_share - 1, in [-1, 1]",
+    "weight": "w = max((V + 1) / 2, WEIGHT_FLOOR) = max(sub_share, WEIGHT_FLOOR)",
+    "floor": 0.01,
+    "neutral": 0.5,
+    "places": 4,
+    "normalized": false,
+    "rejected": "shifted balance ((balance + 1) / 2) — the measured balances span 0.09 of range outside SUB, so every action would weigh 0.5 +/- 0.04; and the plain odds ratio — unbounded and undefined where p_sub_opp is 0 (lamas_chain_divisions.md section 8.1)",
+    "fallback_order": [
+      "rrb_sub_share",
+      "reward_risk_centered",
+      "none"
+    ]
+  },
+  "global": {
+    "CDP": 0.4976,
+    "PGD": 0.4752,
+    "SWPA": 0.4879,
+    "SWP": 0.5666,
+    "TKDA": 0.5001,
+    "TKD": 0.5262,
+    "GPSA": 0.4956,
+    "GPS": 0.5413,
+    "BTKA": 0.5116,
+    "BTK": 0.5977,
+    "SUBA": 0.5178,
+    "SUB": 0.8065
+  },
+  "adcc": {
+    "CDP": 0.5038,
+    "PGD": 0.4583,
+    "SWPA": 0.4997,
+    "SWP": 0.5045,
+    "TKDA": 0.5123,
+    "TKD": 0.5392,
+    "GPSA": 0.484,
+    "GPS": 0.627,
+    "BTKA": 0.5528,
+    "BTK": 0.6799,
+    "SUBA": 0.5334,
+    "SUB": 0.7347
+  },
+  "provenance": {
+    "corpus_digest": "2e6f6b45ddbcb955728427a06e7b099ddc35272f26e2d670da99a2c7d5dbe667",
+    "corpus_bouts": 913,
+    "source": "prod `matches` where status='final' (public competition footage)",
+    "privacy_class": "A — public competition data",
+    "generator": "scripts/build_markov_action_weights.py",
+    "runner": "analysis/lamas_chain.rrb + analysis/rrb_progression.value_table",
+    "deterministic": "n_boot=0 (no RNG); weights rounded to `transform.places`",
+    "families": {
+      "global": {
+        "estimable": true,
+        "reason_code": null,
+        "bouts": 913,
+        "bouts_with_sequence": 741,
+        "usable_bouts": 336,
+        "bouts_refused": {
+          "single_actor": 444,
+          "one_sided": 133
+        },
+        "absorbing_bouts": 118,
+        "absorbed_self": 98,
+        "absorbed_other": 20,
+        "absorbing_coverage": {
+          "clusters": 118,
+          "effective_n": 118.0,
+          "top_share": 0.00847457627118644,
+          "grade": "adequate",
+          "estimable": true,
+          "reason": null,
+          "reason_code": null
+        },
+        "pooled_retention": 0.4119,
+        "n_by_source": {
+          "rrb_sub_share": 12,
+          "reward_risk_centered": 0,
+          "none": 0
+        },
+        "mixed_source": false
+      },
+      "adcc": {
+        "estimable": true,
+        "reason_code": null,
+        "bouts": 185,
+        "bouts_with_sequence": 154,
+        "usable_bouts": 53,
+        "bouts_refused": {
+          "single_actor": 101,
+          "one_sided": 31
+        },
+        "absorbing_bouts": 8,
+        "absorbed_self": 8,
+        "absorbed_other": 0,
+        "absorbing_coverage": {
+          "clusters": 8,
+          "effective_n": 8.0,
+          "top_share": 0.125,
+          "grade": "adequate",
+          "estimable": true,
+          "reason": null,
+          "reason_code": null
+        },
+        "pooled_retention": 0.3213,
+        "n_by_source": {
+          "rrb_sub_share": 12,
+          "reward_risk_centered": 0,
+          "none": 0
+        },
+        "mixed_source": false
+      }
+    },
+    "families_omitted": {
+      "ibjjf": {
+        "reason_code": "no_absorbing_bouts",
+        "reason": "a família não tem lutas absorventes suficientes para o RRB; o consumidor deve usar o bloco `global`",
+        "bouts": 44,
+        "usable_bouts": 11,
+        "absorbing_bouts": 0,
+        "fallback": "global"
+      }
+    },
+    "actions": {
+      "global": {
+        "CDP": {
+          "weight": 0.4976,
+          "source": "rrb_sub_share",
+          "n": 186,
+          "bouts": 111,
+          "n_terminal": 5,
+          "balance": -0.0016,
+          "sub_share": 0.4976,
+          "reason_code": null
+        },
+        "PGD": {
+          "weight": 0.4752,
+          "source": "rrb_sub_share",
+          "n": 152,
+          "bouts": 116,
+          "n_terminal": 3,
+          "balance": -0.0176,
+          "sub_share": 0.4752,
+          "reason_code": null
+        },
+        "SWPA": {
+          "weight": 0.4879,
+          "source": "rrb_sub_share",
+          "n": 181,
+          "bouts": 69,
+          "n_terminal": 13,
+          "balance": -0.0085,
+          "sub_share": 0.4879,
+          "reason_code": null
+        },
+        "SWP": {
+          "weight": 0.5666,
+          "source": "rrb_sub_share",
+          "n": 47,
+          "bouts": 38,
+          "n_terminal": 6,
+          "balance": 0.0466,
+          "sub_share": 0.5666,
+          "reason_code": null
+        },
+        "TKDA": {
+          "weight": 0.5001,
+          "source": "rrb_sub_share",
+          "n": 592,
+          "bouts": 181,
+          "n_terminal": 30,
+          "balance": 0.0001,
+          "sub_share": 0.5001,
+          "reason_code": null
+        },
+        "TKD": {
+          "weight": 0.5262,
+          "source": "rrb_sub_share",
+          "n": 122,
+          "bouts": 74,
+          "n_terminal": 19,
+          "balance": 0.0161,
+          "sub_share": 0.5262,
+          "reason_code": null
+        },
+        "GPSA": {
+          "weight": 0.4956,
+          "source": "rrb_sub_share",
+          "n": 306,
+          "bouts": 150,
+          "n_terminal": 10,
+          "balance": -0.0031,
+          "sub_share": 0.4956,
+          "reason_code": null
+        },
+        "GPS": {
+          "weight": 0.5413,
+          "source": "rrb_sub_share",
+          "n": 55,
+          "bouts": 40,
+          "n_terminal": 5,
+          "balance": 0.0268,
+          "sub_share": 0.5413,
+          "reason_code": null
+        },
+        "BTKA": {
+          "weight": 0.5116,
+          "source": "rrb_sub_share",
+          "n": 1281,
+          "bouts": 212,
+          "n_terminal": 55,
+          "balance": 0.0081,
+          "sub_share": 0.5116,
+          "reason_code": null
+        },
+        "BTK": {
+          "weight": 0.5977,
+          "source": "rrb_sub_share",
+          "n": 50,
+          "bouts": 32,
+          "n_terminal": 8,
+          "balance": 0.0749,
+          "sub_share": 0.5977,
+          "reason_code": null
+        },
+        "SUBA": {
+          "weight": 0.5178,
+          "source": "rrb_sub_share",
+          "n": 1082,
+          "bouts": 258,
+          "n_terminal": 78,
+          "balance": 0.0121,
+          "sub_share": 0.5178,
+          "reason_code": null
+        },
+        "SUB": {
+          "weight": 0.8065,
+          "source": "rrb_sub_share",
+          "n": 176,
+          "bouts": 122,
+          "n_terminal": 104,
+          "balance": 0.4291,
+          "sub_share": 0.8065,
+          "reason_code": null
+        }
+      },
+      "adcc": {
+        "CDP": {
+          "weight": 0.5038,
+          "source": "rrb_sub_share",
+          "n": 61,
+          "bouts": 33,
+          "n_terminal": 1,
+          "balance": 0.001,
+          "sub_share": 0.5038,
+          "reason_code": null
+        },
+        "PGD": {
+          "weight": 0.4583,
+          "source": "rrb_sub_share",
+          "n": 28,
+          "bouts": 21,
+          "n_terminal": 1,
+          "balance": -0.0119,
+          "sub_share": 0.4583,
+          "reason_code": null
+        },
+        "SWPA": {
+          "weight": 0.4997,
+          "source": "rrb_sub_share",
+          "n": 36,
+          "bouts": 14,
+          "n_terminal": 2,
+          "balance": -0.0001,
+          "sub_share": 0.4997,
+          "reason_code": null
+        },
+        "SWP": {
+          "weight": 0.5045,
+          "source": "rrb_sub_share",
+          "n": 10,
+          "bouts": 9,
+          "n_terminal": 1,
+          "balance": 0.0013,
+          "sub_share": 0.5045,
+          "reason_code": null
+        },
+        "TKDA": {
+          "weight": 0.5123,
+          "source": "rrb_sub_share",
+          "n": 115,
+          "bouts": 24,
+          "n_terminal": 2,
+          "balance": 0.0033,
+          "sub_share": 0.5123,
+          "reason_code": null
+        },
+        "TKD": {
+          "weight": 0.5392,
+          "source": "rrb_sub_share",
+          "n": 26,
+          "bouts": 16,
+          "n_terminal": 5,
+          "balance": 0.0094,
+          "sub_share": 0.5392,
+          "reason_code": null
+        },
+        "GPSA": {
+          "weight": 0.484,
+          "source": "rrb_sub_share",
+          "n": 26,
+          "bouts": 19,
+          "n_terminal": 1,
+          "balance": -0.0048,
+          "sub_share": 0.484,
+          "reason_code": null
+        },
+        "GPS": {
+          "weight": 0.627,
+          "source": "rrb_sub_share",
+          "n": 10,
+          "bouts": 9,
+          "n_terminal": 3,
+          "balance": 0.025,
+          "sub_share": 0.627,
+          "reason_code": null
+        },
+        "BTKA": {
+          "weight": 0.5528,
+          "source": "rrb_sub_share",
+          "n": 93,
+          "bouts": 19,
+          "n_terminal": 6,
+          "balance": 0.0151,
+          "sub_share": 0.5528,
+          "reason_code": null
+        },
+        "BTK": {
+          "weight": 0.6799,
+          "source": "rrb_sub_share",
+          "n": 24,
+          "bouts": 10,
+          "n_terminal": 4,
+          "balance": 0.0461,
+          "sub_share": 0.6799,
+          "reason_code": null
+        },
+        "SUBA": {
+          "weight": 0.5334,
+          "source": "rrb_sub_share",
+          "n": 63,
+          "bouts": 29,
+          "n_terminal": 9,
+          "balance": 0.0082,
+          "sub_share": 0.5334,
+          "reason_code": null
+        },
+        "SUB": {
+          "weight": 0.7347,
+          "source": "rrb_sub_share",
+          "n": 59,
+          "bouts": 29,
+          "n_terminal": 18,
+          "balance": 0.1177,
+          "sub_share": 0.7347,
+          "reason_code": null
+        }
+      }
+    }
+  },
+  "caveats": [
+    "Os pesos vêm da SHARE de absorção (`sub_share` do `lamas_chain.rrb`), não do `balance`. O `balance` deslocado foi REJEITADO: fora de SUB ele cabe todo em 0,09 de amplitude, o que daria 0,5 ± 0,04 para toda ação e uma redistribuição uniforme com outro nome.",
+    "A AMPLITUDE É PEQUENA DE PROPÓSITO. O §8.6 do docs/research/lamas_chain_divisions.md mede por quê: a cadeia mistura mais rápido do que absorve, então a ação em que se está diz pouco sobre quem finaliza. Este artefato publica a medição, não uma amplificação dela. Consumidor que precisar de mais contraste está aplicando uma transformação própria e precisa justificá-la no PR dele.",
+    "O peso de SUB é parcialmente CIRCULAR: boa parte das aparições de SUB é o passo terminal que absorve. `n_terminal` viaja em cada linha da procedência exatamente para que isso seja visível em vez de ser lido como achado.",
+    "Os pesos NÃO estão normalizados. O consumidor renormaliza sobre as ações presentes na sequência que está pontuando; um vetor que soma 1 sobre doze estados estaria errado para todo subconjunto. `WEIGHT_FLOOR` é o que torna essa renormalização segura por invariante.",
+    "Tudo aqui passa pela recusa por atribuição do `lamas_chain` (`one_sided` + `single_actor`) antes de entrar, porque o lado de cada transição é lido do `actor_id`.",
+    "Comparável DENTRO de um bloco, não ENTRE blocos: a partição attempt/success segue o LOTE DE ANOTAÇÃO (`successful` ausente é lido como tentativa), e as famílias foram anotadas de formas diferentes (analysis/ruleset_scoring.comparability)."
+  ]
+}

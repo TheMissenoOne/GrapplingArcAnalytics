@@ -1062,6 +1062,21 @@ every corpus. The gap between it and §8.5 is therefore not evidence that first 
 signal; it is what a bout-level statistic looks like when it is printed at appearance
 resolution. Naming it here makes the omission a decision.
 
+### 8.8 What reads RRB downstream
+
+Two layers stand on the values this section produces, and both live outside this document because
+they walk a BOUT rather than describe a corpus — **`docs/research/rrb_progression.md`**:
+
+- **progression and offensive/defensive cycles** (`analysis/rrb_progression.py`) — the athlete's
+  trajectory through the state values over one chain, signed by side. It uses `sub_share` and not
+  `balance` as its value function, for §8.1's own reason: outside `SUB` every balance in the
+  corpus fits inside ±0.075, so a trajectory drawn in it is a flat line. Sign is identical by
+  construction; only the magnitude becomes legible.
+- **`data/rating/markov_action_weights.json`** (`scripts/build_markov_action_weights.py`) — the
+  canonical per-action weight artifact for ELO-delta redistribution, `w = sub_share`. It is a
+  **production input**, so its transform and its gates are pre-registered and pinned by tests, and
+  a ruleset family ships a block only where its own RRB clears §8.4's gates.
+
 ---
 
 ## 9. The chain factor — does an action start a combination?
