@@ -1366,12 +1366,12 @@ document.getElementById('legend').innerHTML=lg.map(([k,l])=>'<span><span class="
 document.getElementById('sigFreq').innerHTML=P.signature.map(s=>{const pct=Math.round(s.pct*100);
   return '<div class="freq-row"><div class="top"><span class="name">'+s.label+'</span><span class="pct">'+pct+'%</span></div>'
     +'<div class="freq-track"><div class="freq-fill" style="width:'+Math.max(6,pct)+'%"></div></div></div>';}).join('');
-// linked matches — result colored win/loss (draws/NC stay neutral); "result" is always
-// "def. <opp>" / "lost to <opp>" / "drew <opp>" (analysis/style_profile.py), so a prefix
-// check is enough, no separate outcome field needed.
+// linked matches — the METHOD line colored win/loss (draws/NC stay neutral); "result" is
+// always "def. <opp>" / "lost to <opp>" / "drew <opp>" (analysis/style_profile.py), so a
+// prefix check is enough, no separate outcome field needed. Name stays neutral by request.
 document.getElementById('linked').innerHTML=P.bouts.slice(0,3).map(m=>{
   const cls=m.result.indexOf('def. ')===0?'win':(m.result.indexOf('lost to ')===0?'loss':'');
-  return '<a class="mcard" href="breakdown-'+m.slug+'.html"><div class="ev">'+(m.year||'')+'</div><div class="op '+cls+'">'+m.result+'</div><div class="rs">'+(m.win_type||'')+'</div></a>';}).join('');
+  return '<a class="mcard" href="breakdown-'+m.slug+'.html"><div class="ev">'+(m.year||'')+'</div><div class="op">'+m.result+'</div><div class="rs '+cls+'">'+(m.win_type||'')+'</div></a>';}).join('');
 if(document.body.classList.contains('lang-pt')) GALang.set('pt');
 """
 
@@ -1398,30 +1398,12 @@ def render_profile_page(profile: dict[str, Any]) -> str:
         if v <= 0:
             v = round(mean_pop * elo_strength, 3)  # assume by grappler ELO
         radar_values.append(round(v, 3))
-    # Colour career-graph nodes by detected system (constellation) — additive: a node dict
-    # only gets a "color" key when it's a member of one of the top systems, graph.js already
-    # prefers `n.color` over its category palette (see the ocean map for the same convention),
-    # so this needs no graph.js change. New node dicts only — never mutate profile["_career_gv"]
-    # in place, since its node objects are shared (by reference) with the GA_FIGHTERS card graph
-    # already written to fighters-data.js.
-    _system_color: dict[str, str] = {}
-    for i, s in enumerate((profile.get("_systems") or {}).get("systems") or []):
-        if i >= 6:  # matches the systems_html card cap below
-            break
-        col = f"hsl({(i * 57) % 360},70%,64%)"
-        for m in s.get("members", []):
-            _system_color.setdefault(str(m).lower().strip(), col)
-    career_gv = profile["_career_gv"]
-    graph_payload = career_gv
-    if _system_color:
-        graph_payload = {**career_gv, "nodes": [
-            {**n, "color": _system_color[str(n["id"]).lower().strip()]}
-            if str(n["id"]).lower().strip() in _system_color else n
-            for n in career_gv["nodes"]
-        ]}
+    # Career-graph nodes keep the category palette — per-system (constellation) node
+    # colouring was tried and removed by owner request 2026-08-26; constellations stay
+    # visible through the systems cards, not painted onto the graph.
     payload = {
         "radar": {"labels": _RADAR_LABELS, "values": radar_values},
-        "graph": graph_payload,
+        "graph": profile["_career_gv"],
         "signature": profile["signature_techniques"],
         # link each bout to the page that was actually written, not the slug the profile
         # computed — they differ when a pair met twice in one year. Every one of THIS
