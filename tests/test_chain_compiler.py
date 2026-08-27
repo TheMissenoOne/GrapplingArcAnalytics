@@ -15,21 +15,23 @@ def test_guard_pull_then_armlock_all_scramble_fallback():
     """'Guard Pull' is type 'transition' in this corpus (D1 forces transition -> 'action'), NOT
     type 'guard' — so the (guard, submission) pair the ticket names never actually arises. The
     real pair resolved is (transition, submission), which D2's action_pair_to_state table has no
-    specific row for (only submission|submission, takedown|*, sweep|*, pass|*), so every gap —
-    before the pull, between pull and armbar, after the armbar — falls through to the '*|*'
-    fallback: 'scramble'. Documented finding, not a guess."""
+    specific row for (only submission|submission, submission|$terminal, takedown|*, sweep|*,
+    pass|*), so the gaps before the pull and between pull and armbar fall through to the '*|*'
+    fallback: 'scramble'. Documented finding, not a guess. The chain's LAST action (the armbar)
+    is genuinely terminal, so it resolves through the '$terminal' marker to 'finish' instead."""
     chain = compile_chain([
         _ev("Guard Pull", "transition"),
         _ev("Armbar", "submission"),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["scramble", "scramble", "scramble"]
+    assert [s.node_key for s in chain.states] == ["scramble", "scramble", "finish"]
     assert all(s.inferred for s in chain.states)
     assert len(chain.edges) == 2
     e0, e1 = chain.edges
     assert (e0.action_key, e0.inferred, e0.terminal) == ("guard pull", False, False)
     assert e0.source_key == "scramble" and e0.target_key == "scramble"
     assert (e1.action_key, e1.inferred, e1.terminal) == ("armbar", False, True)
+    assert e1.target_key == "finish"
     assert not chain.dropped
 
 
@@ -39,13 +41,31 @@ def test_armbar_then_triangle_chains_through_chained_submission():
         _ev("Triangle Choke", "submission"),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["scramble", "chained submission", "scramble"]
+    assert [s.node_key for s in chain.states] == ["scramble", "chained submission", "finish"]
     assert [s.inferred for s in chain.states] == [True, True, True]
     e0, e1 = chain.edges
     assert e0.action_key == "armbar" and e0.target_key == "chained submission"
     assert not e0.inferred and not e0.terminal
     assert e1.action_key == "triangle choke" and e1.source_key == "chained submission"
     assert not e1.inferred and e1.terminal
+    assert e1.target_key == "finish"
+
+
+def test_submission_terminal_resolves_to_finish_not_scramble():
+    """D2's declarative row (`submission|$terminal` -> `finish`), owner call 2026-08-27: the
+    LAST action of a chain being a landed/attempted submission is a semantically different gap
+    than 'no more info' — it should land on the generic 'finish' node, not 'scramble'. A
+    submission in the MIDDLE of the chain (bridging to another action, not a real state) is
+    untouched — still the '*|*' fallback, same as before this change."""
+    chain = compile_chain([
+        _ev("Armbar", "submission"),
+        _ev("Guard Pass", "pass"),  # mid-chain: (submission, pass) has no dedicated row
+    ], inference_table=TABLE)
+    assert [s.node_key for s in chain.states] == ["scramble", "scramble", "top transition"]
+    e0, e1 = chain.edges
+    assert e0.action_key == "armbar" and e0.target_key == "scramble"  # mid-chain: unaffected
+    assert e1.action_key == "guard pass" and e1.terminal is True
+    assert e1.target_key == "top transition"  # non-submission terminal: also unaffected
 
 
 def test_kguard_then_5050_guard_bridges_with_guard_transition():
@@ -91,12 +111,13 @@ def test_chain_ending_in_submission_is_terminal():
         _ev("Armbar", "submission", successful=True),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["mount", "scramble"]
+    assert [s.node_key for s in chain.states] == ["mount", "finish"]
     assert chain.states[1].inferred is True
     edge = chain.edges[0]
     assert edge.terminal is True
     assert edge.action_key == "armbar"
     assert edge.source_key == "mount"
+    assert edge.target_key == "finish"
     assert edge.source_event_index == 1
 
 
@@ -160,7 +181,7 @@ def test_state_after_event_tracks_current_state_incl_terminal_and_dropped():
 
     assert chain.state_after_event[0] == "mount"
     assert chain.state_after_event[1] == "mount"
-    assert chain.state_after_event[2] == chain.states[-1].node_key == "scramble"
+    assert chain.state_after_event[2] == chain.states[-1].node_key == "finish"
 
 
 def test_compile_two_sided_remaps_state_after_event_to_original_index():

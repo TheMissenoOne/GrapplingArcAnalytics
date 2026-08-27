@@ -18,6 +18,8 @@ from analysis.taxonomy_kind import (
     kind_of,
     kind_of_entry,
     load_inference_table,
+    load_orientation_table,
+    orientation_of,
     resolve_library_entry,
     resolve_pair,
 )
@@ -170,6 +172,62 @@ def test_shipped_inference_table_resolves_the_documented_examples() -> None:
     assert infer_action_for_state_pair(table, "control", "guard")["action_key"] == "transition"
 
 
+# ── D2: the genuinely-terminal marker → 'finish' ─────────────────────────────────
+def test_terminal_submission_resolves_to_finish_not_scramble() -> None:
+    table = load_inference_table()
+    assert resolve_pair(table["action_pair_to_state"], "submission", "$terminal") == "finish"
+    assert infer_state_for_action_pair(table, "submission", "$terminal")["node_key"] == "finish"
+
+
+def test_mid_chain_submission_is_unaffected_by_the_terminal_marker() -> None:
+    """Only a REAL terminal call (the literal `$terminal` sentinel) resolves to 'finish' — a
+    submission followed by a real next action type still falls to the '*|*' fallback,
+    unchanged (D2's own spec: mid-chain submission stays exactly as it was)."""
+    table = load_inference_table()
+    assert resolve_pair(table["action_pair_to_state"], "submission", "pass") == "scramble"
+    assert infer_state_for_action_pair(table, "submission", "pass")["node_key"] == "scramble"
+
+
+def test_terminal_takedown_sweep_pass_unaffected_by_the_new_marker() -> None:
+    """The pre-existing 'type|*' rows still catch the terminal marker the same way they catch
+    any other right-hand value — no behavior change for takedown/sweep/pass."""
+    table = load_inference_table()
+    for typ in ("takedown", "sweep", "pass"):
+        assert infer_state_for_action_pair(table, typ, "$terminal")["node_key"] == "top transition"
+
+
+# ── orientation_of: top | bottom | neutral per state (curated) ──────────────────
+def test_orientation_of_bottom_guards() -> None:
+    for label in ("Closed Guard", "Half Guard", "Spider Guard", "X-Guard", "50/50 Guard"):
+        assert orientation_of(label) == "bottom"
+
+
+def test_orientation_of_top_controls() -> None:
+    for label in ("Mount", "Side Control", "Knee on Belly", "Back Control", "Crucifix"):
+        assert orientation_of(label) == "top"
+
+
+def test_orientation_of_neutral_defaults_for_unknown_and_ambiguous_labels() -> None:
+    assert orientation_of("Some Made Up State Nobody Curated") == "neutral"
+    assert orientation_of("Electric Chair") == "neutral"  # leg-lock control, ambiguous by design
+
+
+def test_orientation_of_generic_states() -> None:
+    assert orientation_of("Scramble") == "neutral"
+    assert orientation_of("Top Transition") == "top"
+    assert orientation_of("Chained Submission") == "neutral"
+    assert orientation_of("Finish") == "neutral"
+
+
+def test_orientation_of_deterministic_across_calls() -> None:
+    assert orientation_of("Mount") == orientation_of("Mount")
+
+
+def test_orientation_table_only_carries_the_three_valid_values() -> None:
+    table = load_orientation_table()
+    assert set(table.values()) <= {"top", "bottom", "neutral"}
+
+
 # ── the cross-repo fixture ───────────────────────────────────────────────────────
 def test_golden_fixture_matches_this_implementation() -> None:
     from export.app_node_scores import canonical_label
@@ -189,7 +247,11 @@ def test_golden_fixture_matches_this_implementation() -> None:
             continue
         key = _normalize_name(label)
         typ = str(node.get("type") or "")
-        assert doc["kinds"][key] == {"kind": kind_of(label, typ), "type": typ}
+        kind = kind_of(label, typ)
+        expected = {"kind": kind, "type": typ}
+        if kind == "state":
+            expected["orientation"] = orientation_of(label)
+        assert doc["kinds"][key] == expected
     assert doc["inference_table"] == load_inference_table()
 
 

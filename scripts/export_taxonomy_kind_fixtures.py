@@ -31,7 +31,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from analysis.names import _normalize_name  # noqa: E402
-from analysis.taxonomy_kind import kind_of, load_inference_table  # noqa: E402
+from analysis.taxonomy_kind import kind_of, load_inference_table, orientation_of  # noqa: E402
 from export.app_node_scores import canonical_label  # noqa: E402
 
 APP_NODES_PATH = ROOT.parent / "GrapplingArcApp" / "src" / "data" / "grappling-arch.nodes.json"
@@ -45,7 +45,9 @@ APP_INFERENCE_TABLE_OUT = (
 
 
 def build_kinds() -> dict[str, dict[str, str]]:
-    """``{normalized_canonical_label: {kind, type}}`` for every App library entry."""
+    """``{normalized_canonical_label: {kind, type, orientation?}}`` for every App library entry.
+    ``orientation`` (top|bottom|neutral, D1's curated ``state_orientation.json``) is only
+    meaningful for ``kind == 'state'`` entries — actions/transparent entries don't carry it."""
     nodes = json.loads(APP_NODES_PATH.read_text(encoding="utf-8"))
     out: dict[str, dict[str, str]] = {}
     for node in nodes:
@@ -54,7 +56,11 @@ def build_kinds() -> dict[str, dict[str, str]]:
         if not label:
             continue
         key = _normalize_name(label)
-        out[key] = {"kind": kind_of(label, typ), "type": typ}
+        kind = kind_of(label, typ)
+        entry = {"kind": kind, "type": typ}
+        if kind == "state":
+            entry["orientation"] = orientation_of(label)
+        out[key] = entry
     return out
 
 

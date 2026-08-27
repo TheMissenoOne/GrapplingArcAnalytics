@@ -39,6 +39,22 @@ the table has a mapping, else the generic fallback" — ``resolve_pair``'s own e
 then-fallback order already implements exactly that priority, so no separate terminal-vs-
 fallback branch is written here.
 
+**The genuinely-terminal marker (owner call, 2026-08-27): a chain ending on ``submission``
+resolves to the generic state ``finish``, not ``scramble``.** A row shaped ``"submission|*"``
+cannot express this alone — D2's row-side ``"*"`` matches ANY right-hand value (see
+``resolve_pair``), so it would also swallow a MID-chain submission followed by a real next
+action, which must keep falling through to ``"*|*"`` unchanged (D2's own spec: only the
+TERMINAL submission changes). So the trailing/closing call only — where ``compile_chain`` has
+confirmed there truly is no next event — passes the literal ``"$terminal"`` sentinel instead of
+``"*"`` for the right side, letting the table carry an EXACT row, ``"submission|$terminal" →
+finish``, that only an actually-terminal call can hit (``resolve_pair`` checks the exact pair
+before the wildcard loop). Every other ``"type|*"`` row (`takedown`/`sweep`/`pass`) is
+unaffected — their row-side ``"*"`` still matches ``"$terminal"`` the same way it matches any
+other right-hand value, so a terminal takedown/sweep/pass still resolves exactly as before.
+Rule 5's opening call keeps using the plain ``"*"`` sentinel — the marker distinction only
+matters on the closing side, which is the only place D2 needs to tell "no more events" apart
+from "next event's type happens to be unknown here".
+
 Actor model (rule 8): ``compile_chain`` assumes ``events`` is already ONE actor's own ordered
 flow (the within-actor grouping ``transitions/build_graph.py`` calls ``by_actor``) — it does
 not itself split or validate actor consistency. ``compile_two_sided`` is the thin wrapper for
@@ -60,6 +76,11 @@ from analysis.taxonomy_kind import (
     kind_of,
     load_inference_table,
 )
+
+# Rule 6's genuinely-terminal marker (module docstring) — distinct from the plain ``"*"``
+# used everywhere else, so D2 can express "the chain truly ends on this action type" without
+# also matching every mid-chain pair whose next type happens to be unknown.
+_CHAIN_END = "$terminal"
 
 
 @dataclass(frozen=True)
@@ -213,7 +234,7 @@ def compile_chain(
         state_after_event[idx] = prev_state_key
 
     if pending is not None:
-        st = infer_state_for_action_pair(table, pending.type, "*")
+        st = infer_state_for_action_pair(table, pending.type, _CHAIN_END)
         states.append(ChainState(node_key=st["node_key"], label=st["label"], type=st["type"],
                                   actor=pending.actor, inferred=True))
         edges.append(_edge_from_pending(pending, target_key=st["node_key"], terminal=True))

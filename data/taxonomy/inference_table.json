@@ -1,9 +1,10 @@
 {
   "version": 1,
   "generic_states": {
-    "chained submission": {"node_key": "chained submission", "label": "Chained Submission", "type": "control"},
-    "top transition": {"node_key": "top transition", "label": "Top Transition", "type": "control"},
-    "scramble": {"node_key": "scramble", "label": "Scramble", "type": "control"}
+    "chained submission": {"node_key": "chained submission", "label": "Chained Submission", "type": "control", "orientation": "neutral"},
+    "top transition": {"node_key": "top transition", "label": "Top Transition", "type": "control", "orientation": "top"},
+    "scramble": {"node_key": "scramble", "label": "Scramble", "type": "control", "orientation": "neutral"},
+    "finish": {"node_key": "finish", "label": "Finish", "type": "control", "orientation": "neutral"}
   },
   "generic_actions": {
     "guard transition": {"action_key": "guard transition", "label": "Guard Transition", "type": "transition"},
@@ -11,6 +12,7 @@
   },
   "action_pair_to_state": {
     "submission|submission": "chained submission",
+    "submission|$terminal": "finish",
     "takedown|*": "top transition",
     "sweep|*": "top transition",
     "pass|*": "top transition",

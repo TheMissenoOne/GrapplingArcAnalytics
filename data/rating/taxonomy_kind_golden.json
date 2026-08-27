@@ -5,6 +5,7 @@
     "action_pair_to_state": {
       "*|*": "scramble",
       "pass|*": "top transition",
+      "submission|$terminal": "finish",
       "submission|submission": "chained submission",
       "sweep|*": "top transition",
       "takedown|*": "top transition"
@@ -25,16 +26,25 @@
       "chained submission": {
         "label": "Chained Submission",
         "node_key": "chained submission",
+        "orientation": "neutral",
+        "type": "control"
+      },
+      "finish": {
+        "label": "Finish",
+        "node_key": "finish",
+        "orientation": "neutral",
         "type": "control"
       },
       "scramble": {
         "label": "Scramble",
         "node_key": "scramble",
+        "orientation": "neutral",
         "type": "control"
       },
       "top transition": {
         "label": "Top Transition",
         "node_key": "top transition",
+        "orientation": "top",
         "type": "control"
       }
     },
@@ -47,6 +57,7 @@
   "kinds": {
     "5050 guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "americana keylock": {
@@ -75,6 +86,7 @@
     },
     "back control": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "base": {
@@ -123,6 +135,7 @@
     },
     "butterfly guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "butterfly sweep": {
@@ -151,10 +164,12 @@
     },
     "closed guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "collar sleeve guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "connection": {
@@ -171,6 +186,7 @@
     },
     "crucifix": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "darce choke": {
@@ -179,10 +195,12 @@
     },
     "de la riva guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "deep half guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "dlr leg drag pass": {
@@ -203,6 +221,7 @@
     },
     "electric chair": {
       "kind": "state",
+      "orientation": "neutral",
       "type": "control"
     },
     "ezekiel choke": {
@@ -239,6 +258,7 @@
     },
     "gift wrap": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "gogoplata": {
@@ -267,6 +287,7 @@
     },
     "half guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "half guard smash pass": {
@@ -311,6 +332,7 @@
     },
     "kguard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "kimura": {
@@ -327,6 +349,7 @@
     },
     "knee on belly": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "knee shield collapse pass": {
@@ -343,6 +366,7 @@
     },
     "lasso guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "leg drag pass": {
@@ -351,6 +375,7 @@
     },
     "leg hug": {
       "kind": "state",
+      "orientation": "neutral",
       "type": "control"
     },
     "leg staple pass": {
@@ -375,6 +400,7 @@
     },
     "mount": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "northsouth choke": {
@@ -383,6 +409,7 @@
     },
     "northsouth position": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "old school sweep": {
@@ -395,6 +422,7 @@
     },
     "open guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "osoto gari": {
@@ -403,6 +431,7 @@
     },
     "outside ashi garami": {
       "kind": "state",
+      "orientation": "neutral",
       "type": "control"
     },
     "overhook": {
@@ -443,6 +472,7 @@
     },
     "reverse de la riva": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "rolling": {
@@ -451,10 +481,12 @@
     },
     "rubber guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "saddle inside sankaku": {
       "kind": "state",
+      "orientation": "neutral",
       "type": "control"
     },
     "sassae tsurikomi ashi": {
@@ -463,6 +495,7 @@
     },
     "scarf hold": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "scissor sweep": {
@@ -471,10 +504,12 @@
     },
     "shin to shin guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "shoulder crunch": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "shoulder throw": {
@@ -487,6 +522,7 @@
     },
     "side control": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "single leg takedown": {
@@ -495,6 +531,7 @@
     },
     "single leg x": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "single under pass": {
@@ -511,6 +548,7 @@
     },
     "spider guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "stack pass": {
@@ -563,6 +601,7 @@
     },
     "truck": {
       "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "turtle position": {
@@ -591,6 +630,7 @@
     },
     "worm guard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "wrist lock": {
@@ -599,6 +639,7 @@
     },
     "xguard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     },
     "xpass": {
@@ -607,6 +648,7 @@
     },
     "zguard": {
       "kind": "state",
+      "orientation": "bottom",
       "type": "guard"
     }
   }

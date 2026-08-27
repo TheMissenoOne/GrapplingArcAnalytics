@@ -50,7 +50,7 @@ from __future__ import annotations
 import json
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from analysis.decision_flow import ACTION_TYPES
 from analysis.lamas_chain import lamas_state
@@ -230,3 +230,41 @@ def infer_action_for_state_pair(
     them, e.g. two guard states chain through ``generic_actions['guard transition']``."""
     key = resolve_pair(table["state_pair_to_action"], type_a, type_b)
     return table["generic_actions"][key]
+
+
+# ── orientation: top | bottom | neutral, per STATE (owner call, 2026-08-27) ─────────────
+# Curated, high-confidence only — a fixed lookup in ``data/taxonomy/state_orientation.json``,
+# never derived/guessed. Every leg-entanglement control the owner did not name explicitly
+# (electric chair, leg hug, outside ashi garami, saddle inside sankaku — neither top nor bottom
+# in the classic guard/pass sense) defaults to ``'neutral'`` on purpose, same as any future
+# state this table has not been curated for yet. The four D2 ``generic_states`` carry their own
+# orientation too, keyed the same way (``chained submission``/``top transition``/``scramble``/
+# ``finish``) — this table is their single source, not a special case.
+#
+# This is the state's OWN orientation only. An opponent's mount is still 'top' here — reading
+# it as 'bottom' relative to the OTHER fighter is a perspective flip the caller (App renderer /
+# a dossier) applies, not something this table encodes; it has no opponent-relative concept.
+Orientation = Literal["top", "bottom", "neutral"]
+
+ORIENTATION_TABLE_PATH = (
+    Path(__file__).resolve().parent.parent / "data" / "taxonomy" / "state_orientation.json"
+)
+_ORIENTATION_TABLE: dict[str, str] | None = None
+
+
+def load_orientation_table(path: Path | None = None) -> dict[str, str]:
+    """Read the curated orientation table. No caching — a few hundred bytes, same convention
+    as ``load_inference_table``."""
+    with open(path or ORIENTATION_TABLE_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def orientation_of(canonical_label: str) -> Orientation:
+    """``'top'|'bottom'|'neutral'`` for a state's own canonical label, via the curated table.
+    Unresolved labels (including actions/transparent entries, which this table was never meant
+    to cover) default to ``'neutral'`` — never guessed."""
+    global _ORIENTATION_TABLE
+    if _ORIENTATION_TABLE is None:
+        _ORIENTATION_TABLE = load_orientation_table()
+    key = _normalize_name(str(canonical_label or ""))
+    return cast(Orientation, _ORIENTATION_TABLE.get(key, "neutral"))
