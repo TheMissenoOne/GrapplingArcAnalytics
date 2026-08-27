@@ -21,7 +21,7 @@ outgoing actor's live state (``CompiledChain.state_after_event``) to the incomin
 state. Rendered as a neutral dashed link (``fighter:'x'``), the same convention the public site
 already uses for contested links.
 
-Renders 8 self-contained HTMLs (a single patched ``site/graph.js`` copy shared by all of
+Renders 9 self-contained HTMLs (a single patched ``site/graph.js`` copy shared by all of
 them — see ``_patch_graph_js``) + an ``index.html`` + ``metrics.json``. Deterministic:
 dict/list order follows bundle read order (no unordered ``set`` in the render path),
 community detection sorts every input/tie-break (cicatriz #10, same convention as
@@ -40,12 +40,22 @@ edges only — handovers/inferred edges are the noise, they stay unlabelled), ``
 glyph centred on the node) and ``n.ring`` (a CSS colour string stroked around the node, variant
 7's actor border when ``n.color`` is already the category colour). A real per-type/per-link
 colour or label needs graph.js itself to grow these fields — that becomes a Phase 5 requirement
-on the App's own renderer, not something to sneak into this repo's copy of the shared file.
+on the App's own renderer, not something to sneak into this repo's copy of the shared file. The
+patch set also nudges two constants that ARE just tuning, not new fields — node radius (smaller)
+and label font size (bigger) — after a real screenshot review found several variants read as
+clustered (see ``_mount_knobs``'s own docstring for the layout side of that same fix).
 
 **Finish + orientation (owner call, 2026-08-27, ADR alongside D1/D2):** the compiler now closes
 every chain on the generic state ``finish`` instead of ``scramble`` when it ends on a submission
-(``analysis.chain_compiler``'s ``$terminal`` sentinel) — rendered with its own glyph/colour in
-every migrated variant (``_apply_finish_style``), never blended into a category or a ghost grey.
+(``analysis.chain_compiler``'s ``$terminal`` sentinel) — rendered with its own highlighted colour
+in every migrated variant (``_apply_finish_style``), never blended into a category or a ghost
+grey. The glyph (🏁) is variant 7 (icons) ONLY — every other variant keeps colour, no icon,
+same as every other node there. Finish is a state like any other w.r.t. actor: you and the
+opponent NEVER share a finish node (``_qid`` already qualifies it same as any node_key — ``finish``
+vs ``opp:finish``), and since both read the same colour, the actor **ring** (`_FIG_HEX`, the
+same field variant 7's patch already draws) is applied to a finish node in EVERY variant, not
+just 7, so the two are still visually distinct; the opponent's rendered label also gets an
+explicit ``" (oponente)"`` suffix (``_finish_label``) for the same reason (adendo 2026-08-27).
 Every STATE also has a curated top/bottom/neutral orientation
 (``analysis.taxonomy_kind.orientation_of``, keyed on the state's own ``node_key`` — already the
 canonical normalized form the table is keyed on, so no extra lookup is needed) — shown as a
@@ -60,6 +70,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
 from pathlib import Path
 from typing import Any
 
@@ -84,16 +95,18 @@ _TYPE_BUCKET = {  # variant 5's action-type -> fighter-slot approximation, see m
 # The terminal state D2 now resolves a chain-closing submission to (chain_compiler's
 # `$terminal` sentinel + inference_table.json's `submission|$terminal -> finish` row).
 _FINISH_KEY = "finish"
-_FINISH_ICON = "\U0001f3c1"  # checkered flag
+_FINISH_ICON = "F"  # A.4: letter, not emoji — see _icons_graphview's own docstring for why
 _FINISH_COLOR = "#facc15"
 
-# App's src/types/session.ts NODE_TYPE_ICONS (Bootstrap Icons in the App; approximated here as
-# unicode glyphs for canvas fillText — variant 7 only) / NODE_TYPE_COLORS (copied verbatim,
-# same hex values, cross-checked against the App file 2026-08-27).
+# App's src/types/session.ts NODE_TYPE_ICONS (Bootstrap Icons in the App) / NODE_TYPE_COLORS
+# (copied verbatim, same hex values, cross-checked against the App file 2026-08-27). Icons here
+# are a single bold pt-BR-mnemonic LETTER (variant 7 canvas fillText only), not a Bootstrap
+# icon or an emoji — see _icons_graphview's docstring for the A.4 measurement + decision. No
+# collisions across the 8 categories + finish ('F') + start-anchor ('A', _START_ICON).
 _TYPE_ICONS = {
-    "guard": "\U0001f6e1", "submission": "\U0001f525", "control": "▣",
-    "transition": "⇄", "sweep": "↻", "escape": "⏏",
-    "pass": "⤴", "takedown": "⤵",
+    "guard": "G", "submission": "S", "control": "C",
+    "transition": "T", "sweep": "V", "escape": "E",
+    "pass": "P", "takedown": "D",
 }
 _TYPE_COLORS = {
     "submission": "#ef4444", "control": "#3b82f6", "transition": "#8b5cf6",
@@ -105,6 +118,38 @@ _TYPE_COLORS = {
 # the category. Keep in sync with graph.js's `const FIG` if that palette ever changes.
 _FIG_HEX = {"a": "#4d86ff", "b": "#fc4c02"}
 
+# D (owner addendum 2026-08-27) — organisational START nodes. The other builder's
+# `inference_table.json` carries three generic states — ``start neutral``/``start top``/
+# ``start bottom`` (node_key) — each tagged ``"role": "start"`` (singular; the node_key itself,
+# not the role value, carries the neutral/top/bottom distinction — same table's existing
+# ``orientation`` field / ``analysis.taxonomy_kind.orientation_of`` already encodes that, reused
+# here rather than re-deriving it from the key string). Finish carries ``"role": "finish"``,
+# already handled separately via ``_FINISH_KEY``/actor. Lookup stays defensive (``_role_of``
+# returns ``None`` on a missing entry/field) so nothing here depends on the table shape beyond
+# what's actually landed.
+_START_COLOR = "#34d399"  # teal — distinct from finish's yellow (_FINISH_COLOR)
+_START_ICON = "A"  # variant 7 only — "Âncora"; letters not emoji, see _TYPE_ICONS docstring
+_ANCHOR_Y_OF_ORIENTATION = {"top": -1.0, "neutral": 0.0, "bottom": 1.0}
+
+
+def _role_of(node_key: str) -> str | None:
+    """Defensive lookup of a generic state's ``role`` field (``data/taxonomy/inference_table.json``
+    ``generic_states``) — returns ``None`` if the entry or the field doesn't exist yet."""
+    entry = load_inference_table().get("generic_states", {}).get(node_key)
+    return entry.get("role") if isinstance(entry, dict) else None
+
+
+def _is_start(node_key: str) -> bool:
+    return _role_of(node_key) == "start"
+
+
+def _actor_for(node_key: str, actor: str) -> str:
+    """D: a role='start' node is always the USER's, even reached from the opponent's own
+    chain — never ``opp:``-qualified. Single choke point: called from ``_qid`` (id string) and
+    ``Aggregate.add_state`` (aggregation key), so a start node reached from both sides merges
+    into ONE node/count instead of two ghost duplicates."""
+    return "you" if _is_start(node_key) else actor
+
 
 def _clamp3(n: float) -> int:
     return 1 if n <= 1 else (2 if n == 2 else 3)
@@ -113,8 +158,51 @@ def _clamp3(n: float) -> int:
 def _qid(actor: str, node_key: str) -> str:
     """Node id qualified by actor — you and partner NEVER share a node, even on the same
     node_key (they are fundamentally different states: your closed guard is not their closed
-    guard). ``opp:`` prefix convention per D4/userDecisionFlow."""
+    guard). ``opp:`` prefix convention per D4/userDecisionFlow. Start-role nodes are the one
+    exception (``_actor_for`` — D, always the user's)."""
+    actor = _actor_for(node_key, actor)
     return node_key if actor == "you" else f"opp:{node_key}"
+
+
+def _anchor_radius(n_nodes: int) -> float:
+    """World-coordinate distance from origin to an anchor axis endpoint (D addendum) — scales
+    with graph size so the anchors sit just beyond the free nodes' own typical spread (same
+    formula family as ``_mount_knobs``), never so far the camera's ``fitTarget()`` zooms the
+    rest of the graph down to unreadable. Formula only, not eyeballed in a browser (ponytail:
+    same caveat as ``_mount_knobs`` — revisit with a real screenshot pass if an anchor still
+    reads too close/far once someone opens it)."""
+    return max(260.0, 70.0 * math.sqrt(max(n_nodes, 1)))
+
+
+def _apply_start_style(node: dict[str, Any], node_key: str, *, icon: bool = False) -> None:
+    """D: organisational start nodes — own colour (teal, distinct from finish's yellow), no
+    actor ring (they are never actor-specific once ``_actor_for`` has qualified them as the
+    user's — the ring would otherwise misleadingly read as "your" possession). Icon (variant 7
+    only) is a single letter, same convention as ``_TYPE_ICONS`` (see its docstring for why
+    letters, not emoji)."""
+    if _is_start(node_key):
+        node["color"] = _START_COLOR
+        node.pop("ring", None)
+        if icon:
+            node["icon"] = _START_ICON
+
+
+def _apply_anchor(node: dict[str, Any], node_key: str, actor: str, radius: float) -> None:
+    """Owner addendum 2026-08-27: pin the organisational anchors to a fixed reference axis —
+    start nodes vertical (top/neutral/bottom, per the state's own curated ``orientation_of`` —
+    same field the side-panel ▲/▼ badge already reads), finish horizontal (you=right,
+    opponent=left) — so the rest of the graph organises itself between fixed landmarks instead
+    of reshuffling on every load/expand. World coordinates (not viewport) — stays coherent under
+    pan/zoom and with edge geometry; ``graph.js``'s copy-only ``n.pin`` patch (`_patch_graph_js`)
+    makes ``step()`` skip physics entirely for a pinned node, so once placed here it never
+    drifts. Called last (after style helpers) so ``x``/``y``/``pin`` always win over a random
+    seed."""
+    if _is_start(node_key):
+        y = _ANCHOR_Y_OF_ORIENTATION.get(orientation_of(node_key), 0.0)
+        node["x"], node["y"], node["pin"] = 0.0, y * radius, True
+    elif node_key == _FINISH_KEY:
+        node["x"] = radius if actor == "you" else -radius
+        node["y"], node["pin"] = 0.0, True
 
 
 def _orient_badge(node_key: str) -> str:
@@ -123,27 +211,81 @@ def _orient_badge(node_key: str) -> str:
     return {"top": " ▲", "bottom": " ▼"}.get(o, "")
 
 
-def _apply_finish_style(node: dict[str, Any], node_key: str) -> None:
-    """Finish is the terminal submission target — glyph + colour distinct from every category
-    (and from the ghost grey a variant 6 finish would otherwise get, since a chain-closing
-    state is always structurally inferred) in every MIGRATED variant. Called last so it
-    overrides whatever colour the caller already set."""
+def _finish_label(node_key: str, actor: str, label: str) -> str:
+    """Finish reuses the exact same colour (and, on variant 7, glyph) for both actors — D2's
+    terminal state is generic, not actor-specific — so the label is what tells the opponent's
+    finish apart from your own in the side panel/canvas. Owner call, adendo 2026-08-27."""
+    return f"{label} (oponente)" if node_key == _FINISH_KEY and actor == "partner" else label
+
+
+def _apply_finish_style(node: dict[str, Any], node_key: str, actor: str, *, icon: bool = False) -> None:
+    """Finish is the terminal submission target — colour distinct from every category (and from
+    the ghost grey a variant 6 finish would otherwise get, since a chain-closing state is always
+    structurally inferred) in every MIGRATED variant; the glyph (``icon=True``) is variant 7
+    only. Colour is shared between you and the opponent's own finish, so the actor RING
+    (``_FIG_HEX``) is set here too, in every variant — the only way the two stay visually
+    distinct once colour can't (adendo 2026-08-27). Called last so it overrides whatever colour
+    the caller already set."""
     if node_key == _FINISH_KEY:
         node["color"] = _FINISH_COLOR
-        node["icon"] = _FINISH_ICON
+        node["ring"] = _FIG_HEX[_ACTOR_SIDE[actor]]
+        if icon:
+            node["icon"] = _FINISH_ICON
+
+
+# Neutral — same semantic as graph.js's own FIG.x (contested/handover), reused here for the
+# same "neither actor, structural" meaning (C, owner whiteboard 2026-08-27).
+_BRIDGE_COLOR = "#8a8f98"
+
+
+def _apply_bridge_style(node: dict[str, Any], *, is_bridge: bool) -> None:
+    """C (owner whiteboard 2026-08-27, corrects the earlier system-to-system-edge design): a
+    BRIDGE is a node whose neighbours span >=2 different systems — member of NONE, first-class,
+    rendered individually at every level (never collapsed into a system, never inside a
+    region). Neutral/grey, and flagged (``bridge``) so the label-collision pass (`_patch_graph_js`)
+    gives it top priority — it's the node that explains cross-system structure, so its label
+    must win over an ordinary same-priority node/edge."""
+    if is_bridge:
+        node["color"] = _BRIDGE_COLOR
+        node["bridge"] = True
 
 
 def _mount_knobs(n_nodes: int) -> dict[str, float]:
     """Layout tuning proportional to node count (owner: "não faz sentido ter um cluster de
-    informação") — more nodes get more repulsion + a longer spring rest length so the
-    force-sim actually opens up instead of clustering. Formula only, not eyeballed in a real
-    browser (no headless-canvas check run here — ponytail: revisit with a playwright
-    screenshot pass if a variant still reads as clustered once someone opens it)."""
+    informação"). Retuned AGGRESSIVE 2026-08-27 after a real screenshot review ("quite a few of
+    the views are true clustered... I can't read") — more repulsion, longer spring rest length,
+    less centre pull than the first pass; erring toward too much space over too little per the
+    owner's explicit call (A.3: linkDist ~240 for <=25 nodes, charge ~12000+, gravity ~0.0004).
+    Formula only, not eyeballed in a real browser (no headless-canvas check run here — ponytail:
+    revisit with a playwright screenshot pass if a variant still reads as clustered once someone
+    opens it). Mirrored client-side by ``_PAGE9``'s own ``knobsFor()`` — same formula, JS-side
+    because variant 9's assembled node count only exists once the user has expanded a system."""
     n = max(n_nodes, 1)
-    charge = round(2600 * (1 + n / 40))
-    link_dist = 110 if n <= 25 else max(92, round(110 - (n - 25) * 0.6))
-    gravity = round(0.0016 * (1 + n / 60), 5)
+    charge = round(12000 + 300 * n)
+    link_dist = 240 if n <= 25 else max(190, round(240 - (n - 25) * 0.9))
+    gravity = round(0.0004 * (1 + n / 100), 5)
     return {"charge": charge, "linkDist": link_dist, "gravity": gravity}
+
+
+def _index_parallel_links(links: list[dict[str, Any]]) -> None:
+    """B (owner-reported bug): multiple links between the SAME two nodes (>=2 different actions
+    bridging the same pair of states) used to draw as N identical overlapping lines with N
+    labels stacked at one shared midpoint. Indexes by UNORDERED pair (both directions share one
+    fan, so a reverse-direction edge between the same two nodes doesn't overlap either) and
+    assigns a stable ``par``/``parCount`` — the client (`_patch_graph_js`'s quadratic-curve
+    patch) draws each as its own arc, offset by ``par``'s slot among ``parCount`` siblings, with
+    the label on ITS OWN arc's midpoint. Mutates in place; a pair with only one link is
+    untouched (no ``par``/``parCount`` fields — degenerates to the original straight line)."""
+    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for link in links:
+        key = tuple(sorted((link["from"], link["to"])))
+        groups.setdefault(key, []).append(link)
+    for group in groups.values():
+        n = len(group)
+        if n <= 1:
+            continue
+        for i, link in enumerate(group):
+            link["par"], link["parCount"] = i, n
 
 
 # ── 1. bundle -> compiled chains ────────────────────────────────────────────────
@@ -238,12 +380,13 @@ class Aggregate:
             return
         self.raw_states_total += 1
         self.raw_states_inferred += 1 if s.inferred else 0
-        key = (s.node_key, s.actor)
+        actor = _actor_for(s.node_key, s.actor)  # D: start-role nodes always merge into 'you'
+        key = (s.node_key, actor)
         row = self.states.get(key)
         if row is None:
             label = self.display_labels.get(s.node_key, s.label)
             self.states[key] = {"node_key": s.node_key, "label": label, "type": s.type,
-                                 "actor": s.actor, "count": 1, "inferred": s.inferred}
+                                 "actor": actor, "count": 1, "inferred": s.inferred}
         else:
             row["count"] += 1
             row["inferred"] = row["inferred"] and s.inferred
@@ -346,11 +489,14 @@ def _own_graphview(agg: Aggregate) -> tuple[dict[str, Any], list[dict[str, Any]]
     """Variant 2 — you only. No fighter colouring needed (single actor)."""
     states = {k: v for k, v in agg.states.items() if v["actor"] == "you"}
     edges = [v for v in agg.edges.values() if v["actor"] == "you"]
+    radius = _anchor_radius(len(states))
     nodes = []
     for (node_key, _actor), v in states.items():
-        node = {"id": v["node_key"], "label": v["label"], "cat": _cat_of(v["type"]),
-                "size": _clamp3(v["count"])}
-        _apply_finish_style(node, node_key)
+        node = {"id": v["node_key"], "label": _finish_label(node_key, "you", v["label"]),
+                "cat": _cat_of(v["type"]), "size": _clamp3(v["count"])}
+        _apply_finish_style(node, node_key, "you")
+        _apply_start_style(node, node_key)
+        _apply_anchor(node, node_key, "you", radius)
         nodes.append(node)
     links = []
     for v in edges:
@@ -358,21 +504,44 @@ def _own_graphview(agg: Aggregate) -> tuple[dict[str, Any], list[dict[str, Any]]
         if not v["inferred"]:
             link["label"] = v["action_label"]
         links.append(link)
+    _index_parallel_links(links)
     return {"nodes": nodes, "links": links}, edges
 
 
-def _two_sided_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
+def _style_single_node(node_key: str, actor: str, v: dict[str, Any], *, radius: float,
+                        is_bridge: bool = False) -> dict[str, Any]:
+    """One rendered node's full styling — shared by ``_two_sided_graphview`` (a whole two-sided
+    element set) and the "individual" nodes shown alongside a collapsed system (opponent/
+    finish/start-anchor/bridge — anything ``_system_eligible`` excludes from a community,
+    variants 8/9's level1/level2). Finish/start/anchor/bridge are mutually exclusive
+    categories (bridges only ever come from the you-eligible pool, which already excludes
+    finish/start), so applying all four style helpers in sequence is safe — at most one fires."""
+    node: dict[str, Any] = {"id": _qid(actor, node_key), "label": _finish_label(node_key, actor, v["label"]),
+                             "cat": _cat_of(v["type"]), "size": _clamp3(v["count"]),
+                             "fighter": _ACTOR_SIDE[actor]}
+    _apply_finish_style(node, node_key, actor)
+    _apply_start_style(node, node_key)
+    _apply_bridge_style(node, is_bridge=is_bridge)
+    _apply_anchor(node, node_key, actor, radius)
+    return node
+
+
+def _two_sided_graphview(states: dict, edges: list, handovers: list[dict[str, Any]],
+                          bridge_qids: frozenset[str] = frozenset()) -> dict[str, Any]:
     """Node per (node_key, actor) — you and partner are fundamentally different states, never
     merged, even on the same node_key. Links: within-actor action edges (blue/orange, labelled
     when not inferred) + neutral dashed HANDOVER links (grey, ``fighter:'x'``, the site's own
     contested-link convention) that bridge across the actor switch — the only interconnection
-    between the two subgraphs now that edges never cross actors."""
+    between the two subgraphs now that edges never cross actors. ``bridge_qids`` (C, owner
+    whiteboard) is only ever non-empty when the caller is rendering a sub-selection that still
+    contains cut-vertex nodes (rare — see ``_system_level2``'s own subgraph, which never does,
+    since bridges are excluded from ``member_qids`` upstream); the default keeps every other
+    caller unchanged."""
+    radius = _anchor_radius(len(states))
     nodes = []
     for (node_key, actor), v in states.items():
-        node = {"id": _qid(actor, node_key), "label": v["label"], "cat": _cat_of(v["type"]),
-                "size": _clamp3(v["count"]), "fighter": _ACTOR_SIDE[actor]}
-        _apply_finish_style(node, node_key)
-        nodes.append(node)
+        nodes.append(_style_single_node(node_key, actor, v, radius=radius,
+                                         is_bridge=_qid(actor, node_key) in bridge_qids))
     links = []
     for v in edges:
         link = {"from": _qid(v["actor"], v["source"]), "to": _qid(v["actor"], v["target"]),
@@ -382,6 +551,7 @@ def _two_sided_graphview(states: dict, edges: list, handovers: list[dict[str, An
         links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
+    _index_parallel_links(links)
     return {"nodes": nodes, "links": links}
 
 
@@ -471,13 +641,16 @@ def _hubs_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) 
         degree[h["to"]] = degree.get(h["to"], 0) + 1
     max_deg = max(degree.values(), default=1) or 1
 
+    radius = _anchor_radius(len(states))
     nodes = []
     for (node_key, actor), v in states.items():
         qid = _qid(actor, node_key)
         d = degree.get(qid, 0)
-        node = {"id": qid, "label": v["label"], "cat": _cat_of(v["type"]),
-                "size": 1 + round(2 * d / max_deg)}
-        _apply_finish_style(node, node_key)
+        node = {"id": qid, "label": _finish_label(node_key, actor, v["label"]),
+                "cat": _cat_of(v["type"]), "size": 1 + round(2 * d / max_deg)}
+        _apply_finish_style(node, node_key, actor)
+        _apply_start_style(node, node_key)
+        _apply_anchor(node, node_key, actor, radius)
         nodes.append(node)
     links = []
     for e in edges:
@@ -489,6 +662,7 @@ def _hubs_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) 
         links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
+    _index_parallel_links(links)
     return {"nodes": nodes, "links": links}
 
 
@@ -498,13 +672,17 @@ def _ghost_graphview(states: dict, edges: list, handovers: list[dict[str, Any]])
     field graph.js reads — see module docstring). Ghosting marks INFERRED only, never
     'shared' — you/partner nodes are never merged any more. Finish overrides the ghost grey
     (it is always structurally inferred, but must still read as ITS OWN colour, not noise)."""
+    radius = _anchor_radius(len(states))
     nodes = []
     for (node_key, actor), v in states.items():
-        node = {"id": _qid(actor, node_key), "label": v["label"], "cat": _cat_of(v["type"]),
+        node = {"id": _qid(actor, node_key), "label": _finish_label(node_key, actor, v["label"]),
+                "cat": _cat_of(v["type"]),
                 "size": 1 if v["inferred"] else _clamp3(v["count"]), "fighter": _ACTOR_SIDE[actor]}
         if v["inferred"]:
             node["color"] = "rgba(150,150,160,0.35)"
-        _apply_finish_style(node, node_key)
+        _apply_finish_style(node, node_key, actor)
+        _apply_start_style(node, node_key)
+        _apply_anchor(node, node_key, actor, radius)
         nodes.append(node)
     links = []
     for e in edges:
@@ -518,6 +696,7 @@ def _ghost_graphview(states: dict, edges: list, handovers: list[dict[str, Any]])
         links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
+    _index_parallel_links(links)
     return {"nodes": nodes, "links": links}
 
 
@@ -525,14 +704,23 @@ def _icons_graphview(states: dict, edges: list, handovers: list[dict[str, Any]])
     """Variant 7 — category icon + colour per node, approximating the App's own
     NODE_TYPE_ICONS/NODE_TYPE_COLORS (src/types/session.ts). Colour is taken by category here,
     so actor is shown as a border RING instead (``n.ring``, ``_FIG_HEX`` — a stroke-custom
-    patch on the copy, see module docstring). Same selective element set as variant 4."""
+    patch on the copy, see module docstring). Same selective element set as variant 4. Icons are
+    a single bold LETTER, not an emoji — measured (a headless Chrome render of this exact
+    ``fillText`` call DID paint a coloured glyph in this sandbox's Noto Color Emoji setup) but
+    kept as letters anyway: colour-emoji font availability is a client-machine dependency this
+    module can't guarantee for every viewer, and at the common size-1 node radius (the
+    post-A.3-shrink majority) a detailed pictogram reads worse than a bold single character
+    regardless of font support. A.4 decision, 2026-08-27."""
+    radius = _anchor_radius(len(states))
     nodes = []
     for (node_key, actor), v in states.items():
         typ = _cat_of(v["type"])
-        node = {"id": _qid(actor, node_key), "label": v["label"], "cat": typ,
-                "size": _clamp3(v["count"]), "color": _TYPE_COLORS.get(typ, "#94a3b8"),
+        node = {"id": _qid(actor, node_key), "label": _finish_label(node_key, actor, v["label"]),
+                "cat": typ, "size": _clamp3(v["count"]), "color": _TYPE_COLORS.get(typ, "#94a3b8"),
                 "icon": _TYPE_ICONS.get(typ, ""), "ring": _FIG_HEX[_ACTOR_SIDE[actor]]}
-        _apply_finish_style(node, node_key)
+        _apply_finish_style(node, node_key, actor, icon=True)
+        _apply_start_style(node, node_key, icon=True)
+        _apply_anchor(node, node_key, actor, radius)
         nodes.append(node)
     links = []
     for e in edges:
@@ -543,24 +731,45 @@ def _icons_graphview(states: dict, edges: list, handovers: list[dict[str, Any]])
         links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
+    _index_parallel_links(links)
     return {"nodes": nodes, "links": links}
 
 
-# ── 2b. variant 8 — collapsible systems (community detection) ──────────────────
+# ── 2b. variants 8/9 — collapsible systems (community detection) ───────────────
+
+def _system_eligible(node_key: str, actor: str) -> bool:
+    """C.3/C.4: only the user's own normal states can join a system — the opponent never gets
+    one (never a member, never a hub), and finish/start-anchor nodes are global landmarks, not
+    a system (the App has one guard/pass/submission per graph, not a 'system of finishes')."""
+    if actor != "you":
+        return False
+    if node_key == _FINISH_KEY:
+        return False
+    if _is_start(node_key):
+        return False
+    return True
+
 
 def _detect_systems(states: dict, edges: list[dict[str, Any]],
                      handovers: list[dict[str, Any]]) -> dict[str, Any]:
-    """Greedy-modularity communities over variant 4's selective two-sided graph — "systems".
-    Determinism (cicatriz #10, same convention as ``analysis.network_metrics.detect_communities``):
+    """Greedy-modularity communities over the ELIGIBLE subset (``_system_eligible`` — you-only,
+    never finish/start) of variant 4's selective two-sided graph — "systems". Determinism
+    (cicatriz #10, same convention as ``analysis.network_metrics.detect_communities``):
     nodes/edges added to the ``networkx`` graph in SORTED order, every tie (hub pick, community
     ordering) breaks on a stable sort key, never dict/set iteration order.
 
-    Base is the SELECTIVE set (variant 4), not the full corpus — the same legibility mandate
-    that trims variants 5-7 applies here too (a system map over the raw partner noise would
-    just be a bigger cluster, not a smaller one)."""
-    qid_of = {key: _qid(key[1], key[0]) for key in states}
+    **Bridges (C, owner whiteboard 2026-08-27 — corrects the earlier "aggregate system-to-
+    system edge" design):** after community detection, any node whose NEIGHBOURS (in this same
+    graph) span >=2 different communities is a boundary/cut vertex — pulled OUT of its
+    community into a separate, memberless "first-class" bucket (``bridge_qids``). Computed off
+    ONE static pass over the original community assignment (not iteratively), so the two ends
+    of a single cross-community edge are judged independently — both may end up bridges, or
+    just one, depending on their OTHER neighbours. The caller renders bridges individually
+    (never collapsed, never inside a region) — see ``_render_variant8``/``_render_variant9``."""
+    eligible = {k: v for k, v in states.items() if _system_eligible(k[0], k[1])}
+    qid_of = {key: _qid(key[1], key[0]) for key in eligible}
     g: nx.Graph = nx.Graph()
-    for key in sorted(states, key=lambda k: qid_of[k]):
+    for key in sorted(eligible, key=lambda k: qid_of[k]):
         g.add_node(qid_of[key])
 
     weights: dict[tuple[str, str], int] = {}
@@ -585,27 +794,35 @@ def _detect_systems(states: dict, edges: list[dict[str, Any]],
         comms = [sorted(c) for c in nx.community.greedy_modularity_communities(g, weight="weight")]
     comms = sorted(comms, key=lambda c: (-len(c), c[0]))
 
-    node_of = {qid_of[key]: (key, v) for key, v in states.items()}
+    comm_of: dict[str, int] = {}
+    for idx, members in enumerate(comms):
+        for qid in members:
+            comm_of[qid] = idx
+
+    bridge_qids: set[str] = set()
+    for qid in g.nodes:
+        neighbour_comms = {comm_of[n] for n in g.neighbors(qid) if n in comm_of}
+        if len(neighbour_comms) >= 2:
+            bridge_qids.add(qid)
+
+    node_of = {qid_of[key]: (key, v) for key, v in eligible.items()}
     systems: list[dict[str, Any]] = []
     system_of: dict[str, str] = {}
     for idx, members in enumerate(comms):
-        hub_qid = min(members, key=lambda qid: (-g.degree(qid), qid))  # max degree, tie by id
+        real_members = [qid for qid in members if qid not in bridge_qids]
+        if not real_members:
+            continue
+        hub_qid = min(real_members, key=lambda qid: (-g.degree(qid), qid))  # max degree, tie by id
         hub_key, hub_v = node_of[hub_qid]
-        actor_counts: dict[str, int] = {}
-        for qid in members:
-            actor = node_of[qid][0][1]
-            actor_counts[actor] = actor_counts.get(actor, 0) + 1
-        # majority actor, tie broken toward 'you' (owner call)
-        actor = "you" if actor_counts.get("you", 0) >= actor_counts.get("partner", 0) else "partner"
         sys_id = f"sys:{idx}"
-        for qid in members:
+        for qid in real_members:
             system_of[qid] = sys_id
         systems.append({
             "id": sys_id, "hub_qid": hub_qid, "hub_key": hub_key[0],
-            "label": f"Sistema: {hub_v['label']}", "members": members,
-            "actor": actor, "size": _clamp3(len(members)),
+            "label": f"Sistema: {hub_v['label']}", "members": real_members,
+            "actor": "you", "size": _clamp3(len(real_members)),
         })
-    return {"systems": systems, "system_of": system_of}
+    return {"systems": systems, "system_of": system_of, "bridge_qids": sorted(bridge_qids)}
 
 
 def _cross_system_links(system_of: dict[str, str], edges: list[dict[str, Any]],
@@ -634,20 +851,101 @@ def _cross_system_links(system_of: dict[str, str], edges: list[dict[str, Any]],
     ]
 
 
-def _systems_level1_view(systems: list[dict[str, Any]],
-                          cross_links: list[dict[str, Any]]) -> dict[str, Any]:
-    nodes = [{"id": s["id"], "label": s["label"], "cat": "control", "size": s["size"],
-              "fighter": _ACTOR_SIDE[s["actor"]]} for s in systems]
+def _cross_member_links(system_of: dict[str, str], edges: list[dict[str, Any]],
+                         handovers: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Variant 9's cross-system data at MEMBER granularity — same crossing edges as
+    `_cross_system_links`, but keyed by the two real qids (never collapsed to a system id) plus
+    each side's system id, so the CLIENT can re-resolve an endpoint to either the real member
+    (its system is expanded) or the collapsed system node (it isn't) as the user expands/
+    collapses systems in place. ``count`` stays raw — the client clamps after summing, same
+    order as `_cross_system_links`'s own server-side clamp."""
+    agg: dict[tuple[str, str], dict[str, Any]] = {}
+    for e in edges:
+        u, v = _qid(e["actor"], e["source"]), _qid(e["actor"], e["target"])
+        su, sv = system_of.get(u), system_of.get(v)
+        if su is None or sv is None or su == sv:
+            continue
+        row = agg.setdefault((u, v), {"count": 0, "handover_only": True, "from_sys": su, "to_sys": sv})
+        row["count"] += e["count"]
+        row["handover_only"] = False
+    for h in handovers:
+        u, v = h["from"], h["to"]
+        su, sv = system_of.get(u), system_of.get(v)
+        if su is None or sv is None or su == sv:
+            continue
+        row = agg.setdefault((u, v), {"count": 0, "handover_only": True, "from_sys": su, "to_sys": sv})
+        row["count"] += h["count"]
+    return [
+        {"from": u, "to": v, "count": row["count"], "dashed": row["handover_only"],
+         "fromSys": row["from_sys"], "toSys": row["to_sys"]}
+        for (u, v), row in sorted(agg.items())
+    ]
+
+
+def _excluded_states(states: dict, system_of: dict[str, str]) -> dict:
+    """Every state NOT a system member (opponent, finish, start-anchor, or a bridge — anything
+    ``_detect_systems`` didn't put in ``system_of``) — rendered individually at every level
+    (level1/level2 of variant 8, the always-visible SYSTEMS array of variant 9), never
+    collapsed, never inside a region."""
+    return {k: v for k, v in states.items() if _qid(k[1], k[0]) not in system_of}
+
+
+def _place_of(system_of: dict[str, str], excluded: dict) -> dict[str, str]:
+    """Extends ``system_of`` so EVERY rendered qid resolves to a "placement" id — a system
+    member maps to its collapsed ``sys:N``; anything excluded (opponent/finish/start/bridge)
+    maps to ITSELF. ``_cross_system_links``/``_cross_member_links`` then need no special case
+    at all: aggregating by ``place_of[u] != place_of[v]`` naturally produces system<->bridge,
+    system<->opponent, bridge<->bridge, etc — the sistema-ponte-sistema topology (C, owner
+    whiteboard 2026-08-27) falls out of the SAME aggregation that used to (wrongly) produce
+    direct system-to-system edges, because a real cross-system edge's endpoint is now always a
+    bridge (pulled out of its community precisely because it touches >=2 systems), never a
+    plain member of either side."""
+    place = dict(system_of)
+    for k in excluded:
+        qid = _qid(k[1], k[0])
+        place[qid] = qid
+    return place
+
+
+# Violet — a collapsed system is neither an actor state (blue/orange), finish (yellow), a
+# start-anchor (teal) nor a bridge (grey): its own colour so it never reads as a normal node.
+_SYSTEM_COLOR = "#a78bfa"
+
+
+def _system_node(s: dict[str, Any]) -> dict[str, Any]:
+    """Owner addendum 2026-08-27: a collapsed system must look like "several things folded",
+    not a normal state — own colour + a visible ring (single ring, not a literal double outline
+    — ponytail: cheap within the existing ring patch, revisit with a true concentric second
+    stroke if one ring still reads as an ordinary actor node once someone opens it) + a bigger
+    radius that grows with member count + the member count baked into the label
+    ("Sistema: X · N"). ``system: True`` gives it the TOP label-collision priority (above a
+    bridge's) — the collapsed/expanded pair should read as the same entity at both levels, and
+    a system whose own label loses to a member's is illegible."""
+    return {
+        "id": s["id"], "label": f"{s['label']} · {len(s['members'])}", "cat": "control",
+        "size": min(6, 3 + len(s["members"]) // 2), "color": _SYSTEM_COLOR,
+        "ring": _SYSTEM_COLOR, "system": True,
+    }
+
+
+def _systems_level1_view(systems: list[dict[str, Any]], excluded: dict,
+                          cross_links: list[dict[str, Any]], bridge_qids: frozenset[str],
+                          radius: float) -> dict[str, Any]:
+    nodes = [_system_node(s) for s in systems]
+    nodes += [
+        _style_single_node(k[0], k[1], v, radius=radius, is_bridge=_qid(k[1], k[0]) in bridge_qids)
+        for k, v in sorted(excluded.items(), key=lambda kv: _qid(kv[0][1], kv[0][0]))
+    ]
     return {"nodes": nodes, "links": cross_links}
 
 
-def _system_level2(sys_row: dict[str, Any], system_of: dict[str, str], states: dict,
-                    edges: list[dict[str, Any]], handovers: list[dict[str, Any]],
-                    systems_by_id: dict[str, dict[str, Any]]
-                    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    """One system's own subgraph (nodes/edges/labels as variant 4) + dashed stub links to a
-    mini-node per neighbouring system for edges that leave this system — clickable (by id
-    convention ``stub:<system_id>``) to navigate there."""
+def _system_members(sys_row: dict[str, Any], states: dict, edges: list[dict[str, Any]],
+                     handovers: list[dict[str, Any]]
+                     ) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]]]:
+    """One system's own (states, internal edges, internal handovers) slice, member_qids-filtered
+    — shared by variant 8's drill-down (`_system_level2`, which adds stub nodes on top) and
+    variant 9's in-place expansion (`_render_variant9`, which needs the bare subgraph — the
+    CROSS payload reconnects it to the rest of the view, no stubs needed)."""
     member_qids = set(sys_row["members"])
     sub_states = {k: v for k, v in states.items() if _qid(k[1], k[0]) in member_qids}
     internal_edges = [e for e in edges
@@ -655,37 +953,59 @@ def _system_level2(sys_row: dict[str, Any], system_of: dict[str, str], states: d
                        and _qid(e["actor"], e["target"]) in member_qids]
     internal_handovers = [h for h in handovers
                            if h["from"] in member_qids and h["to"] in member_qids]
+    return sub_states, internal_edges, internal_handovers
+
+
+def _system_level2(sys_row: dict[str, Any], states: dict, edges: list[dict[str, Any]],
+                    handovers: list[dict[str, Any]], excluded: dict, bridge_qids: frozenset[str],
+                    radius: float) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    """One system's own subgraph (nodes/edges/labels as variant 4), a REGION covering only its
+    own members (C.1 — hull/circle behind everything, drawn by the client), plus every neighbour
+    that touches it from outside. Owner whiteboard, 2026-08-27: by construction (`_detect_systems`)
+    a system member's only external neighbours are BRIDGE nodes or non-eligible individuals
+    (opponent/finish/start) — never another system directly, since any node touching >=2
+    systems was pulled out as a bridge already — so those neighbours are embedded here as their
+    own REAL, individually-styled nodes (no synthetic "stub" indirection any more)."""
+    member_qids = set(sys_row["members"])
+    sub_states, internal_edges, internal_handovers = _system_members(sys_row, states, edges, handovers)
     gv = _two_sided_graphview(sub_states, internal_edges, internal_handovers)
 
-    stub_nodes: dict[str, dict[str, Any]] = {}
-    stub_links: list[dict[str, Any]] = []
+    excluded_by_qid = {_qid(k[1], k[0]): (k, v) for k, v in excluded.items()}
+    extra_nodes: dict[str, dict[str, Any]] = {}
+    extra_links: list[dict[str, Any]] = []
 
-    def _stub(this_qid: str, other_qid: str) -> None:
-        other_sys = system_of.get(other_qid)
-        if other_sys is None or other_sys == sys_row["id"]:
-            return
-        stub_id = f"stub:{other_sys}"
-        if stub_id not in stub_nodes:
-            stub_nodes[stub_id] = {"id": stub_id, "label": systems_by_id[other_sys]["label"],
-                                    "cat": "control", "size": 1, "fighter": "x"}
-        stub_links.append({"from": this_qid, "to": stub_id, "weight": 1,
-                            "dashed": True, "fighter": "x"})
+    def _connect(this_qid: str, other_qid: str, weight: int, dashed: bool, label: str | None) -> None:
+        found = excluded_by_qid.get(other_qid)
+        if found is None:
+            return  # not a neighbour this system needs to show (e.g. another system's member)
+        (o_key, o_actor), o_v = found
+        if other_qid not in extra_nodes:
+            extra_nodes[other_qid] = _style_single_node(
+                o_key, o_actor, o_v, radius=radius, is_bridge=other_qid in bridge_qids)
+        link = {"from": this_qid, "to": other_qid, "weight": _clamp3(weight), "arrow": True,
+                "dashed": dashed}
+        if label:
+            link["label"] = label
+        extra_links.append(link)
 
     for e in edges:
         u, v = _qid(e["actor"], e["source"]), _qid(e["actor"], e["target"])
+        label = None if e["inferred"] else e["action_label"]
         if u in member_qids and v not in member_qids:
-            _stub(u, v)
+            _connect(u, v, e["count"], bool(e["inferred"]), label)
         elif v in member_qids and u not in member_qids:
-            _stub(v, u)
+            _connect(v, u, e["count"], bool(e["inferred"]), label)
     for h in handovers:
         if h["from"] in member_qids and h["to"] not in member_qids:
-            _stub(h["from"], h["to"])
+            _connect(h["from"], h["to"], h["count"], True, None)
         elif h["to"] in member_qids and h["from"] not in member_qids:
-            _stub(h["to"], h["from"])
+            _connect(h["to"], h["from"], h["count"], True, None)
 
-    gv["nodes"] = gv["nodes"] + sorted(stub_nodes.values(), key=lambda n: n["id"])
-    gv["links"] = gv["links"] + stub_links
-    return gv, internal_edges
+    gv["nodes"] = gv["nodes"] + sorted(extra_nodes.values(), key=lambda n: n["id"])
+    gv["links"] = gv["links"] + extra_links
+    _index_parallel_links(gv["links"])
+    regions = [{"label": sys_row["label"], "members": sys_row["members"]}]
+    return gv, internal_edges, regions
 
 
 # ── 3. HTML rendering ────────────────────────────────────────────────────────────
@@ -708,7 +1028,7 @@ h1{{font-size:15px;margin:0 0 4px}}.muted{{color:var(--ink2);font-size:12px;marg
 <div id="list">{list_html}</div></div>
 <script src="graph.js"></script>
 <script>const GV = {graphview};
-GAGraph.mount(document.getElementById('cv'),{{mode:'map',nodes:GV.nodes,links:GV.links,pan:true,zoom:true,collide:true,charge:{charge},linkDist:{link_dist},gravity:{gravity},forceLabels: GV.nodes.length < 40}});
+GAGraph.mount(document.getElementById('cv'),{{mode:'map',nodes:GV.nodes,links:GV.links,pan:true,zoom:true,collide:true,bounded:false,charge:{charge},linkDist:{link_dist},gravity:{gravity},forceLabels: GV.nodes.length < 40}});
 </script></body></html>"""
 
 # Variant 8's interactive two-level page — kept as a SEPARATE template (not `.format()`-shared
@@ -755,16 +1075,142 @@ function show(level, id) {
   const cv = freshCanvas();
   mounted = GAGraph.mount(cv, {
     mode: 'map', nodes: data.gv.nodes, links: data.gv.links, pan: true, zoom: true, collide: true,
-    charge: data.charge, linkDist: data.linkDist, gravity: data.gravity,
-    forceLabels: data.gv.nodes.length < 40,
+    bounded: false, charge: data.charge, linkDist: data.linkDist, gravity: data.gravity,
+    forceLabels: data.gv.nodes.length < 40, regions: data.regions || [],
     onSelect: function (n) {
       if (!n) return;
       if (level === 'global' && n.id.indexOf('sys:') === 0) show('system', n.id);
-      if (level === 'system' && n.id.indexOf('stub:') === 0) show('system', n.id.slice(5));
     }
   });
 }
 show('global', null);
+</script></body></html>"""
+
+# Variant 9's in-place-expansion page — sibling of `_PAGE8`, own template for the same
+# double-brace-escaping reason. Global view = one collapsed node per system (SYSTEMS); clicking
+# one swaps it for its real member subgraph (MEMBERS[id]) while every OTHER system stays
+# collapsed — several can be expanded at once, unlike 8's single-level drill-down. Inter-system
+# edges (CROSS, member-granularity) are re-resolved to either the real member endpoint (its
+# system is expanded) or the collapsed system node (it isn't) on every rebuild, then merged by
+# resulting pair. Recollapse: a chip per expanded system in the side panel (`__LEGEND__` below
+# explains why — a member node has no natural "go back" click target once its system is open,
+# so the chip is the only recollapse control).
+_PAGE9 = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>
+:root{--bg:#0b0b0f;--panel:#14141a;--line:#26262e;--ink:#e9e9ee;--ink2:#9a9aa6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:flex;height:100vh}
+#canvas{flex:1;position:relative}#canvas canvas{width:100%;height:100%;display:block}
+#side{width:360px;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:16px}
+h1{font-size:15px;margin:0 0 4px}.muted{color:var(--ink2);font-size:12px;margin-bottom:10px}
+.row{padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:5px;font-size:12px}
+.g{opacity:.45;border-style:dashed}
+.legend{font-size:11px;color:var(--ink2);margin:10px 0;line-height:1.6}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chip{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;font:11px system-ui}
+.chip:hover{border-color:#4d86ff}
+</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1>9 — Systems, expand in place</h1>
+<div class="muted" id="sideSubtitle"></div>
+<div class="legend">__LEGEND__</div>
+<div class="chips" id="chips"></div>
+<div id="list"></div></div>
+<script src="graph.js"></script>
+<script>
+const SYSTEMS = __SYSTEMS_JSON__;   // [{kind:'system',id,label,size,fighter} | {kind:'solo',node}]
+const MEMBERS = __MEMBERS_JSON__;   // {sysId: {nodes, links, members, listHtml, subtitle}}
+const CROSS = __CROSS_JSON__;       // [{from, to, count, dashed, fromSys, toSys}] — real qids (place_of)
+const expanded = new Set();
+let mounted = null;
+let lastPositions = {};  // id -> {x,y} — snapshot across rebuilds, C.2 freeze-on-expand
+function clamp3(n) { return n <= 1 ? 1 : (n === 2 ? 2 : 3); }  // mirrors Python's _clamp3
+function freshCanvas() {
+  const old = document.getElementById('cv');
+  const next = old.cloneNode(false);
+  old.parentNode.replaceChild(next, old);
+  return next;
+}
+function knobsFor(n) {  // mirrors Python's _mount_knobs — same formula, JS-side because the
+  const nn = Math.max(n, 1);   // assembled node count only exists once the user has expanded
+  return {
+    charge: Math.round(12000 + 300 * nn),
+    linkDist: nn <= 25 ? 240 : Math.max(190, Math.round(240 - (nn - 25) * 0.9)),
+    gravity: Math.round(0.0004 * (1 + nn / 100) * 1e5) / 1e5,
+  };
+}
+function frozen(node) {  // C.2: re-seed at the last known position + pin, unless it's already
+  const p = lastPositions[node.id];               // a server-pinned anchor (that never moves anyway)
+  return (p && !node.pin) ? Object.assign({}, node, { x: p.x, y: p.y, pin: true }) : node;
+}
+function computeView(justExpandedId) {
+  const nodes = [];
+  const links = [];
+  const regions = [];
+  for (const s of SYSTEMS) {
+    if (s.kind === 'solo') { nodes.push(frozen(s.node)); continue; }
+    if (expanded.has(s.id)) {
+      const m = MEMBERS[s.id];
+      const freeze = s.id !== justExpandedId;  // the JUST-expanded system's own members settle fresh
+      for (const n of m.nodes) nodes.push(freeze ? frozen(n) : n);
+      for (const l of m.links) links.push(l);
+      regions.push({ label: s.node.label, members: m.members });
+    } else {
+      nodes.push(frozen(s.node));
+    }
+  }
+  const merged = new Map();
+  for (const c of CROSS) {
+    const from = expanded.has(c.fromSys) ? c.from : c.fromSys;
+    const to = expanded.has(c.toSys) ? c.to : c.toSys;
+    if (from === to) continue;
+    const key = from + '|' + to;
+    const row = merged.get(key) || { from, to, count: 0, dashed: true };
+    row.count += c.count;
+    row.dashed = row.dashed && c.dashed;
+    merged.set(key, row);
+  }
+  for (const row of merged.values()) {
+    links.push({ from: row.from, to: row.to, weight: clamp3(row.count), arrow: true, dashed: row.dashed });
+  }
+  return { nodes, links, regions };
+}
+function rebuild(justExpandedId) {
+  const gv = computeView(justExpandedId);
+  const chips = document.getElementById('chips');
+  chips.innerHTML = '';
+  for (const id of expanded) {
+    const sys = SYSTEMS.find(function (s) { return s.kind === 'system' && s.id === id; });
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = '▣ ' + (sys ? sys.node.label : id) + ' — recolher';
+    chip.onclick = function () { expanded.delete(id); rebuild(); };
+    chips.appendChild(chip);
+  }
+  let listHtml = '';
+  for (const id of expanded) listHtml += (MEMBERS[id] && MEMBERS[id].listHtml) || '';
+  document.getElementById('list').innerHTML = listHtml;
+  document.getElementById('sideSubtitle').textContent = expanded.size
+    ? (expanded.size + ' sistema(s) expandido(s) de ' + SYSTEMS.filter(function (s) { return s.kind === 'system'; }).length)
+    : (SYSTEMS.filter(function (s) { return s.kind === 'system'; }).length + ' sistemas, todos recolhidos');
+  if (mounted) {
+    if (mounted.positions) lastPositions = Object.assign({}, lastPositions, mounted.positions());
+    if (mounted.destroy) mounted.destroy();
+  }
+  const cv = freshCanvas();
+  const knobs = knobsFor(gv.nodes.length);
+  mounted = GAGraph.mount(cv, {
+    mode: 'map', nodes: gv.nodes, links: gv.links, pan: true, zoom: true, collide: true,
+    bounded: false, charge: knobs.charge, linkDist: knobs.linkDist, gravity: knobs.gravity,
+    forceLabels: gv.nodes.length < 40, regions: gv.regions,
+    onSelect: function (n) {
+      if (!n) return;
+      if (n.id.indexOf('sys:') === 0) { expanded.add(n.id); rebuild(n.id); }
+    }
+  });
+}
+rebuild();
 </script></body></html>"""
 
 
@@ -802,9 +1248,12 @@ def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
                       handovers4: list[dict[str, Any]]) -> dict[str, Any]:
     detected = _detect_systems(states4, edges4, handovers4)
     systems, system_of = detected["systems"], detected["system_of"]
-    systems_by_id = {s["id"]: s for s in systems}
-    cross_links = _cross_system_links(system_of, edges4, handovers4)
-    level1_gv = _systems_level1_view(systems, cross_links)
+    bridge_qids = frozenset(detected["bridge_qids"])
+    excluded = _excluded_states(states4, system_of)
+    place_of = _place_of(system_of, excluded)
+    cross_links = _cross_system_links(place_of, edges4, handovers4)
+    radius = _anchor_radius(len(states4))
+    level1_gv = _systems_level1_view(systems, excluded, cross_links, bridge_qids, radius)
     level1_knobs = _mount_knobs(len(level1_gv["nodes"]))
     level1_list = "".join(
         f'<div class="row">{s["label"]} <span class="muted">'
@@ -812,31 +1261,32 @@ def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
         for s in systems
     )
     level1 = {"title": "8 — Systems map (global)",
-              "subtitle": f"{len(systems)} systems — greedy-modularity over variant 4's "
-                          "selective two-sided graph",
-              "listHtml": level1_list, "gv": level1_gv, **level1_knobs}
+              "subtitle": f"{len(systems)} systems, {len(bridge_qids)} bridges — greedy-modularity "
+                          "over variant 4's selective two-sided graph",
+              "listHtml": level1_list, "gv": level1_gv, "regions": [], **level1_knobs}
 
     level2: dict[str, Any] = {}
     for s in systems:
-        gv2, internal_edges = _system_level2(s, system_of, states4, edges4, handovers4, systems_by_id)
+        gv2, internal_edges, regions2 = _system_level2(s, states4, edges4, handovers4, excluded,
+                                                         bridge_qids, radius)
         id_to_label = {n["id"]: n["label"] for n in gv2["nodes"]}
         list2 = _edge_list_html(internal_edges, id_to_label)
         knobs2 = _mount_knobs(len(gv2["nodes"]))
         level2[s["id"]] = {
             "title": s["label"],
-            "subtitle": f"{len(s['members'])} nodes, {s['actor']}-dominant — dashed stub = "
-                        "edge leaving this system, click to follow",
-            "listHtml": list2, "gv": gv2, **knobs2,
+            "subtitle": f"{len(s['members'])} nodes, {s['actor']}-dominant — grey nodes are "
+                        "bridges/opponent/anchors, never part of this system",
+            "listHtml": list2, "gv": gv2, "regions": regions2, **knobs2,
         }
 
     html = (
         _PAGE8.replace("__TITLE__", "8 — Collapsible systems")
         .replace(
             "__LEGEND__",
-            "click a system node to drill in; dashed grey = handover-only or a cross-system "
-            "stub — solid = at least one real action edge crosses that pair. Inside a system: "
-            "same convention as variant 4 (blue=you, orange=opponent), dashed stub nodes are "
-            "the neighbouring systems, click to follow.",
+            "click a system node to drill in; grey nodes are BRIDGES (touch >=2 systems — member "
+            "of none) or the opponent/finish/start anchors, never collapsed. Inside a system: same "
+            "convention as variant 4 (blue=you, orange=opponent), the dashed region outline marks "
+            "this system's own members.",
         )
         .replace("__LEVEL1_JSON__", json.dumps(level1, ensure_ascii=False))
         .replace("__LEVEL2_JSON__", json.dumps(level2, ensure_ascii=False))
@@ -848,9 +1298,83 @@ def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
         "edges_per_node": round(len(level1_gv["links"]) / len(level1_gv["nodes"]), 2)
         if level1_gv["nodes"] else 0.0,
         "pct_inferred_edges": None,
-        "partner_elements": sum(1 for s in systems if s["actor"] == "partner"),
+        "partner_elements": sum(1 for k in excluded if k[1] == "partner"),
         "handover_links": sum(1 for link in cross_links if link.get("dashed")),
         "systems": len(systems),
+        "bridges": len(bridge_qids),
+        "knobs": level1_knobs,
+    }
+
+
+def _render_variant9(out: Path, states4: dict, edges4: list[dict[str, Any]],
+                      handovers4: list[dict[str, Any]]) -> dict[str, Any]:
+    """Variant 9 — same systems as variant 8, but expansion happens IN PLACE: the global view
+    shows every system as a node PLUS every bridge/opponent/anchor individually (always
+    visible, never collapsed — C, owner whiteboard); expanding a system swaps its collapsed
+    node for its real member subgraph while every OTHER system stays collapsed (several can be
+    open at once). Inter-placement edges (CROSS, member granularity, built over the SAME
+    ``_place_of`` extension as variant 8 — bridges self-mapped, never a direct system-to-system
+    pair) re-resolve each endpoint to either the real member (its system is expanded) or the
+    collapsed system node (it isn't) on every rebuild (`computeView` in `_PAGE9`), which ALSO
+    freezes (pins) every node that isn't part of the just-expanded system at its last known
+    position (`positions()`/``n.pin`` — C.2, no more "explodes on every click"). Metrics mirror
+    variant 8's shape (same fields, computed over the fully-collapsed default view, for a
+    stable/deterministic number)."""
+    detected = _detect_systems(states4, edges4, handovers4)
+    systems, system_of = detected["systems"], detected["system_of"]
+    bridge_qids = frozenset(detected["bridge_qids"])
+    excluded = _excluded_states(states4, system_of)
+    place_of = _place_of(system_of, excluded)
+    cross_links = _cross_system_links(place_of, edges4, handovers4)  # metrics parity w/ variant 8
+    radius = _anchor_radius(len(states4))
+    level1_gv = _systems_level1_view(systems, excluded, cross_links, bridge_qids, radius)
+    level1_knobs = _mount_knobs(len(level1_gv["nodes"]))
+
+    sys_payload = [{"kind": "system", "id": s["id"], "node": _system_node(s)} for s in systems]
+    sys_payload += [
+        {"kind": "solo", "node": _style_single_node(
+            k[0], k[1], v, radius=radius, is_bridge=_qid(k[1], k[0]) in bridge_qids)}
+        for k, v in sorted(excluded.items(), key=lambda kv: _qid(kv[0][1], kv[0][0]))
+    ]
+
+    members: dict[str, Any] = {}
+    for s in systems:
+        sub_states, internal_edges, internal_handovers = _system_members(s, states4, edges4, handovers4)
+        gv = _two_sided_graphview(sub_states, internal_edges, internal_handovers)
+        id_to_label = {n["id"]: n["label"] for n in gv["nodes"]}
+        members[s["id"]] = {
+            "nodes": gv["nodes"], "links": gv["links"], "members": s["members"],
+            "listHtml": _edge_list_html(internal_edges, id_to_label),
+            "subtitle": f"{len(s['members'])} nos, {s['actor']}-dominant",
+        }
+
+    cross = _cross_member_links(place_of, edges4, handovers4)
+
+    html = (
+        _PAGE9.replace("__TITLE__", "9 — Systems, expand in place")
+        .replace(
+            "__LEGEND__",
+            "click a system node to expand it in place — its real nodes/edges replace it while "
+            "every other system stays collapsed (multiple can be open at once); grey nodes are "
+            "BRIDGES (touch >=2 systems, member of none) or the opponent/finish/start anchors — "
+            "always visible, never collapsed. Everything not just-expanded stays pinned in place "
+            "(no reshuffle on click). Recolher: use the chip below, per expanded system.",
+        )
+        .replace("__SYSTEMS_JSON__", json.dumps(sys_payload, ensure_ascii=False))
+        .replace("__MEMBERS_JSON__", json.dumps(members, ensure_ascii=False))
+        .replace("__CROSS_JSON__", json.dumps(cross, ensure_ascii=False))
+    )
+    (out / "9-sistemas-expande-in-place.html").write_text(html, encoding="utf-8")
+
+    return {
+        "nodes": len(level1_gv["nodes"]), "edges": len(level1_gv["links"]),
+        "edges_per_node": round(len(level1_gv["links"]) / len(level1_gv["nodes"]), 2)
+        if level1_gv["nodes"] else 0.0,
+        "pct_inferred_edges": None,
+        "partner_elements": sum(1 for k in excluded if k[1] == "partner"),
+        "handover_links": sum(1 for link in cross_links if link.get("dashed")),
+        "systems": len(systems),
+        "bridges": len(bridge_qids),
         "knobs": level1_knobs,
     }
 
@@ -864,6 +1388,7 @@ _VARIANT_DESCRIPTIONS = [
     ("6-ghost-inferidos.html", "variant 4 + inferred states/edges rendered as ghosts (dashed/grey)"),
     ("7-icones-categoria.html", "variant 4 + category icon/colour per node (App parity), actor shown as a border ring"),
     ("8-sistemas-colapsavel.html", "variant 4 grouped into systems (greedy-modularity) — click a system to drill in"),
+    ("9-sistemas-expande-in-place.html", "same systems as 8, but expansion stays in the SAME view — click to expand in place (multiple at once), chip to recolher"),
 ]
 
 _INDEX_PAGE = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
@@ -887,21 +1412,8 @@ def _patch_graph_js(js_text: str) -> str:
             "        const mapLabel = opts.forceLabels || !useCam || cam.k >= 1 || (n.size || 1) >= 2 || inFocus;  // map-prototype patch: force-visible labels\n",
         ),
         (
-            "          ctx.closePath(); ctx.fill();\n        }\n      }",
-            "          ctx.closePath(); ctx.fill();\n        }\n"
-            "        if (l.label && (opts.forceLabels || !useCam || cam.k >= 1)) {  // map-prototype patch: edge label\n"
-            "          const mx = (l.s.x + l.t.x) / 2, my = (l.s.y + l.t.y) / 2;\n"
-            "          const ldx = l.t.x - l.s.x, ldy = l.t.y - l.s.y;\n"
-            "          const ld = Math.sqrt(ldx * ldx + ldy * ldy) || 1;\n"
-            "          const lpx = -ldy / ld, lpy = ldx / ld;\n"
-            "          ctx.save();\n"
-            "          ctx.font = `${useCam ? 10 / cam.k : 10}px 'Spline Sans Mono', monospace`;\n"
-            "          ctx.fillStyle = col;\n"
-            "          ctx.globalAlpha = hov ? (active ? 0.9 : 0.08) : 0.75;\n"
-            "          ctx.textAlign = 'center';\n"
-            "          ctx.fillText(l.label, mx + lpx * 7, my + lpy * 7);\n"
-            "          ctx.restore();\n"
-            "        }\n      }",
+            "      r: 5 + (n.size || 1) * 4,",
+            "      r: 4 + (n.size || 1) * 3.2,  // map-prototype patch: smaller radius, more room to breathe (adendo 2026-08-27)",
         ),
         (
             "        ctx.shadowBlur = 0;",
@@ -920,16 +1432,288 @@ def _patch_graph_js(js_text: str) -> str:
             "        ctx.arc(n.x, n.y, Math.max(1, r - 4.5), 0, Math.PI * 2); ctx.fill();",
             "        ctx.beginPath(); ctx.fillStyle = col;\n"
             "        ctx.arc(n.x, n.y, Math.max(1, r - 4.5), 0, Math.PI * 2); ctx.fill();\n"
-            "        if (n.icon) {  // map-prototype patch: category/finish glyph\n"
+            "        if (n.icon) {  // map-prototype patch: category/finish glyph — bold LETTER, not\n"
+            "                       // emoji (A.4: colour-emoji font isn't guaranteed on every viewer,\n"
+            "                       // and reads worse than a letter at the common size-1 node radius)\n"
             "          ctx.save();\n"
             "          ctx.globalAlpha = dim ? 0.18 : 1;\n"
-            "          ctx.font = `${Math.max(9, r)}px sans-serif`;\n"
+            "          ctx.font = `bold ${Math.max(11, r)}px sans-serif`;\n"
             "          ctx.textAlign = 'center';\n"
             "          ctx.textBaseline = 'middle';\n"
             "          ctx.fillStyle = '#fff';\n"
             "          ctx.fillText(n.icon, n.x, n.y);\n"
             "          ctx.restore();\n"
             "        }",
+        ),
+        (
+            # A (label collision) + B (parallel edges) share one array + one draw pass, declared
+            # at mount() scope (not per-frame) so a sibling helper doesn't need it passed around.
+            "    let hover = null, selected = null, raf = null, t = 0;",
+            "    let hover = null, selected = null, raf = null, t = 0;\n"
+            "    let labelCandidates = [];  // map-prototype patch: label collision — collected each frame, drawn after a priority sort",
+        ),
+        (
+            "        if (n === hover && pointer.active && pointer.moved) {  // pin to cursor (screen→world)\n"
+            "          n.x = (pointer.x - cam.x) / cam.k; n.y = (pointer.y - cam.y) / cam.k;\n"
+            "          n.vx = n.vy = 0; continue;\n"
+            "        }",
+            "        if (n === hover && pointer.active && pointer.moved) {  // pin to cursor (screen→world)\n"
+            "          n.x = (pointer.x - cam.x) / cam.k; n.y = (pointer.y - cam.y) / cam.k;\n"
+            "          n.vx = n.vy = 0; continue;\n"
+            "        }\n"
+            "        if (n.pin) { n.vx = n.vy = 0; continue; }  // map-prototype patch: pinned anchor node — never simulated (D addendum)",
+        ),
+        (
+            "      destroy() { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); },\n"
+            "      // programmatic select (search-to-locate): highlight + zoom onto a node by id\n"
+            "      select(id) {\n"
+            "        selected = byId[id] || null;\n"
+            "        if (selected) focusOn(selected); else { focusOn(null); alpha = Math.max(alpha, 0.05); }\n"
+            "        if (onSelect) onSelect(selected);\n"
+            "        return selected;\n"
+            "      },",
+            "      destroy() { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); },\n"
+            "      // programmatic select (search-to-locate): highlight + zoom onto a node by id\n"
+            "      select(id) {\n"
+            "        selected = byId[id] || null;\n"
+            "        if (selected) focusOn(selected); else { focusOn(null); alpha = Math.max(alpha, 0.05); }\n"
+            "        if (onSelect) onSelect(selected);\n"
+            "        return selected;\n"
+            "      },\n"
+            "      positions() {  // map-prototype patch: snapshot live x/y per id — lets a caller\n"
+            "        const out = {};                          // re-seed + pin on the NEXT mount (freeze-on-expand, variant 9)\n"
+            "        for (const n of nodes) out[n.id] = { x: n.x, y: n.y };\n"
+            "        return out;\n"
+            "      },",
+        ),
+        (
+            "      ctx.setTransform(dpr * cam.k, 0, 0, dpr * cam.k, cam.x * dpr, cam.y * dpr);\n"
+            "      const hov = hover || selected;  // hover wins; selection keeps a sticky focus",
+            "      ctx.setTransform(dpr * cam.k, 0, 0, dpr * cam.k, cam.x * dpr, cam.y * dpr);\n"
+            "      labelCandidates.length = 0;  // map-prototype patch: label collision — reset per frame\n"
+            "      if (opts.regions && opts.regions.length) {  // map-prototype patch: system regions (C) — hull/circle behind everything, no colour (colour is the actor's)\n"
+            "        for (const reg of opts.regions) {\n"
+            "          const pts = reg.members.map(id => byId[id]).filter(Boolean);\n"
+            "          if (!pts.length) continue;\n"
+            "          ctx.save();\n"
+            "          ctx.fillStyle = 'rgba(255,255,255,0.04)';\n"
+            "          ctx.strokeStyle = 'rgba(255,255,255,0.22)';\n"
+            "          ctx.lineWidth = 1.2;\n"
+            "          ctx.setLineDash([4, 4]);\n"
+            "          ctx.beginPath();\n"
+            "          if (pts.length < 3) {\n"
+            "            let cx = 0, cy = 0, r = 40;\n"
+            "            for (const p of pts) { cx += p.x; cy += p.y; }\n"
+            "            cx /= pts.length; cy /= pts.length;\n"
+            "            if (pts.length === 2) r = Math.hypot(pts[1].x - pts[0].x, pts[1].y - pts[0].y) / 2 + 30;\n"
+            "            ctx.arc(cx, cy, r, 0, Math.PI * 2);\n"
+            "          } else {\n"
+            "            const hull = convexHull(pts.map(p => ({ x: p.x, y: p.y })));\n"
+            "            let hcx = 0, hcy = 0;\n"
+            "            for (const p of hull) { hcx += p.x; hcy += p.y; }\n"
+            "            hcx /= hull.length; hcy /= hull.length;\n"
+            "            const pad = 26;\n"
+            "            hull.forEach((p, i) => {\n"
+            "              const ddx = p.x - hcx, ddy = p.y - hcy, dd = Math.hypot(ddx, ddy) || 1;\n"
+            "              const ex = p.x + (ddx / dd) * pad, ey = p.y + (ddy / dd) * pad;\n"
+            "              if (i === 0) ctx.moveTo(ex, ey); else ctx.lineTo(ex, ey);\n"
+            "            });\n"
+            "            ctx.closePath();\n"
+            "          }\n"
+            "          ctx.fill(); ctx.stroke();\n"
+            "          ctx.setLineDash([]);\n"
+            "          if (reg.label) {\n"
+            "            let lx = 0, ly = 1e9;\n"
+            "            for (const p of pts) { lx += p.x; ly = Math.min(ly, p.y - 44); }\n"
+            "            lx /= pts.length;\n"
+            "            ctx.fillStyle = 'rgba(233,233,238,0.55)';\n"
+            "            ctx.font = \"11px 'Spline Sans Mono', monospace\";\n"
+            "            ctx.textAlign = 'center';\n"
+            "            ctx.fillText(reg.label, lx, ly);\n"
+            "          }\n"
+            "          ctx.restore();\n"
+            "        }\n"
+            "      }\n"
+            "      const hov = hover || selected;  // hover wins; selection keeps a sticky focus",
+        ),
+        (
+            # Consolidated links loop (B: parallel-edge arcs via a per-pair control-point offset,
+            # `_index_parallel_links`' `l.par`/`l.parCount` — degenerates to a straight line when
+            # parCount<=1, control point ON the line) + edge labels now COLLECTED (A.1), not drawn
+            # inline — the final priority-sorted pass (node patch, below) draws them with a halo.
+            "      // links\n"
+            "      for (const l of links) {\n"
+            "        const active = !hov || (conn.has(l.s.id) && conn.has(l.t.id) && (l.s === hov || l.t === hov));\n"
+            "        const contested = l.fighter === 'x';\n"
+            "        const col = l.fighter ? FIG[l.fighter] : '#3a3a45';\n"
+            "        ctx.strokeStyle = col;\n"
+            "        ctx.globalAlpha = hov ? (active ? 0.85 : 0.08) : (contested ? 0.28 : (l.fighter ? 0.5 : 0.32));\n"
+            "        ctx.lineWidth = edgeWidth(l.weight, wMin, wMax) * (active ? 1.4 : 1) * (contested ? 0.85 : 1);\n"
+            "        ctx.setLineDash(l.dashed ? [5, 5] : (contested ? [3, 4] : []));  // low-success / handover dashed\n"
+            "        ctx.beginPath(); ctx.moveTo(l.s.x, l.s.y); ctx.lineTo(l.t.x, l.t.y); ctx.stroke();\n"
+            "        ctx.setLineDash([]);\n"
+            "        // arrowhead at the target — only when zoomed in enough to read (same gate as labels).\n"
+            "        // Size stays fixed rather than tracking edgeWidth — the 0.75-4px range is narrow enough\n"
+            "        // that a scaled triangle risks overlapping into a blob on the thickest edges; fixed is\n"
+            "        // the safer default without a rendered visual to tune against.\n"
+            "        if (l.arrow && (!useCam || cam.k >= 1)) {\n"
+            "          const dx = l.t.x - l.s.x, dy = l.t.y - l.s.y;\n"
+            "          const d = Math.sqrt(dx * dx + dy * dy) || 1;\n"
+            "          const ux = dx / d, uy = dy / d, px = -uy, py = ux;\n"
+            "          const tip = l.t.r + 2, back = 7, spread = 4.2;\n"
+            "          const ax = l.t.x - ux * tip, ay = l.t.y - uy * tip;\n"
+            "          const bx = ax - ux * back, by = ay - uy * back;\n"
+            "          ctx.fillStyle = col;\n"
+            "          ctx.beginPath();\n"
+            "          ctx.moveTo(ax, ay);\n"
+            "          ctx.lineTo(bx + px * spread, by + py * spread);\n"
+            "          ctx.lineTo(bx - px * spread, by - py * spread);\n"
+            "          ctx.closePath(); ctx.fill();\n"
+            "        }\n"
+            "      }\n"
+            "      ctx.setLineDash([]);\n"
+            "      ctx.globalAlpha = 1;\n"
+            "\n"
+            "      ",
+            "      // links\n"
+            "      for (const l of links) {\n"
+            "        const active = !hov || (conn.has(l.s.id) && conn.has(l.t.id) && (l.s === hov || l.t === hov));\n"
+            "        const contested = l.fighter === 'x';\n"
+            "        const col = l.fighter ? FIG[l.fighter] : '#3a3a45';\n"
+            "        // map-prototype patch: parallel edges (B) — offset the control point perpendicular\n"
+            "        // to the line by l.par's slot among l.parCount siblings sharing the same node pair\n"
+            "        // (unordered — both directions share one fan), so N different actions between the\n"
+            "        // same two states draw as a fan of arcs instead of one overlapping line, each with\n"
+            "        // its own midpoint for the label. parCount<=1 degenerates to a straight line.\n"
+            "        const parN = l.parCount || 1, parI = l.par || 0;\n"
+            "        let cpx = (l.s.x + l.t.x) / 2, cpy = (l.s.y + l.t.y) / 2;\n"
+            "        if (parN > 1) {\n"
+            "          const ddx = l.t.x - l.s.x, ddy = l.t.y - l.s.y;\n"
+            "          const dd = Math.sqrt(ddx * ddx + ddy * ddy) || 1;\n"
+            "          const opx = -ddy / dd, opy = ddx / dd;\n"
+            "          const off = (parI - (parN - 1) / 2) * 24;\n"
+            "          cpx += opx * off; cpy += opy * off;\n"
+            "        }\n"
+            "        ctx.strokeStyle = col;\n"
+            "        ctx.globalAlpha = hov ? (active ? 0.85 : 0.08) : (contested ? 0.28 : (l.fighter ? 0.5 : 0.32));\n"
+            "        ctx.lineWidth = edgeWidth(l.weight, wMin, wMax) * (active ? 1.4 : 1) * (contested ? 0.85 : 1);\n"
+            "        ctx.setLineDash(l.dashed ? [5, 5] : (contested ? [3, 4] : []));  // low-success / handover dashed\n"
+            "        ctx.beginPath(); ctx.moveTo(l.s.x, l.s.y); ctx.quadraticCurveTo(cpx, cpy, l.t.x, l.t.y); ctx.stroke();\n"
+            "        ctx.setLineDash([]);\n"
+            "        // arrowhead at the target, tangent to the curve (control point → end) — only when\n"
+            "        // zoomed in enough to read (same gate as labels). Size stays fixed rather than\n"
+            "        // tracking edgeWidth — the 0.75-4px range is narrow enough that a scaled triangle\n"
+            "        // risks overlapping into a blob on the thickest edges; fixed is the safer default\n"
+            "        // without a rendered visual to tune against.\n"
+            "        if (l.arrow && (!useCam || cam.k >= 1)) {\n"
+            "          const dx = l.t.x - cpx, dy = l.t.y - cpy;\n"
+            "          const d = Math.sqrt(dx * dx + dy * dy) || 1;\n"
+            "          const ux = dx / d, uy = dy / d, px = -uy, py = ux;\n"
+            "          const tip = l.t.r + 2, back = 7, spread = 4.2;\n"
+            "          const ax = l.t.x - ux * tip, ay = l.t.y - uy * tip;\n"
+            "          const bx = ax - ux * back, by = ay - uy * back;\n"
+            "          ctx.fillStyle = col;\n"
+            "          ctx.beginPath();\n"
+            "          ctx.moveTo(ax, ay);\n"
+            "          ctx.lineTo(bx + px * spread, by + py * spread);\n"
+            "          ctx.lineTo(bx - px * spread, by - py * spread);\n"
+            "          ctx.closePath(); ctx.fill();\n"
+            "        }\n"
+            "        if (l.label && (opts.forceLabels || !useCam || cam.k >= 1)) {  // map-prototype patch: edge label — collected here, drawn in the label-collision pass\n"
+            "          const mx = 0.25 * l.s.x + 0.5 * cpx + 0.25 * l.t.x, my = 0.25 * l.s.y + 0.5 * cpy + 0.25 * l.t.y;\n"
+            "          labelCandidates.push({\n"
+            "            text: l.label, x: mx, y: my,\n"
+            "            font: `${useCam ? 11 / cam.k : 11}px 'Spline Sans Mono', monospace`,\n"
+            "            color: col, alpha: hov ? (active ? 0.9 : 0.08) : 0.75,\n"
+            "            kind: 'edge', priority: l.weight || 1,\n"
+            "          });\n"
+            "        }\n"
+            "      }\n"
+            "      ctx.setLineDash([]);\n"
+            "      ctx.globalAlpha = 1;\n"
+            "\n"
+            "      ",
+        ),
+        (
+            # Node label — collected (A.1), not drawn inline; the block right after nodes.forEach
+            # closes (still inside draw()) does ONE priority-sorted pass over every candidate
+            # (nodes before edges; among nodes a collapsed `system` always wins, then a `bridge`,
+            # then bigger size — owner addenda 2026-08-27) with a halo (A.2), skipping on overlap.
+            "        if (showLabel) {\n"
+            "          const ls = (useCam ? 11 / cam.k : 11);\n"
+            "          ctx.globalAlpha = dim ? 0.18 : (mode === 'hero' && n !== hov ? 0.6 : 0.92);\n"
+            "          ctx.fillStyle = '#cfcfd6';\n"
+            "          ctx.font = `${n === hov ? '600 ' : ''}${ls}px 'Spline Sans Mono', monospace`;\n"
+            "          ctx.textAlign = 'center';\n"
+            "          ctx.fillText(n.label, n.x, n.y + r + ls + 2);\n"
+            "        }\n"
+            "        ctx.globalAlpha = 1;\n"
+            "      });\n"
+            "    }",
+            "        if (showLabel) {\n"
+            "          const ls = (useCam ? 12 / cam.k : 12);  // map-prototype patch: bigger node label (adendo 2026-08-27)\n"
+            "          labelCandidates.push({  // map-prototype patch: label collision — collect, draw after sort\n"
+            "            text: n.label, x: n.x, y: n.y + r + ls + 2,\n"
+            "            font: `${n === hov ? '600 ' : ''}${ls}px 'Spline Sans Mono', monospace`,\n"
+            "            color: '#cfcfd6', alpha: dim ? 0.18 : (mode === 'hero' && n !== hov ? 0.6 : 0.92),\n"
+            "            kind: 'node', priority: n.system ? 999 : (n.bridge ? 99 : (n.size || 1)),\n"
+            "          });\n"
+            "        }\n"
+            "        ctx.globalAlpha = 1;\n"
+            "      });\n"
+            "      {  // map-prototype patch: label collision — node>edge; among nodes: system>bridge>bigger size/weight; halo behind text; overlap = silently skipped (hover still works via pick())\n"
+            "        const placed = [];\n"
+            "        const items = labelCandidates.slice().sort((a, b) => {\n"
+            "          if (a.kind !== b.kind) return a.kind === 'node' ? -1 : 1;\n"
+            "          return b.priority - a.priority;\n"
+            "        });\n"
+            "        for (const c of items) {\n"
+            "          ctx.font = c.font;\n"
+            "          const w = ctx.measureText(c.text).width;\n"
+            "          const pad = 3, rx = c.x - w / 2 - pad, ry = c.y - 9 - pad, rw = w + pad * 2, rh = 14 + pad * 2;\n"
+            "          let hit = false;\n"
+            "          for (const p of placed) {\n"
+            "            if (rx < p.x + p.w && rx + rw > p.x && ry < p.y + p.h && ry + rh > p.y) { hit = true; break; }\n"
+            "          }\n"
+            "          if (hit) continue;\n"
+            "          placed.push({ x: rx, y: ry, w: rw, h: rh });\n"
+            "          ctx.globalAlpha = 1;\n"
+            "          ctx.fillStyle = 'rgba(11,11,15,0.78)';\n"
+            "          ctx.fillRect(rx, ry, rw, rh);\n"
+            "          ctx.globalAlpha = c.alpha;\n"
+            "          ctx.fillStyle = c.color;\n"
+            "          ctx.textAlign = 'center';\n"
+            "          ctx.fillText(c.text, c.x, c.y);\n"
+            "        }\n"
+            "        ctx.globalAlpha = 1;\n"
+            "      }\n"
+            "    }",
+        ),
+        (
+            "  function edgeWidth(w, wMin, wMax) {\n"
+            "    w = w || 1;\n"
+            "    if (!(wMax > wMin)) return (EDGE_PX_MIN + EDGE_PX_MAX) / 2;  // every edge same weight\n"
+            "    const t = (Math.sqrt(w) - Math.sqrt(wMin)) / (Math.sqrt(wMax) - Math.sqrt(wMin));\n"
+            "    return EDGE_PX_MIN + Math.max(0, Math.min(1, t)) * (EDGE_PX_MAX - EDGE_PX_MIN);\n"
+            "  }",
+            "  function edgeWidth(w, wMin, wMax) {\n"
+            "    w = w || 1;\n"
+            "    if (!(wMax > wMin)) return (EDGE_PX_MIN + EDGE_PX_MAX) / 2;  // every edge same weight\n"
+            "    const t = (Math.sqrt(w) - Math.sqrt(wMin)) / (Math.sqrt(wMax) - Math.sqrt(wMin));\n"
+            "    return EDGE_PX_MIN + Math.max(0, Math.min(1, t)) * (EDGE_PX_MAX - EDGE_PX_MIN);\n"
+            "  }\n"
+            "\n"
+            "  function convexHull(points) {  // map-prototype patch: system regions (C) — Andrew's monotone chain\n"
+            "    const pts = points.slice().sort((a, b) => a.x - b.x || a.y - b.y);\n"
+            "    if (pts.length < 3) return pts;\n"
+            "    const cross = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x);\n"
+            "    const lower = [];\n"
+            "    for (const p of pts) { while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop(); lower.push(p); }\n"
+            "    const upper = [];\n"
+            "    for (let i = pts.length - 1; i >= 0; i--) { const p = pts[i]; while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop(); upper.push(p); }\n"
+            "    lower.pop(); upper.pop();\n"
+            "    return lower.concat(upper);\n"
+            "  }",
         ),
     ]
     for old, new in patches:
@@ -1031,6 +1815,9 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
     # 8 — collapsible systems (community detection, two-level interactive)
     metrics["variants"]["8-sistemas-colapsavel"] = _render_variant8(out, states4, edges4, handovers4)
 
+    # 9 — same systems, expansion in place (multi-expand, chip to recolher)
+    metrics["variants"]["9-sistemas-expande-in-place"] = _render_variant9(out, states4, edges4, handovers4)
+
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,
         "states_inferred": agg.raw_states_inferred,
@@ -1071,7 +1858,7 @@ def _variant_metrics(gv: dict[str, Any], edges: list[dict[str, Any]] | None, par
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    ap = argparse.ArgumentParser(description="Render 8 actions/states map prototypes from a user bundle")
+    ap = argparse.ArgumentParser(description="Render 9 actions/states map prototypes from a user bundle")
     ap.add_argument("--bundle", type=Path, required=True)
     ap.add_argument("--out", type=Path, default=_DEFAULT_OUT)
     args = ap.parse_args()
