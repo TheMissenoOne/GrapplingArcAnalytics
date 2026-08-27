@@ -129,7 +129,25 @@ _FIG_HEX = {"a": "#4d86ff", "b": "#fc4c02"}
 # what's actually landed.
 _START_COLOR = "#34d399"  # teal — distinct from finish's yellow (_FINISH_COLOR)
 _START_ICON = "A"  # variant 7 only — "Âncora"; letters not emoji, see _TYPE_ICONS docstring
-_ANCHOR_Y_OF_ORIENTATION = {"top": -1.0, "neutral": 0.0, "bottom": 1.0}
+
+# Owner adendo 2026-08-27 (constructive render order, closes the 8/9 design): the 5 organisational
+# anchors (3 start orientations + 2 actor-qualified finishes) are "bolted in place" — pinned, never
+# simulated — and distributed UNIFORMLY around a circle instead of clustered on a single vertical +
+# horizontal axis (the old design put 3 starts on one line and both finishes on another, which reads
+# as two clumps, not 5 evenly-spaced landmarks). ``_anchor_slot`` gives each anchor a stable index
+# 0-4 into that circle; slot -> angle is a fixed regular pentagon, start-top first (straight up),
+# clockwise. Shared by every variant that renders a node (`_apply_anchor` is the single choke point).
+_ANCHOR_SLOT_COUNT = 5
+_ANCHOR_ANGLE_STEP_DEG = 360.0 / _ANCHOR_SLOT_COUNT
+
+
+def _anchor_slot(node_key: str, actor: str) -> int | None:
+    """Stable 0-4 slot for a bolted anchor, or ``None`` for an ordinary node."""
+    if node_key == _FINISH_KEY:
+        return 3 if actor == "you" else 4
+    if _is_start(node_key):
+        return {"top": 0, "neutral": 1, "bottom": 2}.get(orientation_of(node_key))
+    return None
 
 
 def _role_of(node_key: str) -> str | None:
@@ -188,21 +206,20 @@ def _apply_start_style(node: dict[str, Any], node_key: str, *, icon: bool = Fals
 
 
 def _apply_anchor(node: dict[str, Any], node_key: str, actor: str, radius: float) -> None:
-    """Owner addendum 2026-08-27: pin the organisational anchors to a fixed reference axis —
-    start nodes vertical (top/neutral/bottom, per the state's own curated ``orientation_of`` —
-    same field the side-panel ▲/▼ badge already reads), finish horizontal (you=right,
-    opponent=left) — so the rest of the graph organises itself between fixed landmarks instead
-    of reshuffling on every load/expand. World coordinates (not viewport) — stays coherent under
-    pan/zoom and with edge geometry; ``graph.js``'s copy-only ``n.pin`` patch (`_patch_graph_js`)
-    makes ``step()`` skip physics entirely for a pinned node, so once placed here it never
-    drifts. Called last (after style helpers) so ``x``/``y``/``pin`` always win over a random
-    seed."""
-    if _is_start(node_key):
-        y = _ANCHOR_Y_OF_ORIENTATION.get(orientation_of(node_key), 0.0)
-        node["x"], node["y"], node["pin"] = 0.0, y * radius, True
-    elif node_key == _FINISH_KEY:
-        node["x"] = radius if actor == "you" else -radius
-        node["y"], node["pin"] = 0.0, True
+    """Owner addendum 2026-08-27 (revised same day — "distribuídos uniformemente"/"bolted in
+    place"): the 5 organisational anchors sit at fixed, evenly-spaced points on a circle
+    (``_anchor_slot``), never simulated, so the rest of the graph organises itself around fixed
+    landmarks instead of reshuffling on every load/expand — and the landmarks themselves never
+    read as two clumps (the old vertical-start/horizontal-finish axis design). World coordinates
+    (not viewport) — stays coherent under pan/zoom and with edge geometry; ``graph.js``'s
+    copy-only ``n.pin`` patch (`_patch_graph_js`) makes ``step()`` skip physics entirely for a
+    pinned node, so once placed here it never drifts. Called last (after style helpers) so
+    ``x``/``y``/``pin`` always win over a random seed."""
+    slot = _anchor_slot(node_key, actor)
+    if slot is not None:
+        angle = math.radians(-90 + slot * _ANCHOR_ANGLE_STEP_DEG)
+        node["x"], node["y"] = radius * math.cos(angle), radius * math.sin(angle)
+        node["pin"] = True
 
 
 def _orient_badge(node_key: str) -> str:
@@ -464,6 +481,135 @@ def build_aggregate(bundle: dict[str, Any]) -> Aggregate:
                 for from_actor, from_key, to_actor, to_key in _handovers_in_group(group, compiled):
                     agg.add_handover(from_actor, from_key, to_actor, to_key)
     return agg
+
+
+# ── 1b. gating (owner adendo 2026-08-27) ────────────────────────────────────────
+#
+# "Se um grafo está conectado demais, pode ser porque ... ações e estados não estão devidamente
+# gateados" — before tuning a bridge threshold, measure whether density is an ARTEFACT of
+# generic/inferred connective tissue (scramble, top transition, ...) gluing every community
+# together. Two independent axes: minimum edge support (same knob as the App's
+# ``DEFAULT_MIN_EDGE_SUPPORT`` in ``userDecisionFlow.ts``, born of an identical hairball there)
+# and how much of the INFERRED (never-observed, D2 gap-filled) population survives.
+
+_GATE_MIN_SUPPORTS = (1, 2, 3)
+_GATE_POLICIES = ("all", "no_inferred_edges", "no_inferred", "inferred_min2")
+_GATE_POLICY_LABELS = {
+    "all": "tudo (sem gate de inferência)",
+    "no_inferred_edges": "sem edges inferidas",
+    "no_inferred": "sem edges nem estados inferidos (splice)",
+    "inferred_min2": "inferidos só com suporte ≥2",
+}
+
+# Chosen defaults for variants 8/9 — measured with `sweep_gates` against the owner's real bundle
+# (10 you-eligible nodes at the time of measurement; see the builder's report for the full 3x4
+# table). ``min_support=2`` (the App's own precedent) turned out too aggressive HERE — most edges
+# in this small/sparse bundle only have count 1-2, so it collapsed almost everything into
+# near-isolated bridges (measured: 1 system, 7 of 10 nodes as bridges). ``min_support=1`` is a
+# no-op on the support axis (every edge already has count>=1) — the density WAS the generic
+# single-occurrence inferred edges, not the low-but-real observed ones, so ``inferred_min2``
+# (drop inferred edges seen only once, keep ones that repeated) alone is what produced the
+# target shape: 2 systems (4 and 3 members, both >=3) + 3 bridges, vs. 1 system + 7 bridges
+# under the old ungated/undominance-tuned reading. The dominance threshold (above) is tuned
+# AFTER this gate, never before — a graph this cleaned up no longer saturates on "touches >=2
+# communities" the way the raw one did.
+_GATE_MIN_SUPPORT_DEFAULT = 1
+_GATE_POLICY_DEFAULT = "inferred_min2"
+
+
+def _splice_inferred_states(
+    states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]],
+) -> tuple[dict[tuple[str, str], dict[str, Any]], list[dict[str, Any]]]:
+    """Gate axis 2c: an INFERRED state with exactly one incoming and one outgoing action edge is
+    a structural gap-fill (D2), never an observed decision point — remove it and reconnect its
+    predecessor directly to its successor. The spliced edge's ``count`` is the MIN of the two
+    hops it replaces (can't exceed either hop's own support), ``inferred`` stays True (the splice
+    is itself never observed, even when both original hops happened to be). Repeats until no more
+    splices are possible, so a RUN of several inferred states collapses to zero. A state with any
+    other in/out shape (0, or >1 either side) can't be safely spliced without inventing a fan-out
+    — it stays, and downstream ``inferred``-state filtering still applies to it."""
+    states = dict(states)
+    edges = list(edges)
+    changed = True
+    while changed:
+        changed = False
+        incoming: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        outgoing: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        for e in edges:
+            outgoing.setdefault((e["source"], e["actor"]), []).append(e)
+            incoming.setdefault((e["target"], e["actor"]), []).append(e)
+        for key, v in states.items():
+            node_key, actor = key
+            if not v["inferred"]:
+                continue
+            ins, outs = incoming.get(key, []), outgoing.get(key, [])
+            if len(ins) != 1 or len(outs) != 1 or ins[0] is outs[0]:
+                continue
+            in_e, out_e = ins[0], outs[0]
+            spliced = {
+                "source": in_e["source"], "target": out_e["target"],
+                "action_key": f"{in_e['action_key']}>{out_e['action_key']}",
+                "action_label": f"{in_e['action_label']} → {out_e['action_label']}",
+                "action_type": out_e["action_type"], "actor": actor,
+                "count": min(in_e["count"], out_e["count"]), "inferred": True,
+            }
+            edges = [e for e in edges if e is not in_e and e is not out_e]
+            edges.append(spliced)
+            del states[key]
+            changed = True
+            break  # in/out maps are now stale — rebuild before the next candidate
+    return states, edges
+
+
+def _apply_gate(
+    states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]],
+    handovers: list[dict[str, Any]], *, min_support: int, inference_policy: str,
+) -> tuple[dict[tuple[str, str], dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Both gating axes, composed. ``inference_policy`` — see ``_GATE_POLICY_LABELS``."""
+    edges = list(edges)
+    if inference_policy == "no_inferred_edges":
+        edges = [e for e in edges if not e["inferred"]]
+    elif inference_policy == "no_inferred":
+        states, edges = _splice_inferred_states(states, edges)
+        edges = [e for e in edges if not e["inferred"]]
+        states = {k: v for k, v in states.items() if not v["inferred"]}
+    elif inference_policy == "inferred_min2":
+        edges = [e for e in edges if not e["inferred"] or e["count"] >= 2]
+    edges = [e for e in edges if e["count"] >= min_support]
+    handovers = [h for h in handovers if h["count"] >= min_support]
+    kept_qids = {_qid(v["actor"], node_key) for (node_key, _actor), v in states.items()}
+    edges = [e for e in edges
+             if _qid(e["actor"], e["source"]) in kept_qids and _qid(e["actor"], e["target"]) in kept_qids]
+    handovers = [h for h in handovers if h["from"] in kept_qids and h["to"] in kept_qids]
+    return states, edges, handovers
+
+
+def sweep_gates(
+    states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]],
+    handovers: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Diagnostic sweep over both gating axes × the SAME dominance-based system detection —
+    lets the owner see whether the ungated graph's "everything touches >=2 communities" reading
+    was a real property of the data or an artefact of generic/inferred connective tissue. One row
+    per (min_support, policy) combination. Feeds both the CLI report and
+    ``10-gating-comparado.html``."""
+    rows = []
+    for min_support in _GATE_MIN_SUPPORTS:
+        for policy in _GATE_POLICIES:
+            g_states, g_edges, g_handovers = _apply_gate(
+                states, edges, handovers, min_support=min_support, inference_policy=policy)
+            detected = _detect_systems(g_states, g_edges, g_handovers)
+            n_nodes = sum(1 for k in g_states if _system_eligible(k[0], k[1]))
+            n_edges = sum(1 for e in g_edges if e["actor"] == "you")
+            sizes = sorted((len(s["members"]) for s in detected["systems"]), reverse=True)
+            rows.append({
+                "min_support": min_support, "policy": policy,
+                "nodes": n_nodes, "edges": n_edges,
+                "edges_per_node": round(n_edges / n_nodes, 2) if n_nodes else 0.0,
+                "systems": len(detected["systems"]), "system_sizes": sizes,
+                "bridges": len(detected["bridge_qids"]),
+            })
+    return rows
 
 
 # ── 2. variant node/link builders ───────────────────────────────────────────────
@@ -750,22 +896,90 @@ def _system_eligible(node_key: str, actor: str) -> bool:
     return True
 
 
+# Owner adendo 2026-08-27 (item 1, reframed by the density adendo): the old "neighbours touch
+# >=2 communities" bridge rule saturates on a small/dense graph — nearly every node's neighbours
+# span 2 communities, so nearly every node became a memberless bridge. Replaced by DOMINANCE: a
+# node belongs to whichever community holds the LARGEST share of its incident edge weight; it's
+# only a bridge when no community holds a clear majority. Measured against the real bundle AFTER
+# the gate above (`_GATE_MIN_SUPPORT_DEFAULT`/`_GATE_POLICY_DEFAULT`) removes the generic/inferred
+# connective tissue that was gluing everything together — the threshold below is what's left to
+# tune once density is no longer an artefact. See the module docstring's gating table.
+_DOMINANCE_THRESHOLD = 0.5
+
+
+def _weighted_incidence(g: nx.Graph, comm_of: dict[str, int]) -> dict[str, dict[int, int]]:
+    """qid -> {community_idx: incident_weight}, off the graph's OWN edges and the community
+    assignment passed in (a single static pass, same convention the old span-based bridge check
+    used) — never recomputed against a mid-reassignment state."""
+    dist: dict[str, dict[int, int]] = {}
+    for u, v, data in g.edges(data=True):
+        w = data.get("weight", 1)
+        dist.setdefault(u, {}).setdefault(comm_of[v], 0)
+        dist[u][comm_of[v]] += w
+        dist.setdefault(v, {}).setdefault(comm_of[u], 0)
+        dist[v][comm_of[u]] += w
+    return dist
+
+
+def _dominant_pick(dist: dict[int, int], alive: set[int]) -> tuple[int | None, float]:
+    """argmax community among ALIVE candidates + its fraction of the node's TOTAL incident
+    weight (every neighbour, alive or not — weight that only ever pointed at an already-dissolved
+    community has nothing left to dominate, so it reads as unclear, i.e. a bridge, rather than a
+    false member of whatever else survives). Tie-break: smallest community id."""
+    total = sum(dist.values())
+    if not total:
+        return None, 0.0
+    alive_dist = {c: w for c, w in dist.items() if c in alive}
+    if not alive_dist:
+        return None, 0.0
+    best_comm, best_w = max(sorted(alive_dist.items()), key=lambda kv: kv[1])
+    return best_comm, best_w / total
+
+
+def _resolve_systems(g: nx.Graph, comm_of: dict[str, int]) -> dict[str, int | None]:
+    """qid -> its dominant community id, or ``None`` (bridge). First pass: dominance over the
+    ORIGINAL greedy-modularity communities. Then a bounded fixed point dissolves any community
+    left with < 2 members — "a system of 1 isn't a system" — re-picking each of its lone members
+    among the communities still standing (or making it a bridge, if nothing dominant survives).
+    Every iteration strictly shrinks the alive set, so this always terminates."""
+    dist = _weighted_incidence(g, comm_of)
+    alive = set(comm_of.values())
+
+    def _assign_all() -> dict[str, int | None]:
+        out: dict[str, int | None] = {}
+        for qid in g.nodes:
+            best, frac = _dominant_pick(dist.get(qid, {}), alive)
+            touched = len(dist.get(qid, {}))
+            out[qid] = None if best is None or (frac < _DOMINANCE_THRESHOLD and touched >= 2) else best
+        return out
+
+    assign = _assign_all()
+    for _ in range(len(g.nodes) + 1):
+        sizes: dict[int, int] = {}
+        for c in assign.values():
+            if c is not None:
+                sizes[c] = sizes.get(c, 0) + 1
+        weak = {c for c, n in sizes.items() if n < 2}
+        if not weak:
+            break
+        alive -= weak
+        assign = _assign_all()
+    return assign
+
+
 def _detect_systems(states: dict, edges: list[dict[str, Any]],
                      handovers: list[dict[str, Any]]) -> dict[str, Any]:
-    """Greedy-modularity communities over the ELIGIBLE subset (``_system_eligible`` — you-only,
-    never finish/start) of variant 4's selective two-sided graph — "systems". Determinism
-    (cicatriz #10, same convention as ``analysis.network_metrics.detect_communities``):
-    nodes/edges added to the ``networkx`` graph in SORTED order, every tie (hub pick, community
-    ordering) breaks on a stable sort key, never dict/set iteration order.
+    """Greedy-modularity communities (as a starting partition only) over the ELIGIBLE subset
+    (``_system_eligible`` — you-only, never finish/start) of the (already gated, by the caller)
+    two-sided graph, then reassigned by DOMINANCE (``_resolve_systems``) into final "systems" —
+    a node belongs to whichever community holds most of its incident weight; a bridge is one
+    where nothing does. Determinism (cicatriz #10, same convention as
+    ``analysis.network_metrics.detect_communities``): nodes/edges added in SORTED order, every
+    tie (hub pick, community ordering) breaks on a stable sort key, never dict/set order.
 
-    **Bridges (C, owner whiteboard 2026-08-27 — corrects the earlier "aggregate system-to-
-    system edge" design):** after community detection, any node whose NEIGHBOURS (in this same
-    graph) span >=2 different communities is a boundary/cut vertex — pulled OUT of its
-    community into a separate, memberless "first-class" bucket (``bridge_qids``). Computed off
-    ONE static pass over the original community assignment (not iteratively), so the two ends
-    of a single cross-community edge are judged independently — both may end up bridges, or
-    just one, depending on their OTHER neighbours. The caller renders bridges individually
-    (never collapsed, never inside a region) — see ``_render_variant8``/``_render_variant9``."""
+    ``bridge_strength`` (owner adendo 2026-08-27, "só as mais fortes"): each bridge's own total
+    incident weight — the caller ranks/truncates the DISPLAYED bridge set from this without
+    recomputing anything; the full set (``bridge_qids``) always stays the honest backend truth."""
     eligible = {k: v for k, v in states.items() if _system_eligible(k[0], k[1])}
     qid_of = {key: _qid(key[1], key[0]) for key in eligible}
     g: nx.Graph = nx.Graph()
@@ -799,30 +1013,58 @@ def _detect_systems(states: dict, edges: list[dict[str, Any]],
         for qid in members:
             comm_of[qid] = idx
 
-    bridge_qids: set[str] = set()
-    for qid in g.nodes:
-        neighbour_comms = {comm_of[n] for n in g.neighbors(qid) if n in comm_of}
-        if len(neighbour_comms) >= 2:
-            bridge_qids.add(qid)
+    assign = _resolve_systems(g, comm_of)
+    dist = _weighted_incidence(g, comm_of)
+    bridge_qids = {qid for qid, c in assign.items() if c is None}
+    bridge_strength = {qid: sum(dist.get(qid, {}).values()) for qid in bridge_qids}
+
+    groups: dict[int, list[str]] = {}
+    for qid, c in assign.items():
+        if c is not None:
+            groups.setdefault(c, []).append(qid)
+    group_list = sorted((sorted(members) for members in groups.values()),
+                         key=lambda ms: (-len(ms), ms[0]))
 
     node_of = {qid_of[key]: (key, v) for key, v in eligible.items()}
     systems: list[dict[str, Any]] = []
     system_of: dict[str, str] = {}
-    for idx, members in enumerate(comms):
-        real_members = [qid for qid in members if qid not in bridge_qids]
-        if not real_members:
-            continue
-        hub_qid = min(real_members, key=lambda qid: (-g.degree(qid), qid))  # max degree, tie by id
+    for idx, members in enumerate(group_list):
+        hub_qid = min(members, key=lambda qid: (-g.degree(qid), qid))  # max degree, tie by id
         hub_key, hub_v = node_of[hub_qid]
         sys_id = f"sys:{idx}"
-        for qid in real_members:
+        for qid in members:
             system_of[qid] = sys_id
         systems.append({
             "id": sys_id, "hub_qid": hub_qid, "hub_key": hub_key[0],
-            "label": f"Sistema: {hub_v['label']}", "members": real_members,
-            "actor": "you", "size": _clamp3(len(real_members)),
+            "label": f"Sistema: {hub_v['label']}", "members": members,
+            "actor": "you", "size": _clamp3(len(members)),
         })
-    return {"systems": systems, "system_of": system_of, "bridge_qids": sorted(bridge_qids)}
+    return {"systems": systems, "system_of": system_of, "bridge_qids": sorted(bridge_qids),
+            "bridge_strength": bridge_strength}
+
+
+_BRIDGE_DISPLAY_TOP_N = 4  # owner adendo: show only the STRONGEST bridges; easy knob to retune
+
+
+def _select_displayed_bridges(bridge_strength: dict[str, int], top_n: int = _BRIDGE_DISPLAY_TOP_N
+                               ) -> frozenset[str]:
+    """Top-N bridges by incident weight (tie-break: qid) — the ones the VIEW shows. Every other
+    bridge stays in the honest backend count (``bridge_qids``) but never reaches a rendered node,
+    same convention variant 4 already uses to drop low-usage opponent elements."""
+    ranked = sorted(bridge_strength.items(), key=lambda kv: (-kv[1], kv[0]))
+    return frozenset(qid for qid, _w in ranked[:top_n])
+
+
+def _excluded_render_rank(node_key: str, is_bridge: bool) -> int:
+    """Constructive render order (owner adendo): systems first (handled by the caller placing
+    system nodes before this bucket), then the bolted ANCHORS (start/finish — the skeleton's
+    fixed landmarks), then the strongest BRIDGES (already display-filtered upstream), then
+    everyone else (opponent elements)."""
+    if node_key == _FINISH_KEY or _is_start(node_key):
+        return 0
+    if is_bridge:
+        return 1
+    return 2
 
 
 def _cross_system_links(system_of: dict[str, str], edges: list[dict[str, Any]],
@@ -931,10 +1173,18 @@ def _system_node(s: dict[str, Any]) -> dict[str, Any]:
 def _systems_level1_view(systems: list[dict[str, Any]], excluded: dict,
                           cross_links: list[dict[str, Any]], bridge_qids: frozenset[str],
                           radius: float) -> dict[str, Any]:
+    """Constructive order (owner adendo): systems (the skeleton) first, then ``excluded`` ranked
+    anchors-before-bridges-before-opponent (``_excluded_render_rank``) — ``bridge_qids`` here is
+    already the DISPLAY-filtered set (top-N by strength), so every bridge reaching this function
+    renders; the caller drops the rest from ``excluded`` before calling."""
     nodes = [_system_node(s) for s in systems]
     nodes += [
         _style_single_node(k[0], k[1], v, radius=radius, is_bridge=_qid(k[1], k[0]) in bridge_qids)
-        for k, v in sorted(excluded.items(), key=lambda kv: _qid(kv[0][1], kv[0][0]))
+        for k, v in sorted(
+            excluded.items(),
+            key=lambda kv: (_excluded_render_rank(kv[0][0], _qid(kv[0][1], kv[0][0]) in bridge_qids),
+                             _qid(kv[0][1], kv[0][0])),
+        )
     ]
     return {"nodes": nodes, "links": cross_links}
 
@@ -1106,20 +1356,18 @@ h1{font-size:15px;margin:0 0 4px}.muted{color:var(--ink2);font-size:12px;margin-
 .row{padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:5px;font-size:12px}
 .g{opacity:.45;border-style:dashed}
 .legend{font-size:11px;color:var(--ink2);margin:10px 0;line-height:1.6}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
-.chip{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;font:11px system-ui}
-.chip:hover{border-color:#4d86ff}
+.sechead{font-size:11px;color:var(--ink2);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.04em}
+.sysrow{cursor:pointer}.sysrow:hover{border-color:#4d86ff}
 </style></head><body>
 <div id="canvas"><canvas id="cv"></canvas></div>
 <div id="side">
 <h1>9 — Systems, expand in place</h1>
 <div class="muted" id="sideSubtitle"></div>
 <div class="legend">__LEGEND__</div>
-<div class="chips" id="chips"></div>
 <div id="list"></div></div>
 <script src="graph.js"></script>
 <script>
-const SYSTEMS = __SYSTEMS_JSON__;   // [{kind:'system',id,label,size,fighter} | {kind:'solo',node}]
+const SYSTEMS = __SYSTEMS_JSON__;   // [{kind:'system',id,label,size,fighter} | {kind:'solo',node:{...,bridge?,bridgeConnects?}}]
 const MEMBERS = __MEMBERS_JSON__;   // {sysId: {nodes, links, members, listHtml, subtitle}}
 const CROSS = __CROSS_JSON__;       // [{from, to, count, dashed, fromSys, toSys}] — real qids (place_of)
 const expanded = new Set();
@@ -1178,22 +1426,49 @@ function computeView(justExpandedId) {
 }
 function rebuild(justExpandedId) {
   const gv = computeView(justExpandedId);
-  const chips = document.getElementById('chips');
-  chips.innerHTML = '';
-  for (const id of expanded) {
-    const sys = SYSTEMS.find(function (s) { return s.kind === 'system' && s.id === id; });
-    const chip = document.createElement('span');
-    chip.className = 'chip';
-    chip.textContent = '▣ ' + (sys ? sys.node.label : id) + ' — recolher';
-    chip.onclick = function () { expanded.delete(id); rebuild(); };
-    chips.appendChild(chip);
+  const list = document.getElementById('list');
+  list.innerHTML = '';
+  const systemRows = SYSTEMS.filter(function (s) { return s.kind === 'system'; });
+  const bridgeRows = SYSTEMS.filter(function (s) { return s.kind === 'solo' && s.node.bridge; });
+
+  const sysHead = document.createElement('div');
+  sysHead.className = 'sechead';
+  sysHead.textContent = 'Sistemas (' + systemRows.length + ')';
+  list.appendChild(sysHead);
+  for (const s of systemRows) {
+    const isOpen = expanded.has(s.id);
+    const row = document.createElement('div');
+    row.className = 'row sysrow';
+    row.innerHTML = (isOpen ? '▣ ' : '▢ ') + s.node.label +
+      ' <span class="muted">(' + (isOpen ? 'expandido — clique p/ recolher' : 'clique p/ expandir') + ')</span>';
+    row.onclick = function () {
+      if (expanded.has(s.id)) { expanded.delete(s.id); rebuild(); }
+      else { expanded.add(s.id); rebuild(s.id); }
+    };
+    list.appendChild(row);
+    if (isOpen && MEMBERS[s.id] && MEMBERS[s.id].listHtml) {
+      const sub = document.createElement('div');
+      sub.style.marginLeft = '10px';
+      sub.innerHTML = MEMBERS[s.id].listHtml;
+      list.appendChild(sub);
+    }
   }
-  let listHtml = '';
-  for (const id of expanded) listHtml += (MEMBERS[id] && MEMBERS[id].listHtml) || '';
-  document.getElementById('list').innerHTML = listHtml;
+
+  const bridgeHead = document.createElement('div');
+  bridgeHead.className = 'sechead';
+  bridgeHead.textContent = 'Pontes (' + bridgeRows.length + ')';
+  list.appendChild(bridgeHead);
+  for (const s of bridgeRows) {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const conn = (s.node.bridgeConnects || []).join(', ') || '—';
+    row.innerHTML = s.node.label + ' <span class="muted">↔ ' + conn + '</span>';
+    list.appendChild(row);
+  }
+
   document.getElementById('sideSubtitle').textContent = expanded.size
-    ? (expanded.size + ' sistema(s) expandido(s) de ' + SYSTEMS.filter(function (s) { return s.kind === 'system'; }).length)
-    : (SYSTEMS.filter(function (s) { return s.kind === 'system'; }).length + ' sistemas, todos recolhidos');
+    ? (expanded.size + ' sistema(s) expandido(s) de ' + systemRows.length)
+    : (systemRows.length + ' sistemas, todos recolhidos');
   if (mounted) {
     if (mounted.positions) lastPositions = Object.assign({}, lastPositions, mounted.positions());
     if (mounted.destroy) mounted.destroy();
@@ -1211,6 +1486,64 @@ function rebuild(justExpandedId) {
   });
 }
 rebuild();
+</script></body></html>"""
+
+# Variant 10 (owner adendo, density-gate experiment) — the SAME collapsed systems-level view as
+# variant 8's global level, side by side across the 4 inference policies at the chosen
+# min_support — lets the owner SEE the gate's effect instead of trusting a number in a report.
+# Button toggle, not tabs/iframes: cheapest thing that lets one canvas swap between precomputed
+# levels, same pattern as `_PAGE8`'s own `show()`.
+_PAGE10 = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>
+:root{--bg:#0b0b0f;--panel:#14141a;--line:#26262e;--ink:#e9e9ee;--ink2:#9a9aa6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:flex;height:100vh}
+#canvas{flex:1;position:relative}#canvas canvas{width:100%;height:100%;display:block}
+#side{width:360px;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:16px}
+h1{font-size:15px;margin:0 0 4px}.muted{color:var(--ink2);font-size:12px;margin-bottom:10px}
+.row{padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:5px;font-size:12px}
+.legend{font-size:11px;color:var(--ink2);margin:10px 0;line-height:1.6}
+.btns{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.btn{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;font:12px system-ui;text-align:left}
+.btn.active{border-color:#4d86ff;background:#1a1f2e}
+</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1>__TITLE__</h1>
+<div class="legend">__LEGEND__</div>
+<div class="btns" id="btns"></div>
+<div id="list"></div></div>
+<script src="graph.js"></script>
+<script>
+const LEVELS = __LEVELS_JSON__;      // {policyKey: {title, subtitle, gv, charge, linkDist, gravity}}
+const POLICIES = __POLICIES_JSON__;  // [{key, label}] in a fixed, documented order
+let mounted = null;
+function show(key) {
+  const data = LEVELS[key];
+  document.getElementById('list').innerHTML =
+    '<div class="row"><b>' + data.title + '</b><br/><span class="muted">' + data.subtitle + '</span></div>';
+  const btns = document.getElementById('btns');
+  for (const b of btns.children) b.className = 'btn' + (b.dataset.key === key ? ' active' : '');
+  if (mounted && mounted.destroy) mounted.destroy();
+  const old = document.getElementById('cv');
+  const cv = old.cloneNode(false);
+  old.parentNode.replaceChild(cv, old);
+  mounted = GAGraph.mount(cv, {
+    mode: 'map', nodes: data.gv.nodes, links: data.gv.links, pan: true, zoom: true, collide: true,
+    bounded: false, charge: data.charge, linkDist: data.linkDist, gravity: data.gravity,
+    forceLabels: data.gv.nodes.length < 40,
+  });
+}
+const btns = document.getElementById('btns');
+for (const p of POLICIES) {
+  const b = document.createElement('button');
+  b.className = 'btn';
+  b.dataset.key = p.key;
+  b.textContent = p.label;
+  b.onclick = function () { show(p.key); };
+  btns.appendChild(b);
+}
+show(POLICIES[0].key);
 </script></body></html>"""
 
 
@@ -1244,15 +1577,36 @@ def _write_page(out: Path, filename: str, title: str, subtitle: str, legend: str
     return knobs
 
 
+def _gated_systems(states4: dict, edges4: list[dict[str, Any]], handovers4: list[dict[str, Any]]
+                    ) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]], dict[str, Any],
+                               frozenset[str], dict]:
+    """Shared by variants 8/9: gate (owner adendo, `_GATE_MIN_SUPPORT_DEFAULT`/
+    `_GATE_POLICY_DEFAULT`) THEN detect systems on the cleaned graph THEN truncate the bridge
+    set to the ones the VIEW shows (top-N by strength) — dominance runs on the gated graph, the
+    display cut runs on top of dominance's honest answer, never instead of it. Returns
+    ``(g_states, g_edges, g_handovers, detected, displayed_bridge_qids, excluded)`` where
+    ``excluded`` already has the non-displayed bridges removed."""
+    g_states, g_edges, g_handovers = _apply_gate(
+        states4, edges4, handovers4,
+        min_support=_GATE_MIN_SUPPORT_DEFAULT, inference_policy=_GATE_POLICY_DEFAULT)
+    detected = _detect_systems(g_states, g_edges, g_handovers)
+    all_bridges = frozenset(detected["bridge_qids"])
+    displayed = _select_displayed_bridges(detected["bridge_strength"])
+    hidden = all_bridges - displayed
+    excluded = _excluded_states(g_states, detected["system_of"])
+    excluded = {k: v for k, v in excluded.items() if _qid(k[1], k[0]) not in hidden}
+    return g_states, g_edges, g_handovers, detected, displayed, excluded
+
+
 def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
                       handovers4: list[dict[str, Any]]) -> dict[str, Any]:
-    detected = _detect_systems(states4, edges4, handovers4)
+    g_states, g_edges, g_handovers, detected, bridge_qids, excluded = _gated_systems(
+        states4, edges4, handovers4)
     systems, system_of = detected["systems"], detected["system_of"]
-    bridge_qids = frozenset(detected["bridge_qids"])
-    excluded = _excluded_states(states4, system_of)
+    all_bridges = len(detected["bridge_qids"])
     place_of = _place_of(system_of, excluded)
-    cross_links = _cross_system_links(place_of, edges4, handovers4)
-    radius = _anchor_radius(len(states4))
+    cross_links = _cross_system_links(place_of, g_edges, g_handovers)
+    radius = _anchor_radius(len(g_states))
     level1_gv = _systems_level1_view(systems, excluded, cross_links, bridge_qids, radius)
     level1_knobs = _mount_knobs(len(level1_gv["nodes"]))
     level1_list = "".join(
@@ -1261,13 +1615,14 @@ def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
         for s in systems
     )
     level1 = {"title": "8 — Systems map (global)",
-              "subtitle": f"{len(systems)} systems, {len(bridge_qids)} bridges — greedy-modularity "
-                          "over variant 4's selective two-sided graph",
+              "subtitle": f"{len(systems)} systems, {len(bridge_qids)}/{all_bridges} bridges shown — "
+                          f"dominance over the gated graph (min_support={_GATE_MIN_SUPPORT_DEFAULT}, "
+                          f"{_GATE_POLICY_LABELS[_GATE_POLICY_DEFAULT]})",
               "listHtml": level1_list, "gv": level1_gv, "regions": [], **level1_knobs}
 
     level2: dict[str, Any] = {}
     for s in systems:
-        gv2, internal_edges, regions2 = _system_level2(s, states4, edges4, handovers4, excluded,
+        gv2, internal_edges, regions2 = _system_level2(s, g_states, g_edges, g_handovers, excluded,
                                                          bridge_qids, radius)
         id_to_label = {n["id"]: n["label"] for n in gv2["nodes"]}
         list2 = _edge_list_html(internal_edges, id_to_label)
@@ -1283,10 +1638,10 @@ def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
         _PAGE8.replace("__TITLE__", "8 — Collapsible systems")
         .replace(
             "__LEGEND__",
-            "click a system node to drill in; grey nodes are BRIDGES (touch >=2 systems — member "
-            "of none) or the opponent/finish/start anchors, never collapsed. Inside a system: same "
-            "convention as variant 4 (blue=you, orange=opponent), the dashed region outline marks "
-            "this system's own members.",
+            "click a system node to drill in; grey nodes are the STRONGEST BRIDGES (dominance found "
+            "more, only the top few show — see subtitle) or the opponent/finish/start anchors, never "
+            "collapsed. Inside a system: same convention as variant 4 (blue=you, orange=opponent), "
+            "the dashed region outline marks this system's own members.",
         )
         .replace("__LEVEL1_JSON__", json.dumps(level1, ensure_ascii=False))
         .replace("__LEVEL2_JSON__", json.dumps(level2, ensure_ascii=False))
@@ -1301,7 +1656,8 @@ def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
         "partner_elements": sum(1 for k in excluded if k[1] == "partner"),
         "handover_links": sum(1 for link in cross_links if link.get("dashed")),
         "systems": len(systems),
-        "bridges": len(bridge_qids),
+        "bridges": all_bridges,
+        "bridges_shown": len(bridge_qids),
         "knobs": level1_knobs,
     }
 
@@ -1320,26 +1676,44 @@ def _render_variant9(out: Path, states4: dict, edges4: list[dict[str, Any]],
     position (`positions()`/``n.pin`` — C.2, no more "explodes on every click"). Metrics mirror
     variant 8's shape (same fields, computed over the fully-collapsed default view, for a
     stable/deterministic number)."""
-    detected = _detect_systems(states4, edges4, handovers4)
+    g_states, g_edges, g_handovers, detected, bridge_qids, excluded = _gated_systems(
+        states4, edges4, handovers4)
     systems, system_of = detected["systems"], detected["system_of"]
-    bridge_qids = frozenset(detected["bridge_qids"])
-    excluded = _excluded_states(states4, system_of)
+    all_bridges = len(detected["bridge_qids"])
     place_of = _place_of(system_of, excluded)
-    cross_links = _cross_system_links(place_of, edges4, handovers4)  # metrics parity w/ variant 8
-    radius = _anchor_radius(len(states4))
+    cross_links = _cross_system_links(place_of, g_edges, g_handovers)  # metrics parity w/ variant 8
+    radius = _anchor_radius(len(g_states))
     level1_gv = _systems_level1_view(systems, excluded, cross_links, bridge_qids, radius)
     level1_knobs = _mount_knobs(len(level1_gv["nodes"]))
 
+    # Owner adendo (side panel, item 3): each DISPLAYED bridge's own connected systems, so the
+    # panel can say "with which systems it connects" — derived from the same system-granularity
+    # cross_links used for metrics, never recomputed.
+    sys_label_of = {s["id"]: s["label"] for s in systems}
+    bridge_connects: dict[str, list[str]] = {}
+    for c in cross_links:
+        u, v = c["from"], c["to"]
+        if u in bridge_qids and v in sys_label_of:
+            bridge_connects.setdefault(u, []).append(sys_label_of[v])
+        if v in bridge_qids and u in sys_label_of:
+            bridge_connects.setdefault(v, []).append(sys_label_of[u])
+    bridge_connects = {qid: sorted(set(labels)) for qid, labels in bridge_connects.items()}
+
     sys_payload = [{"kind": "system", "id": s["id"], "node": _system_node(s)} for s in systems]
-    sys_payload += [
-        {"kind": "solo", "node": _style_single_node(
-            k[0], k[1], v, radius=radius, is_bridge=_qid(k[1], k[0]) in bridge_qids)}
-        for k, v in sorted(excluded.items(), key=lambda kv: _qid(kv[0][1], kv[0][0]))
-    ]
+    for k, v in sorted(
+        excluded.items(),
+        key=lambda kv: (_excluded_render_rank(kv[0][0], _qid(kv[0][1], kv[0][0]) in bridge_qids),
+                         _qid(kv[0][1], kv[0][0])),
+    ):
+        qid = _qid(k[1], k[0])
+        node = _style_single_node(k[0], k[1], v, radius=radius, is_bridge=qid in bridge_qids)
+        if qid in bridge_qids:
+            node["bridgeConnects"] = bridge_connects.get(qid, [])
+        sys_payload.append({"kind": "solo", "node": node})
 
     members: dict[str, Any] = {}
     for s in systems:
-        sub_states, internal_edges, internal_handovers = _system_members(s, states4, edges4, handovers4)
+        sub_states, internal_edges, internal_handovers = _system_members(s, g_states, g_edges, g_handovers)
         gv = _two_sided_graphview(sub_states, internal_edges, internal_handovers)
         id_to_label = {n["id"]: n["label"] for n in gv["nodes"]}
         members[s["id"]] = {
@@ -1348,17 +1722,18 @@ def _render_variant9(out: Path, states4: dict, edges4: list[dict[str, Any]],
             "subtitle": f"{len(s['members'])} nos, {s['actor']}-dominant",
         }
 
-    cross = _cross_member_links(place_of, edges4, handovers4)
+    cross = _cross_member_links(place_of, g_edges, g_handovers)
 
     html = (
         _PAGE9.replace("__TITLE__", "9 — Systems, expand in place")
         .replace(
             "__LEGEND__",
             "click a system node to expand it in place — its real nodes/edges replace it while "
-            "every other system stays collapsed (multiple can be open at once); grey nodes are "
-            "BRIDGES (touch >=2 systems, member of none) or the opponent/finish/start anchors — "
-            "always visible, never collapsed. Everything not just-expanded stays pinned in place "
-            "(no reshuffle on click). Recolher: use the chip below, per expanded system.",
+            "every other system stays collapsed (multiple can be open at once); grey nodes are the "
+            "STRONGEST BRIDGES (only the top few of what dominance found — see the side panel) or "
+            "the opponent/finish/start anchors — always visible, never collapsed. Everything not "
+            "just-expanded stays pinned in place (no reshuffle on click). Click a system row in the "
+            "list, or its node, to expand/recolher — same control either way.",
         )
         .replace("__SYSTEMS_JSON__", json.dumps(sys_payload, ensure_ascii=False))
         .replace("__MEMBERS_JSON__", json.dumps(members, ensure_ascii=False))
@@ -1374,9 +1749,59 @@ def _render_variant9(out: Path, states4: dict, edges4: list[dict[str, Any]],
         "partner_elements": sum(1 for k in excluded if k[1] == "partner"),
         "handover_links": sum(1 for link in cross_links if link.get("dashed")),
         "systems": len(systems),
-        "bridges": len(bridge_qids),
+        "bridges": all_bridges,
+        "bridges_shown": len(bridge_qids),
         "knobs": level1_knobs,
     }
+
+
+def _render_variant10(out: Path, states4: dict, edges4: list[dict[str, Any]],
+                       handovers4: list[dict[str, Any]]) -> dict[str, Any]:
+    """Owner adendo — the density-gate EXPERIMENT made visible: the collapsed systems-level view
+    (same shape as variant 8's global level), rendered once per inference policy at the chosen
+    ``_GATE_MIN_SUPPORT_DEFAULT``, switchable by button. Returns one metrics row per policy
+    (nodes/edges/systems/bridges) — the same numbers `sweep_gates` reports for this min_support,
+    kept in the artifact so the choice stays checkable without re-running the sweep."""
+    radius = _anchor_radius(len(states4))
+    levels: dict[str, Any] = {}
+    row_metrics: dict[str, Any] = {}
+    for policy in _GATE_POLICIES:
+        g_states, g_edges, g_handovers = _apply_gate(
+            states4, edges4, handovers4,
+            min_support=_GATE_MIN_SUPPORT_DEFAULT, inference_policy=policy)
+        detected = _detect_systems(g_states, g_edges, g_handovers)
+        systems, system_of = detected["systems"], detected["system_of"]
+        bridge_qids = frozenset(detected["bridge_qids"])
+        excluded = _excluded_states(g_states, system_of)
+        place_of = _place_of(system_of, excluded)
+        cross_links = _cross_system_links(place_of, g_edges, g_handovers)
+        gv = _systems_level1_view(systems, excluded, cross_links, bridge_qids, radius)
+        knobs = _mount_knobs(len(gv["nodes"]))
+        sizes = sorted((len(s["members"]) for s in systems), reverse=True)
+        levels[policy] = {
+            "title": f"min_support={_GATE_MIN_SUPPORT_DEFAULT} · {_GATE_POLICY_LABELS[policy]}",
+            "subtitle": f"{len(systems)} sistemas {sizes}, {len(bridge_qids)} pontes, "
+                        f"{len(g_edges)} edges de ação sobreviventes",
+            "gv": gv, **knobs,
+        }
+        row_metrics[policy] = {"nodes": len(gv["nodes"]), "edges": len(gv["links"]),
+                                "systems": len(systems), "system_sizes": sizes,
+                                "bridges": len(bridge_qids)}
+
+    html = (
+        _PAGE10.replace("__TITLE__", "10 — Gating comparado")
+        .replace(
+            "__LEGEND__",
+            f"mesmo min_support ({_GATE_MIN_SUPPORT_DEFAULT}, precedente: App's "
+            "DEFAULT_MIN_EDGE_SUPPORT) nos 4 botões — só a política de inferência muda. Escolha "
+            f"padrão de 8/9: {_GATE_POLICY_LABELS[_GATE_POLICY_DEFAULT]!r}.",
+        )
+        .replace("__LEVELS_JSON__", json.dumps(levels, ensure_ascii=False))
+        .replace("__POLICIES_JSON__", json.dumps(
+            [{"key": p, "label": _GATE_POLICY_LABELS[p]} for p in _GATE_POLICIES], ensure_ascii=False))
+    )
+    (out / "10-gating-comparado.html").write_text(html, encoding="utf-8")
+    return row_metrics
 
 
 _VARIANT_DESCRIPTIONS = [
@@ -1388,7 +1813,8 @@ _VARIANT_DESCRIPTIONS = [
     ("6-ghost-inferidos.html", "variant 4 + inferred states/edges rendered as ghosts (dashed/grey)"),
     ("7-icones-categoria.html", "variant 4 + category icon/colour per node (App parity), actor shown as a border ring"),
     ("8-sistemas-colapsavel.html", "variant 4 grouped into systems (greedy-modularity) — click a system to drill in"),
-    ("9-sistemas-expande-in-place.html", "same systems as 8, but expansion stays in the SAME view — click to expand in place (multiple at once), chip to recolher"),
+    ("9-sistemas-expande-in-place.html", "same systems as 8, but expansion stays in the SAME view — click a system row/node to expand in place (multiple at once)"),
+    ("10-gating-comparado.html", "same gated base, side by side across inference policies — see the effect of the density gate before trusting the dominance/bridge numbers"),
 ]
 
 _INDEX_PAGE = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
@@ -1715,6 +2141,44 @@ def _patch_graph_js(js_text: str) -> str:
             "    return lower.concat(upper);\n"
             "  }",
         ),
+        (
+            # map-prototype patch: fit margin aware of label width + node radius (#2 clipping fix,
+            # owner screenshot review 2026-08-27) — the stock `fitTarget()` only bounds by node
+            # x/y, so a wide label ("Finalização (oponente)") or a big anchor/system node past the
+            # bbox edge draws off-canvas. Labels render at a FIXED ~12px screen size regardless of
+            # zoom (`ls = useCam?12/cam.k:12` in the label pass below), so `ctx.measureText` at that
+            # same font gives an honest SCREEN-space half-width; `pad` is already screen-space
+            # (reserved before dividing by spanX/spanY), so widening it by 2x the worst-case
+            # label/radius margin (both sides of the bbox) keeps every anchor fully on-screen.
+            "    function fitTarget() {\n"
+            "      if (!nodes.length) return { x: 0, y: 0, k: 1 };\n"
+            "      let mnX = 1e9, mnY = 1e9, mxX = -1e9, mxY = -1e9;\n"
+            "      for (const n of nodes) {\n"
+            "        mnX = Math.min(mnX, n.x); mxX = Math.max(mxX, n.x);\n"
+            "        mnY = Math.min(mnY, n.y); mxY = Math.max(mxY, n.y);\n"
+            "      }\n"
+            "      const pad = 70, spanX = (mxX - mnX) || 1, spanY = (mxY - mnY) || 1;\n"
+            "      const k = Math.max(0.25, Math.min(1.3, Math.min((W - pad) / spanX, (H - pad) / spanY)));\n"
+            "      return { k, x: W / 2 - (mnX + mxX) / 2 * k, y: H / 2 - (mnY + mxY) / 2 * k };\n"
+            "    }",
+            "    function fitTarget() {\n"
+            "      if (!nodes.length) return { x: 0, y: 0, k: 1 };\n"
+            "      let mnX = 1e9, mnY = 1e9, mxX = -1e9, mxY = -1e9;\n"
+            "      for (const n of nodes) {\n"
+            "        mnX = Math.min(mnX, n.x); mxX = Math.max(mxX, n.x);\n"
+            "        mnY = Math.min(mnY, n.y); mxY = Math.max(mxY, n.y);\n"
+            "      }\n"
+            "      ctx.font = \"12px 'Spline Sans Mono', monospace\";  // map-prototype patch: label/radius-aware fit margin (#2)\n"
+            "      let maxHalfLabel = 0, maxR = 0;\n"
+            "      for (const n of nodes) {\n"
+            "        if (n.label) maxHalfLabel = Math.max(maxHalfLabel, ctx.measureText(n.label).width / 2);\n"
+            "        maxR = Math.max(maxR, n.r || 5);\n"
+            "      }\n"
+            "      const pad = 70 + 2 * (maxHalfLabel + maxR + 16), spanX = (mxX - mnX) || 1, spanY = (mxY - mnY) || 1;\n"
+            "      const k = Math.max(0.25, Math.min(1.3, Math.min((W - pad) / spanX, (H - pad) / spanY)));\n"
+            "      return { k, x: W / 2 - (mnX + mxX) / 2 * k, y: H / 2 - (mnY + mxY) / 2 * k };\n"
+            "    }",
+        ),
     ]
     for old, new in patches:
         if old not in js_text:
@@ -1817,6 +2281,10 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
 
     # 9 — same systems, expansion in place (multi-expand, chip to recolher)
     metrics["variants"]["9-sistemas-expande-in-place"] = _render_variant9(out, states4, edges4, handovers4)
+
+    # 10 — density-gate experiment made visible (owner adendo): same systems view, one button
+    # per inference policy, at the min_support chosen for 8/9.
+    metrics["gating_by_policy"] = _render_variant10(out, states4, edges4, handovers4)
 
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,

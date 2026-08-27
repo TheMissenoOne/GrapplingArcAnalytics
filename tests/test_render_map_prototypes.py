@@ -14,10 +14,13 @@ from scripts.render_map_prototypes import (
     _FINISH_COLOR,
     _FINISH_ICON,
     _FINISH_KEY,
+    _GATE_POLICY_DEFAULT,
     _GRAPH_JS,
     _START_COLOR,
     _SYSTEM_COLOR,
     _actor_for,
+    _anchor_slot,
+    _apply_gate,
     _complete_two_sided,
     _cross_member_links,
     _cross_system_links,
@@ -29,12 +32,15 @@ from scripts.render_map_prototypes import (
     _patch_graph_js,
     _place_of,
     _qid,
+    _select_displayed_bridges,
     _selective_states_and_edges,
+    _splice_inferred_states,
     _system_members,
     _systems_level1_view,
     _two_sided_graphview,
     build_aggregate,
     render_all,
+    sweep_gates,
 )
 
 _BUG_BUNDLE = {
@@ -62,6 +68,7 @@ _EXPECTED_FILES = [
     "1-baseline.html", "2-migrado-proprio.html", "3-migrado-oponente-completo.html",
     "4-migrado-oponente-seletivo.html", "5-hubs.html", "6-ghost-inferidos.html",
     "7-icones-categoria.html", "8-sistemas-colapsavel.html", "9-sistemas-expande-in-place.html",
+    "10-gating-comparado.html",
 ]
 
 _EXPECTED_VARIANT_KEYS = {
@@ -184,6 +191,8 @@ def test_render_all_is_deterministic(tmp_path):
         (out2 / "8-sistemas-colapsavel.html").read_bytes()
     assert (out1 / "9-sistemas-expande-in-place.html").read_bytes() == \
         (out2 / "9-sistemas-expande-in-place.html").read_bytes()
+    assert (out1 / "10-gating-comparado.html").read_bytes() == \
+        (out2 / "10-gating-comparado.html").read_bytes()
 
 
 def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path):
@@ -208,6 +217,7 @@ def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path):
         "map-prototype patch: pinned anchor node",
         "map-prototype patch: snapshot live x/y",
         "map-prototype patch: system regions",
+        "map-prototype patch: label/radius-aware fit margin",
     ):
         assert marker in copy, marker
 
@@ -322,10 +332,13 @@ def test_finish_states_are_qualified_per_actor_two_distinct_nodes():
 def test_variant9_present_with_multi_expand_and_reconnect_data():
     """9 mirrors 8's systems but keeps everything in ONE view — assert the embedded payload can
     support multi-expand + inter-system reconnection: every cross-placement link's `from`/`to`
-    are REAL qids (never a collapsed `sys:*` id, C: sistema-ponte-sistema — a crossing pair's
-    endpoints are placement ids, at least one of which is a bridge/individual, never two plain
-    system members), so the client can re-resolve them per the current expand state, and every
-    system's member slice really is a subset of the selective states."""
+    are REAL qids (never a collapsed `sys:*` id), so the client can re-resolve them per the
+    current expand state, and every system's member slice really is a subset of the selective
+    states. Since the dominance bridge rule (owner adendo 2026-08-27), a crossing pair CAN be two
+    plain system members directly — dominance judges a node by its TOTAL incident weight, so a
+    strongly-dominated member can still carry one rare, weak edge straight into another system
+    without either endpoint reading as ambiguous; the old "always through a bridge" guarantee
+    only held under the saturating span-based rule this replaced."""
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
@@ -340,9 +353,6 @@ def test_variant9_present_with_multi_expand_and_reconnect_data():
     for c in cross:
         assert c["from"] in real_qids and c["to"] in real_qids  # real members, never 'sys:*'
         assert c["fromSys"] != c["toSys"]
-        # C: sistema-ponte-sistema — a crossing pair is never two DIFFERENT plain system ids;
-        # at least one side is a bridge/individual (its placement id == its own real qid)
-        assert not (c["fromSys"].startswith("sys:") and c["toSys"].startswith("sys:"))
 
     for s in detected["systems"]:
         sub_states, _edges, _handovers = _system_members(s, states4, edges4, handovers4)
@@ -411,11 +421,17 @@ def test_start_role_node_always_qualifies_as_user_side():
     assert _qid("partner", "mount") == "opp:mount"  # untouched for a normal node
 
 
-def test_finish_and_start_anchors_are_pinned_at_a_fixed_axis():
-    """D addendum (owner, 2026-08-27): start nodes pin on a vertical axis (top/neutral/bottom,
-    per the table's own curated ``orientation`` — the ``role`` value itself is just ``'start'``
-    for all three, the node_key tells them apart), finish pins horizontally (you=right,
-    opponent=left) — world coords, never simulated (`n.pin`)."""
+def test_finish_and_start_anchors_are_bolted_uniformly_on_a_circle():
+    """Owner adendo 2026-08-27 (revised same day, "distribuídos uniformemente"/"bolted in
+    place"): the 5 organisational anchors (3 start orientations + 2 actor-qualified finishes)
+    are pinned (never simulated) at evenly-spaced points on a circle — no two share a slot, and
+    every one sits exactly at the given radius from the origin (a regular pentagon), instead of
+    the old two-clump vertical/horizontal axis design."""
+    assert len({_anchor_slot(k, a) for k, a in
+                (("start top", "you"), ("start neutral", "you"), ("start bottom", "you"),
+                 (_FINISH_KEY, "you"), (_FINISH_KEY, "partner"))}) == 5  # 5 distinct slots
+    assert _anchor_slot("mount", "you") is None  # an ordinary node is never an anchor
+
     row = {"node_key": "x", "label": "x", "type": "control", "actor": "you",
            "count": 1, "inferred": True}
     states = {
@@ -427,14 +443,17 @@ def test_finish_and_start_anchors_are_pinned_at_a_fixed_axis():
     }
     gv = _two_sided_graphview(states, [], [])
     by_id = {n["id"]: n for n in gv["nodes"]}
+    anchor_ids = ["start neutral", "start top", "start bottom", _FINISH_KEY, "opp:" + _FINISH_KEY]
+    radius = 260.0  # `_anchor_radius(5)` — same formula the graphview call used internally
 
-    assert by_id["start neutral"]["pin"] is True
-    assert by_id["start neutral"]["x"] == 0.0 and by_id["start neutral"]["y"] == 0.0
-    assert by_id["start top"]["pin"] is True and by_id["start top"]["y"] < 0  # top
-    assert by_id["start bottom"]["pin"] is True and by_id["start bottom"]["y"] > 0  # bottom
-    assert by_id[_FINISH_KEY]["pin"] is True and by_id[_FINISH_KEY]["x"] > 0  # you = right
-    opp_finish = by_id["opp:" + _FINISH_KEY]
-    assert opp_finish["pin"] is True and opp_finish["x"] < 0  # opponent = left
+    positions = []
+    for anchor_id in anchor_ids:
+        n = by_id[anchor_id]
+        assert n["pin"] is True
+        assert (n["x"] ** 2 + n["y"] ** 2) ** 0.5 == pytest.approx(radius, abs=0.01)
+        positions.append((round(n["x"], 3), round(n["y"], 3)))
+    assert len(set(positions)) == 5  # uniformly spread — no two anchors share a spot
+
     for anchor_id in ("start neutral", "start top", "start bottom"):
         assert by_id[anchor_id]["color"] == _START_COLOR
         assert "ring" not in by_id[anchor_id]  # D: no actor ring on an anchor node
@@ -461,3 +480,140 @@ def test_system_node_has_its_own_distinct_visual_treatment():
         assert n.get("system") is True
         assert " · " in n["label"]  # member count baked into the label
         assert n["color"] != _BRIDGE_COLOR != _START_COLOR
+
+
+def _mk_state(node_key: str) -> dict:
+    return {"node_key": node_key, "label": node_key, "type": "guard", "actor": "you",
+            "count": 1, "inferred": False}
+
+
+def _mk_edge(source: str, target: str, weight: int) -> dict:
+    return {"source": source, "target": target, "action_key": f"{source}>{target}",
+            "action_label": f"{source}>{target}", "action_type": "guard", "actor": "you",
+            "count": weight, "inferred": False}
+
+
+def test_dominance_rule_members_by_majority_weight_bridges_only_when_split():
+    """Owner adendo 2026-08-27 (item 1): replaces the old "neighbours touch >=2 communities"
+    rule, which saturated on a small/dense graph. A node whose incident weight is mostly ONE
+    community's (dom_x: 5 to its own triangle, 1 to another) is a MEMBER of that community even
+    though it does touch 2; a node whose weight splits ~evenly across THREE (bridge_y: 2/2/2) is
+    the one that's genuinely ambiguous — a BRIDGE."""
+    nodes = ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3", "dom_x", "bridge_y"]
+    states = {(n, "you"): _mk_state(n) for n in nodes}
+    edges = [
+        _mk_edge("a1", "a2", 5), _mk_edge("a2", "a3", 5), _mk_edge("a1", "a3", 5),
+        _mk_edge("b1", "b2", 5), _mk_edge("b2", "b3", 5), _mk_edge("b1", "b3", 5),
+        _mk_edge("c1", "c2", 5), _mk_edge("c2", "c3", 5), _mk_edge("c1", "c3", 5),
+        _mk_edge("dom_x", "a1", 5), _mk_edge("dom_x", "b1", 1),
+        _mk_edge("bridge_y", "a1", 2), _mk_edge("bridge_y", "b1", 2), _mk_edge("bridge_y", "c1", 2),
+    ]
+    detected = _detect_systems(states, edges, [])
+
+    assert detected["bridge_qids"] == ["bridge_y"]
+    dom_x_system = next(s for s in detected["systems"] if "dom_x" in s["members"])
+    assert {"a1", "a2", "a3"} <= set(dom_x_system["members"])
+    assert len(detected["systems"]) == 3  # A (+dom_x), B, C — bridge_y is memberless
+    assert detected["bridge_strength"]["bridge_y"] == 6  # 2+2+2, honest, unaffected by display cut
+
+
+def test_select_displayed_bridges_keeps_only_the_strongest_top_n():
+    strength = {"weak": 1, "mid": 3, "strong": 9, "also_mid": 3}
+    top2 = _select_displayed_bridges(strength, top_n=2)
+    assert top2 == frozenset({"strong", "also_mid"})  # tie mid/also_mid -> smaller qid wins
+    all10 = _select_displayed_bridges(strength, top_n=10)
+    assert all10 == frozenset(strength)  # never more than exist
+
+
+def test_splice_inferred_states_reconnects_single_in_single_out_gap_states():
+    states = {("p", "you"): _mk_state("p"), ("gap", "you"): {**_mk_state("gap"), "inferred": True},
+              ("q", "you"): _mk_state("q")}
+    edges = [_mk_edge("p", "gap", 3), _mk_edge("gap", "q", 2)]
+
+    new_states, new_edges = _splice_inferred_states(states, edges)
+
+    assert ("gap", "you") not in new_states
+    assert {("p", "you"), ("q", "you")} == set(new_states)
+    assert len(new_edges) == 1
+    assert new_edges[0]["source"] == "p" and new_edges[0]["target"] == "q"
+    assert new_edges[0]["count"] == 2  # min of the two spliced hops
+    assert new_edges[0]["inferred"] is True
+
+    # a busier gap (2 outgoing) can't be safely spliced — stays untouched
+    busy = {("p", "you"): _mk_state("p"), ("gap", "you"): {**_mk_state("gap"), "inferred": True},
+            ("q", "you"): _mk_state("q"), ("r", "you"): _mk_state("r")}
+    busy_edges = [_mk_edge("p", "gap", 3), _mk_edge("gap", "q", 2), _mk_edge("gap", "r", 2)]
+    kept_states, kept_edges = _splice_inferred_states(busy, busy_edges)
+    assert ("gap", "you") in kept_states
+    assert len(kept_edges) == 3
+
+
+def test_apply_gate_drops_low_support_edges_and_orphaned_endpoints():
+    states = {("p", "you"): _mk_state("p"), ("q", "you"): _mk_state("q")}
+    edges = [_mk_edge("p", "q", 1)]  # single occurrence — below the App's own min_edge_support=2
+
+    g_states, g_edges, g_handovers = _apply_gate(
+        states, edges, [], min_support=2, inference_policy="all")
+    assert g_edges == []  # dropped, support < min_support
+    assert g_states == states  # states themselves untouched by the support gate
+
+    inferred_edges = [_mk_edge("p", "q", 5), {**_mk_edge("q", "p", 1), "inferred": True}]
+    g2 = _apply_gate(states, inferred_edges, [], min_support=1,
+                      inference_policy="no_inferred_edges")[1]
+    assert len(g2) == 1 and not g2[0]["inferred"]
+
+
+def test_sweep_gates_covers_every_axis_combination():
+    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    agg = build_aggregate(bundle)
+    states4, edges4, handovers4 = _selective_states_and_edges(agg)
+
+    rows = sweep_gates(states4, edges4, handovers4)
+
+    assert len(rows) == 3 * 4  # 3 min_supports x 4 inference policies
+    seen = {(r["min_support"], r["policy"]) for r in rows}
+    assert len(seen) == 12
+    for r in rows:
+        assert r["nodes"] >= 0 and r["edges"] >= 0 and r["systems"] >= 0 and r["bridges"] >= 0
+
+
+def test_render_all_gating_variant_and_default_policy_wired_into_8_9(tmp_path):
+    """`render_all`'s variant 10 + `metrics["gating_by_policy"]` expose the same experiment the
+    owner asked to SEE, and 8/9 actually run on the gated (not raw) selective graph."""
+    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    out = tmp_path / "run"
+
+    metrics = render_all(bundle, out)
+
+    assert (out / "10-gating-comparado.html").exists()
+    gbp = metrics["gating_by_policy"]
+    assert set(gbp) == {"all", "no_inferred_edges", "no_inferred", "inferred_min2"}
+    for row in gbp.values():
+        assert "systems" in row and "bridges" in row
+
+    v9 = metrics["variants"]["9-sistemas-expande-in-place"]
+    assert "bridges_shown" in v9 and v9["bridges_shown"] <= v9["bridges"]
+    v8 = metrics["variants"]["8-sistemas-colapsavel"]
+    assert "bridges_shown" in v8 and v8["bridges_shown"] <= v8["bridges"]
+    # the gate default actually used is a real, importable policy key
+    assert _GATE_POLICY_DEFAULT in {"all", "no_inferred_edges", "no_inferred", "inferred_min2"}
+
+
+def test_variant9_side_panel_lists_systems_and_bridge_connections(tmp_path):
+    """Item 3: the side panel must carry SYSTEMS (name + member count) and, for every DISPLAYED
+    bridge, which systems it connects — baked into the embedded SYSTEMS payload as
+    ``bridgeConnects`` on the bridge's own node, read straight off the CROSS_LINKS the metrics
+    already use (never a second computation)."""
+    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    out = tmp_path / "run"
+    render_all(bundle, out)
+
+    html = (out / "9-sistemas-expande-in-place.html").read_text(encoding="utf-8")
+    assert "Sistemas (" in html or "SYSTEMS" in html  # payload embedded (list built client-side)
+    start = html.index("const SYSTEMS = ") + len("const SYSTEMS = ")
+    end = html.index(";", start)
+    payload = json.loads(html[start:end])
+    assert any(row["kind"] == "system" for row in payload)
+    bridge_rows = [row for row in payload if row["kind"] == "solo" and row["node"].get("bridge")]
+    for row in bridge_rows:
+        assert "bridgeConnects" in row["node"]  # [] if it only crosses other bridges
