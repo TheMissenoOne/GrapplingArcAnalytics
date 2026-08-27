@@ -11,28 +11,46 @@ def _ev(label, type_, actor="a", **kw):
     return {"label": label, "type": type_, "actor": actor, **kw}
 
 
-def test_guard_pull_then_armlock_all_scramble_fallback():
+def test_guard_pull_then_armlock_opens_start_neutral_then_scramble_fallback():
     """'Guard Pull' is type 'transition' in this corpus (D1 forces transition -> 'action'), NOT
-    type 'guard' — so the (guard, submission) pair the ticket names never actually arises. The
-    real pair resolved is (transition, submission), which D2's action_pair_to_state table has no
-    specific row for (only submission|submission, submission|$terminal, takedown|*, sweep|*,
-    pass|*), so the gaps before the pull and between pull and armbar fall through to the '*|*'
-    fallback: 'scramble'. Documented finding, not a guess. The chain's LAST action (the armbar)
-    is genuinely terminal, so it resolves through the '$terminal' marker to 'finish' instead."""
+    type 'guard'. Rule 5's opening gap now resolves via `lamas_state` reading 'Guard Pull' as
+    Lamas' PGD (guard-pull) — a standing-exchange opening, so the chain opens on 'start neutral'
+    (role='start'), not the bare fallback. The MID-chain gap (transition, submission) between the
+    pull and the armbar is untouched — D2's action_pair_to_state table has no specific row for it
+    (only submission|submission, submission|$terminal, $start|takedown, takedown|*, sweep|*,
+    pass|*), so it still falls through to the '*|*' fallback: 'scramble'. The chain's LAST action
+    (the armbar) is genuinely terminal, so it resolves through the '$terminal' marker to 'finish'
+    instead."""
     chain = compile_chain([
         _ev("Guard Pull", "transition"),
         _ev("Armbar", "submission"),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["scramble", "scramble", "finish"]
+    assert [s.node_key for s in chain.states] == ["start neutral", "scramble", "finish"]
+    assert [s.role for s in chain.states] == ["start", None, "finish"]
     assert all(s.inferred for s in chain.states)
     assert len(chain.edges) == 2
     e0, e1 = chain.edges
     assert (e0.action_key, e0.inferred, e0.terminal) == ("guard pull", False, False)
-    assert e0.source_key == "scramble" and e0.target_key == "scramble"
+    assert e0.source_key == "start neutral" and e0.target_key == "scramble"
     assert (e1.action_key, e1.inferred, e1.terminal) == ("armbar", False, True)
     assert e1.target_key == "finish"
     assert not chain.dropped
+
+
+def test_chain_opening_on_clinch_label_gets_start_neutral():
+    """Lamas CDP (clinch/grip-fighting) is label-, not type-, keyed — 'Collar Tie' is type
+    'control', same type as an ordinary position, so only `lamas_state` (not the table) can tell
+    this opening is a standing exchange."""
+    chain = compile_chain([
+        _ev("Collar Tie", "control"),
+        _ev("Mount", "control"),
+    ], inference_table=TABLE)
+
+    assert chain.states[0].node_key == "start neutral"
+    assert chain.states[0].role == "start"
+    assert chain.edges[0].source_key == "start neutral"
+    assert chain.edges[0].action_key == "collar tie"
 
 
 def test_armbar_then_triangle_chains_through_chained_submission():
@@ -69,15 +87,20 @@ def test_submission_terminal_resolves_to_finish_not_scramble():
 
 
 def test_kguard_then_5050_guard_bridges_with_guard_transition():
+    """`orientation_of('K-Guard') == 'bottom'`, so the chain also opens on a PREPENDED 'start
+    bottom' (module docstring) — this test's own focus is the MID-chain bridge, unaffected: two
+    real guard states still bridge through the real 'guard transition' edge."""
     chain = compile_chain([
         _ev("K-Guard", "guard"),
         _ev("50/50 Guard", "guard"),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["kguard", "5050 guard"]
-    assert not any(s.inferred for s in chain.states)
-    assert len(chain.edges) == 1
-    edge = chain.edges[0]
+    assert [s.node_key for s in chain.states] == ["start bottom", "kguard", "5050 guard"]
+    assert chain.states[0].role == "start"
+    assert not any(s.inferred for s in chain.states[1:])
+    assert len(chain.edges) == 2
+    prepend_edge, edge = chain.edges
+    assert prepend_edge.source_key == "start bottom" and prepend_edge.target_key == "kguard"
     assert edge.action_key == "guard transition"
     assert edge.inferred is True
     assert edge.terminal is False
@@ -85,35 +108,103 @@ def test_kguard_then_5050_guard_bridges_with_guard_transition():
     assert edge.source_key == "kguard" and edge.target_key == "5050 guard"
 
 
-def test_chain_opening_on_takedown_gets_scramble_initial_state():
-    """No canonical standing/em-pe node exists in the 141-entry app library (checked against
-    data/rating/taxonomy_kind_golden.json and analysis.names.CANONICAL_LABELS) so rule 5's
-    fallback fires: initial state is the generic 'scramble', same mechanism as every other gap."""
+def test_chain_opening_on_takedown_gets_start_neutral_initial_state():
+    """D2's declarative opening row (owner call, 2026-08-27): a chain whose first action is a
+    'takedown' resolves rule 5's gap via the `"$start"` sentinel — `"$start|takedown" ->
+    "start neutral"` — mirroring `_CHAIN_END`'s own declarative pattern, no code needed for this
+    specific type. 'start neutral' carries role='start' and is PREPENDED before the real first
+    state, linked by the takedown's own (real, non-inferred) edge."""
     chain = compile_chain([
         _ev("Double Leg Takedown", "takedown"),
         _ev("Mount", "control"),
     ], inference_table=TABLE)
 
-    assert chain.states[0].node_key == "scramble"
+    assert chain.states[0].node_key == "start neutral"
+    assert chain.states[0].role == "start"
     assert chain.states[0].inferred is True
-    assert [s.node_key for s in chain.states] == ["scramble", "mount"]
+    assert [s.node_key for s in chain.states] == ["start neutral", "mount"]
     assert chain.states[1].inferred is False
     assert len(chain.edges) == 1
     edge = chain.edges[0]
     assert edge.action_key == "double leg takedown"
-    assert edge.source_key == "scramble" and edge.target_key == "mount"
+    assert edge.source_key == "start neutral" and edge.target_key == "mount"
     assert not edge.inferred and not edge.terminal
 
 
+def test_chain_opening_on_submission_keeps_the_scramble_fallback():
+    """Not every opening resolves to a curated start node — a chain whose first action is a
+    'submission' has no `"$start|submission"` table row and no PGD/CDP label, so it keeps the
+    pre-existing '*|*' fallback: 'scramble', role=None. Preserves prior behavior exactly."""
+    chain = compile_chain([
+        _ev("Armbar", "submission"),
+        _ev("Guard Pass", "pass"),
+    ], inference_table=TABLE)
+
+    assert chain.states[0].node_key == "scramble"
+    assert chain.states[0].role is None
+
+
+def test_chain_opening_on_closed_guard_state_prepends_start_bottom():
+    """`orientation_of('Closed Guard') == 'bottom'` (curated) — the chain opens on a real STATE,
+    so rule 5 never fires (no action gap to bridge); 'start bottom' is PREPENDED instead, linked
+    by one inferred action edge to the real opening state."""
+    chain = compile_chain([
+        _ev("Closed Guard", "guard"),
+        _ev("Guard Pass", "pass"),
+    ], inference_table=TABLE)
+
+    assert [s.node_key for s in chain.states[:2]] == ["start bottom", "closed guard"]
+    assert chain.states[0].role == "start"
+    assert chain.states[1].role is None and chain.states[1].inferred is False
+    edge = chain.edges[0]
+    assert edge.source_key == "start bottom" and edge.target_key == "closed guard"
+    assert edge.inferred is True and edge.terminal is False
+    assert edge.source_event_index is None
+
+
+def test_chain_opening_on_mount_state_prepends_start_top():
+    """`orientation_of('Mount') == 'top'` (curated) — same mechanism as the guard case, opposite
+    orientation, 'passing'-side node."""
+    chain = compile_chain([
+        _ev("Mount", "control"),
+        _ev("Armbar", "submission"),
+    ], inference_table=TABLE)
+
+    assert chain.states[0].node_key == "start top"
+    assert chain.states[0].role == "start"
+    assert chain.states[1].node_key == "mount"
+    edge = chain.edges[0]
+    assert edge.source_key == "start top" and edge.target_key == "mount"
+    assert edge.inferred is True
+
+
+def test_chain_opening_on_neutral_state_stays_unprepended():
+    """`orientation_of('Electric Chair') == 'neutral'` (ambiguous by design) — no start node is
+    invented for a neutral-orientation opening state; the state itself remains the first node,
+    exactly as before this change."""
+    chain = compile_chain([
+        _ev("Electric Chair", "control"),
+        _ev("Armbar", "submission"),
+    ], inference_table=TABLE)
+
+    assert chain.states[0].node_key == "electric chair"
+    assert chain.states[0].role is None
+    assert chain.states[0].inferred is False
+
+
 def test_chain_ending_in_submission_is_terminal():
+    """`orientation_of('Mount') == 'top'`, so this chain also opens on a PREPENDED 'start top'
+    (module docstring) — this test's own focus is the TERMINAL end, unaffected."""
     chain = compile_chain([
         _ev("Mount", "control"),
         _ev("Armbar", "submission", successful=True),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["mount", "finish"]
-    assert chain.states[1].inferred is True
-    edge = chain.edges[0]
+    assert [s.node_key for s in chain.states] == ["start top", "mount", "finish"]
+    assert chain.states[0].role == "start"
+    assert chain.states[2].inferred is True
+    assert chain.states[2].role == "finish"
+    edge = chain.edges[-1]
     assert edge.terminal is True
     assert edge.action_key == "armbar"
     assert edge.source_key == "mount"
@@ -122,6 +213,9 @@ def test_chain_ending_in_submission_is_terminal():
 
 
 def test_concept_event_dropped_chain_stays_intact():
+    """`orientation_of('Closed Guard') == 'bottom'`, so this chain also opens on a PREPENDED
+    'start bottom' (module docstring) — this test's own focus is the dropped concept event,
+    unaffected: it stays skipped, and the surviving real states/edges are untouched."""
     chain = compile_chain([
         _ev("Closed Guard", "guard"),
         _ev("Grip Fighting", "concept"),
@@ -131,9 +225,10 @@ def test_concept_event_dropped_chain_stays_intact():
     assert len(chain.dropped) == 1
     dropped = chain.dropped[0]
     assert dropped.index == 1 and dropped.reason == "transparent"
-    assert [s.node_key for s in chain.states] == ["closed guard", "top transition"]
-    assert chain.states[1].inferred is True
-    edge = chain.edges[0]
+    assert [s.node_key for s in chain.states] == ["start bottom", "closed guard", "top transition"]
+    assert chain.states[0].role == "start"
+    assert chain.states[2].inferred is True
+    edge = chain.edges[-1]
     assert edge.source_key == "closed guard" and edge.action_key == "guard pass"
     assert edge.terminal is True
 
@@ -156,8 +251,12 @@ def test_compile_two_sided_splits_and_drops_unassigned_with_original_index():
 
     assert set(result) == {"a", "b", "dropped"}
     a = result["a"]
-    assert [s.node_key for s in a.states] == ["closed guard"]
-    assert not a.edges and not a.dropped
+    # `orientation_of('Closed Guard') == 'bottom'` -> side 'a' opens on a PREPENDED 'start
+    # bottom' (module docstring); this test's own focus is the split/original-index remapping.
+    assert [s.node_key for s in a.states] == ["start bottom", "closed guard"]
+    assert a.states[0].role == "start"
+    assert len(a.edges) == 1 and a.edges[0].source_event_index is None
+    assert not a.dropped
 
     b = result["b"]
     assert b.states[0].node_key == "scramble"  # rule 5 fallback for the lone Guard Pass

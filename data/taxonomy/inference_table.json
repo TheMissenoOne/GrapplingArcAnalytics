@@ -1,18 +1,22 @@
 {
   "version": 1,
   "generic_states": {
-    "chained submission": {"node_key": "chained submission", "label": "Chained Submission", "type": "control", "orientation": "neutral"},
-    "top transition": {"node_key": "top transition", "label": "Top Transition", "type": "control", "orientation": "top"},
+    "chained submission": {"node_key": "chained submission", "label": "Finalização Encadeada", "type": "control", "orientation": "neutral"},
+    "top transition": {"node_key": "top transition", "label": "Transição de Topo", "type": "control", "orientation": "top"},
     "scramble": {"node_key": "scramble", "label": "Scramble", "type": "control", "orientation": "neutral"},
-    "finish": {"node_key": "finish", "label": "Finish", "type": "control", "orientation": "neutral"}
+    "finish": {"node_key": "finish", "label": "Finalização", "type": "control", "orientation": "neutral", "role": "finish"},
+    "start neutral": {"node_key": "start neutral", "label": "Início Neutro", "type": "control", "orientation": "neutral", "role": "start"},
+    "start top": {"node_key": "start top", "label": "Início por Cima", "type": "control", "orientation": "top", "role": "start"},
+    "start bottom": {"node_key": "start bottom", "label": "Início por Baixo", "type": "control", "orientation": "bottom", "role": "start"}
   },
   "generic_actions": {
-    "guard transition": {"action_key": "guard transition", "label": "Guard Transition", "type": "transition"},
-    "transition": {"action_key": "transition", "label": "Transition", "type": "transition"}
+    "guard transition": {"action_key": "guard transition", "label": "Transição de Guarda", "type": "transition"},
+    "transition": {"action_key": "transition", "label": "Transição", "type": "transition"}
   },
   "action_pair_to_state": {
     "submission|submission": "chained submission",
     "submission|$terminal": "finish",
+    "$start|takedown": "start neutral",
     "takedown|*": "top transition",
     "sweep|*": "top transition",
     "pass|*": "top transition",

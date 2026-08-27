@@ -3,6 +3,7 @@
   "generated_from": "GrapplingArcAnalytics/scripts/export_taxonomy_kind_fixtures.py",
   "inference_table": {
     "action_pair_to_state": {
+      "$start|takedown": "start neutral",
       "*|*": "scramble",
       "pass|*": "top transition",
       "submission|$terminal": "finish",
@@ -13,26 +14,27 @@
     "generic_actions": {
       "guard transition": {
         "action_key": "guard transition",
-        "label": "Guard Transition",
+        "label": "Transição de Guarda",
         "type": "transition"
       },
       "transition": {
         "action_key": "transition",
-        "label": "Transition",
+        "label": "Transição",
         "type": "transition"
       }
     },
     "generic_states": {
       "chained submission": {
-        "label": "Chained Submission",
+        "label": "Finalização Encadeada",
         "node_key": "chained submission",
         "orientation": "neutral",
         "type": "control"
       },
       "finish": {
-        "label": "Finish",
+        "label": "Finalização",
         "node_key": "finish",
         "orientation": "neutral",
+        "role": "finish",
         "type": "control"
       },
       "scramble": {
@@ -41,8 +43,29 @@
         "orientation": "neutral",
         "type": "control"
       },
+      "start bottom": {
+        "label": "Início por Baixo",
+        "node_key": "start bottom",
+        "orientation": "bottom",
+        "role": "start",
+        "type": "control"
+      },
+      "start neutral": {
+        "label": "Início Neutro",
+        "node_key": "start neutral",
+        "orientation": "neutral",
+        "role": "start",
+        "type": "control"
+      },
+      "start top": {
+        "label": "Início por Cima",
+        "node_key": "start top",
+        "orientation": "top",
+        "role": "start",
+        "type": "control"
+      },
       "top transition": {
-        "label": "Top Transition",
+        "label": "Transição de Topo",
         "node_key": "top transition",
         "orientation": "top",
         "type": "control"

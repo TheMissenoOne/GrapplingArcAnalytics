@@ -55,6 +55,40 @@ Rule 5's opening call keeps using the plain ``"*"`` sentinel — the marker dist
 matters on the closing side, which is the only place D2 needs to tell "no more events" apart
 from "next event's type happens to be unknown here".
 
+**Opening/start nodes (owner call, 2026-08-27, revised same day — 'standing' renamed to the
+orientation-keyed names below).** A chain's opening gap (rule 5) was, until now, always the
+bare ``"*|*"`` fallback (``scramble``) — semantically poor for a chain that visibly opens
+standing, on top, or on bottom. Three curated ``generic_states`` entries fill it, named by
+ORIENTATION (not gesture — the renderer anchors on orientation: neutral in the middle, top up,
+bottom down), each carrying ``"role": "start"``:
+
+- ``start neutral`` — the chain opens on a standing exchange: rule 5 resolving a ``"takedown"``
+  first-action type (declarative, via the ``"$start"`` sentinel — ``"$start|takedown"`` in the
+  table, same mechanism as ``"$terminal"``), OR the first action's ``lamas_chain.lamas_state``
+  reads ``"PGD"`` (guard pull) or ``"CDP"`` (clinch/grip-fighting) — both LABEL-keyed, not
+  type-keyed (a `guard`/`control`/`transition` event can be either a standing exchange or an
+  ordinary state-adjacent action), so the table cannot express them by type alone and
+  ``_opening_state`` checks ``lamas_state`` directly, the same source ``taxonomy_kind.kind_of``
+  already trusts for the same two codes.
+- ``start top`` / ``start bottom`` — the chain opens on a real STATE event (no action to infer
+  a gap from at all — the state IS the opening node), whose ``taxonomy_kind.orientation_of``
+  reads ``"top"``/``"bottom"``. The real state is not replaced; the start node is PREPENDED
+  before it, linked by one inferred edge (``infer_action_for_state_pair``, same rule-4
+  mechanism, called once more here rather than duplicated) — never invented for a chain that
+  opens ``"neutral"`` (unchanged: the first real state is simply the first node, as before).
+
+Every other opening (a chain's first action resolves through neither the ``"$start"`` table row
+nor a PGD/CDP label) keeps the existing ``"*|*"`` fallback — unchanged.
+
+**Perspective, and the ``role`` field.** ``compile_chain`` is actor-agnostic — a ``role='start'``
+node's own ``ChainState.actor`` is whichever event supplied it (same convention as every other
+inferred node here), NOT a perspective claim. The CONSUMER (renderer/dossier) must always
+qualify a ``role='start'`` node on the chain OWNER's own side, never the opponent's — it is
+where THIS chain's flow begins, by construction, regardless of whose name is in ``actor``.
+``role='finish'`` (the pre-existing ``finish`` node, now carrying the same field) remains
+per-actor as before — whoever's submission ended the chain. ``analysis.taxonomy_kind.role_of``
+is the standalone lookup for a caller holding only a node_key.
+
 Actor model (rule 8): ``compile_chain`` assumes ``events`` is already ONE actor's own ordered
 flow (the within-actor grouping ``transitions/build_graph.py`` calls ``by_actor``) — it does
 not itself split or validate actor consistency. ``compile_two_sided`` is the thin wrapper for
@@ -67,20 +101,29 @@ from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, cast
 
+from analysis.lamas_chain import lamas_state
 from analysis.names import _normalize_name, canonicalize
 from analysis.taxonomy_kind import (
     infer_action_for_state_pair,
     infer_state_for_action_pair,
     kind_of,
     load_inference_table,
+    orientation_of,
 )
 
 # Rule 6's genuinely-terminal marker (module docstring) — distinct from the plain ``"*"``
 # used everywhere else, so D2 can express "the chain truly ends on this action type" without
 # also matching every mid-chain pair whose next type happens to be unknown.
 _CHAIN_END = "$terminal"
+
+# Rule 5's opening marker (owner call, 2026-08-27), mirroring ``_CHAIN_END``: a fixed left side
+# ``resolve_pair`` can match exactly, so D2 can say a given first-action TYPE always opens on a
+# specific generic state (``"$start|takedown" -> "start neutral"``) without also swallowing an
+# unrelated ``"*|<type>"`` mid-chain row. No row for a type falls straight through to the
+# existing ``"*|*"`` fallback — same as before this marker existed.
+_CHAIN_START = "$start"
 
 
 @dataclass(frozen=True)
@@ -90,6 +133,11 @@ class ChainState:
     type: str
     actor: str | None
     inferred: bool
+    # 'start' | 'finish' | None — set only for D2 generic-state table entries that carry the
+    # field (module docstring, "Perspective, and the role field"); a REAL (non-inferred) state
+    # never carries it. Perspective is the CONSUMER's job, not this dataclass's: qualify
+    # role='start' always on the chain owner's own side, never the opponent's.
+    role: str | None = None
 
 
 @dataclass(frozen=True)
@@ -143,6 +191,17 @@ def _label_of(event: Mapping[str, Any]) -> str:
 
 def _type_of(event: Mapping[str, Any]) -> str:
     return str(event.get("type", event.get("event_type", "")) or "").strip().lower()
+
+
+def _opening_state(table: Mapping[str, Any], label: str, etype: str) -> dict[str, Any]:
+    """Rule 5's initial state, before a chain that opens on an ACTION. Declarative first via the
+    ``"$start"`` sentinel (a type the table names explicitly resolves with no code change here);
+    guard-pull/clinch opens are label-, not type-, keyed (Lamas ``PGD``/``CDP``) so the table
+    cannot express them by type alone — caught here via ``lamas_state`` before falling through to
+    the table. See the module docstring for the full rule."""
+    if lamas_state({"type": etype, "label": label}) in ("PGD", "CDP"):
+        return cast(dict[str, Any], table["generic_states"]["start neutral"])
+    return infer_state_for_action_pair(table, _CHAIN_START, etype)
 
 
 def _edge_from_pending(p: _Pending, *, target_key: str, terminal: bool) -> ChainEdge:
@@ -204,6 +263,24 @@ def compile_chain(
                     action_type=act["type"], actor=last_actor,
                     inferred=True, terminal=False, source_event_index=None,
                 ))
+            elif prev_kind is None:
+                # Chain opens on a real STATE — no action gap to bridge, so `start top`/
+                # `start bottom` is PREPENDED (not a replacement) when the opening state has a
+                # curated orientation; a 'neutral' opening is unchanged (module docstring).
+                orient = orientation_of(label)
+                if orient in ("top", "bottom"):
+                    start_key = "start top" if orient == "top" else "start bottom"
+                    st = table["generic_states"][start_key]
+                    states.append(ChainState(node_key=st["node_key"], label=st["label"],
+                                              type=st["type"], actor=actor, inferred=True,
+                                              role=st.get("role")))
+                    act = infer_action_for_state_pair(table, st["type"], etype)
+                    edges.append(ChainEdge(
+                        source_key=st["node_key"], target_key=key,
+                        action_key=act["action_key"], action_label=act["label"],
+                        action_type=act["type"], actor=actor,
+                        inferred=True, terminal=False, source_event_index=None,
+                    ))
             states.append(ChainState(node_key=key, label=label, type=etype, actor=actor,
                                       inferred=False))
             prev_state_key, prev_state_type = key, etype
@@ -216,13 +293,15 @@ def compile_chain(
         if prev_kind == "action" and pending is not None:
             st = infer_state_for_action_pair(table, prev_action_type, etype)
             states.append(ChainState(node_key=st["node_key"], label=st["label"],
-                                      type=st["type"], actor=last_actor, inferred=True))
+                                      type=st["type"], actor=last_actor, inferred=True,
+                                      role=st.get("role")))
             edges.append(_edge_from_pending(pending, target_key=st["node_key"], terminal=False))
             prev_state_key, prev_state_type = st["node_key"], st["type"]
         elif prev_kind is None:
-            st = infer_state_for_action_pair(table, "*", etype)
+            st = _opening_state(table, label, etype)
             states.append(ChainState(node_key=st["node_key"], label=st["label"],
-                                      type=st["type"], actor=actor, inferred=True))
+                                      type=st["type"], actor=actor, inferred=True,
+                                      role=st.get("role")))
             prev_state_key, prev_state_type = st["node_key"], st["type"]
         # prev_kind == "state": prev_state_key/prev_state_type already current.
 
@@ -236,7 +315,7 @@ def compile_chain(
     if pending is not None:
         st = infer_state_for_action_pair(table, pending.type, _CHAIN_END)
         states.append(ChainState(node_key=st["node_key"], label=st["label"], type=st["type"],
-                                  actor=pending.actor, inferred=True))
+                                  actor=pending.actor, inferred=True, role=st.get("role")))
         edges.append(_edge_from_pending(pending, target_key=st["node_key"], terminal=True))
         state_after_event[pending.index] = st["node_key"]
 

@@ -22,6 +22,7 @@ from analysis.taxonomy_kind import (
     orientation_of,
     resolve_library_entry,
     resolve_pair,
+    role_of,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -196,6 +197,55 @@ def test_terminal_takedown_sweep_pass_unaffected_by_the_new_marker() -> None:
         assert infer_state_for_action_pair(table, typ, "$terminal")["node_key"] == "top transition"
 
 
+# ── D2: opening ($start) rows and the role-marked generic states ────────────────
+def test_start_sentinel_resolves_takedown_to_start_neutral() -> None:
+    table = load_inference_table()
+    assert resolve_pair(table["action_pair_to_state"], "$start", "takedown") == "start neutral"
+    assert infer_state_for_action_pair(table, "$start", "takedown")["node_key"] == "start neutral"
+
+
+def test_start_sentinel_unresolved_type_falls_back_to_scramble() -> None:
+    """Only 'takedown' has a declarative opening row — every other type still falls through to
+    the pre-existing '*|*' fallback via the `$start` sentinel, same as the plain '*' sentinel it
+    replaces did."""
+    table = load_inference_table()
+    for typ in ("submission", "pass", "sweep", "escape", "transition"):
+        assert infer_state_for_action_pair(table, "$start", typ)["node_key"] == "scramble"
+
+
+def test_generic_states_role_markers() -> None:
+    table = load_inference_table()
+    states = table["generic_states"]
+    assert states["finish"]["role"] == "finish"
+    assert states["start neutral"]["role"] == "start"
+    assert states["start top"]["role"] == "start"
+    assert states["start bottom"]["role"] == "start"
+    for bridge_key in ("scramble", "top transition", "chained submission"):
+        assert "role" not in states[bridge_key]
+
+
+def test_start_nodes_carry_the_documented_orientation() -> None:
+    table = load_inference_table()
+    states = table["generic_states"]
+    assert states["start neutral"]["orientation"] == "neutral"
+    assert states["start top"]["orientation"] == "top"
+    assert states["start bottom"]["orientation"] == "bottom"
+
+
+# ── role_of: the standalone node_key -> role lookup ──────────────────────────────
+def test_role_of_generic_states() -> None:
+    assert role_of("finish") == "finish"
+    assert role_of("start neutral") == "start"
+    assert role_of("start top") == "start"
+    assert role_of("start bottom") == "start"
+    assert role_of("scramble") is None
+
+
+def test_role_of_unknown_or_real_technique_node_is_none() -> None:
+    assert role_of("mount") is None
+    assert role_of("Some Made Up Node Nobody Curated") is None
+
+
 # ── orientation_of: top | bottom | neutral per state (curated) ──────────────────
 def test_orientation_of_bottom_guards() -> None:
     for label in ("Closed Guard", "Half Guard", "Spider Guard", "X-Guard", "50/50 Guard"):
@@ -217,6 +267,19 @@ def test_orientation_of_generic_states() -> None:
     assert orientation_of("Top Transition") == "top"
     assert orientation_of("Chained Submission") == "neutral"
     assert orientation_of("Finish") == "neutral"
+    assert orientation_of("Start Neutral") == "neutral"
+    assert orientation_of("Start Top") == "top"
+    assert orientation_of("Start Bottom") == "bottom"
+
+
+def test_state_orientation_json_agrees_with_inference_table_generic_states() -> None:
+    """`state_orientation.json` is the curated table's own doc-claimed "single source" for a
+    generic state's orientation — the copy inside `inference_table.json`'s `generic_states`
+    block must never drift from it."""
+    table = load_inference_table()
+    orientation = load_orientation_table()
+    for key, entry in table["generic_states"].items():
+        assert entry["orientation"] == orientation[key], key
 
 
 def test_orientation_of_deterministic_across_calls() -> None:

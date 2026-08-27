@@ -268,3 +268,17 @@ def orientation_of(canonical_label: str) -> Orientation:
         _ORIENTATION_TABLE = load_orientation_table()
     key = _normalize_name(str(canonical_label or ""))
     return cast(Orientation, _ORIENTATION_TABLE.get(key, "neutral"))
+
+
+# ── role: 'start' | 'finish' | None, per GENERIC state node_key (owner call, 2026-08-27) ────
+# Curated only where D2's own `generic_states` block says so — `chain_compiler.ChainState`
+# already carries `role` directly (set from the same table entry at the point of insertion), so
+# this is the standalone lookup for a caller that only has a node_key (e.g. a renderer walking
+# an already-serialized chain) and needs the same answer without re-deriving it.
+def role_of(node_key: str) -> str | None:
+    """``'start'|'finish'|None`` for a node_key, via the D2 inference table's ``generic_states``
+    block — the only place role is curated. A real technique node (never a `generic_states` key)
+    reads ``None``, same "curated, not guessed" convention as ``orientation_of``."""
+    table = load_inference_table()
+    entry = table["generic_states"].get(_normalize_name(str(node_key or "")))
+    return entry.get("role") if entry else None
