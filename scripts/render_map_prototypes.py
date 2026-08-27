@@ -332,13 +332,13 @@ h1{{font-size:15px;margin:0 0 4px}}.muted{{color:var(--ink2);font-size:12px;marg
 .g{{opacity:.45;border-style:dashed}}
 .legend{{font-size:11px;color:var(--ink2);margin:10px 0;line-height:1.6}}
 </style></head><body>
-<div id="canvas"></div>
+<div id="canvas"><canvas id="cv"></canvas></div>
 <div id="side"><h1>{title}</h1><div class="muted">{subtitle}</div>
 <div class="legend">{legend}</div>
 <div id="list">{list_html}</div></div>
 <script src="graph.js"></script>
 <script>const GV = {graphview};
-GAGraph.mount(document.getElementById('canvas'),{{mode:'map',nodes:GV.nodes,links:GV.links,pan:true,zoom:true,collide:true}});
+GAGraph.mount(document.getElementById('cv'),{{mode:'map',nodes:GV.nodes,links:GV.links,pan:true,zoom:true,collide:true}});
 </script></body></html>"""
 
 

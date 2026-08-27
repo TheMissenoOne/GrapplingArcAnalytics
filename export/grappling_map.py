@@ -93,7 +93,7 @@ input{{width:100%;margin:12px 0;padding:8px;background:#0c0c11;border:1px solid 
 .tag{{display:inline-block;font-size:11px;color:var(--ink2);border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin-right:4px}}
 .sug{{color:#caa45a}}
 </style></head><body>
-<div id="canvas"></div>
+<div id="canvas"><canvas id="cv"></canvas></div>
 <div id="side"><h1>Grappling Map</h1><div class="muted" id="meta"></div>
 <input id="q" placeholder="search positions…"/><div id="list"></div></div>
 <script src="graph.js"></script>
@@ -101,7 +101,7 @@ input{{width:100%;margin:12px 0;padding:8px;background:#0c0c11;border:1px solid 
 <script>
 const byKey = Object.fromEntries(MAP.nodes.map(n=>[n.node_key,n]));
 const gv = {graphview};
-GAGraph.mount(document.getElementById('canvas'),{{mode:'map',nodes:gv.nodes,links:gv.links}});
+GAGraph.mount(document.getElementById('cv'),{{mode:'map',nodes:gv.nodes,links:gv.links}});
 document.getElementById('meta').textContent =
   MAP.nodes.filter(n=>n.observed).length+' positions · '+MAP.edges.filter(e=>!e.suggested).length+' transitions · '+MAP.edges.filter(e=>e.suggested).length+' suggested';
 const list=document.getElementById('list');
