@@ -11,6 +11,16 @@ aggregated across the whole bundle into unique (node_key, actor) states and
 (source, target, action_key, actor) edges, each carrying a usage/occurrence count and an
 ``inferred`` flag (True only if EVERY occurrence was structurally inferred, never observed).
 
+You and your partner are fundamentally different — never the same node just because you both
+passed through "mount". Every rendered node id is qualified by actor: your own node_key for
+you, ``opp:{node_key}`` for partner (D4/userDecisionFlow's own actor-prefix convention). Edges
+stay strictly within one actor (that's what the compiler produces); the two subgraphs only
+interconnect through a synthetic **handover** link — derived here, not by the compiler, by
+walking each round's raw entries in original order and, on every actor switch, bridging the
+outgoing actor's live state (``CompiledChain.state_after_event``) to the incoming actor's first
+state. Rendered as a neutral dashed link (``fighter:'x'``), the same convention the public site
+already uses for contested links.
+
 Renders 6 self-contained HTMLs (``site/graph.js`` copied alongside, same pattern as
 ``export/grappling_map.py``) + an ``index.html`` + ``metrics.json``. Deterministic: dict/list
 order follows bundle read order (no unordered ``set`` in the render path), and
@@ -40,7 +50,7 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from analysis.chain_compiler import ChainEdge, ChainState, compile_two_sided
+from analysis.chain_compiler import ChainEdge, ChainState, CompiledChain, compile_two_sided
 from analysis.taxonomy_kind import load_inference_table
 
 logger = logging.getLogger(__name__)
@@ -58,6 +68,13 @@ _TYPE_BUCKET = {  # variant 5's action-type -> fighter-slot approximation, see m
 
 def _clamp3(n: float) -> int:
     return 1 if n <= 1 else (2 if n == 2 else 3)
+
+
+def _qid(actor: str, node_key: str) -> str:
+    """Node id qualified by actor — you and partner NEVER share a node, even on the same
+    node_key (they are fundamentally different states: your closed guard is not their closed
+    guard). ``opp:`` prefix convention per D4/userDecisionFlow."""
+    return node_key if actor == "you" else f"opp:{node_key}"
 
 
 # ── 1. bundle -> compiled chains ────────────────────────────────────────────────
@@ -100,6 +117,7 @@ class Aggregate:
     def __init__(self) -> None:
         self.states: dict[tuple[str, str], dict[str, Any]] = {}
         self.edges: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+        self.handovers: dict[tuple[str, str], dict[str, Any]] = {}
         self.raw_states_total = 0
         self.raw_states_inferred = 0
         self.raw_edges_total = 0
@@ -135,6 +153,42 @@ class Aggregate:
             row["count"] += 1
             row["inferred"] = row["inferred"] and e.inferred
 
+    def add_handover(self, from_actor: str, from_key: str, to_actor: str, to_key: str) -> None:
+        from_id, to_id = _qid(from_actor, from_key), _qid(to_actor, to_key)
+        key = (from_id, to_id)
+        row = self.handovers.get(key)
+        if row is None:
+            self.handovers[key] = {"from": from_id, "to": to_id, "from_actor": from_actor,
+                                    "from_key": from_key, "to_actor": to_actor,
+                                    "to_key": to_key, "count": 1}
+        else:
+            row["count"] += 1
+
+
+def _handovers_in_group(group: list[dict[str, Any]],
+                         compiled: dict[str, CompiledChain]) -> list[tuple[str, str, str, str]]:
+    """You/partner subgraphs never touch through an edge any more (edges are strictly
+    within-actor) — the only interconnection is a HANDOVER: the round's raw entries, in order,
+    switch actor mid-stream, and that switch bridges the outgoing actor's live state to the
+    incoming actor's first state (``ChainState`` -> ``ChainEdge`` never sees this, only the
+    raw actor-interleaved stream does). Returns ``(from_actor, from_key, to_actor, to_key)``
+    tuples; a switch is skipped if either side never reached a state yet (nothing to bridge)."""
+    pairs: list[tuple[str, str, str, str]] = []
+    prev_idx: int | None = None
+    prev_actor: str | None = None
+    for idx, e in enumerate(group):
+        actor = _actor_of(e)
+        if actor not in ("you", "partner"):
+            continue
+        if prev_actor is not None and actor != prev_actor:
+            from_side, to_side = _ACTOR_SIDE[prev_actor], _ACTOR_SIDE[actor]
+            from_key = compiled[from_side].state_after_event.get(prev_idx)
+            to_key = compiled[to_side].state_after_event.get(idx)
+            if from_key and to_key:
+                pairs.append((prev_actor, from_key, actor, to_key))
+        prev_idx, prev_actor = idx, actor
+    return pairs
+
 
 def build_aggregate(bundle: dict[str, Any]) -> Aggregate:
     table = load_inference_table()
@@ -150,6 +204,8 @@ def build_aggregate(bundle: dict[str, Any]) -> Aggregate:
                         agg.add_state(s)
                     for e in compiled[side].edges:
                         agg.add_edge(e)
+                for from_actor, from_key, to_actor, to_key in _handovers_in_group(group, compiled):
+                    agg.add_handover(from_actor, from_key, to_actor, to_key)
     return agg
 
 
@@ -183,40 +239,40 @@ def _own_graphview(agg: Aggregate) -> dict[str, Any]:
     return {"nodes": nodes, "links": links}, edges
 
 
-def _two_sided_graphview(states: dict, edges: list) -> dict[str, Any]:
-    nodes, seen = [], set()
-    for (node_key, actor), v in states.items():
-        if node_key in seen:
-            continue
-        seen.add(node_key)
-        agg_count = sum(vv["count"] for kk, vv in states.items() if kk[0] == node_key)
-        nodes.append({"id": node_key, "label": v["label"], "cat": _cat_of(v["type"]),
-                      "size": _clamp3(agg_count),
-                      "fighter": _fighter_for_states_subset(states, node_key)})
-    links = [{"from": v["source"], "to": v["target"], "weight": _clamp3(v["count"]),
-              "arrow": True, "fighter": _ACTOR_SIDE[v["actor"]]} for v in edges]
+def _two_sided_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
+    """Node per (node_key, actor) — you and partner are fundamentally different states, never
+    merged, even on the same node_key. Links: within-actor action edges (blue/orange) + neutral
+    dashed HANDOVER links (grey, ``fighter:'x'``, the site's own contested-link convention) that
+    bridge across the actor switch — the only interconnection between the two subgraphs now that
+    edges never cross actors."""
+    nodes = [{"id": _qid(actor, node_key), "label": v["label"], "cat": _cat_of(v["type"]),
+              "size": _clamp3(v["count"]), "fighter": _ACTOR_SIDE[actor]}
+             for (node_key, actor), v in states.items()]
+    links = [{"from": _qid(v["actor"], v["source"]), "to": _qid(v["actor"], v["target"]),
+              "weight": _clamp3(v["count"]), "arrow": True, "fighter": _ACTOR_SIDE[v["actor"]]}
+             for v in edges]
+    links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
+               "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
     return {"nodes": nodes, "links": links}
 
 
-def _fighter_for_states_subset(states: dict[tuple[str, str], dict[str, Any]], node_key: str) -> str:
-    actors = {v["actor"] for k, v in states.items() if k[0] == node_key}
-    if len(actors) >= 2:
-        return "x"
-    return _ACTOR_SIDE.get(next(iter(actors), None), "a")
-
-
-def _complete_two_sided(agg: Aggregate) -> tuple[dict[str, Any], list[dict[str, Any]]]:
-    """Variant 3 — every you + every partner element."""
-    states = {k: v for k, v in agg.states.items()}
+def _complete_two_sided(agg: Aggregate) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
+    """Variant 3 — every you + every partner element, every handover."""
+    states = dict(agg.states)
     edges = list(agg.edges.values())
-    return _two_sided_graphview(states, edges), edges
+    handovers = list(agg.handovers.values())
+    return _two_sided_graphview(states, edges, handovers), edges, handovers
 
 
-def _sole_bridge_partner_nodes(you_node_keys: set[str], edges: list[dict[str, Any]]) -> set[str]:
-    """BFS-simple bridge check: a low-usage partner node is kept if it connects two OTHERWISE
-    disjoint you-components — i.e. it is the sole path between you elements, not just extra
-    partner-side noise. 'you components' = connectivity using only edges where both ends are
-    you nodes."""
+def _sole_bridge_partner_nodes(you_node_keys: set[str], edges: list[dict[str, Any]],
+                                handovers: list[dict[str, Any]]) -> set[str]:
+    """Union-find bridge check over the NEW qualified-id graph: a low-usage partner node is kept
+    if it connects two OTHERWISE disjoint you-components — i.e. it is the sole path between you
+    elements, not just extra partner-side noise. 'you components' = connectivity using only
+    edges where both ends are you nodes. Edges never cross actors any more, so the only way a
+    partner node touches a you component at all is through a HANDOVER link — that's the bridge
+    this now scans, not coincidental same-node_key adjacency (the merge bug this whole change
+    removes)."""
     # union-find over you-only edges
     parent = {k: k for k in you_node_keys}
 
@@ -238,83 +294,91 @@ def _sole_bridge_partner_nodes(you_node_keys: set[str], edges: list[dict[str, An
             union(s, t)
 
     partner_neighbours: dict[str, set[str]] = {}
-    for e in edges:
-        if e["actor"] != "partner":
-            continue
-        for endpoint, other in ((e["source"], e["target"]), (e["target"], e["source"])):
-            if other in you_node_keys:
-                partner_neighbours.setdefault(endpoint, set()).add(find(other))
+    for h in handovers:
+        you_key = h["from_key"] if h["from_actor"] == "you" else h["to_key"]
+        partner_key = h["to_key"] if h["from_actor"] == "you" else h["from_key"]
+        if you_key in parent:
+            partner_neighbours.setdefault(partner_key, set()).add(find(you_key))
 
     return {p for p, comps in partner_neighbours.items() if len(comps) >= 2}
 
 
-def _selective_states_and_edges(agg: Aggregate) -> tuple[dict, list[dict[str, Any]]]:
+def _selective_states_and_edges(
+    agg: Aggregate,
+) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]]]:
     """Variant 4's element set: partner state/edge enters only if usageCount>=2 OR it is the
-    sole bridge to a you element. Returned separately (not just the graphview) so variants 5/6
-    can reuse the SAME filtered set instead of reverse-engineering it from rendered nodes."""
+    sole handover bridge to a you element. Returned separately (not just the graphview) so
+    variants 5/6 can reuse the SAME filtered set instead of reverse-engineering it from rendered
+    nodes."""
     you_keys = {k[0] for k in agg.states if k[1] == "you"}
     all_edges = list(agg.edges.values())
-    bridges = _sole_bridge_partner_nodes(you_keys, all_edges)
+    all_handovers = list(agg.handovers.values())
+    bridges = _sole_bridge_partner_nodes(you_keys, all_edges, all_handovers)
 
     kept_partner_keys = {
         k[0] for k, v in agg.states.items()
         if v["actor"] == "partner" and (v["count"] >= 2 or k[0] in bridges)
     }
-    kept_keys = you_keys | kept_partner_keys
     states = {k: v for k, v in agg.states.items()
               if v["actor"] == "you" or k[0] in kept_partner_keys}
-    edges = [e for e in all_edges if e["source"] in kept_keys and e["target"] in kept_keys]
-    return states, edges
+    kept_qids = {_qid(v["actor"], node_key) for (node_key, _actor), v in states.items()}
+    edges = [e for e in all_edges
+             if _qid(e["actor"], e["source"]) in kept_qids and _qid(e["actor"], e["target"]) in kept_qids]
+    handovers = [h for h in all_handovers if h["from"] in kept_qids and h["to"] in kept_qids]
+    return states, edges, handovers
 
 
-def _hubs_graphview(states: dict, edges: list) -> dict[str, Any]:
+def _hubs_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
     """Variant 5 — node size by DEGREE percentile (not usage), edges coloured by a 3-bucket
-    action-type approximation (see module docstring: graph.js has no per-link colour field)."""
+    action-type approximation (see module docstring: graph.js has no per-link colour field).
+    Handover links count toward degree too — they're real edges on screen."""
     degree: dict[str, int] = {}
     for e in edges:
-        degree[e["source"]] = degree.get(e["source"], 0) + 1
-        degree[e["target"]] = degree.get(e["target"], 0) + 1
+        s, t = _qid(e["actor"], e["source"]), _qid(e["actor"], e["target"])
+        degree[s] = degree.get(s, 0) + 1
+        degree[t] = degree.get(t, 0) + 1
+    for h in handovers:
+        degree[h["from"]] = degree.get(h["from"], 0) + 1
+        degree[h["to"]] = degree.get(h["to"], 0) + 1
     max_deg = max(degree.values(), default=1) or 1
 
-    nodes, seen = [], set()
-    for (node_key, _actor), v in states.items():
-        if node_key in seen:
-            continue
-        seen.add(node_key)
-        d = degree.get(node_key, 0)
-        nodes.append({"id": node_key, "label": v["label"], "cat": _cat_of(v["type"]),
+    nodes = []
+    for (node_key, actor), v in states.items():
+        qid = _qid(actor, node_key)
+        d = degree.get(qid, 0)
+        nodes.append({"id": qid, "label": v["label"], "cat": _cat_of(v["type"]),
                       "size": 1 + round(2 * d / max_deg)})
-    links = [{"from": e["source"], "to": e["target"], "weight": _clamp3(e["count"]), "arrow": True,
+    links = [{"from": _qid(e["actor"], e["source"]), "to": _qid(e["actor"], e["target"]),
+              "weight": _clamp3(e["count"]), "arrow": True,
               "fighter": _TYPE_BUCKET.get(e["action_type"], "x")} for e in edges]
+    links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
+               "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
     return {"nodes": nodes, "links": links}
 
 
-def _ghost_graphview(states: dict, edges: list) -> dict[str, Any]:
+def _ghost_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
     """Variant 6 — variant 4's selective set, with inferred elements rendered as ghosts:
     dashed + minimum weight/size, node colour a translucent grey (``color`` IS a real node
-    field graph.js reads — see module docstring)."""
-    nodes, seen = [], set()
-    for (node_key, _actor), v in states.items():
-        if node_key in seen:
-            continue
-        seen.add(node_key)
-        agg_count = sum(vv["count"] for kk, vv in states.items() if kk[0] == node_key)
-        all_inferred = all(vv["inferred"] for kk, vv in states.items() if kk[0] == node_key)
-        node = {"id": node_key, "label": v["label"], "cat": _cat_of(v["type"]),
-                "size": 1 if all_inferred else _clamp3(agg_count),
-                "fighter": _fighter_for_states_subset(states, node_key)}
-        if all_inferred:
+    field graph.js reads — see module docstring). Ghosting marks INFERRED only, never
+    'shared' — you/partner nodes are never merged any more."""
+    nodes = []
+    for (node_key, actor), v in states.items():
+        node = {"id": _qid(actor, node_key), "label": v["label"], "cat": _cat_of(v["type"]),
+                "size": 1 if v["inferred"] else _clamp3(v["count"]), "fighter": _ACTOR_SIDE[actor]}
+        if v["inferred"]:
             node["color"] = "rgba(150,150,160,0.35)"
         nodes.append(node)
     links = []
     for e in edges:
-        link = {"from": e["source"], "to": e["target"], "arrow": True,
-                "fighter": _ACTOR_SIDE[e["actor"]]}
+        link = {"from": _qid(e["actor"], e["source"]), "to": _qid(e["actor"], e["target"]),
+                "arrow": True, "fighter": _ACTOR_SIDE[e["actor"]]}
         if e["inferred"]:
             link["weight"], link["dashed"] = 1, True
         else:
             link["weight"] = _clamp3(e["count"])
         links.append(link)
+    links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
+               "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
     return {"nodes": nodes, "links": links}
 
 
@@ -367,8 +431,8 @@ def _write_page(out: Path, filename: str, title: str, subtitle: str, legend: str
 _VARIANT_DESCRIPTIONS = [
     ("1-baseline.html", "the app's CURRENT graph — technique=node — the comparison ruler"),
     ("2-migrado-proprio.html", "new model, YOU only — states=nodes, edges=action"),
-    ("3-migrado-oponente-completo.html", "+ every partner element (blue you / orange partner / grey both)"),
-    ("4-migrado-oponente-seletivo.html", "partner enters only if used >=2x or sole bridge to a you node"),
+    ("3-migrado-oponente-completo.html", "+ every partner element (own node, never merged with yours) + handovers"),
+    ("4-migrado-oponente-seletivo.html", "partner enters only if used >=2x or sole handover bridge to a you node"),
     ("5-hubs.html", "node size by degree, edges bucketed by action type (see legend)"),
     ("6-ghost-inferidos.html", "variant 4 + inferred states/edges rendered as ghosts (dashed/grey)"),
 ]
@@ -405,40 +469,46 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
     metrics["variants"]["2-migrado-proprio"] = _variant_metrics(gv2, edges2, 0)
 
     # 3 — full two-sided
-    gv3, edges3 = _complete_two_sided(agg)
+    gv3, edges3, handovers3 = _complete_two_sided(agg)
     partner3 = sum(1 for k in agg.states if k[1] == "partner") + sum(1 for e in edges3 if e["actor"] == "partner")
     _write_page(out, "3-migrado-oponente-completo.html", "3 — + full opponent",
                 "every you + every partner element",
-                "blue=you orange=partner grey=both touched this node", gv3, edges3)
-    metrics["variants"]["3-migrado-oponente-completo"] = _variant_metrics(gv3, edges3, partner3)
+                "blue=you, orange=opponent (separate nodes, never merged), "
+                "grey dashed=handover (actor switch)", gv3, edges3)
+    metrics["variants"]["3-migrado-oponente-completo"] = _variant_metrics(
+        gv3, edges3, partner3, len(handovers3))
 
-    # 4 — selective opponent (states4/edges4 reused by 5 and 6: same partner-noise gate)
-    states4, edges4 = _selective_states_and_edges(agg)
-    gv4 = _two_sided_graphview(states4, edges4)
+    # 4 — selective opponent (states4/edges4/handovers4 reused by 5 and 6: same partner-noise gate)
+    states4, edges4, handovers4 = _selective_states_and_edges(agg)
+    gv4 = _two_sided_graphview(states4, edges4, handovers4)
     partner4 = sum(1 for k in states4 if k[1] == "partner") + sum(1 for e in edges4 if e["actor"] == "partner")
     _write_page(out, "4-migrado-oponente-seletivo.html", "4 — Selective opponent",
-                "partner element kept only if used >=2x or sole bridge to a you element",
-                "same colours as (3), fewer partner nodes", gv4, edges4)
-    metrics["variants"]["4-migrado-oponente-seletivo"] = _variant_metrics(gv4, edges4, partner4)
+                "partner element kept only if used >=2x or sole handover bridge to a you element",
+                "blue=you, orange=opponent, grey dashed=handover — fewer partner nodes than (3)",
+                gv4, edges4)
+    metrics["variants"]["4-migrado-oponente-seletivo"] = _variant_metrics(
+        gv4, edges4, partner4, len(handovers4))
 
     # 5 — hubs (same element set as 4, different sizing/colour)
-    gv5 = _hubs_graphview(states4, edges4)
+    gv5 = _hubs_graphview(states4, edges4, handovers4)
     _write_page(out, "5-hubs.html", "5 — Hubs (degree size, action-type colour)",
-                "node size = degree percentile",
+                "node size = degree percentile (handover links count toward degree)",
                 "APPROXIMATION: graph.js has no per-link colour field, so action type reuses "
                 "the 3-slot fighter palette — blue=submission/takedown, orange=pass/sweep, "
-                "grey=escape/transition/other. True per-type colour needs an App-side graph.js "
-                "change (Phase 5).",
+                "grey dashed=handover (actor switch). True per-type colour needs an App-side "
+                "graph.js change (Phase 5).",
                 gv5, edges4)
-    metrics["variants"]["5-hubs"] = _variant_metrics(gv5, edges4, partner4)
+    metrics["variants"]["5-hubs"] = _variant_metrics(gv5, edges4, partner4, len(handovers4))
 
     # 6 — ghost inferred (same element set as 4, inferred elements ghosted)
-    gv6 = _ghost_graphview(states4, edges4)
+    gv6 = _ghost_graphview(states4, edges4, handovers4)
     _write_page(out, "6-ghost-inferidos.html", "6 — Ghost inferred",
                 "variant 4 + inferred states/edges rendered as ghosts",
-                "dashed/grey = structurally inferred (D2 gap-fill), never an observed event",
+                "blue=you, orange=opponent, grey dashed=handover; "
+                "ghost (translucent) = structurally inferred (D2 gap-fill), never an observed "
+                "event — ghosting marks INFERRED only, never a shared/merged node",
                 gv6, edges4)
-    metrics["variants"]["6-ghost-inferidos"] = _variant_metrics(gv6, edges4, partner4)
+    metrics["variants"]["6-ghost-inferidos"] = _variant_metrics(gv6, edges4, partner4, len(handovers4))
 
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,
@@ -463,7 +533,8 @@ def _pct(n: int, total: int) -> float:
     return round(100.0 * n / total, 1) if total else 0.0
 
 
-def _variant_metrics(gv: dict[str, Any], edges: list[dict[str, Any]] | None, partner_elements: int) -> dict[str, Any]:
+def _variant_metrics(gv: dict[str, Any], edges: list[dict[str, Any]] | None, partner_elements: int,
+                      handover_links: int = 0) -> dict[str, Any]:
     n_nodes, n_edges = len(gv["nodes"]), len(gv["links"])
     inferred_edges = sum(1 for e in edges if e.get("inferred")) if edges is not None else None
     return {
@@ -472,6 +543,7 @@ def _variant_metrics(gv: dict[str, Any], edges: list[dict[str, Any]] | None, par
         "edges_per_node": round(n_edges / n_nodes, 2) if n_nodes else 0.0,
         "pct_inferred_edges": _pct(inferred_edges, len(edges)) if edges else (0.0 if edges is not None else None),
         "partner_elements": partner_elements,
+        "handover_links": handover_links,
     }
 
 
@@ -485,11 +557,11 @@ def main() -> int:
     bundle = json.loads(args.bundle.read_text(encoding="utf-8"))
     metrics = render_all(bundle, args.out)
 
-    print(f"{'variant':32} {'nodes':>6} {'edges':>6} {'e/n':>6} {'%inf':>6} {'partner':>8}")
+    print(f"{'variant':32} {'nodes':>6} {'edges':>6} {'e/n':>6} {'%inf':>6} {'partner':>8} {'handover':>9}")
     for name, m in metrics["variants"].items():
         pct = m["pct_inferred_edges"]
         print(f"{name:32} {m['nodes']:>6} {m['edges']:>6} {m['edges_per_node']:>6} "
-              f"{'—' if pct is None else pct:>6} {m['partner_elements']:>8}")
+              f"{'—' if pct is None else pct:>6} {m['partner_elements']:>8} {m['handover_links']:>9}")
     cir = metrics["corpus_inference_rate"]
     print(f"\ncorpus inference rate: states {cir['states_inferred_pct']}% "
           f"({cir['states_inferred']}/{cir['states_total']}), "

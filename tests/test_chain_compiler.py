@@ -148,6 +148,42 @@ def test_compile_two_sided_splits_and_drops_unassigned_with_original_index():
     assert d.dropped[0].index == 2 and d.dropped[0].reason == "no_side"
 
 
+def test_state_after_event_tracks_current_state_incl_terminal_and_dropped():
+    """``state_after_event[idx]`` = the node_key live right after processing raw index idx —
+    unchanged across a dropped/transparent event, and overwritten to the terminal-inferred
+    state once the trailing pending action resolves post-loop (rule 6)."""
+    chain = compile_chain([
+        _ev("Mount", "control"),          # 0: state -> "mount"
+        _ev("Grip Fighting", "concept"),  # 1: transparent, carries "mount" forward
+        _ev("Armbar", "submission"),      # 2: pending action, resolves post-loop -> terminal
+    ], inference_table=TABLE)
+
+    assert chain.state_after_event[0] == "mount"
+    assert chain.state_after_event[1] == "mount"
+    assert chain.state_after_event[2] == chain.states[-1].node_key == "scramble"
+
+
+def test_compile_two_sided_remaps_state_after_event_to_original_index():
+    events = [
+        _ev("Closed Guard", "guard", actor="x"),
+        _ev("Guard Pass", "pass", actor="y"),
+        _ev("Round End", "reset", actor="referee"),
+    ]
+
+    def side_of(ev):
+        if ev["actor"] == "x":
+            return "a"
+        if ev["actor"] == "y":
+            return "b"
+        return None
+
+    result = compile_two_sided(events, side_of, inference_table=TABLE)
+    assert result["a"].state_after_event == {0: "closed guard"}
+    # rule 6: pass|* -> top transition
+    assert result["b"].state_after_event == {1: "top transition"}
+    assert result["dropped"].state_after_event == {}
+
+
 def test_determinism():
     events = [
         _ev("K-Guard", "guard"),

@@ -50,7 +50,7 @@ never silently lost — they land in the ``'dropped'`` pseudo-side of the return
 from __future__ import annotations
 
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from typing import Any
 
 from analysis.names import _normalize_name, canonicalize
@@ -97,6 +97,12 @@ class CompiledChain:
     states: list[ChainState]
     edges: list[ChainEdge]
     dropped: list[DroppedEvent]
+    # event index (into the ORIGINAL ``events`` this chain was built from — already rewritten
+    # by ``compile_two_sided``, same convention as ``ChainEdge.source_event_index``) -> the
+    # node_key that is the CURRENT/live state right after that event was processed. Used by
+    # callers that need to bridge across actors at a point in the raw stream (e.g. handover
+    # edges in ``scripts/render_map_prototypes.py``) without re-deriving the walk themselves.
+    state_after_event: dict[int, str | None] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -142,6 +148,7 @@ def compile_chain(
     states: list[ChainState] = []
     edges: list[ChainEdge] = []
     dropped: list[DroppedEvent] = []
+    state_after_event: dict[int, str | None] = {}
 
     prev_kind: str | None = None          # 'state' | 'action' | None (nothing seen yet)
     prev_state_key: str | None = None
@@ -159,6 +166,7 @@ def compile_chain(
         if kind == "transparent":
             dropped.append(DroppedEvent(index=idx, label=label, event_type=etype,
                                          reason="transparent"))
+            state_after_event[idx] = prev_state_key
             continue
 
         key = canonicalize(_normalize_name(label))
@@ -180,6 +188,7 @@ def compile_chain(
             prev_state_key, prev_state_type = key, etype
             prev_kind = "state"
             last_actor = actor
+            state_after_event[idx] = prev_state_key
             continue
 
         # kind == "action"
@@ -201,14 +210,17 @@ def compile_chain(
         prev_kind = "action"
         prev_action_type = etype
         last_actor = actor
+        state_after_event[idx] = prev_state_key
 
     if pending is not None:
         st = infer_state_for_action_pair(table, pending.type, "*")
         states.append(ChainState(node_key=st["node_key"], label=st["label"], type=st["type"],
                                   actor=pending.actor, inferred=True))
         edges.append(_edge_from_pending(pending, target_key=st["node_key"], terminal=True))
+        state_after_event[pending.index] = st["node_key"]
 
-    return CompiledChain(states=states, edges=edges, dropped=dropped)
+    return CompiledChain(states=states, edges=edges, dropped=dropped,
+                          state_after_event=state_after_event)
 
 
 def compile_two_sided(
@@ -250,6 +262,7 @@ def compile_two_sided(
                 for e in compiled.edges
             ],
             dropped=[replace(d, index=orig_idx[d.index]) for d in compiled.dropped],
+            state_after_event={orig_idx[i]: v for i, v in compiled.state_after_event.items()},
         )
     result["dropped"] = CompiledChain(states=[], edges=[], dropped=unassigned)
     return result
