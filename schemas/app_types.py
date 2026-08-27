@@ -7,7 +7,7 @@ Use these to parse user bundle exports and produce benchmark comparisons.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Literal
+from typing import Any, ClassVar, Literal
 
 # ── User / Auth ───────────────────────────────────────────────
 
@@ -30,6 +30,19 @@ class RoundEntry:
     actor: Literal["you", "partner"]
     setup: str | None = None
     successful: bool | None = None  # None ≈ True (back-compat)
+    id: str | None = None
+    nodeKey: str | None = None  # noqa: N815 — mirrors the TS field name (bundle key)
+    sequenceId: str | None = None  # noqa: N815 — mirrors the TS field name (bundle key)
+
+    _FIELDS: ClassVar[frozenset[str]] = frozenset(
+        ("label", "assoc", "type", "actor", "setup", "successful", "id", "nodeKey", "sequenceId")
+    )
+
+    @classmethod
+    def from_dict(cls, e: dict[str, Any]) -> RoundEntry:
+        # Real App bundles carry extra keys the mirror doesn't (TS RoundEntry grows first);
+        # tolerate them instead of crashing on the next optional field the App adds.
+        return cls(**{k: v for k, v in e.items() if k in cls._FIELDS})
 
 
 @dataclass
@@ -164,7 +177,7 @@ class UserBundle:
                 reflection=s.get("reflection"),
             )
             for r in s.get("rounds", []):
-                entries = [RoundEntry(**e) for e in r.get("entries", [])]
+                entries = [RoundEntry.from_dict(e) for e in r.get("entries", [])]
                 session.rounds.append(RoundSnapshot(
                     id=r.get("id", ""), difficulty=r.get("difficulty", 5),
                     intensity=r.get("intensity", 5), duration_min=r.get("durationMin", 5),
