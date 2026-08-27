@@ -1168,6 +1168,30 @@
   ]
  },
  {
+  "id": "032a3629-d5a5-43d7-81f7-54168adaf565",
+  "a": "Amanda Leve",
+  "b": "Britney Elin",
+  "a_key": "amanda leve",
+  "b_key": "britney elin",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "ADCC Trials 2023 East Coast",
+  "year": 2023,
+  "winner": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
+  "a_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
+  "b_id": "9864d9dc-d47f-4680-85ce-c134177a40c3",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 1116,
+    "type": "submission",
+    "label": "Finish",
+    "actor_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
+    "successful": true
+   }
+  ]
+ },
+ {
   "id": "04064856-f2b9-45e3-a463-4b39f775bd9c",
   "a": "Helena Crevar",
   "b": "Alen O'Connell",
@@ -1206,7 +1230,7 @@
   "a_key": "elizabeth mitrovic",
   "b_key": "salli simola",
   "div_a": "+65 kg",
-  "div_b": null,
+  "div_b": "+65 kg",
   "event": "IBJJF Worlds 2023",
   "year": 2023,
   "winner": "80d52d5a-6139-4684-9799-870ac5e513a6",
@@ -1290,6 +1314,180 @@
     "label": "Triangle Choke",
     "actor_id": "aa8ba34c-61f2-471c-b916-3cac5cf5c2fa",
     "successful": true
+   }
+  ]
+ },
+ {
+  "id": "9712e4a9-06f0-42e3-88c0-d0f92353b649",
+  "a": "Nia Blackman",
+  "b": "Amanda Pamela Nicole",
+  "a_key": "nia blackman",
+  "b_key": "amanda pamela nicole",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "Polaris 26",
+  "year": 2023,
+  "winner": "05d12547-002f-4f90-8644-71278e8fbb15",
+  "a_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+  "b_id": "9588929f-6973-46be-9a4a-517aacc58daa",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 57,
+    "type": "submission",
+    "label": "Triangle Choke",
+    "actor_id": "9588929f-6973-46be-9a4a-517aacc58daa",
+    "successful": false
+   },
+   {
+    "ts": 133,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 153,
+    "type": "submission",
+    "label": "Triangle Choke",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 184,
+    "type": "pass",
+    "label": "Double Under Pass",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": false
+   },
+   {
+    "ts": 184,
+    "type": "pass",
+    "label": "Single Under Pass",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": false
+   },
+   {
+    "ts": 184,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": false
+   },
+   {
+    "ts": 184,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": false
+   },
+   {
+    "ts": 193,
+    "type": "pass",
+    "label": "Stack Pass",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 225,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 241,
+    "type": "guard",
+    "label": "50/50 Guard",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 247,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "9588929f-6973-46be-9a4a-517aacc58daa"
+   },
+   {
+    "ts": 273,
+    "type": "submission",
+    "label": "Foot Lock",
+    "actor_id": "9588929f-6973-46be-9a4a-517aacc58daa"
+   },
+   {
+    "ts": 282,
+    "type": "submission",
+    "label": "Toe Hold",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 282,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 289,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 338,
+    "type": "control",
+    "label": "Side Control",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 355,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 412,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": false
+   },
+   {
+    "ts": 419,
+    "type": "submission",
+    "label": "Buggy Choke",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 612,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 712,
+    "type": "guard",
+    "label": "Half Guard",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 761,
+    "type": "guard",
+    "label": "Guard Pull",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 778,
+    "type": "takedown",
+    "label": "Arm Drag",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": false
+   },
+   {
+    "ts": 921,
+    "type": "pass",
+    "label": "Smash Pass",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
+   },
+   {
+    "ts": 980,
+    "type": "control",
+    "label": "Back Control",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15"
    }
   ]
  },
@@ -1527,6 +1725,22 @@
     "actor_id": "ea20cb89-81f1-4335-9ba8-25ad0806f902"
    }
   ]
+ },
+ {
+  "id": "d52c1c33-274a-4eb1-b54c-a88f0d36680b",
+  "a": "Amanda Leve",
+  "b": "Bridget",
+  "a_key": "amanda leve",
+  "b_key": "bridget",
+  "div_a": "+65 kg",
+  "div_b": null,
+  "event": "ADCC Trials 2023 East Coast",
+  "year": 2023,
+  "winner": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
+  "a_id": "f16fc8ee-8b62-44e2-a386-d8f05284901b",
+  "b_id": "3f1cc6c9-d33e-49a0-aa36-de7dd05b3a05",
+  "win_type": "DECISION",
+  "seq": []
  },
  {
   "id": "ee80b192-d859-4fd7-9fb0-84b948ac1fba",
@@ -2319,6 +2533,79 @@
   ]
  },
  {
+  "id": "1a0fd924-9ce5-4d7f-9aca-e6b6997c5a65",
+  "a": "Maria Ruffatto",
+  "b": "Kauane Silva",
+  "a_key": "maria ruffatto",
+  "b_key": "kauane silva",
+  "div_a": "+65 kg",
+  "div_b": "+65 kg",
+  "event": "ADCC Trials 2024 South American 2",
+  "year": 2024,
+  "winner": "6e91b15c-b272-42a7-b02a-f9519f6970d4",
+  "a_id": "6e91b15c-b272-42a7-b02a-f9519f6970d4",
+  "b_id": "06068719-8842-4a06-af4e-159318c94258",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 12590,
+    "type": "control",
+    "label": "Collar Tie",
+    "actor_id": "6e91b15c-b272-42a7-b02a-f9519f6970d4",
+    "successful": true
+   },
+   {
+    "ts": 12645,
+    "type": "takedown",
+    "label": "Snapdown",
+    "actor_id": "6e91b15c-b272-42a7-b02a-f9519f6970d4",
+    "successful": true
+   },
+   {
+    "ts": 12650,
+    "type": "guard",
+    "label": "Leg Entanglement",
+    "actor_id": "6e91b15c-b272-42a7-b02a-f9519f6970d4",
+    "successful": true
+   },
+   {
+    "ts": 12660,
+    "type": "submission",
+    "label": "Heel Hook",
+    "actor_id": "6e91b15c-b272-42a7-b02a-f9519f6970d4",
+    "successful": false
+   },
+   {
+    "ts": 12725,
+    "type": "control",
+    "label": "Top Control",
+    "actor_id": "06068719-8842-4a06-af4e-159318c94258",
+    "successful": true
+   },
+   {
+    "ts": 12735,
+    "type": "submission",
+    "label": "Knee Bar",
+    "actor_id": "6e91b15c-b272-42a7-b02a-f9519f6970d4",
+    "successful": false
+   },
+   {
+    "ts": 12775,
+    "type": "submission",
+    "label": "Straight Ankle Lock",
+    "actor_id": "6e91b15c-b272-42a7-b02a-f9519f6970d4",
+    "successful": true
+   },
+   {
+    "ts": 12785,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "06068719-8842-4a06-af4e-159318c94258",
+    "successful": true
+   }
+  ]
+ },
+ {
   "id": "2b9815d4-b11e-43ea-b697-2afad2cd9e53",
   "a": "Ane Svendsen",
   "b": "Aurelie Le Vern",
@@ -2486,7 +2773,7 @@
   "a_key": "elizabeth mitrovic",
   "b_key": "amanda leve",
   "div_a": "+65 kg",
-  "div_b": null,
+  "div_b": "+65 kg",
   "event": "ADCC Trials 2024 West Coast",
   "year": 2024,
   "winner": "80d52d5a-6139-4684-9799-870ac5e513a6",
@@ -3241,7 +3528,7 @@
   "a_key": "anabel lopez",
   "b_key": "salli simola",
   "div_a": "+65 kg",
-  "div_b": null,
+  "div_b": "+65 kg",
   "event": "World No-Gi 2024",
   "year": 2024,
   "winner": "52dfa67a-9792-4272-abf9-7de3f5f92ba3",
@@ -3567,6 +3854,87 @@
   ]
  },
  {
+  "id": "82bf1dae-b948-4e4d-8d42-3a7c232887eb",
+  "a": "Nia Blackman",
+  "b": "Salli Simola",
+  "a_key": "nia blackman",
+  "b_key": "salli simola",
+  "div_a": "+65 kg",
+  "div_b": "+65 kg",
+  "event": "ADCC Trials 2024 European",
+  "year": 2024,
+  "winner": "05d12547-002f-4f90-8644-71278e8fbb15",
+  "a_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+  "b_id": "d4775237-2ac4-4f1b-a83c-4a8bda8175e6",
+  "win_type": "DECISION",
+  "seq": [
+   {
+    "ts": 17745,
+    "type": "control",
+    "label": "Collar Tie",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": true
+   },
+   {
+    "ts": 17865,
+    "type": "takedown",
+    "label": "Snapdown",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": true
+   },
+   {
+    "ts": 17875,
+    "type": "guard",
+    "label": "Seated Guard",
+    "actor_id": "d4775237-2ac4-4f1b-a83c-4a8bda8175e6",
+    "successful": true
+   },
+   {
+    "ts": 18015,
+    "type": "guard",
+    "label": "Closed Guard",
+    "actor_id": "d4775237-2ac4-4f1b-a83c-4a8bda8175e6",
+    "successful": true
+   },
+   {
+    "ts": 18105,
+    "type": "guard",
+    "label": "Inversion",
+    "actor_id": "d4775237-2ac4-4f1b-a83c-4a8bda8175e6",
+    "successful": true
+   },
+   {
+    "ts": 18115,
+    "type": "escape",
+    "label": "Escape to Standing",
+    "actor_id": "d4775237-2ac4-4f1b-a83c-4a8bda8175e6",
+    "successful": true
+   },
+   {
+    "ts": 18330,
+    "type": "control",
+    "label": "Collar Tie",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": true
+   },
+   {
+    "ts": 18420,
+    "type": "takedown",
+    "label": "Double Leg Takedown",
+    "points": 2,
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": true
+   },
+   {
+    "ts": 18435,
+    "type": "control",
+    "label": "Top Control",
+    "actor_id": "05d12547-002f-4f90-8644-71278e8fbb15",
+    "successful": true
+   }
+  ]
+ },
+ {
   "id": "8c682305-356b-47e8-95d5-b23a236006bf",
   "a": "Nadia Frankland",
   "b": "Paige Ivette",
@@ -3746,7 +4114,7 @@
   "b": "Nadia Frankland",
   "a_key": "sula loewenthal",
   "b_key": "nadia frankland",
-  "div_a": null,
+  "div_a": "65 kg",
   "div_b": "65 kg",
   "event": "ADCC Trials 2024 Asia & Oceania",
   "year": 2024,
@@ -3843,13 +4211,86 @@
   ]
  },
  {
+  "id": "b784429f-8ec6-4e82-9f61-d61fedfefb11",
+  "a": "Nikki Lloyd-Griffiths",
+  "b": "Gase Sanita",
+  "a_key": "nikki lloydgriffiths",
+  "b_key": "gase sanita",
+  "div_a": "+65 kg",
+  "div_b": "+65 kg",
+  "event": "ADCC Trials 2024 Asia & Oceania",
+  "year": 2024,
+  "winner": "5270ce4a-f4cd-47a7-91bb-911eab67c6c5",
+  "a_id": "5270ce4a-f4cd-47a7-91bb-911eab67c6c5",
+  "b_id": "c6b5831d-b58d-4179-8351-9d0a4e1f853a",
+  "win_type": "SUBMISSION",
+  "seq": [
+   {
+    "ts": 27940,
+    "type": "control",
+    "label": "Collar Tie",
+    "actor_id": "5270ce4a-f4cd-47a7-91bb-911eab67c6c5",
+    "successful": true
+   },
+   {
+    "ts": 27990,
+    "type": "takedown",
+    "label": "Snapdown",
+    "actor_id": "5270ce4a-f4cd-47a7-91bb-911eab67c6c5",
+    "successful": true
+   },
+   {
+    "ts": 28015,
+    "type": "control",
+    "label": "Top Control",
+    "actor_id": "5270ce4a-f4cd-47a7-91bb-911eab67c6c5",
+    "successful": true
+   },
+   {
+    "ts": 28045,
+    "type": "guard",
+    "label": "Closed Guard",
+    "actor_id": "c6b5831d-b58d-4179-8351-9d0a4e1f853a",
+    "successful": true
+   },
+   {
+    "ts": 28080,
+    "type": "escape",
+    "label": "Escape to Standing",
+    "actor_id": "c6b5831d-b58d-4179-8351-9d0a4e1f853a",
+    "successful": true
+   },
+   {
+    "ts": 28160,
+    "type": "takedown",
+    "label": "Single Leg Takedown",
+    "actor_id": "5270ce4a-f4cd-47a7-91bb-911eab67c6c5",
+    "successful": true
+   },
+   {
+    "ts": 28165,
+    "type": "submission",
+    "label": "Armbar",
+    "actor_id": "5270ce4a-f4cd-47a7-91bb-911eab67c6c5",
+    "successful": true
+   },
+   {
+    "ts": 28175,
+    "type": "submission",
+    "label": "Tap",
+    "actor_id": "c6b5831d-b58d-4179-8351-9d0a4e1f853a",
+    "successful": true
+   }
+  ]
+ },
+ {
   "id": "b85383fb-1a94-491f-9945-09a7fce75564",
   "a": "Ana Carolina Vieira",
   "b": "Amanda Leve",
   "a_key": "ana carolina vieira",
   "b_key": "amanda leve",
   "div_a": "65 kg",
-  "div_b": null,
+  "div_b": "+65 kg",
   "event": "ADCC 2024",
   "year": 2024,
   "winner": "423cbcd4-4746-46b2-a856-b9331bee8b17",
@@ -4209,7 +4650,7 @@
   "b": "Amy Campo",
   "a_key": "amanda leve",
   "b_key": "amy campo",
-  "div_a": null,
+  "div_a": "+65 kg",
   "div_b": "+65 kg",
   "event": "ADCC 2024",
   "year": 2024,

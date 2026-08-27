@@ -891,9 +891,11 @@ def test_the_extended_manifest_parses_and_shapes_two_divisions() -> None:
     assert manifest["division_mapping"] == {"60 kg": "65 kg", "+60 kg": "+65 kg"}
     for d in manifest["divisions"]:
         for x in d["athletes"]:
-            assert x["origin"] in ("roster2026", "adcc2022")
+            assert x["origin"] in ("roster2026", "adcc2022", "corpus")
             if x["origin"] == "adcc2022":
                 assert x.get("original_division") in manifest["division_mapping"]
+            if x["origin"] == "corpus":
+                assert x.get("provenance")
 
 
 def test_the_extended_manifest_references_all_sixteen_roster_athletes() -> None:

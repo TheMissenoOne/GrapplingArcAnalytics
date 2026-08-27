@@ -1,0 +1,81 @@
+{
+  "_comment": [
+    "ADCC women's 65kg/+65kg sourcing batch 2, 2026-08-27. Step 1 of the ingestion runbook",
+    "(sourcing only) -- nothing in this file has been downloaded or rendered yet.",
+    "",
+    "Same shape as women_65.json: one row per DOWNLOADED video (frame_pdf.py's Entry --",
+    "url/start/end/label/note/kind/skip/transcript). Every row below carries `skip` because",
+    "none of the four resolved videos has a bout timestamp inside it yet -- each is a",
+    "full_event (a whole bracket replay or supercut), not a per-bout upload, and the task",
+    "that sourced this batch explicitly left timestamps for the capture step. A skip entry is",
+    "kept in the file rather than deleted for the same reason women_65.json gives: a video",
+    "that exists and was deliberately not rendered YET is a different fact from a fight",
+    "nobody found footage for. Once a bout's video-absolute start/end is located, split that",
+    "row into one Entry per bout (drop `skip`, add `start`/`end`) the same way",
+    "trials_2023_24_manifest.json splits pwGbW5GZgfc.",
+    "",
+    "Every target bout inside these videos, resolved or not, is indexed with its published",
+    "winner in the sibling file women_65_batch2_bouts.json -- read that one for the actual",
+    "bout list. This file only tracks WHICH VIDEOS carry them.",
+    "",
+    "Cross-reference note: pwGbW5GZgfc (the ADCC Trials Finals 2023-24 compilation) already",
+    "has a row in trials_2023_24_manifest.json with the Ana Vieira vs. Gabrielle McComb bout",
+    "at start=12140/end=12575 -- rendered (PDF exists under",
+    "data/frame_pdf/trials_2023_24/pendentes_gemini/processed/), not yet in a dump. It is",
+    "listed here too (skip) purely so this batch's manifest is a complete sourcing record;",
+    "do not re-render it from here.",
+    "",
+    "FloGrappling row requires --cookies-from-browser (owner's logged-in session) at capture",
+    "time -- anonymous yt-dlp gets HTTP 403/paywall on these, same as every other Flo source",
+    "already in this repo (see women_65.json's Polaris rows).",
+    "",
+    "Owner backlog NOT in this file (no resolvable URL yet, so no Entry row is honest -- a",
+    "fake url would just error out of yt-dlp at capture time): FloGrappling replay pages for",
+    "the Trials semifinals/quarterfinals below. Full target list with published winners is in",
+    "women_65_batch2_bouts.json; the ones with url=null there are this backlog:",
+    "  - Helena Crevar def. Aurelie Le Vern, ADCC 2024 Worlds -65kg QF, heel hook 2:39",
+    "    (checked: NOT covered by the already-ingested -65kg supercut dump -- that dump has",
+    "    Opening Round / Semifinal / Bronze / Final only, no Quarterfinal round at all. Grep:",
+    "    no 'Quarterfinal' stage and no 'Aurelie'/'Le Vern' anywhere in",
+    "    scripts/dumps/supercut_the_entire_2024_adcc_worlds_65kg_bracket_data.py. Genuinely",
+    "    missing footage, not a duplicate.)",
+    "  - Helena Crevar def. Nicole Mathew, West Coast Trials 2024 SF, ankle lock",
+    "  - Morgan Black def. Leilani Bernales, West Coast Trials 2024 SF, 2-0",
+    "  - Helena Crevar def. Aislinn O'Connell, East Coast Trials 2023, ankle lock -- ALREADY",
+    "    IN PROD with 0 events (scripts/dumps/adcc_trials2023_ec_semis_data.py has the row).",
+    "    This is a RE-READ target (enrichment of an existing 0-event match), not a new bout.",
+    "  - Amanda Leve x4, East Coast Trials 2023 +65kg bracket, all sub <3min -- opponents and",
+    "    exact methods were not given in the sourcing task; needs a bracket sheet or the",
+    "    owner's capture-time lookup before these can become four real bout rows."
+  ],
+  "videos": [
+    {
+      "url": "https://www.youtube.com/watch?v=n_dkNnfjx4s",
+      "kind": "full_event",
+      "label": "ADCC 2022 women's brackets (60kg + +60kg), full replay",
+      "note": "targets inside, video-absolute ts unresolved: Ffion Davies def. Adele Fornarino (60kg QF, RNC) [rrb]; Brianna Ste-Marie def. Elvira Karppinen (60kg QF, points); Gabi Garcia def. Nikki Lloyd-Griffiths (+60kg QF, Armbar) [rrb]; Rafaela Guedes def. Kendall Reusing (+60kg SF, injury)",
+      "skip": "ts not yet located for any of the 4 target bouts inside -- locate at capture (widened-step locator pass), then split into per-bout rows with start/end"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=mvxE73j-Njc",
+      "kind": "full_event",
+      "label": "ADCC 2024 absolutes replay",
+      "note": "target inside, video-absolute ts unresolved: Bia Mesquita def. Kendall Reusing (absolute QF, RNC 1:32 broadcast-clock mark) [rrb]",
+      "skip": "ts not yet located -- locate at capture, then split into a per-bout row with start/end"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=pwGbW5GZgfc",
+      "kind": "full_event",
+      "label": "ADCC Trials Finals 2023-24 compilation",
+      "note": "target: Ana Carolina Vieira def. Gabrielle McComb (South American Trials 2 2024 65kg F final, Guillotine) [rrb]",
+      "skip": "already rendered + curated via the trials_2023_24 pipeline (data/frame_pdf/trials_2023_24_bouts.json start=12140 end=12575, data/frame_pdf/trials_2023_24_manifest.json) -- PDF exists at data/frame_pdf/trials_2023_24/pendentes_gemini/processed/ana-vieira-vs--gabrielle-mccomb-12140-pwGbW5GZgfc.pdf, not yet in a dump. Cross-referenced here for completeness only -- NOT a batch2 render target, do not re-render from this file"
+    },
+    {
+      "url": "https://www.flograppling.com/video/15883907",
+      "kind": "full_event",
+      "label": "ADCC 2024 Worlds +65kg bracket, full supercut",
+      "note": "targets inside, video-absolute ts unresolved: Rafaela Guedes def. Kendall Reusing (SF, Guillotine) [rrb]; Kendall Reusing def. Maria Ruffatto (QF, RNC) [rrb]; Ana Julia Campo def. Nikki Lloyd-Griffiths (QF, arm-in RNC) [rrb]; Alexia de Jesus def. Milena Mitrovic (QF, 2-0); Rafaela Guedes def. Nia Blackman (QF, 2-0); Rafaela Guedes def. Alexia de Jesus (Final, 2-0); Kendall Reusing def. Ana Julia Campo (Bronze, 2-0)",
+      "skip": "ts not yet located for any of the 7 target bouts inside -- requires FloGrappling cookies (--cookies-from-browser, owner's session) to even download; locate at capture, then split into per-bout rows with start/end"
+    }
+  ]
+}
