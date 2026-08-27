@@ -1,0 +1,613 @@
+{
+  "contract": "kind_of(label, type) -> 'action'|'state'|'transparent' (D1); inference_table = D2's structural pair -> generic node/edge lookup, verbatim.",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_taxonomy_kind_fixtures.py",
+  "inference_table": {
+    "action_pair_to_state": {
+      "*|*": "scramble",
+      "pass|*": "top transition",
+      "submission|submission": "chained submission",
+      "sweep|*": "top transition",
+      "takedown|*": "top transition"
+    },
+    "generic_actions": {
+      "guard transition": {
+        "action_key": "guard transition",
+        "label": "Guard Transition",
+        "type": "transition"
+      },
+      "transition": {
+        "action_key": "transition",
+        "label": "Transition",
+        "type": "transition"
+      }
+    },
+    "generic_states": {
+      "chained submission": {
+        "label": "Chained Submission",
+        "node_key": "chained submission",
+        "type": "control"
+      },
+      "scramble": {
+        "label": "Scramble",
+        "node_key": "scramble",
+        "type": "control"
+      },
+      "top transition": {
+        "label": "Top Transition",
+        "node_key": "top transition",
+        "type": "control"
+      }
+    },
+    "state_pair_to_action": {
+      "*|*": "transition",
+      "guard|guard": "guard transition"
+    },
+    "version": 1
+  },
+  "kinds": {
+    "5050 guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "americana keylock": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "anaconda choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "ankle pick": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "arm drag": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "arm triangle choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "armbar": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "back control": {
+      "kind": "state",
+      "type": "control"
+    },
+    "base": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "baseball bat choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "berimbolo": {
+      "kind": "action",
+      "type": "transition"
+    },
+    "bicep slicer": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "body lock": {
+      "kind": "action",
+      "type": "control"
+    },
+    "body lock from back": {
+      "kind": "action",
+      "type": "control"
+    },
+    "body lock pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "body triangle": {
+      "kind": "action",
+      "type": "control"
+    },
+    "bow and arrow choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "bridge upa escape": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "buggy choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "butterfly guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "butterfly sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
+    "calf lock": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "calf slicer": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "cartwheel pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "circle throw": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "clock choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "closed guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "collar sleeve guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "connection": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "cop lock": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "cross choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "crucifix": {
+      "kind": "state",
+      "type": "control"
+    },
+    "darce choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "de la riva guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "deep half guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "dlr leg drag pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "double leg takedown": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "double under pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "duck under": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "electric chair": {
+      "kind": "state",
+      "type": "control"
+    },
+    "ezekiel choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "firemans carry": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "float pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "flower sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
+    "folding pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "foot sweep": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "frame": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "ghost escape": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "gift wrap": {
+      "kind": "state",
+      "type": "control"
+    },
+    "gogoplata": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "granby roll": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "grip fighting": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "groin lock": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "guard pull": {
+      "kind": "action",
+      "type": "transition"
+    },
+    "guillotine choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "half guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "half guard smash pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "headquarters pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "heel hook": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "hip bump sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
+    "hip pin pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "hip throw": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "inside arm stack pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "inside trip": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "inverted triangle": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "john wayne sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
+    "kguard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "kimura": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "knee bar": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "knee cut pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "knee on belly": {
+      "kind": "state",
+      "type": "control"
+    },
+    "knee shield collapse pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "knee tap": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "kouchi gari": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "lasso guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "leg drag pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "leg hug": {
+      "kind": "state",
+      "type": "control"
+    },
+    "leg staple pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "level change": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "long step pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "loop choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "lumberjack sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
+    "mount": {
+      "kind": "state",
+      "type": "control"
+    },
+    "northsouth choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "northsouth position": {
+      "kind": "state",
+      "type": "control"
+    },
+    "old school sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
+    "omoplata shoulder lock": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "open guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "osoto gari": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "outside ashi garami": {
+      "kind": "state",
+      "type": "control"
+    },
+    "overhook": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "overunder pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "paper cutter choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "peruvian necktie": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "posture": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "pressure": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "pressure pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "pummeling": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "rear naked choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "reverse de la riva": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "rolling": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "rubber guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "saddle inside sankaku": {
+      "kind": "state",
+      "type": "control"
+    },
+    "sassae tsurikomi ashi": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "scarf hold": {
+      "kind": "state",
+      "type": "control"
+    },
+    "scissor sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
+    "shin to shin guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "shoulder crunch": {
+      "kind": "state",
+      "type": "control"
+    },
+    "shoulder throw": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "shrimp hip escape": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "side control": {
+      "kind": "state",
+      "type": "control"
+    },
+    "single leg takedown": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "single leg x": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "single under pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "smash pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "snapdown": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "spider guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "stack pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "straight ankle lock": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "sumi gaeshi": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "suplex": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "sweeping hip throw": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "tani otoshi": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "technical standup": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "toe hold": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "toreando pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "triangle choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "tripod pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "tripod sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
+    "truck": {
+      "kind": "state",
+      "type": "control"
+    },
+    "turtle position": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "twister": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "uchi mata": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "underhook": {
+      "kind": "transparent",
+      "type": "concept"
+    },
+    "von flue choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "weave pass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "worm guard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "wrist lock": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "xguard": {
+      "kind": "state",
+      "type": "guard"
+    },
+    "xpass": {
+      "kind": "action",
+      "type": "pass"
+    },
+    "zguard": {
+      "kind": "state",
+      "type": "guard"
+    }
+  }
+}

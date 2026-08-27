@@ -1,0 +1,148 @@
+"""D1 — the single classifier for the actions/states taxonomy migration.
+
+**Decision D1** (owner, 2026-08-27): AÇÕES (Lamas: takedown, guard pull, sweep, pass, back
+take, submission — plus ``escape``/``transition`` by explicit owner call) become edge labels;
+ESTADOS (guard, control, position) become nodes. ``concept`` is ``'transparent'`` pending a
+future triage pass — it is neither an action nor a state today, so it must not silently fall
+into either bucket.
+
+    kind = 'action'      iff  lamas_chain.lamas_state({type, label}) is not None
+                          OR  type in {sweep, takedown, pass, submission, escape, transition}
+    kind = 'transparent' iff  type == 'concept'
+    kind = 'state'        otherwise
+
+``escape`` and ``transition`` are forced into ``'action'`` by type alone, same as the four
+Lamas type-first families (``lamas_state`` already resolves those by type) — the owner's call
+extends that same type-first treatment to two more types rather than requiring a label match.
+
+**Reconciliation with existing constants** (this module does not replace them, both still
+answer their own narrower questions):
+
+- ``analysis.decision_flow.ACTION_TYPES`` = ``{pass, takedown, sweep, submission, escape,
+  transition}`` — the SAME six types D1 forces to ``'action'`` by type, verified byte-for-byte
+  at import time below. No divergence found.
+- ``analysis.perspective_sequence.STABLE_STATE_TYPES`` = ``{guard, control}`` — NOT a strict
+  subset of D1's states. Both types are disjoint from D1's forced-action type list (verified
+  below), so an event of one of these types is *never* forced to ``'action'`` by type alone —
+  but D1 still reads its LABEL through ``lamas_state``, and some ``guard``/``control`` labels
+  ARE actions (a guard pull, a landed back take). Measured on the 141-entry App library: 3 of
+  the 35 ``guard``/``control`` entries resolve to ``'action'`` this way ("Body Lock", "Body
+  Lock from Back" via the clinch tokens; "Body Triangle" via the back-take tokens). So "stable
+  state type" describes the common case, not a guarantee — this module is the one place that
+  reads the label to catch the exception `STABLE_STATE_TYPES` was never meant to.
+
+**The "Back Control" carve-out.** ``lamas_chain.BACK_TAKE_TOKENS`` includes the literal token
+``"back control"`` — correct for Lamas' own question (which reads `control/Back Control` as
+the ATTEMPT/SUCCESS of taking the back, since 89 of 91 corpus occurrences carry no `successful`
+flag and the position's own name says it was already taken), but wrong for D1's: "Back
+Control"/"Standing Back Control" name the durable POSITION, not the "back take" action that
+puts you there — and the owner's action list names "back take", not "back control", as the
+action. Left alone, D1 would fold the position into the action it names for a different
+reason than every other guard/control label folds in (token collision, not domain intent), so
+``kind_of`` carves those two literal labels back out to ``'state'`` before consulting
+``lamas_state`` at all. "Back Take" itself, and every OTHER `BACK_TAKE_TOKENS` label
+("Hooks In", "Body Triangle", "Rear Body Lock"), are left exactly as `lamas_state` reads them —
+the carve-out is scoped to the one label the owner's action name (`back take`, not `back
+control`) does not cover, not a broader re-reading of the back-take vocabulary.
+"""
+from __future__ import annotations
+
+import json
+from collections.abc import Mapping
+from pathlib import Path
+from typing import Any, Literal
+
+from analysis.decision_flow import ACTION_TYPES
+from analysis.lamas_chain import lamas_state
+from analysis.names import _deaccent, _normalize_name
+from analysis.perspective_sequence import STABLE_STATE_TYPES
+
+Kind = Literal["action", "state", "transparent"]
+
+# D1's own forced-action type list. Asserted equal to `decision_flow.ACTION_TYPES` below —
+# reusing that constant directly (rather than duplicating it) is what makes drift impossible.
+_FORCED_ACTION_TYPES = ACTION_TYPES
+
+# The "Back Control" carve-out (module docstring). Keyed on `lamas_chain._key` normalization
+# (deaccent then `_normalize_name`) so it matches exactly what `lamas_state` itself compares
+# against.
+_BACK_CONTROL_STATE_LABELS = frozenset({"back control", "standing back control"})
+
+assert _FORCED_ACTION_TYPES == frozenset(
+    {"pass", "takedown", "sweep", "submission", "escape", "transition"}
+), "decision_flow.ACTION_TYPES drifted from D1's forced-action type list"
+assert STABLE_STATE_TYPES.isdisjoint(_FORCED_ACTION_TYPES), (
+    "perspective_sequence.STABLE_STATE_TYPES overlaps a D1 forced-action type — "
+    "a 'guard'/'control' event would then always be an action, contradicting D1"
+)
+
+
+def kind_of(label: str, event_type: str) -> Kind:
+    """D1's classifier: one technique-library entry (or event) → 'action' | 'state' |
+    'transparent'. ``label`` should be the entry's ONE canonical label (English preferred,
+    same convention as ``export.app_node_scores.canonical_label``) — ``lamas_state`` reads
+    English tokens, so a Portuguese-only label can under-classify (see module docstring)."""
+    typ = (event_type or "").strip().lower()
+    if typ == "concept":
+        return "transparent"
+    if typ not in _FORCED_ACTION_TYPES:
+        key = _normalize_name(_deaccent(str(label or "")))
+        if key in _BACK_CONTROL_STATE_LABELS:
+            return "state"
+    if typ in _FORCED_ACTION_TYPES or lamas_state({"type": typ, "label": label}) is not None:
+        return "action"
+    return "state"
+
+
+# ── D2: structural inference table ──────────────────────────────────────────────
+# Never probabilistic — a fixed lookup, checked into `data/taxonomy/inference_table.json`.
+# Bridges the gap the migration creates: two adjacent ACTIONS need a generic STATE node to
+# connect through (edges don't chain to edges), and two adjacent STATES need a generic ACTION
+# edge (nodes don't chain to nodes).
+INFERENCE_TABLE_PATH = (
+    Path(__file__).resolve().parent.parent / "data" / "taxonomy" / "inference_table.json"
+)
+
+
+def load_inference_table(path: Path | None = None) -> dict[str, Any]:
+    """Read the D2 table. No caching — it's a few hundred bytes, read once per export run."""
+    with open(path or INFERENCE_TABLE_PATH, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def resolve_pair(table: Mapping[str, str], type_a: str, type_b: str) -> str:
+    """D2's pair resolution: exact ``"a|b"`` > first entry (table order) whose key has a
+    wildcard on one side and matches the fixed side > the ``"*|*"`` fallback.
+
+    Keys are by event TYPE, never by label — a table with 4-5 rows can cover every type
+    combination this way, where a label-keyed table could not.
+    """
+    a, b = (type_a or "").strip().lower(), (type_b or "").strip().lower()
+    exact = f"{a}|{b}"
+    if exact in table:
+        return table[exact]
+    for key, value in table.items():
+        if key == "*|*":
+            continue
+        ka, _, kb = key.partition("|")
+        if (ka == a or ka == "*") and (kb == b or kb == "*"):
+            return value
+    return table["*|*"]
+
+
+def infer_state_for_action_pair(
+    table: Mapping[str, Any], type_a: str, type_b: str
+) -> dict[str, Any]:
+    """The generic state entry bridging two consecutive action types with no state between
+    them, e.g. two submission attempts chain through ``generic_states['chained submission']``."""
+    key = resolve_pair(table["action_pair_to_state"], type_a, type_b)
+    return table["generic_states"][key]
+
+
+def infer_action_for_state_pair(
+    table: Mapping[str, Any], type_a: str, type_b: str
+) -> dict[str, Any]:
+    """The generic action entry bridging two consecutive state types with no action between
+    them, e.g. two guard states chain through ``generic_actions['guard transition']``."""
+    key = resolve_pair(table["state_pair_to_action"], type_a, type_b)
+    return table["generic_actions"][key]
