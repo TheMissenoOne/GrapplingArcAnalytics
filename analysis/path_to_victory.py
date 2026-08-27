@@ -93,9 +93,13 @@ def path_to_victory(
     rates = {n: _rates(g, n) for n in g}
     terminal = {n: _terminal_rate(g, n) for n in g}
     v = dict.fromkeys(g, 0.0)
+    # Gauss-Seidel sweep updates v[n] in place mid-loop, so the sweep order is part of
+    # the trajectory — a graph's node insertion order (== match read order upstream)
+    # must not leak into the converged values. Sort for a fixed sweep.
+    order = sorted(g)
     for _ in range(max_iter):
         delta = 0.0
-        for n in g:
+        for n in order:
             p_r, p_k = rates[n]
             p_t = terminal[n]
             cont = sum(p * v[j] for j, p in kernel[n])

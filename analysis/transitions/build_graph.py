@@ -86,7 +86,11 @@ def network_from_sequences(
     reward: defaultdict[str, float] = defaultdict(float)
     risk: defaultdict[str, float] = defaultdict(float)
     ok_count: defaultdict[str, float] = defaultdict(float)  # successful appearances (PtV rates)
-    node_type: dict[str, str] = {}
+    # A label can carry >1 type across the corpus (e.g. "Takedown" scored as both
+    # takedown and transition) — resolve by MAJORITY occurrence, not first-writer-wins,
+    # or the node's `type` (and everything PtV derives from it) depends on match read
+    # order. Tie-break on the type name itself so the result is a total order.
+    node_type_counts: dict[str, Counter[str]] = defaultdict(Counter)
     reaction_counts: dict[tuple[str, str], Counter[str]] = defaultdict(Counter)
 
     for seq in sequences:
@@ -97,7 +101,7 @@ def network_from_sequences(
             occ[e["label"]] += wt
             if e["ok"]:
                 ok_count[e["label"]] += wt
-            node_type.setdefault(e["label"], e["type"])
+            node_type_counts[e["label"]][e["type"]] += wt
 
         # index of each event's next *own*-actor event (None actor = no attributable flow)
         by_actor: dict[Any, list[int]] = defaultdict(list)
@@ -141,7 +145,10 @@ def network_from_sequences(
 
     for label, c in occ.items():
         g.add_node(label)
-        g.nodes[label]["type"] = node_type.get(label, "")
+        counts = node_type_counts[label]
+        best = max(counts.values()) if counts else 0
+        winners = sorted(t for t, ct in counts.items() if ct == best)
+        g.nodes[label]["type"] = winners[0] if winners else ""
         g.nodes[label]["occ"] = c
         g.nodes[label]["reward"] = reward[label]
         g.nodes[label]["risk"] = risk[label]

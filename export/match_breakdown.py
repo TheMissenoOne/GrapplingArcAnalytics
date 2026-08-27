@@ -369,7 +369,9 @@ def _headline(bd: dict[str, Any]) -> str:
 
 def _final_matches(session: Session) -> list[Match]:
     """Final bouts that actually have a sequence (an empty bout has nothing to show)."""
-    rows = session.execute(select(Match).where(Match.status == "final")).scalars()
+    rows = session.execute(
+        select(Match).where(Match.status == "final").order_by(Match.id)
+    ).scalars()
     return [m for m in rows if m.sequence]
 
 
