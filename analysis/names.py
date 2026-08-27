@@ -196,6 +196,13 @@ ATHLETE_ALIASES: dict[str, str] = {
     "p donabedian": "patrick donabedian",  # initial → Patrick
     "p gaudio": "patrick gaudio",       # initial → Patrick
     "felipe pena sf": "felipe pena",    # leaked "SF" (semifinal) stage tag
+    "ffion davies final": "ffion davies",  # leaked "Final" stage tag (ADCC 2022 women dup row)
+    # Sula(-Mae) Loewenthal/Lowenthal — one human, four spellings across dumps. "Gita" is the
+    # ADCC 2024 supercut transcript's name for the same athlete: the AO-Trials winner seeded #8
+    # who met Mesquita in the -65 opening round IS Sula-Mae Loewenthal (bout-evidence rationale).
+    "gita lowenthal": "sula mae lowenthal",
+    "sula loewenthal": "sula mae lowenthal",
+    "sula mae loewenthal": "sula mae lowenthal",
     "kyle bame": "kyle boehm",          # "Bame" transcription typo → Kyle Boehm
     # ADCC 2026 women's roster, confirmed 2026-08-20 from the bouts themselves rather than
     # from a string-similarity score. Each merges into the spelling the roster manifest uses.
