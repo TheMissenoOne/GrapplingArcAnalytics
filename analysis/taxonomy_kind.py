@@ -94,6 +94,90 @@ def kind_of(label: str, event_type: str) -> Kind:
     return "state"
 
 
+# ── the library-resolved entry point ────────────────────────────────────────────
+# Bug (owner-confirmed, real bundle): 80/114 logged entries carry a stale ``type`` snapshot
+# from the App at log time (e.g. a "Raspagem de Gancho" sweep logged with ``type: "control"``,
+# a "Guarda Fechada" guard logged the same way) — `kind_of` trusts that `type` when the label
+# doesn't hit an English Lamas token, so a Portuguese-labelled ACTION silently reads as a STATE
+# and becomes a node instead of an edge. Root cause: the caller passed the untrustworthy LOGGED
+# type instead of the technique LIBRARY's own type. `kind_of_entry` fixes this at the one place
+# every caller can route through — it resolves ``label`` against the App's technique library
+# FIRST (same file `scripts/export_taxonomy_kind_fixtures.py` already reads) and, when the
+# label is a known library entry, classifies on the library's own canonical label + type,
+# ignoring the caller's ``event_type`` entirely (it is unreliable exactly when it matters).
+# Mirrors the App's own `kindOf`, which resolves through the library before classifying.
+_APP_NODES_PATH = (
+    Path(__file__).resolve().parent.parent.parent / "GrapplingArcApp" / "src" / "data"
+    / "grappling-arch.nodes.json"
+)
+_LIBRARY_LOOKUP: dict[str, tuple[str, str]] | None = None
+
+
+def _build_library_lookup() -> dict[str, tuple[str, str]]:
+    """``{_normalize_name(variant): (canonical_english_label, library_type)}`` over every
+    App library entry's ``name``/``variations``/``translations.*`` (whatever locales the JSON
+    carries — inspected, not assumed: currently ``pt``/``en``). Same key convention
+    ``export.app_node_scores`` already uses to index the same file (``_normalize_name``, not
+    ``_deaccent``-first — that's the separate `lamas_chain._key` contract).
+
+    Collisions (two entries' variant texts normalize to the same key) are real — 11 in the
+    141-entry library, measured 2026-08-27: ``side mount`` (Side Control/Mount), ``ude garami``
+    (Kimura/Americana), ``harai goshi`` (Hip Throw/Sweeping Hip Throw), ``deep half guard`` +
+    ``zguard`` + ``knee shield`` (Half Guard/Z-Guard/Deep Half Guard overlap), ``ashi garami``
+    (X-Guard/Single Leg X), ``saddle`` (Back Control/Saddle), ``body lock das costas`` (Body
+    Lock from Back/Body Triangle), ``biceps slicer`` (Calf Slicer/Bicep Slicer), ``presso``
+    (Pressure Pass/Pressure — the concept/action collision the ticket names). Resolved
+    deterministically: FIRST entry wins in the library's own file order (the JSON is a
+    committed, static file — file order is already a fixed, reproducible order; same
+    first-wins-by-file-order convention `export.app_node_scores.build_scores` already
+    documents for the identical file), never overwritten by a later entry.
+    """
+    from export.app_node_scores import _name_variants, canonical_label
+
+    nodes = json.loads(_APP_NODES_PATH.read_text(encoding="utf-8"))
+    lookup: dict[str, tuple[str, str]] = {}
+    for node in nodes:
+        canon = canonical_label(node)
+        if not canon:
+            continue
+        typ = str(node.get("type") or "")
+        for text in _name_variants(node):
+            key = _normalize_name(text)
+            if key:
+                lookup.setdefault(key, (canon, typ))
+    return lookup
+
+
+def _library_lookup() -> dict[str, tuple[str, str]]:
+    global _LIBRARY_LOOKUP
+    if _LIBRARY_LOOKUP is None:
+        _LIBRARY_LOOKUP = _build_library_lookup()
+    return _LIBRARY_LOOKUP
+
+
+def resolve_library_entry(label: str) -> tuple[str, str] | None:
+    """``(canonical_english_label, library_type)`` for a raw label recognised by the App's
+    technique library, else ``None``. The library's OWN type — never the caller's — travels
+    with the resolved label, because that type is the trustworthy one (see module note above)."""
+    key = _normalize_name(str(label or ""))
+    if not key:
+        return None
+    return _library_lookup().get(key)
+
+
+def kind_of_entry(label: str, event_type: str | None) -> Kind:
+    """D1's classifier, entry point for real logged data: resolves ``label`` through the App's
+    technique library first (``resolve_library_entry``) and classifies on the library's own
+    canonical label + type — ``event_type`` is used only as a fallback, for labels the library
+    doesn't recognise. See the module note above `_build_library_lookup` for why the caller's
+    ``event_type`` cannot be trusted on its own."""
+    resolved = resolve_library_entry(label)
+    if resolved is not None:
+        canon_label, lib_type = resolved
+        return kind_of(canon_label, lib_type)
+    return kind_of(label, event_type or "")
+
+
 # ── D2: structural inference table ──────────────────────────────────────────────
 # Never probabilistic — a fixed lookup, checked into `data/taxonomy/inference_table.json`.
 # Bridges the gap the migration creates: two adjacent ACTIONS need a generic STATE node to

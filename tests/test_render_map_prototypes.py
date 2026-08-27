@@ -8,6 +8,21 @@ from pathlib import Path
 
 from scripts.render_map_prototypes import _complete_two_sided, build_aggregate, render_all
 
+_BUG_BUNDLE = {
+    "sessions": [{"rounds": [{"entries": [
+        {"label": "Closed Guard", "type": "guard", "actor": "you"},
+        # real bug: action logged with a stale STATE type ("control") — must become an edge,
+        # never a node, and must group with the same technique logged under a DIFFERENT
+        # (English) library variant in the next round.
+        {"label": "Raspagem de Gancho", "type": "control", "actor": "you"},
+        {"label": "Mount", "type": "control", "actor": "you"},
+    ]}, {"entries": [
+        {"label": "Closed Guard", "type": "guard", "actor": "you"},
+        {"label": "Hook Sweep", "type": "control", "actor": "you"},  # same technique, en variant
+        {"label": "Mount", "type": "control", "actor": "you"},
+    ]}]}]
+}
+
 _MOCK_BUNDLE = (
     Path(__file__).resolve().parents[2]
     / "GrapplingArcApp" / "src" / "data" / "mockData" / "mock_user_bundle.json"
@@ -87,6 +102,26 @@ def test_partner_and_you_nodes_are_never_merged_and_handovers_bridge_them():
         assert h["from"] in all_ids and h["to"] in all_ids  # bridges real rendered nodes
     handover_links = [link for link in gv["links"] if link.get("fighter") == "x"]
     assert handover_links and all(link["dashed"] for link in handover_links)
+
+
+def test_action_logged_with_stale_state_type_becomes_an_edge_not_a_node():
+    """Root-cause regression: a logged action ('Raspagem de Gancho') carrying a stale
+    `type: 'control'` snapshot must compile as an EDGE (kind_of_entry resolves the library's
+    real `sweep` type), never a state node — and the same technique logged under a different
+    library variant ('Hook Sweep') in another round must group into the SAME edge, not a
+    second one, while the RENDERED label keeps the owner's own first-seen wording."""
+    agg = build_aggregate(_BUG_BUNDLE)
+
+    node_labels = {v["label"] for v in agg.states.values()}
+    assert "Raspagem de Gancho" not in node_labels
+    assert "Hook Sweep" not in node_labels
+    assert {"Closed Guard", "Mount"} <= node_labels
+
+    sweep_edges = [v for v in agg.edges.values() if v["action_label"] in
+                   ("Raspagem de Gancho", "Hook Sweep")]
+    assert len(sweep_edges) == 1, agg.edges  # both rounds grouped into ONE action edge
+    assert sweep_edges[0]["count"] == 2
+    assert sweep_edges[0]["action_label"] == "Raspagem de Gancho"  # first-seen display wording
 
 
 def test_render_all_is_deterministic(tmp_path):

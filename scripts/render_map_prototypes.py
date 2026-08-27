@@ -51,7 +51,8 @@ from pathlib import Path
 from typing import Any
 
 from analysis.chain_compiler import ChainEdge, ChainState, CompiledChain, compile_two_sided
-from analysis.taxonomy_kind import load_inference_table
+from analysis.names import _normalize_name, canonicalize
+from analysis.taxonomy_kind import load_inference_table, resolve_library_entry
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +110,40 @@ def _actor_of(e: dict[str, Any]) -> str | None:
     return e.get("actor")
 
 
+def _resolve_group(
+    group: list[dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, str]]:
+    """Bug fix (owner-confirmed, real bundle): the owner's raw entries carry a stale ``type``
+    snapshot on 80/114 log lines (an action logged with a state's ``type``), and different
+    entries log the SAME technique under different spellings/pt-vs-en grafia — both of which
+    make ``compile_chain`` (which classifies + keys nodes/edges off exactly the ``label``/
+    ``type`` it's handed) split one technique into several nodes, or misfile an action as a
+    state. Fix: resolve every entry's label through the App's technique library
+    (``taxonomy_kind.resolve_library_entry`` — the same lookup ``kind_of_entry`` uses) BEFORE
+    handing events to ``compile_chain``, so classification and node/action keys are driven by
+    the library's canonical English label + trustworthy type, not the logged snapshot. Entries
+    outside the library keep their raw label/type unchanged (unresolvable, not misclassified).
+
+    Returns the resolved copy of ``group`` (only ``label``/``type`` overridden, every other
+    field — ``actor``, ``sequenceId``, ... — passed through) plus a ``{node/action key:
+    ORIGINAL logged label}`` map (first occurrence wins) so the RENDERED node/edge can still
+    show the owner's own wording instead of the internal canonical English one — grouping
+    changes, display doesn't.
+    """
+    resolved: list[dict[str, Any]] = []
+    display: dict[str, str] = {}
+    for e in group:
+        raw_label = str(e.get("label", e.get("event_label", "")) or "")
+        raw_type = str(e.get("type", e.get("event_type", "")) or "")
+        entry = resolve_library_entry(raw_label)
+        canon_label, canon_type = entry if entry is not None else (raw_label, raw_type)
+        new_e = dict(e)
+        new_e["label"], new_e["type"] = canon_label, canon_type
+        resolved.append(new_e)
+        display.setdefault(canonicalize(_normalize_name(canon_label)), raw_label)
+    return resolved, display
+
+
 class Aggregate:
     """Unique (node_key, actor) states / (source, target, action_key, actor) edges across the
     whole bundle, each with an occurrence count + an inferred flag (True iff EVERY occurrence
@@ -122,6 +157,13 @@ class Aggregate:
         self.raw_states_inferred = 0
         self.raw_edges_total = 0
         self.raw_edges_inferred = 0
+        # node/action key -> the owner's own logged label (`_resolve_group`, first seen wins) —
+        # display only, never affects grouping/classification.
+        self.display_labels: dict[str, str] = {}
+
+    def register_display_labels(self, display: dict[str, str]) -> None:
+        for key, label in display.items():
+            self.display_labels.setdefault(key, label)
 
     def add_state(self, s: ChainState) -> None:
         if s.actor not in ("you", "partner"):
@@ -131,7 +173,8 @@ class Aggregate:
         key = (s.node_key, s.actor)
         row = self.states.get(key)
         if row is None:
-            self.states[key] = {"node_key": s.node_key, "label": s.label, "type": s.type,
+            label = self.display_labels.get(s.node_key, s.label)
+            self.states[key] = {"node_key": s.node_key, "label": label, "type": s.type,
                                  "actor": s.actor, "count": 1, "inferred": s.inferred}
         else:
             row["count"] += 1
@@ -145,8 +188,9 @@ class Aggregate:
         key = (e.source_key, e.target_key, e.action_key, e.actor)
         row = self.edges.get(key)
         if row is None:
+            action_label = self.display_labels.get(e.action_key, e.action_label)
             self.edges[key] = {"source": e.source_key, "target": e.target_key,
-                                "action_key": e.action_key, "action_label": e.action_label,
+                                "action_key": e.action_key, "action_label": action_label,
                                 "action_type": e.action_type, "actor": e.actor,
                                 "count": 1, "inferred": e.inferred}
         else:
@@ -197,7 +241,9 @@ def build_aggregate(bundle: dict[str, Any]) -> Aggregate:
         for round_ in session.get("rounds", []):
             entries = round_.get("entries", []) or []
             for group in partition_by_sequence(entries):
-                compiled = compile_two_sided(group, _side_of, actor_of=_actor_of,
+                resolved_group, display = _resolve_group(group)
+                agg.register_display_labels(display)
+                compiled = compile_two_sided(resolved_group, _side_of, actor_of=_actor_of,
                                               inference_table=table)
                 for side in ("a", "b"):
                     for s in compiled[side].states:

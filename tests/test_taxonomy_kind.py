@@ -16,7 +16,9 @@ from analysis.taxonomy_kind import (
     infer_action_for_state_pair,
     infer_state_for_action_pair,
     kind_of,
+    kind_of_entry,
     load_inference_table,
+    resolve_library_entry,
     resolve_pair,
 )
 
@@ -82,6 +84,42 @@ def test_back_control_carve_out_does_not_override_a_forced_action_type() -> None
     # A hypothetical `transition`/`escape` event labelled "Back Control" is still forced to
     # 'action' by the type rule — the carve-out only intercepts control/guard-type labels.
     assert kind_of("Back Control", "transition") == "action"
+
+
+# ── kind_of_entry: library-resolved, distrusts a stale logged `type` ────────────
+def test_kind_of_entry_action_logged_with_a_stale_state_type() -> None:
+    """Real bug: 'Raspagem de Gancho' (a sweep) logged with `type: 'control'`. `kind_of` alone
+    would read it as a state (pt label misses the English Lamas tokens); `kind_of_entry`
+    resolves the library's own type (`sweep`, forced-action) and gets it right."""
+    assert kind_of("Raspagem de Gancho", "control") == "state"  # the bug, unfixed at this layer
+    assert kind_of_entry("Raspagem de Gancho", "control") == "action"
+
+
+def test_kind_of_entry_state_logged_with_a_stale_type_stays_state() -> None:
+    """'Guarda Fechada' (Closed Guard, a state) also logged with `type: 'control'` in the real
+    bundle — must NOT flip to action just because the logged type happens to differ."""
+    assert kind_of_entry("Guarda Fechada", "control") == "state"
+
+
+def test_kind_of_entry_submission_logged_with_a_stale_type() -> None:
+    assert kind_of_entry("Mata-Leão", "control") == "action"
+
+
+def test_kind_of_entry_falls_back_to_kind_of_outside_the_library() -> None:
+    assert kind_of_entry("Some Unmapped Label", "guard") == kind_of("Some Unmapped Label", "guard")
+    assert kind_of_entry("Some Unmapped Label", "submission") == "action"
+
+
+def test_resolve_library_entry_returns_canonical_label_and_library_type() -> None:
+    assert resolve_library_entry("Raspagem de Gancho") == ("Butterfly Sweep", "sweep")
+    assert resolve_library_entry("mata leao") == ("Rear Naked Choke", "submission")  # variant
+    assert resolve_library_entry("Unknown Technique Nobody Logged") is None
+
+
+def test_library_lookup_is_deterministic_across_calls() -> None:
+    a = resolve_library_entry("Pressão")
+    b = resolve_library_entry("Pressão")
+    assert a == b
 
 
 # ── reconciliation with existing constants ──────────────────────────────────────
