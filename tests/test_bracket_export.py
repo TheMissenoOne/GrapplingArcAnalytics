@@ -869,3 +869,143 @@ def test_tags_are_matched_exactly_after_stripping_not_by_substring() -> None:
 
 def test_the_three_corpus_labels_are_distinct() -> None:
     assert len({ADCC_TRIALS_LABEL, ADCC_WORLDS_LABEL, ADCC_CYCLE_LABEL}) == 3
+
+
+# ── layer 10: women ±65 kg, extended cohort ─────────────────────────────────────
+# The SAME `markov_block`/`reward_risk_comparison` machinery as layer 9, over a named cohort
+# (roster + everyone else already in the corpus with an ADCC-ruleset bout, ±65 kg by an
+# explicit division mapping) instead of one ADCC cycle. `bx.women_65_extended_layer` reads no
+# database and no module-level state, so every case here is a plain function call.
+EXTENDED_MANIFEST_PATH = (Path(__file__).resolve().parent.parent / "data" / "scouting"
+                          / "adcc_women_65_extended.json")
+
+
+def _load_extended_manifest() -> dict[str, object]:
+    return json.loads(EXTENDED_MANIFEST_PATH.read_text(encoding="utf-8"))
+
+
+def test_the_extended_manifest_parses_and_shapes_two_divisions() -> None:
+    manifest = _load_extended_manifest()
+    names = {d["name"] for d in manifest["divisions"]}
+    assert names == {"65 kg", "+65 kg"}
+    assert manifest["division_mapping"] == {"60 kg": "65 kg", "+60 kg": "+65 kg"}
+    for d in manifest["divisions"]:
+        for x in d["athletes"]:
+            assert x["origin"] in ("roster2026", "adcc2022")
+            if x["origin"] == "adcc2022":
+                assert x.get("original_division") in manifest["division_mapping"]
+
+
+def test_the_extended_manifest_references_all_sixteen_roster_athletes() -> None:
+    """Requirement B1.1: the roster is REFERENCED (name + origin), not re-described -- no
+    `qualification`/`country`/`aliases` duplicated from `adcc_2026_women.json`."""
+    manifest = _load_extended_manifest()
+    roster_names = {x["name"] for d in manifest["divisions"] for x in d["athletes"]
+                    if x["origin"] == "roster2026"}
+    assert len(roster_names) == 16
+    for d in manifest["divisions"]:
+        for x in d["athletes"]:
+            if x["origin"] == "roster2026":
+                assert set(x) <= {"name", "origin"}
+
+
+def test_the_unresolved_athlete_is_named_and_excluded() -> None:
+    """'Althea' (ADCC 2022 - Women dump) never became a manifest athlete -- her bout survives
+    only inside Rafaela Guedes's own (roster) side, which is not this layer's concern."""
+    manifest = _load_extended_manifest()
+    all_names = {x["name"] for d in manifest["divisions"] for x in d["athletes"]}
+    assert "Althea" not in all_names and "Jara" not in all_names
+    assert any(u["raw_name"] == "Althea" for u in manifest["unresolved"])
+
+
+def divisions_from_manifest(manifest: dict[str, object]) -> dict[str, str]:
+    from analysis.names import athlete_key
+    return {athlete_key(x["name"]): d["name"]  # type: ignore[index]
+            for d in manifest["divisions"] for x in d["athletes"]}  # type: ignore[union-attr]
+
+
+def _ext_bout(bid: str, a: str, b: str, seq: list[dict[str, object]],
+             div_a: str | None, div_b: str | None, event: str = "ADCC 2022 - Women",
+             winner: str = "A") -> dict[str, object]:
+    from analysis.names import athlete_key
+    return {"id": bid, "a": a, "b": b, "a_key": athlete_key(a), "b_key": athlete_key(b),
+            "div_a": div_a, "div_b": div_b, "event": event, "year": 2022,
+            "winner": winner, "a_id": "A", "b_id": "B", "win_type": "SUBMISSION", "seq": seq}
+
+
+def _seq(*, actor: str = "A") -> list[dict[str, object]]:
+    return [{"type": "control", "label": "Collar Tie", "actor_id": actor},
+            {"type": "takedown", "label": "Single Leg Takedown", "actor_id": actor,
+             "successful": True},
+            {"type": "pass", "label": "Knee Cut Pass", "actor_id": actor},
+            {"type": "control", "label": "Back Control", "actor_id": actor},
+            {"type": "submission", "label": "RNC", "actor_id": actor, "successful": True}]
+
+
+@pytest.mark.parametrize(("event", "expected"), [
+    ("ADCC 2022 - Women", True),
+    ("ADCC Trials 2023 East Coast", True),
+    ("adcc 2024", True),
+    ("Polaris 36", False),
+    ("", False),
+    (None, False),
+])
+def test_is_adcc_event_is_a_dumb_substring_match(event: str | None, expected: bool) -> None:
+    assert bx._is_adcc_event(event) is expected
+
+
+def test_women_65_extended_layer_shape_and_division_mapping() -> None:
+    manifest = _load_extended_manifest()
+    divs = divisions_from_manifest(manifest)
+    bouts = [
+        _ext_bout("e1", "Bia Mesquita", "Mayssa Bastos", _seq(),
+                 divs[bx.athlete_key("Bia Mesquita")], divs[bx.athlete_key("Mayssa Bastos")]),
+        _ext_bout("e2", "Kendall Reusing", "Giovanna Jara", _seq(),
+                 divs[bx.athlete_key("Kendall Reusing")], divs[bx.athlete_key("Giovanna Jara")]),
+        # Not ADCC-tagged -- must not reach either corpus.
+        _ext_bout("e3", "Bia Mesquita", "Bianca Basilio", _seq(),
+                 divs[bx.athlete_key("Bia Mesquita")], divs[bx.athlete_key("Bianca Basilio")],
+                 event="Polaris 36"),
+    ]
+    out = bx.women_65_extended_layer(bouts, manifest)
+    assert out["order"] == ["65 kg", "+65 kg"]
+    assert out["division_mapping"] == {"60 kg": "65 kg", "+60 kg": "+65 kg"}
+    assert any(u["raw_name"] == "Althea" for u in out["unresolved"])
+
+    lo = out["corpora"]["65 kg"]
+    hi = out["corpora"]["+65 kg"]
+    assert lo["n_bouts"] == 1  # only e1; e3 refused for not being ADCC-tagged
+    assert hi["n_bouts"] == 1  # e2
+    assert lo["sequence_bouts"] == {"Bia Mesquita": 1, "Mayssa Bastos": 1}
+    assert hi["sequence_bouts"] == {"Kendall Reusing": 1, "Giovanna Jara": 1}
+    # Same shape `markov_block` always returns -- the validator's generic checks apply unchanged.
+    for corpus in (lo, hi):
+        assert set(corpus) >= {"states", "counts", "probs", "ci", "rows", "reward_risk",
+                               "rrb", "chain_factor", "identity", "sequence_bouts", "caveats"}
+        assert corpus["reward_risk"]["comparison_sides"] == {"d65": "65 kg", "d65p": "+65 kg"}
+
+
+def test_women_65_extended_layer_does_not_mutate_shared_state() -> None:
+    """Isolation, B1's own gate: running the new layer must not change a single number the
+    existing `markov[div]` layer already publishes for the same underlying bouts."""
+    manifest = _load_extended_manifest()
+    divs = divisions_from_manifest(manifest)
+    roster_bout = _bout("r1", TWO_SIDED_SEQ, div_a="65 kg")
+    roster_bout["a_key"], roster_bout["b_key"] = "roster athlete", "opponent"
+    before = json.dumps(bx.markov_layer([roster_bout]), sort_keys=True, default=str)
+
+    extra_bout = _ext_bout("e1", "Bia Mesquita", "Mayssa Bastos", _seq(),
+                           divs[bx.athlete_key("Bia Mesquita")],
+                           divs[bx.athlete_key("Mayssa Bastos")])
+    bx.women_65_extended_layer([extra_bout], manifest)
+
+    after = json.dumps(bx.markov_layer([roster_bout]), sort_keys=True, default=str)
+    assert before == after
+
+
+def test_women_65_extended_layer_leaves_the_2023_24_cycle_selection_untouched() -> None:
+    """Same guarantee from the other direction: the new layer imports nothing from
+    `adcc_corpus_of`, and the previous cycle's exclusion (this file's own gate above) still
+    holds after it runs."""
+    assert adcc_corpus_of("ADCC 2022", 2022) is None
+    assert adcc_corpus_of("ADCC Trials 2022 South America", 2022) is None

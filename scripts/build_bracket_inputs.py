@@ -39,10 +39,19 @@ MANIFEST = SCOUTING / "adcc_2026_women.json"
 OUT = SCOUTING / "adcc_2026_women_sequences.json"
 
 
-def roster_divisions() -> dict[str, str]:
-    manifest = json.loads(MANIFEST.read_text(encoding="utf-8"))
+def divisions_from_manifest(path: Path) -> dict[str, str]:
+    """`athlete_key -> division name` for any manifest shaped like `adcc_2026_women.json`
+    (a list of athlete strings/dicts under `divisions[*].athletes`). Generic on purpose: the
+    extended-cohort manifest (`adcc_women_65_extended.json`) adds `origin`/`original_division`
+    fields this function never reads, so one loader serves both without knowing either's extra
+    shape."""
+    manifest = json.loads(path.read_text(encoding="utf-8"))
     return {athlete_key(x if isinstance(x, str) else x["name"]): d["name"]
             for d in manifest["divisions"] for x in d["athletes"]}
+
+
+def roster_divisions() -> dict[str, str]:
+    return divisions_from_manifest(MANIFEST)
 
 
 def build(divisions: dict[str, str]) -> list[dict[str, Any]]:
@@ -76,10 +85,13 @@ def build(divisions: dict[str, str]) -> list[dict[str, Any]]:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+    ap.add_argument("--manifest", type=Path, default=MANIFEST,
+                    help="roster/cohort manifest (division -> athletes), e.g. the extended "
+                         "women ±65 kg manifest instead of the ADCC 2026 bracket roster")
     ap.add_argument("--out", type=Path, default=OUT)
     a = ap.parse_args()
 
-    divisions = roster_divisions()
+    divisions = divisions_from_manifest(a.manifest)
     bouts = build(divisions)
     a.out.write_text(json.dumps(bouts, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 

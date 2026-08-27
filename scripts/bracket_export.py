@@ -2236,6 +2236,81 @@ def adcc_layer(conn: Any) -> dict[str, Any]:
     }
 
 
+# ── layer 10: women ±65 kg, extended cohort ─────────────────────────────────────
+# The SAME machinery as `adcc_layer` (layer 9), over a DIFFERENT population: not one ADCC
+# cycle across every division and both sexes, but every ADCC-ruleset bout of every WOMAN
+# already in the corpus who is either on the ADCC 2026 ±65 kg roster or maps onto one of its
+# two divisions -- `data/scouting/adcc_women_65_extended.json` names the cohort and the
+# division mapping (ADCC 2022's 60 kg / +60 kg -> the roster's 65 kg / +65 kg) explicitly, so
+# the whole selection is auditable without a database, same as `adcc_corpus_of`.
+EXTENDED_MANIFEST = SCOUTING / "adcc_women_65_extended.json"
+EXTENDED_SEQUENCES = SCOUTING / "adcc_women_65_extended_sequences.json"
+
+
+def _is_adcc_event(event: str | None) -> bool:
+    """Same dumb substring rule `adcc_layer` runs as SQL (`event ilike '%adcc%'`), done in
+    Python because this corpus is read from a sequences JSON file, not the database."""
+    return "adcc" in (event or "").lower()
+
+
+def women_65_extended_layer(bouts: Sequence[Mapping[str, Any]],
+                            manifest: Mapping[str, Any]) -> dict[str, Any]:
+    """Per division: identity of the cohort, then `markov_block` + `reward_risk_comparison`
+    over its ADCC-tagged bouts only -- exactly `markov[div]`'s and `adcc.corpora[*]`'s shape,
+    so a renderer built for either already knows how to draw this.
+
+    ``bouts`` is `build_bracket_inputs.build()`'s output over the EXTENDED manifest (either
+    corner on the cohort, any ruleset) -- filtering to ADCC-tagged events is this function's
+    job, not the input builder's, so the same sequences file could serve an all-rulesets layer
+    later without a second fetch.
+
+    Comparable to `markov[div]` (roster-only, all rulesets) and to `adcc.corpora[*]` (one ADCC
+    cycle, both sexes, every division) only in METHOD, never as the same population -- three
+    different corpora built by the same two functions.
+    """
+    div_mapping = dict(manifest.get("division_mapping") or {})
+    identity: dict[str, list[dict[str, Any]]] = {}
+    for d in manifest["divisions"]:
+        identity[d["name"]] = [
+            {"key": athlete_key(x["name"]), "display": x["name"], "origin": x["origin"],
+             "original_division": x.get("original_division")}
+            for x in d["athletes"]
+        ]
+
+    corpora: dict[str, Any] = {}
+    for div in DIVISIONS:
+        full = [b for b in division_bouts(bouts, div) if _is_adcc_event(b.get("event"))]
+        block = markov_block(full)
+        cohort_keys = {a["key"] for a in identity.get(div, [])}
+        seq_bouts: Counter[str] = Counter()
+        for b in full:
+            if b.get("a_key") in cohort_keys:
+                seq_bouts[b["a"]] += 1
+            if b.get("b_key") in cohort_keys:
+                seq_bouts[b["b"]] += 1
+        corpora[div] = {**block, "identity": identity.get(div, []),
+                        "sequence_bouts": dict(seq_bouts),
+                        "caveats": [
+                            *block["caveats"],
+                            f"COORTE ESTENDIDA. Divisão real mapeada para o par ±65 kg mais "
+                            f"próximo onde aplicável: {div_mapping}. Ver "
+                            f"data/scouting/adcc_women_65_extended.json para proveniência "
+                            f"por atleta.",
+                        ]}
+    a, b = DIVISIONS
+    cmp_rows = reward_risk_comparison(corpora[a]["reward_risk"]["rows"],
+                                      corpora[b]["reward_risk"]["rows"])
+    for div in DIVISIONS:
+        corpora[div]["reward_risk"]["comparison"] = cmp_rows
+        corpora[div]["reward_risk"]["comparison_sides"] = {"d65": a, "d65p": b}
+    return {
+        "order": list(DIVISIONS),
+        "corpora": corpora,
+        "division_mapping": div_mapping,
+        "unresolved": list(manifest.get("unresolved") or []),
+    }
+
+
 def _rrb_line(block: Mapping[str, Any]) -> str:
     """One line per corpus for the two layers a run should be able to fail loudly on.
 
@@ -2257,6 +2332,11 @@ def main() -> int:
     ap.add_argument("--records", type=Path, default=RECORDS,
                     help="BJJ Heroes records JSON (division + rows per athlete)")
     ap.add_argument("--sequences", type=Path, default=SEQUENCES, help="corpus bouts JSON")
+    ap.add_argument("--extended-manifest", type=Path, default=EXTENDED_MANIFEST,
+                    help="women ±65 kg extended-cohort manifest (layer 10)")
+    ap.add_argument("--extended-sequences", type=Path, default=EXTENDED_SEQUENCES,
+                    help="corpus bouts JSON over the extended manifest, built by "
+                         "scripts.build_bracket_inputs --manifest <extended-manifest>")
     ap.add_argument("--out", type=Path, default=REPO.parent / "BracketAnalysis" / "data.json")
     a = ap.parse_args()
 
@@ -2285,6 +2365,17 @@ def main() -> int:
     # them from the baseline the roster is supposed to be compared against.
     roster_ids = {b[f"{s}_id"] for b in bouts for s in ("a", "b")
                   if (b["div_a"] if s == "a" else b["div_b"]) in DIVISIONS}
+
+    # Layer 10. Its own manifest and its own sequences file -- built by
+    # `scripts.build_bracket_inputs --manifest <extended-manifest>` -- so a missing rebuild is a
+    # missing FILE rather than a missing entry in this one, and the layer degrades to `None`
+    # (never a fabricated empty corpus) when either input has not been generated yet.
+    ext_manifest = (json.loads(a.extended_manifest.read_text(encoding="utf-8"))
+                    if a.extended_manifest.exists() else None)
+    ext_bouts = (json.loads(a.extended_sequences.read_text(encoding="utf-8"))
+                if a.extended_sequences.exists() else None)
+    markov_women_65_extended = (women_65_extended_layer(ext_bouts, ext_manifest)
+                                if ext_manifest is not None and ext_bouts is not None else None)
 
     eng = get_engine()
     with eng.connect() as conn:
@@ -2330,6 +2421,7 @@ def main() -> int:
         "sequence": seq,
         "markov": markov,
         "adcc": adcc,
+        "markov_women_65_extended": markov_women_65_extended,
         "embedding": emb,
         "baseline": baseline_layer(bouts, roster_ids, seq),
         "videos": vids,
@@ -2378,6 +2470,20 @@ def main() -> int:
               f"reward-risk {rr['bouts_used']}/{c['n_bouts']} usable, "
               f"{sum(1 for r in rr['rows'] if r['gated'])}/{len(rr['rows'])} states estimable")
         print(f"      {_rrb_line(c)}")
+    if markov_women_65_extended is None:
+        print("  markov_women_65_extended: skipped -- run "
+              "scripts.build_bracket_inputs --manifest data/scouting/"
+              "adcc_women_65_extended.json --out data/scouting/"
+              "adcc_women_65_extended_sequences.json first")
+    else:
+        print("  markov_women_65_extended (ADCC-ruleset, women ±65 kg, extended cohort):")
+        for div in markov_women_65_extended["order"]:
+            c = markov_women_65_extended["corpora"][div]
+            rr = c["reward_risk"]
+            print(f"    {div}: {len(c['identity'])} atletas, {c['n_bouts']} bouts, "
+                  f"{c['n_transitions']} transitions, "
+                  f"reward-risk {rr['bouts_used']}/{c['n_bouts']} usable")
+            print(f"      {_rrb_line(c)}")
     print(f"  videos: {len(vids)}   embedded graphs: "
           f"{sum(v['usable'] for v in emb['divisions'].values())}")
     return 0

@@ -1,0 +1,93 @@
+{
+  "note": "Camada Markov B1 -- mulheres ADCC ±65 kg, corpus estendido. SO atletas ja presentes no corpus (matches.sequence não vazio), nunca uma coorte nova de fora do banco. Divisão real do ADCC 2022 era 60 kg / +60 kg; mapeada para o par ±65 kg mais próximo em division_mapping. NÃO é o roster do bracket 2026 (ver adcc_2026_women.json) -- referencia esses 16 nomes por origem, não duplica qualification/country/aliases.",
+  "division_mapping": {
+    "60 kg": "65 kg",
+    "+60 kg": "+65 kg"
+  },
+  "divisions": [
+    {
+      "name": "65 kg",
+      "athletes": [
+        {"name": "Livia Barasine", "origin": "roster2026"},
+        {"name": "Ana Carolina Vieira", "origin": "roster2026"},
+        {"name": "Injana Goodman", "origin": "roster2026"},
+        {"name": "Sarah Galvão", "origin": "roster2026"},
+        {"name": "Nadia Frankland", "origin": "roster2026"},
+        {"name": "Morgan Black", "origin": "roster2026"},
+        {"name": "Ane Svendsen", "origin": "roster2026"},
+        {"name": "Joslyn Molina", "origin": "roster2026"},
+        {
+          "name": "Bia Mesquita", "origin": "adcc2022",
+          "original_division": "60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__mayssa_bastos.html confirms 60KG bracket (SF/3RD)"
+        },
+        {
+          "name": "Mayssa Bastos", "origin": "adcc2022",
+          "original_division": "60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__mayssa_bastos.html (4F, 60KG)"
+        },
+        {
+          "name": "Bianca Basilio", "origin": "adcc2022",
+          "original_division": "60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__bianca_basilio.html (4F/SF, 60KG)"
+        },
+        {
+          "name": "Julia Maele", "origin": "adcc2022",
+          "original_division": "60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__julia_maele.html (4F, 60KG)"
+        },
+        {
+          "name": "Ffion Davies", "origin": "adcc2022",
+          "original_division": "60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__ffion_davies.html (4F/SF/F, 60KG, campeã)"
+        },
+        {
+          "name": "Brianna Ste-Marie", "origin": "adcc2022",
+          "original_division": "60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__brianna_stemarie.html (4F/SF/F, 60KG)"
+        }
+      ]
+    },
+    {
+      "name": "+65 kg",
+      "athletes": [
+        {"name": "Yara Soares", "origin": "roster2026"},
+        {"name": "Rafaela Guedes", "origin": "roster2026"},
+        {"name": "Anabel Lopez", "origin": "roster2026"},
+        {"name": "Paige Ivette", "origin": "roster2026"},
+        {"name": "Matilda Reid", "origin": "roster2026"},
+        {"name": "Gabi Garcia", "origin": "roster2026"},
+        {"name": "Helena Crevar", "origin": "roster2026"},
+        {"name": "Elizabeth Mitrovic", "origin": "roster2026"},
+        {
+          "name": "Kendall Reusing", "origin": "adcc2022",
+          "original_division": "+60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__kendall_reusing.html (4F/SF, O60KG)"
+        },
+        {
+          "name": "Amy Campo", "origin": "adcc2022",
+          "original_division": "+60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__amy_campo.html (4F/SF/F, O60KG, campeã do corte usado no dump)"
+        },
+        {
+          "name": "Elizabeth Clay", "origin": "adcc2022",
+          "original_division": "+60 kg",
+          "provenance": "scripts.dumps.adcc2022_women_data; bjjheroes match__elisabeth_clay.html (4F, O60KG)"
+        },
+        {
+          "name": "Giovanna Jara", "origin": "adcc2022",
+          "original_division": "+60 kg",
+          "provenance": "Resolve 'Jara' do dump (bout vs Kendall Reusing, guilhotina, 4F). bjjheroes match__kendall_reusing.html linha 35222: 'Giovanna Jara', ADCC O60KG 4F 2022, guillotine -- mesmo resultado e adversária do dump."
+        }
+      ]
+    }
+  ],
+  "unresolved": [
+    {
+      "raw_name": "Althea",
+      "bout": "Raphaela Guedes vs Althea, ADCC 2022 - Women (scripts.dumps.adcc2022_women_data)",
+      "reason": "Nome parcial sem correspondência confiável. O bracket real (bjjheroes match__rafaela_guedes.html) mostra Guedes vencendo a 4F de +60kg contra 'Eleftheria Christodoulou' -- possível a mesma pessoa (apelido?), mas sem confirmação externa não é seguro assumir. Excluída do manifesto; o bout permanece no corpus do ROSTER (adcc_2026_women_sequences.json) do lado de Guedes, que já era rosterizada -- esta camada não a adiciona como atleta própria.",
+      "decision_needed": "dono confirma se 'Althea' == Eleftheria Christodoulou antes de nomeá-la aqui"
+    }
+  ]
+}
