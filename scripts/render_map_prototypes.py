@@ -130,23 +130,28 @@ _FIG_HEX = {"a": "#4d86ff", "b": "#fc4c02"}
 _START_COLOR = "#34d399"  # teal — distinct from finish's yellow (_FINISH_COLOR)
 _START_ICON = "A"  # variant 7 only — "Âncora"; letters not emoji, see _TYPE_ICONS docstring
 
-# Owner adendo 2026-08-27 (constructive render order, closes the 8/9 design): the 5 organisational
-# anchors (3 start orientations + 2 actor-qualified finishes) are "bolted in place" — pinned, never
-# simulated — and distributed UNIFORMLY around a circle instead of clustered on a single vertical +
-# horizontal axis (the old design put 3 starts on one line and both finishes on another, which reads
-# as two clumps, not 5 evenly-spaced landmarks). ``_anchor_slot`` gives each anchor a stable index
-# 0-4 into that circle; slot -> angle is a fixed regular pentagon, start-top first (straight up),
-# clockwise. Shared by every variant that renders a node (`_apply_anchor` is the single choke point).
-_ANCHOR_SLOT_COUNT = 5
-_ANCHOR_ANGLE_STEP_DEG = 360.0 / _ANCHOR_SLOT_COUNT
+# Owner spec, literal (2026-08-27, corrects the earlier uniform-circle/pentagon pass which lost
+# this semantic): "the neutral node will be anchored to the center, the top to the top, the
+# bottom to the bottom, and Left is the opponent finish. Right is your finish." The 5
+# organisational anchors (3 start orientations + 2 actor-qualified finishes) are "bolted in
+# place" — pinned, never simulated — at these 5 fixed points: center + the 4 cardinal directions
+# of a cross, which is uniform-by-construction (nothing clumps) without needing an arbitrary
+# pentagon. ``_anchor_slot`` maps a node to its direction key (or ``None`` for an ordinary node);
+# ``_ANCHOR_UNIT`` is that key's unit vector, scaled by ``_apply_anchor``'s radius (neutral's
+# vector is the zero vector, so it always lands at the origin regardless of radius). Shared by
+# every variant that renders a node (`_apply_anchor` is the single choke point). Canvas
+# convention: y grows DOWNWARD, so "top" is negative y.
+_ANCHOR_UNIT = {"top": (0.0, -1.0), "bottom": (0.0, 1.0), "left": (-1.0, 0.0),
+                 "right": (1.0, 0.0), "neutral": (0.0, 0.0)}
 
 
-def _anchor_slot(node_key: str, actor: str) -> int | None:
-    """Stable 0-4 slot for a bolted anchor, or ``None`` for an ordinary node."""
+def _anchor_slot(node_key: str, actor: str) -> str | None:
+    """Stable direction key for a bolted anchor (one of ``_ANCHOR_UNIT``), or ``None`` for an
+    ordinary node."""
     if node_key == _FINISH_KEY:
-        return 3 if actor == "you" else 4
+        return "left" if actor == "partner" else "right"  # opponent's finish / your own
     if _is_start(node_key):
-        return {"top": 0, "neutral": 1, "bottom": 2}.get(orientation_of(node_key))
+        return orientation_of(node_key)  # "top" / "bottom" / "neutral" — same key set
     return None
 
 
@@ -206,19 +211,18 @@ def _apply_start_style(node: dict[str, Any], node_key: str, *, icon: bool = Fals
 
 
 def _apply_anchor(node: dict[str, Any], node_key: str, actor: str, radius: float) -> None:
-    """Owner addendum 2026-08-27 (revised same day — "distribuídos uniformemente"/"bolted in
-    place"): the 5 organisational anchors sit at fixed, evenly-spaced points on a circle
-    (``_anchor_slot``), never simulated, so the rest of the graph organises itself around fixed
-    landmarks instead of reshuffling on every load/expand — and the landmarks themselves never
-    read as two clumps (the old vertical-start/horizontal-finish axis design). World coordinates
-    (not viewport) — stays coherent under pan/zoom and with edge geometry; ``graph.js``'s
-    copy-only ``n.pin`` patch (`_patch_graph_js`) makes ``step()`` skip physics entirely for a
-    pinned node, so once placed here it never drifts. Called last (after style helpers) so
-    ``x``/``y``/``pin`` always win over a random seed."""
+    """Owner spec (2026-08-27): the 5 organisational anchors sit at fixed points on a cross —
+    neutral at the CENTER, top/bottom above/below it, the opponent's finish LEFT, your own finish
+    RIGHT (``_anchor_slot`` -> ``_ANCHOR_UNIT``) — never simulated, so the rest of the graph
+    organises itself around fixed, legible landmarks instead of reshuffling on every load/expand.
+    World coordinates (not viewport) — stays coherent under pan/zoom and with edge geometry;
+    ``graph.js``'s copy-only ``n.pin`` patch (`_patch_graph_js`) makes ``step()`` skip physics
+    entirely for a pinned node, so once placed here it never drifts. Called last (after style
+    helpers) so ``x``/``y``/``pin`` always win over a random seed."""
     slot = _anchor_slot(node_key, actor)
     if slot is not None:
-        angle = math.radians(-90 + slot * _ANCHOR_ANGLE_STEP_DEG)
-        node["x"], node["y"] = radius * math.cos(angle), radius * math.sin(angle)
+        ux, uy = _ANCHOR_UNIT[slot]
+        node["x"], node["y"] = radius * ux, radius * uy
         node["pin"] = True
 
 
@@ -2143,13 +2147,18 @@ def _patch_graph_js(js_text: str) -> str:
         ),
         (
             # map-prototype patch: fit margin aware of label width + node radius (#2 clipping fix,
-            # owner screenshot review 2026-08-27) — the stock `fitTarget()` only bounds by node
-            # x/y, so a wide label ("Finalização (oponente)") or a big anchor/system node past the
-            # bbox edge draws off-canvas. Labels render at a FIXED ~12px screen size regardless of
-            # zoom (`ls = useCam?12/cam.k:12` in the label pass below), so `ctx.measureText` at that
-            # same font gives an honest SCREEN-space half-width; `pad` is already screen-space
-            # (reserved before dividing by spanX/spanY), so widening it by 2x the worst-case
-            # label/radius margin (both sides of the bbox) keeps every anchor fully on-screen.
+            # owner screenshot review 2026-08-27; magnitude corrected same day — the first pass
+            # stacked the old flat 70 UNDER a doubled label reserve, which over-margined every
+            # variant into a thumbnail) — the stock `fitTarget()` only bounds by node x/y, so a
+            # wide label ("Finalização (oponente)") or a big anchor/system node past the bbox edge
+            # draws off-canvas. Labels render at a FIXED ~12px screen size regardless of zoom
+            # (`ls = useCam?12/cam.k:12` in the label pass below), so `ctx.measureText` at that
+            # same font gives an honest SCREEN-space half-width; `pad` is subtracted from W/H
+            # BEFORE dividing by spanX/spanY to get `k`, so it reserves exactly `pad` screen px of
+            # margin regardless of zoom — that mechanism was already correct, only the VALUE was
+            # too big. `2 * (halfLabel + r + slack)` alone already reserves the worst-case overhang
+            # on BOTH sides of the bbox (no extra flat constant needed on top); slack shrunk from
+            # 16 to 8 (one screen-space cushion, not stacked with a second implicit one).
             "    function fitTarget() {\n"
             "      if (!nodes.length) return { x: 0, y: 0, k: 1 };\n"
             "      let mnX = 1e9, mnY = 1e9, mxX = -1e9, mxY = -1e9;\n"
@@ -2174,7 +2183,7 @@ def _patch_graph_js(js_text: str) -> str:
             "        if (n.label) maxHalfLabel = Math.max(maxHalfLabel, ctx.measureText(n.label).width / 2);\n"
             "        maxR = Math.max(maxR, n.r || 5);\n"
             "      }\n"
-            "      const pad = 70 + 2 * (maxHalfLabel + maxR + 16), spanX = (mxX - mnX) || 1, spanY = (mxY - mnY) || 1;\n"
+            "      const pad = 2 * (maxHalfLabel + maxR + 8), spanX = (mxX - mnX) || 1, spanY = (mxY - mnY) || 1;\n"
             "      const k = Math.max(0.25, Math.min(1.3, Math.min((W - pad) / spanX, (H - pad) / spanY)));\n"
             "      return { k, x: W / 2 - (mnX + mxX) / 2 * k, y: H / 2 - (mnY + mxY) / 2 * k };\n"
             "    }",

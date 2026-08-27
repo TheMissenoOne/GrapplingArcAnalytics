@@ -421,15 +421,16 @@ def test_start_role_node_always_qualifies_as_user_side():
     assert _qid("partner", "mount") == "opp:mount"  # untouched for a normal node
 
 
-def test_finish_and_start_anchors_are_bolted_uniformly_on_a_circle():
-    """Owner adendo 2026-08-27 (revised same day, "distribuídos uniformemente"/"bolted in
-    place"): the 5 organisational anchors (3 start orientations + 2 actor-qualified finishes)
-    are pinned (never simulated) at evenly-spaced points on a circle — no two share a slot, and
-    every one sits exactly at the given radius from the origin (a regular pentagon), instead of
-    the old two-clump vertical/horizontal axis design."""
+def test_finish_and_start_anchors_sit_on_the_owner_specified_cross():
+    """Owner correction (2026-08-27, literal re-spec): the uniform-circle/pentagon layout broke
+    the anchors' semantics — restore center/top/bottom/left/right exactly as the owner asked
+    ("the neutral node will be anchored to the center, the top to the top, the bottom to the
+    bottom, and Left is the opponent finish. Right is your finish"). Still pinned, still a single
+    choke point (`_apply_anchor`), still non-clumped (a cross + center IS spread out) — just the
+    RIGHT five points instead of an arbitrary pentagon."""
     assert len({_anchor_slot(k, a) for k, a in
                 (("start top", "you"), ("start neutral", "you"), ("start bottom", "you"),
-                 (_FINISH_KEY, "you"), (_FINISH_KEY, "partner"))}) == 5  # 5 distinct slots
+                 (_FINISH_KEY, "you"), (_FINISH_KEY, "partner"))}) == 5  # 5 distinct anchor keys
     assert _anchor_slot("mount", "you") is None  # an ordinary node is never an anchor
 
     row = {"node_key": "x", "label": "x", "type": "control", "actor": "you",
@@ -443,16 +444,28 @@ def test_finish_and_start_anchors_are_bolted_uniformly_on_a_circle():
     }
     gv = _two_sided_graphview(states, [], [])
     by_id = {n["id"]: n for n in gv["nodes"]}
-    anchor_ids = ["start neutral", "start top", "start bottom", _FINISH_KEY, "opp:" + _FINISH_KEY]
     radius = 260.0  # `_anchor_radius(5)` — same formula the graphview call used internally
 
-    positions = []
-    for anchor_id in anchor_ids:
-        n = by_id[anchor_id]
-        assert n["pin"] is True
-        assert (n["x"] ** 2 + n["y"] ** 2) ** 0.5 == pytest.approx(radius, abs=0.01)
-        positions.append((round(n["x"], 3), round(n["y"], 3)))
-    assert len(set(positions)) == 5  # uniformly spread — no two anchors share a spot
+    all_anchor_ids = ("start neutral", "start top", "start bottom",
+                       _FINISH_KEY, "opp:" + _FINISH_KEY)
+    for anchor_id in all_anchor_ids:
+        assert by_id[anchor_id]["pin"] is True
+
+    # center — neutral start, radius 0 regardless of the shared anchor radius
+    n = by_id["start neutral"]
+    assert (n["x"], n["y"]) == (0.0, 0.0)
+    # top — negative y (canvas y-down convention, same as before)
+    n = by_id["start top"]
+    assert n["x"] == pytest.approx(0.0) and n["y"] == pytest.approx(-radius)
+    # bottom — positive y
+    n = by_id["start bottom"]
+    assert n["x"] == pytest.approx(0.0) and n["y"] == pytest.approx(radius)
+    # left — the OPPONENT's finish
+    n = by_id["opp:" + _FINISH_KEY]
+    assert n["x"] == pytest.approx(-radius) and n["y"] == pytest.approx(0.0)
+    # right — YOUR own finish
+    n = by_id[_FINISH_KEY]
+    assert n["x"] == pytest.approx(radius) and n["y"] == pytest.approx(0.0)
 
     for anchor_id in ("start neutral", "start top", "start bottom"):
         assert by_id[anchor_id]["color"] == _START_COLOR
