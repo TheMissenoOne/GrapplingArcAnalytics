@@ -1,4 +1,4 @@
-"""Phase 1 (actions/states migration) — 6 comparison prototypes of ONE user's own map.
+"""Phase 1 (actions/states migration) — 8 comparison prototypes of ONE user's own map.
 
     uv run python -m scripts.render_map_prototypes --bundle PATH [--out DIR]
 
@@ -21,22 +21,36 @@ outgoing actor's live state (``CompiledChain.state_after_event``) to the incomin
 state. Rendered as a neutral dashed link (``fighter:'x'``), the same convention the public site
 already uses for contested links.
 
-Renders 6 self-contained HTMLs (``site/graph.js`` copied alongside, same pattern as
-``export/grappling_map.py``) + an ``index.html`` + ``metrics.json``. Deterministic: dict/list
-order follows bundle read order (no unordered ``set`` in the render path), and
-``metrics.json`` is written with ``sort_keys=True`` as a second belt.
+Renders 8 self-contained HTMLs (a single patched ``site/graph.js`` copy shared by all of
+them — see ``_patch_graph_js``) + an ``index.html`` + ``metrics.json``. Deterministic:
+dict/list order follows bundle read order (no unordered ``set`` in the render path),
+community detection sorts every input/tie-break (cicatriz #10, same convention as
+``analysis.network_metrics.detect_communities``), and ``metrics.json`` is written with
+``sort_keys=True`` as a second belt.
 
-**graph.js contract (read before editing, do not invent fields):** node {id,label,cat,
-size 1-3,fighter 'a'|'b'|'x',color?}; link {from,to,fighter,weight 1-3,arrow,dashed}. No
-per-link ``label`` and no per-link ``color`` are ever read by the renderer (only ``fighter``
-drives link colour, via the fixed 3-slot ``FIG`` palette) — two limitations this module works
-around rather than papers over:
-  - action labels (variant 2+) go in an HTML side list next to the canvas, not on the edge.
-  - action-TYPE colouring (variant 5) reuses the 3-slot ``fighter`` field as a 3-bucket
-    approximation (submission/takedown -> 'a', pass/sweep -> 'b', escape/transition/other ->
-    'x'), NOT true per-type colour. A real 6-colour edge legend needs graph.js to read an
-    ``l.color`` -- that becomes a Phase 5 requirement on the App's own renderer, not something
-    to sneak into this repo's copy of the shared file.
+**graph.js contract (read before editing, do not invent fields on the ORIGINAL — this module
+patches its own COPY, never ``site/graph.js`` itself):** node {id,label,cat, size 1-3,
+fighter 'a'|'b'|'x', color?}; link {from,to,fighter,weight 1-3,arrow,dashed}. The stock
+renderer reads none of {label on a link, per-node icon, per-node ring} and gates node labels
+behind ``cam.k>=1`` — three limitations this module works around by patching the COPY
+(``_patch_graph_js``, string-replace, hard error if an anchor drifted) rather than the shared
+site file: ``opts.forceLabels`` (always-show labels below a size threshold, computed client-side
+from the graph's own node count), ``l.label`` drawn at an edge's midpoint (non-inferred action
+edges only — handovers/inferred edges are the noise, they stay unlabelled), ``n.icon`` (a unicode
+glyph centred on the node) and ``n.ring`` (a CSS colour string stroked around the node, variant
+7's actor border when ``n.color`` is already the category colour). A real per-type/per-link
+colour or label needs graph.js itself to grow these fields — that becomes a Phase 5 requirement
+on the App's own renderer, not something to sneak into this repo's copy of the shared file.
+
+**Finish + orientation (owner call, 2026-08-27, ADR alongside D1/D2):** the compiler now closes
+every chain on the generic state ``finish`` instead of ``scramble`` when it ends on a submission
+(``analysis.chain_compiler``'s ``$terminal`` sentinel) — rendered with its own glyph/colour in
+every migrated variant (``_apply_finish_style``), never blended into a category or a ghost grey.
+Every STATE also has a curated top/bottom/neutral orientation
+(``analysis.taxonomy_kind.orientation_of``, keyed on the state's own ``node_key`` — already the
+canonical normalized form the table is keyed on, so no extra lookup is needed) — shown as a
+discreet ▲/▼ suffix next to a node's label in the side panel only, never on the canvas itself
+(the canvas stays uncluttered; ``metrics.json`` carries the corpus-wide counts).
 """
 
 # ruff: noqa: E501  (HTML/JS template strings are content)
@@ -46,13 +60,14 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import shutil
 from pathlib import Path
 from typing import Any
 
+import networkx as nx
+
 from analysis.chain_compiler import ChainEdge, ChainState, CompiledChain, compile_two_sided
 from analysis.names import _normalize_name, canonicalize
-from analysis.taxonomy_kind import load_inference_table, resolve_library_entry
+from analysis.taxonomy_kind import load_inference_table, orientation_of, resolve_library_entry
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +81,30 @@ _TYPE_BUCKET = {  # variant 5's action-type -> fighter-slot approximation, see m
     "pass": "b", "sweep": "b",
 }
 
+# The terminal state D2 now resolves a chain-closing submission to (chain_compiler's
+# `$terminal` sentinel + inference_table.json's `submission|$terminal -> finish` row).
+_FINISH_KEY = "finish"
+_FINISH_ICON = "\U0001f3c1"  # checkered flag
+_FINISH_COLOR = "#facc15"
+
+# App's src/types/session.ts NODE_TYPE_ICONS (Bootstrap Icons in the App; approximated here as
+# unicode glyphs for canvas fillText — variant 7 only) / NODE_TYPE_COLORS (copied verbatim,
+# same hex values, cross-checked against the App file 2026-08-27).
+_TYPE_ICONS = {
+    "guard": "\U0001f6e1", "submission": "\U0001f525", "control": "▣",
+    "transition": "⇄", "sweep": "↻", "escape": "⏏",
+    "pass": "⤴", "takedown": "⤵",
+}
+_TYPE_COLORS = {
+    "submission": "#ef4444", "control": "#3b82f6", "transition": "#8b5cf6",
+    "guard": "#22c55e", "sweep": "#06b6d4", "takedown": "#ec4899",
+    "escape": "#10b981", "pass": "#f97316",
+}
+# site/graph.js's own FIG.a/FIG.b constants (module docstring's "no per-node stroke" gap) —
+# mirrored here as literal hex so variant 7 can draw an actor RING while `color` is taken by
+# the category. Keep in sync with graph.js's `const FIG` if that palette ever changes.
+_FIG_HEX = {"a": "#4d86ff", "b": "#fc4c02"}
+
 
 def _clamp3(n: float) -> int:
     return 1 if n <= 1 else (2 if n == 2 else 3)
@@ -76,6 +115,35 @@ def _qid(actor: str, node_key: str) -> str:
     node_key (they are fundamentally different states: your closed guard is not their closed
     guard). ``opp:`` prefix convention per D4/userDecisionFlow."""
     return node_key if actor == "you" else f"opp:{node_key}"
+
+
+def _orient_badge(node_key: str) -> str:
+    """▲ top / ▼ bottom / '' neutral — side-panel-only suffix, see module docstring."""
+    o = orientation_of(node_key)
+    return {"top": " ▲", "bottom": " ▼"}.get(o, "")
+
+
+def _apply_finish_style(node: dict[str, Any], node_key: str) -> None:
+    """Finish is the terminal submission target — glyph + colour distinct from every category
+    (and from the ghost grey a variant 6 finish would otherwise get, since a chain-closing
+    state is always structurally inferred) in every MIGRATED variant. Called last so it
+    overrides whatever colour the caller already set."""
+    if node_key == _FINISH_KEY:
+        node["color"] = _FINISH_COLOR
+        node["icon"] = _FINISH_ICON
+
+
+def _mount_knobs(n_nodes: int) -> dict[str, float]:
+    """Layout tuning proportional to node count (owner: "não faz sentido ter um cluster de
+    informação") — more nodes get more repulsion + a longer spring rest length so the
+    force-sim actually opens up instead of clustering. Formula only, not eyeballed in a real
+    browser (no headless-canvas check run here — ponytail: revisit with a playwright
+    screenshot pass if a variant still reads as clustered once someone opens it)."""
+    n = max(n_nodes, 1)
+    charge = round(2600 * (1 + n / 40))
+    link_dist = 110 if n <= 25 else max(92, round(110 - (n - 25) * 0.6))
+    gravity = round(0.0016 * (1 + n / 60), 5)
+    return {"charge": charge, "linkDist": link_dist, "gravity": gravity}
 
 
 # ── 1. bundle -> compiled chains ────────────────────────────────────────────────
@@ -274,29 +342,44 @@ def _baseline_graphview(bundle: dict[str, Any]) -> dict[str, Any]:
     return {"nodes": nodes, "links": links}
 
 
-def _own_graphview(agg: Aggregate) -> dict[str, Any]:
+def _own_graphview(agg: Aggregate) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     """Variant 2 — you only. No fighter colouring needed (single actor)."""
     states = {k: v for k, v in agg.states.items() if v["actor"] == "you"}
     edges = [v for v in agg.edges.values() if v["actor"] == "you"]
-    nodes = [{"id": v["node_key"], "label": v["label"], "cat": _cat_of(v["type"]),
-              "size": _clamp3(v["count"])} for v in states.values()]
-    links = [{"from": v["source"], "to": v["target"], "weight": _clamp3(v["count"]), "arrow": True}
-              for v in edges]
+    nodes = []
+    for (node_key, _actor), v in states.items():
+        node = {"id": v["node_key"], "label": v["label"], "cat": _cat_of(v["type"]),
+                "size": _clamp3(v["count"])}
+        _apply_finish_style(node, node_key)
+        nodes.append(node)
+    links = []
+    for v in edges:
+        link = {"from": v["source"], "to": v["target"], "weight": _clamp3(v["count"]), "arrow": True}
+        if not v["inferred"]:
+            link["label"] = v["action_label"]
+        links.append(link)
     return {"nodes": nodes, "links": links}, edges
 
 
 def _two_sided_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
     """Node per (node_key, actor) — you and partner are fundamentally different states, never
-    merged, even on the same node_key. Links: within-actor action edges (blue/orange) + neutral
-    dashed HANDOVER links (grey, ``fighter:'x'``, the site's own contested-link convention) that
-    bridge across the actor switch — the only interconnection between the two subgraphs now that
-    edges never cross actors."""
-    nodes = [{"id": _qid(actor, node_key), "label": v["label"], "cat": _cat_of(v["type"]),
-              "size": _clamp3(v["count"]), "fighter": _ACTOR_SIDE[actor]}
-             for (node_key, actor), v in states.items()]
-    links = [{"from": _qid(v["actor"], v["source"]), "to": _qid(v["actor"], v["target"]),
-              "weight": _clamp3(v["count"]), "arrow": True, "fighter": _ACTOR_SIDE[v["actor"]]}
-             for v in edges]
+    merged, even on the same node_key. Links: within-actor action edges (blue/orange, labelled
+    when not inferred) + neutral dashed HANDOVER links (grey, ``fighter:'x'``, the site's own
+    contested-link convention) that bridge across the actor switch — the only interconnection
+    between the two subgraphs now that edges never cross actors."""
+    nodes = []
+    for (node_key, actor), v in states.items():
+        node = {"id": _qid(actor, node_key), "label": v["label"], "cat": _cat_of(v["type"]),
+                "size": _clamp3(v["count"]), "fighter": _ACTOR_SIDE[actor]}
+        _apply_finish_style(node, node_key)
+        nodes.append(node)
+    links = []
+    for v in edges:
+        link = {"from": _qid(v["actor"], v["source"]), "to": _qid(v["actor"], v["target"]),
+                "weight": _clamp3(v["count"]), "arrow": True, "fighter": _ACTOR_SIDE[v["actor"]]}
+        if not v["inferred"]:
+            link["label"] = v["action_label"]
+        links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
     return {"nodes": nodes, "links": links}
@@ -354,8 +437,8 @@ def _selective_states_and_edges(
 ) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]]]:
     """Variant 4's element set: partner state/edge enters only if usageCount>=2 OR it is the
     sole handover bridge to a you element. Returned separately (not just the graphview) so
-    variants 5/6 can reuse the SAME filtered set instead of reverse-engineering it from rendered
-    nodes."""
+    variants 5/6/7/8 can reuse the SAME filtered set instead of reverse-engineering it from
+    rendered nodes."""
     you_keys = {k[0] for k in agg.states if k[1] == "you"}
     all_edges = list(agg.edges.values())
     all_handovers = list(agg.handovers.values())
@@ -392,11 +475,18 @@ def _hubs_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) 
     for (node_key, actor), v in states.items():
         qid = _qid(actor, node_key)
         d = degree.get(qid, 0)
-        nodes.append({"id": qid, "label": v["label"], "cat": _cat_of(v["type"]),
-                      "size": 1 + round(2 * d / max_deg)})
-    links = [{"from": _qid(e["actor"], e["source"]), "to": _qid(e["actor"], e["target"]),
-              "weight": _clamp3(e["count"]), "arrow": True,
-              "fighter": _TYPE_BUCKET.get(e["action_type"], "x")} for e in edges]
+        node = {"id": qid, "label": v["label"], "cat": _cat_of(v["type"]),
+                "size": 1 + round(2 * d / max_deg)}
+        _apply_finish_style(node, node_key)
+        nodes.append(node)
+    links = []
+    for e in edges:
+        link = {"from": _qid(e["actor"], e["source"]), "to": _qid(e["actor"], e["target"]),
+                "weight": _clamp3(e["count"]), "arrow": True,
+                "fighter": _TYPE_BUCKET.get(e["action_type"], "x")}
+        if not e["inferred"]:
+            link["label"] = e["action_label"]
+        links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
     return {"nodes": nodes, "links": links}
@@ -406,13 +496,15 @@ def _ghost_graphview(states: dict, edges: list, handovers: list[dict[str, Any]])
     """Variant 6 — variant 4's selective set, with inferred elements rendered as ghosts:
     dashed + minimum weight/size, node colour a translucent grey (``color`` IS a real node
     field graph.js reads — see module docstring). Ghosting marks INFERRED only, never
-    'shared' — you/partner nodes are never merged any more."""
+    'shared' — you/partner nodes are never merged any more. Finish overrides the ghost grey
+    (it is always structurally inferred, but must still read as ITS OWN colour, not noise)."""
     nodes = []
     for (node_key, actor), v in states.items():
         node = {"id": _qid(actor, node_key), "label": v["label"], "cat": _cat_of(v["type"]),
                 "size": 1 if v["inferred"] else _clamp3(v["count"]), "fighter": _ACTOR_SIDE[actor]}
         if v["inferred"]:
             node["color"] = "rgba(150,150,160,0.35)"
+        _apply_finish_style(node, node_key)
         nodes.append(node)
     links = []
     for e in edges:
@@ -422,10 +514,178 @@ def _ghost_graphview(states: dict, edges: list, handovers: list[dict[str, Any]])
             link["weight"], link["dashed"] = 1, True
         else:
             link["weight"] = _clamp3(e["count"])
+            link["label"] = e["action_label"]
         links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
     return {"nodes": nodes, "links": links}
+
+
+def _icons_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
+    """Variant 7 — category icon + colour per node, approximating the App's own
+    NODE_TYPE_ICONS/NODE_TYPE_COLORS (src/types/session.ts). Colour is taken by category here,
+    so actor is shown as a border RING instead (``n.ring``, ``_FIG_HEX`` — a stroke-custom
+    patch on the copy, see module docstring). Same selective element set as variant 4."""
+    nodes = []
+    for (node_key, actor), v in states.items():
+        typ = _cat_of(v["type"])
+        node = {"id": _qid(actor, node_key), "label": v["label"], "cat": typ,
+                "size": _clamp3(v["count"]), "color": _TYPE_COLORS.get(typ, "#94a3b8"),
+                "icon": _TYPE_ICONS.get(typ, ""), "ring": _FIG_HEX[_ACTOR_SIDE[actor]]}
+        _apply_finish_style(node, node_key)
+        nodes.append(node)
+    links = []
+    for e in edges:
+        link = {"from": _qid(e["actor"], e["source"]), "to": _qid(e["actor"], e["target"]),
+                "weight": _clamp3(e["count"]), "arrow": True, "fighter": _ACTOR_SIDE[e["actor"]]}
+        if not e["inferred"]:
+            link["label"] = e["action_label"]
+        links.append(link)
+    links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
+               "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
+    return {"nodes": nodes, "links": links}
+
+
+# ── 2b. variant 8 — collapsible systems (community detection) ──────────────────
+
+def _detect_systems(states: dict, edges: list[dict[str, Any]],
+                     handovers: list[dict[str, Any]]) -> dict[str, Any]:
+    """Greedy-modularity communities over variant 4's selective two-sided graph — "systems".
+    Determinism (cicatriz #10, same convention as ``analysis.network_metrics.detect_communities``):
+    nodes/edges added to the ``networkx`` graph in SORTED order, every tie (hub pick, community
+    ordering) breaks on a stable sort key, never dict/set iteration order.
+
+    Base is the SELECTIVE set (variant 4), not the full corpus — the same legibility mandate
+    that trims variants 5-7 applies here too (a system map over the raw partner noise would
+    just be a bigger cluster, not a smaller one)."""
+    qid_of = {key: _qid(key[1], key[0]) for key in states}
+    g: nx.Graph = nx.Graph()
+    for key in sorted(states, key=lambda k: qid_of[k]):
+        g.add_node(qid_of[key])
+
+    weights: dict[tuple[str, str], int] = {}
+    for e in edges:
+        u, v = _qid(e["actor"], e["source"]), _qid(e["actor"], e["target"])
+        if u == v or u not in g or v not in g:
+            continue
+        pair = (u, v) if u < v else (v, u)
+        weights[pair] = weights.get(pair, 0) + e["count"]
+    for h in handovers:
+        u, v = h["from"], h["to"]
+        if u == v or u not in g or v not in g:
+            continue
+        pair = (u, v) if u < v else (v, u)
+        weights[pair] = weights.get(pair, 0) + h["count"]
+    for u, v in sorted(weights):
+        g.add_edge(u, v, weight=weights[(u, v)])
+
+    if g.number_of_edges() == 0:
+        comms = [[n] for n in sorted(g.nodes)]
+    else:
+        comms = [sorted(c) for c in nx.community.greedy_modularity_communities(g, weight="weight")]
+    comms = sorted(comms, key=lambda c: (-len(c), c[0]))
+
+    node_of = {qid_of[key]: (key, v) for key, v in states.items()}
+    systems: list[dict[str, Any]] = []
+    system_of: dict[str, str] = {}
+    for idx, members in enumerate(comms):
+        hub_qid = min(members, key=lambda qid: (-g.degree(qid), qid))  # max degree, tie by id
+        hub_key, hub_v = node_of[hub_qid]
+        actor_counts: dict[str, int] = {}
+        for qid in members:
+            actor = node_of[qid][0][1]
+            actor_counts[actor] = actor_counts.get(actor, 0) + 1
+        # majority actor, tie broken toward 'you' (owner call)
+        actor = "you" if actor_counts.get("you", 0) >= actor_counts.get("partner", 0) else "partner"
+        sys_id = f"sys:{idx}"
+        for qid in members:
+            system_of[qid] = sys_id
+        systems.append({
+            "id": sys_id, "hub_qid": hub_qid, "hub_key": hub_key[0],
+            "label": f"Sistema: {hub_v['label']}", "members": members,
+            "actor": actor, "size": _clamp3(len(members)),
+        })
+    return {"systems": systems, "system_of": system_of}
+
+
+def _cross_system_links(system_of: dict[str, str], edges: list[dict[str, Any]],
+                         handovers: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Level-1 edges: aggregate of action edges + handovers whose endpoints land in TWO
+    different systems. ``dashed`` iff every crossing link between that pair is a handover (no
+    real action edge ever crosses there)."""
+    agg: dict[tuple[str, str], dict[str, Any]] = {}
+    for e in edges:
+        u, v = system_of.get(_qid(e["actor"], e["source"])), system_of.get(_qid(e["actor"], e["target"]))
+        if u is None or v is None or u == v:
+            continue
+        row = agg.setdefault((u, v), {"count": 0, "handover_only": True})
+        row["count"] += e["count"]
+        row["handover_only"] = False
+    for h in handovers:
+        u, v = system_of.get(h["from"]), system_of.get(h["to"])
+        if u is None or v is None or u == v:
+            continue
+        row = agg.setdefault((u, v), {"count": 0, "handover_only": True})
+        row["count"] += h["count"]
+    return [
+        {"from": u, "to": v, "weight": _clamp3(row["count"]), "arrow": True,
+         "dashed": row["handover_only"]}
+        for (u, v), row in sorted(agg.items())
+    ]
+
+
+def _systems_level1_view(systems: list[dict[str, Any]],
+                          cross_links: list[dict[str, Any]]) -> dict[str, Any]:
+    nodes = [{"id": s["id"], "label": s["label"], "cat": "control", "size": s["size"],
+              "fighter": _ACTOR_SIDE[s["actor"]]} for s in systems]
+    return {"nodes": nodes, "links": cross_links}
+
+
+def _system_level2(sys_row: dict[str, Any], system_of: dict[str, str], states: dict,
+                    edges: list[dict[str, Any]], handovers: list[dict[str, Any]],
+                    systems_by_id: dict[str, dict[str, Any]]
+                    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    """One system's own subgraph (nodes/edges/labels as variant 4) + dashed stub links to a
+    mini-node per neighbouring system for edges that leave this system — clickable (by id
+    convention ``stub:<system_id>``) to navigate there."""
+    member_qids = set(sys_row["members"])
+    sub_states = {k: v for k, v in states.items() if _qid(k[1], k[0]) in member_qids}
+    internal_edges = [e for e in edges
+                       if _qid(e["actor"], e["source"]) in member_qids
+                       and _qid(e["actor"], e["target"]) in member_qids]
+    internal_handovers = [h for h in handovers
+                           if h["from"] in member_qids and h["to"] in member_qids]
+    gv = _two_sided_graphview(sub_states, internal_edges, internal_handovers)
+
+    stub_nodes: dict[str, dict[str, Any]] = {}
+    stub_links: list[dict[str, Any]] = []
+
+    def _stub(this_qid: str, other_qid: str) -> None:
+        other_sys = system_of.get(other_qid)
+        if other_sys is None or other_sys == sys_row["id"]:
+            return
+        stub_id = f"stub:{other_sys}"
+        if stub_id not in stub_nodes:
+            stub_nodes[stub_id] = {"id": stub_id, "label": systems_by_id[other_sys]["label"],
+                                    "cat": "control", "size": 1, "fighter": "x"}
+        stub_links.append({"from": this_qid, "to": stub_id, "weight": 1,
+                            "dashed": True, "fighter": "x"})
+
+    for e in edges:
+        u, v = _qid(e["actor"], e["source"]), _qid(e["actor"], e["target"])
+        if u in member_qids and v not in member_qids:
+            _stub(u, v)
+        elif v in member_qids and u not in member_qids:
+            _stub(v, u)
+    for h in handovers:
+        if h["from"] in member_qids and h["to"] not in member_qids:
+            _stub(h["from"], h["to"])
+        elif h["to"] in member_qids and h["from"] not in member_qids:
+            _stub(h["to"], h["from"])
+
+    gv["nodes"] = gv["nodes"] + sorted(stub_nodes.values(), key=lambda n: n["id"])
+    gv["links"] = gv["links"] + stub_links
+    return gv, internal_edges
 
 
 # ── 3. HTML rendering ────────────────────────────────────────────────────────────
@@ -448,15 +708,76 @@ h1{{font-size:15px;margin:0 0 4px}}.muted{{color:var(--ink2);font-size:12px;marg
 <div id="list">{list_html}</div></div>
 <script src="graph.js"></script>
 <script>const GV = {graphview};
-GAGraph.mount(document.getElementById('cv'),{{mode:'map',nodes:GV.nodes,links:GV.links,pan:true,zoom:true,collide:true}});
+GAGraph.mount(document.getElementById('cv'),{{mode:'map',nodes:GV.nodes,links:GV.links,pan:true,zoom:true,collide:true,charge:{charge},linkDist:{link_dist},gravity:{gravity},forceLabels: GV.nodes.length < 40}});
+</script></body></html>"""
+
+# Variant 8's interactive two-level page — kept as a SEPARATE template (not `.format()`-shared
+# with `_PAGE`) so its script body can use real `{`/`}` for JS objects/functions without the
+# double-brace escaping that would need everywhere in `_PAGE`; substitution is plain
+# `str.replace` on `__TOKEN__` placeholders instead.
+_PAGE8 = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>
+:root{--bg:#0b0b0f;--panel:#14141a;--line:#26262e;--ink:#e9e9ee;--ink2:#9a9aa6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:flex;height:100vh}
+#canvas{flex:1;position:relative}#canvas canvas{width:100%;height:100%;display:block}
+#side{width:360px;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:16px}
+h1{font-size:15px;margin:0 0 4px}.muted{color:var(--ink2);font-size:12px;margin-bottom:10px}
+.row{padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:5px;font-size:12px}
+.g{opacity:.45;border-style:dashed}
+.legend{font-size:11px;color:var(--ink2);margin:10px 0;line-height:1.6}
+#backBtn{display:none;margin-bottom:10px;background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;font:12px system-ui}
+</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<button id="backBtn" onclick="show('global', null)">&larr; voltar ao mapa de sistemas</button>
+<h1 id="sideTitle"></h1><div class="muted" id="sideSubtitle"></div>
+<div class="legend">__LEGEND__</div>
+<div id="list"></div></div>
+<script src="graph.js"></script>
+<script>
+const LEVEL1 = __LEVEL1_JSON__;
+const LEVEL2 = __LEVEL2_JSON__;
+let mounted = null;
+function freshCanvas() {
+  const old = document.getElementById('cv');
+  const next = old.cloneNode(false);
+  old.parentNode.replaceChild(next, old);
+  return next;
+}
+function show(level, id) {
+  const data = level === 'global' ? LEVEL1 : LEVEL2[id];
+  document.getElementById('sideTitle').textContent = data.title;
+  document.getElementById('sideSubtitle').textContent = data.subtitle;
+  document.getElementById('list').innerHTML = data.listHtml;
+  document.getElementById('backBtn').style.display = level === 'global' ? 'none' : 'block';
+  if (mounted && mounted.destroy) mounted.destroy();
+  const cv = freshCanvas();
+  mounted = GAGraph.mount(cv, {
+    mode: 'map', nodes: data.gv.nodes, links: data.gv.links, pan: true, zoom: true, collide: true,
+    charge: data.charge, linkDist: data.linkDist, gravity: data.gravity,
+    forceLabels: data.gv.nodes.length < 40,
+    onSelect: function (n) {
+      if (!n) return;
+      if (level === 'global' && n.id.indexOf('sys:') === 0) show('system', n.id);
+      if (level === 'system' && n.id.indexOf('stub:') === 0) show('system', n.id.slice(5));
+    }
+  });
+}
+show('global', null);
 </script></body></html>"""
 
 
 def _edge_list_html(edges: list[dict[str, Any]], id_to_label: dict[str, str]) -> str:
     rows = []
     for e in sorted(edges, key=lambda e: (-e["count"], e["source"], e["target"])):
-        src = id_to_label.get(e["source"], e["source"])
-        tgt = id_to_label.get(e["target"], e["target"])
+        # look up by the QUALIFIED id — `e["source"]`/`e["target"]` are raw node_keys, and for
+        # the partner actor that's not the rendered node's id (`opp:{node_key}`); without
+        # qualifying first, every partner-side row fell back to the raw key instead of its
+        # label. Root-cause fix (was silently wrong on every two-sided variant's side panel).
+        src_id, tgt_id = _qid(e["actor"], e["source"]), _qid(e["actor"], e["target"])
+        src = id_to_label.get(src_id, e["source"]) + _orient_badge(e["source"])
+        tgt = id_to_label.get(tgt_id, e["target"]) + _orient_badge(e["target"])
         cls = " g" if e.get("inferred") else ""
         rows.append(
             f'<div class="row{cls}">{src} —<b>{e["action_label"]}</b>→ {tgt} '
@@ -466,12 +787,72 @@ def _edge_list_html(edges: list[dict[str, Any]], id_to_label: dict[str, str]) ->
 
 
 def _write_page(out: Path, filename: str, title: str, subtitle: str, legend: str,
-                 graphview: dict[str, Any], edges: list[dict[str, Any]] | None) -> None:
+                 graphview: dict[str, Any], edges: list[dict[str, Any]] | None) -> dict[str, float]:
     id_to_label = {n["id"]: n["label"] for n in graphview["nodes"]}
     list_html = _edge_list_html(edges, id_to_label) if edges is not None else ""
+    knobs = _mount_knobs(len(graphview["nodes"]))
     html = _PAGE.format(title=title, subtitle=subtitle, legend=legend, list_html=list_html,
-                         graphview=json.dumps(graphview, ensure_ascii=False))
+                         graphview=json.dumps(graphview, ensure_ascii=False),
+                         charge=knobs["charge"], link_dist=knobs["linkDist"], gravity=knobs["gravity"])
     (out / filename).write_text(html, encoding="utf-8")
+    return knobs
+
+
+def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
+                      handovers4: list[dict[str, Any]]) -> dict[str, Any]:
+    detected = _detect_systems(states4, edges4, handovers4)
+    systems, system_of = detected["systems"], detected["system_of"]
+    systems_by_id = {s["id"]: s for s in systems}
+    cross_links = _cross_system_links(system_of, edges4, handovers4)
+    level1_gv = _systems_level1_view(systems, cross_links)
+    level1_knobs = _mount_knobs(len(level1_gv["nodes"]))
+    level1_list = "".join(
+        f'<div class="row">{s["label"]} <span class="muted">'
+        f'({len(s["members"])} nos, {s["actor"]})</span></div>'
+        for s in systems
+    )
+    level1 = {"title": "8 — Systems map (global)",
+              "subtitle": f"{len(systems)} systems — greedy-modularity over variant 4's "
+                          "selective two-sided graph",
+              "listHtml": level1_list, "gv": level1_gv, **level1_knobs}
+
+    level2: dict[str, Any] = {}
+    for s in systems:
+        gv2, internal_edges = _system_level2(s, system_of, states4, edges4, handovers4, systems_by_id)
+        id_to_label = {n["id"]: n["label"] for n in gv2["nodes"]}
+        list2 = _edge_list_html(internal_edges, id_to_label)
+        knobs2 = _mount_knobs(len(gv2["nodes"]))
+        level2[s["id"]] = {
+            "title": s["label"],
+            "subtitle": f"{len(s['members'])} nodes, {s['actor']}-dominant — dashed stub = "
+                        "edge leaving this system, click to follow",
+            "listHtml": list2, "gv": gv2, **knobs2,
+        }
+
+    html = (
+        _PAGE8.replace("__TITLE__", "8 — Collapsible systems")
+        .replace(
+            "__LEGEND__",
+            "click a system node to drill in; dashed grey = handover-only or a cross-system "
+            "stub — solid = at least one real action edge crosses that pair. Inside a system: "
+            "same convention as variant 4 (blue=you, orange=opponent), dashed stub nodes are "
+            "the neighbouring systems, click to follow.",
+        )
+        .replace("__LEVEL1_JSON__", json.dumps(level1, ensure_ascii=False))
+        .replace("__LEVEL2_JSON__", json.dumps(level2, ensure_ascii=False))
+    )
+    (out / "8-sistemas-colapsavel.html").write_text(html, encoding="utf-8")
+
+    return {
+        "nodes": len(level1_gv["nodes"]), "edges": len(level1_gv["links"]),
+        "edges_per_node": round(len(level1_gv["links"]) / len(level1_gv["nodes"]), 2)
+        if level1_gv["nodes"] else 0.0,
+        "pct_inferred_edges": None,
+        "partner_elements": sum(1 for s in systems if s["actor"] == "partner"),
+        "handover_links": sum(1 for link in cross_links if link.get("dashed")),
+        "systems": len(systems),
+        "knobs": level1_knobs,
+    }
 
 
 _VARIANT_DESCRIPTIONS = [
@@ -481,6 +862,8 @@ _VARIANT_DESCRIPTIONS = [
     ("4-migrado-oponente-seletivo.html", "partner enters only if used >=2x or sole handover bridge to a you node"),
     ("5-hubs.html", "node size by degree, edges bucketed by action type (see legend)"),
     ("6-ghost-inferidos.html", "variant 4 + inferred states/edges rendered as ghosts (dashed/grey)"),
+    ("7-icones-categoria.html", "variant 4 + category icon/colour per node (App parity), actor shown as a border ring"),
+    ("8-sistemas-colapsavel.html", "variant 4 grouped into systems (greedy-modularity) — click a system to drill in"),
 ]
 
 _INDEX_PAGE = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
@@ -492,69 +875,161 @@ a{{color:#4d86ff}}li{{margin-bottom:10px}}</style></head><body>
 </body></html>"""
 
 
+def _patch_graph_js(js_text: str) -> str:
+    """Programmatic patch on the COPY only — ``site/graph.js`` itself is never touched (see
+    module docstring: this file exists precisely because the shared renderer can't yet do
+    per-link label/icon/ring). Deterministic string-replace, one anchor each; any anchor not
+    found raises — a prototype that silently shipped without one of these features is worse
+    than a loud failure."""
+    patches = [
+        (
+            "        const mapLabel = !useCam || cam.k >= 1 || (n.size || 1) >= 2 || inFocus;",
+            "        const mapLabel = opts.forceLabels || !useCam || cam.k >= 1 || (n.size || 1) >= 2 || inFocus;  // map-prototype patch: force-visible labels\n",
+        ),
+        (
+            "          ctx.closePath(); ctx.fill();\n        }\n      }",
+            "          ctx.closePath(); ctx.fill();\n        }\n"
+            "        if (l.label && (opts.forceLabels || !useCam || cam.k >= 1)) {  // map-prototype patch: edge label\n"
+            "          const mx = (l.s.x + l.t.x) / 2, my = (l.s.y + l.t.y) / 2;\n"
+            "          const ldx = l.t.x - l.s.x, ldy = l.t.y - l.s.y;\n"
+            "          const ld = Math.sqrt(ldx * ldx + ldy * ldy) || 1;\n"
+            "          const lpx = -ldy / ld, lpy = ldx / ld;\n"
+            "          ctx.save();\n"
+            "          ctx.font = `${useCam ? 10 / cam.k : 10}px 'Spline Sans Mono', monospace`;\n"
+            "          ctx.fillStyle = col;\n"
+            "          ctx.globalAlpha = hov ? (active ? 0.9 : 0.08) : 0.75;\n"
+            "          ctx.textAlign = 'center';\n"
+            "          ctx.fillText(l.label, mx + lpx * 7, my + lpy * 7);\n"
+            "          ctx.restore();\n"
+            "        }\n      }",
+        ),
+        (
+            "        ctx.shadowBlur = 0;",
+            "        ctx.shadowBlur = 0;\n"
+            "        if (n.ring) {  // map-prototype patch: actor border ring\n"
+            "          ctx.save();\n"
+            "          ctx.globalAlpha = dim ? 0.18 : 1;\n"
+            "          ctx.lineWidth = 2.5;\n"
+            "          ctx.strokeStyle = n.ring;\n"
+            "          ctx.beginPath(); ctx.arc(n.x, n.y, r + 3, 0, Math.PI * 2); ctx.stroke();\n"
+            "          ctx.restore();\n"
+            "        }",
+        ),
+        (
+            "        ctx.beginPath(); ctx.fillStyle = col;\n"
+            "        ctx.arc(n.x, n.y, Math.max(1, r - 4.5), 0, Math.PI * 2); ctx.fill();",
+            "        ctx.beginPath(); ctx.fillStyle = col;\n"
+            "        ctx.arc(n.x, n.y, Math.max(1, r - 4.5), 0, Math.PI * 2); ctx.fill();\n"
+            "        if (n.icon) {  // map-prototype patch: category/finish glyph\n"
+            "          ctx.save();\n"
+            "          ctx.globalAlpha = dim ? 0.18 : 1;\n"
+            "          ctx.font = `${Math.max(9, r)}px sans-serif`;\n"
+            "          ctx.textAlign = 'center';\n"
+            "          ctx.textBaseline = 'middle';\n"
+            "          ctx.fillStyle = '#fff';\n"
+            "          ctx.fillText(n.icon, n.x, n.y);\n"
+            "          ctx.restore();\n"
+            "        }",
+        ),
+    ]
+    for old, new in patches:
+        if old not in js_text:
+            raise ValueError(
+                "render_map_prototypes: graph.js patch anchor not found — site/graph.js "
+                f"drifted from what this module expects. Anchor: {old[:70]!r}..."
+            )
+        js_text = js_text.replace(old, new, 1)
+    return js_text
+
+
+def _orientation_counts(agg: Aggregate) -> dict[str, int]:
+    counts = {"top": 0, "bottom": 0, "neutral": 0}
+    for node_key, _actor in agg.states:
+        counts[orientation_of(node_key)] += 1
+    return counts
+
+
 def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
     out.mkdir(parents=True, exist_ok=True)
     if _GRAPH_JS.exists():
-        shutil.copy(_GRAPH_JS, out / "graph.js")
+        patched = _patch_graph_js(_GRAPH_JS.read_text(encoding="utf-8"))
+        (out / "graph.js").write_text(patched, encoding="utf-8")
 
     agg = build_aggregate(bundle)
     metrics: dict[str, Any] = {"variants": {}}
 
     # 1 — baseline (not compiled, no edge-label list)
     gv1 = _baseline_graphview(bundle)
-    _write_page(out, "1-baseline.html", "1 — Baseline (current app graph)",
-                "technique=node, App's own graph today", "no legend — plain baseline",
-                gv1, None)
-    metrics["variants"]["1-baseline"] = _variant_metrics(gv1, None, 0)
+    knobs1 = _write_page(out, "1-baseline.html", "1 — Baseline (current app graph)",
+                          "technique=node, App's own graph today", "no legend — plain baseline",
+                          gv1, None)
+    metrics["variants"]["1-baseline"] = {**_variant_metrics(gv1, None, 0), "knobs": knobs1}
 
     # 2 — you only
     gv2, edges2 = _own_graphview(agg)
-    _write_page(out, "2-migrado-proprio.html", "2 — Migrated, you only",
-                "states=nodes, edges=action (label in the list, graph.js has no link label)",
-                "arrows = your own chain order", gv2, edges2)
-    metrics["variants"]["2-migrado-proprio"] = _variant_metrics(gv2, edges2, 0)
+    knobs2 = _write_page(out, "2-migrado-proprio.html", "2 — Migrated, you only",
+                          "states=nodes, edges=action label at the midpoint (non-inferred only)",
+                          "arrows = your own chain order", gv2, edges2)
+    metrics["variants"]["2-migrado-proprio"] = {**_variant_metrics(gv2, edges2, 0), "knobs": knobs2}
 
     # 3 — full two-sided
     gv3, edges3, handovers3 = _complete_two_sided(agg)
     partner3 = sum(1 for k in agg.states if k[1] == "partner") + sum(1 for e in edges3 if e["actor"] == "partner")
-    _write_page(out, "3-migrado-oponente-completo.html", "3 — + full opponent",
-                "every you + every partner element",
-                "blue=you, orange=opponent (separate nodes, never merged), "
-                "grey dashed=handover (actor switch)", gv3, edges3)
-    metrics["variants"]["3-migrado-oponente-completo"] = _variant_metrics(
-        gv3, edges3, partner3, len(handovers3))
+    knobs3 = _write_page(out, "3-migrado-oponente-completo.html", "3 — + full opponent",
+                          "every you + every partner element",
+                          "blue=you, orange=opponent (separate nodes, never merged), "
+                          "grey dashed=handover (actor switch)", gv3, edges3)
+    metrics["variants"]["3-migrado-oponente-completo"] = {
+        **_variant_metrics(gv3, edges3, partner3, len(handovers3)), "knobs": knobs3}
 
-    # 4 — selective opponent (states4/edges4/handovers4 reused by 5 and 6: same partner-noise gate)
+    # 4 — selective opponent (states4/edges4/handovers4 reused by 5/6/7/8: same partner-noise gate)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
     gv4 = _two_sided_graphview(states4, edges4, handovers4)
     partner4 = sum(1 for k in states4 if k[1] == "partner") + sum(1 for e in edges4 if e["actor"] == "partner")
-    _write_page(out, "4-migrado-oponente-seletivo.html", "4 — Selective opponent",
-                "partner element kept only if used >=2x or sole handover bridge to a you element",
-                "blue=you, orange=opponent, grey dashed=handover — fewer partner nodes than (3)",
-                gv4, edges4)
-    metrics["variants"]["4-migrado-oponente-seletivo"] = _variant_metrics(
-        gv4, edges4, partner4, len(handovers4))
+    knobs4 = _write_page(out, "4-migrado-oponente-seletivo.html", "4 — Selective opponent",
+                          "partner element kept only if used >=2x or sole handover bridge to a you element",
+                          "blue=you, orange=opponent, grey dashed=handover — fewer partner nodes than (3)",
+                          gv4, edges4)
+    metrics["variants"]["4-migrado-oponente-seletivo"] = {
+        **_variant_metrics(gv4, edges4, partner4, len(handovers4)), "knobs": knobs4}
 
     # 5 — hubs (same element set as 4, different sizing/colour)
     gv5 = _hubs_graphview(states4, edges4, handovers4)
-    _write_page(out, "5-hubs.html", "5 — Hubs (degree size, action-type colour)",
-                "node size = degree percentile (handover links count toward degree)",
-                "APPROXIMATION: graph.js has no per-link colour field, so action type reuses "
-                "the 3-slot fighter palette — blue=submission/takedown, orange=pass/sweep, "
-                "grey dashed=handover (actor switch). True per-type colour needs an App-side "
-                "graph.js change (Phase 5).",
-                gv5, edges4)
-    metrics["variants"]["5-hubs"] = _variant_metrics(gv5, edges4, partner4, len(handovers4))
+    knobs5 = _write_page(out, "5-hubs.html", "5 — Hubs (degree size, action-type colour)",
+                          "node size = degree percentile (handover links count toward degree)",
+                          "APPROXIMATION: graph.js has no per-link colour field, so action type reuses "
+                          "the 3-slot fighter palette — blue=submission/takedown, orange=pass/sweep, "
+                          "grey dashed=handover (actor switch). True per-type colour needs an App-side "
+                          "graph.js change (Phase 5).",
+                          gv5, edges4)
+    metrics["variants"]["5-hubs"] = {
+        **_variant_metrics(gv5, edges4, partner4, len(handovers4)), "knobs": knobs5}
 
     # 6 — ghost inferred (same element set as 4, inferred elements ghosted)
     gv6 = _ghost_graphview(states4, edges4, handovers4)
-    _write_page(out, "6-ghost-inferidos.html", "6 — Ghost inferred",
-                "variant 4 + inferred states/edges rendered as ghosts",
-                "blue=you, orange=opponent, grey dashed=handover; "
-                "ghost (translucent) = structurally inferred (D2 gap-fill), never an observed "
-                "event — ghosting marks INFERRED only, never a shared/merged node",
-                gv6, edges4)
-    metrics["variants"]["6-ghost-inferidos"] = _variant_metrics(gv6, edges4, partner4, len(handovers4))
+    knobs6 = _write_page(out, "6-ghost-inferidos.html", "6 — Ghost inferred",
+                          "variant 4 + inferred states/edges rendered as ghosts",
+                          "blue=you, orange=opponent, grey dashed=handover; "
+                          "ghost (translucent) = structurally inferred (D2 gap-fill), never an observed "
+                          "event — ghosting marks INFERRED only, never a shared/merged node; finish "
+                          "keeps its own colour even when ghosted", gv6, edges4)
+    metrics["variants"]["6-ghost-inferidos"] = {
+        **_variant_metrics(gv6, edges4, partner4, len(handovers4)), "knobs": knobs6}
+
+    # 7 — category icons (App parity), actor as a border ring
+    gv7 = _icons_graphview(states4, edges4, handovers4)
+    knobs7 = _write_page(out, "7-icones-categoria.html", "7 — Category icons",
+                          "colour+glyph = category (App's NODE_TYPE_ICONS/COLORS), ring = actor",
+                          "guard \U0001f6e1 submission \U0001f525 control ▣ transition ⇄ "
+                          "sweep ↻ escape ⏏ pass ⤴ takedown ⤵ finish \U0001f3c1 — "
+                          "blue ring=you, orange ring=opponent (APPROXIMATION: graph.js has no real "
+                          "per-node stroke field, patched into this copy only, see module docstring)",
+                          gv7, edges4)
+    metrics["variants"]["7-icones-categoria"] = {
+        **_variant_metrics(gv7, edges4, partner4, len(handovers4)), "knobs": knobs7}
+
+    # 8 — collapsible systems (community detection, two-level interactive)
+    metrics["variants"]["8-sistemas-colapsavel"] = _render_variant8(out, states4, edges4, handovers4)
 
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,
@@ -564,6 +1039,7 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
         "edges_inferred": agg.raw_edges_inferred,
         "edges_inferred_pct": _pct(agg.raw_edges_inferred, agg.raw_edges_total),
     }
+    metrics["orientation_counts"] = _orientation_counts(agg)
 
     items = "".join(
         f'<li><a href="{fname}">{fname}</a> — {desc}</li>' for fname, desc in _VARIANT_DESCRIPTIONS
@@ -595,7 +1071,7 @@ def _variant_metrics(gv: dict[str, Any], edges: list[dict[str, Any]] | None, par
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    ap = argparse.ArgumentParser(description="Render 6 actions/states map prototypes from a user bundle")
+    ap = argparse.ArgumentParser(description="Render 8 actions/states map prototypes from a user bundle")
     ap.add_argument("--bundle", type=Path, required=True)
     ap.add_argument("--out", type=Path, default=_DEFAULT_OUT)
     args = ap.parse_args()
@@ -612,6 +1088,8 @@ def main() -> int:
     print(f"\ncorpus inference rate: states {cir['states_inferred_pct']}% "
           f"({cir['states_inferred']}/{cir['states_total']}), "
           f"edges {cir['edges_inferred_pct']}% ({cir['edges_inferred']}/{cir['edges_total']})")
+    oc = metrics["orientation_counts"]
+    print(f"orientation: top {oc['top']}, bottom {oc['bottom']}, neutral {oc['neutral']}")
     print(f"\n-> {args.out}")
     return 0
 
