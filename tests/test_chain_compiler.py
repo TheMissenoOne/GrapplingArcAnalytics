@@ -54,12 +54,15 @@ def test_chain_opening_on_clinch_label_gets_start_neutral():
 
 
 def test_armbar_then_triangle_chains_through_chained_submission():
+    """`$start|submission -> start engaged` (2026-08-27) opens the chain — see the dedicated
+    'start engaged' tests for that row's own focus; this test's own focus is the MID-chain
+    submission|submission bridge (unaffected)."""
     chain = compile_chain([
         _ev("Armbar", "submission"),
         _ev("Triangle Choke", "submission"),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["scramble", "chained submission", "finish"]
+    assert [s.node_key for s in chain.states] == ["start engaged", "chained submission", "finish"]
     assert [s.inferred for s in chain.states] == [True, True, True]
     e0, e1 = chain.edges
     assert e0.action_key == "armbar" and e0.target_key == "chained submission"
@@ -74,12 +77,14 @@ def test_submission_terminal_resolves_to_finish_not_scramble():
     LAST action of a chain being a landed/attempted submission is a semantically different gap
     than 'no more info' — it should land on the generic 'finish' node, not 'scramble'. A
     submission in the MIDDLE of the chain (bridging to another action, not a real state) is
-    untouched — still the '*|*' fallback, same as before this change."""
+    untouched — still the '*|*' fallback, same as before this change. `$start|submission ->
+    start engaged` (also 2026-08-27) opens the chain — this test's own focus is the mid-chain
+    and terminal gaps, unaffected by that row."""
     chain = compile_chain([
         _ev("Armbar", "submission"),
         _ev("Guard Pass", "pass"),  # mid-chain: (submission, pass) has no dedicated row
     ], inference_table=TABLE)
-    assert [s.node_key for s in chain.states] == ["scramble", "scramble", "top transition"]
+    assert [s.node_key for s in chain.states] == ["start engaged", "scramble", "top transition"]
     e0, e1 = chain.edges
     assert e0.action_key == "armbar" and e0.target_key == "scramble"  # mid-chain: unaffected
     assert e1.action_key == "guard pass" and e1.terminal is True
@@ -108,6 +113,65 @@ def test_kguard_then_5050_guard_bridges_with_guard_transition():
     assert edge.source_key == "kguard" and edge.target_key == "5050 guard"
 
 
+def test_mount_then_side_control_bridges_with_control_transition():
+    """Two real `control` states with no action between them bridge through the new
+    `control|control -> control transition` row (2026-08-27), not the bare `transition`
+    fallback. `orientation_of('Mount') == 'top'` also prepends 'start top' (module docstring)
+    ahead of the pair this test targets — unpacked explicitly, same convention as the
+    kguard/5050 guard-transition test above."""
+    chain = compile_chain([
+        _ev("Mount", "control"),
+        _ev("Side Control", "control"),
+    ], inference_table=TABLE)
+
+    prepend_edge, edge = chain.edges
+    assert prepend_edge.source_key == "start top" and prepend_edge.target_key == "mount"
+    assert edge.source_key == "mount" and edge.target_key == "side control"
+    assert edge.action_key == "control transition"
+    assert edge.inferred is True
+
+
+def test_mount_then_closed_guard_bridges_with_guard_recovery():
+    """`control|guard -> guard recovery` (2026-08-27): control lost, back in someone's guard."""
+    chain = compile_chain([
+        _ev("Mount", "control"),
+        _ev("Closed Guard", "guard"),
+    ], inference_table=TABLE)
+
+    edge = [e for e in chain.edges if e.source_key == "mount" and e.target_key == "closed guard"][0]
+    assert edge.action_key == "guard recovery"
+
+
+def test_closed_guard_then_mount_bridges_with_guard_exit():
+    """`guard|control -> guard exit` (2026-08-27): left the guard, into a control position."""
+    chain = compile_chain([
+        _ev("Closed Guard", "guard"),
+        _ev("Mount", "control"),
+    ], inference_table=TABLE)
+
+    edge = [e for e in chain.edges if e.source_key == "closed guard" and e.target_key == "mount"][0]
+    assert edge.action_key == "guard exit"
+
+
+def test_escape_action_then_submission_action_bridges_with_bottom_transition():
+    """Two adjacent ACTIONS with no state between them: an escape (forced-action type) followed
+    by a submission bridges through the new `escape|* -> bottom transition` row, mirroring
+    `takedown|* -> top transition`. The invented STATE is inferred; the EDGE reaching it is the
+    real, logged 'Some Escape' action."""
+    chain = compile_chain([
+        _ev("Closed Guard", "guard"),
+        _ev("Some Escape", "escape"),
+        _ev("Armbar", "submission"),
+    ], inference_table=TABLE)
+
+    bridge_states = [s for s in chain.states if s.node_key == "bottom transition"]
+    assert len(bridge_states) == 1 and bridge_states[0].inferred is True
+    bridge_edge = [e for e in chain.edges if e.target_key == "bottom transition"][0]
+    assert bridge_edge.inferred is False
+    assert bridge_edge.action_key == "some escape"
+    assert bridge_edge.source_key == "closed guard"
+
+
 def test_chain_opening_on_takedown_gets_start_neutral_initial_state():
     """D2's declarative opening row (owner call, 2026-08-27): a chain whose first action is a
     'takedown' resolves rule 5's gap via the `"$start"` sentinel — `"$start|takedown" ->
@@ -131,17 +195,18 @@ def test_chain_opening_on_takedown_gets_start_neutral_initial_state():
     assert not edge.inferred and not edge.terminal
 
 
-def test_chain_opening_on_submission_keeps_the_scramble_fallback():
-    """Not every opening resolves to a curated start node — a chain whose first action is a
-    'submission' has no `"$start|submission"` table row and no PGD/CDP label, so it keeps the
-    pre-existing '*|*' fallback: 'scramble', role=None. Preserves prior behavior exactly."""
+def test_chain_opening_on_submission_resolves_to_start_engaged():
+    """D2's declarative opening row (owner call, 2026-08-27): a chain whose first action is a
+    'submission' has its own row (`"$start|submission" -> "start engaged"`, orientation
+    neutral) — distinct from 'start neutral' (which means "standing"), since a submission
+    attempt opening means the fighters were already engaged, not on their feet."""
     chain = compile_chain([
         _ev("Armbar", "submission"),
         _ev("Guard Pass", "pass"),
     ], inference_table=TABLE)
 
-    assert chain.states[0].node_key == "scramble"
-    assert chain.states[0].role is None
+    assert chain.states[0].node_key == "start engaged"
+    assert chain.states[0].role == "start"
 
 
 def test_chain_opening_on_closed_guard_state_prepends_start_bottom():
@@ -259,7 +324,7 @@ def test_compile_two_sided_splits_and_drops_unassigned_with_original_index():
     assert not a.dropped
 
     b = result["b"]
-    assert b.states[0].node_key == "scramble"  # rule 5 fallback for the lone Guard Pass
+    assert b.states[0].node_key == "start top"  # $start|pass (2026-08-27) for the lone Guard Pass
     assert b.edges[0].source_event_index == 1  # rewritten to the ORIGINAL events index
 
     d = result["dropped"]

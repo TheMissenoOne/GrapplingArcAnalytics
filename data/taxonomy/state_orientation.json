@@ -1,6 +1,9 @@
 {
   "5050 guard": "bottom",
   "back control": "top",
+  "body lock from back": "top",
+  "body triangle": "top",
+  "bottom transition": "bottom",
   "butterfly guard": "bottom",
   "chained submission": "neutral",
   "closed guard": "bottom",
@@ -31,10 +34,12 @@
   "single leg x": "bottom",
   "spider guard": "bottom",
   "start bottom": "bottom",
+  "start engaged": "neutral",
   "start neutral": "neutral",
   "start top": "top",
   "top transition": "top",
   "truck": "top",
+  "turtle position": "bottom",
   "worm guard": "bottom",
   "xguard": "bottom",
   "zguard": "bottom"

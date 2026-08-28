@@ -8,33 +8,33 @@ actor-id split.
 
 ## Corpus
 - matches compiled: 281
-- dropped events (by reason): {'no_side': 180}
+- dropped events (by reason): {'transparent': 20, 'no_side': 180}
 
 ## chain_compiler (new structure)
-- unique state nodes: 68
-- unique transition edges (state→state, deduped): 250
-- total state-node occurrences (raw walk, not deduped): 2244
-- total action edges: 1863
-- inferred state nodes: 70.8%
-- inferred action edges: 14.9%
+- unique state nodes: 77
+- unique transition edges (state→state, deduped): 344
+- total state-node occurrences (raw walk, not deduped): 2208
+- total action edges: 1827
+- inferred state nodes: 62.4%
+- inferred action edges: 23.9%
 
 ### Top 10 states by degree
-- scramble: 1640
-- top transition: 481
-- chained submission: 478
-- mount: 349
-- half guard: 132
-- escape to turtle: 77
-- butterfly guard: 77
-- closed guard: 67
-- northsouth: 54
-- side control: 44
+- scramble: 866
+- top transition: 461
+- chained submission: 412
+- mount: 367
+- back take: 211
+- half guard: 140
+- bottom transition: 130
+- finish: 113
+- body triangle: 100
+- butterfly guard: 78
 
 ### Top 10 actions by volume
-- transition: 221
+- control transition: 223
 - sweep: 207
-- back take: 117
 - triangle attempt: 117
+- transition: 95
 - guillotine attempt: 62
 - escape to standing: 60
 - guard transition: 57

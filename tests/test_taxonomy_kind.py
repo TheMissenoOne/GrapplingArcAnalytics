@@ -89,6 +89,25 @@ def test_back_control_carve_out_does_not_override_a_forced_action_type() -> None
     assert kind_of("Back Control", "transition") == "action"
 
 
+# ── the carve-out's 2026-08-27 extension: Body Triangle / Body Lock from Back ──────
+def test_body_triangle_and_body_lock_from_back_are_state_despite_back_take_tokens() -> None:
+    """Same token collision as "Back Control" — `lamas_chain.BACK_TAKE_TOKENS` reads both
+    labels as the back-take action, but they name durable POSITIONS the App library already
+    lists under `control` (`attribution._CONTROL_BACK`)."""
+    from analysis.lamas_chain import lamas_state
+
+    assert lamas_state({"type": "control", "label": "Body Triangle"}) is not None
+    assert lamas_state({"type": "control", "label": "Body Lock from Back"}) is not None
+    assert kind_of("Body Triangle", "control") == "state"
+    assert kind_of("Body Lock from Back", "control") == "state"
+
+
+def test_bare_body_lock_is_not_carved_out() -> None:
+    """"Body Lock" (no "from Back") is deliberately left alone — not a `BACK_TAKE_TOKENS`
+    collision, and folding it in would move a Markov `CDP` weight (full ELO replay)."""
+    assert kind_of("Body Lock", "control") == "action"
+
+
 # ── kind_of_entry: library-resolved, distrusts a stale logged `type` ────────────
 def test_kind_of_entry_action_logged_with_a_stale_state_type() -> None:
     """Real bug: 'Raspagem de Gancho' (a sweep) logged with `type: 'control'`. `kind_of` alone
@@ -106,6 +125,15 @@ def test_kind_of_entry_state_logged_with_a_stale_type_stays_state() -> None:
 
 def test_kind_of_entry_submission_logged_with_a_stale_type() -> None:
     assert kind_of_entry("Mata-Leão", "control") == "action"
+
+
+def test_kind_of_entry_turtle_is_state_not_action() -> None:
+    """Real bug this carve-out (1.3) exists for: 'Turtle'/'Quatro Apoios' variants used to
+    resolve to the library's `Turtle Position` node with `type: 'escape'` — a FORCED_ACTION
+    type — so `kind_of_entry` misread the App's own turtle position as an ACTION. Now `type`
+    is `'defensive'` (not forced), so the position reads as a state."""
+    assert kind_of_entry("Turtle", "control") == "state"
+    assert kind_of_entry("Quatro Apoios", "control") == "state"
 
 
 def test_kind_of_entry_falls_back_to_kind_of_outside_the_library() -> None:
@@ -168,9 +196,9 @@ def test_shipped_inference_table_resolves_the_documented_examples() -> None:
         "chained submission"
     )
     assert infer_state_for_action_pair(table, "takedown", "pass")["node_key"] == "top transition"
-    assert infer_state_for_action_pair(table, "escape", "escape")["node_key"] == "scramble"
+    assert infer_state_for_action_pair(table, "escape", "escape")["node_key"] == "bottom transition"
     assert infer_action_for_state_pair(table, "guard", "guard")["action_key"] == "guard transition"
-    assert infer_action_for_state_pair(table, "control", "guard")["action_key"] == "transition"
+    assert infer_action_for_state_pair(table, "control", "guard")["action_key"] == "guard recovery"
 
 
 # ── D2: the genuinely-terminal marker → 'finish' ─────────────────────────────────
@@ -197,6 +225,56 @@ def test_terminal_takedown_sweep_pass_unaffected_by_the_new_marker() -> None:
         assert infer_state_for_action_pair(table, typ, "$terminal")["node_key"] == "top transition"
 
 
+# ── D2: 2026-08-27 pairs — generic vocabulary differentiation ───────────────────
+def test_start_pass_resolves_to_start_top() -> None:
+    """A chain opening on a `pass` means you were already on top of their guard —
+    established position, not scramble."""
+    table = load_inference_table()
+    assert infer_state_for_action_pair(table, "$start", "pass")["node_key"] == "start top"
+
+
+def test_start_escape_resolves_to_start_bottom() -> None:
+    """A chain opening on an `escape` means you were pinned — established bottom."""
+    table = load_inference_table()
+    assert infer_state_for_action_pair(table, "$start", "escape")["node_key"] == "start bottom"
+
+
+def test_start_submission_resolves_to_start_engaged_not_start_neutral() -> None:
+    """A chain opening on a `submission` attempt is neither standing ($start|takedown ->
+    'start neutral') nor a topology-known opening — 'start engaged' (neutral orientation) is
+    its own generic state, not folded into 'start neutral' (which means 'standing')."""
+    table = load_inference_table()
+    entry = infer_state_for_action_pair(table, "$start", "submission")
+    assert entry["node_key"] == "start engaged"
+    assert entry["orientation"] == "neutral"
+    assert entry["role"] == "start"
+
+
+def test_escape_star_resolves_to_bottom_transition_mirroring_top_transition() -> None:
+    table = load_inference_table()
+    assert infer_state_for_action_pair(table, "escape", "anything")["node_key"] == (
+        "bottom transition"
+    )
+    assert infer_state_for_action_pair(table, "escape", "anything")["orientation"] == "bottom"
+
+
+def test_control_control_resolves_to_control_transition() -> None:
+    table = load_inference_table()
+    assert infer_action_for_state_pair(table, "control", "control")["action_key"] == (
+        "control transition"
+    )
+
+
+def test_control_guard_resolves_to_guard_recovery() -> None:
+    table = load_inference_table()
+    assert infer_action_for_state_pair(table, "control", "guard")["action_key"] == "guard recovery"
+
+
+def test_guard_control_resolves_to_guard_exit() -> None:
+    table = load_inference_table()
+    assert infer_action_for_state_pair(table, "guard", "control")["action_key"] == "guard exit"
+
+
 # ── D2: opening ($start) rows and the role-marked generic states ────────────────
 def test_start_sentinel_resolves_takedown_to_start_neutral() -> None:
     table = load_inference_table()
@@ -205,11 +283,11 @@ def test_start_sentinel_resolves_takedown_to_start_neutral() -> None:
 
 
 def test_start_sentinel_unresolved_type_falls_back_to_scramble() -> None:
-    """Only 'takedown' has a declarative opening row — every other type still falls through to
-    the pre-existing '*|*' fallback via the `$start` sentinel, same as the plain '*' sentinel it
-    replaces did."""
+    """'takedown'/'pass'/'escape'/'submission' now have declarative opening rows (2026-08-27) —
+    every OTHER type still falls through to the pre-existing '*|*' fallback via the `$start`
+    sentinel, same as the plain '*' sentinel it replaces did."""
     table = load_inference_table()
-    for typ in ("submission", "pass", "sweep", "escape", "transition"):
+    for typ in ("sweep", "transition"):
         assert infer_state_for_action_pair(table, "$start", typ)["node_key"] == "scramble"
 
 
@@ -220,7 +298,8 @@ def test_generic_states_role_markers() -> None:
     assert states["start neutral"]["role"] == "start"
     assert states["start top"]["role"] == "start"
     assert states["start bottom"]["role"] == "start"
-    for bridge_key in ("scramble", "top transition", "chained submission"):
+    assert states["start engaged"]["role"] == "start"
+    for bridge_key in ("scramble", "top transition", "bottom transition", "chained submission"):
         assert "role" not in states[bridge_key]
 
 
@@ -230,6 +309,7 @@ def test_start_nodes_carry_the_documented_orientation() -> None:
     assert states["start neutral"]["orientation"] == "neutral"
     assert states["start top"]["orientation"] == "top"
     assert states["start bottom"]["orientation"] == "bottom"
+    assert states["start engaged"]["orientation"] == "neutral"
 
 
 # ── role_of: the standalone node_key -> role lookup ──────────────────────────────
@@ -238,7 +318,9 @@ def test_role_of_generic_states() -> None:
     assert role_of("start neutral") == "start"
     assert role_of("start top") == "start"
     assert role_of("start bottom") == "start"
+    assert role_of("start engaged") == "start"
     assert role_of("scramble") is None
+    assert role_of("bottom transition") is None
 
 
 def test_role_of_unknown_or_real_technique_node_is_none() -> None:
@@ -257,6 +339,12 @@ def test_orientation_of_top_controls() -> None:
         assert orientation_of(label) == "top"
 
 
+def test_orientation_of_carve_out_positions() -> None:
+    assert orientation_of("Turtle Position") == "bottom"
+    assert orientation_of("Body Triangle") == "top"
+    assert orientation_of("Body Lock from Back") == "top"
+
+
 def test_orientation_of_neutral_defaults_for_unknown_and_ambiguous_labels() -> None:
     assert orientation_of("Some Made Up State Nobody Curated") == "neutral"
     assert orientation_of("Electric Chair") == "neutral"  # leg-lock control, ambiguous by design
@@ -265,11 +353,13 @@ def test_orientation_of_neutral_defaults_for_unknown_and_ambiguous_labels() -> N
 def test_orientation_of_generic_states() -> None:
     assert orientation_of("Scramble") == "neutral"
     assert orientation_of("Top Transition") == "top"
+    assert orientation_of("Bottom Transition") == "bottom"
     assert orientation_of("Chained Submission") == "neutral"
     assert orientation_of("Finish") == "neutral"
     assert orientation_of("Start Neutral") == "neutral"
     assert orientation_of("Start Top") == "top"
     assert orientation_of("Start Bottom") == "bottom"
+    assert orientation_of("Start Engaged") == "neutral"
 
 
 def test_state_orientation_json_agrees_with_inference_table_generic_states() -> None:

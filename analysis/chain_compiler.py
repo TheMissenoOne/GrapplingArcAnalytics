@@ -2,7 +2,9 @@
 
 Turns one contiguous sequence of events (a chain / round — the CALLER decides the cut,
 same convention as ``decision_flow.extract_patterns``) into a walk of state NODES linked by
-action EDGES, per D1's classifier (``analysis.taxonomy_kind.kind_of``) and D2's structural
+action EDGES, per D1's classifier (``analysis.taxonomy_kind.kind_of_entry`` — resolves the
+event's label through the App technique library before classifying, so a stale logged ``type``
+never misreads an action as a state) and D2's structural
 inference table (``analysis.taxonomy_kind.load_inference_table`` +
 ``infer_state_for_action_pair``/``infer_action_for_state_pair``). Purely structural — no
 probability, no success scoring (that is a separate design, D7, in progress: this module
@@ -108,7 +110,7 @@ from analysis.names import _normalize_name, canonicalize
 from analysis.taxonomy_kind import (
     infer_action_for_state_pair,
     infer_state_for_action_pair,
-    kind_of,
+    kind_of_entry,
     load_inference_table,
     orientation_of,
 )
@@ -241,7 +243,7 @@ def compile_chain(
         label = _label_of(ev)
         etype = _type_of(ev)
         actor = actor_of(ev) if actor_of is not None else ev.get("actor")
-        kind = kind_of(label, etype)
+        kind = kind_of_entry(label, etype)
 
         if kind == "transparent":
             dropped.append(DroppedEvent(index=idx, label=label, event_type=etype,

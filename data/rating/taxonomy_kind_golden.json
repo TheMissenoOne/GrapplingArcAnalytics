@@ -3,8 +3,12 @@
   "generated_from": "GrapplingArcAnalytics/scripts/export_taxonomy_kind_fixtures.py",
   "inference_table": {
     "action_pair_to_state": {
+      "$start|escape": "start bottom",
+      "$start|pass": "start top",
+      "$start|submission": "start engaged",
       "$start|takedown": "start neutral",
       "*|*": "scramble",
+      "escape|*": "bottom transition",
       "pass|*": "top transition",
       "submission|$terminal": "finish",
       "submission|submission": "chained submission",
@@ -12,6 +16,21 @@
       "takedown|*": "top transition"
     },
     "generic_actions": {
+      "control transition": {
+        "action_key": "control transition",
+        "label": "Troca de Controle",
+        "type": "transition"
+      },
+      "guard exit": {
+        "action_key": "guard exit",
+        "label": "Saída da Guarda",
+        "type": "transition"
+      },
+      "guard recovery": {
+        "action_key": "guard recovery",
+        "label": "Recomposição de Guarda",
+        "type": "transition"
+      },
       "guard transition": {
         "action_key": "guard transition",
         "label": "Transição de Guarda",
@@ -24,6 +43,12 @@
       }
     },
     "generic_states": {
+      "bottom transition": {
+        "label": "Transição de Baixo",
+        "node_key": "bottom transition",
+        "orientation": "bottom",
+        "type": "control"
+      },
       "chained submission": {
         "label": "Finalização Encadeada",
         "node_key": "chained submission",
@@ -50,6 +75,13 @@
         "role": "start",
         "type": "control"
       },
+      "start engaged": {
+        "label": "Início Engajado",
+        "node_key": "start engaged",
+        "orientation": "neutral",
+        "role": "start",
+        "type": "control"
+      },
       "start neutral": {
         "label": "Início Neutro",
         "node_key": "start neutral",
@@ -73,6 +105,9 @@
     },
     "state_pair_to_action": {
       "*|*": "transition",
+      "control|control": "control transition",
+      "control|guard": "guard recovery",
+      "guard|control": "guard exit",
       "guard|guard": "guard transition"
     },
     "version": 1
@@ -133,7 +168,8 @@
       "type": "control"
     },
     "body lock from back": {
-      "kind": "action",
+      "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "body lock pass": {
@@ -141,7 +177,8 @@
       "type": "pass"
     },
     "body triangle": {
-      "kind": "action",
+      "kind": "state",
+      "orientation": "top",
       "type": "control"
     },
     "bow and arrow choke": {
@@ -628,8 +665,9 @@
       "type": "control"
     },
     "turtle position": {
-      "kind": "action",
-      "type": "escape"
+      "kind": "state",
+      "orientation": "bottom",
+      "type": "defensive"
     },
     "twister": {
       "kind": "action",

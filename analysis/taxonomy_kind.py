@@ -41,9 +41,17 @@ action. Left alone, D1 would fold the position into the action it names for a di
 reason than every other guard/control label folds in (token collision, not domain intent), so
 ``kind_of`` carves those two literal labels back out to ``'state'`` before consulting
 ``lamas_state`` at all. "Back Take" itself, and every OTHER `BACK_TAKE_TOKENS` label
-("Hooks In", "Body Triangle", "Rear Body Lock"), are left exactly as `lamas_state` reads them —
-the carve-out is scoped to the one label the owner's action name (`back take`, not `back
-control`) does not cover, not a broader re-reading of the back-take vocabulary.
+("Hooks In", "Rear Body Lock"), are left exactly as `lamas_state` reads them — the carve-out is
+scoped to the labels the owner's action name (`back take`, not `back control`) does not cover,
+not a broader re-reading of the back-take vocabulary.
+
+**Extension, 2026-08-27 (carve-out D1).** "Body Triangle" and "Body Lock from Back" are the
+same token collision as "Back Control": both name durable POSITIONS the App library already
+lists under `control` (`attribution._CONTROL_BACK`), but their labels hit `BACK_TAKE_TOKENS`,
+so `lamas_state` would read them as the back-take ACTION. Carved out to `'state'` the same way,
+for the same reason — the position is not the action that reaches it. "Body Lock" (bare, not
+"from Back") is deliberately NOT carved out — it is not a `BACK_TAKE_TOKENS` collision and
+changing its kind would move a Markov `CDP` weight, which needs a full ELO replay.
 """
 from __future__ import annotations
 
@@ -65,8 +73,13 @@ _FORCED_ACTION_TYPES = ACTION_TYPES
 
 # The "Back Control" carve-out (module docstring). Keyed on `lamas_chain._key` normalization
 # (deaccent then `_normalize_name`) so it matches exactly what `lamas_state` itself compares
-# against.
-_BACK_CONTROL_STATE_LABELS = frozenset({"back control", "standing back control"})
+# against. "Body Triangle"/"Body Lock from Back" are the same carve-out for the same reason:
+# `attribution._CONTROL_BACK` already lists them as durable POSITIONS, but their labels are
+# Lamas back-take tokens (`BACK_TAKE_TOKENS`), so `lamas_state` would read them as the back-take
+# ACTION without this carve-out — same pattern as "back control" already in production.
+_BACK_CONTROL_STATE_LABELS = frozenset({
+    "back control", "standing back control", "body triangle", "body lock from back",
+})
 
 assert _FORCED_ACTION_TYPES == frozenset(
     {"pass", "takedown", "sweep", "submission", "escape", "transition"}
