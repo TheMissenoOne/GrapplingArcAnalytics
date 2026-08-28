@@ -4,6 +4,7 @@ Runs on the App's own synthetic ``mock_user_bundle.json`` (not the owner's real 
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,7 @@ from scripts.render_map_prototypes import (
     _START_COLOR,
     _SYSTEM_COLOR,
     _actor_for,
+    _anchor_radius,
     _anchor_slot,
     _apply_gate,
     _collapse_directed,
@@ -444,13 +446,14 @@ def test_start_role_node_always_qualifies_as_user_side():
     assert _qid("partner", "mount") == "opp:mount"  # untouched for a normal node
 
 
-def test_finish_and_start_anchors_sit_on_the_owner_specified_cross():
-    """Owner correction (2026-08-27, literal re-spec): the uniform-circle/pentagon layout broke
-    the anchors' semantics — restore center/top/bottom/left/right exactly as the owner asked
-    ("the neutral node will be anchored to the center, the top to the top, the bottom to the
-    bottom, and Left is the opponent finish. Right is your finish"). Still pinned, still a single
-    choke point (`_apply_anchor`), still non-clumped (a cross + center IS spread out) — just the
-    RIGHT five points instead of an arbitrary pentagon."""
+def test_finish_and_start_anchors_sit_on_the_owner_specified_pentagon():
+    """Owner re-spec (2026-08-27, third arrangement): the five bolted anchors are the vertices of
+    a regular PENTAGON, named vertex by vertex — neutral start at the extreme left, top start
+    upper-left, both finishes on the right (yours upper, the opponent's lower), bottom start
+    lower-left. Left-to-right therefore reads start -> finish, the same direction the flow bias
+    pushes. An earlier uniform pentagon was rejected because it scattered the semantics; this one
+    keeps them and is a pentagon on purpose. Still pinned, still one choke point
+    (`_apply_anchor`)."""
     assert len({_anchor_slot(k, a) for k, a in
                 (("start top", "you"), ("start neutral", "you"), ("start bottom", "you"),
                  (_FINISH_KEY, "you"), (_FINISH_KEY, "partner"))}) == 5  # 5 distinct anchor keys
@@ -467,28 +470,30 @@ def test_finish_and_start_anchors_sit_on_the_owner_specified_cross():
     }
     gv = _two_sided_graphview(states, [], [])
     by_id = {n["id"]: n for n in gv["nodes"]}
-    radius = 260.0  # `_anchor_radius(5)` — same formula the graphview call used internally
+    radius = _anchor_radius(5)  # same formula the graphview call used internally
 
     all_anchor_ids = ("start neutral", "start top", "start bottom",
                        _FINISH_KEY, "opp:" + _FINISH_KEY)
     for anchor_id in all_anchor_ids:
         assert by_id[anchor_id]["pin"] is True
 
-    # center — neutral start, radius 0 regardless of the shared anchor radius
-    n = by_id["start neutral"]
-    assert (n["x"], n["y"]) == (0.0, 0.0)
-    # top — negative y (canvas y-down convention, same as before)
-    n = by_id["start top"]
-    assert n["x"] == pytest.approx(0.0) and n["y"] == pytest.approx(-radius)
-    # bottom — positive y
-    n = by_id["start bottom"]
-    assert n["x"] == pytest.approx(0.0) and n["y"] == pytest.approx(radius)
-    # left — the OPPONENT's finish
-    n = by_id["opp:" + _FINISH_KEY]
-    assert n["x"] == pytest.approx(-radius) and n["y"] == pytest.approx(0.0)
-    # right — YOUR own finish
-    n = by_id[_FINISH_KEY]
-    assert n["x"] == pytest.approx(radius) and n["y"] == pytest.approx(0.0)
+    # every anchor sits ON the circle of that radius — it is a regular pentagon, not five
+    # hand-placed points, so the frame stays even however many anchors a variant renders
+    for anchor_id in all_anchor_ids:
+        n = by_id[anchor_id]
+        assert math.hypot(n["x"], n["y"]) == pytest.approx(radius)
+
+    # ...at the named vertices (canvas y grows DOWNWARD, so "upper" is negative y)
+    assert by_id["start neutral"]["x"] == pytest.approx(-radius)   # extreme left
+    assert by_id["start neutral"]["y"] == pytest.approx(0.0, abs=1e-9)
+    assert by_id["start top"]["x"] < 0 and by_id["start top"]["y"] < 0        # upper left
+    assert by_id["start bottom"]["x"] < 0 and by_id["start bottom"]["y"] > 0  # lower left
+    assert by_id[_FINISH_KEY]["x"] > 0 and by_id[_FINISH_KEY]["y"] < 0        # upper right: yours
+    opp = by_id["opp:" + _FINISH_KEY]
+    assert opp["x"] > 0 and opp["y"] > 0                                       # lower right: theirs
+    # the two finishes mirror each other across the horizontal axis
+    assert opp["x"] == pytest.approx(by_id[_FINISH_KEY]["x"])
+    assert opp["y"] == pytest.approx(-by_id[_FINISH_KEY]["y"])
 
     for anchor_id in ("start neutral", "start top", "start bottom"):
         assert by_id[anchor_id]["color"] == _START_COLOR
@@ -693,8 +698,11 @@ def test_collapse_directed_sparse_dominant_two_way():
     def _e(u, v, n):
         return [{"actor": "you", "source": u, "target": v, "count": 1, "inferred": False}] * n
 
-    place_of = {_qid("you", "p"): "P", _qid("you", "q"): "Q",
-                _qid("you", "r"): "R", _qid("you", "s"): "S"}
+    # The aggregate contract only governs links touching a COLLAPSED SYSTEM — that is the one
+    # endpoint kind standing for many underlying edges. Between two real nodes each action keeps
+    # its own link (asserted at the bottom of this test), so the fixture places must be systems.
+    place_of = {_qid("you", "p"): "sys:P", _qid("you", "q"): "sys:Q",
+                _qid("you", "r"): "sys:R", _qid("you", "s"): "sys:S"}
 
     # sparse: max(f, r) < MIN_EDGE_ARROW -> undirected
     sparse_edges = _e("p", "q", MIN_EDGE_ARROW - 1)
@@ -706,7 +714,7 @@ def test_collapse_directed_sparse_dominant_two_way():
     links = _collapse_directed(place_of, dominant_edges, [])
     assert len(links) == 1
     assert links[0]["arrow"] is True
-    assert links[0]["from"] == "R" and links[0]["to"] == "S"  # oriented majority direction
+    assert links[0]["from"] == "sys:R" and links[0]["to"] == "sys:S"  # majority direction
 
     # two-way: minority share above TWO_WAY_RATIO of the majority -> stays undirected
     f = MIN_EDGE_ARROW + 4
@@ -715,6 +723,19 @@ def test_collapse_directed_sparse_dominant_two_way():
     links = _collapse_directed(place_of, two_way_edges, [])
     assert len(links) == 1 and links[0]["arrow"] is False
     assert links[0]["weight"] >= 1  # still carries the aggregate weight
+
+    # ...and between two REAL nodes nothing is aggregated: several actions bridging the same
+    # pair stay separate, labelled, and fanned into their own arcs (owner 2026-08-27).
+    real = {_qid("you", "p"): _qid("you", "p"), _qid("you", "q"): _qid("you", "q")}
+    multi = [{"actor": "you", "source": "p", "target": "q", "count": 3,
+              "inferred": False, "action_label": "Armbar"},
+             {"actor": "you", "source": "p", "target": "q", "count": 1,
+              "inferred": False, "action_label": "Triangle"}]
+    links = _collapse_directed(real, multi, [])
+    assert len(links) == 2
+    assert {link["label"] for link in links} == {"Armbar", "Triangle"}
+    assert all(link["arrow"] is True for link in links)      # structural, never edge_arrow'd
+    assert all(link["parCount"] == 2 for link in links)      # fanned into their own arcs
 
 
 def test_collapse_directed_handover_only_pair_is_dashed():

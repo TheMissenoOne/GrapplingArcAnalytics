@@ -155,15 +155,31 @@ _START_ICON = "A"  # variant 7 only — "Âncora"; letters not emoji, see _TYPE_
 # vector is the zero vector, so it always lands at the origin regardless of radius). Shared by
 # every variant that renders a node (`_apply_anchor` is the single choke point). Canvas
 # convention: y grows DOWNWARD, so "top" is negative y.
-_ANCHOR_UNIT = {"top": (0.0, -1.0), "bottom": (0.0, 1.0), "left": (-1.0, 0.0),
-                 "right": (1.0, 0.0), "neutral": (0.0, 0.0)}
+# Owner spec 2026-08-27 (third arrangement, replacing the cross): the five bolted anchors are
+# the vertices of a REGULAR PENTAGON, walked from the far-left vertex at 72-degree steps —
+# neutral start at the extreme left, top start upper-left, the two finishes on the right (yours
+# upper-right, the opponent's lower-right), bottom start lower-left. Reading left to right is
+# then reading start -> finish, which is the same direction the flow bias pushes; reading top to
+# bottom on the left is the orientation axis it always was. Canvas convention: y grows DOWNWARD,
+# so a positive maths angle becomes a negative y.
+_PENTAGON_ANGLES = {  # degrees, maths convention (0 = east, counter-clockwise)
+    "neutral": 180.0,       # extreme left
+    "top": 108.0,           # upper left
+    "finish_you": 36.0,     # upper right
+    "finish_opp": -36.0,    # lower right
+    "bottom": -108.0,       # lower left
+}
+_ANCHOR_UNIT = {
+    slot: (math.cos(math.radians(deg)), -math.sin(math.radians(deg)))
+    for slot, deg in _PENTAGON_ANGLES.items()
+}
 
 
 def _anchor_slot(node_key: str, actor: str) -> str | None:
-    """Stable direction key for a bolted anchor (one of ``_ANCHOR_UNIT``), or ``None`` for an
-    ordinary node."""
+    """Stable pentagon-vertex key for a bolted anchor (one of ``_ANCHOR_UNIT``), or ``None`` for
+    an ordinary node."""
     if node_key == _FINISH_KEY:
-        return "left" if actor == "partner" else "right"  # opponent's finish / your own
+        return "finish_opp" if actor == "partner" else "finish_you"
     if _is_start(node_key):
         return orientation_of(node_key)  # "top" / "bottom" / "neutral" — same key set
     return None
@@ -219,7 +235,11 @@ def _anchor_radius(n_nodes: int) -> float:
     rest of the graph down to unreadable. Formula only, not eyeballed in a browser (ponytail:
     same caveat as ``_mount_knobs`` — revisit with a real screenshot pass if an anchor still
     reads too close/far once someone opens it)."""
-    return max(260.0, 70.0 * math.sqrt(max(n_nodes, 1)))
+    # Sized so the free nodes settle INSIDE the pentagon (owner 2026-08-27: "spaced in a way
+    # that the map will be mostly contained inside of the pentagon") — the anchors are the frame,
+    # not five more nodes in the crowd. Scales with the same sqrt(n) family as ``_mount_knobs``
+    # so a bigger graph gets a bigger frame instead of bursting out of a fixed one.
+    return max(430.0, 125.0 * math.sqrt(max(n_nodes, 1)))
 
 
 def _apply_start_style(node: dict[str, Any], node_key: str, *, icon: bool = False) -> None:
@@ -237,9 +257,8 @@ def _apply_start_style(node: dict[str, Any], node_key: str, *, icon: bool = Fals
 
 
 def _apply_anchor(node: dict[str, Any], node_key: str, actor: str, radius: float) -> None:
-    """Owner spec (2026-08-27): the 5 organisational anchors sit at fixed points on a cross —
-    neutral at the CENTER, top/bottom above/below it, the opponent's finish LEFT, your own finish
-    RIGHT (``_anchor_slot`` -> ``_ANCHOR_UNIT``) — never simulated, so the rest of the graph
+    """Owner spec (2026-08-27): the 5 organisational anchors are the vertices of a PENTAGON
+    (``_PENTAGON_ANGLES``) sized to contain the rest of the map — never simulated, so the graph
     organises itself around fixed, legible landmarks instead of reshuffling on every load/expand.
     World coordinates (not viewport) — stays coherent under pan/zoom and with edge geometry;
     ``graph.js``'s copy-only ``n.pin`` patch (`_patch_graph_js`) makes ``step()`` skip physics
@@ -1376,6 +1395,14 @@ def _collapse_directed(place_of: dict[str, str], edges: list[dict[str, Any]],
     genuine two-way exchange or too sparse to call. ``dashed`` iff every crossing between that
     pair was a handover, same convention as `_cross_system_links`."""
     agg: dict[tuple[str, str], dict[str, Any]] = {}
+    direct: list[dict[str, Any]] = []
+
+    def _aggregated(u: str, v: str) -> bool:
+        """Only a COLLAPSED SYSTEM stands for many underlying edges — that is the one place a
+        volume aggregate is the honest rendering. Two real nodes (opponent, bridge, anchor) keep
+        one link PER ACTION, so several actions bridging the same pair fan into their own arcs
+        with their own labels (owner 2026-08-27) instead of merging into a single mute stroke."""
+        return u.startswith("sys:") or v.startswith("sys:")
 
     def _add(u: str | None, v: str | None, w: int, is_action: bool) -> None:
         if u is None or v is None or u == v:
@@ -1390,10 +1417,27 @@ def _collapse_directed(place_of: dict[str, str], edges: list[dict[str, Any]],
             row["handover_only"] = False
 
     for e in edges:
-        _add(place_of.get(_qid(e["actor"], e["source"])), place_of.get(_qid(e["actor"], e["target"])),
-             e["count"], True)
+        u = place_of.get(_qid(e["actor"], e["source"]))
+        v = place_of.get(_qid(e["actor"], e["target"]))
+        if u is None or v is None or u == v:
+            continue
+        if _aggregated(u, v):
+            _add(u, v, e["count"], True)
+        else:
+            link = {"from": u, "to": v, "weight": _clamp3(e["count"]), "arrow": True,
+                    "label": e["action_label"], "fighter": _ACTOR_SIDE[e["actor"]]}
+            if e["inferred"]:
+                link["inf"] = True
+            direct.append(link)
     for h in handovers:
-        _add(place_of.get(h["from"]), place_of.get(h["to"]), h["count"], False)
+        u, v = place_of.get(h["from"]), place_of.get(h["to"])
+        if u is None or v is None or u == v:
+            continue
+        if _aggregated(u, v):
+            _add(u, v, h["count"], False)
+        else:
+            direct.append({"from": u, "to": v, "weight": _clamp3(h["count"]), "arrow": True,
+                            "dashed": True, "fighter": "x"})
 
     links = []
     for (lo, hi), row in sorted(agg.items()):
@@ -1401,6 +1445,8 @@ def _collapse_directed(place_of: dict[str, str], edges: list[dict[str, Any]],
         src, tgt = (lo, hi) if f >= r else (hi, lo)
         links.append({"from": src, "to": tgt, "weight": _clamp3(f + r),
                       "arrow": edge_arrow(f, r), "dashed": row["handover_only"]})
+    links += direct
+    _index_parallel_links(links)
     return links
 
 
