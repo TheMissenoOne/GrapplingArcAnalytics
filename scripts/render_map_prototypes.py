@@ -1568,7 +1568,15 @@ def _combo_key(opponent_mode: str, min_support: int, inference_policy: str) -> s
     return f"{opponent_mode}|{min_support}|{inference_policy}"
 
 
-_DEFAULT_SYSTEMS_COMBO: tuple[str, int, str] = ("complete", 1, "all")
+# Owner call 2026-08-27, after reading the gating comparison on his own data: this is THE
+# criterion, so both 11 and 12 open on it. min_support=1 because the App's own
+# DEFAULT_MIN_EDGE_SUPPORT=2 measured too aggressive for a bundle this sparse; the inference gate
+# is what actually carries the cleanup (a single-occurrence generic edge is the table shrugging,
+# and it was wiring everything to everything); selective opponent keeps a partner element only
+# when it recurs or is the sole bridge to something of his. On his bundle: 2 systems [5,2],
+# 3 bridges, 15 nodes / 39 edges against 18/48 wide open.
+_DEFAULT_SYSTEMS_COMBO: tuple[str, int, str] = ("selective", 1, "inferred_min2")
+_WIDEST_SYSTEMS_COMBO: tuple[str, int, str] = ("complete", 1, "all")  # nothing gated — the "vs" reference
 _ALL_SYSTEMS_COMBOS: tuple[tuple[str, int, str], ...] = tuple(
     (om, ms, pol) for om in _OPPONENT_MODES for ms in _GATE_MIN_SUPPORTS for pol in _GATE_POLICIES
 )  # 3 x 3 x 4 = 36, literal nested-loop order (deterministic — never a set on this path)
@@ -2254,6 +2262,7 @@ const COMBO_OPTIONS = __COMBO_OPTIONS_JSON__;
 const OPPONENT_LABELS = __OPPONENT_MODE_LABELS_JSON__;
 const POLICY_LABELS = __POLICY_LABELS_JSON__;
 const DEFAULT_KEY = __DEFAULT_KEY__;
+const WIDEST = __WIDEST_JSON__;          // {key, nodes, edges} — the "vs" reference, always the widest combo
 let comboKey = DEFAULT_KEY;
 let view = 'global';
 let hiddenTypes = new Set();
@@ -2298,7 +2307,7 @@ function flowPct(gv, positions) {  // % of ACTION edges (l.at set) whose target.
   return total ? Math.round(100 * mono / total) : null;
 }
 function renderSummary(data, filtered) {
-  const meta = data.meta, baseline = COMBOS[DEFAULT_KEY].meta;
+  const meta = data.meta;
   const bridgesShown = bridgeNodesOf(data).filter(function (n) { return n.bridgeRank < bridgeCount; }).length;
   document.getElementById('summary').innerHTML =
     '<b>' + POLICY_LABELS[meta.inference_policy] + '</b>, suporte&ge;' + meta.min_support + ', '
@@ -2306,7 +2315,7 @@ function renderSummary(data, filtered) {
     + meta.systems + ' sistema(s) ' + JSON.stringify(meta.system_sizes) + ', '
     + bridgesShown + '/' + meta.bridges + ' pontes exibidas<br/>'
     + filtered.nodes.length + ' nos / ' + filtered.links.length + ' edges (vs '
-    + baseline.nodes + '/' + baseline.edges + ' no combo mais permissivo — ' + DEFAULT_KEY + ')';
+    + WIDEST.nodes + '/' + WIDEST.edges + ' no combo mais permissivo — ' + WIDEST.key + ')';
 }
 function rebuild() {
   const data = COMBOS[comboKey];
@@ -2439,6 +2448,13 @@ def _render_systems_page(out: Path, filename: str, title: str, agg: Aggregate,
     code paths producing "the same" graph)."""
     payloads = {_combo_key(*c): _combo_payload(agg, *c) for c in combos}
     default_key = _combo_key(*default_combo)
+    # The "vs" line compares against the WIDEST combo, never against whatever happens to be the
+    # default — once the default became a gated criterion, comparing to itself made the line
+    # meaningless. A only precomputes one combo, so the reference travels as bare counts.
+    widest_key = _combo_key(*_WIDEST_SYSTEMS_COMBO)
+    widest_meta = payloads.get(widest_key, {}).get("meta") or _combo_payload(
+        agg, *_WIDEST_SYSTEMS_COMBO)["meta"]
+    widest = {"key": widest_key, "nodes": widest_meta["nodes"], "edges": widest_meta["edges"]}
     combos_json = json.dumps(payloads, ensure_ascii=False)
     payload_bytes = len(combos_json.encode("utf-8"))
 
@@ -2449,6 +2465,7 @@ def _render_systems_page(out: Path, filename: str, title: str, agg: Aggregate,
         .replace("__TITLE__", title)
         .replace("__CONTROLS_CLASS__", "" if controls else " hidden")
         .replace("__DEFAULT_KEY__", json.dumps(default_key))
+        .replace("__WIDEST_JSON__", json.dumps(widest, ensure_ascii=False))
         .replace("__COMBOS_JSON__", combos_json)
         .replace("__COMBO_OPTIONS_JSON__", json.dumps(combo_options, ensure_ascii=False))
         .replace("__OPPONENT_MODE_LABELS_JSON__", json.dumps(_OPPONENT_MODE_LABELS, ensure_ascii=False))
