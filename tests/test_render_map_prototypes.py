@@ -14,7 +14,6 @@ from scripts.render_map_prototypes import (
     _ALL_SYSTEMS_COMBOS,
     _BOUNDARY_COLOR,
     _BRIDGE_COLOR,
-    _DEFAULT_SYSTEMS_COMBO,
     _FIG_HEX,
     _FINISH_COLOR,
     _FINISH_ICON,
@@ -24,6 +23,7 @@ from scripts.render_map_prototypes import (
     _START_COLOR,
     _SYSTEM_COLOR,
     _actor_for,
+    _adaptive_default,
     _anchor_radius,
     _anchor_slot,
     _apply_gate,
@@ -837,7 +837,14 @@ def test_system_boundary_view_covers_four_destination_kinds_and_ida_e_volta():
     assert {(link["from"], link["to"]) for link in qm_links} == \
         {("q", "opp:mount"), ("opp:mount", "q")}
     assert {link["parCount"] for link in qm_links} == {2}  # `_index_parallel_links` fanned them
-    assert all(link["dash"] == [2, 3] for link in qm_links)
+    # a stub carries the vocabulary of what actually crosses: an ACTION keeps the short stub
+    # dash and names itself; a crossing that is only a HANDOVER takes the map's own handover
+    # language (grey, long dash) and says so, instead of the mute "×1" it used to render
+    for link in qm_links:
+        if link.get("fighter") == "x":
+            assert link["dashed"] is True and link["label"].startswith("troca de mãos")
+        else:
+            assert link["dash"] == [2, 3] and not link["label"].startswith("troca")
     assert all(link["arrow"] is True for link in qm_links)  # stub links always structurally arrowed
 
     # internal action edges carry `at` (12's client-side type filter); stub links never do
@@ -849,21 +856,26 @@ def test_system_boundary_view_covers_four_destination_kinds_and_ida_e_volta():
 
 
 def test_render_variant11_locked_combo_matches_variant12_default_combo(tmp_path):
-    """Frente 2 §2.1: A is B with the controls off, locked to `_DEFAULT_SYSTEMS_COMBO` — the same
-    combo's payload must be byte-identical whichever wrapper produced it (both call the exact same
-    `_combo_payload`, never two code paths)."""
+    """Frente 2 §2.1: A is B with the controls off, opening on the same combo — the payload must
+    be byte-identical whichever wrapper produced it (both call the exact same `_combo_payload`,
+    never two code paths). Since 2026-08-27 that combo is chosen ADAPTIVELY from the graph's own
+    ungated size rather than read from a fixed constant, so the test asks the same function the
+    renderers ask."""
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
+    default = _adaptive_default(agg)
 
-    a_payload = _combo_payload(agg, *_DEFAULT_SYSTEMS_COMBO)
-    b_payload = _combo_payload(agg, *_DEFAULT_SYSTEMS_COMBO)
+    a_payload = _combo_payload(agg, *default)
+    b_payload = _combo_payload(agg, *default)
     assert json.dumps(a_payload, sort_keys=True) == json.dumps(b_payload, sort_keys=True)
 
     out = tmp_path / "run"
     metrics = render_all(bundle, out)
     v11 = metrics["variants"]["11-sistemas-vista-separada"]
     v12 = metrics["variants"]["12-sistemas-vista-separada-seletiva"]
-    assert v11["combos"] == 1
+    # A carries its own combo, plus the widest one when that is not already it — the "vs" line's
+    # reference, never a second view
+    assert v11["combos"] in (1, 2)
     assert v12["combos"] == len(_ALL_SYSTEMS_COMBOS) == 36
     # the locked combo's own metrics (nodes/edges/systems/bridges) match 11 exactly
     assert v11["nodes"] == a_payload["meta"]["nodes"]
@@ -878,7 +890,7 @@ def test_render_variant11_locked_combo_matches_variant12_default_combo(tmp_path)
     start = html12.index("const COMBOS = ") + len("const COMBOS = ")
     end = html12.index(";          // {comboKey", start)
     combos_embedded = json.loads(html12[start:end])
-    default_key = _combo_key(*_DEFAULT_SYSTEMS_COMBO)
+    default_key = _combo_key(*default)  # the adaptive pick, the same one both wrappers opened on
     assert json.dumps(combos_embedded[default_key], sort_keys=True) == \
         json.dumps(a_payload, sort_keys=True)
 
@@ -918,3 +930,24 @@ def test_start_anchor_is_mirrored_for_the_opponent_side():
     for e in agg.edges.values():
         assert _qid("you" if e["source"].startswith("start ") else e["actor"],
                     e["source"]) in node_ids, e
+
+
+def test_adaptive_gate_only_ever_tightens_as_the_map_grows():
+    """Owner 2026-08-27: the gate follows how much the map is about to draw. A thin graph shows
+    everything (gating it would hide the little there is); a growing one drops one-off generics
+    and thins the opponent; a large one also demands an edge recurred. Calibrated on the owner's
+    own bundle — 59 artefacts ungated, and he chose the gated reading at that size, so the
+    permissive band ends below it."""
+    from scripts.render_map_prototypes import _ADAPTIVE_GATE_LADDER, adaptive_combo
+
+    assert adaptive_combo(10) == ("complete", 1, "all")
+    assert adaptive_combo(59) == ("selective", 1, "inferred_min2")   # the owner's own graph
+    assert adaptive_combo(500) == ("selective", 2, "inferred_min2")
+
+    # monotonic: every step of the ladder is at least as strict as the one before it — a bigger
+    # map must never be shown MORE permissively than a smaller one
+    rank = {"complete": 0, "selective": 1, "none": 2}
+    seen = [(rank[c[0]], c[1], c[2] != "all") for _ceiling, c in _ADAPTIVE_GATE_LADDER]
+    assert seen == sorted(seen)
+    assert [ceiling for ceiling, _c in _ADAPTIVE_GATE_LADDER] == \
+        sorted(ceiling for ceiling, _c in _ADAPTIVE_GATE_LADDER)

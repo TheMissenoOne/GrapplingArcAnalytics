@@ -1556,9 +1556,21 @@ def _system_boundary_view(
             stub_nodes[dest_place] = _stub_node(dest_place, systems_by_id, excluded_by_qid, bridge_qids)
         src, tgt = (member_qid, dest_place) if member_is_source else (dest_place, member_qid)
         top = sorted(row["actions"].items(), key=lambda kv: (-kv[1], kv[0]))
-        label = f"{top[0][0]} ×{row['count']}" if top else f"×{row['count']}"
-        gv["links"].append({"from": src, "to": tgt, "weight": _clamp3(row["count"]),
-                             "arrow": True, "dash": [2, 3], "label": label, "inf": True})
+        if top:
+            # a real action leaves/enters the system: belt colour + the short stub dash, so it
+            # reads with the same weight as the action edges inside the region
+            link = {"from": src, "to": tgt, "weight": _clamp3(row["count"]), "arrow": True,
+                     "dash": [2, 3], "label": f"{top[0][0]} ×{row['count']}",
+                     "fighter": _ACTOR_SIDE["you"], "inf": True}
+        else:
+            # nothing crossed but a HANDOVER — the exchange changed hands, there is no action to
+            # name. It used to render as a mute "×1" stub, which read as a missing label rather
+            # than as the thing it is; it now carries the map's own handover vocabulary (grey,
+            # long dash) and says so.
+            link = {"from": src, "to": tgt, "weight": _clamp3(row["count"]), "arrow": True,
+                     "dashed": True, "label": f"troca de mãos ×{row['count']}",
+                     "fighter": "x", "inf": True}
+        gv["links"].append(link)
     gv["nodes"] = gv["nodes"] + sorted(stub_nodes.values(), key=lambda n: n["id"])
     _index_parallel_links(gv["links"])
 
@@ -1604,6 +1616,28 @@ def _combo_key(opponent_mode: str, min_support: int, inference_policy: str) -> s
 # 3 bridges, 15 nodes / 39 edges against 18/48 wide open.
 _DEFAULT_SYSTEMS_COMBO: tuple[str, int, str] = ("selective", 1, "inferred_min2")
 _WIDEST_SYSTEMS_COMBO: tuple[str, int, str] = ("complete", 1, "all")  # nothing gated — the "vs" reference
+
+# Adaptive gate (owner 2026-08-27): the right amount of gating is a function of how much the
+# map is about to draw, not a fixed policy. A beginner's graph is small enough to show whole —
+# gating it hides the little he has; a mature graph drowns without a gate. Thresholds are on the
+# UNGATED artefact count (nodes + edges of the widest combo), so the decision is made against
+# what would actually be rendered, and the ladder only ever tightens as the map grows.
+# Calibrated against the owner's own judgement, not a round number: his bundle renders 59
+# artefacts ungated, and having compared both he chose the gated reading — so the permissive band
+# ends below that. A map only shows everything while it is genuinely thin.
+_ADAPTIVE_GATE_LADDER: tuple[tuple[int, tuple[str, int, str]], ...] = (
+    (40, ("complete", 1, "all")),               # thin: show everything, opponent included
+    (110, ("selective", 1, "inferred_min2")),   # growing: drop one-off generics, thin the opponent
+    (10**9, ("selective", 2, "inferred_min2")), # large: also require an edge to have recurred
+)
+
+
+def adaptive_combo(artefacts: int) -> tuple[str, int, str]:
+    """Pick the gate from how many artefacts the ungated map would render (see the ladder)."""
+    for ceiling, combo in _ADAPTIVE_GATE_LADDER:
+        if artefacts < ceiling:
+            return combo
+    return _ADAPTIVE_GATE_LADDER[-1][1]
 _ALL_SYSTEMS_COMBOS: tuple[tuple[str, int, str], ...] = tuple(
     (om, ms, pol) for om in _OPPONENT_MODES for ms in _GATE_MIN_SUPPORTS for pol in _GATE_POLICIES
 )  # 3 x 3 x 4 = 36, literal nested-loop order (deterministic — never a set on this path)
@@ -2481,7 +2515,8 @@ def _render_systems_page(out: Path, filename: str, title: str, agg: Aggregate,
     widest_key = _combo_key(*_WIDEST_SYSTEMS_COMBO)
     widest_meta = payloads.get(widest_key, {}).get("meta") or _combo_payload(
         agg, *_WIDEST_SYSTEMS_COMBO)["meta"]
-    widest = {"key": widest_key, "nodes": widest_meta["nodes"], "edges": widest_meta["edges"]}
+    widest = {"key": widest_key, "nodes": widest_meta["nodes"], "edges": widest_meta["edges"],
+              "artefacts": widest_meta["nodes"] + widest_meta["edges"]}
     combos_json = json.dumps(payloads, ensure_ascii=False)
     payload_bytes = len(combos_json.encode("utf-8"))
 
@@ -2512,16 +2547,24 @@ def _render_systems_page(out: Path, filename: str, title: str, agg: Aggregate,
     }
 
 
+def _adaptive_default(agg: Aggregate) -> tuple[str, int, str]:
+    """The gate this graph should OPEN on, measured from its own ungated size."""
+    widest = _combo_payload(agg, *_WIDEST_SYSTEMS_COMBO)["meta"]
+    return adaptive_combo(widest["nodes"] + widest["edges"])
+
+
 def _render_variant11(out: Path, agg: Aggregate) -> dict[str, Any]:
+    default = _adaptive_default(agg)
+    combos = (default,) if default == _WIDEST_SYSTEMS_COMBO else (default, _WIDEST_SYSTEMS_COMBO)
     return _render_systems_page(
         out, "11-sistemas-vista-separada.html", "11 — Sistemas, vista separada", agg,
-        (_DEFAULT_SYSTEMS_COMBO,), default_combo=_DEFAULT_SYSTEMS_COMBO, controls=False)
+        combos, default_combo=default, controls=False)
 
 
 def _render_variant12(out: Path, agg: Aggregate) -> dict[str, Any]:
     return _render_systems_page(
         out, "12-sistemas-vista-separada-seletiva.html", "12 — Sistemas, vista separada (seletiva)", agg,
-        _ALL_SYSTEMS_COMBOS, default_combo=_DEFAULT_SYSTEMS_COMBO, controls=True)
+        _ALL_SYSTEMS_COMBOS, default_combo=_adaptive_default(agg), controls=True)
 
 
 _VARIANT_DESCRIPTIONS = [
@@ -2814,15 +2857,21 @@ def _patch_graph_js(js_text: str) -> str:
             "          const dx = l.t.x - cpx, dy = l.t.y - cpy;\n"
             "          const d = Math.sqrt(dx * dx + dy * dy) || 1;\n"
             "          const ux = dx / d, uy = dy / d, px = -uy, py = ux;\n"
-            "          const tip = l.t.r + 2, back = 7, spread = 4.2;\n"
+            "          // owner 2026-08-27: direction was not readable on the system view — a 7px\n"
+            "          // triangle under a 0.32 stroke alpha is a smudge. Bigger, plus its own alpha\n"
+            "          // floor below, so the arrow reads even where the stroke is deliberately faint.\n"
+            "          const tip = l.t.r + 2, back = 12, spread = 6.5;\n"
             "          const ax = l.t.x - ux * tip, ay = l.t.y - uy * tip;\n"
             "          const bx = ax - ux * back, by = ay - uy * back;\n"
+            "          ctx.save();\n"
+            "          ctx.globalAlpha = Math.max(ctx.globalAlpha, hov && !active ? 0.08 : 0.85);\n"
             "          ctx.fillStyle = col;\n"
             "          ctx.beginPath();\n"
             "          ctx.moveTo(ax, ay);\n"
             "          ctx.lineTo(bx + px * spread, by + py * spread);\n"
             "          ctx.lineTo(bx - px * spread, by - py * spread);\n"
             "          ctx.closePath(); ctx.fill();\n"
+            "          ctx.restore();\n"
             "        }\n"
             "        if (l.label && (opts.forceLabels || !useCam || cam.k >= 1)) {  // map-prototype patch: edge label — collected here, drawn in the label-collision pass\n"
             "          const mx = 0.25 * l.s.x + 0.5 * cpx + 0.25 * l.t.x, my = 0.25 * l.s.y + 0.5 * cpy + 0.25 * l.t.y;\n"
