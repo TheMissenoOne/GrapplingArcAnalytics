@@ -491,8 +491,10 @@ def test_finish_and_start_anchors_sit_on_the_owner_specified_cross():
 
 
 def test_system_node_has_its_own_distinct_visual_treatment():
-    """Owner addendum 2026-08-27: a collapsed system must look like an aggregate, not an
-    ordinary node — own colour, member count in the label, top label-collision priority."""
+    """Owner addendum 2026-08-27, second pass: a collapsed system must look like an aggregate,
+    but the distinction is the RING alone now (double stroke, drawn client-side off `system:
+    True`) — no violet fill of its own any more, so it falls back to the same category colour an
+    ordinary node of that `cat` would use, and doesn't steal attention by colour."""
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
@@ -507,10 +509,11 @@ def test_system_node_has_its_own_distinct_visual_treatment():
     sys_nodes = [n for n in gv["nodes"] if n["id"].startswith("sys:")]
     assert sys_nodes
     for n in sys_nodes:
-        assert n["color"] == _SYSTEM_COLOR
+        assert "color" not in n  # no fill of its own — falls back to the category's own colour
+        assert n["ring"] == _SYSTEM_COLOR
         assert n.get("system") is True
         assert " · " in n["label"]  # member count baked into the label
-        assert n["color"] != _BRIDGE_COLOR != _START_COLOR
+        assert n["ring"] != _BRIDGE_COLOR != _START_COLOR
 
 
 def _mk_state(node_key: str) -> dict:

@@ -1190,16 +1190,22 @@ _BOUNDARY_COLOR = "#f472b6"
 
 def _system_node(s: dict[str, Any]) -> dict[str, Any]:
     """Owner addendum 2026-08-27: a collapsed system must look like "several things folded",
-    not a normal state — own colour + a visible ring (single ring, not a literal double outline
-    — ponytail: cheap within the existing ring patch, revisit with a true concentric second
-    stroke if one ring still reads as an ordinary actor node once someone opens it) + a bigger
-    radius that grows with member count + the member count baked into the label
-    ("Sistema: X · N"). ``system: True`` gives it the TOP label-collision priority (above a
-    bridge's) — the collapsed/expanded pair should read as the same entity at both levels, and
-    a system whose own label loses to a member's is illegible."""
+    not a normal state — a bigger radius that grows with member count + the member count baked
+    into the label ("Sistema: X · N"). ``system: True`` gives it the TOP label-collision priority
+    (above a bridge's) — the collapsed/expanded pair should read as the same entity at both
+    levels, and a system whose own label loses to a member's is illegible.
+
+    Owner correction (2026-08-27, second pass): drop the violet FILL — the distinction must come
+    from the ring alone (plus the size/label already above), so a system node doesn't steal
+    attention by colour. No explicit ``color`` key here means the client falls back to the same
+    category colour an ORDINARY node of this ``cat`` would use (`graph.js`'s own
+    ``n.color || (n.fighter?...:CAT[n.cat])`` — never re-derived here, just relying on the
+    existing fallback). The ring alone isn't enough at a glance once it's no longer paired with a
+    unique fill, so it's now a literal double stroke (`n.system` — the copy's ring patch draws a
+    second, wider concentric ring only for a system node; see `_patch_graph_js`)."""
     return {
         "id": s["id"], "label": f"{s['label']} · {len(s['members'])}", "cat": "control",
-        "size": min(6, 3 + len(s["members"]) // 2), "color": _SYSTEM_COLOR,
+        "size": min(6, 3 + len(s["members"]) // 2),
         "ring": _SYSTEM_COLOR, "system": True,
     }
 
@@ -1456,6 +1462,21 @@ def _system_boundary_view(
     return gv, internal_edges, regions, boundary_html
 
 
+def _member_chips_html(sys_row: dict[str, Any], qid_to_state: dict[str, dict[str, Any]]) -> str:
+    """One clickable chip per system member, sorted by usage count desc (tie: qid) — a system
+    here only ever has a handful of members (2-6, measured), so no truncation. ``data-sys``/
+    ``data-qid`` are read by the page's own delegated click handler (`_PAGE_SYSTEMS`) to open
+    that system and highlight the member (``mounted.select``)."""
+    rows = sorted(
+        ((qid_to_state[qid]["label"], qid_to_state[qid]["count"], qid) for qid in sys_row["members"]),
+        key=lambda t: (-t[1], t[0]),
+    )
+    return "".join(
+        f'<span class="chip" data-sys="{sys_row["id"]}" data-qid="{qid}">{label}</span>'
+        for label, _count, qid in rows
+    )
+
+
 def _combo_key(opponent_mode: str, min_support: int, inference_policy: str) -> str:
     return f"{opponent_mode}|{min_support}|{inference_policy}"
 
@@ -1496,8 +1517,15 @@ def _combo_payload(agg: Aggregate, opponent_mode: str, min_support: int, inferen
         if node["id"] in strength_rank:
             node["bridgeRank"] = strength_rank[node["id"]]
     global_knobs = _mount_knobs(len(global_gv["nodes"]))
+    # owner adendo (2026-08-27, second pass): a state that's now a system MEMBER has no node of
+    # its own in the global view any more (it's folded into the collapsed system) — the owner
+    # asked "cadê o sistema quatro apoios?" about exactly this, with no way to tell which system a
+    # technique landed in short of opening every one. `qid_to_state` covers every state (member
+    # AND excluded) so each system's row can list its own members by name.
+    qid_to_state = {_qid(k[1], k[0]): v for k, v in states.items()}
     global_list = "".join(
-        f'<div class="row">{s["label"]} <span class="muted">({len(s["members"])} nos)</span></div>'
+        f'<div class="row">{s["label"]} <span class="muted">({len(s["members"])} nos)</span>'
+        f'<div class="members">{_member_chips_html(s, qid_to_state)}</div></div>'
         for s in systems
     )
 
@@ -2101,6 +2129,9 @@ h1{font-size:15px;margin:0 0 4px}.muted{color:var(--ink2);font-size:12px;margin-
 .controls label{display:block;margin-bottom:8px}
 .controls select,.controls input[type=range]{width:100%}
 .controls .tchk{display:inline-block;margin:0 8px 4px 0}
+.members{margin-top:4px}
+.chip{display:inline-block;background:var(--bg);color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:2px 8px;margin:2px 4px 0 0;cursor:pointer;font:11px system-ui}
+.chip:hover{color:var(--ink);border-color:#4d86ff}
 </style></head><body>
 <div id="canvas"><canvas id="cv"></canvas></div>
 <div id="side">
@@ -2232,6 +2263,18 @@ function rebuild() {
     }
   }, 1500);
 }
+
+// owner adendo (2026-08-27, second pass): a member chip inside the global systems list opens
+// its own system and highlights that node — `#list`'s own DIV survives every rebuild() (only
+// its innerHTML is replaced), so ONE delegated listener here keeps working across reloads.
+document.getElementById('list').addEventListener('click', function (e) {
+  const chip = e.target.closest('.chip');
+  if (!chip) return;
+  view = chip.getAttribute('data-sys');
+  const qid = chip.getAttribute('data-qid');
+  rebuild();
+  if (mounted && mounted.select) mounted.select(qid);
+});
 
 function resetControlsForCombo() {
   const bridges = bridgeNodesOf(COMBOS[comboKey]);
@@ -2396,6 +2439,11 @@ def _patch_graph_js(js_text: str) -> str:
             "          ctx.lineWidth = 2.5;\n"
             "          ctx.strokeStyle = n.ring;\n"
             "          ctx.beginPath(); ctx.arc(n.x, n.y, r + 3, 0, Math.PI * 2); ctx.stroke();\n"
+            "          if (n.system) {  // map-prototype patch: system node — TRUE double ring (owner\n"
+            "                          // correction: no fill colour of its own any more, ring is the\n"
+            "                          // only distinguishing mark, one ring alone reads too thin)\n"
+            "            ctx.beginPath(); ctx.arc(n.x, n.y, r + 7, 0, Math.PI * 2); ctx.stroke();\n"
+            "          }\n"
             "          ctx.restore();\n"
             "        }",
         ),
@@ -2434,6 +2482,29 @@ def _patch_graph_js(js_text: str) -> str:
             "          n.vx = n.vy = 0; continue;\n"
             "        }\n"
             "        if (n.pin) { n.vx = n.vy = 0; continue; }  // map-prototype patch: pinned anchor node — never simulated (D addendum)",
+        ),
+        (
+            # 11/12 fix (measured, screenshot repro): a system-boundary view has NO pinned
+            # anchors (unlike the global view's finish/start cross), so its whole layout depends
+            # on the free-body sim reaching a good spread from a random seed. `d2 = ... || 1`
+            # only guards a LITERAL zero — two nodes seeded a few px apart (`Math.random()`
+            # jitter is ±20px on each axis, so near-coincidence is common at n~20) still get
+            # `force = CHARGE/d2` in the thousands for one step, and the velocity that imparts
+            # decays only 14%/step (DAMP=0.86), so its geometric-sum travel distance
+            # (`v/(1-DAMP)`) is enormous — a single kick can fling a low-degree stub node
+            # 700-900 world units from the rest before gravity/springs claw it back, and `warm`'s
+            # fixed step budget often runs out before it does. Reproduced empirically: 12 reloads
+            # of the same "Sistema: Montada" combo, ~1/6 produced an outlier that far away,
+            # which blows up `fitTarget()`'s bbox and renders the real cluster small and
+            # off-centre — exactly the reported "amontoado no canto". Flooring `d2` caps the
+            # worst-case one-step force the same way `COLLIDE`'s hard-separation branch already
+            # caps overlap, just for the force path too.
+            "          let dx = a.x - b.x, dy = a.y - b.y;\n"
+            "          let d2 = dx * dx + dy * dy || 1;\n"
+            "          let d = Math.sqrt(d2);",
+            "          let dx = a.x - b.x, dy = a.y - b.y;\n"
+            "          let d2 = Math.max(dx * dx + dy * dy, 36);  // map-prototype patch: floor repulsion distance — no near-coincident-seed catapult\n"
+            "          let d = Math.sqrt(d2);",
         ),
         (
             "      destroy() { cancelAnimationFrame(raf); ro.disconnect(); io.disconnect(); },\n"
