@@ -130,14 +130,24 @@ def run(dry_run: bool) -> int:
                 delete(Match).where(Match.athlete_a_id == Match.athlete_b_id)
             )
             self_deleted = getattr(self_res, "rowcount", 0) or 0
-            seen: set[tuple[frozenset[str], int | None]] = set()
-            for m in list(session.execute(select(Match)).scalars()):
-                sig = (frozenset((m.athlete_a_id, m.athlete_b_id)), m.year)
-                if sig in seen:
-                    session.delete(m)
+            # Which duplicate SURVIVES is a data decision, not an iteration accident. This used
+            # to keep whatever an unordered `select(Match)` returned first and delete the rest —
+            # the same first-writer-wins defect class as the PtV node type — and it cost the
+            # 30+-event reading of the ADCC 2022 women's final, leaving the 5-event one. Keep the
+            # RICHEST sequence (then the one with a winner, then the oldest id): a duplicate
+            # pairing is the same bout read twice, and the fuller read is the one worth keeping.
+            def _keep_rank(m: Match) -> tuple[int, int, str]:
+                return (-len(m.sequence or []), 0 if m.winner_id else 1, str(m.id))
+
+            by_sig: dict[tuple[frozenset[str], int | None], list[Match]] = {}
+            for m in session.execute(select(Match).order_by(Match.id)).scalars():
+                by_sig.setdefault((frozenset((m.athlete_a_id, m.athlete_b_id)), m.year), []).append(m)
+            for dupes in by_sig.values():
+                if len(dupes) < 2:
+                    continue
+                for loser in sorted(dupes, key=_keep_rank)[1:]:
+                    session.delete(loser)
                     dup_deleted += 1
-                else:
-                    seen.add(sig)
             session.flush()
             for aid in touched:
                 ath = session.get(Athlete, aid)
