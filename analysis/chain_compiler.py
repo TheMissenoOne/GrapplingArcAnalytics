@@ -72,12 +72,12 @@ bottom down), each carrying ``"role": "start"``:
   ordinary state-adjacent action), so the table cannot express them by type alone and
   ``_opening_state`` checks ``lamas_state`` directly, the same source ``taxonomy_kind.kind_of``
   already trusts for the same two codes.
-- ``start top`` / ``start bottom`` — the chain opens on a real STATE event (no action to infer
-  a gap from at all — the state IS the opening node), whose ``taxonomy_kind.orientation_of``
-  reads ``"top"``/``"bottom"``. The real state is not replaced; the start node is PREPENDED
-  before it, linked by one inferred edge (``infer_action_for_state_pair``, same rule-4
-  mechanism, called once more here rather than duplicated) — never invented for a chain that
-  opens ``"neutral"`` (unchanged: the first real state is simply the first node, as before).
+- ``start top`` / ``start bottom`` — reached the same way as ``start neutral``: as the inferred
+  SOURCE of a chain-opening ACTION, never prepended to a chain-opening STATE. That prepending
+  existed briefly and was removed (owner call 2026-08-27): "costas não deveria ser presumido
+  como precedido por top start" — reaching a state through an action nobody logged is an
+  invention, and only actions connect to a start anchor. A chain that opens on a real state
+  opens there, and that state carries ``nascent=True`` so a consumer can say so.
 
 Every other opening (a chain's first action resolves through neither the ``"$start"`` table row
 nor a PGD/CDP label) keeps the existing ``"*|*"`` fallback — unchanged.
@@ -112,7 +112,6 @@ from analysis.taxonomy_kind import (
     infer_state_for_action_pair,
     kind_of_entry,
     load_inference_table,
-    orientation_of,
 )
 
 # Rule 6's genuinely-terminal marker (module docstring) — distinct from the plain ``"*"``
@@ -140,6 +139,10 @@ class ChainState:
     # never carries it. Perspective is the CONSUMER's job, not this dataclass's: qualify
     # role='start' always on the chain owner's own side, never the opponent's.
     role: str | None = None
+    # True when the chain simply BEGINS at this state — no action preceded it and none was
+    # invented (owner call 2026-08-27). A start anchor exists to be an ACTION's missing source;
+    # a state that opens a chain needs no source, so it is marked rather than wired.
+    nascent: bool = False
 
 
 @dataclass(frozen=True)
@@ -265,26 +268,15 @@ def compile_chain(
                     action_type=act["type"], actor=last_actor,
                     inferred=True, terminal=False, source_event_index=None,
                 ))
-            elif prev_kind is None:
-                # Chain opens on a real STATE — no action gap to bridge, so `start top`/
-                # `start bottom` is PREPENDED (not a replacement) when the opening state has a
-                # curated orientation; a 'neutral' opening is unchanged (module docstring).
-                orient = orientation_of(label)
-                if orient in ("top", "bottom"):
-                    start_key = "start top" if orient == "top" else "start bottom"
-                    st = table["generic_states"][start_key]
-                    states.append(ChainState(node_key=st["node_key"], label=st["label"],
-                                              type=st["type"], actor=actor, inferred=True,
-                                              role=st.get("role")))
-                    act = infer_action_for_state_pair(table, st["type"], etype)
-                    edges.append(ChainEdge(
-                        source_key=st["node_key"], target_key=key,
-                        action_key=act["action_key"], action_label=act["label"],
-                        action_type=act["type"], actor=actor,
-                        inferred=True, terminal=False, source_event_index=None,
-                    ))
+            # A chain that OPENS on a real state opens there, full stop (owner call
+            # 2026-08-27): prepending `start top`/`start bottom` and an inferred action to reach
+            # it invented a move nobody logged — "costas não deveria ser presumido como precedido
+            # por top start". A start anchor exists to be an ACTION's missing source, which is why
+            # the action branch below still infers one; a state needs no source. Such a state is
+            # flagged ``nascent`` instead, so a consumer can show that the chain simply begins
+            # there rather than pretending an edge into it exists.
             states.append(ChainState(node_key=key, label=label, type=etype, actor=actor,
-                                      inferred=False))
+                                      inferred=False, nascent=prev_kind is None))
             prev_state_key, prev_state_type = key, etype
             prev_kind = "state"
             last_actor = actor

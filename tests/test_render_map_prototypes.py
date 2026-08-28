@@ -893,3 +893,28 @@ def test_render_variant12_payload_bytes_tripwire(tmp_path):
     v12 = metrics["variants"]["12-sistemas-vista-separada-seletiva"]
     assert v12["payload_bytes"] > 0
     assert v12["payload_bytes"] < 5_000_000  # generous tripwire ceiling on this mock bundle
+
+
+def test_start_anchor_is_mirrored_for_the_opponent_side():
+    """Owner 2026-08-27: "top start/bottom is always from the perspective of the user, so an
+    opponent passing action should be connected to bottom start". The compiler is actor-agnostic
+    and names the anchor from the action's own orientation, so an opponent chain opening on a
+    PASS names `start top` — meaning THEY were on top. The map has one set of anchors and its
+    vertical axis is the user's, so the aggregate mirrors it: their top is his bottom. Only start
+    anchors mirror; the opponent's finish stays their own."""
+    bundle = {"sessions": [{"rounds": [{"entries": [
+        {"label": "Guard Pass", "type": "pass", "actor": "partner"},
+        {"label": "Mount", "type": "control", "actor": "partner"},
+    ]}]}]}
+    agg = build_aggregate(bundle)
+
+    start_keys = {k for (k, _actor) in agg.states if k.startswith("start ")}
+    assert start_keys == {"start bottom"}, start_keys  # never 'start top' from a partner pass
+    # ...and it lands on the user's side, like every start anchor
+    assert ("start bottom", "you") in agg.states
+    assert all(actor == "you" for (k, actor) in agg.states if k.startswith("start "))
+    # the edge that leaves it was rewritten to the mirrored endpoint too — no dangling source
+    node_ids = {_qid(v["actor"], k) for (k, _a), v in agg.states.items()}
+    for e in agg.edges.values():
+        assert _qid("you" if e["source"].startswith("start ") else e["actor"],
+                    e["source"]) in node_ids, e

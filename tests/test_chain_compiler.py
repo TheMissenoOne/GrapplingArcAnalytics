@@ -100,12 +100,11 @@ def test_kguard_then_5050_guard_bridges_with_guard_transition():
         _ev("50/50 Guard", "guard"),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["start bottom", "kguard", "5050 guard"]
-    assert chain.states[0].role == "start"
+    assert [s.node_key for s in chain.states] == ["kguard", "5050 guard"]
+    assert chain.states[0].nascent is True  # opens on a real state: no anchor invented
     assert not any(s.inferred for s in chain.states[1:])
-    assert len(chain.edges) == 2
-    prepend_edge, edge = chain.edges
-    assert prepend_edge.source_key == "start bottom" and prepend_edge.target_key == "kguard"
+    assert len(chain.edges) == 1
+    (edge,) = chain.edges
     assert edge.action_key == "guard transition"
     assert edge.inferred is True
     assert edge.terminal is False
@@ -124,8 +123,7 @@ def test_mount_then_side_control_bridges_with_control_transition():
         _ev("Side Control", "control"),
     ], inference_table=TABLE)
 
-    prepend_edge, edge = chain.edges
-    assert prepend_edge.source_key == "start top" and prepend_edge.target_key == "mount"
+    (edge,) = chain.edges
     assert edge.source_key == "mount" and edge.target_key == "side control"
     assert edge.action_key == "control transition"
     assert edge.inferred is True
@@ -211,38 +209,26 @@ def test_chain_opening_on_submission_resolves_to_start_neutral():
     assert chain.states[0].role == "start"
 
 
-def test_chain_opening_on_closed_guard_state_prepends_start_bottom():
-    """`orientation_of('Closed Guard') == 'bottom'` (curated) — the chain opens on a real STATE,
-    so rule 5 never fires (no action gap to bridge); 'start bottom' is PREPENDED instead, linked
-    by one inferred action edge to the real opening state."""
-    chain = compile_chain([
-        _ev("Closed Guard", "guard"),
-        _ev("Guard Pass", "pass"),
-    ], inference_table=TABLE)
-
-    assert [s.node_key for s in chain.states[:2]] == ["start bottom", "closed guard"]
-    assert chain.states[0].role == "start"
-    assert chain.states[1].role is None and chain.states[1].inferred is False
-    edge = chain.edges[0]
-    assert edge.source_key == "start bottom" and edge.target_key == "closed guard"
-    assert edge.inferred is True and edge.terminal is False
-    assert edge.source_event_index is None
+def test_chain_opening_on_closed_guard_state_state_is_nascent():
+    """The prepend this test used to pin is GONE (owner call 2026-08-27): reaching a
+    chain-opening state through an invented action was a claim the log never made. The state
+    opens the chain on its own and carries ``nascent`` — see
+    ``test_chain_opening_on_a_state_starts_loose_and_is_marked_nascent`` for the full contract."""
+    chain = compile_chain([_ev("Closed Guard", "guard")], inference_table=TABLE)
+    assert [s.node_key for s in chain.states] == ["closed guard"]
+    assert chain.states[0].nascent is True
+    assert not any(s.role == "start" for s in chain.states)
 
 
-def test_chain_opening_on_mount_state_prepends_start_top():
-    """`orientation_of('Mount') == 'top'` (curated) — same mechanism as the guard case, opposite
-    orientation, 'passing'-side node."""
-    chain = compile_chain([
-        _ev("Mount", "control"),
-        _ev("Armbar", "submission"),
-    ], inference_table=TABLE)
-
-    assert chain.states[0].node_key == "start top"
-    assert chain.states[0].role == "start"
-    assert chain.states[1].node_key == "mount"
-    edge = chain.edges[0]
-    assert edge.source_key == "start top" and edge.target_key == "mount"
-    assert edge.inferred is True
+def test_chain_opening_on_mount_state_state_is_nascent():
+    """The prepend this test used to pin is GONE (owner call 2026-08-27): reaching a
+    chain-opening state through an invented action was a claim the log never made. The state
+    opens the chain on its own and carries ``nascent`` — see
+    ``test_chain_opening_on_a_state_starts_loose_and_is_marked_nascent`` for the full contract."""
+    chain = compile_chain([_ev("Mount", "control")], inference_table=TABLE)
+    assert [s.node_key for s in chain.states] == ["mount"]
+    assert chain.states[0].nascent is True
+    assert not any(s.role == "start" for s in chain.states)
 
 
 def test_chain_opening_on_neutral_state_stays_unprepended():
@@ -267,10 +253,10 @@ def test_chain_ending_in_submission_is_terminal():
         _ev("Armbar", "submission", successful=True),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["start top", "mount", "finish"]
-    assert chain.states[0].role == "start"
-    assert chain.states[2].inferred is True
-    assert chain.states[2].role == "finish"
+    assert [s.node_key for s in chain.states] == ["mount", "finish"]
+    assert chain.states[0].nascent is True  # opens on a real state: no anchor invented
+    assert chain.states[1].inferred is True
+    assert chain.states[1].role == "finish"
     edge = chain.edges[-1]
     assert edge.terminal is True
     assert edge.action_key == "armbar"
@@ -292,9 +278,9 @@ def test_concept_event_dropped_chain_stays_intact():
     assert len(chain.dropped) == 1
     dropped = chain.dropped[0]
     assert dropped.index == 1 and dropped.reason == "transparent"
-    assert [s.node_key for s in chain.states] == ["start bottom", "closed guard", "top transition"]
-    assert chain.states[0].role == "start"
-    assert chain.states[2].inferred is True
+    assert [s.node_key for s in chain.states] == ["closed guard", "top transition"]
+    assert chain.states[0].nascent is True  # opens on a real state: no anchor invented
+    assert chain.states[1].inferred is True
     edge = chain.edges[-1]
     assert edge.source_key == "closed guard" and edge.action_key == "guard pass"
     assert edge.terminal is True
@@ -318,11 +304,11 @@ def test_compile_two_sided_splits_and_drops_unassigned_with_original_index():
 
     assert set(result) == {"a", "b", "dropped"}
     a = result["a"]
-    # `orientation_of('Closed Guard') == 'bottom'` -> side 'a' opens on a PREPENDED 'start
-    # bottom' (module docstring); this test's own focus is the split/original-index remapping.
-    assert [s.node_key for s in a.states] == ["start bottom", "closed guard"]
-    assert a.states[0].role == "start"
-    assert len(a.edges) == 1 and a.edges[0].source_event_index is None
+    # side 'a' opens on a real state, so it opens THERE — no anchor, and with a single event
+    # no edge either; this test's own focus is the split/original-index remapping.
+    assert [s.node_key for s in a.states] == ["closed guard"]
+    assert a.states[0].nascent is True
+    assert a.edges == []
     assert not a.dropped
 
     b = result["b"]
@@ -382,3 +368,46 @@ def test_determinism():
     first = compile_chain(events, inference_table=TABLE)
     second = compile_chain(events, inference_table=TABLE)
     assert first == second
+
+
+def test_chain_opening_on_a_state_starts_loose_and_is_marked_nascent():
+    """Owner call 2026-08-27: "costas não deveria ser presumido como precedido por top start —
+    deveria começar solto sem inferência de ação prévia". A start anchor exists to be the missing
+    SOURCE of a chain-opening action; a state that opens a chain needs no source, so prepending
+    one (and the edge to reach it) invented a move nobody logged. Only actions connect to a start
+    anchor. Such a state is marked `nascent` instead — the chain simply begins there."""
+    chain = compile_chain([
+        _ev("Back Control", "control"),   # orientation 'top' — used to be prepended by start top
+        _ev("Armbar", "submission"),
+    ], inference_table=TABLE)
+
+    assert [s.node_key for s in chain.states] == ["back control", "finish"]
+    assert chain.states[0].nascent is True
+    assert chain.states[0].inferred is False
+    assert not any(s.role == "start" for s in chain.states)
+    assert [(e.source_key, e.target_key) for e in chain.edges] == [("back control", "finish")]
+
+
+def test_a_state_reached_by_an_action_is_not_nascent():
+    """The flag is about having no predecessor, not about being first in some chain: the opening
+    state is nascent, the one an action leads into never is."""
+    chain = compile_chain([
+        _ev("Closed Guard", "guard"),
+        _ev("Armbar", "submission"),
+    ], inference_table=TABLE)
+    by_key = {s.node_key: s for s in chain.states}
+    assert by_key["closed guard"].nascent is True
+    assert by_key["finish"].nascent is False
+
+
+def test_only_actions_connect_to_a_start_anchor():
+    """A start anchor is only ever reached as an ACTION's inferred source — never as a prepended
+    state-to-state hop. Chain opening on an action gets one; chain opening on a state does not."""
+    opens_on_action = compile_chain([_ev("Double Leg Takedown", "takedown")],
+                                    inference_table=TABLE)
+    assert opens_on_action.states[0].role == "start"
+    assert opens_on_action.edges[0].source_key == opens_on_action.states[0].node_key
+
+    opens_on_state = compile_chain([_ev("Mount", "control")], inference_table=TABLE)
+    assert not any(s.role == "start" for s in opens_on_state.states)
+    assert opens_on_state.edges == []

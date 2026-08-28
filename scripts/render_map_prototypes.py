@@ -202,6 +202,22 @@ def _is_shared(node_key: str) -> bool:
     return bool(entry.get("shared")) if isinstance(entry, dict) else False
 
 
+_START_LABELS = {"start top": "Início por Cima", "start bottom": "Início por Baixo",
+                  "start neutral": "Início Neutro"}
+
+
+def _perspective_key(node_key: str, actor: str | None) -> str:
+    """Start anchors are read from the USER's side, always (owner 2026-08-27). The compiler is
+    actor-agnostic — it names the opening anchor from the action's own orientation — so an
+    opponent chain that opens with a PASS names ``start top``, meaning *they* were on top. From
+    the user's perspective that is the bottom, and the map only has one set of anchors. Mirroring
+    here (never in the compiler, where perspective is deliberately not decided) keeps
+    ``start top``/``start bottom`` meaning what the map's vertical axis says they mean."""
+    if actor != "partner" or not _is_start(node_key):
+        return node_key
+    return {"start top": "start bottom", "start bottom": "start top"}.get(node_key, node_key)
+
+
 def _actor_for(node_key: str, actor: str) -> str:
     """D: a role='start' node is always the USER's, even reached from the opponent's own
     chain — never ``opp:``-qualified. Single choke point: called from ``_qid`` (id string) and
@@ -448,27 +464,34 @@ class Aggregate:
             return
         self.raw_states_total += 1
         self.raw_states_inferred += 1 if s.inferred else 0
-        actor = _actor_for(s.node_key, s.actor)  # D: start-role nodes always merge into 'you'
-        key = (s.node_key, actor)
+        node_key = _perspective_key(s.node_key, s.actor)  # opponent's top IS the user's bottom
+        actor = _actor_for(node_key, s.actor)  # D: start-role nodes always merge into 'you'
+        key = (node_key, actor)
         row = self.states.get(key)
         if row is None:
-            label = self.display_labels.get(s.node_key, s.label)
-            self.states[key] = {"node_key": s.node_key, "label": label, "type": s.type,
-                                 "actor": actor, "count": 1, "inferred": s.inferred}
+            label = self.display_labels.get(node_key, _START_LABELS.get(node_key, s.label))
+            self.states[key] = {"node_key": node_key, "label": label, "type": s.type,
+                                 "actor": actor, "count": 1, "inferred": s.inferred,
+                                 "nascent": s.nascent}
         else:
             row["count"] += 1
             row["inferred"] = row["inferred"] and s.inferred
+            # a state is only NASCENT if nothing ever preceded it — one chain reaching it
+            # through an action is enough to settle that something did
+            row["nascent"] = row.get("nascent", False) and s.nascent
 
     def add_edge(self, e: ChainEdge) -> None:
         if e.actor not in ("you", "partner"):
             return
         self.raw_edges_total += 1
         self.raw_edges_inferred += 1 if e.inferred else 0
-        key = (e.source_key, e.target_key, e.action_key, e.actor)
+        source_key = _perspective_key(e.source_key, e.actor)
+        target_key = _perspective_key(e.target_key, e.actor)
+        key = (source_key, target_key, e.action_key, e.actor)
         row = self.edges.get(key)
         if row is None:
             action_label = self.display_labels.get(e.action_key, e.action_label)
-            self.edges[key] = {"source": e.source_key, "target": e.target_key,
+            self.edges[key] = {"source": source_key, "target": target_key,
                                 "action_key": e.action_key, "action_label": action_label,
                                 "action_type": e.action_type, "actor": e.actor,
                                 "count": 1, "inferred": e.inferred}
