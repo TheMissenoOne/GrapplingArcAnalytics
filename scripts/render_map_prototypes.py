@@ -179,12 +179,23 @@ def _is_start(node_key: str) -> bool:
     return _role_of(node_key) == "start"
 
 
+def _is_shared(node_key: str) -> bool:
+    """A generic state flagged ``shared`` in the table: a situation NEITHER athlete owns."""
+    entry = load_inference_table().get("generic_states", {}).get(node_key)
+    return bool(entry.get("shared")) if isinstance(entry, dict) else False
+
+
 def _actor_for(node_key: str, actor: str) -> str:
     """D: a role='start' node is always the USER's, even reached from the opponent's own
     chain — never ``opp:``-qualified. Single choke point: called from ``_qid`` (id string) and
     ``Aggregate.add_state`` (aggregation key), so a start node reached from both sides merges
-    into ONE node/count instead of two ghost duplicates."""
-    return "you" if _is_start(node_key) else actor
+    into ONE node/count instead of two ghost duplicates.
+
+    ``shared`` generics merge the same way, for the opposite reason: the rule that keeps your
+    mount separate from theirs exists because a position is OWNED — somebody plays it. A
+    scramble is the interval where nobody owns anything, so "my scramble" and "their scramble"
+    would be one physical event counted twice. Ownership is the test, not actor presence."""
+    return "you" if (_is_start(node_key) or _is_shared(node_key)) else actor
 
 
 def _clamp3(n: float) -> int:

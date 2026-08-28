@@ -21,6 +21,11 @@
         "label": "Troca de Controle",
         "type": "transition"
       },
+      "defensive retreat": {
+        "action_key": "defensive retreat",
+        "label": "Recuo Defensivo",
+        "type": "transition"
+      },
       "guard exit": {
         "action_key": "guard exit",
         "label": "Saída da Guarda",
@@ -66,6 +71,7 @@
         "label": "Scramble",
         "node_key": "scramble",
         "orientation": "neutral",
+        "shared": true,
         "type": "control"
       },
       "start bottom": {
@@ -105,8 +111,10 @@
     },
     "state_pair_to_action": {
       "*|*": "transition",
+      "*|defensive": "defensive retreat",
       "control|control": "control transition",
       "control|guard": "guard recovery",
+      "defensive|guard": "guard recovery",
       "guard|control": "guard exit",
       "guard|guard": "guard transition"
     },

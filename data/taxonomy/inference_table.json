@@ -4,7 +4,7 @@
     "chained submission": {"node_key": "chained submission", "label": "Finalização Encadeada", "type": "control", "orientation": "neutral"},
     "top transition": {"node_key": "top transition", "label": "Transição de Topo", "type": "control", "orientation": "top"},
     "bottom transition": {"node_key": "bottom transition", "label": "Transição de Baixo", "type": "control", "orientation": "bottom"},
-    "scramble": {"node_key": "scramble", "label": "Scramble", "type": "control", "orientation": "neutral"},
+    "scramble": {"node_key": "scramble", "label": "Scramble", "type": "control", "orientation": "neutral", "shared": true},
     "finish": {"node_key": "finish", "label": "Finalização", "type": "control", "orientation": "neutral", "role": "finish"},
     "start neutral": {"node_key": "start neutral", "label": "Início Neutro", "type": "control", "orientation": "neutral", "role": "start"},
     "start top": {"node_key": "start top", "label": "Início por Cima", "type": "control", "orientation": "top", "role": "start"},
@@ -16,6 +16,7 @@
     "control transition": {"action_key": "control transition", "label": "Troca de Controle", "type": "transition"},
     "guard recovery": {"action_key": "guard recovery", "label": "Recomposição de Guarda", "type": "transition"},
     "guard exit": {"action_key": "guard exit", "label": "Saída da Guarda", "type": "transition"},
+    "defensive retreat": {"action_key": "defensive retreat", "label": "Recuo Defensivo", "type": "transition"},
     "transition": {"action_key": "transition", "label": "Transição", "type": "transition"}
   },
   "action_pair_to_state": {
@@ -36,6 +37,8 @@
     "control|control": "control transition",
     "control|guard": "guard recovery",
     "guard|control": "guard exit",
+    "defensive|guard": "guard recovery",
+    "*|defensive": "defensive retreat",
     "*|*": "transition"
   }
 }
