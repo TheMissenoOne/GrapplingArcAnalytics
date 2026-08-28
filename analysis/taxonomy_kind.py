@@ -204,7 +204,8 @@ INFERENCE_TABLE_PATH = (
 def load_inference_table(path: Path | None = None) -> dict[str, Any]:
     """Read the D2 table. No caching — it's a few hundred bytes, read once per export run."""
     with open(path or INFERENCE_TABLE_PATH, encoding="utf-8") as f:
-        return json.load(f)
+        table: dict[str, Any] = json.load(f)
+        return table
 
 
 def resolve_pair(table: Mapping[str, str], type_a: str, type_b: str) -> str:
@@ -233,7 +234,8 @@ def infer_state_for_action_pair(
     """The generic state entry bridging two consecutive action types with no state between
     them, e.g. two submission attempts chain through ``generic_states['chained submission']``."""
     key = resolve_pair(table["action_pair_to_state"], type_a, type_b)
-    return table["generic_states"][key]
+    entry: dict[str, Any] = table["generic_states"][key]
+    return entry
 
 
 def infer_action_for_state_pair(
@@ -242,7 +244,8 @@ def infer_action_for_state_pair(
     """The generic action entry bridging two consecutive state types with no action between
     them, e.g. two guard states chain through ``generic_actions['guard transition']``."""
     key = resolve_pair(table["state_pair_to_action"], type_a, type_b)
-    return table["generic_actions"][key]
+    entry: dict[str, Any] = table["generic_actions"][key]
+    return entry
 
 
 # ── orientation: top | bottom | neutral, per STATE (owner call, 2026-08-27) ─────────────
@@ -269,7 +272,8 @@ def load_orientation_table(path: Path | None = None) -> dict[str, str]:
     """Read the curated orientation table. No caching — a few hundred bytes, same convention
     as ``load_inference_table``."""
     with open(path or ORIENTATION_TABLE_PATH, encoding="utf-8") as f:
-        return json.load(f)
+        table: dict[str, str] = json.load(f)
+        return table
 
 
 def orientation_of(canonical_label: str) -> Orientation:

@@ -90,7 +90,10 @@ def network_from_sequences(
     # takedown and transition) — resolve by MAJORITY occurrence, not first-writer-wins,
     # or the node's `type` (and everything PtV derives from it) depends on match read
     # order. Tie-break on the type name itself so the result is a total order.
-    node_type_counts: dict[str, Counter[str]] = defaultdict(Counter)
+    # Same reasoning as `occ`/etc above — only `.values()`/`.items()` are used below, never a
+    # Counter-only method, and `wt` is a float. `reaction_counts` stays a real `Counter[str]`:
+    # `.update()` there always counts by 1 (labels between two events), never `wt`.
+    node_type_counts: dict[str, defaultdict[str, float]] = defaultdict(lambda: defaultdict(float))
     reaction_counts: dict[tuple[str, str], Counter[str]] = defaultdict(Counter)
 
     for seq in sequences:

@@ -392,7 +392,9 @@ def test_golden_fixture_matches_this_implementation() -> None:
     )
     from analysis.names import _normalize_name
 
-    expected_keys = {_normalize_name(canonical_label(n)) for n in nodes if canonical_label(n)}
+    expected_keys = {
+        _normalize_name(label) for n in nodes if (label := canonical_label(n))
+    }
     assert len(doc["kinds"]) == len(expected_keys)
     for node in nodes:
         label = canonical_label(node)

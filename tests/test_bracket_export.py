@@ -14,6 +14,7 @@ import importlib.util
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -880,8 +881,12 @@ EXTENDED_MANIFEST_PATH = (Path(__file__).resolve().parent.parent / "data" / "sco
                           / "adcc_women_65_extended.json")
 
 
-def _load_extended_manifest() -> dict[str, object]:
-    return json.loads(EXTENDED_MANIFEST_PATH.read_text(encoding="utf-8"))
+def _load_extended_manifest() -> dict[str, Any]:
+    """Real nested JSON, walked below (``manifest["divisions"][i]["athletes"]``) -- unlike this
+    file's other ``dict[str, object]`` fixtures, which are only ever built and passed, never
+    subscripted into, ``object`` isn't traversable so this one is genuinely ``Any``."""
+    data: dict[str, Any] = json.loads(EXTENDED_MANIFEST_PATH.read_text(encoding="utf-8"))
+    return data
 
 
 def test_the_extended_manifest_parses_and_shapes_two_divisions() -> None:
@@ -920,10 +925,10 @@ def test_the_unresolved_athlete_is_named_and_excluded() -> None:
     assert any(u["raw_name"] == "Althea" for u in manifest["unresolved"])
 
 
-def divisions_from_manifest(manifest: dict[str, object]) -> dict[str, str]:
+def divisions_from_manifest(manifest: dict[str, Any]) -> dict[str, str]:
     from analysis.names import athlete_key
-    return {athlete_key(x["name"]): d["name"]  # type: ignore[index]
-            for d in manifest["divisions"] for x in d["athletes"]}  # type: ignore[union-attr]
+    return {athlete_key(x["name"]): d["name"]
+            for d in manifest["divisions"] for x in d["athletes"]}
 
 
 def _ext_bout(bid: str, a: str, b: str, seq: list[dict[str, object]],

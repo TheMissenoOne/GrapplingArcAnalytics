@@ -83,6 +83,7 @@ import argparse
 import json
 import logging
 import math
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -400,11 +401,12 @@ def partition_by_sequence(entries: list[dict[str, Any]]) -> list[list[dict[str, 
     return groups
 
 
-def _side_of(e: dict[str, Any]) -> str | None:
-    return _ACTOR_SIDE.get(e.get("actor"))
+def _side_of(e: Mapping[str, Any]) -> str | None:
+    actor = e.get("actor")
+    return _ACTOR_SIDE.get(actor) if isinstance(actor, str) else None
 
 
-def _actor_of(e: dict[str, Any]) -> str | None:
+def _actor_of(e: Mapping[str, Any]) -> str | None:
     return e.get("actor")
 
 
@@ -530,7 +532,7 @@ def _handovers_in_group(group: list[dict[str, Any]],
         actor = _actor_of(e)
         if actor not in ("you", "partner"):
             continue
-        if prev_actor is not None and actor != prev_actor:
+        if prev_actor is not None and prev_idx is not None and actor != prev_actor:
             from_side, to_side = _ACTOR_SIDE[prev_actor], _ACTOR_SIDE[actor]
             from_key = compiled[from_side].state_after_event.get(prev_idx)
             to_key = compiled[to_side].state_after_event.get(idx)
@@ -751,7 +753,7 @@ def _style_single_node(node_key: str, actor: str, v: dict[str, Any], *, radius: 
     return node
 
 
-def _two_sided_graphview(states: dict, edges: list, handovers: list[dict[str, Any]],
+def _two_sided_graphview(states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]], handovers: list[dict[str, Any]],
                           bridge_qids: frozenset[str] = frozenset()) -> dict[str, Any]:
     """Node per (node_key, actor) — you and partner are fundamentally different states, never
     merged, even on the same node_key. Links: within-actor action edges (blue/orange, labelled
@@ -830,7 +832,7 @@ def _sole_bridge_partner_nodes(you_node_keys: set[str], edges: list[dict[str, An
 
 def _selective_states_and_edges(
     agg: Aggregate,
-) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]]]:
+) -> tuple[dict[tuple[str, str], dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     """Variant 4's element set: partner state/edge enters only if usageCount>=2 OR it is the
     sole handover bridge to a you element. Returned separately (not just the graphview) so
     variants 5/6/7/8 can reuse the SAME filtered set instead of reverse-engineering it from
@@ -853,7 +855,7 @@ def _selective_states_and_edges(
     return states, edges, handovers
 
 
-def _hubs_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
+def _hubs_graphview(states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]], handovers: list[dict[str, Any]]) -> dict[str, Any]:
     """Variant 5 — node size by DEGREE percentile (not usage), edges coloured by a 3-bucket
     action-type approximation (see module docstring: graph.js has no per-link colour field).
     Handover links count toward degree too — they're real edges on screen."""
@@ -893,7 +895,7 @@ def _hubs_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) 
     return {"nodes": nodes, "links": links}
 
 
-def _ghost_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
+def _ghost_graphview(states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]], handovers: list[dict[str, Any]]) -> dict[str, Any]:
     """Variant 6 — variant 4's selective set, with inferred elements rendered as ghosts:
     dashed + minimum weight/size, node colour a translucent grey (``color`` IS a real node
     field graph.js reads — see module docstring). Ghosting marks INFERRED only, never
@@ -927,7 +929,7 @@ def _ghost_graphview(states: dict, edges: list, handovers: list[dict[str, Any]])
     return {"nodes": nodes, "links": links}
 
 
-def _icons_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) -> dict[str, Any]:
+def _icons_graphview(states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]], handovers: list[dict[str, Any]]) -> dict[str, Any]:
     """Variant 7 — category icon + colour per node, approximating the App's own
     NODE_TYPE_ICONS/NODE_TYPE_COLORS (src/types/session.ts). Colour is taken by category here,
     so actor is shown as a border RING instead (``n.ring``, ``_FIG_HEX`` — a stroke-custom
@@ -1049,7 +1051,7 @@ def _resolve_systems(g: nx.Graph, comm_of: dict[str, int]) -> dict[str, int | No
     return assign
 
 
-def _detect_systems(states: dict, edges: list[dict[str, Any]],
+def _detect_systems(states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]],
                      handovers: list[dict[str, Any]]) -> dict[str, Any]:
     """Greedy-modularity communities (as a starting partition only) over the ELIGIBLE subset
     (``_system_eligible`` — you-only, never finish/start) of the (already gated, by the caller)
@@ -1232,7 +1234,7 @@ def _cross_member_links(system_of: dict[str, str], edges: list[dict[str, Any]],
     ]
 
 
-def _excluded_states(states: dict, system_of: dict[str, str]) -> dict:
+def _excluded_states(states: dict[tuple[str, str], dict[str, Any]], system_of: dict[str, str]) -> dict[tuple[str, str], dict[str, Any]]:
     """Every state NOT a system member (opponent, finish, start-anchor, or a bridge — anything
     ``_detect_systems`` didn't put in ``system_of``) — rendered individually at every level
     (level1/level2 of variant 8, the always-visible SYSTEMS array of variant 9), never
@@ -1240,7 +1242,7 @@ def _excluded_states(states: dict, system_of: dict[str, str]) -> dict:
     return {k: v for k, v in states.items() if _qid(k[1], k[0]) not in system_of}
 
 
-def _place_of(system_of: dict[str, str], excluded: dict) -> dict[str, str]:
+def _place_of(system_of: dict[str, str], excluded: dict[tuple[str, str], dict[str, Any]]) -> dict[str, str]:
     """Extends ``system_of`` so EVERY rendered qid resolves to a "placement" id — a system
     member maps to its collapsed ``sys:N``; anything excluded (opponent/finish/start/bridge)
     maps to ITSELF. ``_cross_system_links``/``_cross_member_links`` then need no special case
@@ -1290,7 +1292,7 @@ def _system_node(s: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _systems_level1_view(systems: list[dict[str, Any]], excluded: dict,
+def _systems_level1_view(systems: list[dict[str, Any]], excluded: dict[tuple[str, str], dict[str, Any]],
                           cross_links: list[dict[str, Any]], bridge_qids: frozenset[str],
                           radius: float) -> dict[str, Any]:
     """Constructive order (owner adendo): systems (the skeleton) first, then ``excluded`` ranked
@@ -1309,9 +1311,9 @@ def _systems_level1_view(systems: list[dict[str, Any]], excluded: dict,
     return {"nodes": nodes, "links": cross_links}
 
 
-def _system_members(sys_row: dict[str, Any], states: dict, edges: list[dict[str, Any]],
+def _system_members(sys_row: dict[str, Any], states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]],
                      handovers: list[dict[str, Any]]
-                     ) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]]]:
+                     ) -> tuple[dict[tuple[str, str], dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     """One system's own (states, internal edges, internal handovers) slice, member_qids-filtered
     — shared by variant 8's drill-down (`_system_level2`, which adds stub nodes on top) and
     variant 9's in-place expansion (`_render_variant9`, which needs the bare subgraph — the
@@ -1326,8 +1328,8 @@ def _system_members(sys_row: dict[str, Any], states: dict, edges: list[dict[str,
     return sub_states, internal_edges, internal_handovers
 
 
-def _system_level2(sys_row: dict[str, Any], states: dict, edges: list[dict[str, Any]],
-                    handovers: list[dict[str, Any]], excluded: dict, bridge_qids: frozenset[str],
+def _system_level2(sys_row: dict[str, Any], states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]],
+                    handovers: list[dict[str, Any]], excluded: dict[tuple[str, str], dict[str, Any]], bridge_qids: frozenset[str],
                     radius: float) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]]]:
     """One system's own subgraph (nodes/edges/labels as variant 4), a REGION covering only its
     own members (C.1 — hull/circle behind everything, drawn by the client), plus every neighbour
@@ -1393,7 +1395,7 @@ _OPPONENT_MODE_LABELS = {
 }
 
 
-def _opponent_scoped(agg: Aggregate, mode: str) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]]]:
+def _opponent_scoped(agg: Aggregate, mode: str) -> tuple[dict[tuple[str, str], dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
     """The third combo axis (11/12's "modo de oponente") — same (states, edges, handovers) shape
     as `_complete_two_sided`/`_selective_states_and_edges`, generalised with a THIRD mode
     (``"none"``) that drops the opponent's own subgraph entirely: states/edges filtered to
@@ -1502,7 +1504,7 @@ def _stub_node(dest_place: str, systems_by_id: dict[str, dict[str, Any]],
 
 
 def _system_boundary_view(
-    sys_row: dict[str, Any], states: dict, edges: list[dict[str, Any]], handovers: list[dict[str, Any]],
+    sys_row: dict[str, Any], states: dict[tuple[str, str], dict[str, Any]], edges: list[dict[str, Any]], handovers: list[dict[str, Any]],
     cross: list[dict[str, Any]], place_of: dict[str, str],
     excluded_by_qid: dict[str, tuple[tuple[str, str], dict[str, Any]]],
     systems_by_id: dict[str, dict[str, Any]], bridge_qids: frozenset[str],
@@ -1525,7 +1527,7 @@ def _system_boundary_view(
     relevant = [c for c in cross if c["fromSys"] == sys_row["id"] or c["toSys"] == sys_row["id"]]
     out_count: dict[str, int] = {}
     in_count: dict[str, int] = {}
-    stub_links: dict[tuple[str, str, bool], dict[str, int]] = {}
+    stub_links: dict[tuple[str, str, bool], dict[str, Any]] = {}
     for c in relevant:
         if c["from"] in member_qids:
             member_qid, dest_qid, member_is_source = c["from"], c["to"], True
@@ -2033,9 +2035,9 @@ def _write_page(out: Path, filename: str, title: str, subtitle: str, legend: str
     return knobs
 
 
-def _gated_systems(states4: dict, edges4: list[dict[str, Any]], handovers4: list[dict[str, Any]]
-                    ) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]], dict[str, Any],
-                               frozenset[str], dict]:
+def _gated_systems(states4: dict[tuple[str, str], dict[str, Any]], edges4: list[dict[str, Any]], handovers4: list[dict[str, Any]]
+                    ) -> tuple[dict[tuple[str, str], dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any],
+                               frozenset[str], dict[tuple[str, str], dict[str, Any]]]:
     """Shared by variants 8/9: gate (owner adendo, `_GATE_MIN_SUPPORT_DEFAULT`/
     `_GATE_POLICY_DEFAULT`) THEN detect systems on the cleaned graph THEN truncate the bridge
     set to the ones the VIEW shows (top-N by strength) — dominance runs on the gated graph, the
@@ -2054,7 +2056,7 @@ def _gated_systems(states4: dict, edges4: list[dict[str, Any]], handovers4: list
     return g_states, g_edges, g_handovers, detected, displayed, excluded
 
 
-def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
+def _render_variant8(out: Path, states4: dict[tuple[str, str], dict[str, Any]], edges4: list[dict[str, Any]],
                       handovers4: list[dict[str, Any]]) -> dict[str, Any]:
     g_states, g_edges, g_handovers, detected, bridge_qids, excluded = _gated_systems(
         states4, edges4, handovers4)
@@ -2118,7 +2120,7 @@ def _render_variant8(out: Path, states4: dict, edges4: list[dict[str, Any]],
     }
 
 
-def _render_variant9(out: Path, states4: dict, edges4: list[dict[str, Any]],
+def _render_variant9(out: Path, states4: dict[tuple[str, str], dict[str, Any]], edges4: list[dict[str, Any]],
                       handovers4: list[dict[str, Any]]) -> dict[str, Any]:
     """Variant 9 — same systems as variant 8, but expansion happens IN PLACE: the global view
     shows every system as a node PLUS every bridge/opponent/anchor individually (always
@@ -2211,7 +2213,7 @@ def _render_variant9(out: Path, states4: dict, edges4: list[dict[str, Any]],
     }
 
 
-def _render_variant10(out: Path, states4: dict, edges4: list[dict[str, Any]],
+def _render_variant10(out: Path, states4: dict[tuple[str, str], dict[str, Any]], edges4: list[dict[str, Any]],
                        handovers4: list[dict[str, Any]]) -> dict[str, Any]:
     """Owner adendo — the density-gate EXPERIMENT made visible: the collapsed systems-level view
     (same shape as variant 8's global level), rendered once per inference policy at the chosen
@@ -3182,12 +3184,16 @@ def _pct(n: int, total: int) -> float:
 def _variant_metrics(gv: dict[str, Any], edges: list[dict[str, Any]] | None, partner_elements: int,
                       handover_links: int = 0) -> dict[str, Any]:
     n_nodes, n_edges = len(gv["nodes"]), len(gv["links"])
-    inferred_edges = sum(1 for e in edges if e.get("inferred")) if edges is not None else None
+    pct_inferred: float | None
+    if edges:
+        pct_inferred = _pct(sum(1 for e in edges if e.get("inferred")), len(edges))
+    else:
+        pct_inferred = 0.0 if edges is not None else None
     return {
         "nodes": n_nodes,
         "edges": n_edges,
         "edges_per_node": round(n_edges / n_nodes, 2) if n_nodes else 0.0,
-        "pct_inferred_edges": _pct(inferred_edges, len(edges)) if edges else (0.0 if edges is not None else None),
+        "pct_inferred_edges": pct_inferred,
         "partner_elements": partner_elements,
         "handover_links": handover_links,
     }

@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -91,7 +92,7 @@ _EXPECTED_VARIANT_KEYS = {
 }
 
 
-def test_render_all_produces_every_artifact_with_valid_counts(tmp_path):
+def test_render_all_produces_every_artifact_with_valid_counts(tmp_path: Path) -> None:
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     out = tmp_path / "run1"
 
@@ -146,7 +147,7 @@ def test_render_all_produces_every_artifact_with_valid_counts(tmp_path):
     assert sum(oc.values()) <= cir["states_total"]
 
 
-def test_partner_and_you_nodes_are_never_merged_and_handovers_bridge_them():
+def test_partner_and_you_nodes_are_never_merged_and_handovers_bridge_them() -> None:
     """The owner's correction: you and partner are fundamentally different, never one node
     just because they share a node_key. Each is its own qualified id; the only thing that
     connects the two subgraphs is a handover link."""
@@ -172,7 +173,7 @@ def test_partner_and_you_nodes_are_never_merged_and_handovers_bridge_them():
     assert handover_links and all(link["dashed"] for link in handover_links)
 
 
-def test_action_logged_with_stale_state_type_becomes_an_edge_not_a_node():
+def test_action_logged_with_stale_state_type_becomes_an_edge_not_a_node() -> None:
     """Root-cause regression: a logged action ('Raspagem de Gancho') carrying a stale
     `type: 'control'` snapshot must compile as an EDGE (kind_of_entry resolves the library's
     real `sweep` type), never a state node — and the same technique logged under a different
@@ -192,7 +193,7 @@ def test_action_logged_with_stale_state_type_becomes_an_edge_not_a_node():
     assert sweep_edges[0]["action_label"] == "Raspagem de Gancho"  # first-seen display wording
 
 
-def test_render_all_is_deterministic(tmp_path):
+def test_render_all_is_deterministic(tmp_path: Path) -> None:
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     out1, out2 = tmp_path / "run1", tmp_path / "run2"
 
@@ -212,7 +213,7 @@ def test_render_all_is_deterministic(tmp_path):
         (out2 / "12-sistemas-vista-separada-seletiva.html").read_bytes()
 
 
-def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path):
+def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path: Path) -> None:
     before = _GRAPH_JS.read_text(encoding="utf-8")
 
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
@@ -242,12 +243,12 @@ def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path):
         assert marker in copy, marker
 
 
-def test_patch_graph_js_errors_loudly_if_an_anchor_is_missing():
+def test_patch_graph_js_errors_loudly_if_an_anchor_is_missing() -> None:
     with pytest.raises(ValueError, match="patch anchor not found"):
         _patch_graph_js("var totally = 'different file contents';")
 
 
-def test_variant7_nodes_carry_a_category_icon():
+def test_variant7_nodes_carry_a_category_icon() -> None:
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
@@ -262,7 +263,7 @@ def test_variant7_nodes_carry_a_category_icon():
             assert "ring" in n and n["ring"], n
 
 
-def test_variant8_embeds_multiple_systems_deterministically():
+def test_variant8_embeds_multiple_systems_deterministically() -> None:
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
@@ -280,7 +281,7 @@ def test_variant8_embeds_multiple_systems_deterministically():
         assert s["actor"] in ("you", "partner")
 
 
-def test_every_action_edge_is_labelled_generics_yield_handovers_never_labelled():
+def test_every_action_edge_is_labelled_generics_yield_handovers_never_labelled() -> None:
     """Inferred edges used to be silent, because the only generic action was the meaningless
     bare "Transição" and labelling it was noise. Once every frequent pair got an honest name
     (control transition, guard recovery, guard exit, defensive retreat...) the silence started
@@ -307,7 +308,7 @@ def test_every_action_edge_is_labelled_generics_yield_handovers_never_labelled()
         assert "label" not in link
 
 
-def test_finish_node_has_glyph_only_in_variant7_color_elsewhere():
+def test_finish_node_has_glyph_only_in_variant7_color_elsewhere() -> None:
     """Owner correction: emoji/glyph belongs to variant 7 (icons) only — every other migrated
     variant keeps the finish node's highlighted colour but no glyph."""
     row = {"node_key": _FINISH_KEY, "label": "Finalizacao", "type": "submission",
@@ -325,7 +326,7 @@ def test_finish_node_has_glyph_only_in_variant7_color_elsewhere():
     assert n7["icon"] == _FINISH_ICON
 
 
-def test_finish_states_are_qualified_per_actor_two_distinct_nodes():
+def test_finish_states_are_qualified_per_actor_two_distinct_nodes() -> None:
     """Adendo: finish is a state like any other w.r.t. actor — a bundle where BOTH you and the
     opponent close their own chain on a submission must produce two SEPARATE finish nodes
     (`finish` / `opp:finish`), never merged into one, and they must stay visually
@@ -354,7 +355,7 @@ def test_finish_states_are_qualified_per_actor_two_distinct_nodes():
     assert "(oponente)" not in you_finish["label"]
 
 
-def test_variant9_present_with_multi_expand_and_reconnect_data():
+def test_variant9_present_with_multi_expand_and_reconnect_data() -> None:
     """9 mirrors 8's systems but keeps everything in ONE view — assert the embedded payload can
     support multi-expand + inter-system reconnection: every cross-placement link's `from`/`to`
     are REAL qids (never a collapsed `sys:*` id), so the client can re-resolve them per the
@@ -385,7 +386,7 @@ def test_variant9_present_with_multi_expand_and_reconnect_data():
         assert set(sub_states) <= set(states4)
 
 
-def test_community_detection_excludes_opponent_finish_and_start_nodes():
+def test_community_detection_excludes_opponent_finish_and_start_nodes() -> None:
     """C.3/C.4: the opponent never gets a system (never a member, never a hub), and finish/
     start-anchor nodes are global landmarks, never grouped either."""
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
@@ -403,7 +404,7 @@ def test_community_detection_excludes_opponent_finish_and_start_nodes():
     assert any(k[1] == "partner" for k in excluded), "mock bundle has opponent states to exclude"
 
 
-def test_bridge_nodes_are_memberless_and_individually_rendered():
+def test_bridge_nodes_are_memberless_and_individually_rendered() -> None:
     """C (owner whiteboard): a node whose neighbours span >=2 systems is a bridge — pulled out
     of every community, never a member, always in the 'excluded'/individually-rendered bucket."""
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
@@ -420,7 +421,7 @@ def test_bridge_nodes_are_memberless_and_individually_rendered():
     assert bridge_qids <= excluded_qids  # every bridge lands in the individually-rendered bucket
 
 
-def test_index_parallel_links_assigns_par_and_par_count_per_unordered_pair():
+def test_index_parallel_links_assigns_par_and_par_count_per_unordered_pair() -> None:
     """B (owner-reported bug): N links between the SAME two nodes get a stable par/parCount so
     the client can fan them into separate arcs instead of one overlapping line."""
     links = [
@@ -437,7 +438,7 @@ def test_index_parallel_links_assigns_par_and_par_count_per_unordered_pair():
     assert "par" not in ac and "parCount" not in ac  # single link, untouched
 
 
-def test_start_role_node_always_qualifies_as_user_side():
+def test_start_role_node_always_qualifies_as_user_side() -> None:
     """D — the other builder's ``inference_table.json`` now carries ``start neutral``/``start
     top``/``start bottom`` tagged ``role: 'start'``: always the user's, even reached from the
     opponent's own chain, and ``_qid`` never prefixes one ``opp:``."""
@@ -446,7 +447,7 @@ def test_start_role_node_always_qualifies_as_user_side():
     assert _qid("partner", "mount") == "opp:mount"  # untouched for a normal node
 
 
-def test_finish_and_start_anchors_sit_on_the_owner_specified_pentagon():
+def test_finish_and_start_anchors_sit_on_the_owner_specified_pentagon() -> None:
     """Owner re-spec (2026-08-27, third arrangement): the five bolted anchors are the vertices of
     a regular PENTAGON, named vertex by vertex — neutral start at the extreme left, top start
     upper-left, both finishes on the right (yours upper, the opponent's lower), bottom start
@@ -500,7 +501,7 @@ def test_finish_and_start_anchors_sit_on_the_owner_specified_pentagon():
         assert "ring" not in by_id[anchor_id]  # D: no actor ring on an anchor node
 
 
-def test_system_node_has_its_own_distinct_visual_treatment():
+def test_system_node_has_its_own_distinct_visual_treatment() -> None:
     """Owner addendum 2026-08-27, third pass: a collapsed system reads as an aggregate through
     SHAPE, never hue. No fill of its own (falls back to the category colour), and the ring is the
     belt colour — the same blue the user's own nodes and bridges carry, because the owner asked
@@ -530,18 +531,18 @@ def test_system_node_has_its_own_distinct_visual_treatment():
         assert n["ring"] != _START_COLOR     # start anchors keep their own colour AND a diamond
 
 
-def _mk_state(node_key: str) -> dict:
+def _mk_state(node_key: str) -> dict[str, Any]:
     return {"node_key": node_key, "label": node_key, "type": "guard", "actor": "you",
             "count": 1, "inferred": False}
 
 
-def _mk_edge(source: str, target: str, weight: int) -> dict:
+def _mk_edge(source: str, target: str, weight: int) -> dict[str, Any]:
     return {"source": source, "target": target, "action_key": f"{source}>{target}",
             "action_label": f"{source}>{target}", "action_type": "guard", "actor": "you",
             "count": weight, "inferred": False}
 
 
-def test_dominance_rule_members_by_majority_weight_bridges_only_when_split():
+def test_dominance_rule_members_by_majority_weight_bridges_only_when_split() -> None:
     """Owner adendo 2026-08-27 (item 1): replaces the old "neighbours touch >=2 communities"
     rule, which saturated on a small/dense graph. A node whose incident weight is mostly ONE
     community's (dom_x: 5 to its own triangle, 1 to another) is a MEMBER of that community even
@@ -565,7 +566,7 @@ def test_dominance_rule_members_by_majority_weight_bridges_only_when_split():
     assert detected["bridge_strength"]["bridge_y"] == 6  # 2+2+2, honest, unaffected by display cut
 
 
-def test_select_displayed_bridges_keeps_only_the_strongest_top_n():
+def test_select_displayed_bridges_keeps_only_the_strongest_top_n() -> None:
     strength = {"weak": 1, "mid": 3, "strong": 9, "also_mid": 3}
     top2 = _select_displayed_bridges(strength, top_n=2)
     assert top2 == frozenset({"strong", "also_mid"})  # tie mid/also_mid -> smaller qid wins
@@ -573,7 +574,7 @@ def test_select_displayed_bridges_keeps_only_the_strongest_top_n():
     assert all10 == frozenset(strength)  # never more than exist
 
 
-def test_splice_inferred_states_reconnects_single_in_single_out_gap_states():
+def test_splice_inferred_states_reconnects_single_in_single_out_gap_states() -> None:
     states = {("p", "you"): _mk_state("p"), ("gap", "you"): {**_mk_state("gap"), "inferred": True},
               ("q", "you"): _mk_state("q")}
     edges = [_mk_edge("p", "gap", 3), _mk_edge("gap", "q", 2)]
@@ -596,7 +597,7 @@ def test_splice_inferred_states_reconnects_single_in_single_out_gap_states():
     assert len(kept_edges) == 3
 
 
-def test_apply_gate_drops_low_support_edges_and_orphaned_endpoints():
+def test_apply_gate_drops_low_support_edges_and_orphaned_endpoints() -> None:
     states = {("p", "you"): _mk_state("p"), ("q", "you"): _mk_state("q")}
     edges = [_mk_edge("p", "q", 1)]  # single occurrence — below the App's own min_edge_support=2
 
@@ -611,7 +612,7 @@ def test_apply_gate_drops_low_support_edges_and_orphaned_endpoints():
     assert len(g2) == 1 and not g2[0]["inferred"]
 
 
-def test_sweep_gates_covers_every_axis_combination():
+def test_sweep_gates_covers_every_axis_combination() -> None:
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
@@ -625,7 +626,7 @@ def test_sweep_gates_covers_every_axis_combination():
         assert r["nodes"] >= 0 and r["edges"] >= 0 and r["systems"] >= 0 and r["bridges"] >= 0
 
 
-def test_render_all_gating_variant_and_default_policy_wired_into_8_9(tmp_path):
+def test_render_all_gating_variant_and_default_policy_wired_into_8_9(tmp_path: Path) -> None:
     """`render_all`'s variant 10 + `metrics["gating_by_policy"]` expose the same experiment the
     owner asked to SEE, and 8/9 actually run on the gated (not raw) selective graph."""
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
@@ -647,7 +648,7 @@ def test_render_all_gating_variant_and_default_policy_wired_into_8_9(tmp_path):
     assert _GATE_POLICY_DEFAULT in {"all", "no_inferred_edges", "no_inferred", "inferred_min2"}
 
 
-def test_variant9_side_panel_lists_systems_and_bridge_connections(tmp_path):
+def test_variant9_side_panel_lists_systems_and_bridge_connections(tmp_path: Path) -> None:
     """Item 3: the side panel must carry SYSTEMS (name + member count) and, for every DISPLAYED
     bridge, which systems it connects — baked into the embedded SYSTEMS payload as
     ``bridgeConnects`` on the bridge's own node, read straight off the CROSS_LINKS the metrics
@@ -669,7 +670,7 @@ def test_variant9_side_panel_lists_systems_and_bridge_connections(tmp_path):
 
 # ── Frente 2 (11/12) — separate systems view ────────────────────────────────────
 
-def test_opponent_scoped_three_modes():
+def test_opponent_scoped_three_modes() -> None:
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
 
@@ -689,13 +690,13 @@ def test_opponent_scoped_three_modes():
         _opponent_scoped(agg, "bogus")
 
 
-def test_collapse_directed_sparse_dominant_two_way():
+def test_collapse_directed_sparse_dominant_two_way() -> None:
     """Contract test: `_collapse_directed` decides direction via the imported
     `edge_arrow`/its own constants — sparse (below MIN_EDGE_ARROW) stays undirected, a dominant
     direction gets an arrow oriented the majority way, a genuine two-way exchange (minority share
     above TWO_WAY_RATIO) stays undirected even though both sides clear the minimum."""
 
-    def _e(u, v, n):
+    def _e(u: str, v: str, n: int) -> list[dict[str, Any]]:
         return [{"actor": "you", "source": u, "target": v, "count": 1, "inferred": False}] * n
 
     # The aggregate contract only governs links touching a COLLAPSED SYSTEM — that is the one
@@ -738,15 +739,16 @@ def test_collapse_directed_sparse_dominant_two_way():
     assert all(link["parCount"] == 2 for link in links)      # fanned into their own arcs
 
 
-def test_collapse_directed_handover_only_pair_is_dashed():
+def test_collapse_directed_handover_only_pair_is_dashed() -> None:
     place_of = {"a": "A", "b": "B"}
     handovers = [{"from": "a", "to": "b", "count": 5}]
     links = _collapse_directed(place_of, [], handovers)
     assert len(links) == 1 and links[0]["dashed"] is True
 
 
-def test_system_boundary_view_covers_four_destination_kinds_and_ida_e_volta():
-    def _st(node_key, label, type_, actor, count, inferred):
+def test_system_boundary_view_covers_four_destination_kinds_and_ida_e_volta() -> None:
+    def _st(node_key: str, label: str, type_: str, actor: str, count: int,
+            inferred: bool) -> dict[str, Any]:
         return {"node_key": node_key, "label": label, "type": type_, "actor": actor,
                 "count": count, "inferred": inferred}
 
@@ -771,7 +773,7 @@ def test_system_boundary_view_covers_four_destination_kinds_and_ida_e_volta():
         ("start neutral", "you"): _st("start neutral", "Start", "control", "you", 1, True),
     }
 
-    def _e(u, v, actor, w):
+    def _e(u: str, v: str, actor: str, w: int) -> dict[str, Any]:
         return {"source": u, "target": v, "action_key": f"{u}>{v}", "action_label": f"{u}>{v}",
                 "action_type": "guard", "actor": actor, "count": w, "inferred": False}
 
@@ -855,7 +857,7 @@ def test_system_boundary_view_covers_four_destination_kinds_and_ida_e_volta():
     assert "travessia" in boundary_html
 
 
-def test_render_variant11_locked_combo_matches_variant12_default_combo(tmp_path):
+def test_render_variant11_locked_combo_matches_variant12_default_combo(tmp_path: Path) -> None:
     """Frente 2 §2.1: A is B with the controls off, opening on the same combo — the payload must
     be byte-identical whichever wrapper produced it (both call the exact same `_combo_payload`,
     never two code paths). Since 2026-08-27 that combo is chosen ADAPTIVELY from the graph's own
@@ -895,7 +897,7 @@ def test_render_variant11_locked_combo_matches_variant12_default_combo(tmp_path)
         json.dumps(a_payload, sort_keys=True)
 
 
-def test_render_variant12_payload_bytes_tripwire(tmp_path):
+def test_render_variant12_payload_bytes_tripwire(tmp_path: Path) -> None:
     """~20KB/combo x 36 combos is the measured order of magnitude (plan §2.6) — this is a
     tripwire, not a strict contract: it should catch an accidental blow-up (e.g. a combo axis
     duplicated), not a legitimate size change from more source data."""
@@ -907,7 +909,7 @@ def test_render_variant12_payload_bytes_tripwire(tmp_path):
     assert v12["payload_bytes"] < 5_000_000  # generous tripwire ceiling on this mock bundle
 
 
-def test_start_anchor_is_mirrored_for_the_opponent_side():
+def test_start_anchor_is_mirrored_for_the_opponent_side() -> None:
     """Owner 2026-08-27: "top start/bottom is always from the perspective of the user, so an
     opponent passing action should be connected to bottom start". The compiler is actor-agnostic
     and names the anchor from the action's own orientation, so an opponent chain opening on a
@@ -932,7 +934,7 @@ def test_start_anchor_is_mirrored_for_the_opponent_side():
                     e["source"]) in node_ids, e
 
 
-def test_adaptive_gate_only_ever_tightens_as_the_map_grows():
+def test_adaptive_gate_only_ever_tightens_as_the_map_grows() -> None:
     """Owner 2026-08-27: the gate follows how much the map is about to draw. A thin graph shows
     everything (gating it would hide the little there is); a growing one drops one-off generics
     and thins the opponent; a large one also demands an edge recurred. Calibrated on the owner's

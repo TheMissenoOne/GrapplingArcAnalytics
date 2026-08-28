@@ -1,17 +1,20 @@
 """Chain compiler (Phase 1, actions/states migration) — structural, deterministic, zero prob."""
 from __future__ import annotations
 
+from collections.abc import Mapping
+from typing import Any
+
 from analysis.chain_compiler import compile_chain, compile_two_sided
 from analysis.taxonomy_kind import load_inference_table
 
 TABLE = load_inference_table()
 
 
-def _ev(label, type_, actor="a", **kw):
+def _ev(label: str, type_: str, actor: str = "a", **kw: Any) -> dict[str, Any]:
     return {"label": label, "type": type_, "actor": actor, **kw}
 
 
-def test_guard_pull_then_armlock_opens_start_neutral_then_scramble_fallback():
+def test_guard_pull_then_armlock_opens_start_neutral_then_scramble_fallback() -> None:
     """'Guard Pull' is type 'transition' in this corpus (D1 forces transition -> 'action'), NOT
     type 'guard'. Rule 5's opening gap now resolves via `lamas_state` reading 'Guard Pull' as
     Lamas' PGD (guard-pull) — a standing-exchange opening, so the chain opens on 'start neutral'
@@ -38,7 +41,7 @@ def test_guard_pull_then_armlock_opens_start_neutral_then_scramble_fallback():
     assert not chain.dropped
 
 
-def test_chain_opening_on_clinch_label_gets_start_neutral():
+def test_chain_opening_on_clinch_label_gets_start_neutral() -> None:
     """Lamas CDP (clinch/grip-fighting) is label-, not type-, keyed — 'Collar Tie' is type
     'control', same type as an ordinary position, so only `lamas_state` (not the table) can tell
     this opening is a standing exchange."""
@@ -53,7 +56,7 @@ def test_chain_opening_on_clinch_label_gets_start_neutral():
     assert chain.edges[0].action_key == "collar tie"
 
 
-def test_armbar_then_triangle_chains_through_chained_submission():
+def test_armbar_then_triangle_chains_through_chained_submission() -> None:
     """`$start|submission -> start neutral` opens the chain (owner call 2026-08-27, replacing
     a dedicated 'start engaged' node he judged meaningless); this test's own focus is the
     MID-chain submission|submission bridge, unaffected either way."""
@@ -72,7 +75,7 @@ def test_armbar_then_triangle_chains_through_chained_submission():
     assert e1.target_key == "finish"
 
 
-def test_submission_terminal_resolves_to_finish_not_scramble():
+def test_submission_terminal_resolves_to_finish_not_scramble() -> None:
     """D2's declarative row (`submission|$terminal` -> `finish`), owner call 2026-08-27: the
     LAST action of a chain being a landed/attempted submission is a semantically different gap
     than 'no more info' — it should land on the generic 'finish' node, not 'scramble'. A
@@ -91,7 +94,7 @@ def test_submission_terminal_resolves_to_finish_not_scramble():
     assert e1.target_key == "top transition"  # non-submission terminal: also unaffected
 
 
-def test_kguard_then_5050_guard_bridges_with_guard_transition():
+def test_kguard_then_5050_guard_bridges_with_guard_transition() -> None:
     """`orientation_of('K-Guard') == 'bottom'`, so the chain also opens on a PREPENDED 'start
     bottom' (module docstring) — this test's own focus is the MID-chain bridge, unaffected: two
     real guard states still bridge through the real 'guard transition' edge."""
@@ -112,7 +115,7 @@ def test_kguard_then_5050_guard_bridges_with_guard_transition():
     assert edge.source_key == "kguard" and edge.target_key == "5050 guard"
 
 
-def test_mount_then_side_control_bridges_with_control_transition():
+def test_mount_then_side_control_bridges_with_control_transition() -> None:
     """Two real `control` states with no action between them bridge through the new
     `control|control -> control transition` row (2026-08-27), not the bare `transition`
     fallback. `orientation_of('Mount') == 'top'` also prepends 'start top' (module docstring)
@@ -129,7 +132,7 @@ def test_mount_then_side_control_bridges_with_control_transition():
     assert edge.inferred is True
 
 
-def test_mount_then_closed_guard_bridges_with_guard_recovery():
+def test_mount_then_closed_guard_bridges_with_guard_recovery() -> None:
     """`control|guard -> guard recovery` (2026-08-27): control lost, back in someone's guard."""
     chain = compile_chain([
         _ev("Mount", "control"),
@@ -140,7 +143,7 @@ def test_mount_then_closed_guard_bridges_with_guard_recovery():
     assert edge.action_key == "guard recovery"
 
 
-def test_closed_guard_then_mount_bridges_with_guard_exit():
+def test_closed_guard_then_mount_bridges_with_guard_exit() -> None:
     """`guard|control -> guard exit` (2026-08-27): left the guard, into a control position."""
     chain = compile_chain([
         _ev("Closed Guard", "guard"),
@@ -151,7 +154,7 @@ def test_closed_guard_then_mount_bridges_with_guard_exit():
     assert edge.action_key == "guard exit"
 
 
-def test_escape_action_then_submission_action_bridges_with_bottom_transition():
+def test_escape_action_then_submission_action_bridges_with_bottom_transition() -> None:
     """Two adjacent ACTIONS with no state between them: an escape (forced-action type) followed
     by a submission bridges through the new `escape|* -> bottom transition` row, mirroring
     `takedown|* -> top transition`. The invented STATE is inferred; the EDGE reaching it is the
@@ -170,7 +173,7 @@ def test_escape_action_then_submission_action_bridges_with_bottom_transition():
     assert bridge_edge.source_key == "closed guard"
 
 
-def test_chain_opening_on_takedown_gets_start_neutral_initial_state():
+def test_chain_opening_on_takedown_gets_start_neutral_initial_state() -> None:
     """D2's declarative opening row (owner call, 2026-08-27): a chain whose first action is a
     'takedown' resolves rule 5's gap via the `"$start"` sentinel — `"$start|takedown" ->
     "start neutral"` — mirroring `_CHAIN_END`'s own declarative pattern, no code needed for this
@@ -193,7 +196,7 @@ def test_chain_opening_on_takedown_gets_start_neutral_initial_state():
     assert not edge.inferred and not edge.terminal
 
 
-def test_chain_opening_on_submission_resolves_to_start_neutral():
+def test_chain_opening_on_submission_resolves_to_start_neutral() -> None:
     """D2's declarative opening row: a chain whose first action is a 'submission' opens on
     'start neutral'. A dedicated 'start engaged' node was tried and REMOVED — the owner judged
     the concept meaningless, and routing here is the honest alternative: where the athlete was
@@ -209,7 +212,7 @@ def test_chain_opening_on_submission_resolves_to_start_neutral():
     assert chain.states[0].role == "start"
 
 
-def test_chain_opening_on_closed_guard_state_state_is_nascent():
+def test_chain_opening_on_closed_guard_state_state_is_nascent() -> None:
     """The prepend this test used to pin is GONE (owner call 2026-08-27): reaching a
     chain-opening state through an invented action was a claim the log never made. The state
     opens the chain on its own and carries ``nascent`` — see
@@ -220,7 +223,7 @@ def test_chain_opening_on_closed_guard_state_state_is_nascent():
     assert not any(s.role == "start" for s in chain.states)
 
 
-def test_chain_opening_on_mount_state_state_is_nascent():
+def test_chain_opening_on_mount_state_state_is_nascent() -> None:
     """The prepend this test used to pin is GONE (owner call 2026-08-27): reaching a
     chain-opening state through an invented action was a claim the log never made. The state
     opens the chain on its own and carries ``nascent`` — see
@@ -231,7 +234,7 @@ def test_chain_opening_on_mount_state_state_is_nascent():
     assert not any(s.role == "start" for s in chain.states)
 
 
-def test_chain_opening_on_neutral_state_stays_unprepended():
+def test_chain_opening_on_neutral_state_stays_unprepended() -> None:
     """`orientation_of('Electric Chair') == 'neutral'` (ambiguous by design) — no start node is
     invented for a neutral-orientation opening state; the state itself remains the first node,
     exactly as before this change."""
@@ -245,7 +248,7 @@ def test_chain_opening_on_neutral_state_stays_unprepended():
     assert chain.states[0].inferred is False
 
 
-def test_chain_ending_in_submission_is_terminal():
+def test_chain_ending_in_submission_is_terminal() -> None:
     """`orientation_of('Mount') == 'top'`, so this chain also opens on a PREPENDED 'start top'
     (module docstring) — this test's own focus is the TERMINAL end, unaffected."""
     chain = compile_chain([
@@ -265,7 +268,7 @@ def test_chain_ending_in_submission_is_terminal():
     assert edge.source_event_index == 1
 
 
-def test_concept_event_dropped_chain_stays_intact():
+def test_concept_event_dropped_chain_stays_intact() -> None:
     """`orientation_of('Closed Guard') == 'bottom'`, so this chain also opens on a PREPENDED
     'start bottom' (module docstring) — this test's own focus is the dropped concept event,
     unaffected: it stays skipped, and the surviving real states/edges are untouched."""
@@ -286,14 +289,14 @@ def test_concept_event_dropped_chain_stays_intact():
     assert edge.terminal is True
 
 
-def test_compile_two_sided_splits_and_drops_unassigned_with_original_index():
+def test_compile_two_sided_splits_and_drops_unassigned_with_original_index() -> None:
     events = [
         _ev("Closed Guard", "guard", actor="x"),
         _ev("Guard Pass", "pass", actor="y"),
         _ev("Round End", "reset", actor="referee"),
     ]
 
-    def side_of(ev):
+    def side_of(ev: Mapping[str, Any]) -> str | None:
         if ev["actor"] == "x":
             return "a"
         if ev["actor"] == "y":
@@ -321,7 +324,7 @@ def test_compile_two_sided_splits_and_drops_unassigned_with_original_index():
     assert d.dropped[0].index == 2 and d.dropped[0].reason == "no_side"
 
 
-def test_state_after_event_tracks_current_state_incl_terminal_and_dropped():
+def test_state_after_event_tracks_current_state_incl_terminal_and_dropped() -> None:
     """``state_after_event[idx]`` = the node_key live right after processing raw index idx —
     unchanged across a dropped/transparent event, and overwritten to the terminal-inferred
     state once the trailing pending action resolves post-loop (rule 6)."""
@@ -336,14 +339,14 @@ def test_state_after_event_tracks_current_state_incl_terminal_and_dropped():
     assert chain.state_after_event[2] == chain.states[-1].node_key == "finish"
 
 
-def test_compile_two_sided_remaps_state_after_event_to_original_index():
+def test_compile_two_sided_remaps_state_after_event_to_original_index() -> None:
     events = [
         _ev("Closed Guard", "guard", actor="x"),
         _ev("Guard Pass", "pass", actor="y"),
         _ev("Round End", "reset", actor="referee"),
     ]
 
-    def side_of(ev):
+    def side_of(ev: Mapping[str, Any]) -> str | None:
         if ev["actor"] == "x":
             return "a"
         if ev["actor"] == "y":
@@ -357,7 +360,7 @@ def test_compile_two_sided_remaps_state_after_event_to_original_index():
     assert result["dropped"].state_after_event == {}
 
 
-def test_determinism():
+def test_determinism() -> None:
     events = [
         _ev("K-Guard", "guard"),
         _ev("Guard Pull", "transition"),
@@ -370,7 +373,7 @@ def test_determinism():
     assert first == second
 
 
-def test_chain_opening_on_a_state_starts_loose_and_is_marked_nascent():
+def test_chain_opening_on_a_state_starts_loose_and_is_marked_nascent() -> None:
     """Owner call 2026-08-27: "costas não deveria ser presumido como precedido por top start —
     deveria começar solto sem inferência de ação prévia". A start anchor exists to be the missing
     SOURCE of a chain-opening action; a state that opens a chain needs no source, so prepending
@@ -388,7 +391,7 @@ def test_chain_opening_on_a_state_starts_loose_and_is_marked_nascent():
     assert [(e.source_key, e.target_key) for e in chain.edges] == [("back control", "finish")]
 
 
-def test_a_state_reached_by_an_action_is_not_nascent():
+def test_a_state_reached_by_an_action_is_not_nascent() -> None:
     """The flag is about having no predecessor, not about being first in some chain: the opening
     state is nascent, the one an action leads into never is."""
     chain = compile_chain([
@@ -400,7 +403,7 @@ def test_a_state_reached_by_an_action_is_not_nascent():
     assert by_key["finish"].nascent is False
 
 
-def test_only_actions_connect_to_a_start_anchor():
+def test_only_actions_connect_to_a_start_anchor() -> None:
     """A start anchor is only ever reached as an ACTION's inferred source — never as a prepended
     state-to-state hop. Chain opening on an action gets one; chain opening on a state does not."""
     opens_on_action = compile_chain([_ev("Double Leg Takedown", "takedown")],

@@ -8,10 +8,12 @@ on purpose — if the SQL shape moves, this fails and the reviewer has to look a
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 from sqlalchemy import create_engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
 _MIGRATION = (
@@ -141,14 +143,16 @@ _SQLITE_URL = "sqlite:///:memory:"
 
 
 @pytest.fixture()
-def engine():
+def engine() -> Iterator[Engine]:
     from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
 
     import db.models  # noqa: F401 — registers all ORM models with Base.metadata
     from db.base import Base
 
     SQLiteTypeCompiler.visit_JSONB = SQLiteTypeCompiler.visit_JSON  # type: ignore[attr-defined]
-    SQLiteTypeCompiler.visit_UUID = lambda self, type_, **kw: "VARCHAR(36)"  # type: ignore[attr-defined]
+    SQLiteTypeCompiler.visit_UUID = (  # type: ignore[method-assign]
+        lambda self, type_, **kw: "VARCHAR(36)"
+    )
     SQLiteTypeCompiler.visit_ARRAY = lambda self, type_, **kw: "TEXT"  # type: ignore[attr-defined]
 
     eng = create_engine(_SQLITE_URL, connect_args={"check_same_thread": False})
@@ -158,12 +162,12 @@ def engine():
 
 
 @pytest.fixture()
-def session(engine):
+def session(engine: Engine) -> Iterator[Session]:
     with Session(engine) as s:
         yield s
 
 
-def test_class_plan_template_and_instructional_round_trip(session) -> None:
+def test_class_plan_template_and_instructional_round_trip(session: Session) -> None:
     """Shape round-trips through SQLAlchemy — FKs, PK, defaults.
 
     ``focus_node_keys`` is left unset so the INSERT omits it and the column's
