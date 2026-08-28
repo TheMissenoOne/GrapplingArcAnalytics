@@ -21,7 +21,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy.dialects.postgresql import ARRAY, JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 
@@ -330,7 +330,10 @@ class ClassSession(Base):
     """A professor's live class inside a group (alembic 0026). ``join_token`` is what the
     class QR carries — a student who scans it and already belongs to the group gets that
     day's ``user_sessions`` row stamped with this class's id via ``attach_to_class()``. RLS
-    lives in alembic 0026."""
+    lives in alembic 0026.
+
+    ``focus_node_keys``/``plan`` (alembic 0050) are the professor's own written class plan —
+    canonical node keys and free-text roteiro, no student data of any kind."""
 
     __tablename__ = "class_sessions"
 
@@ -345,9 +348,76 @@ class ClassSession(Base):
     starts_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     join_token: Mapped[str | None] = mapped_column(Text, unique=True)
     token_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    focus_node_keys: Mapped[list[str]] = mapped_column(
+        ARRAY(Text), nullable=False, server_default="{}"
+    )
+    plan: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     __table_args__ = (Index("idx_class_sessions_group", "group_id"),)
+
+
+class ClassPlanTemplate(Base):
+    """A reusable class theme/focus, scoped to one academy (alembic 0050).
+
+    Readable by anyone in the group (a student can see what's coming); written only by the
+    group's owner/professor, same split every group-scoped table has used since 0026. No
+    student data — this is the professor's own authored content."""
+
+    __tablename__ = "class_plan_templates"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    group_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("groups.id", ondelete="CASCADE"), nullable=False
+    )
+    created_by: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    focus_node_keys: Mapped[list[str]] = mapped_column(
+        ARRAY(Text), nullable=False, server_default="{}"
+    )
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (Index("idx_class_plan_templates_group", "group_id"),)
+
+
+class Instructional(Base):
+    """A professor's authored teaching material for the whole academy (alembic 0050) — a
+    video (bucket path in ``instructional-media``, alembic 0050) or an external link, plus
+    a focus and a sort order for a syllabus-style list.
+
+    Read policy is ``is_group_member``: a student in the academy is exactly who this content
+    is for (the opposite direction from ``group_member_sessions``, which flows student to
+    professor). Write is owner/professor only. No student data of any kind."""
+
+    __tablename__ = "instructionals"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    group_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("groups.id", ondelete="CASCADE"), nullable=False
+    )
+    created_by: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    focus_node_keys: Mapped[list[str]] = mapped_column(
+        ARRAY(Text), nullable=False, server_default="{}"
+    )
+    video_path: Mapped[str | None] = mapped_column(Text)
+    external_url: Mapped[str | None] = mapped_column(Text)
+    sort_order: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (Index("idx_instructionals_group", "group_id"),)
 
 
 class FrameAnnotation(Base):

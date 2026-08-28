@@ -21,6 +21,7 @@ def session():
 
     SQLiteTypeCompiler.visit_JSONB = SQLiteTypeCompiler.visit_JSON  # type: ignore[attr-defined]
     SQLiteTypeCompiler.visit_UUID = lambda self, type_, **kw: "VARCHAR(36)"  # type: ignore[attr-defined]
+    SQLiteTypeCompiler.visit_ARRAY = lambda self, type_, **kw: "TEXT"  # type: ignore[attr-defined]
 
     engine = create_engine(_SQLITE_URL, connect_args={"check_same_thread": False})
     Base.metadata.create_all(engine, checkfirst=True)

@@ -29,13 +29,22 @@ import { deleteAccount, type DeletionEffects, type OwnedFile } from './deletion.
  * Every private bucket, not just the one this function was written for.
  *
  * `user-media` (alembic 0042) exists because `session-videos` carries a professor read policy
- * that must not reach a study attachment. Two buckets means the sweep below has to visit both:
- * a bucket the deletion path does not know about is files left on the server under a response
- * that says the account is gone.
+ * that must not reach a study attachment. `instructional-media` (alembic 0050) is a third:
+ * professor-authored teaching material for a whole group. Three buckets means the sweep below
+ * has to visit all three: a bucket the deletion path does not know about is files left on the
+ * server under a response that says the account is gone.
  *
  * Add a bucket to the schema, add it here in the same change.
  */
-const PRIVATE_BUCKETS = ['session-videos', 'user-media'];
+const PRIVATE_BUCKETS = ['session-videos', 'user-media', 'instructional-media'];
+
+/**
+ * `instructional-media` objects live under `{groupId}/...`, not `{ownerId}/...` — the whole
+ * group reads them (`is_group_member`), so the path can't be keyed by one person. A professor
+ * who deletes their account still needs those objects swept, so for this bucket the "owner
+ * prefix" to walk is each group THEY OWN, not their own uid.
+ */
+const GROUP_KEYED_BUCKETS = new Set(['instructional-media']);
 const PAGE = 100;
 
 const ALLOWED_ORIGINS = [
@@ -93,10 +102,18 @@ async function listOwnedInBucket(
   return paths;
 }
 
-/** The same sweep across every private bucket. */
+/** The same sweep across every private bucket, group-keyed buckets walked one group at a time. */
 async function listOwnedFiles(client: SupabaseClient, ownerId: string): Promise<OwnedFile[]> {
   const found: OwnedFile[] = [];
   for (const bucket of PRIVATE_BUCKETS) {
+    if (GROUP_KEYED_BUCKETS.has(bucket)) {
+      const { data: groups, error } = await client.from('groups').select('id').eq('owner_id', ownerId);
+      if (error) throw new Error(`group lookup failed for ${bucket}: ${error.message}`);
+      for (const group of groups ?? []) {
+        found.push(...(await listOwnedInBucket(client, bucket, group.id)));
+      }
+      continue;
+    }
     found.push(...(await listOwnedInBucket(client, bucket, ownerId)));
   }
   return found;

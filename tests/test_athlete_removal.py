@@ -48,6 +48,7 @@ def engine() -> Iterator[Engine]:
     SQLiteTypeCompiler.visit_UUID = (  # type: ignore[method-assign]
         lambda self, type_, **kw: "VARCHAR(36)"
     )
+    SQLiteTypeCompiler.visit_ARRAY = lambda self, type_, **kw: "TEXT"  # type: ignore[attr-defined]
 
     eng = create_engine(_SQLITE_URL, connect_args={"check_same_thread": False})
     Base.metadata.create_all(eng, checkfirst=True)
