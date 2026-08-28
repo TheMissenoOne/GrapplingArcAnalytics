@@ -202,6 +202,9 @@ def _is_shared(node_key: str) -> bool:
     return bool(entry.get("shared")) if isinstance(entry, dict) else False
 
 
+# Anchors are the map's frame, so their size is FIXED (owner 2026-08-27) — deriving it from
+# usage count made the landmark shrink or grow between renders and between gate combos.
+_ANCHOR_SIZE = 3
 _START_LABELS = {"start top": "Início por Cima", "start bottom": "Início por Baixo",
                   "start neutral": "Início Neutro"}
 
@@ -267,6 +270,7 @@ def _apply_start_style(node: dict[str, Any], node_key: str, *, icon: bool = Fals
     if _is_start(node_key):
         node["color"] = _START_COLOR
         node["shape"] = "diamond"  # owner 2026-08-27 — shape, not just hue, marks where a chain opens
+        node["size"] = _ANCHOR_SIZE  # a landmark's size can't wobble with how often it was hit
         node.pop("ring", None)
         if icon:
             node["icon"] = _START_ICON
@@ -2788,7 +2792,11 @@ def _patch_graph_js(js_text: str) -> str:
             "          const ddx = l.t.x - l.s.x, ddy = l.t.y - l.s.y;\n"
             "          const dd = Math.sqrt(ddx * ddx + ddy * ddy) || 1;\n"
             "          const opx = -ddy / dd, opy = ddx / dd;\n"
-            "          const off = (parI - (parN - 1) / 2) * 24;\n"
+            "          // the fan's step scales with the edge's own LENGTH: a fixed offset is a wide\n"
+            "          // fan on a short edge and an invisible one on a long edge, which is exactly\n"
+            "          // how several actions between two distant states collapsed into one stroke.\n"
+            "          const step = Math.max(30, Math.min(dd * 0.13, 120));\n"
+            "          const off = (parI - (parN - 1) / 2) * step;\n"
             "          cpx += opx * off; cpy += opy * off;\n"
             "        }\n"
             "        ctx.strokeStyle = col;\n"
