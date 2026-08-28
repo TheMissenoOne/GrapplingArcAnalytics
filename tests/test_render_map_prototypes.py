@@ -278,7 +278,14 @@ def test_variant8_embeds_multiple_systems_deterministically():
         assert s["actor"] in ("you", "partner")
 
 
-def test_edges_carry_label_iff_not_inferred_handovers_never_labelled():
+def test_every_action_edge_is_labelled_generics_yield_handovers_never_labelled():
+    """Inferred edges used to be silent, because the only generic action was the meaningless
+    bare "Transição" and labelling it was noise. Once every frequent pair got an honest name
+    (control transition, guard recovery, guard exit, defensive retreat...) the silence started
+    HIDING real information, so every action edge is labelled now — generics carry ``inf`` and
+    yield to real actions in the client's label-collision pass instead of being suppressed here.
+    Handovers stay unlabelled: the dashed grey stroke already says 'the exchange changed hands'
+    and there is no action to name."""
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
     gv2, edges2 = _own_graphview(agg)
@@ -286,10 +293,8 @@ def test_edges_carry_label_iff_not_inferred_handovers_never_labelled():
     action_links = [link for link in gv2["links"]]
     assert len(action_links) == len(edges2)
     for link, edge in zip(action_links, edges2):
-        if edge["inferred"]:
-            assert "label" not in link, edge
-        else:
-            assert link.get("label") == edge["action_label"], edge
+        assert link.get("label") == edge["action_label"], edge
+        assert link.get("inf", False) is bool(edge["inferred"]), edge
 
     # handovers (variant 3+) are never labelled, dashed only
     _, edges3, handovers3 = _complete_two_sided(agg)
@@ -491,10 +496,13 @@ def test_finish_and_start_anchors_sit_on_the_owner_specified_cross():
 
 
 def test_system_node_has_its_own_distinct_visual_treatment():
-    """Owner addendum 2026-08-27, second pass: a collapsed system must look like an aggregate,
-    but the distinction is the RING alone now (double stroke, drawn client-side off `system:
-    True`) — no violet fill of its own any more, so it falls back to the same category colour an
-    ordinary node of that `cat` would use, and doesn't steal attention by colour."""
+    """Owner addendum 2026-08-27, third pass: a collapsed system reads as an aggregate through
+    SHAPE, never hue. No fill of its own (falls back to the category colour), and the ring is the
+    belt colour — the same blue the user's own nodes and bridges carry, because the owner asked
+    for the violet to go. The double stroke (drawn client-side off `system: True`) is the whole
+    mark. Sharing the belt colour with bridges is therefore INTENDED, not a collision: what
+    separates them is the ring and the `bridge`/`system` flags, and the start anchors are the one
+    element that keeps a colour of its own — plus a diamond silhouette."""
     bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
@@ -513,7 +521,8 @@ def test_system_node_has_its_own_distinct_visual_treatment():
         assert n["ring"] == _SYSTEM_COLOR
         assert n.get("system") is True
         assert " · " in n["label"]  # member count baked into the label
-        assert n["ring"] != _BRIDGE_COLOR != _START_COLOR
+        assert n["ring"] == _BRIDGE_COLOR  # both belt colour by design; the ring is the mark
+        assert n["ring"] != _START_COLOR     # start anchors keep their own colour AND a diamond
 
 
 def _mk_state(node_key: str) -> dict:

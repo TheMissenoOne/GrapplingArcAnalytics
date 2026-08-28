@@ -89,6 +89,7 @@ from typing import Any
 import networkx as nx
 
 from analysis.chain_compiler import ChainEdge, ChainState, CompiledChain, compile_two_sided
+from analysis.constellations.detect import detect as constellation_detect
 from analysis.names import _normalize_name, canonicalize
 from analysis.network_metrics import edge_arrow
 from analysis.taxonomy_kind import load_inference_table, orientation_of, resolve_library_entry
@@ -229,6 +230,7 @@ def _apply_start_style(node: dict[str, Any], node_key: str, *, icon: bool = Fals
     letters, not emoji)."""
     if _is_start(node_key):
         node["color"] = _START_COLOR
+        node["shape"] = "diamond"  # owner 2026-08-27 — shape, not just hue, marks where a chain opens
         node.pop("ring", None)
         if icon:
             node["icon"] = _START_ICON
@@ -278,9 +280,11 @@ def _apply_finish_style(node: dict[str, Any], node_key: str, actor: str, *, icon
             node["icon"] = _FINISH_ICON
 
 
-# Neutral — same semantic as graph.js's own FIG.x (contested/handover), reused here for the
-# same "neither actor, structural" meaning (C, owner whiteboard 2026-08-27).
-_BRIDGE_COLOR = "#8a8f98"
+# Belt colour — the same blue the user's own nodes and edges carry (``_FIG_HEX["a"]``). It was
+# neutral grey until the owner asked for the belt colour (2026-08-27): a bridge is still HIS
+# node, so it should read as his game, not as a third party. Structure is carried by the panel
+# listing and by label priority instead of by hue.
+_BRIDGE_COLOR = _FIG_HEX["a"]
 
 
 def _apply_bridge_style(node: dict[str, Any], *, is_bridge: bool) -> None:
@@ -675,8 +679,9 @@ def _own_graphview(agg: Aggregate) -> tuple[dict[str, Any], list[dict[str, Any]]
     links = []
     for v in edges:
         link = {"from": v["source"], "to": v["target"], "weight": _clamp3(v["count"]), "arrow": True}
-        if not v["inferred"]:
-            link["label"] = v["action_label"]
+        link["label"] = v["action_label"]
+        if v["inferred"]:
+            link["inf"] = True  # named generic: still labelled, but yields on label collision
         links.append(link)
     _index_parallel_links(links)
     return {"nodes": nodes, "links": links}, edges
@@ -720,8 +725,9 @@ def _two_sided_graphview(states: dict, edges: list, handovers: list[dict[str, An
     for v in edges:
         link = {"from": _qid(v["actor"], v["source"]), "to": _qid(v["actor"], v["target"]),
                 "weight": _clamp3(v["count"]), "arrow": True, "fighter": _ACTOR_SIDE[v["actor"]]}
-        if not v["inferred"]:
-            link["label"] = v["action_label"]
+        link["label"] = v["action_label"]
+        if v["inferred"]:
+            link["inf"] = True  # named generic: still labelled, but yields on label collision
         links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
@@ -831,8 +837,9 @@ def _hubs_graphview(states: dict, edges: list, handovers: list[dict[str, Any]]) 
         link = {"from": _qid(e["actor"], e["source"]), "to": _qid(e["actor"], e["target"]),
                 "weight": _clamp3(e["count"]), "arrow": True,
                 "fighter": _TYPE_BUCKET.get(e["action_type"], "x")}
-        if not e["inferred"]:
-            link["label"] = e["action_label"]
+        link["label"] = e["action_label"]
+        if e["inferred"]:
+            link["inf"] = True  # named generic: still labelled, but yields on label collision
         links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
@@ -900,8 +907,9 @@ def _icons_graphview(states: dict, edges: list, handovers: list[dict[str, Any]])
     for e in edges:
         link = {"from": _qid(e["actor"], e["source"]), "to": _qid(e["actor"], e["target"]),
                 "weight": _clamp3(e["count"]), "arrow": True, "fighter": _ACTOR_SIDE[e["actor"]]}
-        if not e["inferred"]:
-            link["label"] = e["action_label"]
+        link["label"] = e["action_label"]
+        if e["inferred"]:
+            link["inf"] = True  # named generic: still labelled, but yields on label collision
         links.append(link)
     links += [{"from": h["from"], "to": h["to"], "weight": _clamp3(h["count"]),
                "arrow": True, "dashed": True, "fighter": "x"} for h in handovers]
@@ -1030,10 +1038,29 @@ def _detect_systems(states: dict, edges: list[dict[str, Any]],
     for u, v in sorted(weights):
         g.add_edge(u, v, weight=weights[(u, v)])
 
+    # App parity (owner call 2026-08-27): the partition comes from the SAME detector the App
+    # runs on the device — `analysis.constellations.detect`, of which the App's
+    # `src/services/constellations/detect.ts` is a line-by-line port (Louvain, resolution 1.0,
+    # seeded, plus the ADR-07 split of any internally disconnected community). It was greedy
+    # modularity here, which is a different algorithm and could hand him systems his own App
+    # would never show. Membership is topology only — no rating argument exists on that
+    # signature and none should ever be added. The dominance pass below still runs on top: it
+    # is what extracts BRIDGES, a concept the App's pure partition has no room for.
+    dg: nx.DiGraph = nx.DiGraph()
+    dg.add_nodes_from(sorted(g.nodes))
+    directed: dict[tuple[str, str], int] = {}
+    for e in edges:
+        u, v = _qid(e["actor"], e["source"]), _qid(e["actor"], e["target"])
+        if u == v or u not in g or v not in g:
+            continue
+        directed[(u, v)] = directed.get((u, v), 0) + e["count"]
+    for u, v in sorted(directed):
+        dg.add_edge(u, v, weight=directed[(u, v)])
+
     if g.number_of_edges() == 0:
         comms = [[n] for n in sorted(g.nodes)]
     else:
-        comms = [sorted(c) for c in nx.community.greedy_modularity_communities(g, weight="weight")]
+        comms = [sorted(c.members) for c in constellation_detect(dg).constellations]
     comms = sorted(comms, key=lambda c: (-len(c), c[0]))
 
     comm_of: dict[str, int] = {}
@@ -1135,19 +1162,26 @@ def _cross_member_links(system_of: dict[str, str], edges: list[dict[str, Any]],
         su, sv = system_of.get(u), system_of.get(v)
         if su is None or sv is None or su == sv:
             continue
-        row = agg.setdefault((u, v), {"count": 0, "handover_only": True, "from_sys": su, "to_sys": sv})
+        row = agg.setdefault((u, v), {"count": 0, "handover_only": True, "from_sys": su,
+                                      "to_sys": sv, "actions": {}})
         row["count"] += e["count"]
         row["handover_only"] = False
+        # the ACTION that crosses, not just that something did — the frontier stub labels itself
+        # with it, so "where does this system go" also answers "by doing what".
+        row["actions"][e["action_label"]] = row["actions"].get(e["action_label"], 0) + e["count"]
     for h in handovers:
         u, v = h["from"], h["to"]
         su, sv = system_of.get(u), system_of.get(v)
         if su is None or sv is None or su == sv:
             continue
-        row = agg.setdefault((u, v), {"count": 0, "handover_only": True, "from_sys": su, "to_sys": sv})
+        row = agg.setdefault((u, v), {"count": 0, "handover_only": True, "from_sys": su,
+                                      "to_sys": sv, "actions": {}})
         row["count"] += h["count"]
     return [
         {"from": u, "to": v, "count": row["count"], "dashed": row["handover_only"],
-         "fromSys": row["from_sys"], "toSys": row["to_sys"]}
+         "fromSys": row["from_sys"], "toSys": row["to_sys"],
+         "action_label": (sorted(row["actions"].items(), key=lambda kv: (-kv[1], kv[0]))[0][0]
+                          if row["actions"] else "")}
         for (u, v), row in sorted(agg.items())
     ]
 
@@ -1179,7 +1213,7 @@ def _place_of(system_of: dict[str, str], excluded: dict) -> dict[str, str]:
 
 # Violet — a collapsed system is neither an actor state (blue/orange), finish (yellow), a
 # start-anchor (teal) nor a bridge (grey): its own colour so it never reads as a normal node.
-_SYSTEM_COLOR = "#a78bfa"
+_SYSTEM_COLOR = _FIG_HEX["a"]  # owner 2026-08-27: belt colour, not violet — the double ring is the mark
 
 # Pink — 11/12's own boundary marker (a system MEMBER with >=1 crossing link), distinct from
 # every other ring colour in this module (system violet, finish/actor blue-orange, bridge grey,
@@ -1429,8 +1463,13 @@ def _system_boundary_view(
             out_count[member_qid] = out_count.get(member_qid, 0) + 1
         else:
             in_count[member_qid] = in_count.get(member_qid, 0) + 1
-        row = stub_links.setdefault((member_qid, dest_place, member_is_source), {"count": 0})
+        row = stub_links.setdefault((member_qid, dest_place, member_is_source),
+                                    {"count": 0, "actions": {}})
         row["count"] += c["count"]
+        # keep the action that carries the crossing — a frontier stub whose label only said
+        # "there is a way out" would answer half the owner's question ("para onde o sistema vai").
+        if c.get("action_label"):
+            row["actions"][c["action_label"]] = row["actions"].get(c["action_label"], 0) + c["count"]
 
     for node in gv["nodes"]:
         o, i = out_count.get(node["id"], 0), in_count.get(node["id"], 0)
@@ -1443,8 +1482,10 @@ def _system_boundary_view(
         if dest_place not in stub_nodes:
             stub_nodes[dest_place] = _stub_node(dest_place, systems_by_id, excluded_by_qid, bridge_qids)
         src, tgt = (member_qid, dest_place) if member_is_source else (dest_place, member_qid)
+        top = sorted(row["actions"].items(), key=lambda kv: (-kv[1], kv[0]))
+        label = f"{top[0][0]} ×{row['count']}" if top else f"×{row['count']}"
         gv["links"].append({"from": src, "to": tgt, "weight": _clamp3(row["count"]),
-                             "arrow": True, "dash": [2, 3]})
+                             "arrow": True, "dash": [2, 3], "label": label, "inf": True})
     gv["nodes"] = gv["nodes"] + sorted(stub_nodes.values(), key=lambda n: n["id"])
     _index_parallel_links(gv["links"])
 
@@ -2136,9 +2177,11 @@ h1{font-size:15px;margin:0 0 4px}.muted{color:var(--ink2);font-size:12px;margin-
 <div id="canvas"><canvas id="cv"></canvas></div>
 <div id="side">
 <h1 id="sideTitle">__TITLE__</h1><div class="muted" id="sideSubtitle"></div>
-<div class="legend">Navegue pelas pills, clicando num nó de sistema (violeta), ou num mini-nó
+<div class="legend">Navegue pelas pills, clicando num nó de sistema (anel duplo), ou num mini-nó
 pontilhado (stub — um por destino, não por travessia); os três controles escrevem o mesmo estado.
-Anel rosa = nó de fronteira, com <code>[→saídas ←entradas]</code> no rótulo. Sólido = ação
+Losango = âncora de início; anel duplo = sistema colapsado; anel rosa = nó de fronteira, com
+<code>[→saídas ←entradas]</code> no rótulo. Cor da faixa (azul) = você, incluindo as pontes;
+laranja = oponente; amarelo = finalização. Sólido = ação
 observada/inferida; tracejado longo cinza <code>[5,5]</code> = handover; pontilhado curto
 <code>[2,3]</code> terminando num mini-nó = stub de fronteira. Seta: SEMPRE em ação/handover/stub
 (estrutural); só no nível agregado (sistema↔sistema/ponte/âncora) a seta vem de
@@ -2423,12 +2466,37 @@ def _patch_graph_js(js_text: str) -> str:
     than a loud failure."""
     patches = [
         (
+            "  function mount(canvas, opts) {\n    const ctx = canvas.getContext('2d');",
+            "  function mount(canvas, opts) {\n    const ctx = canvas.getContext('2d');\n"
+            "    // map-prototype patch: node silhouette — a start anchor is a DIAMOND (owner\n"
+            "    // 2026-08-27), everything else stays a circle. One helper, used by every layer\n"
+            "    // of the node draw (glow, dark core, inner fill, ring) so the shape is coherent.\n"
+            "    function gaNodePath(c, n, rad) {\n"
+            "      c.beginPath();\n"
+            "      if (n.shape === 'diamond') {\n"
+            "        const d = rad * 1.25;  // equal-area-ish: a diamond looks smaller than its circle\n"
+            "        c.moveTo(n.x, n.y - d); c.lineTo(n.x + d, n.y);\n"
+            "        c.lineTo(n.x, n.y + d); c.lineTo(n.x - d, n.y); c.closePath();\n"
+            "      } else {\n"
+            "        c.arc(n.x, n.y, rad, 0, Math.PI * 2);\n"
+            "      }\n"
+            "    }",
+        ),
+        (
             "        const mapLabel = !useCam || cam.k >= 1 || (n.size || 1) >= 2 || inFocus;",
             "        const mapLabel = opts.forceLabels || !useCam || cam.k >= 1 || (n.size || 1) >= 2 || inFocus;  // map-prototype patch: force-visible labels\n",
         ),
         (
             "      r: 5 + (n.size || 1) * 4,",
             "      r: 4 + (n.size || 1) * 3.2,  // map-prototype patch: smaller radius, more room to breathe (adendo 2026-08-27)",
+        ),
+        (
+            "        ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill();",
+            "        gaNodePath(ctx, n, r); ctx.fill();  // map-prototype patch: diamond-aware glow",
+        ),
+        (
+            "        ctx.arc(n.x, n.y, Math.max(1.5, r - 2.6), 0, Math.PI * 2); ctx.fill();",
+            "        gaNodePath(ctx, n, Math.max(1.5, r - 2.6)); ctx.fill();  // map-prototype patch: diamond-aware core",
         ),
         (
             "        ctx.shadowBlur = 0;",
@@ -2438,11 +2506,11 @@ def _patch_graph_js(js_text: str) -> str:
             "          ctx.globalAlpha = dim ? 0.18 : 1;\n"
             "          ctx.lineWidth = 2.5;\n"
             "          ctx.strokeStyle = n.ring;\n"
-            "          ctx.beginPath(); ctx.arc(n.x, n.y, r + 3, 0, Math.PI * 2); ctx.stroke();\n"
+            "          gaNodePath(ctx, n, r + 3); ctx.stroke();\n"
             "          if (n.system) {  // map-prototype patch: system node — TRUE double ring (owner\n"
             "                          // correction: no fill colour of its own any more, ring is the\n"
             "                          // only distinguishing mark, one ring alone reads too thin)\n"
-            "            ctx.beginPath(); ctx.arc(n.x, n.y, r + 7, 0, Math.PI * 2); ctx.stroke();\n"
+            "            gaNodePath(ctx, n, r + 7); ctx.stroke();\n"
             "          }\n"
             "          ctx.restore();\n"
             "        }",
@@ -2450,8 +2518,8 @@ def _patch_graph_js(js_text: str) -> str:
         (
             "        ctx.beginPath(); ctx.fillStyle = col;\n"
             "        ctx.arc(n.x, n.y, Math.max(1, r - 4.5), 0, Math.PI * 2); ctx.fill();",
-            "        ctx.beginPath(); ctx.fillStyle = col;\n"
-            "        ctx.arc(n.x, n.y, Math.max(1, r - 4.5), 0, Math.PI * 2); ctx.fill();\n"
+            "        ctx.fillStyle = col;\n"
+            "        gaNodePath(ctx, n, Math.max(1, r - 4.5)); ctx.fill();  // map-prototype patch: diamond-aware fill\n"
             "        if (n.icon) {  // map-prototype patch: category/finish glyph — bold LETTER, not\n"
             "                       // emoji (A.4: colour-emoji font isn't guaranteed on every viewer,\n"
             "                       // and reads worse than a letter at the common size-1 node radius)\n"
@@ -2668,7 +2736,7 @@ def _patch_graph_js(js_text: str) -> str:
             "            text: l.label, x: mx, y: my,\n"
             "            font: `${useCam ? 11 / cam.k : 11}px 'Spline Sans Mono', monospace`,\n"
             "            color: col, alpha: hov ? (active ? 0.9 : 0.08) : 0.75,\n"
-            "            kind: 'edge', priority: l.weight || 1,\n"
+            "            kind: 'edge', priority: (l.weight || 1) - (l.inf ? 0.5 : 0),  // named generics yield to real actions\n"
             "          });\n"
             "        }\n"
             "      }\n"
