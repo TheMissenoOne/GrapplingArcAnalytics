@@ -22,6 +22,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from analysis.gendered_text import Gender, pick
+
 Section = tuple[str, list[str]]
 
 LANGS = ("en", "pt")
@@ -143,6 +145,7 @@ def _progression_section(p: dict[str, Any], lang: str = "en") -> Section | None:
     if not prog:
         return None
     name = p["fighter"]["name"]
+    gender: Gender = p["fighter"].get("gender")
     per_action = prog.get("per_action")
     off_p = (prog.get("off_share") or {}).get("p")
     def_p = (prog.get("def_share") or {}).get("p")
@@ -153,8 +156,14 @@ def _progression_section(p: dict[str, Any], lang: str = "en") -> Section | None:
         ("a blended read of how much initiative each action carries in this corpus",
          "uma leitura mista de quanta iniciativa cada ação carrega neste acervo")
         if prog.get("_mixed_source") else
-        ("a read of how close each action leaves him to eventually finishing",
-         "uma leitura de quão perto cada ação o deixa de uma eventual finalização")
+        (pick(gender,
+              m="a read of how close each action leaves him to eventually finishing",
+              f="a read of how close each action leaves her to eventually finishing",
+              neutral="a read of how close each action leaves them to eventually finishing"),
+         pick(gender,
+              m="uma leitura de quão perto cada ação o deixa de uma eventual finalização",
+              f="uma leitura de quão perto cada ação a deixa de uma eventual finalização",
+              neutral="uma leitura de quão perto cada ação está de uma eventual finalização"))
     )
     if per_action > 0.005:
         dir_en, dir_pt = "climbed, on balance", "subiu, no saldo"
@@ -162,24 +171,28 @@ def _progression_section(p: dict[str, Any], lang: str = "en") -> Section | None:
         dir_en, dir_pt = "slipped, on balance", "recuou, no saldo"
     else:
         dir_en, dir_pt = "held roughly flat", "ficou praticamente estável"
+    possessive_en = pick(gender, m="his", f="her", neutral="their")
+    possessive_pt = pick(gender, m="dele", f="dela", neutral=f"de {name}")
     sentences = [_t(
         lang,
-        f"Across the sequences this corpus has for {name} — {basis_en} — his standing "
-        f"{dir_en} over the course of his logged fights.",
-        f"Nas sequências que este acervo tem de {name} — {basis_pt} — a posição dele "
-        f"{dir_pt} ao longo das lutas registradas.")]
+        f"Across the sequences this corpus has for {name} — {basis_en} — {possessive_en} "
+        f"standing {dir_en} over the course of {possessive_en} logged fights.",
+        f"Nas sequências que este acervo tem de {name} — {basis_pt} — a posição "
+        f"{possessive_pt} {dir_pt} ao longo das lutas registradas.")]
 
     dominant = "off" if (off_p or 0) >= (def_p or 0) else "def"
     mean_len = prog.get(f"mean_{dominant}_cycle_len")
     ground_en = "offensive" if dominant == "off" else "defensive"
     ground_pt = "ofensivo" if dominant == "off" else "defensivo"
     len_r = round(mean_len) if mean_len else None
+    holds_en = pick(gender, m="He holds", f="She holds", neutral="They hold")
+    holds_pt = pick(gender, m="Ele fica", f="Ela fica", neutral=f"{name} fica")
     sentences.append(_t(
         lang,
-        f"He holds {ground_en} ground more often than not"
+        f"{holds_en} {ground_en} ground more often than not"
         + (f", cycling back to it roughly every {len_r} action{'s' if len_r != 1 else ''}."
            if len_r else "."),
-        f"Ele fica mais tempo em terreno {ground_pt}"
+        f"{holds_pt} mais tempo em terreno {ground_pt}"
         + (f", voltando a ele a cada {len_r} {'ação' if len_r == 1 else 'ações'} em média."
            if len_r else ".")))
 
@@ -375,6 +388,7 @@ def match_narrative(bd: dict[str, Any], lang: str = "en") -> list[Section]:
 def profile_narrative(p: dict[str, Any], lang: str = "en") -> list[Section]:
     f = p["fighter"]
     name = f["name"]
+    gender: Gender = f.get("gender")
     sections: list[Section] = []
 
     # Archetype + style mix.
@@ -392,14 +406,20 @@ def profile_narrative(p: dict[str, Any], lang: str = "en") -> list[Section]:
     else:
         opener = _t(lang, f"{name}'s game, mapped.", f"O jogo de {name}, mapeado.")
     if bucket_str:
+        mat_time_en = pick(gender, m="His mat time", f="Her mat time", neutral="Mat time")
+        mat_time_pt = pick(gender, m="O tempo de tatame dele",
+                            f="O tempo de tatame dela", neutral="O tempo de tatame")
         opener += _t(lang,
-                     f" His mat time skews {bucket_str}.",
-                     f" O tempo de tatame dele pende para {bucket_str}.")
+                     f" {mat_time_en} skews {bucket_str}.",
+                     f" {mat_time_pt} pende para {bucket_str}.")
     rank, pctile = f.get("elo_rank"), f.get("elo_percentile")
     if rank:
+        sits_en = pick(gender, m="He sits", f="She sits", neutral="They sit")
+        division_en = pick(gender, m="his division", f="her division", neutral="the division")
+        subject_pt = pick(gender, m="Ele", f="Ela", neutral=name)
         opener += _t(lang,
-                     f" He sits #{rank} by Grappling ELO in his division",
-                     f" Ele é o #{rank} em Grappling ELO na divisão dele")
+                     f" {sits_en} #{rank} by Grappling ELO in {division_en}",
+                     f" {subject_pt} é o #{rank} em Grappling ELO na divisão")
         opener += (_t(lang, f" (top {pctile}% overall).", f" (top {pctile}% no geral).")
                    if pctile else ".")
     sections.append((_t(lang, "The system", "O sistema"), [opener]))
@@ -411,9 +431,14 @@ def profile_narrative(p: dict[str, Any], lang: str = "en") -> list[Section]:
         # ponytail: names only, no per-entry percentage — a %-of-8-events "conversion" claim
         # from a thin sample reads as more precise than the data supports (owner distrust).
         entries = ", ".join(s["label"] for s in sig)
+        entries_head_en = pick(gender, m="His most-traveled entries",
+                                f="Her most-traveled entries", neutral="Most-traveled entries")
+        entries_head_pt = pick(gender, m="As entradas mais percorridas dele",
+                                f="As entradas mais percorridas dela",
+                                neutral="As entradas mais percorridas")
         line = _t(lang,
-                  f"His most-traveled entries: {entries}.",
-                  f"As entradas mais percorridas dele: {entries}.")
+                  f"{entries_head_en}: {entries}.",
+                  f"{entries_head_pt}: {entries}.")
         if trans:
             spine = "; ".join(f"{t['from']} → {t['to']}" for t in trans)
             line += _t(lang,
@@ -426,9 +451,12 @@ def profile_narrative(p: dict[str, Any], lang: str = "en") -> list[Section]:
     fam = fin.get("submission_family", {})
     fin_bits = []
     if fin.get("finish_rate"):
+        finishes_en = pick(gender, m="He finishes", f="She finishes", neutral="Finishes")
+        wins_en = pick(gender, m="his wins", f="her wins", neutral="the wins")
+        subject_pt = pick(gender, m="Ele", f="Ela", neutral=name)
         fin_bits.append(_t(lang,
-                           f"He finishes {_pct(fin['finish_rate'])} of his wins",
-                           f"Ele finaliza {_pct(fin['finish_rate'])} das vitórias"))
+                           f"{finishes_en} {_pct(fin['finish_rate'])} of {wins_en}",
+                           f"{subject_pt} finaliza {_pct(fin['finish_rate'])} das vitórias"))
     if fam.get("dominant"):
         fin_bits.append(_t(lang,
                            f"mostly via {fam['dominant'].lower()}",

@@ -254,6 +254,9 @@ def build_style_profile(athlete: Athlete, session: Session) -> dict[str, Any]:
             "name": athlete.name, "slug": _slug(athlete.name),
             "nickname": athlete.nickname, "team": athlete.team,
             "weight_class": athlete.weight_class,
+            # 'f' | 'm' | None — feeds gendered_text.pick() in export/narrative.py + site_data.py.
+            # None (no evidence) must never make the prose read masculine.
+            "gender": athlete.gender,
             "graph_elo": round(athlete.elo, 1),
             "elo_series": [round(float(x), 1) for x in (athlete.elo_series or [])],
             "elo_rank": elo_rank,

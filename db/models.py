@@ -82,6 +82,9 @@ class Athlete(Base):
     team: Mapped[str | None] = mapped_column(Text)
     weight_class: Mapped[str | None] = mapped_column(String(40))
     belt: Mapped[str | None] = mapped_column(String(40))
+    # 'f' | 'm' | NULL. NULL = no evidence, and prose MUST render neutral for it (never defaults
+    # masculine) — see alembic 0049 and analysis/gendered_text.py for the full convention.
+    gender: Mapped[str | None] = mapped_column(String(1))
     source: Mapped[str] = mapped_column(String(20), default="manual")
     elo: Mapped[float] = mapped_column(Float, default=1000.0)  # grown graph ELO
     rank_elo: Mapped[float | None] = mapped_column(Float)  # ADCC leaderboard target

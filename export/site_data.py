@@ -44,6 +44,7 @@ from analysis.athlete_systems import (
 from analysis.counter_moves import counter_moves
 from analysis.defense_rate import defense_profile
 from analysis.event_profile import build_event_profile, event_names
+from analysis.gendered_text import Gender, pick
 from analysis.names import _normalize_name, canonical_label, canonicalize
 from analysis.network_metrics import edge_arrow, edge_dashed, network_from_sequences
 from analysis.path_to_victory import dilemmas, path_to_victory
@@ -1043,6 +1044,33 @@ def _bi(en: str, pt: str) -> str:
             f'<span data-lang-pt>{html.escape(pt)}</span>')
 
 
+# Dossier section headings (English-only chrome, unlike the bilingual prose body) that
+# pronoun-agree with athletes.gender. See analysis/gendered_text.pick's docstring for the
+# convention — None (unknown) never reads masculine.
+def _defense_heading(gender: Gender) -> str:
+    return pick(gender, m="What he stops, weighted by who threw it",
+                f="What she stops, weighted by who threw it",
+                neutral="What gets stopped, weighted by who threw it")
+
+
+def _counters_heading(gender: Gender) -> str:
+    return pick(gender, m="His highest-value answer from each position",
+                f="Her highest-value answer from each position",
+                neutral="The highest-value answer from each position")
+
+
+def _progression_heading(gender: Gender) -> str:
+    return pick(gender, m="Where his sequences move him",
+                f="Where her sequences move her",
+                neutral="Where the sequences move")
+
+
+def _signature_heading(gender: Gender) -> str:
+    return pick(gender, m="What he reaches for first",
+                f="What she reaches for first",
+                neutral="What gets reached for first")
+
+
 def _one_prose(sections: list[tuple[str, list[str]]]) -> str:
     parts = []
     for heading, paras in sections:
@@ -1378,6 +1406,7 @@ if(document.body.classList.contains('lang-pt')) GALang.set('pt');
 
 def render_profile_page(profile: dict[str, Any]) -> str:
     f = profile["fighter"]
+    gender: Gender = f.get("gender")
     fin = profile["finishing"]
     fam = fin.get("submission_family", {})
     sections = profile_narrative(profile)
@@ -1590,7 +1619,7 @@ document.addEventListener('DOMContentLoaded', function(){{
             )
             defense_html = f"""<section class="mod"><div class="wrap">
   <div class="sec-head"><span class="eyebrow">Defense</span>
-    <h2 class="h-lg mt16">What he stops, weighted by who threw it</h2></div>
+    <h2 class="h-lg mt16">{html.escape(_defense_heading(gender))}</h2></div>
   <div class="fingrid">{ov_card}{dcards}</div>
   <p class="graph-hint">Share of opponents' attempts stuffed, each weighted by that
   opponent's Grappling ELO — defending an elite is worth more than defending a novice.</p>
@@ -1615,7 +1644,7 @@ document.addEventListener('DOMContentLoaded', function(){{
         )
         counters_html = f"""<section class="mod"><div class="wrap">
   <div class="sec-head"><span class="eyebrow orange">Counter moves</span>
-    <h2 class="h-lg mt16">His highest-value answer from each position</h2></div>
+    <h2 class="h-lg mt16">{html.escape(_counters_heading(gender))}</h2></div>
   <div class="forks"><div class="fork-rows">{rows}</div></div>
   <p class="graph-hint">Ranked by Path-to-Victory value of where the response lands.</p>
 </div></section>"""
@@ -1629,7 +1658,7 @@ document.addEventListener('DOMContentLoaded', function(){{
     if prog_sec and prog_sec_pt:
         progression_html = f"""<section class="mod"><div class="wrap">
   <div class="sec-head"><span class="eyebrow">Progression</span>
-    <h2 class="h-lg mt16">Where his sequences move him</h2></div>
+    <h2 class="h-lg mt16">{html.escape(_progression_heading(gender))}</h2></div>
   <div class="editorial"><p>{_bi(prog_sec[1][0], prog_sec_pt[1][0])}</p></div>
 </div></section>"""
 
@@ -1662,7 +1691,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 {systems_html}
 <section class="mod"><div class="wrap"><div class="mod-grid">
   <div class="mod-intro"><span class="eyebrow">Signature game</span>
-    <h2 class="mt16">What he reaches for first</h2>
+    <h2 class="mt16">{html.escape(_signature_heading(gender))}</h2>
     <div class="editorial">{_prose_html([sections[1]], [sections_pt[1]]) if len(sections) > 1 else ''}</div></div>
   <div class="freq" id="sigFreq"></div>
 </div></div></section>

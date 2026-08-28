@@ -265,6 +265,52 @@ class TestProgressionSection:
         assert 2 <= len(sentences) <= 4
 
 
+class TestGenderedProse:
+    """athletes.gender ('f'|'m'|None, alembic 0049) drives pronoun agreement in the dossier
+    body. None (no evidence) must read neutral, never masculine — root task rule."""
+
+    def test_female_athlete_no_masculine_pronouns_en(self) -> None:
+        p = _profile()
+        p["fighter"]["gender"] = "f"
+        body = f" {_flat(profile_narrative(p)).lower()} "
+        for bad in (" he ", " his ", " him "):
+            assert bad not in body
+        assert "she" in body or "her" in body
+
+    def test_female_athlete_no_masculine_pronouns_pt(self) -> None:
+        p = _profile()
+        p["fighter"]["gender"] = "f"
+        body = f" {_flat(profile_narrative(p, lang='pt')).lower()} "
+        assert " dele " not in body
+        assert "dela" in body
+
+    def test_unknown_gender_no_masculine_pronoun_en(self) -> None:
+        p = _profile()  # no "gender" key at all -> unknown
+        body = f" {_flat(profile_narrative(p)).lower()} "
+        for bad in (" he ", " his ", " him "):
+            assert bad not in body
+
+    def test_unknown_gender_no_masculine_pronoun_pt(self) -> None:
+        p = _profile()
+        body = f" {_flat(profile_narrative(p, lang='pt')).lower()} "
+        assert " dele " not in body
+
+    def test_progression_female_no_masculine_pronoun(self) -> None:
+        p = _profile()
+        p["fighter"]["gender"] = "f"
+        p["_progression"] = _gated_progression_row()
+        text = f" {_prog_text(profile_narrative(p)).lower()} "
+        for bad in (" he ", " his "):
+            assert bad not in text
+
+    def test_progression_unknown_no_masculine_pronoun(self) -> None:
+        p = _profile()
+        p["_progression"] = _gated_progression_row()
+        text = f" {_prog_text(profile_narrative(p)).lower()} "
+        for bad in (" he ", " his "):
+            assert bad not in text
+
+
 def test_every_section_differs_between_languages() -> None:
     """A missing _t() call shows up as identical EN/PT copy — catch it here rather than
     on the page."""
