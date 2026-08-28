@@ -1,0 +1,2718 @@
+{
+  " seis": [
+    "Omoplata (Shoulder Lock)",
+    "submission"
+  ],
+  "100 kilos": [
+    "Side Control",
+    "control"
+  ],
+  "411": [
+    "Saddle (Inside Sankaku)",
+    "control"
+  ],
+  "50 50": [
+    "50/50 Guard",
+    "guard"
+  ],
+  "5050": [
+    "50/50 Guard",
+    "guard"
+  ],
+  "5050 guard": [
+    "50/50 Guard",
+    "guard"
+  ],
+  "93 guard": [
+    "Z-Guard",
+    "guard"
+  ],
+  "aberta": [
+    "Open Guard",
+    "guard"
+  ],
+  "abraco de perna": [
+    "Leg Hug",
+    "control"
+  ],
+  "abrao": [
+    "Body Lock",
+    "control"
+  ],
+  "abrao das costas": [
+    "Body Lock from Back",
+    "control"
+  ],
+  "abrao de perna": [
+    "Leg Hug",
+    "control"
+  ],
+  "achilles lock": [
+    "Straight Ankle Lock",
+    "submission"
+  ],
+  "alavanca de estrutura": [
+    "Frame",
+    "concept"
+  ],
+  "algema": [
+    "Cop Lock",
+    "submission"
+  ],
+  "americana": [
+    "Americana (Keylock)",
+    "submission"
+  ],
+  "americana de p": [
+    "Toe Hold",
+    "submission"
+  ],
+  "americana keylock": [
+    "Americana (Keylock)",
+    "submission"
+  ],
+  "anaconda": [
+    "Anaconda Choke",
+    "submission"
+  ],
+  "anaconda choke": [
+    "Anaconda Choke",
+    "submission"
+  ],
+  "ankle lock": [
+    "Straight Ankle Lock",
+    "submission"
+  ],
+  "ankle pick": [
+    "Ankle Pick",
+    "takedown"
+  ],
+  "aranha": [
+    "Spider Guard",
+    "guard"
+  ],
+  "arco e flecha": [
+    "Bow and Arrow Choke",
+    "submission"
+  ],
+  "arm bar": [
+    "Armbar",
+    "submission"
+  ],
+  "arm drag": [
+    "Arm Drag",
+    "takedown"
+  ],
+  "arm triangle": [
+    "Arm Triangle Choke",
+    "submission"
+  ],
+  "arm triangle choke": [
+    "Arm Triangle Choke",
+    "submission"
+  ],
+  "armbar": [
+    "Armbar",
+    "submission"
+  ],
+  "armlock": [
+    "Armbar",
+    "submission"
+  ],
+  "arrancada de tornozelo": [
+    "Ankle Pick",
+    "takedown"
+  ],
+  "arraste de perna": [
+    "Leg Drag Pass",
+    "pass"
+  ],
+  "arrasto de perna": [
+    "Leg Drag Pass",
+    "pass"
+  ],
+  "arremesso de quadril": [
+    "Hip Throw",
+    "takedown"
+  ],
+  "ashi": [
+    "Foot Sweep",
+    "takedown"
+  ],
+  "ashi barai": [
+    "Foot Sweep",
+    "takedown"
+  ],
+  "ashi garami": [
+    "X-Guard",
+    "guard"
+  ],
+  "ashi garami externo": [
+    "Outside Ashi Garami",
+    "control"
+  ],
+  "ashi sankaku garami": [
+    "Omoplata (Shoulder Lock)",
+    "submission"
+  ],
+  "back": [
+    "Back Control",
+    "control"
+  ],
+  "back body lock": [
+    "Body Lock from Back",
+    "control"
+  ],
+  "back control": [
+    "Back Control",
+    "control"
+  ],
+  "back mount": [
+    "Back Control",
+    "control"
+  ],
+  "back step": [
+    "Long Step Pass",
+    "pass"
+  ],
+  "back take": [
+    "Back Control",
+    "control"
+  ],
+  "baiana": [
+    "Double Leg Takedown",
+    "takedown"
+  ],
+  "balance": [
+    "Base",
+    "concept"
+  ],
+  "banana split": [
+    "Groin Lock",
+    "submission"
+  ],
+  "base": [
+    "Base",
+    "concept"
+  ],
+  "baseball bat choke": [
+    "Baseball Bat Choke",
+    "submission"
+  ],
+  "baseball choke": [
+    "Baseball Bat Choke",
+    "submission"
+  ],
+  "bear hug": [
+    "Body Lock",
+    "control"
+  ],
+  "berimba": [
+    "Berimbolo",
+    "transition"
+  ],
+  "berimbolo": [
+    "Berimbolo",
+    "transition"
+  ],
+  "bicep slicer": [
+    "Bicep Slicer",
+    "submission"
+  ],
+  "biceps slicer": [
+    "Calf Slicer",
+    "submission"
+  ],
+  "body lock": [
+    "Body Lock",
+    "control"
+  ],
+  "body lock das costas": [
+    "Body Lock from Back",
+    "control"
+  ],
+  "body lock from back": [
+    "Body Lock from Back",
+    "control"
+  ],
+  "body lock pass": [
+    "Body Lock Pass",
+    "pass"
+  ],
+  "body lock pressure": [
+    "Body Lock Pass",
+    "pass"
+  ],
+  "body triangle": [
+    "Body Triangle",
+    "control"
+  ],
+  "bolo": [
+    "Berimbolo",
+    "transition"
+  ],
+  "botinha": [
+    "Straight Ankle Lock",
+    "submission"
+  ],
+  "bow and arrow": [
+    "Bow and Arrow Choke",
+    "submission"
+  ],
+  "bow and arrow choke": [
+    "Bow and Arrow Choke",
+    "submission"
+  ],
+  "brabo choke": [
+    "D'Arce Choke",
+    "submission"
+  ],
+  "bridge": [
+    "Bridge (Upa Escape)",
+    "escape"
+  ],
+  "bridge escape": [
+    "Bridge (Upa Escape)",
+    "escape"
+  ],
+  "bridge upa escape": [
+    "Bridge (Upa Escape)",
+    "escape"
+  ],
+  "buggy": [
+    "Buggy Choke",
+    "submission"
+  ],
+  "buggy choke": [
+    "Buggy Choke",
+    "submission"
+  ],
+  "bull dog choke": [
+    "Rear Naked Choke",
+    "submission"
+  ],
+  "bullfighter pass": [
+    "Toreando Pass",
+    "pass"
+  ],
+  "butterfly": [
+    "Butterfly Guard",
+    "guard"
+  ],
+  "butterfly guard": [
+    "Butterfly Guard",
+    "guard"
+  ],
+  "butterfly sweep": [
+    "Butterfly Sweep",
+    "sweep"
+  ],
+  "cadeira eletrica": [
+    "Electric Chair",
+    "control"
+  ],
+  "cadeira eltrica": [
+    "Electric Chair",
+    "control"
+  ],
+  "calcanhar": [
+    "Heel Hook",
+    "submission"
+  ],
+  "calf crank": [
+    "Calf Slicer",
+    "submission"
+  ],
+  "calf crush": [
+    "Calf Lock",
+    "submission"
+  ],
+  "calf crusher": [
+    "Calf Lock",
+    "submission"
+  ],
+  "calf lock": [
+    "Calf Lock",
+    "submission"
+  ],
+  "calf slicer": [
+    "Calf Slicer",
+    "submission"
+  ],
+  "canela a canela": [
+    "Shin to Shin Guard",
+    "guard"
+  ],
+  "cartwheel": [
+    "Cartwheel Pass",
+    "pass"
+  ],
+  "cartwheel pass": [
+    "Cartwheel Pass",
+    "pass"
+  ],
+  "ceifada externa": [
+    "Osoto Gari",
+    "takedown"
+  ],
+  "cem quilos": [
+    "Side Control",
+    "control"
+  ],
+  "centro de comando pass": [
+    "Headquarters Pass",
+    "pass"
+  ],
+  "chave americana": [
+    "Americana (Keylock)",
+    "submission"
+  ],
+  "chave de bceps": [
+    "Bicep Slicer",
+    "submission"
+  ],
+  "chave de biceps": [
+    "Bicep Slicer",
+    "submission"
+  ],
+  "chave de brao": [
+    "Armbar",
+    "submission"
+  ],
+  "chave de calcanhar": [
+    "Heel Hook",
+    "submission"
+  ],
+  "chave de embrulho": [
+    "Gift Wrap",
+    "control"
+  ],
+  "chave de joelho": [
+    "Knee Bar",
+    "submission"
+  ],
+  "chave de p": [
+    "Toe Hold",
+    "submission"
+  ],
+  "chave de p toe hold": [
+    "Toe Hold",
+    "submission"
+  ],
+  "chave de panturrilha": [
+    "Calf Lock",
+    "submission"
+  ],
+  "chave de pe": [
+    "Toe Hold",
+    "submission"
+  ],
+  "chave de polcia": [
+    "Cop Lock",
+    "submission"
+  ],
+  "chave de pulso": [
+    "Wrist Lock",
+    "submission"
+  ],
+  "chave de tornozelo": [
+    "Straight Ankle Lock",
+    "submission"
+  ],
+  "chave de virilha": [
+    "Groin Lock",
+    "submission"
+  ],
+  "chave kimura": [
+    "Kimura",
+    "submission"
+  ],
+  "cinquenta cinquenta": [
+    "50/50 Guard",
+    "guard"
+  ],
+  "cintura": [
+    "Body Lock",
+    "control"
+  ],
+  "circle throw": [
+    "Circle Throw",
+    "takedown"
+  ],
+  "clinch body lock": [
+    "Body Lock",
+    "control"
+  ],
+  "clock choke": [
+    "Clock Choke",
+    "submission"
+  ],
+  "closed guard": [
+    "Closed Guard",
+    "guard"
+  ],
+  "cocona": [
+    "Knee on Belly",
+    "control"
+  ],
+  "coil lock": [
+    "Omoplata (Shoulder Lock)",
+    "submission"
+  ],
+  "colapso do knee shield": [
+    "Knee Shield Collapse Pass",
+    "pass"
+  ],
+  "colarinho e manga": [
+    "Collar Sleeve Guard",
+    "guard"
+  ],
+  "collar and sleeve": [
+    "Collar Sleeve Guard",
+    "guard"
+  ],
+  "collar sleeve": [
+    "Collar Sleeve Guard",
+    "guard"
+  ],
+  "collar sleeve guard": [
+    "Collar Sleeve Guard",
+    "guard"
+  ],
+  "compresso de bceps": [
+    "Bicep Slicer",
+    "submission"
+  ],
+  "conexao": [
+    "Connection",
+    "concept"
+  ],
+  "conexo": [
+    "Connection",
+    "concept"
+  ],
+  "connection": [
+    "Connection",
+    "concept"
+  ],
+  "connection points": [
+    "Connection",
+    "concept"
+  ],
+  "controle das costas": [
+    "Back Control",
+    "control"
+  ],
+  "controle de pegadas": [
+    "Grip Fighting",
+    "concept"
+  ],
+  "controle lateral": [
+    "Side Control",
+    "control"
+  ],
+  "cop lock": [
+    "Cop Lock",
+    "submission"
+  ],
+  "corner reversal": [
+    "Sumi Gaeshi",
+    "takedown"
+  ],
+  "corte de joelho": [
+    "Knee Cut Pass",
+    "pass"
+  ],
+  "costas": [
+    "Back Control",
+    "control"
+  ],
+  "cross choke": [
+    "Cross Choke",
+    "submission"
+  ],
+  "cross collar choke": [
+    "Cross Choke",
+    "submission"
+  ],
+  "cross pass": [
+    "X-Pass",
+    "pass"
+  ],
+  "cross step drag": [
+    "DLR Leg Drag Pass",
+    "pass"
+  ],
+  "cross step pass": [
+    "X-Pass",
+    "pass"
+  ],
+  "crucifix": [
+    "Crucifix",
+    "control"
+  ],
+  "crucifix control": [
+    "Crucifix",
+    "control"
+  ],
+  "crucifixo": [
+    "Crucifix",
+    "control"
+  ],
+  "crunch de ombro": [
+    "Shoulder Crunch",
+    "control"
+  ],
+  "cruzada": [
+    "Side Control",
+    "control"
+  ],
+  "darce": [
+    "D'Arce Choke",
+    "submission"
+  ],
+  "darce choke": [
+    "D'Arce Choke",
+    "submission"
+  ],
+  "de ashi harai": [
+    "Foot Sweep",
+    "takedown"
+  ],
+  "de la riva": [
+    "De la Riva Guard",
+    "guard"
+  ],
+  "de la riva guard": [
+    "De la Riva Guard",
+    "guard"
+  ],
+  "de la riva leg drag": [
+    "DLR Leg Drag Pass",
+    "pass"
+  ],
+  "de la riva reversa": [
+    "Reverse De La Riva",
+    "guard"
+  ],
+  "de quatro": [
+    "Turtle Position",
+    "defensive"
+  ],
+  "deashi barai": [
+    "Foot Sweep",
+    "takedown"
+  ],
+  "deep half": [
+    "Deep Half Guard",
+    "guard"
+  ],
+  "deep half guard": [
+    "Half Guard",
+    "guard"
+  ],
+  "dela riva": [
+    "De la Riva Guard",
+    "guard"
+  ],
+  "delariva": [
+    "De la Riva Guard",
+    "guard"
+  ],
+  "dlr": [
+    "De la Riva Guard",
+    "guard"
+  ],
+  "dlr invertida": [
+    "Reverse De La Riva",
+    "guard"
+  ],
+  "dlr leg drag": [
+    "DLR Leg Drag Pass",
+    "pass"
+  ],
+  "dlr leg drag pass": [
+    "DLR Leg Drag Pass",
+    "pass"
+  ],
+  "dobradica": [
+    "Folding Pass",
+    "pass"
+  ],
+  "double": [
+    "Double Leg Takedown",
+    "takedown"
+  ],
+  "double leg": [
+    "Double Leg Takedown",
+    "takedown"
+  ],
+  "double leg takedown": [
+    "Double Leg Takedown",
+    "takedown"
+  ],
+  "double under": [
+    "Double Under Pass",
+    "pass"
+  ],
+  "double under pass": [
+    "Double Under Pass",
+    "pass"
+  ],
+  "double under stack": [
+    "Double Under Pass",
+    "pass"
+  ],
+  "double unders": [
+    "Double Under Pass",
+    "pass"
+  ],
+  "double wrist lock": [
+    "Kimura",
+    "submission"
+  ],
+  "drag": [
+    "Arm Drag",
+    "takedown"
+  ],
+  "drag pass": [
+    "Leg Drag Pass",
+    "pass"
+  ],
+  "duas pernas": [
+    "Double Under Pass",
+    "pass"
+  ],
+  "duck": [
+    "Duck Under",
+    "takedown"
+  ],
+  "duck under": [
+    "Duck Under",
+    "takedown"
+  ],
+  "duplo under": [
+    "Double Under Pass",
+    "pass"
+  ],
+  "elbow escape": [
+    "Shrimp (Hip Escape)",
+    "escape"
+  ],
+  "electric chair": [
+    "Electric Chair",
+    "control"
+  ],
+  "electricchair": [
+    "Electric Chair",
+    "control"
+  ],
+  "elevator sweep": [
+    "Butterfly Sweep",
+    "sweep"
+  ],
+  "empilhamento": [
+    "Stack Pass",
+    "pass"
+  ],
+  "empilhar": [
+    "Stack Pass",
+    "pass"
+  ],
+  "equilbrio": [
+    "Base",
+    "concept"
+  ],
+  "escapada de montada": [
+    "Bridge (Upa Escape)",
+    "escape"
+  ],
+  "escapadinha": [
+    "Shrimp (Hip Escape)",
+    "escape"
+  ],
+  "escudo de joelho": [
+    "Z-Guard",
+    "guard"
+  ],
+  "esgrima": [
+    "Pummeling",
+    "concept"
+  ],
+  "esgrima de braos": [
+    "Pummeling",
+    "concept"
+  ],
+  "esmagamento": [
+    "Smash Pass",
+    "pass"
+  ],
+  "espinha torcida": [
+    "Twister",
+    "submission"
+  ],
+  "estrangulamento arco e flecha": [
+    "Bow and Arrow Choke",
+    "submission"
+  ],
+  "estrangulamento buggy": [
+    "Buggy Choke",
+    "submission"
+  ],
+  "estrangulamento cruzado": [
+    "Cross Choke",
+    "submission"
+  ],
+  "estrangulamento de relgio": [
+    "Clock Choke",
+    "submission"
+  ],
+  "estrangulamento ezequiel": [
+    "Ezekiel Choke",
+    "submission"
+  ],
+  "estrangulamento guilhotina lateral": [
+    "Paper Cutter Choke",
+    "submission"
+  ],
+  "estrangulamento nortesul": [
+    "North-South Choke",
+    "submission"
+  ],
+  "estrangulamento por trs": [
+    "Rear Naked Choke",
+    "submission"
+  ],
+  "estrangulamento rodado": [
+    "Loop Choke",
+    "submission"
+  ],
+  "estrangulamento taco de beisebol": [
+    "Baseball Bat Choke",
+    "submission"
+  ],
+  "estrangulamento von flue": [
+    "Von Flue Choke",
+    "submission"
+  ],
+  "estrutura": [
+    "Frame",
+    "concept"
+  ],
+  "ezekiel": [
+    "Ezekiel Choke",
+    "submission"
+  ],
+  "ezekiel choke": [
+    "Ezekiel Choke",
+    "submission"
+  ],
+  "ezequiel": [
+    "Ezekiel Choke",
+    "submission"
+  ],
+  "fechada": [
+    "Closed Guard",
+    "guard"
+  ],
+  "fechamento de quadril": [
+    "Body Lock Pass",
+    "pass"
+  ],
+  "fenda do joelho": [
+    "Knee Cut Pass",
+    "pass"
+  ],
+  "fifty fifty": [
+    "50/50 Guard",
+    "guard"
+  ],
+  "fireman carry": [
+    "Fireman's Carry",
+    "takedown"
+  ],
+  "firemans carry": [
+    "Fireman's Carry",
+    "takedown"
+  ],
+  "float": [
+    "Float Pass",
+    "pass"
+  ],
+  "float pass": [
+    "Float Pass",
+    "pass"
+  ],
+  "floating pass": [
+    "Float Pass",
+    "pass"
+  ],
+  "flow rolling": [
+    "Rolling",
+    "concept"
+  ],
+  "flower sweep": [
+    "Flower Sweep",
+    "sweep"
+  ],
+  "folding": [
+    "Folding Pass",
+    "pass"
+  ],
+  "folding pass": [
+    "Folding Pass",
+    "pass"
+  ],
+  "foot sweep": [
+    "Foot Sweep",
+    "takedown"
+  ],
+  "four points": [
+    "Turtle Position",
+    "defensive"
+  ],
+  "frame": [
+    "Frame",
+    "concept"
+  ],
+  "framing": [
+    "Frame",
+    "concept"
+  ],
+  "fuga": [
+    "Shrimp (Hip Escape)",
+    "escape"
+  ],
+  "fuga de quadril": [
+    "Shrimp (Hip Escape)",
+    "escape"
+  ],
+  "fuga fantasma": [
+    "Ghost Escape",
+    "escape"
+  ],
+  "full guard": [
+    "Closed Guard",
+    "guard"
+  ],
+  "full mount": [
+    "Mount",
+    "control"
+  ],
+  "gancho por baixo": [
+    "Underhook",
+    "concept"
+  ],
+  "gancho por cima": [
+    "Overhook",
+    "concept"
+  ],
+  "ganchos": [
+    "Butterfly Guard",
+    "guard"
+  ],
+  "ghost": [
+    "Ghost Escape",
+    "escape"
+  ],
+  "ghost escape": [
+    "Ghost Escape",
+    "escape"
+  ],
+  "gift wrap": [
+    "Gift Wrap",
+    "control"
+  ],
+  "gift wrap control": [
+    "Gift Wrap",
+    "control"
+  ],
+  "giftwrap": [
+    "Gift Wrap",
+    "control"
+  ],
+  "gogo": [
+    "Gogoplata",
+    "submission"
+  ],
+  "gogoplata": [
+    "Gogoplata",
+    "submission"
+  ],
+  "grampear a perna": [
+    "Leg Staple Pass",
+    "pass"
+  ],
+  "grampo de perna": [
+    "Leg Staple Pass",
+    "pass"
+  ],
+  "granby": [
+    "Granby Roll",
+    "escape"
+  ],
+  "granby roll": [
+    "Granby Roll",
+    "escape"
+  ],
+  "gravata cruzada": [
+    "Cross Choke",
+    "submission"
+  ],
+  "gravata peruana": [
+    "Peruvian Necktie",
+    "submission"
+  ],
+  "grip": [
+    "Grip Fighting",
+    "concept"
+  ],
+  "grip fighting": [
+    "Grip Fighting",
+    "concept"
+  ],
+  "groin lock": [
+    "Groin Lock",
+    "submission"
+  ],
+  "guard pull": [
+    "Guard Pull",
+    "transition"
+  ],
+  "guarda 5050": [
+    "50/50 Guard",
+    "guard"
+  ],
+  "guarda aberta": [
+    "Open Guard",
+    "guard"
+  ],
+  "guarda aranha": [
+    "Spider Guard",
+    "guard"
+  ],
+  "guarda borboleta": [
+    "Butterfly Guard",
+    "guard"
+  ],
+  "guarda borracha": [
+    "Rubber Guard",
+    "guard"
+  ],
+  "guarda canela a canela": [
+    "Shin to Shin Guard",
+    "guard"
+  ],
+  "guarda colarinho e manga": [
+    "Collar Sleeve Guard",
+    "guard"
+  ],
+  "guarda de borracha": [
+    "Rubber Guard",
+    "guard"
+  ],
+  "guarda de ganchos": [
+    "Butterfly Guard",
+    "guard"
+  ],
+  "guarda de la riva": [
+    "De la Riva Guard",
+    "guard"
+  ],
+  "guarda de la riva invertida": [
+    "Reverse De La Riva",
+    "guard"
+  ],
+  "guarda de perna": [
+    "Half Guard",
+    "guard"
+  ],
+  "guarda equis": [
+    "X-Guard",
+    "guard"
+  ],
+  "guarda fechada": [
+    "Closed Guard",
+    "guard"
+  ],
+  "guarda k": [
+    "K-Guard",
+    "guard"
+  ],
+  "guarda laco": [
+    "Lasso Guard",
+    "guard"
+  ],
+  "guarda lao": [
+    "Lasso Guard",
+    "guard"
+  ],
+  "guarda lapela": [
+    "Worm Guard",
+    "guard"
+  ],
+  "guarda total": [
+    "Closed Guard",
+    "guard"
+  ],
+  "guarda worm": [
+    "Worm Guard",
+    "guard"
+  ],
+  "guarda x": [
+    "X-Guard",
+    "guard"
+  ],
+  "guarda x simples": [
+    "Single Leg X",
+    "guard"
+  ],
+  "guarda z": [
+    "Z-Guard",
+    "guard"
+  ],
+  "guilho": [
+    "Guillotine Choke",
+    "submission"
+  ],
+  "guilhotina": [
+    "Guillotine Choke",
+    "submission"
+  ],
+  "guilhotina lateral": [
+    "Paper Cutter Choke",
+    "submission"
+  ],
+  "guillotine": [
+    "Guillotine Choke",
+    "submission"
+  ],
+  "guillotine choke": [
+    "Guillotine Choke",
+    "submission"
+  ],
+  "guillotine from back": [
+    "Twister",
+    "submission"
+  ],
+  "gyaku ude garami": [
+    "Kimura",
+    "submission"
+  ],
+  "hadaka jime": [
+    "Rear Naked Choke",
+    "submission"
+  ],
+  "half": [
+    "Half Guard",
+    "guard"
+  ],
+  "half guard": [
+    "Half Guard",
+    "guard"
+  ],
+  "half guard smash": [
+    "Half Guard Smash Pass",
+    "pass"
+  ],
+  "half guard smash pass": [
+    "Half Guard Smash Pass",
+    "pass"
+  ],
+  "half knee shield collapse": [
+    "Knee Shield Collapse Pass",
+    "pass"
+  ],
+  "hand fighting": [
+    "Pummeling",
+    "concept"
+  ],
+  "handfighting": [
+    "Grip Fighting",
+    "concept"
+  ],
+  "harai": [
+    "Sweeping Hip Throw",
+    "takedown"
+  ],
+  "harai goshi": [
+    "Hip Throw",
+    "takedown"
+  ],
+  "haraigoshi": [
+    "Sweeping Hip Throw",
+    "takedown"
+  ],
+  "hasami gaeshi": [
+    "Scissor Sweep",
+    "sweep"
+  ],
+  "head and arm choke": [
+    "Arm Triangle Choke",
+    "submission"
+  ],
+  "head and arm control": [
+    "Scarf Hold",
+    "control"
+  ],
+  "headquarters": [
+    "Headquarters Pass",
+    "pass"
+  ],
+  "headquarters pass": [
+    "Headquarters Pass",
+    "pass"
+  ],
+  "heel hook": [
+    "Heel Hook",
+    "submission"
+  ],
+  "heelhook": [
+    "Heel Hook",
+    "submission"
+  ],
+  "high mount": [
+    "Mount",
+    "control"
+  ],
+  "hip bump": [
+    "Hip Bump Sweep",
+    "sweep"
+  ],
+  "hip bump sweep": [
+    "Hip Bump Sweep",
+    "sweep"
+  ],
+  "hip escape": [
+    "Shrimp (Hip Escape)",
+    "escape"
+  ],
+  "hip pin": [
+    "Hip Pin Pass",
+    "pass"
+  ],
+  "hip pin pass": [
+    "Hip Pin Pass",
+    "pass"
+  ],
+  "hip staple": [
+    "Hip Pin Pass",
+    "pass"
+  ],
+  "hip staple smash": [
+    "Smash Pass",
+    "pass"
+  ],
+  "hip throw": [
+    "Hip Throw",
+    "takedown"
+  ],
+  "hiza juji gatame": [
+    "Knee Bar",
+    "submission"
+  ],
+  "honey hole": [
+    "Saddle (Inside Sankaku)",
+    "control"
+  ],
+  "hook sweep": [
+    "Butterfly Sweep",
+    "sweep"
+  ],
+  "hooks guard": [
+    "Butterfly Guard",
+    "guard"
+  ],
+  "hq pass": [
+    "Headquarters Pass",
+    "pass"
+  ],
+  "inner thigh throw": [
+    "Uchi Mata",
+    "takedown"
+  ],
+  "inside arm stack": [
+    "Inside Arm Stack Pass",
+    "pass"
+  ],
+  "inside arm stack pass": [
+    "Inside Arm Stack Pass",
+    "pass"
+  ],
+  "inside heel hook": [
+    "Heel Hook",
+    "submission"
+  ],
+  "inside sankaku": [
+    "Saddle (Inside Sankaku)",
+    "control"
+  ],
+  "inside senkaku": [
+    "Saddle (Inside Sankaku)",
+    "control"
+  ],
+  "inside trip": [
+    "Inside Trip",
+    "takedown"
+  ],
+  "inverted triangle": [
+    "Inverted Triangle",
+    "submission"
+  ],
+  "ippon seoi nage": [
+    "Shoulder Throw",
+    "takedown"
+  ],
+  "joelho na barriga": [
+    "Knee on Belly",
+    "control"
+  ],
+  "john wayne": [
+    "John Wayne Sweep",
+    "sweep"
+  ],
+  "john wayne sweep": [
+    "John Wayne Sweep",
+    "sweep"
+  ],
+  "juji gatame": [
+    "Armbar",
+    "submission"
+  ],
+  "juji jime": [
+    "Cross Choke",
+    "submission"
+  ],
+  "jujigatame": [
+    "Armbar",
+    "submission"
+  ],
+  "k guard": [
+    "K-Guard",
+    "guard"
+  ],
+  "kami shiho gatame": [
+    "North-South Position",
+    "control"
+  ],
+  "kata gatame": [
+    "Arm Triangle Choke",
+    "submission"
+  ],
+  "kata guruma": [
+    "Fireman's Carry",
+    "takedown"
+  ],
+  "katagatame": [
+    "Arm Triangle Choke",
+    "submission"
+  ],
+  "kataguruma": [
+    "Fireman's Carry",
+    "takedown"
+  ],
+  "kesa": [
+    "Scarf Hold",
+    "control"
+  ],
+  "kesa gatame": [
+    "Scarf Hold",
+    "control"
+  ],
+  "kesagatame": [
+    "Scarf Hold",
+    "control"
+  ],
+  "key lock": [
+    "Americana (Keylock)",
+    "submission"
+  ],
+  "keylock": [
+    "Americana (Keylock)",
+    "submission"
+  ],
+  "kguard": [
+    "K-Guard",
+    "guard"
+  ],
+  "kimura": [
+    "Kimura",
+    "submission"
+  ],
+  "knee bar": [
+    "Knee Bar",
+    "submission"
+  ],
+  "knee cut": [
+    "Knee Cut Pass",
+    "pass"
+  ],
+  "knee cut pass": [
+    "Knee Cut Pass",
+    "pass"
+  ],
+  "knee fold pass": [
+    "Knee Shield Collapse Pass",
+    "pass"
+  ],
+  "knee mount": [
+    "Knee on Belly",
+    "control"
+  ],
+  "knee on belly": [
+    "Knee on Belly",
+    "control"
+  ],
+  "knee on stomach": [
+    "Knee on Belly",
+    "control"
+  ],
+  "knee shield": [
+    "Half Guard",
+    "guard"
+  ],
+  "knee shield collapse pass": [
+    "Knee Shield Collapse Pass",
+    "pass"
+  ],
+  "knee shield pass": [
+    "Knee Shield Collapse Pass",
+    "pass"
+  ],
+  "knee slice": [
+    "Knee Cut Pass",
+    "pass"
+  ],
+  "knee slide": [
+    "Knee Cut Pass",
+    "pass"
+  ],
+  "knee tap": [
+    "Knee Tap",
+    "takedown"
+  ],
+  "knee tap takedown": [
+    "Knee Tap",
+    "takedown"
+  ],
+  "kneebar": [
+    "Knee Bar",
+    "submission"
+  ],
+  "ko uchi gari": [
+    "Kouchi Gari",
+    "takedown"
+  ],
+  "kob": [
+    "Knee on Belly",
+    "control"
+  ],
+  "kouchi gari": [
+    "Kouchi Gari",
+    "takedown"
+  ],
+  "kouchigari": [
+    "Kouchi Gari",
+    "takedown"
+  ],
+  "kumi kata": [
+    "Grip Fighting",
+    "concept"
+  ],
+  "kumikata": [
+    "Grip Fighting",
+    "concept"
+  ],
+  "lao": [
+    "Lasso Guard",
+    "guard"
+  ],
+  "lapel guard": [
+    "Worm Guard",
+    "guard"
+  ],
+  "lasso": [
+    "Lasso Guard",
+    "guard"
+  ],
+  "lasso guard": [
+    "Lasso Guard",
+    "guard"
+  ],
+  "lateral": [
+    "Side Control",
+    "control"
+  ],
+  "leg drag": [
+    "Leg Drag Pass",
+    "pass"
+  ],
+  "leg drag da de la riva": [
+    "DLR Leg Drag Pass",
+    "pass"
+  ],
+  "leg drag pass": [
+    "Leg Drag Pass",
+    "pass"
+  ],
+  "leg hug": [
+    "Leg Hug",
+    "control"
+  ],
+  "leg staple": [
+    "Leg Staple Pass",
+    "pass"
+  ],
+  "leg staple pass": [
+    "Leg Staple Pass",
+    "pass"
+  ],
+  "leg weave": [
+    "Weave Pass",
+    "pass"
+  ],
+  "legdrag": [
+    "Leg Drag Pass",
+    "pass"
+  ],
+  "leghug": [
+    "Leg Hug",
+    "control"
+  ],
+  "lenhador": [
+    "Lumberjack Sweep",
+    "sweep"
+  ],
+  "levantada de base": [
+    "Technical Stand-Up",
+    "escape"
+  ],
+  "levantada tcnica": [
+    "Technical Stand-Up",
+    "escape"
+  ],
+  "level": [
+    "Level Change",
+    "concept"
+  ],
+  "level change": [
+    "Level Change",
+    "concept"
+  ],
+  "lockdown": [
+    "Half Guard",
+    "guard"
+  ],
+  "long step": [
+    "Long Step Pass",
+    "pass"
+  ],
+  "long step pass": [
+    "Long Step Pass",
+    "pass"
+  ],
+  "longo passo": [
+    "Long Step Pass",
+    "pass"
+  ],
+  "loop": [
+    "Loop Choke",
+    "submission"
+  ],
+  "loop choke": [
+    "Loop Choke",
+    "submission"
+  ],
+  "lumberjack sweep": [
+    "Lumberjack Sweep",
+    "sweep"
+  ],
+  "mae hadaka jime": [
+    "Guillotine Choke",
+    "submission"
+  ],
+  "major outer reap": [
+    "Osoto Gari",
+    "takedown"
+  ],
+  "mata leao": [
+    "Rear Naked Choke",
+    "submission"
+  ],
+  "mataleo": [
+    "Rear Naked Choke",
+    "submission"
+  ],
+  "mawashi": [
+    "Wrist Lock",
+    "submission"
+  ],
+  "meia": [
+    "Half Guard",
+    "guard"
+  ],
+  "meia guarda": [
+    "Half Guard",
+    "guard"
+  ],
+  "meia guarda 93": [
+    "Z-Guard",
+    "guard"
+  ],
+  "meia guarda profunda": [
+    "Deep Half Guard",
+    "guard"
+  ],
+  "meianove": [
+    "North-South Position",
+    "control"
+  ],
+  "mergulhada": [
+    "Underhook",
+    "concept"
+  ],
+  "mergulho": [
+    "Duck Under",
+    "takedown"
+  ],
+  "mergulho duck under": [
+    "Duck Under",
+    "takedown"
+  ],
+  "mission control": [
+    "Rubber Guard",
+    "guard"
+  ],
+  "mo de vaca": [
+    "Wrist Lock",
+    "submission"
+  ],
+  "montada": [
+    "Mount",
+    "control"
+  ],
+  "montar": [
+    "Mount",
+    "control"
+  ],
+  "morote gari": [
+    "Double Leg Takedown",
+    "takedown"
+  ],
+  "morote seoi nage": [
+    "Shoulder Throw",
+    "takedown"
+  ],
+  "mount": [
+    "Mount",
+    "control"
+  ],
+  "mudana de nvel": [
+    "Level Change",
+    "concept"
+  ],
+  "mudar nvel": [
+    "Level Change",
+    "concept"
+  ],
+  "nogi brabo": [
+    "D'Arce Choke",
+    "submission"
+  ],
+  "norte sul": [
+    "North-South Position",
+    "control"
+  ],
+  "nortesul": [
+    "North-South Position",
+    "control"
+  ],
+  "north south": [
+    "North-South Position",
+    "control"
+  ],
+  "north south choke": [
+    "North-South Choke",
+    "submission"
+  ],
+  "northsouth": [
+    "North-South Position",
+    "control"
+  ],
+  "northsouth choke": [
+    "North-South Choke",
+    "submission"
+  ],
+  "northsouth position": [
+    "North-South Position",
+    "control"
+  ],
+  "o goshi": [
+    "Hip Throw",
+    "takedown"
+  ],
+  "o uchi gari": [
+    "Inside Trip",
+    "takedown"
+  ],
+  "ogoshi": [
+    "Hip Throw",
+    "takedown"
+  ],
+  "old school": [
+    "Old School Sweep",
+    "sweep"
+  ],
+  "old school da meia guarda": [
+    "Old School Sweep",
+    "sweep"
+  ],
+  "old school sweep": [
+    "Old School Sweep",
+    "sweep"
+  ],
+  "omoplata": [
+    "Omoplata (Shoulder Lock)",
+    "submission"
+  ],
+  "omoplata shoulder lock": [
+    "Omoplata (Shoulder Lock)",
+    "submission"
+  ],
+  "open guard": [
+    "Open Guard",
+    "guard"
+  ],
+  "osoto gari": [
+    "Osoto Gari",
+    "takedown"
+  ],
+  "osotogari": [
+    "Osoto Gari",
+    "takedown"
+  ],
+  "ouchi gari": [
+    "Inside Trip",
+    "takedown"
+  ],
+  "ouchigari": [
+    "Inside Trip",
+    "takedown"
+  ],
+  "outside ashi": [
+    "Outside Ashi Garami",
+    "control"
+  ],
+  "outside ashi garami": [
+    "Outside Ashi Garami",
+    "control"
+  ],
+  "outside heel hook": [
+    "Heel Hook",
+    "submission"
+  ],
+  "outside reap": [
+    "Osoto Gari",
+    "takedown"
+  ],
+  "outside sankaku": [
+    "Outside Ashi Garami",
+    "control"
+  ],
+  "over": [
+    "Overhook",
+    "concept"
+  ],
+  "over under": [
+    "Over-Under Pass",
+    "pass"
+  ],
+  "over under pass": [
+    "Over-Under Pass",
+    "pass"
+  ],
+  "overhook": [
+    "Overhook",
+    "concept"
+  ],
+  "overunder": [
+    "Over-Under Pass",
+    "pass"
+  ],
+  "overunder pass": [
+    "Over-Under Pass",
+    "pass"
+  ],
+  "panturrilha": [
+    "Calf Lock",
+    "submission"
+  ],
+  "panturrilha slicer": [
+    "Calf Slicer",
+    "submission"
+  ],
+  "paper cutter": [
+    "Paper Cutter Choke",
+    "submission"
+  ],
+  "paper cutter choke": [
+    "Paper Cutter Choke",
+    "submission"
+  ],
+  "passagem bernardo": [
+    "Over-Under Pass",
+    "pass"
+  ],
+  "passagem body lock": [
+    "Body Lock Pass",
+    "pass"
+  ],
+  "passagem com entrelaamento": [
+    "Weave Pass",
+    "pass"
+  ],
+  "passagem de cintura": [
+    "Body Lock Pass",
+    "pass"
+  ],
+  "passagem de duplo under": [
+    "Double Under Pass",
+    "pass"
+  ],
+  "passagem de pino no quadril": [
+    "Hip Pin Pass",
+    "pass"
+  ],
+  "passagem de pressao": [
+    "Pressure Pass",
+    "pass"
+  ],
+  "passagem de presso": [
+    "Pressure Pass",
+    "pass"
+  ],
+  "passagem de single under": [
+    "Single Under Pass",
+    "pass"
+  ],
+  "passagem dobradia": [
+    "Folding Pass",
+    "pass"
+  ],
+  "passagem em x": [
+    "X-Pass",
+    "pass"
+  ],
+  "passagem estrela": [
+    "Cartwheel Pass",
+    "pass"
+  ],
+  "passagem flutuante": [
+    "Float Pass",
+    "pass"
+  ],
+  "passagem headquarters": [
+    "Headquarters Pass",
+    "pass"
+  ],
+  "passagem smash": [
+    "Smash Pass",
+    "pass"
+  ],
+  "passagem sobreesob": [
+    "Over-Under Pass",
+    "pass"
+  ],
+  "passagem toreando": [
+    "Toreando Pass",
+    "pass"
+  ],
+  "passagem torre": [
+    "Stack Pass",
+    "pass"
+  ],
+  "passagem trip": [
+    "Tripod Pass",
+    "pass"
+  ],
+  "passagem weave": [
+    "Weave Pass",
+    "pass"
+  ],
+  "passagem x": [
+    "X-Pass",
+    "pass"
+  ],
+  "passo longo": [
+    "Long Step Pass",
+    "pass"
+  ],
+  "pegada": [
+    "Grip Fighting",
+    "concept"
+  ],
+  "pegada de tornozelo": [
+    "Ankle Pick",
+    "takedown"
+  ],
+  "pegada na cintura": [
+    "Body Lock",
+    "control"
+  ],
+  "pegada nas costas": [
+    "Back Control",
+    "control"
+  ],
+  "pendulum sweep": [
+    "Flower Sweep",
+    "sweep"
+  ],
+  "peruvian": [
+    "Peruvian Necktie",
+    "submission"
+  ],
+  "peruvian necktie": [
+    "Peruvian Necktie",
+    "submission"
+  ],
+  "peso": [
+    "Pressure",
+    "concept"
+  ],
+  "pick de tornozelo": [
+    "Ankle Pick",
+    "takedown"
+  ],
+  "pin cut": [
+    "Hip Pin Pass",
+    "pass"
+  ],
+  "pin leg and pass": [
+    "Leg Staple Pass",
+    "pass"
+  ],
+  "plan b sweep": [
+    "John Wayne Sweep",
+    "sweep"
+  ],
+  "pndulo": [
+    "Flower Sweep",
+    "sweep"
+  ],
+  "police lock": [
+    "Cop Lock",
+    "submission"
+  ],
+  "ponte": [
+    "Bridge (Upa Escape)",
+    "escape"
+  ],
+  "ponte upa": [
+    "Bridge (Upa Escape)",
+    "escape"
+  ],
+  "posicao truck": [
+    "Truck",
+    "control"
+  ],
+  "posio nortesul": [
+    "North-South Position",
+    "control"
+  ],
+  "posio truck": [
+    "Truck",
+    "control"
+  ],
+  "position hq": [
+    "Headquarters Pass",
+    "pass"
+  ],
+  "postura": [
+    "Posture",
+    "concept"
+  ],
+  "postura ereta": [
+    "Posture",
+    "concept"
+  ],
+  "posture": [
+    "Posture",
+    "concept"
+  ],
+  "pressao": [
+    "Pressure",
+    "concept"
+  ],
+  "presso": [
+    "Pressure Pass",
+    "pass"
+  ],
+  "pressure": [
+    "Pressure",
+    "concept"
+  ],
+  "pressure pass": [
+    "Pressure Pass",
+    "pass"
+  ],
+  "pressure pass half": [
+    "Half Guard Smash Pass",
+    "pass"
+  ],
+  "propping and drawing ankle throw": [
+    "Sassae Tsurikomi Ashi",
+    "takedown"
+  ],
+  "propping drawing ankle throw": [
+    "Sassae Tsurikomi Ashi",
+    "takedown"
+  ],
+  "pulling guard": [
+    "Guard Pull",
+    "transition"
+  ],
+  "pummel": [
+    "Pummeling",
+    "concept"
+  ],
+  "pummeling": [
+    "Pummeling",
+    "concept"
+  ],
+  "puxada": [
+    "Guard Pull",
+    "transition"
+  ],
+  "puxada de braco": [
+    "Arm Drag",
+    "takedown"
+  ],
+  "puxada de brao": [
+    "Arm Drag",
+    "takedown"
+  ],
+  "puxada para guarda": [
+    "Guard Pull",
+    "transition"
+  ],
+  "puxar guarda": [
+    "Guard Pull",
+    "transition"
+  ],
+  "puxo de nuca": [
+    "Snapdown",
+    "takedown"
+  ],
+  "quadril": [
+    "Hip Throw",
+    "takedown"
+  ],
+  "quartel general": [
+    "Headquarters Pass",
+    "pass"
+  ],
+  "quatro apoios": [
+    "Turtle Position",
+    "defensive"
+  ],
+  "quebra de knee shield": [
+    "Knee Shield Collapse Pass",
+    "pass"
+  ],
+  "queda de bombeiro": [
+    "Fireman's Carry",
+    "takedown"
+  ],
+  "queda de duas pernas": [
+    "Double Leg Takedown",
+    "takedown"
+  ],
+  "queda de joelho": [
+    "Knee Tap",
+    "takedown"
+  ],
+  "queda de uma perna": [
+    "Single Leg Takedown",
+    "takedown"
+  ],
+  "queda do crculo": [
+    "Circle Throw",
+    "takedown"
+  ],
+  "queda dupla": [
+    "Double Leg Takedown",
+    "takedown"
+  ],
+  "queda simples": [
+    "Single Leg Takedown",
+    "takedown"
+  ],
+  "raspagem da cintura": [
+    "Hip Bump Sweep",
+    "sweep"
+  ],
+  "raspagem de gancho": [
+    "Butterfly Sweep",
+    "sweep"
+  ],
+  "raspagem de quadril": [
+    "Hip Bump Sweep",
+    "sweep"
+  ],
+  "raspagem flor": [
+    "Flower Sweep",
+    "sweep"
+  ],
+  "raspagem john wayne": [
+    "John Wayne Sweep",
+    "sweep"
+  ],
+  "raspagem lenhador": [
+    "Lumberjack Sweep",
+    "sweep"
+  ],
+  "raspagem meia guarda": [
+    "Old School Sweep",
+    "sweep"
+  ],
+  "raspagem old school": [
+    "Old School Sweep",
+    "sweep"
+  ],
+  "raspagem tesoura": [
+    "Scissor Sweep",
+    "sweep"
+  ],
+  "raspagem trip": [
+    "Tripod Sweep",
+    "sweep"
+  ],
+  "rasteira interna": [
+    "Inside Trip",
+    "takedown"
+  ],
+  "rdlr": [
+    "Reverse De La Riva",
+    "guard"
+  ],
+  "rear naked choke": [
+    "Rear Naked Choke",
+    "submission"
+  ],
+  "relgio": [
+    "Clock Choke",
+    "submission"
+  ],
+  "reverse de la riva": [
+    "Reverse De La Riva",
+    "guard"
+  ],
+  "reverse dlr": [
+    "Reverse De La Riva",
+    "guard"
+  ],
+  "reverse triangle": [
+    "Inverted Triangle",
+    "submission"
+  ],
+  "rla": [
+    "Rolling",
+    "concept"
+  ],
+  "rnc": [
+    "Rear Naked Choke",
+    "submission"
+  ],
+  "rola": [
+    "Rolling",
+    "concept"
+  ],
+  "rolamento": [
+    "Rolling",
+    "concept"
+  ],
+  "rolamento granby": [
+    "Granby Roll",
+    "escape"
+  ],
+  "roll": [
+    "Rolling",
+    "concept"
+  ],
+  "rolling": [
+    "Rolling",
+    "concept"
+  ],
+  "rubber guard": [
+    "Rubber Guard",
+    "guard"
+  ],
+  "saddle": [
+    "Back Control",
+    "control"
+  ],
+  "saddle inside sankaku": [
+    "Saddle (Inside Sankaku)",
+    "control"
+  ],
+  "sankaku": [
+    "Triangle Choke",
+    "submission"
+  ],
+  "sankaku jime": [
+    "Triangle Choke",
+    "submission"
+  ],
+  "sasae": [
+    "Sassae Tsurikomi Ashi",
+    "takedown"
+  ],
+  "sassae": [
+    "Sassae Tsurikomi Ashi",
+    "takedown"
+  ],
+  "sassae tsurikomi ashi": [
+    "Sassae Tsurikomi Ashi",
+    "takedown"
+  ],
+  "scarf hold": [
+    "Scarf Hold",
+    "control"
+  ],
+  "scissor sweep": [
+    "Scissor Sweep",
+    "sweep"
+  ],
+  "sela": [
+    "Saddle (Inside Sankaku)",
+    "control"
+  ],
+  "sela 411": [
+    "Saddle (Inside Sankaku)",
+    "control"
+  ],
+  "seoi nage": [
+    "Shoulder Throw",
+    "takedown"
+  ],
+  "seoinage": [
+    "Shoulder Throw",
+    "takedown"
+  ],
+  "shin guard": [
+    "Shin to Shin Guard",
+    "guard"
+  ],
+  "shin to shin": [
+    "Shin to Shin Guard",
+    "guard"
+  ],
+  "shin to shin guard": [
+    "Shin to Shin Guard",
+    "guard"
+  ],
+  "shintoshin drag pass": [
+    "DLR Leg Drag Pass",
+    "pass"
+  ],
+  "shoulder crunch": [
+    "Shoulder Crunch",
+    "control"
+  ],
+  "shoulder lock": [
+    "Omoplata (Shoulder Lock)",
+    "submission"
+  ],
+  "shoulder smash": [
+    "Half Guard Smash Pass",
+    "pass"
+  ],
+  "shoulder throw": [
+    "Shoulder Throw",
+    "takedown"
+  ],
+  "shouldercrunch": [
+    "Shoulder Crunch",
+    "control"
+  ],
+  "shrimp": [
+    "Shrimp (Hip Escape)",
+    "escape"
+  ],
+  "shrimp hip escape": [
+    "Shrimp (Hip Escape)",
+    "escape"
+  ],
+  "side control": [
+    "Side Control",
+    "control"
+  ],
+  "side mount": [
+    "Side Control",
+    "control"
+  ],
+  "single": [
+    "Single Leg Takedown",
+    "takedown"
+  ],
+  "single leg": [
+    "Single Leg Takedown",
+    "takedown"
+  ],
+  "single leg takedown": [
+    "Single Leg Takedown",
+    "takedown"
+  ],
+  "single leg x": [
+    "Single Leg X",
+    "guard"
+  ],
+  "single leg x guard": [
+    "Single Leg X",
+    "guard"
+  ],
+  "single under": [
+    "Single Under Pass",
+    "pass"
+  ],
+  "single under pass": [
+    "Single Under Pass",
+    "pass"
+  ],
+  "sleeve choke": [
+    "Ezekiel Choke",
+    "submission"
+  ],
+  "slicer": [
+    "Calf Slicer",
+    "submission"
+  ],
+  "slx": [
+    "Single Leg X",
+    "guard"
+  ],
+  "small inner reap": [
+    "Kouchi Gari",
+    "takedown"
+  ],
+  "smash": [
+    "Smash Pass",
+    "pass"
+  ],
+  "smash da meia guarda": [
+    "Half Guard Smash Pass",
+    "pass"
+  ],
+  "smash pass": [
+    "Smash Pass",
+    "pass"
+  ],
+  "smash stack": [
+    "Smash Pass",
+    "pass"
+  ],
+  "smash variation": [
+    "Inside Arm Stack Pass",
+    "pass"
+  ],
+  "snap": [
+    "Snapdown",
+    "takedown"
+  ],
+  "snap down": [
+    "Snapdown",
+    "takedown"
+  ],
+  "snapdown": [
+    "Snapdown",
+    "takedown"
+  ],
+  "sobregancho": [
+    "Overhook",
+    "concept"
+  ],
+  "sode guruma jime": [
+    "Ezekiel Choke",
+    "submission"
+  ],
+  "souplesse": [
+    "Suplex",
+    "takedown"
+  ],
+  "sparring": [
+    "Rolling",
+    "concept"
+  ],
+  "spider": [
+    "Spider Guard",
+    "guard"
+  ],
+  "spider guard": [
+    "Spider Guard",
+    "guard"
+  ],
+  "stack": [
+    "Stack Pass",
+    "pass"
+  ],
+  "stack control brao dentro": [
+    "Inside Arm Stack Pass",
+    "pass"
+  ],
+  "stack pass": [
+    "Stack Pass",
+    "pass"
+  ],
+  "stack pressure pass": [
+    "Stack Pass",
+    "pass"
+  ],
+  "stack with underhook": [
+    "Inside Arm Stack Pass",
+    "pass"
+  ],
+  "staple pass": [
+    "Leg Staple Pass",
+    "pass"
+  ],
+  "step back pass": [
+    "Long Step Pass",
+    "pass"
+  ],
+  "stomach throw": [
+    "Circle Throw",
+    "takedown"
+  ],
+  "straight ankle lock": [
+    "Straight Ankle Lock",
+    "submission"
+  ],
+  "straight footlock": [
+    "Straight Ankle Lock",
+    "submission"
+  ],
+  "sumi gaeshi": [
+    "Sumi Gaeshi",
+    "takedown"
+  ],
+  "sumigaeshi": [
+    "Sumi Gaeshi",
+    "takedown"
+  ],
+  "suplay": [
+    "Suplex",
+    "takedown"
+  ],
+  "suplex": [
+    "Suplex",
+    "takedown"
+  ],
+  "suplex de cintura": [
+    "Suplex",
+    "takedown"
+  ],
+  "sweeping hip throw": [
+    "Sweeping Hip Throw",
+    "takedown"
+  ],
+  "taco de beisebol": [
+    "Baseball Bat Choke",
+    "submission"
+  ],
+  "tani otoshi": [
+    "Tani Otoshi",
+    "takedown"
+  ],
+  "taniotoshi": [
+    "Tani Otoshi",
+    "takedown"
+  ],
+  "tartaruga": [
+    "Turtle Position",
+    "defensive"
+  ],
+  "tate shiho gatame": [
+    "Mount",
+    "control"
+  ],
+  "tecer": [
+    "Weave Pass",
+    "pass"
+  ],
+  "technical get up": [
+    "Technical Stand-Up",
+    "escape"
+  ],
+  "technical stand up": [
+    "Technical Stand-Up",
+    "escape"
+  ],
+  "technical standup": [
+    "Technical Stand-Up",
+    "escape"
+  ],
+  "tesoura": [
+    "Scissor Sweep",
+    "sweep"
+  ],
+  "the truck": [
+    "Truck",
+    "control"
+  ],
+  "toe hold": [
+    "Toe Hold",
+    "submission"
+  ],
+  "toehold": [
+    "Toe Hold",
+    "submission"
+  ],
+  "tokei jime": [
+    "Clock Choke",
+    "submission"
+  ],
+  "tomoe nage": [
+    "Circle Throw",
+    "takedown"
+  ],
+  "tomoenage": [
+    "Circle Throw",
+    "takedown"
+  ],
+  "toreada": [
+    "Toreando Pass",
+    "pass"
+  ],
+  "toreando": [
+    "Toreando Pass",
+    "pass"
+  ],
+  "toreando pass": [
+    "Toreando Pass",
+    "pass"
+  ],
+  "torre": [
+    "Stack Pass",
+    "pass"
+  ],
+  "torre com brao dentro": [
+    "Inside Arm Stack Pass",
+    "pass"
+  ],
+  "toureando": [
+    "Toreando Pass",
+    "pass"
+  ],
+  "trap and roll": [
+    "Bridge (Upa Escape)",
+    "escape"
+  ],
+  "triangle": [
+    "Triangle Choke",
+    "submission"
+  ],
+  "triangle choke": [
+    "Triangle Choke",
+    "submission"
+  ],
+  "triangulo de corpo": [
+    "Body Triangle",
+    "control"
+  ],
+  "triangulo invertido": [
+    "Inverted Triangle",
+    "submission"
+  ],
+  "tringulo": [
+    "Triangle Choke",
+    "submission"
+  ],
+  "tringulo de brao": [
+    "Arm Triangle Choke",
+    "submission"
+  ],
+  "tringulo de corpo": [
+    "Body Triangle",
+    "control"
+  ],
+  "tringulo invertido": [
+    "Inverted Triangle",
+    "submission"
+  ],
+  "trip": [
+    "Tripod Sweep",
+    "sweep"
+  ],
+  "trip collapse pass": [
+    "Knee Shield Collapse Pass",
+    "pass"
+  ],
+  "trip com overhook": [
+    "Tripod Pass",
+    "pass"
+  ],
+  "trip merma": [
+    "Tripod Pass",
+    "pass"
+  ],
+  "trip pass": [
+    "Tripod Pass",
+    "pass"
+  ],
+  "tripe sweep": [
+    "Tripod Sweep",
+    "sweep"
+  ],
+  "tripod pass": [
+    "Tripod Pass",
+    "pass"
+  ],
+  "tripod pressure": [
+    "Tripod Pass",
+    "pass"
+  ],
+  "tripod sweep": [
+    "Tripod Sweep",
+    "sweep"
+  ],
+  "truck": [
+    "Truck",
+    "control"
+  ],
+  "turtle": [
+    "Turtle Position",
+    "defensive"
+  ],
+  "turtle position": [
+    "Turtle Position",
+    "defensive"
+  ],
+  "twister": [
+    "Twister",
+    "submission"
+  ],
+  "twister lock": [
+    "Twister",
+    "submission"
+  ],
+  "uchi": [
+    "Uchi Mata",
+    "takedown"
+  ],
+  "uchi mata": [
+    "Uchi Mata",
+    "takedown"
+  ],
+  "uchimata": [
+    "Uchi Mata",
+    "takedown"
+  ],
+  "ude garami": [
+    "Kimura",
+    "submission"
+  ],
+  "ude garami superior": [
+    "Americana (Keylock)",
+    "submission"
+  ],
+  "udegarami": [
+    "Kimura",
+    "submission"
+  ],
+  "um under": [
+    "Single Under Pass",
+    "pass"
+  ],
+  "under": [
+    "Underhook",
+    "concept"
+  ],
+  "underhook": [
+    "Underhook",
+    "concept"
+  ],
+  "underhook hike pass": [
+    "Single Under Pass",
+    "pass"
+  ],
+  "upa": [
+    "Bridge (Upa Escape)",
+    "escape"
+  ],
+  "valley drop": [
+    "Tani Otoshi",
+    "takedown"
+  ],
+  "varrida de p": [
+    "Foot Sweep",
+    "takedown"
+  ],
+  "virilha": [
+    "Groin Lock",
+    "submission"
+  ],
+  "von flue": [
+    "Von Flue Choke",
+    "submission"
+  ],
+  "von flue choke": [
+    "Von Flue Choke",
+    "submission"
+  ],
+  "weave": [
+    "Weave Pass",
+    "pass"
+  ],
+  "weave pass": [
+    "Weave Pass",
+    "pass"
+  ],
+  "worm": [
+    "Worm Guard",
+    "guard"
+  ],
+  "worm guard": [
+    "Worm Guard",
+    "guard"
+  ],
+  "wrist lock": [
+    "Wrist Lock",
+    "submission"
+  ],
+  "wristlock": [
+    "Wrist Lock",
+    "submission"
+  ],
+  "x guard": [
+    "X-Guard",
+    "guard"
+  ],
+  "x pass": [
+    "X-Pass",
+    "pass"
+  ],
+  "x simples": [
+    "Single Leg X",
+    "guard"
+  ],
+  "xguard": [
+    "X-Guard",
+    "guard"
+  ],
+  "xpass": [
+    "X-Pass",
+    "pass"
+  ],
+  "yoko shiho gatame": [
+    "Side Control",
+    "control"
+  ],
+  "z guard": [
+    "Z-Guard",
+    "guard"
+  ],
+  "zguard": [
+    "Half Guard",
+    "guard"
+  ]
+}

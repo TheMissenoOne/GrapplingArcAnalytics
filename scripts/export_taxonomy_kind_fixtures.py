@@ -1,6 +1,6 @@
 """Fixtures douradas do contrato de taxonomia (D1/D2) — kind_of + tabela de inferência.
 
-Mesmo padrão de `scripts/export_markov_weight_fixtures.py`. Duas peças do contrato:
+Mesmo padrão de `scripts/export_markov_weight_fixtures.py`. Três peças do contrato:
 
 1. **``kind_of``** (D1) — classifica cada uma das 141 entradas da biblioteca do App
    (``grappling-arch.nodes.json``) em ``action``/``state``/``transparent``. O rótulo lido é o
@@ -12,6 +12,13 @@ Mesmo padrão de `scripts/export_markov_weight_fixtures.py`. Duas peças do cont
    em `kind_of` já absorve o segundo caso que existiria sem ele ("Costas"/"Back Control" dá
    estado nas duas leituras, porque agora é sempre estado).
 2. **A tabela de inferência D2** — copiada verbatim de ``data/taxonomy/inference_table.json``.
+3. **O lookup de biblioteca** (``data/taxonomy/library_lookup.json``) — o ÚNICO artefato que
+   ``analysis.taxonomy_kind.resolve_library_entry``/``kind_of_entry`` leem em runtime. Este
+   script é o único lugar autorizado a abrir o arquivo do App (é o gerador); CI roda esta
+   Analytics sozinha, sem o repo irmão, então nenhum módulo de `analysis/`/`export/`/`db/`
+   pode depender dele existindo no disco. Regenere com `--check` sempre que
+   `grappling-arch.nodes.json` mudar — sem isso, `resolve_library_entry` fica com dados
+   obsoletos e ninguém percebe.
 
     uv run python -m scripts.export_taxonomy_kind_fixtures
     uv run python -m scripts.export_taxonomy_kind_fixtures --check
@@ -32,7 +39,7 @@ sys.path.insert(0, str(ROOT))
 
 from analysis.names import _normalize_name  # noqa: E402
 from analysis.taxonomy_kind import kind_of, load_inference_table, orientation_of  # noqa: E402
-from export.app_node_scores import canonical_label  # noqa: E402
+from export.app_node_scores import _name_variants, canonical_label  # noqa: E402
 
 APP_NODES_PATH = ROOT.parent / "GrapplingArcApp" / "src" / "data" / "grappling-arch.nodes.json"
 ANALYTICS_OUT = ROOT / "data" / "rating" / "taxonomy_kind_golden.json"
@@ -42,6 +49,7 @@ APP_FIXTURE_OUT = (
 APP_INFERENCE_TABLE_OUT = (
     ROOT.parent / "GrapplingArcApp" / "src" / "data" / "taxonomy_inference_table.json"
 )
+LIBRARY_LOOKUP_OUT = ROOT / "data" / "taxonomy" / "library_lookup.json"
 
 
 def build_kinds() -> dict[str, dict[str, str]]:
@@ -62,6 +70,38 @@ def build_kinds() -> dict[str, dict[str, str]]:
             entry["orientation"] = orientation_of(label)
         out[key] = entry
     return out
+
+
+def build_library_lookup() -> dict[str, list[str]]:
+    """``{_normalize_name(variant): [canonical_english_label, library_type]}`` over every App
+    library entry's ``name``/``variations``/``translations.*``. This is the artifact
+    ``analysis.taxonomy_kind.resolve_library_entry`` reads at runtime instead of opening the
+    App's JSON directly (root CLAUDE.md: no `analysis/`/`export/`/`db/` module may depend on a
+    sibling repo checkout).
+
+    Collisions (two entries' variant texts normalize to the same key) are real — 11 in the
+    141-entry library, measured 2026-08-27: ``side mount`` (Side Control/Mount), ``ude garami``
+    (Kimura/Americana), ``harai goshi`` (Hip Throw/Sweeping Hip Throw), ``deep half guard`` +
+    ``zguard`` + ``knee shield`` (Half Guard/Z-Guard/Deep Half Guard overlap), ``ashi garami``
+    (X-Guard/Single Leg X), ``saddle`` (Back Control/Saddle), ``body lock das costas`` (Body
+    Lock from Back/Body Triangle), ``biceps slicer`` (Calf Slicer/Bicep Slicer), ``presso``
+    (Pressure Pass/Pressure). Resolved deterministically: FIRST entry wins in the library's
+    own file order (a committed, static file, so file order is a fixed reproducible order —
+    same first-wins-by-file-order convention ``export.app_node_scores.build_scores``
+    documents for the identical file), never overwritten by a later entry.
+    """
+    nodes = json.loads(APP_NODES_PATH.read_text(encoding="utf-8"))
+    lookup: dict[str, list[str]] = {}
+    for node in nodes:
+        canon = canonical_label(node)
+        if not canon:
+            continue
+        typ = str(node.get("type") or "")
+        for text in _name_variants(node):
+            key = _normalize_name(text)
+            if key and key not in lookup:
+                lookup[key] = [canon, typ]
+    return lookup
 
 
 def build_fixture() -> dict[str, Any]:
@@ -88,10 +128,12 @@ def main() -> int:
 
     fixture_text = render(build_fixture())
     table_text = render(load_inference_table())
+    lookup_text = render(build_library_lookup())
     targets = [
         (ANALYTICS_OUT, fixture_text),
         (APP_FIXTURE_OUT, fixture_text),
         (APP_INFERENCE_TABLE_OUT, table_text),
+        (LIBRARY_LOOKUP_OUT, lookup_text),
     ]
     if args.check:
         bad = False

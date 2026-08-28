@@ -153,6 +153,23 @@ def test_library_lookup_is_deterministic_across_calls() -> None:
     assert a == b
 
 
+def test_library_lookup_never_reads_the_sibling_app_repo_at_runtime() -> None:
+    """CI checks out this repo alone (no `../GrapplingArcApp`) — `taxonomy_kind` must resolve
+    labels from a vendored, committed artifact, not by opening the sibling repo's file. The
+    generator (`scripts/export_taxonomy_kind_fixtures.py`) is the one place allowed to read the
+    App live; this module must not."""
+    import inspect
+
+    import analysis.taxonomy_kind as tk
+
+    # `parent.parent.parent` is the sibling-repo traversal idiom used elsewhere in this repo
+    # (e.g. `cv/vocab_map.py`'s `_DEFAULT_NODES_PATH`) to reach `../GrapplingArcApp` — this
+    # module must not construct such a path at all.
+    assert "parent.parent.parent" not in inspect.getsource(tk)
+    # still resolves real library data, from the committed artifact
+    assert resolve_library_entry("Raspagem de Gancho") == ("Butterfly Sweep", "sweep")
+
+
 # ── reconciliation with existing constants ──────────────────────────────────────
 def test_reconciled_with_decision_flow_action_types() -> None:
     assert ACTION_TYPES == frozenset(
@@ -383,13 +400,13 @@ def test_orientation_table_only_carries_the_three_valid_values() -> None:
 
 # ── the cross-repo fixture ───────────────────────────────────────────────────────
 def test_golden_fixture_matches_this_implementation() -> None:
+    app_nodes_path = ROOT.parent / "GrapplingArcApp" / "src" / "data" / "grappling-arch.nodes.json"
+    if not app_nodes_path.is_file():
+        pytest.skip("GrapplingArcApp não está ao lado deste repo")
     from export.app_node_scores import canonical_label
 
     doc = json.loads(GOLDEN.read_text(encoding="utf-8"))
-    nodes = json.loads(
-        (ROOT.parent / "GrapplingArcApp" / "src" / "data" / "grappling-arch.nodes.json")
-        .read_text(encoding="utf-8")
-    )
+    nodes = json.loads(app_nodes_path.read_text(encoding="utf-8"))
     from analysis.names import _normalize_name
 
     expected_keys = {
@@ -424,7 +441,12 @@ def test_app_inference_table_matches_analytics_source() -> None:
 
 def test_generator_check_flag_is_green() -> None:
     """`--check` must pass on the fixtures already materialized in the tree — a stale golden
-    file is a defect this test exists to catch."""
+    file is a defect this test exists to catch. Needs the sibling App repo (the generator's
+    own source of truth); skip on a single-repo CI checkout, same pattern as the other
+    cross-repo tests above."""
+    app_nodes_path = ROOT.parent / "GrapplingArcApp" / "src" / "data" / "grappling-arch.nodes.json"
+    if not app_nodes_path.is_file():
+        pytest.skip("GrapplingArcApp não está ao lado deste repo")
     result = subprocess.run(
         [sys.executable, "-m", "scripts.export_taxonomy_kind_fixtures", "--check"],
         cwd=ROOT, capture_output=True, text=True,

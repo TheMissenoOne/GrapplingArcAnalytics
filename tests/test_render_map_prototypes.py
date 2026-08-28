@@ -75,6 +75,18 @@ _MOCK_BUNDLE = (
     / "GrapplingArcApp" / "src" / "data" / "mockData" / "mock_user_bundle.json"
 )
 
+
+def _load_mock_bundle() -> dict[str, Any]:
+    """Every caller below needs the App's own mock bundle — sibling repo, absent on a
+    single-repo CI checkout. Skip honestly (same pattern as
+    ``test_grapplemap.py::test_export_icons_writes_subset_and_index``) instead of failing on a
+    ``FileNotFoundError`` that isn't the bug under test."""
+    if not _MOCK_BUNDLE.is_file():
+        pytest.skip("mock_user_bundle.json not found (sibling GrapplingArcApp repo absent)")
+    bundle: dict[str, Any] = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    return bundle
+
+
 _EXPECTED_FILES = [
     "index.html", "graph.js", "metrics.json",
     "1-baseline.html", "2-migrado-proprio.html", "3-migrado-oponente-completo.html",
@@ -93,7 +105,7 @@ _EXPECTED_VARIANT_KEYS = {
 
 
 def test_render_all_produces_every_artifact_with_valid_counts(tmp_path: Path) -> None:
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     out = tmp_path / "run1"
 
     metrics = render_all(bundle, out)
@@ -151,7 +163,7 @@ def test_partner_and_you_nodes_are_never_merged_and_handovers_bridge_them() -> N
     """The owner's correction: you and partner are fundamentally different, never one node
     just because they share a node_key. Each is its own qualified id; the only thing that
     connects the two subgraphs is a handover link."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     gv, _edges, handovers = _complete_two_sided(agg)
 
@@ -194,7 +206,7 @@ def test_action_logged_with_stale_state_type_becomes_an_edge_not_a_node() -> Non
 
 
 def test_render_all_is_deterministic(tmp_path: Path) -> None:
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     out1, out2 = tmp_path / "run1", tmp_path / "run2"
 
     render_all(bundle, out1)
@@ -214,9 +226,15 @@ def test_render_all_is_deterministic(tmp_path: Path) -> None:
 
 
 def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path: Path) -> None:
+    # site/graph.js lives in the sibling GrapplingArc (public site) repo, absent on a
+    # single-repo CI checkout — render_all() itself already degrades gracefully
+    # (`_GRAPH_JS.exists()` guard, scripts/render_map_prototypes.py), only this test's own
+    # before/after read needs the same skip.
+    if not _GRAPH_JS.is_file():
+        pytest.skip("site/graph.js not found (sibling GrapplingArc repo absent)")
     before = _GRAPH_JS.read_text(encoding="utf-8")
 
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     out = tmp_path / "run"
     render_all(bundle, out)
 
@@ -249,7 +267,7 @@ def test_patch_graph_js_errors_loudly_if_an_anchor_is_missing() -> None:
 
 
 def test_variant7_nodes_carry_a_category_icon() -> None:
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
     gv7 = _icons_graphview(states4, edges4, handovers4)
@@ -264,7 +282,7 @@ def test_variant7_nodes_carry_a_category_icon() -> None:
 
 
 def test_variant8_embeds_multiple_systems_deterministically() -> None:
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
 
@@ -289,7 +307,7 @@ def test_every_action_edge_is_labelled_generics_yield_handovers_never_labelled()
     yield to real actions in the client's label-collision pass instead of being suppressed here.
     Handovers stay unlabelled: the dashed grey stroke already says 'the exchange changed hands'
     and there is no action to name."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     gv2, edges2 = _own_graphview(agg)
 
@@ -365,7 +383,7 @@ def test_variant9_present_with_multi_expand_and_reconnect_data() -> None:
     strongly-dominated member can still carry one rare, weak edge straight into another system
     without either endpoint reading as ambiguous; the old "always through a bridge" guarantee
     only held under the saturating span-based rule this replaced."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
     detected = _detect_systems(states4, edges4, handovers4)
@@ -389,7 +407,7 @@ def test_variant9_present_with_multi_expand_and_reconnect_data() -> None:
 def test_community_detection_excludes_opponent_finish_and_start_nodes() -> None:
     """C.3/C.4: the opponent never gets a system (never a member, never a hub), and finish/
     start-anchor nodes are global landmarks, never grouped either."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
     detected = _detect_systems(states4, edges4, handovers4)
@@ -407,7 +425,7 @@ def test_community_detection_excludes_opponent_finish_and_start_nodes() -> None:
 def test_bridge_nodes_are_memberless_and_individually_rendered() -> None:
     """C (owner whiteboard): a node whose neighbours span >=2 systems is a bridge — pulled out
     of every community, never a member, always in the 'excluded'/individually-rendered bucket."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
     detected = _detect_systems(states4, edges4, handovers4)
@@ -509,7 +527,7 @@ def test_system_node_has_its_own_distinct_visual_treatment() -> None:
     mark. Sharing the belt colour with bridges is therefore INTENDED, not a collision: what
     separates them is the ring and the `bridge`/`system` flags, and the start anchors are the one
     element that keeps a colour of its own — plus a diamond silhouette."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
     detected = _detect_systems(states4, edges4, handovers4)
@@ -613,7 +631,7 @@ def test_apply_gate_drops_low_support_edges_and_orphaned_endpoints() -> None:
 
 
 def test_sweep_gates_covers_every_axis_combination() -> None:
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     states4, edges4, handovers4 = _selective_states_and_edges(agg)
 
@@ -629,7 +647,7 @@ def test_sweep_gates_covers_every_axis_combination() -> None:
 def test_render_all_gating_variant_and_default_policy_wired_into_8_9(tmp_path: Path) -> None:
     """`render_all`'s variant 10 + `metrics["gating_by_policy"]` expose the same experiment the
     owner asked to SEE, and 8/9 actually run on the gated (not raw) selective graph."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     out = tmp_path / "run"
 
     metrics = render_all(bundle, out)
@@ -653,7 +671,7 @@ def test_variant9_side_panel_lists_systems_and_bridge_connections(tmp_path: Path
     bridge, which systems it connects — baked into the embedded SYSTEMS payload as
     ``bridgeConnects`` on the bridge's own node, read straight off the CROSS_LINKS the metrics
     already use (never a second computation)."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     out = tmp_path / "run"
     render_all(bundle, out)
 
@@ -671,7 +689,7 @@ def test_variant9_side_panel_lists_systems_and_bridge_connections(tmp_path: Path
 # ── Frente 2 (11/12) — separate systems view ────────────────────────────────────
 
 def test_opponent_scoped_three_modes() -> None:
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
 
     c_states, c_edges, c_handovers = _opponent_scoped(agg, "complete")
@@ -863,7 +881,7 @@ def test_render_variant11_locked_combo_matches_variant12_default_combo(tmp_path:
     never two code paths). Since 2026-08-27 that combo is chosen ADAPTIVELY from the graph's own
     ungated size rather than read from a fixed constant, so the test asks the same function the
     renderers ask."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     agg = build_aggregate(bundle)
     default = _adaptive_default(agg)
 
@@ -901,7 +919,7 @@ def test_render_variant12_payload_bytes_tripwire(tmp_path: Path) -> None:
     """~20KB/combo x 36 combos is the measured order of magnitude (plan §2.6) — this is a
     tripwire, not a strict contract: it should catch an accidental blow-up (e.g. a combo axis
     duplicated), not a legitimate size change from more source data."""
-    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    bundle = _load_mock_bundle()
     out = tmp_path / "run"
     metrics = render_all(bundle, out)
     v12 = metrics["variants"]["12-sistemas-vista-separada-seletiva"]

@@ -115,50 +115,28 @@ def kind_of(label: str, event_type: str) -> Kind:
 # and becomes a node instead of an edge. Root cause: the caller passed the untrustworthy LOGGED
 # type instead of the technique LIBRARY's own type. `kind_of_entry` fixes this at the one place
 # every caller can route through — it resolves ``label`` against the App's technique library
-# FIRST (same file `scripts/export_taxonomy_kind_fixtures.py` already reads) and, when the
-# label is a known library entry, classifies on the library's own canonical label + type,
-# ignoring the caller's ``event_type`` entirely (it is unreliable exactly when it matters).
-# Mirrors the App's own `kindOf`, which resolves through the library before classifying.
-_APP_NODES_PATH = (
-    Path(__file__).resolve().parent.parent.parent / "GrapplingArcApp" / "src" / "data"
-    / "grappling-arch.nodes.json"
+# FIRST and, when the label is a known library entry, classifies on the library's own canonical
+# label + type, ignoring the caller's ``event_type`` entirely (it is unreliable exactly when it
+# matters). Mirrors the App's own `kindOf`, which resolves through the library before
+# classifying.
+#
+# The lookup is read from ``data/taxonomy/library_lookup.json`` — a vendored, committed
+# artifact, NEVER the App repo directly. CI checks out this repo alone (no sibling
+# `GrapplingArcApp`), so no module under `analysis/`/`export/`/`db/` may depend on that repo
+# being on disk at runtime. `scripts/export_taxonomy_kind_fixtures.py` is the one place
+# allowed to open the App's JSON — it is the generator, run manually (or via `--check` in CI)
+# whenever `grappling-arch.nodes.json` changes; this module only ever reads its output.
+_LIBRARY_LOOKUP_PATH = (
+    Path(__file__).resolve().parent.parent / "data" / "taxonomy" / "library_lookup.json"
 )
 _LIBRARY_LOOKUP: dict[str, tuple[str, str]] | None = None
 
 
 def _build_library_lookup() -> dict[str, tuple[str, str]]:
-    """``{_normalize_name(variant): (canonical_english_label, library_type)}`` over every
-    App library entry's ``name``/``variations``/``translations.*`` (whatever locales the JSON
-    carries — inspected, not assumed: currently ``pt``/``en``). Same key convention
-    ``export.app_node_scores`` already uses to index the same file (``_normalize_name``, not
-    ``_deaccent``-first — that's the separate `lamas_chain._key` contract).
-
-    Collisions (two entries' variant texts normalize to the same key) are real — 11 in the
-    141-entry library, measured 2026-08-27: ``side mount`` (Side Control/Mount), ``ude garami``
-    (Kimura/Americana), ``harai goshi`` (Hip Throw/Sweeping Hip Throw), ``deep half guard`` +
-    ``zguard`` + ``knee shield`` (Half Guard/Z-Guard/Deep Half Guard overlap), ``ashi garami``
-    (X-Guard/Single Leg X), ``saddle`` (Back Control/Saddle), ``body lock das costas`` (Body
-    Lock from Back/Body Triangle), ``biceps slicer`` (Calf Slicer/Bicep Slicer), ``presso``
-    (Pressure Pass/Pressure — the concept/action collision the ticket names). Resolved
-    deterministically: FIRST entry wins in the library's own file order (the JSON is a
-    committed, static file — file order is already a fixed, reproducible order; same
-    first-wins-by-file-order convention `export.app_node_scores.build_scores` already
-    documents for the identical file), never overwritten by a later entry.
-    """
-    from export.app_node_scores import _name_variants, canonical_label
-
-    nodes = json.loads(_APP_NODES_PATH.read_text(encoding="utf-8"))
-    lookup: dict[str, tuple[str, str]] = {}
-    for node in nodes:
-        canon = canonical_label(node)
-        if not canon:
-            continue
-        typ = str(node.get("type") or "")
-        for text in _name_variants(node):
-            key = _normalize_name(text)
-            if key:
-                lookup.setdefault(key, (canon, typ))
-    return lookup
+    """``{_normalize_name(variant): (canonical_english_label, library_type)}`` — read from the
+    committed artifact (see module note above), never derived from the App's file directly."""
+    raw = json.loads(_LIBRARY_LOOKUP_PATH.read_text(encoding="utf-8"))
+    return {key: (canon, typ) for key, (canon, typ) in raw.items()}
 
 
 def _library_lookup() -> dict[str, tuple[str, str]]:
