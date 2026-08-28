@@ -8,8 +8,12 @@ from pathlib import Path
 
 import pytest
 
+from analysis.network_metrics import MIN_EDGE_ARROW, TWO_WAY_RATIO
 from scripts.render_map_prototypes import (
+    _ALL_SYSTEMS_COMBOS,
+    _BOUNDARY_COLOR,
     _BRIDGE_COLOR,
+    _DEFAULT_SYSTEMS_COMBO,
     _FIG_HEX,
     _FINISH_COLOR,
     _FINISH_ICON,
@@ -21,6 +25,9 @@ from scripts.render_map_prototypes import (
     _actor_for,
     _anchor_slot,
     _apply_gate,
+    _collapse_directed,
+    _combo_key,
+    _combo_payload,
     _complete_two_sided,
     _cross_member_links,
     _cross_system_links,
@@ -28,6 +35,7 @@ from scripts.render_map_prototypes import (
     _excluded_states,
     _icons_graphview,
     _index_parallel_links,
+    _opponent_scoped,
     _own_graphview,
     _patch_graph_js,
     _place_of,
@@ -35,6 +43,7 @@ from scripts.render_map_prototypes import (
     _select_displayed_bridges,
     _selective_states_and_edges,
     _splice_inferred_states,
+    _system_boundary_view,
     _system_members,
     _systems_level1_view,
     _two_sided_graphview,
@@ -68,13 +77,15 @@ _EXPECTED_FILES = [
     "1-baseline.html", "2-migrado-proprio.html", "3-migrado-oponente-completo.html",
     "4-migrado-oponente-seletivo.html", "5-hubs.html", "6-ghost-inferidos.html",
     "7-icones-categoria.html", "8-sistemas-colapsavel.html", "9-sistemas-expande-in-place.html",
-    "10-gating-comparado.html",
+    "10-gating-comparado.html", "11-sistemas-vista-separada.html",
+    "12-sistemas-vista-separada-seletiva.html",
 ]
 
 _EXPECTED_VARIANT_KEYS = {
     "1-baseline", "2-migrado-proprio", "3-migrado-oponente-completo",
     "4-migrado-oponente-seletivo", "5-hubs", "6-ghost-inferidos",
     "7-icones-categoria", "8-sistemas-colapsavel", "9-sistemas-expande-in-place",
+    "11-sistemas-vista-separada", "12-sistemas-vista-separada-seletiva",
 }
 
 
@@ -193,6 +204,10 @@ def test_render_all_is_deterministic(tmp_path):
         (out2 / "9-sistemas-expande-in-place.html").read_bytes()
     assert (out1 / "10-gating-comparado.html").read_bytes() == \
         (out2 / "10-gating-comparado.html").read_bytes()
+    assert (out1 / "11-sistemas-vista-separada.html").read_bytes() == \
+        (out2 / "11-sistemas-vista-separada.html").read_bytes()
+    assert (out1 / "12-sistemas-vista-separada-seletiva.html").read_bytes() == \
+        (out2 / "12-sistemas-vista-separada-seletiva.html").read_bytes()
 
 
 def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path):
@@ -218,6 +233,9 @@ def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path):
         "map-prototype patch: snapshot live x/y",
         "map-prototype patch: system regions",
         "map-prototype patch: label/radius-aware fit margin",
+        "map-prototype patch: arrowhead gate now respects forceLabels",
+        "map-prototype patch: per-link custom dash",
+        "map-prototype patch: flow-bias layout",
     ):
         assert marker in copy, marker
 
@@ -630,3 +648,215 @@ def test_variant9_side_panel_lists_systems_and_bridge_connections(tmp_path):
     bridge_rows = [row for row in payload if row["kind"] == "solo" and row["node"].get("bridge")]
     for row in bridge_rows:
         assert "bridgeConnects" in row["node"]  # [] if it only crosses other bridges
+
+
+# ── Frente 2 (11/12) — separate systems view ────────────────────────────────────
+
+def test_opponent_scoped_three_modes():
+    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    agg = build_aggregate(bundle)
+
+    c_states, c_edges, c_handovers = _opponent_scoped(agg, "complete")
+    assert c_states == dict(agg.states)
+    assert c_handovers  # mock bundle switches actor mid-round
+
+    s_states, s_edges, s_handovers = _opponent_scoped(agg, "selective")
+    assert set(s_states) <= set(c_states)  # selective only ever REMOVES partner elements
+
+    n_states, n_edges, n_handovers = _opponent_scoped(agg, "none")
+    assert n_handovers == []  # a handover always needs a partner endpoint
+    assert all(k[1] == "you" for k in n_states)
+    assert all(e["actor"] == "you" for e in n_edges)
+
+    with pytest.raises(ValueError, match="unknown opponent mode"):
+        _opponent_scoped(agg, "bogus")
+
+
+def test_collapse_directed_sparse_dominant_two_way():
+    """Contract test: `_collapse_directed` decides direction via the imported
+    `edge_arrow`/its own constants — sparse (below MIN_EDGE_ARROW) stays undirected, a dominant
+    direction gets an arrow oriented the majority way, a genuine two-way exchange (minority share
+    above TWO_WAY_RATIO) stays undirected even though both sides clear the minimum."""
+
+    def _e(u, v, n):
+        return [{"actor": "you", "source": u, "target": v, "count": 1, "inferred": False}] * n
+
+    place_of = {_qid("you", "p"): "P", _qid("you", "q"): "Q",
+                _qid("you", "r"): "R", _qid("you", "s"): "S"}
+
+    # sparse: max(f, r) < MIN_EDGE_ARROW -> undirected
+    sparse_edges = _e("p", "q", MIN_EDGE_ARROW - 1)
+    links = _collapse_directed(place_of, sparse_edges, [])
+    assert len(links) == 1 and links[0]["arrow"] is False
+
+    # dominant: forward >> reverse, both sides comfortably clear the minimum
+    dominant_edges = _e("r", "s", MIN_EDGE_ARROW + 6) + _e("s", "r", 1)
+    links = _collapse_directed(place_of, dominant_edges, [])
+    assert len(links) == 1
+    assert links[0]["arrow"] is True
+    assert links[0]["from"] == "R" and links[0]["to"] == "S"  # oriented majority direction
+
+    # two-way: minority share above TWO_WAY_RATIO of the majority -> stays undirected
+    f = MIN_EDGE_ARROW + 4
+    r = int(f * TWO_WAY_RATIO) + 1
+    two_way_edges = _e("p", "q", f) + _e("q", "p", r)
+    links = _collapse_directed(place_of, two_way_edges, [])
+    assert len(links) == 1 and links[0]["arrow"] is False
+    assert links[0]["weight"] >= 1  # still carries the aggregate weight
+
+
+def test_collapse_directed_handover_only_pair_is_dashed():
+    place_of = {"a": "A", "b": "B"}
+    handovers = [{"from": "a", "to": "b", "count": 5}]
+    links = _collapse_directed(place_of, [], handovers)
+    assert len(links) == 1 and links[0]["dashed"] is True
+
+
+def test_system_boundary_view_covers_four_destination_kinds_and_ida_e_volta():
+    def _st(node_key, label, type_, actor, count, inferred):
+        return {"node_key": node_key, "label": label, "type": type_, "actor": actor,
+                "count": count, "inferred": inferred}
+
+    nodes_states = {
+        # system X
+        ("p", "you"): _st("p", "P", "guard", "you", 5, False),
+        ("q", "you"): _st("q", "Q", "guard", "you", 5, False),
+        ("r", "you"): _st("r", "R", "guard", "you", 5, False),
+        # system Y
+        ("m", "you"): _st("m", "M", "pass", "you", 5, False),
+        ("n", "you"): _st("n", "N", "pass", "you", 5, False),
+        ("o", "you"): _st("o", "O", "pass", "you", 5, False),
+        # system Z — exists only so `bridge_z` touches 3 communities evenly (the dominance rule
+        # can never call a 2-community touch a bridge, see test_dominance_rule_... — a bridge
+        # needs a genuine 3-way split)
+        ("u", "you"): _st("u", "U", "control", "you", 5, False),
+        ("v", "you"): _st("v", "V", "control", "you", 5, False),
+        # excluded: bridge, opponent, finish, start
+        ("bridge_z", "you"): _st("bridge_z", "Bridge Z", "control", "you", 4, False),
+        ("mount", "partner"): _st("mount", "Mount", "control", "partner", 3, False),
+        (_FINISH_KEY, "you"): _st(_FINISH_KEY, "Finalizacao", "submission", "you", 1, True),
+        ("start neutral", "you"): _st("start neutral", "Start", "control", "you", 1, True),
+    }
+
+    def _e(u, v, actor, w):
+        return {"source": u, "target": v, "action_key": f"{u}>{v}", "action_label": f"{u}>{v}",
+                "action_type": "guard", "actor": actor, "count": w, "inferred": False}
+
+    edges = [
+        _e("p", "q", "you", 5), _e("q", "r", "you", 5), _e("r", "p", "you", 5),
+        _e("m", "n", "you", 5), _e("n", "o", "you", 5), _e("o", "m", "you", 5),
+        _e("u", "v", "you", 5),
+        # bridge_z splits evenly across X/Y/Z — genuinely ambiguous, no dominant community
+        _e("p", "bridge_z", "you", 2), _e("bridge_z", "m", "you", 2), _e("bridge_z", "u", "you", 2),
+        _e("r", "n", "you", 1),  # a DIRECT system-to-system edge (X's own destination kind: SYSTEM)
+        _e("r", _FINISH_KEY, "you", 4),
+        _e("start neutral", "p", "you", 2),
+    ]
+    # a real edge NEVER crosses actors (Aggregate's own invariant) — the opponent destination
+    # kind can only be reached via a HANDOVER, qualified ids already baked in (`Aggregate.
+    # add_handover`'s own shape), ida-e-volta so `_index_parallel_links` has two arcs to fan.
+    handovers = [
+        {"from": "q", "to": "opp:mount", "from_actor": "you", "from_key": "q",
+         "to_actor": "partner", "to_key": "mount", "count": 2},
+        {"from": "opp:mount", "to": "q", "from_actor": "partner", "from_key": "mount",
+         "to_actor": "you", "to_key": "q", "count": 1},
+    ]
+
+    detected = _detect_systems(nodes_states, edges, handovers)
+    systems, system_of = detected["systems"], detected["system_of"]
+    assert len(systems) == 3, systems
+    bridge_qids = frozenset(detected["bridge_qids"])
+    assert bridge_qids == {"bridge_z"}
+
+    excluded = _excluded_states(nodes_states, system_of)
+    place_of = _place_of(system_of, excluded)
+    cross = _cross_member_links(place_of, edges, handovers)
+    systems_by_id = {s["id"]: s for s in systems}
+    excluded_by_qid = {_qid(k[1], k[0]): (k, v) for k, v in excluded.items()}
+
+    sys_x = next(s for s in systems if "p" in s["members"])
+    gv, internal_edges, regions, boundary_html = _system_boundary_view(
+        sys_x, nodes_states, edges, handovers, cross, place_of, excluded_by_qid,
+        systems_by_id, bridge_qids)
+
+    stub_ids = {n["id"] for n in gv["nodes"] if n.get("stub")}
+    sys_y = next(s for s in systems if "m" in s["members"])
+    assert sys_y["id"] in stub_ids  # destination kind: SYSTEM (shared mini-node, not per-member)
+    assert "bridge_z" in stub_ids  # destination kind: BRIDGE
+    assert "opp:mount" in stub_ids  # destination kind: OPPONENT
+    assert any(qid in stub_ids for qid in (_FINISH_KEY, "start neutral"))  # kind: ANCHOR
+
+    # exactly one stub node per DESTINATION, never per traversal (p AND another p-side edge would
+    # still be one 'sys:Y' stub — here p and bridge_z each cross once, still one stub per place)
+    sys_y_stub_nodes = [n for n in gv["nodes"] if n["id"] == sys_y["id"]]
+    assert len(sys_y_stub_nodes) == 1
+
+    # boundary member marker: p (out to bridge) and q (out+in to opponent) both get a ring + suffix
+    by_id = {n["id"]: n for n in gv["nodes"]}
+    assert by_id["p"]["ring"] == _BOUNDARY_COLOR
+    assert "[→" in by_id["p"]["label"] and "←" in by_id["p"]["label"]
+    assert by_id["q"]["ring"] == _BOUNDARY_COLOR
+
+    # ida-e-volta between q and the opponent stub -> two links, same unordered pair, opposite dirs
+    qm_links = [link for link in gv["links"]
+                if {link["from"], link["to"]} == {"q", "opp:mount"}]
+    assert len(qm_links) == 2
+    assert {(link["from"], link["to"]) for link in qm_links} == \
+        {("q", "opp:mount"), ("opp:mount", "q")}
+    assert {link["parCount"] for link in qm_links} == {2}  # `_index_parallel_links` fanned them
+    assert all(link["dash"] == [2, 3] for link in qm_links)
+    assert all(link["arrow"] is True for link in qm_links)  # stub links always structurally arrowed
+
+    # internal action edges carry `at` (12's client-side type filter); stub links never do
+    internal_links = [link for link in gv["links"] if link.get("at")]
+    assert internal_links and all(link["at"] == "guard" for link in internal_links)
+
+    assert regions == [{"label": sys_x["label"], "members": sys_x["members"]}]
+    assert "travessia" in boundary_html
+
+
+def test_render_variant11_locked_combo_matches_variant12_default_combo(tmp_path):
+    """Frente 2 §2.1: A is B with the controls off, locked to `_DEFAULT_SYSTEMS_COMBO` — the same
+    combo's payload must be byte-identical whichever wrapper produced it (both call the exact same
+    `_combo_payload`, never two code paths)."""
+    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    agg = build_aggregate(bundle)
+
+    a_payload = _combo_payload(agg, *_DEFAULT_SYSTEMS_COMBO)
+    b_payload = _combo_payload(agg, *_DEFAULT_SYSTEMS_COMBO)
+    assert json.dumps(a_payload, sort_keys=True) == json.dumps(b_payload, sort_keys=True)
+
+    out = tmp_path / "run"
+    metrics = render_all(bundle, out)
+    v11 = metrics["variants"]["11-sistemas-vista-separada"]
+    v12 = metrics["variants"]["12-sistemas-vista-separada-seletiva"]
+    assert v11["combos"] == 1
+    assert v12["combos"] == len(_ALL_SYSTEMS_COMBOS) == 36
+    # the locked combo's own metrics (nodes/edges/systems/bridges) match 11 exactly
+    assert v11["nodes"] == a_payload["meta"]["nodes"]
+    assert v11["systems"] == a_payload["meta"]["systems"]
+    assert v11["bridges"] == a_payload["meta"]["bridges"]
+
+    html11 = (out / "11-sistemas-vista-separada.html").read_text(encoding="utf-8")
+    assert 'class="controls hidden"' in html11
+    html12 = (out / "12-sistemas-vista-separada-seletiva.html").read_text(encoding="utf-8")
+    assert 'class="controls hidden"' not in html12
+
+    start = html12.index("const COMBOS = ") + len("const COMBOS = ")
+    end = html12.index(";          // {comboKey", start)
+    combos_embedded = json.loads(html12[start:end])
+    default_key = _combo_key(*_DEFAULT_SYSTEMS_COMBO)
+    assert json.dumps(combos_embedded[default_key], sort_keys=True) == \
+        json.dumps(a_payload, sort_keys=True)
+
+
+def test_render_variant12_payload_bytes_tripwire(tmp_path):
+    """~20KB/combo x 36 combos is the measured order of magnitude (plan §2.6) — this is a
+    tripwire, not a strict contract: it should catch an accidental blow-up (e.g. a combo axis
+    duplicated), not a legitimate size change from more source data."""
+    bundle = json.loads(_MOCK_BUNDLE.read_text(encoding="utf-8"))
+    out = tmp_path / "run"
+    metrics = render_all(bundle, out)
+    v12 = metrics["variants"]["12-sistemas-vista-separada-seletiva"]
+    assert v12["payload_bytes"] > 0
+    assert v12["payload_bytes"] < 5_000_000  # generous tripwire ceiling on this mock bundle

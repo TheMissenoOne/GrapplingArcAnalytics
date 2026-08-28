@@ -61,6 +61,18 @@ Every STATE also has a curated top/bottom/neutral orientation
 canonical normalized form the table is keyed on, so no extra lookup is needed) — shown as a
 discreet ▲/▼ suffix next to a node's label in the side panel only, never on the canvas itself
 (the canvas stays uncluttered; ``metrics.json`` carries the corpus-wide counts).
+
+**11/12 — separate systems view (owner request, Frente 2 of the taxonomy lote, 2026-08-27):**
+two more pages, ``_render_systems_page`` with two thin wrappers. 11 (A) = a locked read: the
+GLOBAL level shows every node/edge (systems collapsed, but EVERY bridge, never variant 8/9's
+top-N display cut) at combo ``("complete", 1, "all")``; clicking a system opens ITS OWN induced
+subgraph + fronteira (never variant 8/9's ``_system_level2`` embedded-real-neighbour model —
+here a crossing collapses to one STUB mini-node per destination PLACE, from
+``_cross_member_links``, the shared model). 12 (B) = the same page with the controls live:
+36 precomputed (inference policy × min_support × opponent mode) combos server-side, `bridgeRank`
+cut / action-type hide / flow-bias live on the client. Direction: a per-action/handover/stub
+link is always structurally arrowed; only the GLOBAL aggregate link (``_collapse_directed``)
+asks ``analysis.network_metrics.edge_arrow`` whether the volume earns a direction.
 """
 
 # ruff: noqa: E501  (HTML/JS template strings are content)
@@ -78,6 +90,7 @@ import networkx as nx
 
 from analysis.chain_compiler import ChainEdge, ChainState, CompiledChain, compile_two_sided
 from analysis.names import _normalize_name, canonicalize
+from analysis.network_metrics import edge_arrow
 from analysis.taxonomy_kind import load_inference_table, orientation_of, resolve_library_entry
 
 logger = logging.getLogger(__name__)
@@ -1157,6 +1170,12 @@ def _place_of(system_of: dict[str, str], excluded: dict) -> dict[str, str]:
 # start-anchor (teal) nor a bridge (grey): its own colour so it never reads as a normal node.
 _SYSTEM_COLOR = "#a78bfa"
 
+# Pink — 11/12's own boundary marker (a system MEMBER with >=1 crossing link), distinct from
+# every other ring colour in this module (system violet, finish/actor blue-orange, bridge grey,
+# start teal) so a member that also happens to touch the boundary never gets mistaken for one of
+# those other categories.
+_BOUNDARY_COLOR = "#f472b6"
+
 
 def _system_node(s: dict[str, Any]) -> dict[str, Any]:
     """Owner addendum 2026-08-27: a collapsed system must look like "several things folded",
@@ -1260,6 +1279,244 @@ def _system_level2(sys_row: dict[str, Any], states: dict, edges: list[dict[str, 
     _index_parallel_links(gv["links"])
     regions = [{"label": sys_row["label"], "members": sys_row["members"]}]
     return gv, internal_edges, regions
+
+
+# ── 2c. variants 11/12 — separate systems view (global + per-system stubs) ─────
+#
+# Frente 2 (owner request, 2026-08-27): NOT variant 8/9's model. There the system view embeds
+# every real outside neighbour individually (`_system_level2`); here it collapses each crossing
+# to a STUB mini-node keyed by DESTINATION PLACE (`_cross_member_links`'s own {from,to,fromSys,
+# toSys} — the model, never reinvented). Different views, both already owner-approved — see the
+# module docstring's "11/12" paragraph.
+
+_OPPONENT_MODES = ("complete", "selective", "none")
+_OPPONENT_MODE_LABELS = {
+    "complete": "oponente completo", "selective": "oponente seletivo (>=2x ou ponte)",
+    "none": "só você",
+}
+
+
+def _opponent_scoped(agg: Aggregate, mode: str) -> tuple[dict, list[dict[str, Any]], list[dict[str, Any]]]:
+    """The third combo axis (11/12's "modo de oponente") — same (states, edges, handovers) shape
+    as `_complete_two_sided`/`_selective_states_and_edges`, generalised with a THIRD mode
+    (``"none"``) that drops the opponent's own subgraph entirely: states/edges filtered to
+    actor=='you', no handovers (a handover always needs a partner endpoint on one side).
+    ``"complete"``/``"selective"`` reuse the existing element-set builders verbatim."""
+    if mode == "complete":
+        return dict(agg.states), list(agg.edges.values()), list(agg.handovers.values())
+    if mode == "selective":
+        return _selective_states_and_edges(agg)
+    if mode == "none":
+        states = {k: v for k, v in agg.states.items() if k[1] == "you"}
+        edges = [e for e in agg.edges.values() if e["actor"] == "you"]
+        return states, edges, []
+    raise ValueError(f"unknown opponent mode: {mode!r}")
+
+
+def _collapse_directed(place_of: dict[str, str], edges: list[dict[str, Any]],
+                        handovers: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Level-1 aggregated links for 11/12's GLOBAL view — same crossing-edge aggregation as
+    `_cross_system_links` (never that function itself, variant 8/9 stay untouched), but direction
+    is decided by `edge_arrow` (imported from `analysis.network_metrics`, never re-derived) over
+    each UNORDERED pair's forward/reverse weight: at THIS aggregate level the site's own
+    directed-edge contract applies (root CLAUDE.md's directed-edges row) — a per-action/handover/
+    stub link stays structurally directed (arrow=True always, decided elsewhere), but a volume
+    aggregate between two systems/bridges/anchors can and should read as undirected when it's a
+    genuine two-way exchange or too sparse to call. ``dashed`` iff every crossing between that
+    pair was a handover, same convention as `_cross_system_links`."""
+    agg: dict[tuple[str, str], dict[str, Any]] = {}
+
+    def _add(u: str | None, v: str | None, w: int, is_action: bool) -> None:
+        if u is None or v is None or u == v:
+            return
+        lo, hi = (u, v) if u <= v else (v, u)
+        row = agg.setdefault((lo, hi), {"fwd": 0, "rev": 0, "handover_only": True})
+        if u == lo:
+            row["fwd"] += w
+        else:
+            row["rev"] += w
+        if is_action:
+            row["handover_only"] = False
+
+    for e in edges:
+        _add(place_of.get(_qid(e["actor"], e["source"])), place_of.get(_qid(e["actor"], e["target"])),
+             e["count"], True)
+    for h in handovers:
+        _add(place_of.get(h["from"]), place_of.get(h["to"]), h["count"], False)
+
+    links = []
+    for (lo, hi), row in sorted(agg.items()):
+        f, r = row["fwd"], row["rev"]
+        src, tgt = (lo, hi) if f >= r else (hi, lo)
+        links.append({"from": src, "to": tgt, "weight": _clamp3(f + r),
+                      "arrow": edge_arrow(f, r), "dashed": row["handover_only"]})
+    return links
+
+
+def _stub_node(dest_place: str, systems_by_id: dict[str, dict[str, Any]],
+                excluded_by_qid: dict[str, tuple[tuple[str, str], dict[str, Any]]],
+                bridge_qids: frozenset[str]) -> dict[str, Any]:
+    """One boundary stub — a mini-node per DESTINATION (never per traversal), styled by what kind
+    of thing it points at: another SYSTEM (violet, `_system_node`'s own styling), a BRIDGE (grey,
+    `is_bridge=True`), an organisational ANCHOR (finish/start's own colour, both via
+    `_style_single_node`), or an OPPONENT element (no override needed — `_style_single_node`'s own
+    ``fighter`` field already reads orange client-side). Radius=0.0: a stub is never itself a
+    bolted anchor even when its DESTINATION is one — `_apply_anchor` would otherwise pin/place it
+    at the shared cross landmark, so x/y/pin are stripped after."""
+    if dest_place.startswith("sys:"):
+        node = dict(_system_node(systems_by_id[dest_place]))
+    else:
+        (node_key, actor), v = excluded_by_qid[dest_place]
+        node = _style_single_node(node_key, actor, v, radius=0.0, is_bridge=dest_place in bridge_qids)
+        node.pop("x", None)
+        node.pop("y", None)
+        node.pop("pin", None)
+    node["id"] = dest_place
+    node["size"] = 1
+    node["stub"] = True
+    return node
+
+
+def _system_boundary_view(
+    sys_row: dict[str, Any], states: dict, edges: list[dict[str, Any]], handovers: list[dict[str, Any]],
+    cross: list[dict[str, Any]], place_of: dict[str, str],
+    excluded_by_qid: dict[str, tuple[tuple[str, str], dict[str, Any]]],
+    systems_by_id: dict[str, dict[str, Any]], bridge_qids: frozenset[str],
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], str]:
+    """11/12's OWN system view — induced subgraph + fronteira, stub model (never
+    `_system_level2`'s embedded-real-neighbour model, see module docstring). A boundary MEMBER
+    gets a ring (`_BOUNDARY_COLOR`) + a ``[→out ←in]`` suffix; every crossing (from
+    `_cross_member_links`, the shared model, never reinvented) collapses to ONE stub node per
+    DESTINATION PLACE (several real members of the same other system, or several crossings into
+    the same bridge/anchor/opponent, share one mini-node) with one link per (member, place,
+    direction) — ida+volta land on the same unordered pair, `_index_parallel_links` already fans
+    them into two opposite arcs with their own arrowheads. Returns (graphview, internal action
+    edges, regions, boundary panel HTML)."""
+    member_qids = set(sys_row["members"])
+    sub_states, internal_edges, internal_handovers = _system_members(sys_row, states, edges, handovers)
+    gv = _two_sided_graphview(sub_states, internal_edges, internal_handovers)
+    for link, e in zip(gv["links"][: len(internal_edges)], internal_edges):
+        link["at"] = e["action_type"]  # 12's client-side type filter — action links only
+
+    relevant = [c for c in cross if c["fromSys"] == sys_row["id"] or c["toSys"] == sys_row["id"]]
+    out_count: dict[str, int] = {}
+    in_count: dict[str, int] = {}
+    stub_links: dict[tuple[str, str, bool], dict[str, int]] = {}
+    for c in relevant:
+        if c["from"] in member_qids:
+            member_qid, dest_qid, member_is_source = c["from"], c["to"], True
+        else:
+            member_qid, dest_qid, member_is_source = c["to"], c["from"], False
+        dest_place = place_of[dest_qid]
+        if member_is_source:
+            out_count[member_qid] = out_count.get(member_qid, 0) + 1
+        else:
+            in_count[member_qid] = in_count.get(member_qid, 0) + 1
+        row = stub_links.setdefault((member_qid, dest_place, member_is_source), {"count": 0})
+        row["count"] += c["count"]
+
+    for node in gv["nodes"]:
+        o, i = out_count.get(node["id"], 0), in_count.get(node["id"], 0)
+        if o or i:
+            node["ring"] = _BOUNDARY_COLOR
+            node["label"] = f"{node['label']} [→{o} ←{i}]"
+
+    stub_nodes: dict[str, dict[str, Any]] = {}
+    for (member_qid, dest_place, member_is_source), row in sorted(stub_links.items()):
+        if dest_place not in stub_nodes:
+            stub_nodes[dest_place] = _stub_node(dest_place, systems_by_id, excluded_by_qid, bridge_qids)
+        src, tgt = (member_qid, dest_place) if member_is_source else (dest_place, member_qid)
+        gv["links"].append({"from": src, "to": tgt, "weight": _clamp3(row["count"]),
+                             "arrow": True, "dash": [2, 3]})
+    gv["nodes"] = gv["nodes"] + sorted(stub_nodes.values(), key=lambda n: n["id"])
+    _index_parallel_links(gv["links"])
+
+    id_to_label = {n["id"]: n["label"] for n in gv["nodes"]}
+    boundary_rows = []
+    for (member_qid, dest_place, member_is_source), row in sorted(stub_links.items()):
+        src_id, tgt_id = (member_qid, dest_place) if member_is_source else (dest_place, member_qid)
+        src, tgt = id_to_label.get(src_id, src_id), id_to_label.get(tgt_id, tgt_id)
+        boundary_rows.append(
+            f'<div class="row">{src} → {tgt} <span class="muted">(travessia, x{row["count"]})</span></div>'
+        )
+    boundary_html = "".join(boundary_rows)
+
+    regions = [{"label": sys_row["label"], "members": sys_row["members"]}]
+    return gv, internal_edges, regions, boundary_html
+
+
+def _combo_key(opponent_mode: str, min_support: int, inference_policy: str) -> str:
+    return f"{opponent_mode}|{min_support}|{inference_policy}"
+
+
+_DEFAULT_SYSTEMS_COMBO: tuple[str, int, str] = ("complete", 1, "all")
+_ALL_SYSTEMS_COMBOS: tuple[tuple[str, int, str], ...] = tuple(
+    (om, ms, pol) for om in _OPPONENT_MODES for ms in _GATE_MIN_SUPPORTS for pol in _GATE_POLICIES
+)  # 3 x 3 x 4 = 36, literal nested-loop order (deterministic — never a set on this path)
+
+
+def _combo_payload(agg: Aggregate, opponent_mode: str, min_support: int, inference_policy: str
+                    ) -> dict[str, Any]:
+    """One (opponent_mode, min_support, inference_policy) combo's full page data — global + every
+    system, self-contained enough to embed straight into the HTML template. Bridges here are
+    NEVER display-truncated (unlike 8/9's `_gated_systems` top-N) — 11/12 show every bridge the
+    dominance rule found (owner: "o dono liberou a densidade porque o detalhe mora na vista de
+    sistema"); ``bridgeRank`` (rank by `bridge_strength`, 0=strongest) lets B's own slider cut the
+    DISPLAYED count client-side without recomputing anything server-side."""
+    raw_states, raw_edges, raw_handovers = _opponent_scoped(agg, opponent_mode)
+    states, edges, handovers = _apply_gate(
+        raw_states, raw_edges, raw_handovers, min_support=min_support, inference_policy=inference_policy)
+    detected = _detect_systems(states, edges, handovers)
+    systems, system_of = detected["systems"], detected["system_of"]
+    bridge_qids = frozenset(detected["bridge_qids"])
+    excluded = _excluded_states(states, system_of)
+    place_of = _place_of(system_of, excluded)
+    cross = _cross_member_links(place_of, edges, handovers)
+    radius = _anchor_radius(len(states))
+
+    strength_rank = {
+        qid: rank for rank, (qid, _w) in enumerate(
+            sorted(detected["bridge_strength"].items(), key=lambda kv: (-kv[1], kv[0])))
+    }
+
+    global_links = _collapse_directed(place_of, edges, handovers)
+    global_gv = _systems_level1_view(systems, excluded, global_links, bridge_qids, radius)
+    for node in global_gv["nodes"]:
+        if node["id"] in strength_rank:
+            node["bridgeRank"] = strength_rank[node["id"]]
+    global_knobs = _mount_knobs(len(global_gv["nodes"]))
+    global_list = "".join(
+        f'<div class="row">{s["label"]} <span class="muted">({len(s["members"])} nos)</span></div>'
+        for s in systems
+    )
+
+    systems_by_id = {s["id"]: s for s in systems}
+    excluded_by_qid = {_qid(k[1], k[0]): (k, v) for k, v in excluded.items()}
+
+    system_pages: dict[str, Any] = {}
+    for s in systems:
+        gv, internal_edges, regions, boundary_html = _system_boundary_view(
+            s, states, edges, handovers, cross, place_of, excluded_by_qid, systems_by_id, bridge_qids)
+        id_to_label = {n["id"]: n["label"] for n in gv["nodes"]}
+        system_pages[s["id"]] = {
+            "title": s["label"],
+            "subtitle": f"{len(s['members'])} nos, {s['actor']}-dominant",
+            "gv": gv, "regions": regions,
+            "listHtml": _edge_list_html(internal_edges, id_to_label) + boundary_html,
+            **_mount_knobs(len(gv["nodes"])),
+        }
+
+    return {
+        "global": {"title": "Global", "subtitle": f"{len(systems)} sistema(s), {len(bridge_qids)} ponte(s)",
+                   "gv": global_gv, "regions": [], "listHtml": global_list, **global_knobs},
+        "systems": system_pages,
+        "meta": {
+            "opponent_mode": opponent_mode, "min_support": min_support, "inference_policy": inference_policy,
+            "nodes": len(global_gv["nodes"]), "edges": len(global_gv["links"]),
+            "systems": len(systems), "bridges": len(bridge_qids),
+            "system_sizes": sorted((len(s["members"]) for s in systems), reverse=True),
+        },
+    }
 
 
 # ── 3. HTML rendering ────────────────────────────────────────────────────────────
@@ -1808,6 +2065,278 @@ def _render_variant10(out: Path, states4: dict, edges4: list[dict[str, Any]],
     return row_metrics
 
 
+# 11/12 (Frente 2) — shared template: pills + system-node click + stub-node click all write the
+# SAME `view` state ('global' | sysId); `Global` is the real default (App's own "Global chip
+# shows another graph" quirk deliberately NOT copied). Canvas recreated every `show()`/`rebuild()`
+# (same anti-leak pattern as `_PAGE8`/`_PAGE9`). `__CONTROLS_CLASS__` is the ONLY difference
+# between A and B — B's own combo/bridge/type/flow controls, hidden (not removed) on A, which is
+# permanently locked to `_DEFAULT_SYSTEMS_COMBO`.
+_PAGE_SYSTEMS = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>
+:root{--bg:#0b0b0f;--panel:#14141a;--line:#26262e;--ink:#e9e9ee;--ink2:#9a9aa6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.4 system-ui,sans-serif;display:flex;height:100vh}
+#canvas{flex:1;position:relative}#canvas canvas{width:100%;height:100%;display:block}
+#side{width:380px;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:16px}
+h1{font-size:15px;margin:0 0 4px}.muted{color:var(--ink2);font-size:12px;margin-bottom:10px}
+.row{padding:6px 8px;border:1px solid var(--line);border-radius:8px;margin-bottom:5px;font-size:12px}
+.g{opacity:.45;border-style:dashed}
+.legend{font-size:11px;color:var(--ink2);margin:10px 0;line-height:1.6}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.pill{background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:999px;padding:4px 10px;cursor:pointer;font:11px system-ui}
+.pill.active{border-color:#4d86ff;background:#1a1f2e}
+.controls{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:12px;font-size:12px}
+.controls.hidden{display:none}
+.controls label{display:block;margin-bottom:8px}
+.controls select,.controls input[type=range]{width:100%}
+.controls .tchk{display:inline-block;margin:0 8px 4px 0}
+</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1 id="sideTitle">__TITLE__</h1><div class="muted" id="sideSubtitle"></div>
+<div class="legend">Navegue pelas pills, clicando num nó de sistema (violeta), ou num mini-nó
+pontilhado (stub — um por destino, não por travessia); os três controles escrevem o mesmo estado.
+Anel rosa = nó de fronteira, com <code>[→saídas ←entradas]</code> no rótulo. Sólido = ação
+observada/inferida; tracejado longo cinza <code>[5,5]</code> = handover; pontilhado curto
+<code>[2,3]</code> terminando num mini-nó = stub de fronteira. Seta: SEMPRE em ação/handover/stub
+(estrutural); só no nível agregado (sistema↔sistema/ponte/âncora) a seta vem de
+<code>edge_arrow</code> (pode sumir se o volume for parelho/esparso demais). Filtro de tipo é
+DISPLAY-ONLY — não recalcula sistemas nem pontes (ponytail: recalcular exigiria portar a
+detecção de sistemas para o cliente; troque o combo para isso).</div>
+<div class="controls__CONTROLS_CLASS__" id="controls">
+  <label>Política de inferência<select id="selPolicy"></select></label>
+  <label>Suporte mínimo<select id="selSupport"></select></label>
+  <label>Oponente<select id="selOpponent"></select></label>
+  <label>Pontes exibidas: <span id="bridgeCountLabel"></span>
+    <input type="range" id="bridgeSlider" min="0" max="0" value="0"/></label>
+  <label>Viés de fluxo: <span id="flowLabel">0</span>
+    <input type="range" id="flowSlider" min="0" max="3" step="0.5" value="0"/></label>
+  <div id="typeChecks"></div>
+</div>
+<div class="pills" id="pills"></div>
+<div class="row" id="summary"></div>
+<div id="list"></div></div>
+<script src="graph.js"></script>
+<script>
+const COMBOS = __COMBOS_JSON__;          // {comboKey: {global, systems:{sysId:...}, meta}}
+const COMBO_OPTIONS = __COMBO_OPTIONS_JSON__;
+const OPPONENT_LABELS = __OPPONENT_MODE_LABELS_JSON__;
+const POLICY_LABELS = __POLICY_LABELS_JSON__;
+const DEFAULT_KEY = __DEFAULT_KEY__;
+let comboKey = DEFAULT_KEY;
+let view = 'global';
+let hiddenTypes = new Set();
+let flowBias = 0;
+let bridgeCount = 0;
+let mounted = null;
+
+function freshCanvas() {
+  const old = document.getElementById('cv');
+  const next = old.cloneNode(false);
+  old.parentNode.replaceChild(next, old);
+  return next;
+}
+function currentPageData() {
+  const data = COMBOS[comboKey];
+  return view === 'global' ? data.global : data.systems[view];
+}
+function bridgeNodesOf(data) { return data.global.gv.nodes.filter(function (n) { return n.bridgeRank !== undefined; }); }
+function applyFilters(pageData) {
+  const nodes = pageData.gv.nodes.filter(function (n) {
+    if (n.bridgeRank !== undefined && n.bridgeRank >= bridgeCount) return false;
+    if (hiddenTypes.has(n.cat) && !n.system && !n.pin && !n.stub) return false;
+    return true;
+  });
+  const keep = new Set(nodes.map(function (n) { return n.id; }));
+  const links = pageData.gv.links.filter(function (l) {
+    if (!keep.has(l.from) || !keep.has(l.to)) return false;
+    if (l.at && hiddenTypes.has(l.at)) return false;
+    return true;
+  });
+  return { nodes: nodes, links: links };
+}
+function flowPct(gv, positions) {  // % of ACTION edges (l.at set) whose target.x > source.x
+  let total = 0, mono = 0;
+  for (const l of gv.links) {
+    if (!l.at) continue;
+    const s = positions[l.from], t = positions[l.to];
+    if (!s || !t) continue;
+    total++;
+    if (t.x > s.x) mono++;
+  }
+  return total ? Math.round(100 * mono / total) : null;
+}
+function renderSummary(data, filtered) {
+  const meta = data.meta, baseline = COMBOS[DEFAULT_KEY].meta;
+  const bridgesShown = bridgeNodesOf(data).filter(function (n) { return n.bridgeRank < bridgeCount; }).length;
+  document.getElementById('summary').innerHTML =
+    '<b>' + POLICY_LABELS[meta.inference_policy] + '</b>, suporte&ge;' + meta.min_support + ', '
+    + OPPONENT_LABELS[meta.opponent_mode] + '<br/>'
+    + meta.systems + ' sistema(s) ' + JSON.stringify(meta.system_sizes) + ', '
+    + bridgesShown + '/' + meta.bridges + ' pontes exibidas<br/>'
+    + filtered.nodes.length + ' nos / ' + filtered.links.length + ' edges (vs '
+    + baseline.nodes + '/' + baseline.edges + ' no combo mais permissivo — ' + DEFAULT_KEY + ')';
+}
+function rebuild() {
+  const data = COMBOS[comboKey];
+  const pageData = currentPageData();
+  const filtered = applyFilters(pageData);
+
+  document.getElementById('sideTitle').textContent = pageData.title;
+  document.getElementById('sideSubtitle').textContent = pageData.subtitle;
+  document.getElementById('list').innerHTML = pageData.listHtml || '';
+
+  const pills = document.getElementById('pills');
+  pills.innerHTML = '';
+  const gPill = document.createElement('div');
+  gPill.className = 'pill' + (view === 'global' ? ' active' : '');
+  gPill.textContent = 'Global';
+  gPill.onclick = function () { view = 'global'; rebuild(); };
+  pills.appendChild(gPill);
+  for (const sysId of Object.keys(data.systems)) {
+    const p = document.createElement('div');
+    p.className = 'pill' + (view === sysId ? ' active' : '');
+    p.textContent = data.systems[sysId].title;
+    p.onclick = (function (id) { return function () { view = id; rebuild(); }; })(sysId);
+    pills.appendChild(p);
+  }
+
+  if (mounted && mounted.destroy) mounted.destroy();
+  const cv = freshCanvas();
+  mounted = GAGraph.mount(cv, {
+    mode: 'map', nodes: filtered.nodes, links: filtered.links, pan: true, zoom: true, collide: true,
+    bounded: false, charge: pageData.charge, linkDist: pageData.linkDist, gravity: pageData.gravity,
+    forceLabels: filtered.nodes.length < 40, regions: pageData.regions || [], flowBias: flowBias,
+    onSelect: function (n) {
+      if (!n) return;
+      if (String(n.id).indexOf('sys:') === 0) { view = n.id; rebuild(); }
+    }
+  });
+  renderSummary(data, filtered);
+  setTimeout(function () {
+    if (!mounted || !mounted.positions) return;
+    const pct = flowPct(filtered, mounted.positions());
+    if (pct !== null) {
+      document.getElementById('summary').innerHTML += '<br/>fluxo (alvo.x&gt;origem.x): ' + pct + '% das ações';
+    }
+  }, 1500);
+}
+
+function resetControlsForCombo() {
+  const bridges = bridgeNodesOf(COMBOS[comboKey]);
+  bridgeCount = bridges.length;
+  const slider = document.getElementById('bridgeSlider');
+  slider.max = bridges.length; slider.value = bridges.length;
+  document.getElementById('bridgeCountLabel').textContent = bridges.length + '/' + bridges.length;
+}
+
+const selPolicy = document.getElementById('selPolicy');
+const selSupport = document.getElementById('selSupport');
+const selOpponent = document.getElementById('selOpponent');
+function uniq(arr) { return arr.filter(function (v, i) { return arr.indexOf(v) === i; }); }
+for (const p of uniq(COMBO_OPTIONS.map(function (o) { return o.policy; }))) {
+  const o = document.createElement('option'); o.value = p; o.textContent = POLICY_LABELS[p]; selPolicy.appendChild(o);
+}
+for (const s of uniq(COMBO_OPTIONS.map(function (o) { return o.minSupport; }))) {
+  const o = document.createElement('option'); o.value = s; o.textContent = s; selSupport.appendChild(o);
+}
+for (const om of uniq(COMBO_OPTIONS.map(function (o) { return o.opponentMode; }))) {
+  const o = document.createElement('option'); o.value = om; o.textContent = OPPONENT_LABELS[om]; selOpponent.appendChild(o);
+}
+(function () {
+  const parts = DEFAULT_KEY.split('|');
+  selOpponent.value = parts[0]; selSupport.value = parts[1]; selPolicy.value = parts[2];
+})();
+function onComboChange() {
+  comboKey = selOpponent.value + '|' + selSupport.value + '|' + selPolicy.value;
+  view = 'global';  // trocar de combo reseta view (sys:N não é estável entre combos)
+  resetControlsForCombo();
+  rebuild();
+}
+selPolicy.onchange = onComboChange;
+selSupport.onchange = onComboChange;
+selOpponent.onchange = onComboChange;
+document.getElementById('bridgeSlider').oninput = function () {
+  bridgeCount = Number(this.value);
+  document.getElementById('bridgeCountLabel').textContent = bridgeCount + '/' + bridgeNodesOf(COMBOS[comboKey]).length;
+  rebuild();
+};
+document.getElementById('flowSlider').oninput = function () {
+  flowBias = Number(this.value);
+  document.getElementById('flowLabel').textContent = flowBias;
+  rebuild();
+};
+const ALL_TYPES = ['guard', 'pass', 'sweep', 'takedown', 'control', 'submission', 'escape', 'transition'];
+const typeChecks = document.getElementById('typeChecks');
+for (const ty of ALL_TYPES) {
+  const label = document.createElement('label');
+  label.className = 'tchk';
+  const cb = document.createElement('input');
+  cb.type = 'checkbox'; cb.checked = true;
+  cb.onchange = (function (t, box) { return function () {
+    if (box.checked) hiddenTypes.delete(t); else hiddenTypes.add(t);
+    rebuild();
+  }; })(ty, cb);
+  label.appendChild(cb);
+  label.appendChild(document.createTextNode(' ' + ty));
+  typeChecks.appendChild(label);
+}
+
+resetControlsForCombo();
+rebuild();
+</script></body></html>"""
+
+
+def _render_systems_page(out: Path, filename: str, title: str, agg: Aggregate,
+                          combos: tuple[tuple[str, int, str], ...], *,
+                          default_combo: tuple[str, int, str], controls: bool) -> dict[str, Any]:
+    """Frente 2 §2.1: ONE function, two wrappers. A = B with the controls hidden and permanently
+    locked to `default_combo` (only that combo is even precomputed for A — cheap, and the reason
+    A's own payload is byte-identical to B's payload at that same combo key, never two different
+    code paths producing "the same" graph)."""
+    payloads = {_combo_key(*c): _combo_payload(agg, *c) for c in combos}
+    default_key = _combo_key(*default_combo)
+    combos_json = json.dumps(payloads, ensure_ascii=False)
+    payload_bytes = len(combos_json.encode("utf-8"))
+
+    combo_options = [{"key": _combo_key(*c), "opponentMode": c[0], "minSupport": c[1], "policy": c[2]}
+                      for c in combos]
+    html = (
+        _PAGE_SYSTEMS
+        .replace("__TITLE__", title)
+        .replace("__CONTROLS_CLASS__", "" if controls else " hidden")
+        .replace("__DEFAULT_KEY__", json.dumps(default_key))
+        .replace("__COMBOS_JSON__", combos_json)
+        .replace("__COMBO_OPTIONS_JSON__", json.dumps(combo_options, ensure_ascii=False))
+        .replace("__OPPONENT_MODE_LABELS_JSON__", json.dumps(_OPPONENT_MODE_LABELS, ensure_ascii=False))
+        .replace("__POLICY_LABELS_JSON__", json.dumps(_GATE_POLICY_LABELS, ensure_ascii=False))
+    )
+    (out / filename).write_text(html, encoding="utf-8")
+
+    default_payload = payloads[default_key]
+    handover_links = sum(1 for link in default_payload["global"]["gv"]["links"] if link.get("dashed"))
+    return {
+        "nodes": default_payload["meta"]["nodes"], "edges": default_payload["meta"]["edges"],
+        "handover_links": handover_links,
+        "systems": default_payload["meta"]["systems"], "bridges": default_payload["meta"]["bridges"],
+        "combos": len(combos), "payload_bytes": payload_bytes,
+        "knobs": {"charge": default_payload["global"]["charge"], "linkDist": default_payload["global"]["linkDist"],
+                  "gravity": default_payload["global"]["gravity"]},
+    }
+
+
+def _render_variant11(out: Path, agg: Aggregate) -> dict[str, Any]:
+    return _render_systems_page(
+        out, "11-sistemas-vista-separada.html", "11 — Sistemas, vista separada", agg,
+        (_DEFAULT_SYSTEMS_COMBO,), default_combo=_DEFAULT_SYSTEMS_COMBO, controls=False)
+
+
+def _render_variant12(out: Path, agg: Aggregate) -> dict[str, Any]:
+    return _render_systems_page(
+        out, "12-sistemas-vista-separada-seletiva.html", "12 — Sistemas, vista separada (seletiva)", agg,
+        _ALL_SYSTEMS_COMBOS, default_combo=_DEFAULT_SYSTEMS_COMBO, controls=True)
+
+
 _VARIANT_DESCRIPTIONS = [
     ("1-baseline.html", "the app's CURRENT graph — technique=node — the comparison ruler"),
     ("2-migrado-proprio.html", "new model, YOU only — states=nodes, edges=action"),
@@ -1819,6 +2348,8 @@ _VARIANT_DESCRIPTIONS = [
     ("8-sistemas-colapsavel.html", "variant 4 grouped into systems (greedy-modularity) — click a system to drill in"),
     ("9-sistemas-expande-in-place.html", "same systems as 8, but expansion stays in the SAME view — click a system row/node to expand in place (multiple at once)"),
     ("10-gating-comparado.html", "same gated base, side by side across inference policies — see the effect of the density gate before trusting the dominance/bridge numbers"),
+    ("11-sistemas-vista-separada.html", "global (every node/edge, systems collapsed, ALL bridges) + a separate per-system view with a stub mini-node per boundary destination — locked combo, no controls"),
+    ("12-sistemas-vista-separada-seletiva.html", "same as 11, controls live — 36 precomputed (policy x min_support x opponent mode) combos, client-side bridge/type/flow-bias filters"),
 ]
 
 _INDEX_PAGE = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
@@ -2188,6 +2719,34 @@ def _patch_graph_js(js_text: str) -> str:
             "      return { k, x: W / 2 - (mnX + mxX) / 2 * k, y: H / 2 - (mnY + mxY) / 2 * k };\n"
             "    }",
         ),
+        (
+            # 11/12 fix (owner-reported, ONLY patch that touches an already-approved page's look —
+            # screenshot 4 and 8 before/after): the arrowhead gate used to hide on cam.k<1, which
+            # is every small graph this module renders after fitTarget() zooms to fit. Respect
+            # forceLabels the same way the label pass already does.
+            "        if (l.arrow && (!useCam || cam.k >= 1)) {\n",
+            "        if (l.arrow && (opts.forceLabels || !useCam || cam.k >= 1)) {  // map-prototype patch: arrowhead gate now respects forceLabels\n",
+        ),
+        (
+            # 11/12's own dash vocabulary — a stub boundary link ([2,3]) is neither the low-
+            # success/handover long dash ([5,5]) nor the contested short dash ([3,4]); `l.dash`
+            # (an explicit array) wins when present, everything else keeps its old behaviour.
+            "        ctx.setLineDash(l.dashed ? [5, 5] : (contested ? [3, 4] : []));  // low-success / handover dashed\n",
+            "        ctx.setLineDash(l.dash || (l.dashed ? [5, 5] : (contested ? [3, 4] : [])));  // map-prototype patch: per-link custom dash (11/12 stub links, [2,3])\n",
+        ),
+        (
+            # 11/12's flow-bias layout (`opts.flowBias`, default undefined -> falsy -> every other
+            # variant byte-identical): push the target +x and the source -x, scaled by the link's
+            # own weight, BEFORE the node loop integrates positions below — a pinned node zeroes
+            # its own vx there regardless, so the anchor cross never moves.
+            "        l.s.vx += fx; l.s.vy += fy; l.t.vx -= fx; l.t.vy -= fy;\n      }\n",
+            "        l.s.vx += fx; l.s.vy += fy; l.t.vx -= fx; l.t.vy -= fy;\n"
+            "        if (opts.flowBias && l.arrow) {  // map-prototype patch: flow-bias layout (11/12)\n"
+            "          const fb = opts.flowBias * (l.weight || 1) * alpha;\n"
+            "          l.t.vx += fb; l.s.vx -= fb;\n"
+            "        }\n"
+            "      }\n",
+        ),
     ]
     for old, new in patches:
         if old not in js_text:
@@ -2295,6 +2854,11 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
     # per inference policy, at the min_support chosen for 8/9.
     metrics["gating_by_policy"] = _render_variant10(out, states4, edges4, handovers4)
 
+    # 11/12 — separate systems view: global (every node/edge, systems collapsed, ALL bridges) +
+    # a per-system boundary+stub view. 11 = locked combo, no controls; 12 = the same page, live.
+    metrics["variants"]["11-sistemas-vista-separada"] = _render_variant11(out, agg)
+    metrics["variants"]["12-sistemas-vista-separada-seletiva"] = _render_variant12(out, agg)
+
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,
         "states_inferred": agg.raw_states_inferred,
@@ -2345,9 +2909,11 @@ def main() -> int:
 
     print(f"{'variant':32} {'nodes':>6} {'edges':>6} {'e/n':>6} {'%inf':>6} {'partner':>8} {'handover':>9}")
     for name, m in metrics["variants"].items():
-        pct = m["pct_inferred_edges"]
-        print(f"{name:32} {m['nodes']:>6} {m['edges']:>6} {m['edges_per_node']:>6} "
-              f"{'—' if pct is None else pct:>6} {m['partner_elements']:>8} {m['handover_links']:>9}")
+        pct = m.get("pct_inferred_edges")
+        e_n = m.get("edges_per_node", "—")
+        partner = m.get("partner_elements", "—")
+        print(f"{name:32} {m['nodes']:>6} {m['edges']:>6} {e_n!s:>6} "
+              f"{'—' if pct is None else pct:>6} {partner!s:>8} {m['handover_links']:>9}")
     cir = metrics["corpus_inference_rate"]
     print(f"\ncorpus inference rate: states {cir['states_inferred_pct']}% "
           f"({cir['states_inferred']}/{cir['states_total']}), "
