@@ -8,8 +8,7 @@
     "finish": {"node_key": "finish", "label": "Finalização", "type": "control", "orientation": "neutral", "role": "finish"},
     "start neutral": {"node_key": "start neutral", "label": "Início Neutro", "type": "control", "orientation": "neutral", "role": "start"},
     "start top": {"node_key": "start top", "label": "Início por Cima", "type": "control", "orientation": "top", "role": "start"},
-    "start bottom": {"node_key": "start bottom", "label": "Início por Baixo", "type": "control", "orientation": "bottom", "role": "start"},
-    "start engaged": {"node_key": "start engaged", "label": "Início Engajado", "type": "control", "orientation": "neutral", "role": "start"}
+    "start bottom": {"node_key": "start bottom", "label": "Início por Baixo", "type": "control", "orientation": "bottom", "role": "start"}
   },
   "generic_actions": {
     "guard transition": {"action_key": "guard transition", "label": "Transição de Guarda", "type": "transition"},
@@ -25,7 +24,7 @@
     "$start|takedown": "start neutral",
     "$start|pass": "start top",
     "$start|escape": "start bottom",
-    "$start|submission": "start engaged",
+    "$start|submission": "start neutral",
     "takedown|*": "top transition",
     "sweep|*": "top transition",
     "pass|*": "top transition",

@@ -5,7 +5,7 @@
     "action_pair_to_state": {
       "$start|escape": "start bottom",
       "$start|pass": "start top",
-      "$start|submission": "start engaged",
+      "$start|submission": "start neutral",
       "$start|takedown": "start neutral",
       "*|*": "scramble",
       "escape|*": "bottom transition",
@@ -78,13 +78,6 @@
         "label": "Início por Baixo",
         "node_key": "start bottom",
         "orientation": "bottom",
-        "role": "start",
-        "type": "control"
-      },
-      "start engaged": {
-        "label": "Início Engajado",
-        "node_key": "start engaged",
-        "orientation": "neutral",
         "role": "start",
         "type": "control"
       },

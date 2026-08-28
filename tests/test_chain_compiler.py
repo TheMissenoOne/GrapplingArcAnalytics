@@ -54,15 +54,15 @@ def test_chain_opening_on_clinch_label_gets_start_neutral():
 
 
 def test_armbar_then_triangle_chains_through_chained_submission():
-    """`$start|submission -> start engaged` (2026-08-27) opens the chain — see the dedicated
-    'start engaged' tests for that row's own focus; this test's own focus is the MID-chain
-    submission|submission bridge (unaffected)."""
+    """`$start|submission -> start neutral` opens the chain (owner call 2026-08-27, replacing
+    a dedicated 'start engaged' node he judged meaningless); this test's own focus is the
+    MID-chain submission|submission bridge, unaffected either way."""
     chain = compile_chain([
         _ev("Armbar", "submission"),
         _ev("Triangle Choke", "submission"),
     ], inference_table=TABLE)
 
-    assert [s.node_key for s in chain.states] == ["start engaged", "chained submission", "finish"]
+    assert [s.node_key for s in chain.states] == ["start neutral", "chained submission", "finish"]
     assert [s.inferred for s in chain.states] == [True, True, True]
     e0, e1 = chain.edges
     assert e0.action_key == "armbar" and e0.target_key == "chained submission"
@@ -78,13 +78,13 @@ def test_submission_terminal_resolves_to_finish_not_scramble():
     than 'no more info' — it should land on the generic 'finish' node, not 'scramble'. A
     submission in the MIDDLE of the chain (bridging to another action, not a real state) is
     untouched — still the '*|*' fallback, same as before this change. `$start|submission ->
-    start engaged` (also 2026-08-27) opens the chain — this test's own focus is the mid-chain
-    and terminal gaps, unaffected by that row."""
+    start neutral` opens the chain — this test's own focus is the mid-chain and terminal gaps,
+    unaffected by that row."""
     chain = compile_chain([
         _ev("Armbar", "submission"),
         _ev("Guard Pass", "pass"),  # mid-chain: (submission, pass) has no dedicated row
     ], inference_table=TABLE)
-    assert [s.node_key for s in chain.states] == ["start engaged", "scramble", "top transition"]
+    assert [s.node_key for s in chain.states] == ["start neutral", "scramble", "top transition"]
     e0, e1 = chain.edges
     assert e0.action_key == "armbar" and e0.target_key == "scramble"  # mid-chain: unaffected
     assert e1.action_key == "guard pass" and e1.terminal is True
@@ -195,17 +195,19 @@ def test_chain_opening_on_takedown_gets_start_neutral_initial_state():
     assert not edge.inferred and not edge.terminal
 
 
-def test_chain_opening_on_submission_resolves_to_start_engaged():
-    """D2's declarative opening row (owner call, 2026-08-27): a chain whose first action is a
-    'submission' has its own row (`"$start|submission" -> "start engaged"`, orientation
-    neutral) — distinct from 'start neutral' (which means "standing"), since a submission
-    attempt opening means the fighters were already engaged, not on their feet."""
+def test_chain_opening_on_submission_resolves_to_start_neutral():
+    """D2's declarative opening row: a chain whose first action is a 'submission' opens on
+    'start neutral'. A dedicated 'start engaged' node was tried and REMOVED — the owner judged
+    the concept meaningless, and routing here is the honest alternative: where the athlete was
+    before an unlogged submission is genuinely unknown, which is what the neutral anchor is
+    for. Measured cost, accepted: start neutral becomes the highest-degree node in his own
+    graph (9), above butterfly guard."""
     chain = compile_chain([
         _ev("Armbar", "submission"),
         _ev("Guard Pass", "pass"),
     ], inference_table=TABLE)
 
-    assert chain.states[0].node_key == "start engaged"
+    assert chain.states[0].node_key == "start neutral"
     assert chain.states[0].role == "start"
 
 

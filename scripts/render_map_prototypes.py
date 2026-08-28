@@ -2151,8 +2151,8 @@ detecção de sistemas para o cliente; troque o combo para isso).</div>
   <label>Oponente<select id="selOpponent"></select></label>
   <label>Pontes exibidas: <span id="bridgeCountLabel"></span>
     <input type="range" id="bridgeSlider" min="0" max="0" value="0"/></label>
-  <label>Viés de fluxo: <span id="flowLabel">0</span>
-    <input type="range" id="flowSlider" min="0" max="3" step="0.5" value="0"/></label>
+  <label>Viés de fluxo: <span id="flowLabel">2</span>
+    <input type="range" id="flowSlider" min="0" max="3" step="0.5" value="2"/></label>
   <div id="typeChecks"></div>
 </div>
 <div class="pills" id="pills"></div>
@@ -2168,7 +2168,7 @@ const DEFAULT_KEY = __DEFAULT_KEY__;
 let comboKey = DEFAULT_KEY;
 let view = 'global';
 let hiddenTypes = new Set();
-let flowBias = 0;
+let flowBias = 2;   // measured: at 0 the monotonicity read is noise (38-88% across reloads of the SAME view), at 2 it settles to 75-88%
 let bridgeCount = 0;
 let mounted = null;
 
@@ -2699,7 +2699,10 @@ def _patch_graph_js(js_text: str) -> str:
             "            text: n.label, x: n.x, y: n.y + r + ls + 2,\n"
             "            font: `${n === hov ? '600 ' : ''}${ls}px 'Spline Sans Mono', monospace`,\n"
             "            color: '#cfcfd6', alpha: dim ? 0.18 : (mode === 'hero' && n !== hov ? 0.6 : 0.92),\n"
-            "            kind: 'node', priority: n.system ? 999 : (n.bridge ? 99 : (n.size || 1)),\n"
+            # anchors (pinned start/finish) sit just under systems and bridges: they are the map's
+            # frame of reference, so a plain node's label must never bury them (measured: the two
+            # finish anchors lost their labels to ordinary neighbours once flow bias was on).
+            "            kind: 'node', priority: n.system ? 999 : (n.bridge ? 99 : (n.pin ? 89 : (n.size || 1))),\n"
             "          });\n"
             "        }\n"
             "        ctx.globalAlpha = 1;\n"

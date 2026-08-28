@@ -239,15 +239,18 @@ def test_start_escape_resolves_to_start_bottom() -> None:
     assert infer_state_for_action_pair(table, "$start", "escape")["node_key"] == "start bottom"
 
 
-def test_start_submission_resolves_to_start_engaged_not_start_neutral() -> None:
-    """A chain opening on a `submission` attempt is neither standing ($start|takedown ->
-    'start neutral') nor a topology-known opening — 'start engaged' (neutral orientation) is
-    its own generic state, not folded into 'start neutral' (which means 'standing')."""
+def test_start_submission_folds_into_start_neutral() -> None:
+    """A chain opening on a `submission` attempt folds into 'start neutral'. It briefly had a
+    dedicated 'start engaged' node; the owner removed it (2026-08-27) as a meaningless concept,
+    and the neutral anchor is the honest home: where the athlete was before an unlogged
+    submission is genuinely unknown. There is deliberately NO generic state left that means
+    'engaged but unplaced'."""
     table = load_inference_table()
     entry = infer_state_for_action_pair(table, "$start", "submission")
-    assert entry["node_key"] == "start engaged"
+    assert entry["node_key"] == "start neutral"
     assert entry["orientation"] == "neutral"
     assert entry["role"] == "start"
+    assert "start engaged" not in table["generic_states"]
 
 
 def test_escape_star_resolves_to_bottom_transition_mirroring_top_transition() -> None:
@@ -298,7 +301,6 @@ def test_generic_states_role_markers() -> None:
     assert states["start neutral"]["role"] == "start"
     assert states["start top"]["role"] == "start"
     assert states["start bottom"]["role"] == "start"
-    assert states["start engaged"]["role"] == "start"
     for bridge_key in ("scramble", "top transition", "bottom transition", "chained submission"):
         assert "role" not in states[bridge_key]
 
@@ -309,7 +311,6 @@ def test_start_nodes_carry_the_documented_orientation() -> None:
     assert states["start neutral"]["orientation"] == "neutral"
     assert states["start top"]["orientation"] == "top"
     assert states["start bottom"]["orientation"] == "bottom"
-    assert states["start engaged"]["orientation"] == "neutral"
 
 
 # ── role_of: the standalone node_key -> role lookup ──────────────────────────────
@@ -318,7 +319,6 @@ def test_role_of_generic_states() -> None:
     assert role_of("start neutral") == "start"
     assert role_of("start top") == "start"
     assert role_of("start bottom") == "start"
-    assert role_of("start engaged") == "start"
     assert role_of("scramble") is None
     assert role_of("bottom transition") is None
 
