@@ -1420,3 +1420,21 @@ com as oito fontes, `diff -r` byte-idêntico. Byte-identidade das variantes 1–
 uma captura por tempo não é oráculo estável para elas, verificado repetindo a MESMA página).
 Capturas 1280×800 e 390×840 em `data/processed/map_prototypes/screenshots/`
 (`scripts/shoot_map_prototypes.py`, playwright sob `uv run --with playwright`).
+
+## 16. Fase 5d — orçamento de traços e dobra por categoria no site (2026-09-01)
+
+`min_count=2` (que dropava 1 974 ocorrências em silêncio) morreu. `path_payload` ranqueia
+variantes por support/strength e mantém `PATH_VARIANT_BUDGET = 60`; o excedente DOBRA em vez
+de sumir: grupo = família `(source,target,actor)` + categoria uniforme de ação → UM caminho
+sintético ("Submissions ×2"), passado pelo MESMO bundler/layout (ganha traço e posição de
+graça), expandindo na seleção; rótulos comprimem repetição consecutiva ("Triangle ×3",
+display). Campo aditivo `folded` + `stats.variants/foldedGroups/foldedVersions`; invariante
+§13 testado (variants == kept + folded — nada some). Finalização unificada = amarelo CHEIO
+(decisão do dono; a cor da seta já diz de quem foi). Rótulos de ação seguem a direção da
+aresta e arqueiam no traço curvo em toda instância (App TextPath/textPath; site tangente no
+ponto do rótulo, upgrade por-caractere nomeado).
+
+Medido: dossiê/breakdown nunca dobram em volume real (59/48/56/31 variantes < 60); oceano
+dobra 2 161 de 2 221 em 877 grupos ⇒ 937 traços — melhor que nada-dropado, pior que a
+legibilidade do gate antigo (396). Teto de grupos com DIVULGAÇÃO (não desenhado ≠ descartado)
+é a alavanca seguinte, aplicada só ao oceano.
