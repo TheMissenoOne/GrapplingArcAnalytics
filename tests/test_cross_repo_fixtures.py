@@ -52,6 +52,11 @@ GENERATORS: list[tuple[str, Path, Path]] = [
         APP_FIXTURES / "flowLayoutGolden.json",
     ),
     (
+        "scripts.export_ring_layout_fixtures",
+        ROOT / "data" / "rating" / "ring_layout_golden.json",
+        APP_FIXTURES / "ringLayoutGolden.json",
+    ),
+    (
         "scripts.export_map_aggregate_fixtures",
         ROOT / "data" / "rating" / "map_aggregate_golden.json",
         APP_FIXTURES / "mapAggregateGolden.json",

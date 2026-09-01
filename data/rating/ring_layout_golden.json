@@ -1,0 +1,3141 @@
+{
+  "anchor_placements": {
+    "arco": {
+      "angles": {
+        "bottom": 65.0,
+        "neutral": 90.0,
+        "top": 115.0
+      },
+      "radius": {
+        "bottom": 1.0,
+        "neutral": 1.0,
+        "top": 1.0
+      }
+    },
+    "bipolar": {
+      "angles": {
+        "bottom": 270.0,
+        "neutral": 180.0,
+        "top": 90.0
+      },
+      "radius": {
+        "bottom": 1.0,
+        "neutral": 0.45,
+        "top": 1.0
+      }
+    },
+    "tercos": {
+      "angles": {
+        "bottom": 270.0,
+        "neutral": 180.0,
+        "top": 90.0
+      },
+      "radius": {
+        "bottom": 1.0,
+        "neutral": 1.0,
+        "top": 1.0
+      }
+    }
+  },
+  "cases": [
+    {
+      "anchor_slots": {},
+      "bubbles": {
+        "points": {
+          "s:closed guard": [
+            53.6,
+            38.0
+          ],
+          "s:finish": [
+            33.8,
+            38.0
+          ],
+          "s:mount": [
+            30.5,
+            38.0
+          ]
+        },
+        "segments": {
+          "g:0": [
+            33.8,
+            16.0
+          ],
+          "g:1": [
+            43.7,
+            16.0
+          ]
+        }
+      },
+      "bundled": {
+        "points": [
+          {
+            "id": "s:closed guard",
+            "kind": "state",
+            "state_key": "closed guard"
+          },
+          {
+            "id": "s:mount",
+            "kind": "state",
+            "state_key": "mount"
+          },
+          {
+            "id": "s:finish",
+            "kind": "state",
+            "state_key": "finish"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:closed guard",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:mount"
+          },
+          {
+            "actions": [
+              "americana"
+            ],
+            "from_point": "s:mount",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:finish"
+          }
+        ]
+      },
+      "centre_ids": [
+        "s:finish"
+      ],
+      "label_len": {
+        "g:0": 6,
+        "g:1": 9,
+        "s:closed guard": 12,
+        "s:finish": 6,
+        "s:mount": 5
+      },
+      "name": "linear",
+      "paths": [
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p1",
+          "source": "closed guard",
+          "target": "mount"
+        },
+        {
+          "actions": [
+            "americana"
+          ],
+          "path_id": "p2",
+          "source": "mount",
+          "target": "finish"
+        }
+      ],
+      "placements": {
+        "arco": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:closed guard": [
+              -254.25135077,
+              225.734912302
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:mount": [
+              0.0,
+              -170.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:closed guard": 2,
+            "s:finish": 0,
+            "s:mount": 1
+          },
+          "sector": {
+            "s:closed guard": "bottom",
+            "s:finish": "top",
+            "s:mount": "top"
+          },
+          "unreachable": []
+        },
+        "bipolar": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:closed guard": [
+              -254.25135077,
+              225.734912302
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:mount": [
+              0.0,
+              -170.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:closed guard": 2,
+            "s:finish": 0,
+            "s:mount": 1
+          },
+          "sector": {
+            "s:closed guard": "bottom",
+            "s:finish": "top",
+            "s:mount": "top"
+          },
+          "unreachable": []
+        },
+        "tercos": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:closed guard": [
+              -254.25135077,
+              225.734912302
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:mount": [
+              0.0,
+              -170.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:closed guard": 2,
+            "s:finish": 0,
+            "s:mount": 1
+          },
+          "sector": {
+            "s:closed guard": "bottom",
+            "s:finish": "top",
+            "s:mount": "top"
+          },
+          "unreachable": []
+        }
+      },
+      "ring_index": {
+        "s:closed guard": 2,
+        "s:finish": 0,
+        "s:mount": 1
+      },
+      "sector_of": {
+        "s:closed guard": "bottom",
+        "s:mount": "top"
+      },
+      "support": {
+        "s:closed guard": 1.0,
+        "s:finish": 1.0,
+        "s:mount": 2.0
+      },
+      "target_aspect": null,
+      "why": "cadeia trivial ate a finalizacao: aneis 2,1,0 lidos de fora para dentro"
+    },
+    {
+      "anchor_slots": {
+        "s:start neutral": "neutral"
+      },
+      "bubbles": {
+        "points": {
+          "s:closed guard": [
+            53.6,
+            38.0
+          ],
+          "s:finish": [
+            33.8,
+            38.0
+          ],
+          "s:mount": [
+            30.5,
+            38.0
+          ],
+          "s:side control": [
+            53.6,
+            38.0
+          ],
+          "s:start neutral": [
+            56.9,
+            38.0
+          ]
+        },
+        "segments": {
+          "g:0": [
+            56.9,
+            16.0
+          ],
+          "g:1": [
+            33.8,
+            16.0
+          ],
+          "g:2": [
+            66.8,
+            16.0
+          ],
+          "g:3": [
+            47.0,
+            16.0
+          ],
+          "g:4": [
+            40.4,
+            16.0
+          ]
+        }
+      },
+      "bundled": {
+        "points": [
+          {
+            "id": "s:start neutral",
+            "kind": "state",
+            "state_key": "start neutral"
+          },
+          {
+            "id": "s:side control",
+            "kind": "state",
+            "state_key": "side control"
+          },
+          {
+            "id": "s:closed guard",
+            "kind": "state",
+            "state_key": "closed guard"
+          },
+          {
+            "id": "s:mount",
+            "kind": "state",
+            "state_key": "mount"
+          },
+          {
+            "id": "s:finish",
+            "kind": "state",
+            "state_key": "finish"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "scissor sweep"
+            ],
+            "from_point": "s:closed guard",
+            "id": "g:0",
+            "path_ids": [
+              "p4"
+            ],
+            "to_point": "s:mount"
+          },
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:mount",
+            "id": "g:1",
+            "path_ids": [
+              "p5"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "mount transition"
+            ],
+            "from_point": "s:side control",
+            "id": "g:2",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:mount"
+          },
+          {
+            "actions": [
+              "guard pull"
+            ],
+            "from_point": "s:start neutral",
+            "id": "g:3",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:closed guard"
+          },
+          {
+            "actions": [
+              "takedown"
+            ],
+            "from_point": "s:start neutral",
+            "id": "g:4",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:side control"
+          }
+        ]
+      },
+      "centre_ids": [
+        "s:finish"
+      ],
+      "label_len": {
+        "g:0": 13,
+        "g:1": 6,
+        "g:2": 16,
+        "g:3": 10,
+        "g:4": 8,
+        "s:closed guard": 12,
+        "s:finish": 6,
+        "s:mount": 5,
+        "s:side control": 12,
+        "s:start neutral": 13
+      },
+      "name": "fork_merge",
+      "paths": [
+        {
+          "actions": [
+            "takedown"
+          ],
+          "path_id": "p1",
+          "source": "start neutral",
+          "target": "side control"
+        },
+        {
+          "actions": [
+            "guard pull"
+          ],
+          "path_id": "p2",
+          "source": "start neutral",
+          "target": "closed guard"
+        },
+        {
+          "actions": [
+            "mount transition"
+          ],
+          "path_id": "p3",
+          "source": "side control",
+          "target": "mount"
+        },
+        {
+          "actions": [
+            "scissor sweep"
+          ],
+          "path_id": "p4",
+          "source": "closed guard",
+          "target": "mount"
+        },
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p5",
+          "source": "mount",
+          "target": "finish"
+        }
+      ],
+      "placements": {
+        "arco": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:closed guard": [
+              -254.25135077,
+              225.734912302
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:mount": [
+              0.0,
+              -170.0
+            ],
+            "s:side control": [
+              0.0,
+              -340.0
+            ],
+            "s:start neutral": [
+              0.0,
+              -560.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:closed guard": 2,
+            "s:finish": 0,
+            "s:mount": 1,
+            "s:side control": 2,
+            "s:start neutral": 3
+          },
+          "sector": {
+            "s:closed guard": "bottom",
+            "s:finish": "top",
+            "s:mount": "top",
+            "s:side control": "top",
+            "s:start neutral": "bottom"
+          },
+          "unreachable": []
+        },
+        "bipolar": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:closed guard": [
+              -254.25135077,
+              225.734912302
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:mount": [
+              0.0,
+              -170.0
+            ],
+            "s:side control": [
+              0.0,
+              -340.0
+            ],
+            "s:start neutral": [
+              -252.0,
+              0.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:closed guard": 2,
+            "s:finish": 0,
+            "s:mount": 1,
+            "s:side control": 2,
+            "s:start neutral": 3
+          },
+          "sector": {
+            "s:closed guard": "bottom",
+            "s:finish": "top",
+            "s:mount": "top",
+            "s:side control": "top",
+            "s:start neutral": "bottom"
+          },
+          "unreachable": []
+        },
+        "tercos": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:closed guard": [
+              -254.25135077,
+              225.734912302
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:mount": [
+              0.0,
+              -170.0
+            ],
+            "s:side control": [
+              0.0,
+              -340.0
+            ],
+            "s:start neutral": [
+              -560.0,
+              0.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:closed guard": 2,
+            "s:finish": 0,
+            "s:mount": 1,
+            "s:side control": 2,
+            "s:start neutral": 3
+          },
+          "sector": {
+            "s:closed guard": "bottom",
+            "s:finish": "top",
+            "s:mount": "top",
+            "s:side control": "top",
+            "s:start neutral": "bottom"
+          },
+          "unreachable": []
+        }
+      },
+      "ring_index": {
+        "s:closed guard": 2,
+        "s:finish": 0,
+        "s:mount": 1,
+        "s:side control": 2,
+        "s:start neutral": 3
+      },
+      "sector_of": {
+        "s:closed guard": "bottom",
+        "s:mount": "top",
+        "s:side control": "top"
+      },
+      "support": {
+        "s:closed guard": 2.0,
+        "s:finish": 1.0,
+        "s:mount": 3.0,
+        "s:side control": 2.0,
+        "s:start neutral": 2.0
+      },
+      "target_aspect": null,
+      "why": "duas rotas ate a MESMA finalizacao, uma por setor — onde a ordenacao por baricentro dentro do setor e o desempate (bary, -support, id) tem de bater"
+    },
+    {
+      "anchor_slots": {},
+      "bubbles": {
+        "points": {
+          "s:back control": [
+            53.6,
+            38.0
+          ],
+          "s:closed guard": [
+            53.6,
+            38.0
+          ],
+          "s:finish": [
+            33.8,
+            38.0
+          ],
+          "s:turtle": [
+            33.8,
+            38.0
+          ]
+        },
+        "segments": {
+          "g:0": [
+            33.8,
+            16.0
+          ],
+          "g:1": [
+            43.7,
+            16.0
+          ]
+        }
+      },
+      "bundled": {
+        "points": [
+          {
+            "id": "s:closed guard",
+            "kind": "state",
+            "state_key": "closed guard"
+          },
+          {
+            "id": "s:finish",
+            "kind": "state",
+            "state_key": "finish"
+          },
+          {
+            "id": "s:turtle",
+            "kind": "state",
+            "state_key": "turtle"
+          },
+          {
+            "id": "s:back control",
+            "kind": "state",
+            "state_key": "back control"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:closed guard",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "back take"
+            ],
+            "from_point": "s:turtle",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:back control"
+          }
+        ]
+      },
+      "centre_ids": [
+        "s:finish"
+      ],
+      "label_len": {
+        "g:0": 6,
+        "g:1": 9,
+        "s:back control": 12,
+        "s:closed guard": 12,
+        "s:finish": 6,
+        "s:turtle": 6
+      },
+      "name": "unreachable",
+      "paths": [
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p1",
+          "source": "closed guard",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "back take"
+          ],
+          "path_id": "p2",
+          "source": "turtle",
+          "target": "back control"
+        }
+      ],
+      "placements": {
+        "arco": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:back control": [
+              0.0,
+              -340.0
+            ],
+            "s:closed guard": [
+              0.0,
+              170.0
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:turtle": [
+              0.0,
+              340.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:back control": 2,
+            "s:closed guard": 1,
+            "s:finish": 0,
+            "s:turtle": 2
+          },
+          "sector": {
+            "s:back control": "top",
+            "s:closed guard": "bottom",
+            "s:finish": "bottom",
+            "s:turtle": "bottom"
+          },
+          "unreachable": [
+            "s:back control",
+            "s:turtle"
+          ]
+        },
+        "bipolar": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:back control": [
+              0.0,
+              -340.0
+            ],
+            "s:closed guard": [
+              0.0,
+              170.0
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:turtle": [
+              0.0,
+              340.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:back control": 2,
+            "s:closed guard": 1,
+            "s:finish": 0,
+            "s:turtle": 2
+          },
+          "sector": {
+            "s:back control": "top",
+            "s:closed guard": "bottom",
+            "s:finish": "bottom",
+            "s:turtle": "bottom"
+          },
+          "unreachable": [
+            "s:back control",
+            "s:turtle"
+          ]
+        },
+        "tercos": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            },
+            {
+              "ring": 2,
+              "rx": 340.0,
+              "ry": 340.0
+            }
+          ],
+          "positions": {
+            "s:back control": [
+              0.0,
+              -340.0
+            ],
+            "s:closed guard": [
+              0.0,
+              170.0
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:turtle": [
+              0.0,
+              340.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0,
+            "2": 340.0
+          },
+          "ring": {
+            "s:back control": 2,
+            "s:closed guard": 1,
+            "s:finish": 0,
+            "s:turtle": 2
+          },
+          "sector": {
+            "s:back control": "top",
+            "s:closed guard": "bottom",
+            "s:finish": "bottom",
+            "s:turtle": "bottom"
+          },
+          "unreachable": [
+            "s:back control",
+            "s:turtle"
+          ]
+        }
+      },
+      "ring_index": {
+        "s:closed guard": 1,
+        "s:finish": 0
+      },
+      "sector_of": {
+        "s:back control": "top",
+        "s:closed guard": "bottom",
+        "s:turtle": "bottom"
+      },
+      "support": {
+        "s:back control": 1.0,
+        "s:closed guard": 1.0,
+        "s:finish": 1.0,
+        "s:turtle": 1.0
+      },
+      "target_aspect": null,
+      "why": "um estado SEM rota ate a finalizacao: nao some e nao e chutado, cai UM anel alem do mais profundo alcancavel"
+    },
+    {
+      "anchor_slots": {
+        "s:start top": "top"
+      },
+      "bubbles": {
+        "points": {
+          "s:back control body triangle": [
+            99.8,
+            38.0
+          ],
+          "s:crucifix control": [
+            66.8,
+            38.0
+          ],
+          "s:finish": [
+            33.8,
+            38.0
+          ],
+          "s:high mount control": [
+            73.4,
+            38.0
+          ],
+          "s:knee on belly control": [
+            83.3,
+            38.0
+          ],
+          "s:mounted triangle setup": [
+            86.6,
+            38.0
+          ],
+          "s:north south control": [
+            76.7,
+            38.0
+          ],
+          "s:side control kesa gatame": [
+            93.2,
+            38.0
+          ],
+          "s:start top": [
+            43.7,
+            38.0
+          ]
+        },
+        "segments": {
+          "g:0": [
+            66.8,
+            16.0
+          ],
+          "g:1": [
+            50.3,
+            16.0
+          ],
+          "g:2": [
+            33.8,
+            16.0
+          ],
+          "g:3": [
+            33.8,
+            16.0
+          ],
+          "g:4": [
+            60.2,
+            16.0
+          ],
+          "g:5": [
+            33.8,
+            16.0
+          ],
+          "g:6": [
+            43.7,
+            16.0
+          ],
+          "g:7": [
+            70.1,
+            16.0
+          ]
+        }
+      },
+      "bundled": {
+        "points": [
+          {
+            "id": "s:north south control",
+            "kind": "state",
+            "state_key": "north south control"
+          },
+          {
+            "id": "s:finish",
+            "kind": "state",
+            "state_key": "finish"
+          },
+          {
+            "id": "s:knee on belly control",
+            "kind": "state",
+            "state_key": "knee on belly control"
+          },
+          {
+            "id": "s:mounted triangle setup",
+            "kind": "state",
+            "state_key": "mounted triangle setup"
+          },
+          {
+            "id": "s:high mount control",
+            "kind": "state",
+            "state_key": "high mount control"
+          },
+          {
+            "id": "s:back control body triangle",
+            "kind": "state",
+            "state_key": "back control body triangle"
+          },
+          {
+            "id": "s:crucifix control",
+            "kind": "state",
+            "state_key": "crucifix control"
+          },
+          {
+            "id": "s:side control kesa gatame",
+            "kind": "state",
+            "state_key": "side control kesa gatame"
+          },
+          {
+            "id": "s:start top",
+            "kind": "state",
+            "state_key": "start top"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "rear naked choke"
+            ],
+            "from_point": "s:back control body triangle",
+            "id": "g:0",
+            "path_ids": [
+              "p5"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "short choke"
+            ],
+            "from_point": "s:crucifix control",
+            "id": "g:1",
+            "path_ids": [
+              "p6"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:high mount control",
+            "id": "g:2",
+            "path_ids": [
+              "p4"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:knee on belly control",
+            "id": "g:3",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "triangle choke"
+            ],
+            "from_point": "s:mounted triangle setup",
+            "id": "g:4",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "kimura"
+            ],
+            "from_point": "s:north south control",
+            "id": "g:5",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "americana"
+            ],
+            "from_point": "s:side control kesa gatame",
+            "id": "g:6",
+            "path_ids": [
+              "p7"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "headquarters pass"
+            ],
+            "from_point": "s:start top",
+            "id": "g:7",
+            "path_ids": [
+              "p8"
+            ],
+            "to_point": "s:north south control"
+          }
+        ]
+      },
+      "centre_ids": [
+        "s:finish"
+      ],
+      "label_len": {
+        "g:0": 16,
+        "g:1": 11,
+        "g:2": 6,
+        "g:3": 6,
+        "g:4": 14,
+        "g:5": 6,
+        "g:6": 9,
+        "g:7": 17,
+        "s:back control body triangle": 26,
+        "s:crucifix control": 16,
+        "s:finish": 6,
+        "s:high mount control": 18,
+        "s:knee on belly control": 21,
+        "s:mounted triangle setup": 22,
+        "s:north south control": 19,
+        "s:side control kesa gatame": 24,
+        "s:start top": 9
+      },
+      "name": "crowded",
+      "paths": [
+        {
+          "actions": [
+            "kimura"
+          ],
+          "path_id": "p1",
+          "source": "north south control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p2",
+          "source": "knee on belly control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "triangle choke"
+          ],
+          "path_id": "p3",
+          "source": "mounted triangle setup",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p4",
+          "source": "high mount control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "rear naked choke"
+          ],
+          "path_id": "p5",
+          "source": "back control body triangle",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "short choke"
+          ],
+          "path_id": "p6",
+          "source": "crucifix control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "americana"
+          ],
+          "path_id": "p7",
+          "source": "side control kesa gatame",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "headquarters pass"
+          ],
+          "path_id": "p8",
+          "source": "start top",
+          "target": "north south control"
+        }
+      ],
+      "placements": {
+        "arco": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 785.8,
+              "ry": 785.8
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              419.509994731,
+              -664.45473687
+            ],
+            "s:crucifix control": [
+              218.354301483,
+              -754.857689933
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -785.804513239
+            ],
+            "s:knee on belly control": [
+              -218.354301483,
+              -754.857689933
+            ],
+            "s:mounted triangle setup": [
+              -419.509994731,
+              -664.45473687
+            ],
+            "s:north south control": [
+              587.623114506,
+              -521.71621436
+            ],
+            "s:side control kesa gatame": [
+              -587.623114506,
+              -521.71621436
+            ],
+            "s:start top": [
+              -425.071355036,
+              -911.568462585
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        },
+        "bipolar": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 785.8,
+              "ry": 785.8
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              419.509994731,
+              -664.45473687
+            ],
+            "s:crucifix control": [
+              218.354301483,
+              -754.857689933
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -785.804513239
+            ],
+            "s:knee on belly control": [
+              -218.354301483,
+              -754.857689933
+            ],
+            "s:mounted triangle setup": [
+              -419.509994731,
+              -664.45473687
+            ],
+            "s:north south control": [
+              587.623114506,
+              -521.71621436
+            ],
+            "s:side control kesa gatame": [
+              -587.623114506,
+              -521.71621436
+            ],
+            "s:start top": [
+              0.0,
+              -1005.804513239
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        },
+        "tercos": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 785.8,
+              "ry": 785.8
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              419.509994731,
+              -664.45473687
+            ],
+            "s:crucifix control": [
+              218.354301483,
+              -754.857689933
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -785.804513239
+            ],
+            "s:knee on belly control": [
+              -218.354301483,
+              -754.857689933
+            ],
+            "s:mounted triangle setup": [
+              -419.509994731,
+              -664.45473687
+            ],
+            "s:north south control": [
+              587.623114506,
+              -521.71621436
+            ],
+            "s:side control kesa gatame": [
+              -587.623114506,
+              -521.71621436
+            ],
+            "s:start top": [
+              0.0,
+              -1005.804513239
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        }
+      },
+      "ring_index": {
+        "s:back control body triangle": 1,
+        "s:crucifix control": 1,
+        "s:finish": 0,
+        "s:high mount control": 1,
+        "s:knee on belly control": 1,
+        "s:mounted triangle setup": 1,
+        "s:north south control": 1,
+        "s:side control kesa gatame": 1,
+        "s:start top": 2
+      },
+      "sector_of": {
+        "s:back control body triangle": "top",
+        "s:crucifix control": "top",
+        "s:high mount control": "top",
+        "s:knee on belly control": "top",
+        "s:mounted triangle setup": "top",
+        "s:north south control": "top",
+        "s:side control kesa gatame": "top"
+      },
+      "support": {
+        "s:back control body triangle": 1.0,
+        "s:crucifix control": 1.0,
+        "s:finish": 7.0,
+        "s:high mount control": 1.0,
+        "s:knee on belly control": 1.0,
+        "s:mounted triangle setup": 1.0,
+        "s:north south control": 2.0,
+        "s:side control kesa gatame": 1.0,
+        "s:start top": 1.0
+      },
+      "target_aspect": null,
+      "why": "sete estados no MESMO anel e no MESMO setor com rotulos longos: o unico caso em que _separate_on_ring pesa — empurrao so em ANGULO, re-centrado na media, e os limites do setor cedendo em vez de um raio mudar"
+    },
+    {
+      "anchor_slots": {
+        "s:start top": "top"
+      },
+      "bubbles": {
+        "points": {
+          "s:back control body triangle": [
+            99.8,
+            38.0
+          ],
+          "s:crucifix control": [
+            66.8,
+            38.0
+          ],
+          "s:finish": [
+            33.8,
+            38.0
+          ],
+          "s:high mount control": [
+            73.4,
+            38.0
+          ],
+          "s:knee on belly control": [
+            83.3,
+            38.0
+          ],
+          "s:mounted triangle setup": [
+            86.6,
+            38.0
+          ],
+          "s:north south control": [
+            76.7,
+            38.0
+          ],
+          "s:side control kesa gatame": [
+            93.2,
+            38.0
+          ],
+          "s:start top": [
+            43.7,
+            38.0
+          ]
+        },
+        "segments": {
+          "g:0": [
+            66.8,
+            16.0
+          ],
+          "g:1": [
+            50.3,
+            16.0
+          ],
+          "g:2": [
+            33.8,
+            16.0
+          ],
+          "g:3": [
+            33.8,
+            16.0
+          ],
+          "g:4": [
+            60.2,
+            16.0
+          ],
+          "g:5": [
+            33.8,
+            16.0
+          ],
+          "g:6": [
+            43.7,
+            16.0
+          ],
+          "g:7": [
+            70.1,
+            16.0
+          ]
+        }
+      },
+      "bundled": {
+        "points": [
+          {
+            "id": "s:north south control",
+            "kind": "state",
+            "state_key": "north south control"
+          },
+          {
+            "id": "s:finish",
+            "kind": "state",
+            "state_key": "finish"
+          },
+          {
+            "id": "s:knee on belly control",
+            "kind": "state",
+            "state_key": "knee on belly control"
+          },
+          {
+            "id": "s:mounted triangle setup",
+            "kind": "state",
+            "state_key": "mounted triangle setup"
+          },
+          {
+            "id": "s:high mount control",
+            "kind": "state",
+            "state_key": "high mount control"
+          },
+          {
+            "id": "s:back control body triangle",
+            "kind": "state",
+            "state_key": "back control body triangle"
+          },
+          {
+            "id": "s:crucifix control",
+            "kind": "state",
+            "state_key": "crucifix control"
+          },
+          {
+            "id": "s:side control kesa gatame",
+            "kind": "state",
+            "state_key": "side control kesa gatame"
+          },
+          {
+            "id": "s:start top",
+            "kind": "state",
+            "state_key": "start top"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "rear naked choke"
+            ],
+            "from_point": "s:back control body triangle",
+            "id": "g:0",
+            "path_ids": [
+              "p5"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "short choke"
+            ],
+            "from_point": "s:crucifix control",
+            "id": "g:1",
+            "path_ids": [
+              "p6"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:high mount control",
+            "id": "g:2",
+            "path_ids": [
+              "p4"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:knee on belly control",
+            "id": "g:3",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "triangle choke"
+            ],
+            "from_point": "s:mounted triangle setup",
+            "id": "g:4",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "kimura"
+            ],
+            "from_point": "s:north south control",
+            "id": "g:5",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "americana"
+            ],
+            "from_point": "s:side control kesa gatame",
+            "id": "g:6",
+            "path_ids": [
+              "p7"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "headquarters pass"
+            ],
+            "from_point": "s:start top",
+            "id": "g:7",
+            "path_ids": [
+              "p8"
+            ],
+            "to_point": "s:north south control"
+          }
+        ]
+      },
+      "centre_ids": [
+        "s:finish"
+      ],
+      "label_len": {
+        "g:0": 16,
+        "g:1": 11,
+        "g:2": 6,
+        "g:3": 6,
+        "g:4": 14,
+        "g:5": 6,
+        "g:6": 9,
+        "g:7": 17,
+        "s:back control body triangle": 26,
+        "s:crucifix control": 16,
+        "s:finish": 6,
+        "s:high mount control": 18,
+        "s:knee on belly control": 21,
+        "s:mounted triangle setup": 22,
+        "s:north south control": 19,
+        "s:side control kesa gatame": 24,
+        "s:start top": 9
+      },
+      "name": "desktop_aspect",
+      "paths": [
+        {
+          "actions": [
+            "kimura"
+          ],
+          "path_id": "p1",
+          "source": "north south control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p2",
+          "source": "knee on belly control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "triangle choke"
+          ],
+          "path_id": "p3",
+          "source": "mounted triangle setup",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p4",
+          "source": "high mount control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "rear naked choke"
+          ],
+          "path_id": "p5",
+          "source": "back control body triangle",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "short choke"
+          ],
+          "path_id": "p6",
+          "source": "crucifix control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "americana"
+          ],
+          "path_id": "p7",
+          "source": "side control kesa gatame",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "headquarters pass"
+          ],
+          "path_id": "p8",
+          "source": "start top",
+          "target": "north south control"
+        }
+      ],
+      "placements": {
+        "arco": {
+          "bend": [
+            1.352246808,
+            0.739509973
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 1062.6,
+              "ry": 581.1
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              567.281051116,
+              -491.370904447
+            ],
+            "s:crucifix control": [
+              295.268907098,
+              -558.224789816
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -581.11027428
+            ],
+            "s:knee on belly control": [
+              -295.268907098,
+              -558.224789816
+            ],
+            "s:mounted triangle setup": [
+              -567.281051116,
+              -491.370904447
+            ],
+            "s:north south control": [
+              794.611480642,
+              -385.814343536
+            ],
+            "s:side control kesa gatame": [
+              -794.611480642,
+              -385.814343536
+            ],
+            "s:start top": [
+              -574.801382835,
+              -674.113969052
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        },
+        "bipolar": {
+          "bend": [
+            1.352246808,
+            0.739509973
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 1062.6,
+              "ry": 581.1
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              567.281051116,
+              -491.370904447
+            ],
+            "s:crucifix control": [
+              295.268907098,
+              -558.224789816
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -581.11027428
+            ],
+            "s:knee on belly control": [
+              -295.268907098,
+              -558.224789816
+            ],
+            "s:mounted triangle setup": [
+              -567.281051116,
+              -491.370904447
+            ],
+            "s:north south control": [
+              794.611480642,
+              -385.814343536
+            ],
+            "s:side control kesa gatame": [
+              -794.611480642,
+              -385.814343536
+            ],
+            "s:start top": [
+              0.0,
+              -743.802468316
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        },
+        "tercos": {
+          "bend": [
+            1.352246808,
+            0.739509973
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 1062.6,
+              "ry": 581.1
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              567.281051116,
+              -491.370904447
+            ],
+            "s:crucifix control": [
+              295.268907098,
+              -558.224789816
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -581.11027428
+            ],
+            "s:knee on belly control": [
+              -295.268907098,
+              -558.224789816
+            ],
+            "s:mounted triangle setup": [
+              -567.281051116,
+              -491.370904447
+            ],
+            "s:north south control": [
+              794.611480642,
+              -385.814343536
+            ],
+            "s:side control kesa gatame": [
+              -794.611480642,
+              -385.814343536
+            ],
+            "s:start top": [
+              0.0,
+              -743.802468316
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        }
+      },
+      "ring_index": {
+        "s:back control body triangle": 1,
+        "s:crucifix control": 1,
+        "s:finish": 0,
+        "s:high mount control": 1,
+        "s:knee on belly control": 1,
+        "s:mounted triangle setup": 1,
+        "s:north south control": 1,
+        "s:side control kesa gatame": 1,
+        "s:start top": 2
+      },
+      "sector_of": {
+        "s:back control body triangle": "top",
+        "s:crucifix control": "top",
+        "s:high mount control": "top",
+        "s:knee on belly control": "top",
+        "s:mounted triangle setup": "top",
+        "s:north south control": "top",
+        "s:side control kesa gatame": "top"
+      },
+      "support": {
+        "s:back control body triangle": 1.0,
+        "s:crucifix control": 1.0,
+        "s:finish": 7.0,
+        "s:high mount control": 1.0,
+        "s:knee on belly control": 1.0,
+        "s:mounted triangle setup": 1.0,
+        "s:north south control": 2.0,
+        "s:side control kesa gatame": 1.0,
+        "s:start top": 1.0
+      },
+      "target_aspect": 1.8285714285714285,
+      "why": "os mesmos caminhos de `crowded` numa tela larga (1280/700 = 1,829) — trava o PARAMETRO target_aspect e, com ele, as guias de anel como ELIPSES da excentricidade da superficie"
+    },
+    {
+      "anchor_slots": {
+        "s:start top": "top"
+      },
+      "bubbles": {
+        "points": {
+          "s:back control body triangle": [
+            99.8,
+            38.0
+          ],
+          "s:crucifix control": [
+            66.8,
+            38.0
+          ],
+          "s:finish": [
+            33.8,
+            38.0
+          ],
+          "s:high mount control": [
+            73.4,
+            38.0
+          ],
+          "s:knee on belly control": [
+            83.3,
+            38.0
+          ],
+          "s:mounted triangle setup": [
+            86.6,
+            38.0
+          ],
+          "s:north south control": [
+            76.7,
+            38.0
+          ],
+          "s:side control kesa gatame": [
+            93.2,
+            38.0
+          ],
+          "s:start top": [
+            43.7,
+            38.0
+          ]
+        },
+        "segments": {
+          "g:0": [
+            66.8,
+            16.0
+          ],
+          "g:1": [
+            50.3,
+            16.0
+          ],
+          "g:2": [
+            33.8,
+            16.0
+          ],
+          "g:3": [
+            33.8,
+            16.0
+          ],
+          "g:4": [
+            60.2,
+            16.0
+          ],
+          "g:5": [
+            33.8,
+            16.0
+          ],
+          "g:6": [
+            43.7,
+            16.0
+          ],
+          "g:7": [
+            70.1,
+            16.0
+          ]
+        }
+      },
+      "bundled": {
+        "points": [
+          {
+            "id": "s:north south control",
+            "kind": "state",
+            "state_key": "north south control"
+          },
+          {
+            "id": "s:finish",
+            "kind": "state",
+            "state_key": "finish"
+          },
+          {
+            "id": "s:knee on belly control",
+            "kind": "state",
+            "state_key": "knee on belly control"
+          },
+          {
+            "id": "s:mounted triangle setup",
+            "kind": "state",
+            "state_key": "mounted triangle setup"
+          },
+          {
+            "id": "s:high mount control",
+            "kind": "state",
+            "state_key": "high mount control"
+          },
+          {
+            "id": "s:back control body triangle",
+            "kind": "state",
+            "state_key": "back control body triangle"
+          },
+          {
+            "id": "s:crucifix control",
+            "kind": "state",
+            "state_key": "crucifix control"
+          },
+          {
+            "id": "s:side control kesa gatame",
+            "kind": "state",
+            "state_key": "side control kesa gatame"
+          },
+          {
+            "id": "s:start top",
+            "kind": "state",
+            "state_key": "start top"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "rear naked choke"
+            ],
+            "from_point": "s:back control body triangle",
+            "id": "g:0",
+            "path_ids": [
+              "p5"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "short choke"
+            ],
+            "from_point": "s:crucifix control",
+            "id": "g:1",
+            "path_ids": [
+              "p6"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:high mount control",
+            "id": "g:2",
+            "path_ids": [
+              "p4"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:knee on belly control",
+            "id": "g:3",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "triangle choke"
+            ],
+            "from_point": "s:mounted triangle setup",
+            "id": "g:4",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "kimura"
+            ],
+            "from_point": "s:north south control",
+            "id": "g:5",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "americana"
+            ],
+            "from_point": "s:side control kesa gatame",
+            "id": "g:6",
+            "path_ids": [
+              "p7"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "headquarters pass"
+            ],
+            "from_point": "s:start top",
+            "id": "g:7",
+            "path_ids": [
+              "p8"
+            ],
+            "to_point": "s:north south control"
+          }
+        ]
+      },
+      "centre_ids": [
+        "s:finish"
+      ],
+      "label_len": {
+        "g:0": 16,
+        "g:1": 11,
+        "g:2": 6,
+        "g:3": 6,
+        "g:4": 14,
+        "g:5": 6,
+        "g:6": 9,
+        "g:7": 17,
+        "s:back control body triangle": 26,
+        "s:crucifix control": 16,
+        "s:finish": 6,
+        "s:high mount control": 18,
+        "s:knee on belly control": 21,
+        "s:mounted triangle setup": 22,
+        "s:north south control": 19,
+        "s:side control kesa gatame": 24,
+        "s:start top": 9
+      },
+      "name": "phone_aspect",
+      "paths": [
+        {
+          "actions": [
+            "kimura"
+          ],
+          "path_id": "p1",
+          "source": "north south control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p2",
+          "source": "knee on belly control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "triangle choke"
+          ],
+          "path_id": "p3",
+          "source": "mounted triangle setup",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p4",
+          "source": "high mount control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "rear naked choke"
+          ],
+          "path_id": "p5",
+          "source": "back control body triangle",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "short choke"
+          ],
+          "path_id": "p6",
+          "source": "crucifix control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "americana"
+          ],
+          "path_id": "p7",
+          "source": "side control kesa gatame",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "headquarters pass"
+          ],
+          "path_id": "p8",
+          "source": "start top",
+          "target": "north south control"
+        }
+      ],
+      "placements": {
+        "arco": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 785.8,
+              "ry": 785.8
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              419.509994731,
+              -664.45473687
+            ],
+            "s:crucifix control": [
+              218.354301483,
+              -754.857689933
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -785.804513239
+            ],
+            "s:knee on belly control": [
+              -218.354301483,
+              -754.857689933
+            ],
+            "s:mounted triangle setup": [
+              -419.509994731,
+              -664.45473687
+            ],
+            "s:north south control": [
+              587.623114506,
+              -521.71621436
+            ],
+            "s:side control kesa gatame": [
+              -587.623114506,
+              -521.71621436
+            ],
+            "s:start top": [
+              -425.071355036,
+              -911.568462585
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        },
+        "bipolar": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 785.8,
+              "ry": 785.8
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              419.509994731,
+              -664.45473687
+            ],
+            "s:crucifix control": [
+              218.354301483,
+              -754.857689933
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -785.804513239
+            ],
+            "s:knee on belly control": [
+              -218.354301483,
+              -754.857689933
+            ],
+            "s:mounted triangle setup": [
+              -419.509994731,
+              -664.45473687
+            ],
+            "s:north south control": [
+              587.623114506,
+              -521.71621436
+            ],
+            "s:side control kesa gatame": [
+              -587.623114506,
+              -521.71621436
+            ],
+            "s:start top": [
+              0.0,
+              -1005.804513239
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        },
+        "tercos": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 785.8,
+              "ry": 785.8
+            }
+          ],
+          "positions": {
+            "s:back control body triangle": [
+              419.509994731,
+              -664.45473687
+            ],
+            "s:crucifix control": [
+              218.354301483,
+              -754.857689933
+            ],
+            "s:finish": [
+              0.0,
+              0.0
+            ],
+            "s:high mount control": [
+              0.0,
+              -785.804513239
+            ],
+            "s:knee on belly control": [
+              -218.354301483,
+              -754.857689933
+            ],
+            "s:mounted triangle setup": [
+              -419.509994731,
+              -664.45473687
+            ],
+            "s:north south control": [
+              587.623114506,
+              -521.71621436
+            ],
+            "s:side control kesa gatame": [
+              -587.623114506,
+              -521.71621436
+            ],
+            "s:start top": [
+              0.0,
+              -1005.804513239
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 785.804513239
+          },
+          "ring": {
+            "s:back control body triangle": 1,
+            "s:crucifix control": 1,
+            "s:finish": 0,
+            "s:high mount control": 1,
+            "s:knee on belly control": 1,
+            "s:mounted triangle setup": 1,
+            "s:north south control": 1,
+            "s:side control kesa gatame": 1,
+            "s:start top": 2
+          },
+          "sector": {
+            "s:back control body triangle": "top",
+            "s:crucifix control": "top",
+            "s:finish": "top",
+            "s:high mount control": "top",
+            "s:knee on belly control": "top",
+            "s:mounted triangle setup": "top",
+            "s:north south control": "top",
+            "s:side control kesa gatame": "top",
+            "s:start top": "top"
+          },
+          "unreachable": []
+        }
+      },
+      "ring_index": {
+        "s:back control body triangle": 1,
+        "s:crucifix control": 1,
+        "s:finish": 0,
+        "s:high mount control": 1,
+        "s:knee on belly control": 1,
+        "s:mounted triangle setup": 1,
+        "s:north south control": 1,
+        "s:side control kesa gatame": 1,
+        "s:start top": 2
+      },
+      "sector_of": {
+        "s:back control body triangle": "top",
+        "s:crucifix control": "top",
+        "s:high mount control": "top",
+        "s:knee on belly control": "top",
+        "s:mounted triangle setup": "top",
+        "s:north south control": "top",
+        "s:side control kesa gatame": "top"
+      },
+      "support": {
+        "s:back control body triangle": 1.0,
+        "s:crucifix control": 1.0,
+        "s:finish": 7.0,
+        "s:high mount control": 1.0,
+        "s:knee on belly control": 1.0,
+        "s:mounted triangle setup": 1.0,
+        "s:north south control": 2.0,
+        "s:side control kesa gatame": 1.0,
+        "s:start top": 1.0
+      },
+      "target_aspect": 0.4642857142857143,
+      "why": "os mesmos caminhos num celular em pe (390/840 = 0,464): o disco NAO curva, porque a moldura do anel ja e retrato — medido, curvar custa 5 nomes e 4 nomes de acao"
+    },
+    {
+      "anchor_slots": {
+        "s:start bottom": "bottom",
+        "s:start neutral": "neutral"
+      },
+      "bubbles": {
+        "points": {
+          "s:mount": [
+            30.5,
+            38.0
+          ],
+          "s:side control": [
+            53.6,
+            38.0
+          ],
+          "s:start bottom": [
+            53.6,
+            38.0
+          ],
+          "s:start neutral": [
+            56.9,
+            38.0
+          ]
+        },
+        "segments": {
+          "g:0": [
+            66.8,
+            16.0
+          ],
+          "g:1": [
+            33.8,
+            16.0
+          ],
+          "g:2": [
+            40.4,
+            16.0
+          ]
+        }
+      },
+      "bundled": {
+        "points": [
+          {
+            "id": "s:start neutral",
+            "kind": "state",
+            "state_key": "start neutral"
+          },
+          {
+            "id": "s:side control",
+            "kind": "state",
+            "state_key": "side control"
+          },
+          {
+            "id": "s:start bottom",
+            "kind": "state",
+            "state_key": "start bottom"
+          },
+          {
+            "id": "s:mount",
+            "kind": "state",
+            "state_key": "mount"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "mount transition"
+            ],
+            "from_point": "s:side control",
+            "id": "g:0",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:mount"
+          },
+          {
+            "actions": [
+              "escape"
+            ],
+            "from_point": "s:side control",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:start bottom"
+          },
+          {
+            "actions": [
+              "takedown"
+            ],
+            "from_point": "s:start neutral",
+            "id": "g:2",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:side control"
+          }
+        ]
+      },
+      "centre_ids": [],
+      "label_len": {
+        "g:0": 16,
+        "g:1": 6,
+        "g:2": 8,
+        "s:mount": 5,
+        "s:side control": 12,
+        "s:start bottom": 12,
+        "s:start neutral": 13
+      },
+      "name": "no_finish",
+      "paths": [
+        {
+          "actions": [
+            "takedown"
+          ],
+          "path_id": "p1",
+          "source": "start neutral",
+          "target": "side control"
+        },
+        {
+          "actions": [
+            "escape"
+          ],
+          "path_id": "p2",
+          "source": "side control",
+          "target": "start bottom"
+        },
+        {
+          "actions": [
+            "mount transition"
+          ],
+          "path_id": "p3",
+          "source": "side control",
+          "target": "mount"
+        }
+      ],
+      "placements": {
+        "arco": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            }
+          ],
+          "positions": {
+            "s:mount": [
+              -127.125675385,
+              -112.867456151
+            ],
+            "s:side control": [
+              127.125675385,
+              -112.867456151
+            ],
+            "s:start bottom": [
+              164.821122079,
+              -353.460036944
+            ],
+            "s:start neutral": [
+              0.0,
+              -390.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0
+          },
+          "ring": {
+            "s:mount": 1,
+            "s:side control": 1,
+            "s:start bottom": 2,
+            "s:start neutral": 2
+          },
+          "sector": {
+            "s:mount": "top",
+            "s:side control": "top",
+            "s:start bottom": "top",
+            "s:start neutral": "top"
+          },
+          "unreachable": [
+            "s:mount",
+            "s:side control"
+          ]
+        },
+        "bipolar": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            }
+          ],
+          "positions": {
+            "s:mount": [
+              -127.125675385,
+              -112.867456151
+            ],
+            "s:side control": [
+              127.125675385,
+              -112.867456151
+            ],
+            "s:start bottom": [
+              0.0,
+              390.0
+            ],
+            "s:start neutral": [
+              -175.5,
+              0.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0
+          },
+          "ring": {
+            "s:mount": 1,
+            "s:side control": 1,
+            "s:start bottom": 2,
+            "s:start neutral": 2
+          },
+          "sector": {
+            "s:mount": "top",
+            "s:side control": "top",
+            "s:start bottom": "top",
+            "s:start neutral": "top"
+          },
+          "unreachable": [
+            "s:mount",
+            "s:side control"
+          ]
+        },
+        "tercos": {
+          "bend": [
+            1.0,
+            1.0
+          ],
+          "centre": [
+            0.0,
+            0.0
+          ],
+          "guides": [
+            {
+              "ring": 1,
+              "rx": 170.0,
+              "ry": 170.0
+            }
+          ],
+          "positions": {
+            "s:mount": [
+              -127.125675385,
+              -112.867456151
+            ],
+            "s:side control": [
+              127.125675385,
+              -112.867456151
+            ],
+            "s:start bottom": [
+              0.0,
+              390.0
+            ],
+            "s:start neutral": [
+              -390.0,
+              0.0
+            ]
+          },
+          "radius": {
+            "0": 0.0,
+            "1": 170.0
+          },
+          "ring": {
+            "s:mount": 1,
+            "s:side control": 1,
+            "s:start bottom": 2,
+            "s:start neutral": 2
+          },
+          "sector": {
+            "s:mount": "top",
+            "s:side control": "top",
+            "s:start bottom": "top",
+            "s:start neutral": "top"
+          },
+          "unreachable": [
+            "s:mount",
+            "s:side control"
+          ]
+        }
+      },
+      "ring_index": {},
+      "sector_of": {
+        "s:mount": "top",
+        "s:side control": "top"
+      },
+      "support": {
+        "s:mount": 1.0,
+        "s:side control": 3.0,
+        "s:start bottom": 1.0,
+        "s:start neutral": 1.0
+      },
+      "target_aspect": null,
+      "why": "NENHUMA finalizacao no grafo — o bundle de quem nunca registrou uma submissao. Sem centro todo estado e inalcancavel: um anel so, ancoras fora dele"
+    }
+  ],
+  "constants": {
+    "FLOW_COMPACT_MIN": 0.4,
+    "FLOW_LABEL_CHAR": 0.55,
+    "FLOW_LABEL_EM": 12.0,
+    "FLOW_LABEL_PAD_X": 14.0,
+    "FLOW_LABEL_PAD_Y": 10.0,
+    "FLOW_NODE_RADIUS": 16.0,
+    "RING_ANCHOR_GAP": 220.0,
+    "RING_MIN_GAP": 170.0,
+    "SECTOR_CENTRE": {
+      "bottom": 270.0,
+      "neutral": 180.0,
+      "top": 90.0
+    },
+    "SECTOR_INSET": 0.06,
+    "SECTOR_SPAN": 110.0
+  },
+  "contract": "ringLayout(bundled, {centreIds, anchorSlots, sectorOf, support, labelLen, placement, targetAspect}) -> point id -> (x, y), plus the ring index, the radius per ring and the guide ellipses. RADIUS IS THE CLAIM: ring(p) is the fewest strokes on a DIRECTED walk from p to a finish (reverse BFS from the centre); a point with no route lands one ring beyond the deepest reachable one. ANGLE is the point's orientation sector (top up / neutral left / bottom down), ordered inside the sector by the barycentre of its already-placed inner neighbours. Overlap is resolved in ANGLE ONLY (`separateOnRing`) — nothing may change a radius. Anchors are FIXED at the placement's own vertices outside the widest ring. Analytics mirror: analysis/ring_layout.py.",
+  "default_placement": "bipolar",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_ring_layout_fixtures.py",
+  "mode": "fixo"
+}

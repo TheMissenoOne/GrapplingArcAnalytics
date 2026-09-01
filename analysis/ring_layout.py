@@ -35,18 +35,28 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-from analysis.flow_layout import _bubbles, _compact, _relax, _spread, label_half_extent
+from analysis.flow_layout import (
+    FLOW_COMPACT_MIN,
+    _bubbles,
+    _relax,
+    _spread,
+    label_half_extent,
+)
 from analysis.path_bundling import BundledGraph
 
 __all__ = [
     "ANCHOR_MODES",
     "ANCHOR_PLACEMENTS",
+    "DEFAULT_RING_MODE",
+    "DEFAULT_RING_PLACEMENT",
     "RING_ANCHOR_GAP",
     "RING_MIN_GAP",
     "SECTOR_CENTRE",
+    "SECTOR_INSET",
     "SECTOR_SPAN",
     "RingLayout",
     "layout_quality",
+    "ring_guides",
     "ring_index",
     "ring_layout",
 ]
@@ -116,6 +126,15 @@ ANCHOR_MODES: dict[str, dict[str, Any]] = {
 }
 
 
+#: What the PRODUCT draws (owner, 2026-09-01 night, on the variant-17 demo): *"I like the
+#: seventeen example demo. with the bipolar anchor points, fixed anchor, and labels on all the
+#: actions."* — Neutro pulled inside as a second pole, Top/Bottom outside, nothing relaxed off
+#: its ring. The other placements and both free modes stay in the table because the prototype
+#: still renders them side by side; only the DEFAULT is the decision.
+DEFAULT_RING_PLACEMENT = "bipolar"
+DEFAULT_RING_MODE = "fixo"
+
+
 @dataclass(frozen=True)
 class RingLayout:
     pos: dict[str, tuple[float, float]]
@@ -125,6 +144,7 @@ class RingLayout:
     unreachable: tuple[str, ...]    #: points with no observed route to a centre, sorted
     anchor_seed: dict[str, tuple[float, float]]  #: where an anchor was placed BEFORE relaxing
     bend: tuple[float, float]       #: the (kx, ky) the viewport bend applied to every radius
+    centre: tuple[float, float]     #: where the finish landed — the guides' own origin
 
 
 def ring_index(bundled: BundledGraph, centre_ids: Sequence[str]) -> dict[str, int]:
@@ -245,8 +265,8 @@ def ring_layout(
     sector_of: Mapping[str, str],
     support: Mapping[str, float],
     label_len: Mapping[str, int] | None = None,
-    placement: str = "arco",
-    mode: str = "fixo",
+    placement: str = DEFAULT_RING_PLACEMENT,
+    mode: str = DEFAULT_RING_MODE,
     target_aspect: float | None = None,
 ) -> RingLayout:
     """Lay the bundled graph out as concentric rings around ``centre_ids``.
@@ -359,29 +379,79 @@ def ring_layout(
         _spread(pos, bubbles, fixed, neighbours)
     bend = (1.0, 1.0)
     if target_aspect is not None:
-        before = dict(pos)
-        pos.clear()
-        pos.update(_compact(before, target_aspect))
+        bend = _bend(pos, pos.get(centres[0], (0.0, 0.0)) if centres else (0.0, 0.0),
+                      target_aspect)
         anchor_seed = {p: pos[p] for p in anchors}  # the seed is where the FRAME put it, bent
-        bend = _extent_ratio(before, pos)
     if opts["spread"]:
         _relax(pos, bubbles, fixed)
         _relax(pos, [b for b in bubbles if len(b[3]) == 1], fixed)
 
+    centre = pos[centres[0]] if centres else (0.0, 0.0)
     return RingLayout(pos=pos, ring=ring, radius=radii, sector=sector,
-                      unreachable=unreachable, anchor_seed=anchor_seed, bend=bend)
+                      unreachable=unreachable, anchor_seed=anchor_seed, bend=bend,
+                      centre=centre)
 
 
-def _extent_ratio(before: Mapping[str, tuple[float, float]],
-                   after: Mapping[str, tuple[float, float]]) -> tuple[float, float]:
-    """The (kx, ky) an affine, centre-preserving bend applied — read off the extents instead of
-    re-deriving `_compact`'s formula, so there is one source of truth and a no-op reads 1.0."""
-    def span(pos: Mapping[str, tuple[float, float]], axis: int) -> float:
-        values = [p[axis] for p in pos.values()]
-        return (max(values) - min(values)) if values else 0.0
+def ring_guides(layout: RingLayout) -> list[dict[str, Any]]:
+    """The concentric guides a renderer draws under the graph, in the SAME world units the
+    positions are in.
 
-    wx, wy = span(before, 0), span(before, 1)
-    return (span(after, 0) / wx if wx else 1.0, span(after, 1) / wy if wy else 1.0)
+    They are ellipses and not circles because the layout is a disc bent toward its surface's
+    aspect at constant area (``target_aspect``); an affine, centre-preserving bend turns a
+    concentric circle into a concentric ellipse, so ``rx``/``ry`` come from the bend the points
+    themselves went through and never from a second computation. Ring 0 (the finish itself) has
+    no guide — it is the node.
+
+    A guide is a CLAIM about the data ("everything on this line is N strokes from a finish"), so
+    a caller that relaxes points off their ring must not draw them; ``ring_layout``'s free modes
+    are exactly that case and the prototype drops the guides there.
+    """
+    kx, ky = layout.bend
+    return [{"ring": k, "rx": round(layout.radius[k] * kx, 1),
+              "ry": round(layout.radius[k] * ky, 1)}
+             for k in sorted(layout.radius) if layout.radius[k] > 0.0]
+
+
+def _bend(pos: dict[str, tuple[float, float]], centre: tuple[float, float],
+           target: float) -> tuple[float, float]:
+    """Shape the DISC to its surface, about the RING CENTRE, at constant area. In place.
+
+    ``target`` is the surface's true ratio (``width / height``); on a LANDSCAPE surface the
+    result is a picture whose rings have exactly that aspect, which is what "a disc shaped like
+    the screen" means. A PORTRAIT surface is left alone — see the branch below for why.
+
+    ⚠️ This is deliberately NOT ``flow_layout._compact``, and the difference is not cosmetic.
+    ``_compact`` reads the CURRENT aspect off the whole point cloud's bounding box and corrects
+    by the mismatch. A ring layout's cloud is a disc PLUS three outlying anchors, so when a
+    bundle only has one of them (measured, the App's own mock: a single ``start top`` and no
+    bottom) the box is tall and narrow, the correction overshoots, and the guides come out at an
+    eccentricity of ~4 on a 2:1 screen — concentric rings drawn as flat ovals. Here the geometry
+    is KNOWN (a disc, aspect 1), so the factor is known too: ``sqrt(target)`` on x and its
+    reciprocal on y, one formula for both orientations, no branch, area preserved.
+
+    Bending about the ring centre rather than the cloud's centre is the other half: it is what
+    keeps every ring concentric with the finish after the bend, and therefore what makes a guide
+    ellipse a true description of where the points are.
+
+    ``FLOW_COMPACT_MIN`` is the same floor the flow uses: an extreme surface must not flatten the
+    disc into a line.
+    """
+    if target < 1.0:
+        # A PORTRAIT surface gets no bend, and that is a measurement, not a symmetry. The ring
+        # frame is ALREADY portrait: the bipolar poles sit at 90 and 270 degrees, so the cloud is
+        # ~2x outer_radius tall and ~1.45x wide before anything is bent. Stretching it further to
+        # match a phone buys nothing and costs the only axis the labels have — measured on the
+        # App's own mock at 390x700, bent vs. unbent: 20 vs 25 names drawn, 11 vs 15 ACTION names,
+        # and the top pole's own name lost. The disc stays round; the frame is what fills the
+        # screen.
+        return (1.0, 1.0)
+    k = math.sqrt(target)
+    kx = max(FLOW_COMPACT_MIN, min(1.0 / FLOW_COMPACT_MIN, k))
+    ky = max(FLOW_COMPACT_MIN, min(1.0 / FLOW_COMPACT_MIN, 1.0 / k))
+    cx, cy = centre
+    for point, (x, y) in list(pos.items()):
+        pos[point] = (cx + (x - cx) * kx, cy + (y - cy) * ky)
+    return (kx, ky)
 
 
 def _crosses(a: tuple[float, float], b: tuple[float, float],

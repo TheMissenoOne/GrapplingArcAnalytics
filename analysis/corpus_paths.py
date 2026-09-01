@@ -56,9 +56,11 @@ from analysis.flow_layout import (
 from analysis.markov_weights import block_for_family, load_markov_weights
 from analysis.path_bundling import RenderPath, Segment, bundle_paths
 from analysis.path_metrics import PathMetrics, path_metrics
+from analysis.ring_layout import DEFAULT_RING_PLACEMENT, ring_guides, ring_layout
 from analysis.taxonomy_kind import load_inference_table, orientation_of
 
 __all__ = [
+    "LAYOUTS",
     "OCEAN_FOLD_GROUP_BUDGET",
     "PATH_VARIANT_BUDGET",
     "PathAggregate",
@@ -88,6 +90,14 @@ PATH_VARIANT_BUDGET = 60
 # ~407, close to the owner's ~400 target (`export/site_data.py` measurement, 2026-09-01). Only
 # the ocean passes this; a dossier/breakdown never crosses it (`max_fold_groups=None` default).
 OCEAN_FOLD_GROUP_BUDGET = 340
+
+# §17 (Fase 5e, owner 2026-09-01 night, on the variant-17 demo): the dossier and the breakdown
+# draw CONCENTRIC RINGS — Finish at the centre, radius = strokes to a finish, the three generic
+# anchors fixed outside in the bipolar placement. The OCEAN stays on the flow: measured, its ring
+# 2 alone holds 141 of 85 states' occurrences and the disc becomes one band (the same reason it
+# already carries a stroke ceiling the other two do not need). One parameter, two readings — the
+# rest of the payload is byte-for-byte the same shape either way.
+LAYOUTS = ("flow", "ring")
 
 # A folded stroke's synthetic single action key — unique per fold group by construction (each
 # carries its own bucket index), so it can never merge with a real action's segment and never
@@ -581,6 +591,8 @@ def path_payload(
     rating_of: Callable[[str], float | None] | None = None,
     max_variants: int = PATH_VARIANT_BUDGET,
     max_fold_groups: int | None = None,
+    layout: str = "flow",
+    target_aspect: float | None = None,
 ) -> dict[str, Any]:
     """Layers 3 + 4 — the bundled graph, laid out, as the site's ``{nodes, links, paths,
     folded}``.
@@ -595,6 +607,21 @@ def path_payload(
     with fewer variants than the budget folds nothing, which is why a single-bout breakdown
     almost never does. Deterministic: the ranking key is total over the corpus, ties break on
     ``path_id``.
+
+    ``layout`` (§17, Fase 5e) picks the FRAME. ``"flow"`` is the left-to-right reading every
+    caller had; ``"ring"`` is the owner's 2026-09-01 decision for the dossier and the breakdown:
+    Finish at the centre, every state on a discrete ring whose radius is the fewest strokes to a
+    finish, the three generic anchors fixed outside in the bipolar placement. Ring mode adds two
+    ADDITIVE fields — ``rings`` (the guide ellipses, in the same world units as the positions)
+    and ``ringCentre`` — plus a ``ring`` index on every state node; a client that does not know
+    about them draws exactly what it drew before. It also changes what ``back`` means on a
+    stroke: on a disc "behind in the flow" is not an x comparison, it is a stroke moving AWAY
+    from the finish, which is the return-edge reading the bow was invented for.
+
+    ``target_aspect`` is the surface's TRUE ratio (``width / height``) and only the ring reads
+    it — see ``analysis.ring_layout`` for why it is not the long-axis ratio ``flow_layout``
+    takes. ``None`` leaves the disc unbent, which is what a payload committed to a file for
+    readers on every screen size should be.
 
     ``max_fold_groups`` (docs §12, 2026-09-01) — the Ocean's SECOND ceiling. Folding fixes the
     ethics (grouping by family+category instead of a raw drop) but not the density: the full
@@ -701,8 +728,35 @@ def path_payload(
             _join_labels_compressed([labels.get(k, k) for k in seg.actions])
         )
 
-    pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
-                      weight=node_weight, label_len=label_len)
+    if layout not in LAYOUTS:
+        raise ValueError(f"layout desconhecido: {layout!r}")
+    ring_of: dict[str, int] = {}
+    rings: list[dict[str, Any]] = []
+    ring_centre: list[float] = [0.0, 0.0]
+    if layout == "ring":
+        # The ring wants the same anchor decision split two ways: the FINISH is the centre, the
+        # three oriented generics are the outer frame. Everything else is a state and needs the
+        # orientation its own sector reads.
+        centre_ids = tuple(sorted(p for p, slot in anchor_slots.items() if slot == "finish"))
+        generic_anchors = {p: slot for p, slot in anchor_slots.items() if slot != "finish"}
+        sector_of: dict[str, str] = {}
+        for point in bundled.points:
+            if point.state_key is None:
+                continue
+            found = state_rows.get(point.state_key)
+            node_key = found[0][0] if found else point.state_key.removeprefix("opp:")
+            if node_key != _FINISH_KEY:
+                sector_of[point.id] = orientation_of(node_key)
+        laid = ring_layout(bundled, centre_ids=centre_ids, anchor_slots=generic_anchors,
+                            sector_of=sector_of, support=node_weight, label_len=label_len,
+                            placement=DEFAULT_RING_PLACEMENT, target_aspect=target_aspect)
+        pos = laid.pos
+        ring_of = laid.ring
+        rings = ring_guides(laid)
+        ring_centre = [round(laid.centre[0], 1), round(laid.centre[1], 1)]
+    else:
+        pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
+                           weight=node_weight, label_len=label_len)
 
     nodes: list[dict[str, Any]] = []
     for point in sorted(bundled.points, key=lambda p: p.id):
@@ -712,6 +766,10 @@ def path_payload(
                 "id": point.id, "label": "", "kind": point.kind, "cat": "control", "size": 1,
                 "color": _JUNCTION_COLOR, "junction": True,
                 "x": round(x, 1), "y": round(y, 1), "pin": True,
+                # a branch/merge dot sits on a ring like anything else — carrying the index makes
+                # "every positioned node has a ring" true of the whole payload, which is what
+                # lets a reader (or a test) evaluate a stroke's direction without a second BFS
+                **({"ring": ring_of[point.id]} if point.id in ring_of else {}),
             })
             continue
         found = state_rows.get(point.state_key)
@@ -735,6 +793,11 @@ def path_payload(
             "fighter": side,
             "x": round(x, 1), "y": round(y, 1), "pin": True,
         }
+        if point.id in ring_of:
+            # ADDITIVE: which ring this state sits on. The position already says it; the number
+            # is what lets a panel say "two strokes from a finish" without re-deriving a BFS in
+            # the client.
+            node["ring"] = ring_of[point.id]
         if anchor:
             node["orient"] = orientation_of(node_key) if node_key != _FINISH_KEY else "finish"
             node["shape"] = "diamond"
@@ -790,9 +853,13 @@ def path_payload(
             }
             if all(a["inferred"] for a in acts):
                 link["inf"] = True  # a named generic — still labelled, yields on a collision
-        # A RETURN edge (target at or behind the source in the flow) is a real cycle in a
-        # technique map, not a defect — bowed out and thinner, so the forward reading stays loud.
-        if pos[seg.to_point][0] <= pos[seg.from_point][0]:
+        # A RETURN edge is a real cycle in a technique map, not a defect — bowed out and
+        # thinner, so the forward reading stays loud. "Backwards" is whatever the frame's own
+        # forward is: rightward on the flow, INWARD (toward the finish) on the rings, where an
+        # x comparison would be meaningless on a disc.
+        backwards = (ring_of[seg.to_point] > ring_of[seg.from_point]
+                      if ring_of else pos[seg.to_point][0] <= pos[seg.from_point][0])
+        if backwards:
             link["bow"], link["back"] = 0.22, True
         links.append(link)
     _index_parallel_links(links)
@@ -863,6 +930,11 @@ def path_payload(
         "paths": path_rows,
         "unresolved": unresolved_rows,
         "folded": folded_rows,
+        # ADDITIVE (§17): the frame this payload was laid out in, and — in ring mode — the guide
+        # ellipses and their origin. `site/graph.js` draws them under everything; a client that
+        # ignores the fields draws the same graph it always drew.
+        "layout": layout,
+        **({"rings": rings, "ringCentre": ring_centre} if layout == "ring" else {}),
         "stats": {
             "paths": len(paths),
             "variants": len(all_paths),

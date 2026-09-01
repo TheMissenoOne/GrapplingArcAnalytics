@@ -344,7 +344,9 @@ def build_match_breakdown(
         # actions[] (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md), bundled and laid out in Python.
         # ADDITIVE — `transition_graph` above is untouched, so the small cards and anything
         # still reading the every-event-is-a-node graph keep working unchanged.
-        "path_graph": path_payload(aggregate_bouts([sequence])),
+        # §17 (Fase 5e): the breakdown draws CONCENTRIC RINGS — Finish at the centre, radius =
+        # strokes to a finish. Owner's call on the variant-17 demo, 2026-09-01.
+        "path_graph": path_payload(aggregate_bouts([sequence]), layout="ring"),
         "fighters": {"a": _fighter_block(a), "b": _fighter_block(b)},
         # ── Strategic layer (RF14 / DS-12) — additive, backward-compatible ──
         "decision_space": sequence_decision_space(sequence, curated_ds),

@@ -499,7 +499,10 @@ def _athlete_path_graph(athlete_id: str, matches: list[Any]) -> dict[str, Any]:
         ]
         if own:
             bouts.append(own)
-    return path_payload(aggregate_bouts(bouts))
+    # §17 (Fase 5e): the dossier draws CONCENTRIC RINGS — Finish at the centre, radius =
+    # strokes to a finish. Owner's call on the variant-17 demo, 2026-09-01. The OCEAN stays on
+    # the flow (its own caller below) — measured, a corpus-scale disc is one band.
+    return path_payload(aggregate_bouts(bouts), layout="ring")
 
 
 def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
@@ -523,7 +526,11 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
 # 5 -> 6 (docs §12, 2026-09-01, Ocean's second ceiling): every `folded[i]` row gained `drawn`
 # and `stats` gained `undrawn` — additive on breakdowns too (they never set `max_fold_groups`,
 # so `drawn` is always `True` here), but still a new key a stale cached item would lack.
-BREAKDOWN_VERSION = 6
+# 6 -> 7 (§17, Fase 5e, 2026-09-01): `path_graph` is laid out as concentric RINGS and gained
+# `layout`/`rings`/`ringCentre` plus a `ring` index on every state node. Every x/y in a cached
+# breakdown is from the old frame, so this is not merely a missing key — it is a different
+# picture, and the cache has to miss.
+BREAKDOWN_VERSION = 7
 
 # --only previews keep their own cache so a partial run can never overwrite the real one.
 _PREVIEW_CACHE_DIR = Path(__file__).resolve().parent.parent / ".export_cache" / "preview"
@@ -795,7 +802,9 @@ def _progression_example(
 # Separate from PROFILE_VERSION because that one is style_profile's own contract, not ours.
 # 3 -> 4 (§5d): same `folded`/`max_variants` shape change as BREAKDOWN_VERSION, above.
 # 4 -> 5 (docs §12, 2026-09-01): same `drawn`/`undrawn` shape change as BREAKDOWN_VERSION 5 -> 6.
-DOSSIER_VERSION = 5
+# 5 -> 6 (§17, Fase 5e): same ring-layout change as BREAKDOWN_VERSION 6 -> 7 — every cached
+# position is from the old frame, so the cache has to miss, not merely gain a key.
+DOSSIER_VERSION = 6
 
 
 def build_fighters(
@@ -1201,6 +1210,9 @@ var PG = BD.pathGraph && BD.pathGraph.nodes && BD.pathGraph.nodes.length ? BD.pa
 if (PG) {
   GAGraph.mountPaths(document.getElementById('seqGraph'), {
     nodes: PG.nodes, links: PG.links, paths: PG.paths, unresolved: PG.unresolved,
+    // §17 — the concentric-ring frame. Additive: an older bundle has neither field and draws as
+    // the flow it was laid out in.
+    layout: PG.layout, rings: PG.rings, ringCentre: PG.ringCentre,
     onLinkSelect: l => { if (l && l.ts != null) gaSeek(l.ts); },
   });
 } else {
@@ -1498,6 +1510,8 @@ var CPG = P.pathGraph && P.pathGraph.nodes && P.pathGraph.nodes.length ? P.pathG
 if (CPG) {
   GAGraph.mountPaths(document.getElementById('careerGraph'), {
     nodes: CPG.nodes, links: CPG.links, paths: CPG.paths, unresolved: CPG.unresolved,
+    // §17 — the concentric-ring frame (additive; see the breakdown's own note).
+    layout: CPG.layout, rings: CPG.rings, ringCentre: CPG.ringCentre,
     // footage still hangs off the TECHNIQUE, which is now an action on the stroke
     onLinkSelect: l => { if (l && P.videos) { for (const a of (l.actions||[])) { if (P.videos[a.key]) { gaWatch(P.videos[a.key]); return; } } } },
     onSelect: n => { if (n && P.videos && n.stateKey) gaWatch(P.videos[n.stateKey]); },

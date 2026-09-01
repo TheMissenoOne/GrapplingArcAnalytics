@@ -106,7 +106,9 @@ def test_payload_carries_what_the_renderer_contracts_on() -> None:
     # §13.7: `unresolved` is new and additive — family-only context (support/traffic), never a
     # variant's own count or rating (P5, tests/test_actions_parity.py). §5d: `folded` is new and
     # additive too — always present, empty here because two tiny bouts never cross the budget.
-    assert set(payload) == {"nodes", "links", "paths", "stats", "unresolved", "folded"}
+    # §17: `layout` names the frame the positions were computed in ("flow" here; the ring adds
+    # `rings`/`ringCentre` on top — see tests/test_corpus_paths_ring.py).
+    assert set(payload) == {"nodes", "links", "paths", "stats", "unresolved", "folded", "layout"}
     assert payload["folded"] == []
 
     ids = {n["id"] for n in payload["nodes"]}

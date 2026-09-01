@@ -1445,3 +1445,116 @@ grupos de dobra ranqueados pelo próprio count; os demais viajam com `drawn:fals
 não desenhados que o tocam (painel, sem re-layout). Medido: 944 → 407 traços, 2 965
 ocorrências invariantes entre kept+drawn+undrawn. `BREAKDOWN_VERSION 6`/`DOSSIER_VERSION 5`
 (chave `drawn` é incondicional por consistência de API).
+
+---
+
+## 17. Fase 5e — anéis concêntricos no produto (decisão do dono, 2026-09-01, noite)
+
+> *"I like the seventeen example demo. with the bipolar anchor points, fixed anchor, and labels
+> on all the actions. And the most important thing is having the labels angled according to the
+> edge they belong to and giving proper spacing for everything."*
+
+O layout do Mapa deixa de ser o fluxo esquerda→direita e passa a ser o quadro da variante 17.
+**O raio é a AFIRMAÇÃO**, e é a única coisa que o leitor precisa que lhe digam:
+
+    anel(p) = o menor número de traços num caminho DIRIGIDO de p até uma finalização.
+
+Anel 0 é a própria finalização; anel 1 é tudo a uma ação de finalizar. Um estado sem nenhuma
+rota observada até uma finalização não some e não é chutado — cai UM anel além do mais profundo
+alcançável, que é exatamente o desenho de *"nunca vimos isso terminar uma luta"*. O **ângulo** é
+a outra metade e é o que impede os raios de virarem espaguete: cada ponto fica no setor da sua
+própria orientação (`top` em cima, `neutral` à esquerda, `bottom` embaixo — o mesmo eixo vertical
+que todo o resto do produto lê), ordenado dentro do setor pelo baricentro dos vizinhos internos
+já posicionados. Modo **bipolar** com âncoras **fixas**: Finalização no centro, Neutro puxado
+para DENTRO do disco (0,45 do raio externo) como segundo polo, Top/Bottom fora.
+
+| Peça | Onde |
+|---|---|
+| Definição compartilhada | `analysis/ring_layout.py` ↔ `GrapplingArcApp/src/services/map/ringLayout.ts` |
+| Golden byte-idêntico | `scripts/export_ring_layout_fixtures.py [--check]` → `data/rating/ring_layout_golden.json` + `src/services/__fixtures__/ringLayoutGolden.json` (7 casos × 3 colocações) |
+| Invariante do anel | `tests/test_ring_layout.py`, `tests/test_corpus_paths_ring.py`, `ringLayoutGolden.test.ts` |
+| Superfícies | App `NetworkScreen` (`MAP_LAYOUT = 'ring'`), dossiê e breakdown do site (`path_payload(layout="ring")`) |
+| Fora | **O OCEANO fica no fluxo.** Medido: o corpus inteiro tem 2 221 ocorrências sobre 85 estados e o anel 2 sozinho segura 141 — o disco vira uma faixa. É a mesma razão pela qual só ele carrega o teto de traços do §16.1. |
+
+### 17.1 Duas consequências de "o raio é uma afirmação"
+
+1. **Sobreposição resolve só em ÂNGULO** (`_separate_on_ring`). A relaxação cartesiana do
+   `flow_layout` move a caixa no eixo de MENOR penetração, que num disco é quase sempre o
+   RADIAL — ela levantava o estado do anel que a página existe para mostrar. A primeira defesa
+   é o próprio RAIO (`_ring_radii` dimensiona cada anel pelo seu setor mais cheio); a passada
+   angular é a segunda, uma varredura para a frente re-centrada na média original, e os limites
+   do setor CEDEM antes de um raio mudar.
+2. **`target_aspect` é a razão VERDADEIRA da superfície (`largura/altura`)**, não a razão do
+   eixo longo que o fluxo recebe, porque o fluxo é VIRADO num celular (`mapPathsView` troca x/y)
+   e o anel nunca é: trocar os eixos de um disco troca "por cima" com "à esquerda".
+   E a curvatura é **assimétrica de propósito** — numa tela larga o disco é esticado para a
+   razão da tela (as guias saem com a excentricidade dela); num celular em pé **não curva**,
+   porque a moldura já é retrato (os polos ficam em 90° e 270°, deixando a nuvem ~2× o raio
+   externo de altura contra ~1,45× de largura). Medido no mock do App a 390×700, curvado vs.
+   não curvado: **20 contra 25 nomes desenhados, 11 contra 15 nomes de AÇÃO**, e o nome do polo
+   de cima perdido.
+
+### 17.2 A régua dos rótulos (mesma noite)
+
+*"labels on all the actions"* + *"o top X POR CENTO fica visível SEMPRE"*:
+
+- **proeminentes** = os `MAP_PROMINENT_SHARE = 0.2` traços mais pesados (piso
+  `MAP_PROMINENT_MIN = 3` para grafos pequenos, veto `weight >= 2`, **sem teto**). O teto rígido
+  de 8 que existia contradizia a regra assim que um dossiê passava de 40 traços. Eles são
+  `pinned`: primeira escolha de vaga e nenhum orçamento os derruba;
+- **todos os demais são oferecidos**, em qualquer zoom. O PISO DE PRIORIDADE POR ZOOM e o
+  ORÇAMENTO DE ÁREA **sumiram** do mapa — eram dois palpites no lugar da única pergunta que
+  importa: esse nome cabe em algum lugar legível? O que esconde agora é só o solver, e o que
+  ele esconde volta no zoom (o conjunto de candidatos é o que está NA TELA);
+- o oceano **mantém** piso e orçamento: é a superfície que ficou no fluxo e a que tem ~400
+  traços, e oferecer 400 nomes a um solver O(n²) a cada quadro é o novelo, não uma leitura.
+
+Dois consertos medidos que vieram junto:
+
+- **A escada de vagas da aresta** (`labelLayout.EDGE_SLOTS`, espelhada em `PATH_EDGE_SLOTS`):
+  com só ±1 na normal o deslocamento é de 14 px, que livra a LINHA e nada mais — e num anel o
+  ponto médio de todo traço radial fica a poucos pixels da pílula de um estado. Medido no bundle
+  do dono a 390×700: **9 de 21 nomes de ação tinham casa, 15 com a escada**. Ir além de ±4 não
+  compra nada (medido).
+- **`site/graph.js` media o rótulo errado**: `measureText(...).width * cam.k`. `measureText` é
+  independente do transform, e o glifo é pintado dentro de um grupo `1/cam.k`, então a caixa
+  reservada era do tamanho do nome × o ZOOM — num fit típico (~0,5), metade. Era assim que um
+  dossiê desenhava "Arm Triangle Choke" por cima de "Double Leg Takedown" com a passada de
+  colisão rodando. O espelho do App nunca teve o fator.
+
+### 17.3 O que o payload ganhou (aditivo)
+
+`layout` ("flow"|"ring"), `rings` (`[{ring, rx, ry}]`, elipses-guia em unidades de MUNDO) e
+`ringCentre`; cada nó posicionado ganha `ring`. Um cliente que não conheça os campos desenha o
+que sempre desenhou. `back` num traço muda de sentido: no disco "para trás" não é uma comparação
+de x, é o traço que se AFASTA da finalização — a leitura de aresta-de-volta que o arco sempre
+quis dizer. `BREAKDOWN_VERSION 6→7`, `DOSSIER_VERSION 5→6` (toda posição em cache é do quadro
+antigo, então o cache tem de errar, não apenas ganhar uma chave).
+
+### 17.4 Números medidos
+
+| | breakdown (11 estados, 29 traços) | dossiê (21 estados, 54 traços) |
+|---|---|---|
+| nomes de estado sobrepostos | **0** (fluxo: 0) | **0** (fluxo: 0) |
+| cobertura de tinta legível | 8,0% (fluxo: 23,8%) | 6,8% (fluxo: 16,3%) |
+
+App, bundle do dono, 390×700 no fit: 24/48 nomes, 11/33 nomes de ação; mock do App: 23/31 e
+14/21. Antes desta fase o piso de zoom desenhava **zero** nomes de ação no fit. Ocupação do
+viewport no App (mock): **77,1% a 390×700** (fit 0,561) e **42,9% a 1280×700** (fit 0,758),
+contra 83,2% / 89,8% do fluxo — o celular praticamente empata, o desktop cai, e é
+um **custo conhecido da moldura**: o anel bipolar é um haltere vertical (Top em cima, Bottom
+embaixo, Neutro puxado para dentro à esquerda), então uma tela larga guarda colunas vazias dos
+dois lados por construção. Mover os polos é o caminho de upgrade e é decisão do dono, não
+afinação.
+
+Proeminentes: 36 de 42 células (bundle × escopo × viewport × zoom) a 100%. O que falta é sempre
+o FIT — um anel converge todo traço num centro, então na escala em que o mapa inteiro cabe na
+tela um nome rotacionado de ~85 px pode genuinamente não ter onde ficar dentro do viewport
+(Global do dono: 4/7 no fit do celular, 5/7 no do desktop, 6/7 a 1,8×). Volta no zoom, e é
+limite de GEOMETRIA — o orçamento e o piso que escondiam esses nomes não existem mais.
+
+Capturas: `docs/screenshots/ring/*.png` (site, dossiê e breakdown reais, anel vs. fluxo, 1100×760
+e 390×700) e `GrapplingArcApp/docs/screenshots/map/*.png` (App, 390×840 e 1280×800).
+
+⚠️ **Regenerar o site é obrigatório** — os dois bumps de versão invalidam todo breakdown e
+dossiê em cache, e as páginas em disco hoje são do quadro antigo.
