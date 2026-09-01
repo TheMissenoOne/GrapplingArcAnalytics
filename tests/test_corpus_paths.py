@@ -255,6 +255,56 @@ def test_folded_payload_is_still_deterministic() -> None:
     assert json.dumps(one, sort_keys=True) == json.dumps(flipped, sort_keys=True)
 
 
+def test_ocean_ceiling_never_drops_a_fold_group_only_marks_it_undrawn() -> None:
+    """Ocean's second ceiling (docs §12, 2026-09-01) — 60 kept variants + one stroke per fold
+    GROUP is still a novelo (877 groups measured over the full corpus). ``max_fold_groups``
+    caps how many fold groups draw a stroke; the rest stay in ``folded`` (``drawn=False``) and
+    their occurrence total rolls into ``stats.undrawn`` — nothing disappears, only its stroke."""
+    agg = aggregate_bouts(_FOLD_BOUTS)
+    wide = path_payload(agg, max_variants=1)  # default: every fold group drawn
+    assert all(fm["drawn"] for fm in wide["folded"])
+    assert wide["stats"]["undrawn"] == {"groups": 0, "occurrences": 0}
+
+    narrow = path_payload(agg, max_variants=1, max_fold_groups=1)
+    drawn = [fm for fm in narrow["folded"] if fm["drawn"]]
+    undrawn = [fm for fm in narrow["folded"] if not fm["drawn"]]
+    assert len(drawn) == 1 and len(undrawn) == 1
+
+    # nothing disappears: same fold groups present, drawn or not
+    assert {fm["id"] for fm in wide["folded"]} == {fm["id"] for fm in narrow["folded"]}
+    # occurrence total is conserved across drawn + undrawn (the invariant the ticket asks for)
+    assert sum(fm["count"] for fm in wide["folded"]) == \
+        sum(fm["count"] for fm in narrow["folded"])
+    assert narrow["stats"]["undrawn"] == {
+        "groups": len(undrawn), "occurrences": sum(fm["count"] for fm in undrawn),
+    }
+
+    # only the drawn group gets a stroke on the map; the undrawn one has none
+    drawn_ids_on_map = {lk["folded"]["id"] for lk in narrow["links"] if lk.get("folded")}
+    assert drawn_ids_on_map == {fm["id"] for fm in drawn}
+    assert not (drawn_ids_on_map & {fm["id"] for fm in undrawn})
+
+
+def test_ocean_ceiling_never_draws_a_phantom_route() -> None:
+    """An undrawn fold group must never sneak a synthetic stroke into the bundler — the ceiling
+    is a stroke ceiling, not a smaller drop under another name."""
+    agg = aggregate_bouts(_FOLD_BOUTS)
+    payload = path_payload(agg, max_variants=1, max_fold_groups=1)
+    undrawn_ids = {fm["id"] for fm in payload["folded"] if not fm["drawn"]}
+    assert not any(lk.get("folded", {}).get("id") in undrawn_ids for lk in payload["links"])
+
+
+def test_ocean_ceiling_is_deterministic() -> None:
+    agg = aggregate_bouts(_FOLD_BOUTS)
+    one = path_payload(agg, max_variants=1, max_fold_groups=1)
+    two = path_payload(agg, max_variants=1, max_fold_groups=1)
+    flipped = path_payload(
+        aggregate_bouts(list(reversed(_FOLD_BOUTS))), max_variants=1, max_fold_groups=1
+    )
+    assert json.dumps(one, sort_keys=True) == json.dumps(two, sort_keys=True)
+    assert json.dumps(one, sort_keys=True) == json.dumps(flipped, sort_keys=True)
+
+
 def test_join_labels_compressed_collapses_consecutive_repeats() -> None:
     """§5d item 3 — consecutive repeats of the SAME action label compress on display; a chain
     with no repeats, or non-adjacent repeats, is untouched."""

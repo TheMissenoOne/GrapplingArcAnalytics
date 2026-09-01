@@ -59,6 +59,8 @@ from analysis.path_metrics import PathMetrics, path_metrics
 from analysis.taxonomy_kind import load_inference_table, orientation_of
 
 __all__ = [
+    "OCEAN_FOLD_GROUP_BUDGET",
+    "PATH_VARIANT_BUDGET",
     "PathAggregate",
     "aggregate_bouts",
     "path_payload",
@@ -79,6 +81,13 @@ _SIDES = ("a", "b")
 # strokes. ~60 is the owner's number (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md §FASE 5d);
 # below it the mechanism never fires, which is the whole point for a one-bout breakdown.
 PATH_VARIANT_BUDGET = 60
+
+# Ocean's SECOND ceiling (docs §12, 2026-09-01): 60 kept variants + one stroke per fold GROUP
+# is still a novelo — the full corpus folds into 877 groups, more strokes (937) than the OLD
+# static gate it replaced (396). Measured over the real corpus: 340 caps `stats.segments` at
+# ~407, close to the owner's ~400 target (`export/site_data.py` measurement, 2026-09-01). Only
+# the ocean passes this; a dossier/breakdown never crosses it (`max_fold_groups=None` default).
+OCEAN_FOLD_GROUP_BUDGET = 340
 
 # A folded stroke's synthetic single action key — unique per fold group by construction (each
 # carries its own bucket index), so it can never merge with a real action's segment and never
@@ -516,6 +525,7 @@ def _fold_overflow(
     types_of: Mapping[str, tuple[str, ...]],
     metrics_by_path: Mapping[str, PathMetrics],
     labels: Mapping[str, str],
+    max_fold_groups: int | None = None,
 ) -> tuple[list[RenderPath], dict[str, dict[str, Any]]]:
     """§5d, items 1-2 — group every budget-cut variant by family (source, target, actor), then
     by whether all its own actions share one category. Each group becomes ONE synthetic
@@ -523,12 +533,23 @@ def _fold_overflow(
     gets a real stroke and position for free) plus a metadata row carrying every folded variant
     UNABRIDGED — folding is render-only (§13's own rule: agreggation never touches topology),
     nothing here is dropped, and nothing here changes ``support``/rating (those are read straight
-    off ``metrics_by_path``, computed before any budget was applied)."""
+    off ``metrics_by_path``, computed before any budget was applied).
+
+    ``max_fold_groups`` — the Ocean's SECOND ceiling (docs §12, 2026-09-01): even with every
+    variant folded, one group per fold bucket still means as many strokes as there are buckets
+    (877 measured over the full corpus — a novelo again). Ranked by each bucket's own total
+    occurrence count, only the top ``max_fold_groups`` get a synthetic ``RenderPath`` (``drawn``).
+    The rest still get a full ``meta`` row (``drawn=False``) — never dropped, just not stroked;
+    a client reveals them on demand from the payload it already has. ``None`` (the dossier/
+    breakdown default) draws every group, unchanged from before this ceiling existed."""
     buckets: dict[tuple[str, str, str, str | None], list[RenderPath]] = {}
     for p in overflow:
         source, target, actor = family_of[p.path_id]
         cat = _uniform_category(types_of[p.path_id])
         buckets.setdefault((source, target, actor, cat), []).append(p)
+
+    ranked = sorted(buckets, key=lambda k: (-sum(p.count for p in buckets[k]), repr(k)))
+    drawn_keys = set(ranked) if max_fold_groups is None else set(ranked[:max_fold_groups])
 
     synth: list[RenderPath] = []
     meta: dict[str, dict[str, Any]] = {}
@@ -538,14 +559,16 @@ def _fold_overflow(
         total = sum(p.count for p in group)
         plural = _CAT_PLURAL.get(cat, "Other paths") if cat else "Other paths"
         fold_id = f"{_FOLD_PREFIX}{i}"
-        synth.append(RenderPath(
-            path_id=fold_id, source=group[0].source, target=group[0].target,
-            actions=(fold_id,), actor=actor, count=total,
-        ))
+        drawn = bkey in drawn_keys
+        if drawn:
+            synth.append(RenderPath(
+                path_id=fold_id, source=group[0].source, target=group[0].target,
+                actions=(fold_id,), actor=actor, count=total,
+            ))
         meta[fold_id] = {
             "id": fold_id, "source": group[0].source, "target": group[0].target,
             "category": cat, "label": f"{plural} ×{len(group)}", "count": total,
-            "variantCount": len(group), "actor": actor,
+            "variantCount": len(group), "actor": actor, "drawn": drawn,
             "variants": [_variant_row(p, metrics_by_path[p.path_id], labels) for p in group],
         }
     return synth, meta
@@ -557,6 +580,7 @@ def path_payload(
     structure: str = DEFAULT_ANCHOR_STRUCTURE,
     rating_of: Callable[[str], float | None] | None = None,
     max_variants: int = PATH_VARIANT_BUDGET,
+    max_fold_groups: int | None = None,
 ) -> dict[str, Any]:
     """Layers 3 + 4 — the bundled graph, laid out, as the site's ``{nodes, links, paths,
     folded}``.
@@ -571,6 +595,15 @@ def path_payload(
     with fewer variants than the budget folds nothing, which is why a single-bout breakdown
     almost never does. Deterministic: the ranking key is total over the corpus, ties break on
     ``path_id``.
+
+    ``max_fold_groups`` (docs §12, 2026-09-01) — the Ocean's SECOND ceiling. Folding fixes the
+    ethics (grouping by family+category instead of a raw drop) but not the density: the full
+    corpus folds into 877 groups, and 60 kept variants + 877 fold strokes is still a novelo
+    (measured, more strokes than the OLD static gate it replaced). Only the top
+    ``max_fold_groups`` fold groups (ranked by their own occurrence count) draw a stroke; the
+    rest still ride in ``folded`` (``drawn=False``) and roll up into ``stats.undrawn`` — never
+    dropped, just not stroked, for a client to reveal on demand. ``None`` (the dossier/breakdown
+    default, and every caller before this ceiling existed) draws every fold group.
     """
     unified = bool(ANCHOR_STRUCTURES[structure]["unified_finish"])
     collapse = agg.collapse_actors
@@ -610,7 +643,8 @@ def path_payload(
         paths = [p for p in all_paths if p.path_id in keep_ids]
         overflow = [p for p in all_paths if p.path_id not in keep_ids]
         synth_paths, fold_meta = _fold_overflow(
-            overflow, family_of, types_of, metrics_by_path, labels
+            overflow, family_of, types_of, metrics_by_path, labels,
+            max_fold_groups=max_fold_groups,
         )
         bundle_input = paths + synth_paths
 
@@ -817,6 +851,12 @@ def path_payload(
             "guesses": {labels.get(k, k): v for k, v in info["guesses"].items()},
         })
 
+    # Ocean's second ceiling: fold groups the ranking cut from a stroke, still fully present in
+    # `folded` (`drawn=False`) — this is the aggregate the meta line and the "not drawn" reveal
+    # read, by GROUP count and by total OCCURRENCE count (never variant identity, same §13.4
+    # convention as `unresolved`: context, not a redraw).
+    undrawn_groups = [fm for fm in fold_meta.values() if not fm["drawn"]]
+
     return {
         "nodes": nodes,
         "links": links,
@@ -828,6 +868,10 @@ def path_payload(
             "variants": len(all_paths),
             "foldedGroups": len(fold_meta),
             "foldedVariants": sum(fm["variantCount"] for fm in fold_meta.values()),
+            "undrawn": {
+                "groups": len(undrawn_groups),
+                "occurrences": sum(fm["count"] for fm in undrawn_groups),
+            },
             "segments": len(bundled.segments),
             "states": sum(1 for p in bundled.points if p.kind == "state"),
             "branchPoints": sum(

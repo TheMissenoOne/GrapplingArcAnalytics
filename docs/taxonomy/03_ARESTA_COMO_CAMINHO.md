@@ -1438,3 +1438,10 @@ Medido: dossiê/breakdown nunca dobram em volume real (59/48/56/31 variantes < 6
 dobra 2 161 de 2 221 em 877 grupos ⇒ 937 traços — melhor que nada-dropado, pior que a
 legibilidade do gate antigo (396). Teto de grupos com DIVULGAÇÃO (não desenhado ≠ descartado)
 é a alavanca seguinte, aplicada só ao oceano.
+
+**§16.1 — teto do oceano (mesmo dia):** `OCEAN_FOLD_GROUP_BUDGET = 340` (só o oceano):
+grupos de dobra ranqueados pelo próprio count; os demais viajam com `drawn:false` +
+`stats.undrawn` — a linha meta diz "N paths not drawn" e selecionar um estado LISTA os grupos
+não desenhados que o tocam (painel, sem re-layout). Medido: 944 → 407 traços, 2 965
+ocorrências invariantes entre kept+drawn+undrawn. `BREAKDOWN_VERSION 6`/`DOSSIER_VERSION 5`
+(chave `drawn` é incondicional por consistência de API).

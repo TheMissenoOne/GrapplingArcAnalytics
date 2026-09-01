@@ -42,7 +42,7 @@ from analysis.athlete_systems import (
     from_career_graphview,
     profile_to_dict,
 )
-from analysis.corpus_paths import aggregate_bouts, path_payload
+from analysis.corpus_paths import OCEAN_FOLD_GROUP_BUDGET, aggregate_bouts, path_payload
 from analysis.counter_moves import counter_moves
 from analysis.defense_rate import defense_profile
 from analysis.event_profile import build_event_profile, event_names
@@ -520,7 +520,10 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
 # 4 -> 5 (§5d, docs/taxonomy/03_ARESTA_COMO_CAMINHO.md §FASE 5d): `path_graph` gained the
 # additive `folded` field and its `min_count` drop became the ranked `max_variants` budget — a
 # cached breakdown built before this would silently render with the old static gate's shape.
-BREAKDOWN_VERSION = 5
+# 5 -> 6 (docs §12, 2026-09-01, Ocean's second ceiling): every `folded[i]` row gained `drawn`
+# and `stats` gained `undrawn` — additive on breakdowns too (they never set `max_fold_groups`,
+# so `drawn` is always `True` here), but still a new key a stale cached item would lack.
+BREAKDOWN_VERSION = 6
 
 # --only previews keep their own cache so a partial run can never overwrite the real one.
 _PREVIEW_CACHE_DIR = Path(__file__).resolve().parent.parent / ".export_cache" / "preview"
@@ -791,7 +794,8 @@ def _progression_example(
 # Same job as BREAKDOWN_VERSION, for the dossier's cached items (1: `:pg`, the path map).
 # Separate from PROFILE_VERSION because that one is style_profile's own contract, not ours.
 # 3 -> 4 (§5d): same `folded`/`max_variants` shape change as BREAKDOWN_VERSION, above.
-DOSSIER_VERSION = 4
+# 4 -> 5 (docs §12, 2026-09-01): same `drawn`/`undrawn` shape change as BREAKDOWN_VERSION 5 -> 6.
+DOSSIER_VERSION = 5
 
 
 def build_fighters(
@@ -2005,7 +2009,7 @@ _OCEAN_BODY = """<section class="ocean-stage">
     <button id="oceanClose" class="ocean-close" aria-label="close">&times;</button>
     <h2 id="opName"></h2><div id="opMeta"></div>
     <div id="opMetrics" class="op-metrics"></div>
-    <div id="opNeighbours"></div><div id="opEdges"></div>
+    <div id="opNeighbours"></div><div id="opEdges"></div><div id="opUndrawn"></div>
   </aside>
 </section>"""
 
@@ -2015,10 +2019,14 @@ var byId = {}; O.nodes.forEach(function(n){ byId[n.id]=n; });
 var __pg = O.pathGraph && O.pathGraph.stats;
 // §5d counter: `paths` is what draws with its own stroke, `foldedGroups` is how many
 // category strokes stand in for everything past the budget — nothing here was dropped,
-// `foldedVariants` (of `variants` total) is still there, just folded.
+// `foldedVariants` (of `variants` total) is still there, just folded. §oceano's SECOND ceiling
+// (docs §12, 2026-09-01): `undrawn.groups` of those fold groups don't even get a stroke — they
+// still ride in `pathGraph.folded` (`drawn:false`) for onSelect() to list, per state, below.
+var __ud = __pg && __pg.undrawn;
 document.getElementById('oceanMeta').textContent = __pg
   ? (__pg.states+' positions · '+__pg.paths+' technique paths drawn individually · '
-     +__pg.foldedGroups+' folded groups covering '+__pg.foldedVariants+' more (of '+__pg.variants+' total) · '
+     +__pg.foldedGroups+' folded groups covering '+__pg.foldedVariants+' more (of '+__pg.variants+' total)'
+     +(__ud && __ud.groups ? ' · '+__ud.groups+' paths not drawn' : '')+' · '
      +__pg.segments+' strokes · '+__pg.sharedActionPct+'% of the ink is shared')
   : ((O.meta.positions||0)+' of '+(O.meta.total_positions||O.meta.positions||0)+' techniques (top slice) · '+
      (O.meta.transitions||0)+' transitions · '+(O.regions||[]).length+' regions');
@@ -2095,6 +2103,7 @@ function onLinkSelect(link){
   // expands the panel to list every one of them (unabridged, `folded.variants`), never just a
   // count. The map itself keeps drawing ONE thicker stroke — the expansion is the reading, not
   // a redraw.
+  document.getElementById('opUndrawn').innerHTML = '';  // that section is a NODE's, not a stroke's
   if(link.folded){
     var f = link.folded;
     document.getElementById('opName').textContent = f.label;
@@ -2158,6 +2167,25 @@ function onSelect(node){
     bar('Favorability',mt.favorability)+bar('Effectiveness',mt.effectiveness);
   document.getElementById('opNeighbours').innerHTML = nb ? '<div class="op-sec">Similar positions</div><div class="op-tags">'+nb+'</div>' : '';
   document.getElementById('opEdges').innerHTML = outs ? '<div class="op-sec">Leads to</div><div class="muted">'+outs+'</div>' : '';
+  // Ocean's second ceiling (docs §12, 2026-09-01): a fold group past `max_fold_groups` gets no
+  // stroke, but its data still rode in `pathGraph.folded` (`drawn:false`). Reveal it here, on
+  // the state it touches — no re-layout needed, `folded[i].source`/`.target` already carry the
+  // point id this node draws at.
+  var ud = '';
+  if(PGO){
+    var selPoint = PGO.nodes.filter(function(x){return x.stateKey===n.id;})[0];
+    var pid = selPoint ? selPoint.id : null;
+    var undrawn = pid ? (PGO.folded||[]).filter(function(f){
+      return f.drawn===false && (f.source===pid || f.target===pid); }) : [];
+    if(undrawn.length){
+      // `f.label` already carries its own variant count ("Submissions ×3"); only add the
+      // occurrence total when it says something the label doesn't (more than one occurrence).
+      ud = '<div class="op-sec">Not drawn ('+undrawn.length+')</div><div class="muted">'+
+        undrawn.map(function(f){return f.label+(f.count>1?' ('+f.count+'×)':'');}).join(', ')+
+        '</div>';
+    }
+  }
+  document.getElementById('opUndrawn').innerHTML = ud;
   panel.hidden=false;
 }
 document.getElementById('oceanClose').addEventListener('click', function(){ panel.hidden=true; g.select(null); });
@@ -2360,8 +2388,15 @@ def export_site(session: Session, out: Path, full: bool = False,
     # what draws individually; the corpus still bundles in under a second regardless, so this was
     # never a perf gate. Everything past the budget FOLDS into a category stroke instead of
     # dropping — see `path_payload`'s docstring and `analysis.corpus_paths._fold_overflow`.
+    # `max_fold_groups` is the Ocean's SECOND ceiling (only this caller sets it — a dossier/
+    # breakdown never folds enough to need one): 877 fold groups measured over the full corpus
+    # would still put 937 strokes on one canvas, more than the old static gate it replaced.
+    # Nothing is dropped — every group past the budget rides in `pathGraph.folded` flagged
+    # `drawn=False`, and `pathGraph.stats.undrawn` is the aggregate the meta line reads.
     ocean["pathGraph"] = path_payload(
-        aggregate_bouts(_corpus_bouts(session), collapse_actors=True))
+        aggregate_bouts(_corpus_bouts(session), collapse_actors=True),
+        max_fold_groups=OCEAN_FOLD_GROUP_BUDGET,
+    )
     (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
     (out / "the-ocean.html").write_text(render_ocean_page(), encoding="utf-8")
     _t = _phase("build_ocean + data.js", _t)
