@@ -102,7 +102,9 @@ def test_site_path_graph_builders_read_only_public_match_sequences() -> None:
 
 def test_payload_carries_what_the_renderer_contracts_on() -> None:
     payload = path_payload(aggregate_bouts([BOUT_A, BOUT_B]))
-    assert set(payload) == {"nodes", "links", "paths", "stats"}
+    # §13.7: `unresolved` is new and additive — family-only context (support/traffic), never a
+    # variant's own count or rating (P5, tests/test_actions_parity.py).
+    assert set(payload) == {"nodes", "links", "paths", "stats", "unresolved"}
 
     ids = {n["id"] for n in payload["nodes"]}
     for node in payload["nodes"]:

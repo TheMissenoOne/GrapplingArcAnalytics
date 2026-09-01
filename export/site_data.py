@@ -517,7 +517,7 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
 # covers the bout's DB fields, which is the right contract for data — but a code change that
 # adds a key (2: `path_graph`) leaves every cached item valid and silently missing it, and the
 # renderer then falls back for the whole corpus. Same precedent as `PROFILE_VERSION`.
-BREAKDOWN_VERSION = 3
+BREAKDOWN_VERSION = 4
 
 # --only previews keep their own cache so a partial run can never overwrite the real one.
 _PREVIEW_CACHE_DIR = Path(__file__).resolve().parent.parent / ".export_cache" / "preview"
@@ -787,7 +787,7 @@ def _progression_example(
 
 # Same job as BREAKDOWN_VERSION, for the dossier's cached items (1: `:pg`, the path map).
 # Separate from PROFILE_VERSION because that one is style_profile's own contract, not ours.
-DOSSIER_VERSION = 2
+DOSSIER_VERSION = 3
 
 
 def build_fighters(
@@ -1192,7 +1192,7 @@ function gaSeek(t){
 var PG = BD.pathGraph && BD.pathGraph.nodes && BD.pathGraph.nodes.length ? BD.pathGraph : null;
 if (PG) {
   GAGraph.mountPaths(document.getElementById('seqGraph'), {
-    nodes: PG.nodes, links: PG.links, paths: PG.paths,
+    nodes: PG.nodes, links: PG.links, paths: PG.paths, unresolved: PG.unresolved,
     onLinkSelect: l => { if (l && l.ts != null) gaSeek(l.ts); },
   });
 } else {
@@ -1489,7 +1489,7 @@ function gaWatch(ref){
 var CPG = P.pathGraph && P.pathGraph.nodes && P.pathGraph.nodes.length ? P.pathGraph : null;
 if (CPG) {
   GAGraph.mountPaths(document.getElementById('careerGraph'), {
-    nodes: CPG.nodes, links: CPG.links, paths: CPG.paths,
+    nodes: CPG.nodes, links: CPG.links, paths: CPG.paths, unresolved: CPG.unresolved,
     // footage still hangs off the TECHNIQUE, which is now an action on the stroke
     onLinkSelect: l => { if (l && P.videos) { for (const a of (l.actions||[])) { if (P.videos[a.key]) { gaWatch(P.videos[a.key]); return; } } } },
     onSelect: n => { if (n && P.videos && n.stateKey) gaWatch(P.videos[n.stateKey]); },
@@ -2024,7 +2024,7 @@ var panel = document.getElementById('oceanPanel');
 var PGO = O.pathGraph && O.pathGraph.nodes && O.pathGraph.nodes.length ? O.pathGraph : null;
 var g = PGO
   ? GAGraph.mountPaths(document.getElementById('oceanGraph'), {
-      nodes: PGO.nodes, links: PGO.links, paths: PGO.paths,
+      nodes: PGO.nodes, links: PGO.links, paths: PGO.paths, unresolved: PGO.unresolved,
       // the HUD floats OVER the canvas — reserve the space it really occupies so the map is
       // never fitted underneath it. MEASURED, not a constant: the region legend grows a row
       // per detected system, and below 760px the HUD is a full-width top band instead of a

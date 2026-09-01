@@ -144,31 +144,31 @@ def test_p3_observations_for_side_never_sees_actions_or_position() -> None:
     assert "actions" not in src and "ChainEdge" not in src
 
 
-def test_p3_scalar_adapter_consumer_is_fixed_full_sequence_key() -> None:
-    """FIXED in Phase 1 (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md):
-    ``scripts.render_map_prototypes.Aggregate.add_edge`` used to key off the scalar adapter
-    (``e.action_key``, i.e. ``actions[0]`` only) — Phase 0 left this a KNOWN gap. Phase 1
-    closes it: the dedup key now covers the WHOLE ``actions[]`` sequence, in order. Two edges
-    carrying the identical sequence dedupe together regardless of which action happens to sit
-    at index 0; two edges whose sequences differ land in different buckets for the RIGHT
-    reason (an actually different path), not because only ``actions[0]`` was compared."""
-    same_order_a = _edge((_OBS_1, _INFERRED_MID, _OBS_2))
-    same_order_b = _edge((_OBS_1, _INFERRED_MID, _OBS_2))  # identical sequence, new edge object
+def test_p3_variant_identity_is_the_observed_subsequence_not_the_full_sequence() -> None:
+    """SUPERSEDES the Phase-1 "whole sequence" key (§13.2/§13.3 of the contract doc, decision
+    2026-09-01): a variant's identity is the OBSERVED subsequence — the inferred filler is
+    annotation of the gap, never identity. Two edges whose OBSERVED actions agree, in order,
+    dedupe into ONE variant even when the inferred action sits at a different position between
+    them (`_INFERRED_MID` first vs. spliced between the two observed actions); an edge whose
+    observed actions actually differ still lands in a different bucket, for the right reason."""
+    same_observed_a = _edge((_OBS_1, _INFERRED_MID, _OBS_2))
+    same_observed_b = _edge((_INFERRED_MID, _OBS_1, _OBS_2))  # inferred moved, same 2 observed
 
     agg = Aggregate()
-    agg.add_edge(same_order_a)
-    agg.add_edge(same_order_b)
+    agg.add_edge(same_observed_a)
+    agg.add_edge(same_observed_b)
+    assert len(agg.edges) == 1  # observed subsequence (armbar, guard pass) is identical
     (row,) = agg.edges.values()
-    assert row["count"] == 2  # same full sequence -> same bucket
+    assert row["count"] == 2
 
-    different_order = _edge((_INFERRED_MID, _OBS_1, _OBS_2))  # actions[0] differs from above
+    different_observed = _edge((_OBS_2, _INFERRED_MID, _OBS_1))  # observed order reversed
     agg2 = Aggregate()
-    agg2.add_edge(_edge((_OBS_1, _INFERRED_MID, _OBS_2)))
-    agg2.add_edge(different_order)
-    assert len(agg2.edges) == 2  # different actual sequences -> different buckets, correctly
-    key_a, key_b = agg2.edges.keys()
-    assert key_a[2] == (_OBS_1.key, _INFERRED_MID.key, _OBS_2.key)
-    assert key_b[2] == (_INFERRED_MID.key, _OBS_1.key, _OBS_2.key)
+    agg2.add_edge(same_observed_a)
+    agg2.add_edge(different_observed)
+    assert len(agg2.edges) == 2  # different observed sequences -> different buckets, correctly
+    key_a, key_b = sorted(agg2.edges.keys())
+    assert key_a[2] == (_OBS_1.key, _OBS_2.key)
+    assert key_b[2] == (_OBS_2.key, _OBS_1.key)
 
 
 # ── P4 — compatibility adapter ───────────────────────────────────────────────────────────
@@ -217,6 +217,94 @@ def test_p4_compile_chain_output_is_still_single_action_edges() -> None:
         _ev("Armbar", "submission"),
     ], inference_table=TABLE)
     assert all(len(e.actions) == 1 for e in chain.edges)
+
+
+# ── §13 — family / variant / unresolved occurrence (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md) ──
+
+
+def test_p5_wholly_inferred_occurrence_propagates_family_support_only() -> None:
+    """P5 (§13.4), on the PUBLIC aggregator (`analysis.corpus_paths.PathAggregate`): an
+    occurrence with no observed action contributes 0 to any variant's own `count`, 0 rating
+    observations, and +1 to the family's `support` — never a phantom trunk of its own."""
+    from analysis.corpus_paths import PathAggregate, _metrics_by_path
+
+    concrete = _edge((_OBS_1,))    # mount -> side control, 1 observed action -> a real variant
+    ghost = _edge((_INFERRED_MID,))  # SAME relation, wholly inferred -> never its own variant
+
+    agg = PathAggregate()
+    agg.add_edge(concrete, "a")
+    agg.add_edge(ghost, "a")
+    agg.finalize()
+
+    assert len(agg.edges) == 1                     # the ghost created no second variant
+    (row,) = agg.edges.values()
+    assert row["count"] == 1                       # 0 contributed to the variant's own count
+    assert agg.unresolved[("mount", "side control", "a")]["count"] == 1
+
+    metrics = _metrics_by_path(agg, lambda _k: 1500.0)
+    (m,) = metrics.values()
+    assert m.support == 2                          # +1 family support from the ghost
+    assert m.observed == 1                         # rating (path_metrics) never sees the ghost
+
+
+def test_p5_private_aggregate_mirrors_the_same_routing() -> None:
+    """Same invariant, on the PRIVATE aggregator (`scripts.render_map_prototypes.Aggregate`) —
+    the App's `mapAggregate.ts` mirrors this one."""
+    concrete = _edge((_OBS_1,))
+    ghost = _edge((_INFERRED_MID,))
+
+    agg = Aggregate()
+    agg.add_edge(concrete)
+    agg.add_edge(ghost)
+    agg.finalize()
+
+    assert len(agg.edges) == 1
+    (row,) = agg.edges.values()
+    assert row["count"] == 1
+    # both fixtures share this actor — the family key below relies on it
+    assert _OBS_1.actor == "you"
+    assert agg.unresolved[("mount", "side control", "you")]["count"] == 1
+
+
+def test_p5_a_family_with_no_concrete_variant_gets_one_disguised_placeholder() -> None:
+    """§13.3's other branch: when a relation has NO concrete variant at all, every wholly-
+    inferred occurrence folds into ONE placeholder edge (still drawable) instead of `unresolved`
+    — the placeholder IS `unresolved`, disguised, not a resolved technique."""
+    sweep_guess = ChainAction(key="sweep", label="Sweep", type="sweep", actor="you",
+                               inferred=True, source_event_index=None)
+    reversal_guess = ChainAction(key="reversal", label="Reversal", type="transition", actor="you",
+                                  inferred=True, source_event_index=None)
+
+    from analysis.corpus_paths import PathAggregate
+
+    agg = PathAggregate()
+    agg.add_edge(_edge((sweep_guess,)), "a")
+    agg.add_edge(_edge((sweep_guess,)), "a")
+    agg.add_edge(_edge((reversal_guess,)), "a")
+    agg.finalize()
+
+    assert len(agg.edges) == 1               # one disguised placeholder, not two ghost variants
+    assert agg.unresolved == {}              # no concrete variant exists to attach `unresolved` to
+    (row,) = agg.edges.values()
+    assert row["count"] == 3
+    assert row["unresolved_guesses"] == {"reversal": 1, "sweep": 2}
+    assert row["actions"] == ("sweep",)      # majority guess is the representative label
+
+
+def test_provenance_matches_inferred_at_both_compiler_construction_sites() -> None:
+    """§13.5: additive `provenance`, `inferred=True` iff `provenance == 'inferred'`. Checked at
+    the two places `chain_compiler` builds a `ChainAction` (the spliced-in generic and the
+    observed action off a real event) rather than validated at construction, so a caller
+    building fixtures directly (this file's own `_OBS_1`/`_INFERRED_MID`) is unaffected."""
+    chain = compile_chain([
+        _ev("Mount", "control"),
+        _ev("Side Control", "control"),  # empty buffer -> exactly one inferred action
+        _ev("Armbar", "submission"),
+    ], inference_table=TABLE)
+    assert chain.edges  # sanity: the fixture actually produced something to check
+    for edge in chain.edges:
+        for action in edge.actions:
+            assert action.inferred == (action.provenance == "inferred"), action
 
 
 # ── Fase 1b — anchor coverage invariant (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md) ─────────────

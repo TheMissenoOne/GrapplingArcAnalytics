@@ -206,6 +206,14 @@ class ChainAction:
     # the input names both, this flag carries whose it is either way. Additive with a default:
     # every existing construction site and reader is unaffected.
     actor_is_opponent: bool = False
+    # §13.5: provenance of the OBSERVATION, not just whether it was inferred. Additive, default
+    # 'user' (a logged App/transcript event with no finer source yet). 'inferred' is the only
+    # value this module itself ever sets — a future video-refinement pass owns 'video_high'/
+    # 'video_low'. `inferred == True` iff `provenance == 'inferred'`; the boolean stays the
+    # compat adapter every existing reader (gates, dedup, rendering) already uses. Precedence
+    # (user >= video_high > video_low > inferred) matters only when the SAME session is reread
+    # (edit, not new evidence) — not exercised by this phase.
+    provenance: str = "user"
 
 
 @dataclass(frozen=True)
@@ -329,7 +337,7 @@ def _splice(observed: list[ChainAction], inserts: list[InferredInsert]) -> tuple
             out.append(ChainAction(key=ins.entry["action_key"], label=ins.entry["label"],
                                     type=ins.entry["type"], actor=ins.actor,
                                     inferred=True, source_event_index=None,
-                                    actor_is_opponent=ins.is_opponent))
+                                    actor_is_opponent=ins.is_opponent, provenance="inferred"))
         if i < len(observed):
             out.append(observed[i])
     return tuple(out)

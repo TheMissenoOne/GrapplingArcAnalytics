@@ -153,9 +153,15 @@ def _anchor_slot(node_key: str, side: str, structure: str) -> str | None:
 class PathAggregate:
     """Unique states / path-occurrences across a set of bouts.
 
-    States key on ``(node_key, fighter)``; a transition keys on the WHOLE ordered action
-    sequence — two occurrences whose first action matches but whose trails diverge are two
-    different paths and must not share a bucket (the Fase 1 key, not the ``actions[0]`` one)."""
+    States key on ``(node_key, fighter)``. A VARIANT keys on ``(source, target, OBSERVED
+    subsequence, actor)`` — §13.1-13.3 of the contract doc: the inferred fill of a gap is
+    annotation of that occurrence, never identity, so two edges whose observed actions agree
+    (in order) share a variant no matter where an inferred action landed among them. An
+    occurrence with NO observed action at all never becomes its own variant: it resolves into
+    ``unresolved`` (a counter on the RELATION ``(source, target, actor)``, §13.4) when the
+    relation already has a concrete variant, or folds into one placeholder edge — a disguised
+    ``unresolved`` bucket, §13.3 — when it does not. ``finalize()`` makes that call once, after
+    every occurrence has been seen, so the decision does not depend on bout order."""
 
     def __init__(self, *, collapse_actors: bool = False) -> None:
         self.collapse_actors = collapse_actors
@@ -165,6 +171,13 @@ class PathAggregate:
         # occurrence under one key carries the same action sequence/terminality by construction.
         self.edge_sample: dict[tuple[str, str, tuple[str, ...], str], ChainEdge] = {}
         self.display_labels: dict[str, str] = {}
+        # Wholly-inferred occurrences, buffered until `finalize()` — see the class docstring.
+        self._ghosts: list[dict[str, Any]] = []
+        # (source, target, actor) -> {"count": int, "guesses": {action_key: count}}. Populated
+        # ONLY for a relation that already carries >=1 concrete variant — a relation with none
+        # gets its placeholder edge instead (`finalize()`).
+        self.unresolved: dict[tuple[str, str, str], dict[str, Any]] = {}
+        self._finalized = False
 
     # ── ingestion ───────────────────────────────────────────────────────────────────
     def register_labels(self, events: Iterable[Mapping[str, Any]]) -> None:
@@ -203,35 +216,85 @@ class PathAggregate:
         target = _perspective_key(edge.target_key, side)
         actor = "a" if self.collapse_actors else side
         action_seq = tuple(a.key for a in edge.actions)
-        key = (source, target, action_seq, actor)
+        observed_seq = tuple(a.key for a in edge.actions if not a.inferred)
+        action_labels = tuple(
+            self.display_labels.get(a.key) or _generic_action_label(a.key) or a.label
+            for a in edge.actions
+        )
+        action_inferred = tuple(a.inferred for a in edge.actions)
+        # Video seek (breakdown pages): an ACTION is what happened at a moment, and in this
+        # model the action rides the edge — so the timestamp does too. FIRST occurrence wins,
+        # same convention as the display label.
+        action_ts = tuple(
+            (ts_of(a.source_event_index)
+             if ts_of is not None and a.source_event_index is not None else None)
+            for a in edge.actions
+        )
+        if not observed_seq:
+            # §13.3: wholly inferred. Never its own variant — buffered, resolved by `finalize()`
+            # once every occurrence has been seen (§2 already proves the empty-buffer case
+            # yields exactly one action, so `action_seq[0]` is the whole guess).
+            self._ghosts.append({
+                "family": (source, target, actor), "guess": action_seq[0] if action_seq else "",
+                "edge": edge, "actions": action_seq, "action_labels": action_labels,
+                "action_inferred": action_inferred, "action_ts": action_ts,
+            })
+            return
+        key = (source, target, observed_seq, actor)
         row = self.edges.get(key)
         if row is None:
-            # Video seek (breakdown pages): an ACTION is what happened at a moment, and in this
-            # model the action rides the edge — so the timestamp does too. FIRST occurrence
-            # wins, same convention as the display label: across many bouts a relation has many
-            # moments and no single one is "the" one, so only a single-bout payload (which is
-            # what a breakdown is) gets a meaningful seek out of this.
-            action_ts = tuple(
-                (ts_of(a.source_event_index)
-                 if ts_of is not None and a.source_event_index is not None else None)
-                for a in edge.actions
-            )
             self.edges[key] = {
                 "source": source,
                 "target": target,
                 "actor": actor,
                 "count": 1,
                 "actions": action_seq,
-                "action_labels": tuple(
-                    self.display_labels.get(a.key) or _generic_action_label(a.key) or a.label
-                    for a in edge.actions
-                ),
-                "action_inferred": tuple(a.inferred for a in edge.actions),
+                "action_labels": action_labels,
+                "action_inferred": action_inferred,
                 "action_ts": action_ts,
             }
             self.edge_sample[key] = edge
         else:
             row["count"] += 1
+
+    def finalize(self) -> None:
+        """§13.3, the order-independent half: decide, for every buffered wholly-inferred
+        occurrence, whether it lands as `unresolved` context on an existing relation or as one
+        folded placeholder edge (a relation with no concrete variant at all — the placeholder
+        IS `unresolved`, just disguised as a drawable edge so the family still renders
+        something). Idempotent; safe to call once after every `add_edge`."""
+        if self._finalized:
+            return
+        self._finalized = True
+        concrete_families = {(k[0], k[1], k[3]) for k in self.edges}
+        grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+        for ghost in self._ghosts:
+            grouped.setdefault(ghost["family"], []).append(ghost)
+        for family, occurrences in grouped.items():
+            guesses: dict[str, int] = {}
+            for occ in occurrences:
+                guesses[occ["guess"]] = guesses.get(occ["guess"], 0) + 1
+            if family in concrete_families:
+                self.unresolved[family] = {
+                    "count": len(occurrences), "guesses": dict(sorted(guesses.items())),
+                }
+                continue
+            # No concrete variant anywhere for this relation — fold every guess into ONE
+            # placeholder edge. Majority guess wins the representative action/label, tied
+            # alphabetically for determinism; first occurrence carrying it wins the sample
+            # (same "first seen wins" convention as everywhere else in this module).
+            top_guess = min(guesses, key=lambda g: (-guesses[g], g))
+            rep = next(o for o in occurrences if o["guess"] == top_guess)
+            source, target, actor = family
+            placeholder_key = (source, target, (top_guess,), actor)
+            self.edges[placeholder_key] = {
+                "source": source, "target": target, "actor": actor,
+                "count": len(occurrences), "actions": rep["actions"],
+                "action_labels": rep["action_labels"], "action_inferred": rep["action_inferred"],
+                "action_ts": rep["action_ts"], "unresolved_guesses": dict(sorted(guesses.items())),
+            }
+            self.edge_sample[placeholder_key] = rep["edge"]
+        self._ghosts = []
 
 
 def _ts_reader(events: Sequence[Mapping[str, Any]]) -> Callable[[int], int | None]:
@@ -281,6 +344,7 @@ def aggregate_bouts(
                 agg.add_state(state, side)
             for edge in compiled[side].edges:
                 agg.add_edge(edge, side, ts_of)
+    agg.finalize()
     return agg
 
 
@@ -290,15 +354,19 @@ def render_paths(agg: PathAggregate) -> list[RenderPath]:
     collapse = agg.collapse_actors
     out: list[RenderPath] = []
     for i, key in enumerate(sorted(agg.edges)):
-        source, target, actions, actor = key
+        source, target, _observed_key, actor = key
+        row = agg.edges[key]
         out.append(
             RenderPath(
                 path_id=f"p{i}",
                 source=_qid(actor, source, collapse=collapse),
                 target=_qid(actor, target, collapse=collapse),
-                actions=actions,
+                # The FULL action path (observed + inferred), never the variant's identity key
+                # (which is the OBSERVED-only subsequence, §13.2) — the drawing/bundling needs
+                # every action an occurrence actually carries.
+                actions=row["actions"],
                 actor=actor,
-                count=agg.edges[key]["count"],
+                count=row["count"],
             )
         )
     return out
@@ -313,6 +381,10 @@ def _metrics_by_path(
     for key, row in agg.edges.items():
         rel = (key[0], key[1], key[3])
         support[rel] = support.get(rel, 0) + row["count"]
+    # §13.4: an unresolved occurrence propagates FAMILY support even though it never becomes a
+    # variant's own `count` — it did happen, between the same two states.
+    for rel, info in agg.unresolved.items():
+        support[rel] = support.get(rel, 0) + info["count"]
     out: dict[str, PathMetrics] = {}
     for i, key in enumerate(sorted(agg.edges)):
         rel = (key[0], key[1], key[3])
@@ -546,10 +618,31 @@ def path_payload(
     shared_actions = sum(len(s.actions) for s in bundled.segments if len(s.path_ids) > 1)
     total_actions = sum(len(s.actions) for s in bundled.segments)
 
+    # §13.4/13.7: family context ONLY — never a variant's count, never rating. A relation with
+    # no concrete variant at all has nothing to list here; its whole story is the disguised
+    # placeholder edge already in `links` (`unresolved_guesses`).
+    unresolved_rows: list[dict[str, Any]] = []
+    for (source, target, actor), info in sorted(agg.unresolved.items()):
+        src_qid = _qid(actor, source, collapse=collapse)
+        tgt_qid = _qid(actor, target, collapse=collapse)
+        variant_count = sum(
+            1 for row in agg.edges.values()
+            if row["source"] == source and row["target"] == target and row["actor"] == actor
+        )
+        top_guess = min(info["guesses"], key=lambda g: (-info["guesses"][g], g))
+        unresolved_rows.append({
+            "source": point_of_state.get(src_qid, f"s:{src_qid}"),
+            "target": point_of_state.get(tgt_qid, f"s:{tgt_qid}"),
+            "actor": actor, "count": info["count"], "variantCount": variant_count,
+            "label": labels.get(top_guess, top_guess),
+            "guesses": {labels.get(k, k): v for k, v in info["guesses"].items()},
+        })
+
     return {
         "nodes": nodes,
         "links": links,
         "paths": path_rows,
+        "unresolved": unresolved_rows,
         "stats": {
             "paths": len(paths),
             "segments": len(bundled.segments),

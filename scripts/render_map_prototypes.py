@@ -507,6 +507,17 @@ class Aggregate:
         # nothing that walks a row's fields can trip over a dataclass.
         self.edge_sample: dict[tuple[str, str, tuple[str, ...], str], ChainEdge] = {}
         self.handovers: dict[tuple[str, str], dict[str, Any]] = {}
+        # §13.1-13.3 (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md): a variant's identity is the
+        # OBSERVED subsequence, never the whole sequence — the inferred fill is annotation of an
+        # occurrence, not identity. A wholly-inferred occurrence never becomes its own variant;
+        # it is buffered here and resolved by `finalize()`, once every occurrence has been seen
+        # so the call does not depend on bout/round order.
+        self._ghosts: list[dict[str, Any]] = []
+        # (source, target, actor) -> {"count", "guesses"} — populated ONLY for a relation that
+        # already carries >=1 concrete variant (a relation with none gets a placeholder edge
+        # instead — the disguised `unresolved`, see `finalize()`).
+        self.unresolved: dict[tuple[str, str, str], dict[str, Any]] = {}
+        self._finalized = False
         self.raw_states_total = 0
         self.raw_states_inferred = 0
         self.raw_edges_total = 0
@@ -557,7 +568,19 @@ class Aggregate:
         source_key = _perspective_key(e.source_key, e.actor)
         target_key = _perspective_key(e.target_key, e.actor)
         action_seq = tuple(a.key for a in e.actions)
-        key = (source_key, target_key, action_seq, e.actor)
+        action_labels = tuple(self.display_labels.get(a.key, a.label) for a in e.actions)
+        action_inferred = tuple(a.inferred for a in e.actions)
+        if wholly_inferred:
+            # §13.3: never its own variant. Buffered — `finalize()` decides per relation.
+            self._ghosts.append({
+                "family": (source_key, target_key, e.actor),
+                "guess": action_seq[0] if action_seq else "",
+                "edge": e, "actions": action_seq,
+                "action_labels": action_labels, "action_inferred": action_inferred,
+            })
+            return
+        observed_seq = tuple(a.key for a in e.actions if not a.inferred)
+        key = (source_key, target_key, observed_seq, e.actor)
         row = self.edges.get(key)
         if row is None:
             action_label = self.display_labels.get(e.action_key, e.action_label)
@@ -569,13 +592,48 @@ class Aggregate:
                                 # every variant 1-12 reads the scalar fields above and is
                                 # untouched by these three.
                                 "actions": action_seq,
-                                "action_labels": tuple(
-                                    self.display_labels.get(a.key, a.label) for a in e.actions),
-                                "action_inferred": tuple(a.inferred for a in e.actions)}
+                                "action_labels": action_labels,
+                                "action_inferred": action_inferred}
             self.edge_sample[key] = e
         else:
             row["count"] += 1
             row["inferred"] = row["inferred"] and wholly_inferred
+
+    def finalize(self) -> None:
+        """§13.3, order-independent half — mirrors `analysis.corpus_paths.PathAggregate.finalize`
+        for the private/prototype aggregate. Idempotent."""
+        if self._finalized:
+            return
+        self._finalized = True
+        concrete_families = {(k[0], k[1], k[3]) for k in self.edges}
+        grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
+        for ghost in self._ghosts:
+            grouped.setdefault(ghost["family"], []).append(ghost)
+        for family, occurrences in grouped.items():
+            guesses: dict[str, int] = {}
+            for occ in occurrences:
+                guesses[occ["guess"]] = guesses.get(occ["guess"], 0) + 1
+            if family in concrete_families:
+                self.unresolved[family] = {
+                    "count": len(occurrences), "guesses": dict(sorted(guesses.items())),
+                }
+                continue
+            top_guess = min(guesses, key=lambda g: (-guesses[g], g))
+            rep = next(o for o in occurrences if o["guess"] == top_guess)
+            source_key, target_key, actor = family
+            placeholder_key = (source_key, target_key, (top_guess,), actor)
+            self.edges[placeholder_key] = {
+                "source": source_key, "target": target_key,
+                "action_key": rep["edge"].action_key,
+                "action_label": self.display_labels.get(rep["edge"].action_key, rep["edge"].action_label),
+                "action_type": rep["edge"].action_type, "actor": actor,
+                "count": len(occurrences), "inferred": True,
+                "actions": rep["actions"], "action_labels": rep["action_labels"],
+                "action_inferred": rep["action_inferred"],
+                "unresolved_guesses": dict(sorted(guesses.items())),
+            }
+            self.edge_sample[placeholder_key] = rep["edge"]
+        self._ghosts = []
 
     def add_handover(self, from_actor: str, from_key: str, to_actor: str, to_key: str) -> None:
         from_id, to_id = _qid(from_actor, from_key), _qid(to_actor, to_key)
@@ -632,6 +690,7 @@ def build_aggregate(bundle: dict[str, Any]) -> Aggregate:
                         agg.add_edge(e)
                 for from_actor, from_key, to_actor, to_key in _handovers_in_group(group, compiled):
                     agg.add_handover(from_actor, from_key, to_actor, to_key)
+    agg.finalize()
     return agg
 
 
@@ -1826,13 +1885,15 @@ def render_paths(agg: Aggregate) -> list[RenderPath]:
     from dict order."""
     out: list[RenderPath] = []
     for i, key in enumerate(sorted(agg.edges)):
-        source_key, target_key, actions, actor = key
+        source_key, target_key, _observed_key, actor = key
         v = agg.edges[key]
         out.append(RenderPath(
             path_id=f"p{i}",
             source=_qid(actor, source_key),
             target=_qid(actor, target_key),
-            actions=actions,
+            # The FULL action path (observed + inferred), never the variant's identity key
+            # (the OBSERVED-only subsequence, §13.2) — bundling/rendering needs every action.
+            actions=v["actions"],
             actor=actor,
             count=v["count"],
         ))
