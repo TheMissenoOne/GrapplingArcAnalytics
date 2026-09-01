@@ -1252,3 +1252,171 @@ classificação e a paridade das duas cópias do piso de zoom.
   quadrática inteira é o upgrade, nomeado em `mapLabelLayer.ts`.
 - **física por rótulo** — o solver é guloso e determinístico de propósito; relaxação já existe no
   layout de MUNDO, que é onde ela pode mover pontos.
+
+---
+
+## 15. Demos de campo (2026-09-01) — variantes 15/16/17 do protótipo
+
+Pedido do dono, três páginas novas em `scripts/render_map_prototypes.py` (saída gitignored em
+`data/processed/map_prototypes/`, dado privado dele fica ali). **Variantes 1–14 saem
+byte-idênticas** — verificado com `cmp` antes/depois, e a única mudança compartilhada é a cópia
+patchada do `graph.js` (patches novos, todos condicionados a campos que só as páginas novas
+emitem; o `13-caminhos.html` renderizado é pixel-idêntico em captura headless).
+
+### 15.1 Fontes — o mapa deixou de ter uma só
+
+Uma `PathSource` (`scripts/render_map_prototypes.PathSource` + `path_source`) normaliza os DOIS
+agregados do repo: o privado (`Aggregate`, bundle do App do dono) e o público
+(`analysis.corpus_paths.PathAggregate`). Eles já expõem os mesmos três atributos
+(`states` chaveado `(node_key, actor)`, `edges` com `actions`/`action_labels`/`action_inferred`,
+`edge_sample` com um `ChainEdge` por chave), então UM adaptador cobre os dois; o que difere
+(modelo de ator, regra de perspectiva) já foi resolvido antes do agregado existir. A única
+correção que o lado público precisou: o rótulo de uma ÂNCORA vem do vocabulário, nunca do estado
+compilado — `_perspective_key` espelha a chave do lado `b` sem tocar no label, e ler
+`row["label"]` imprimia "Por Cima" no nó que o espelho acabou de renomear `start bottom`.
+
+Oito fontes no run do dono (`--public-sources`, leitura de banco somente-leitura em
+`scripts/map_demo_sources.py`): o bundle dele (PRIVADO, 42 ocorrências), o corpus inteiro
+(PÚBLICO, 742 lutas / 2 221 ocorrências, atores colapsados) e seis dossiês — Gordon Ryan mais os
+cinco seguintes do **quadro de Grappling ELO publicado** (`GrapplingArc/site/elo-data.js`, lido
+em vez de recomputado: aquele arquivo É o ranking que o dono vê). ⚠️ As duas classes de dado
+convivem na mesma PÁGINA e nunca no mesmo agregado — a fonte é a unidade de toda dobra, toda
+métrica e todo layout.
+
+### 15.2 Variante 15 — orçamento de traços (Fase 5d)
+
+`analysis/render_budget.py` (puro, testado): ranqueia por (support, strength, count, id), mantém
+as `budget` melhores como elas mesmas, e **dobra** o resto — nunca descarta. Um grupo é
+`(source, target, actor, categoria)` quando todas as ações da ocorrência são de um tipo
+("Finalizações ×4"), senão cai no balde misto da família ("outros caminhos ×N"); um grupo de um
+membro só desenha a própria ocorrência. O traço dobrado carrega uma chave de ação SINTÉTICA
+(`$fold:…`), então o bundler não pode fazê-lo dividir tinta com uma ação real — uma dobra é um
+objeto editorial e não pode parecer uma técnica que aconteceu. `compress_actions` comprime
+repetição CONSECUTIVA no rótulo ("Triangle ×3"), só display.
+
+**§13 vale por construção**: `count`/`support`/rating de toda ocorrência real ficam intactos, e
+a soma que uma dobra mostra não existe em lugar nenhum além do desenho. Dois testes afirmam isso
+(partição exata desenhadas ∪ dobradas, e invariância das linhas do painel em todo orçamento).
+
+Medido, corpus (2 221 ocorrências, 85 estados, **589 famílias**):
+
+| orçamento | desenhadas | dobradas | grupos | traços |
+|---|---|---|---|---|
+| sem limite | 2 221 | 0 | 0 | **2 297** |
+| top 120 | 510 | 1 711 | 310 | 852 |
+| top 60 | 450 | 1 771 | 311 | **790** |
+| top 10 | 400 | 1 821 | 314 | 736 |
+
+⚠️ **O "~60 traços" do plano não é alcançável só dobrando, e o motivo é topológico.** Toda
+FAMÍLIA (par de estados + ator) com ocorrência precisa de pelo menos um traço, porque uma dobra
+não pode mover uma ponta — um traço que começasse em outro lugar desenharia uma transição que
+ninguém andou. O corpus tem 589 famílias, então 736 é 25% acima do piso e a dobra já entregou
+praticamente tudo que podia. Descer abaixo disso exige reduzir PARES DE ESTADO, que é a decisão
+lossy que o `min_count=2` do oceano já toma (e que perde 1 974 ocorrências sem dizer).
+O bundle do dono tem 42 ocorrências sobre 37 famílias: nada dobra acima de `top 10`.
+
+### 15.3 Variantes 16/17 — anéis concêntricos
+
+`analysis/ring_layout.py`. Finalização (vértice unificado) no CENTRO — **disco amarelo CHEIO**,
+não o preenchimento partido por ator das 13/14 (decisão do dono, 2026-09-01: a cor da seta que
+chega já diz quem finalizou, e meia bolinha na cor de cada atleta lê como "este vértice pertence
+aos dois", que não é o que ele significa; as 13/14 mantêm o split porque carregam a garantia de
+byte-identidade). **Raio de um estado = o
+menor número de traços numa caminhada DIRIGIDA dele até uma finalização observada** (BFS
+reversa). Um estado sem rota nenhuma não é escondido nem chutado: cai um anel além do mais
+profundo alcançável. Empates por support, depois por id.
+
+O **ângulo** é a metade que impede os raios de virarem spaghetti: setor pela ORIENTAÇÃO do
+próprio estado (`top` em cima, `neutral` à esquerda, `bottom` embaixo — o mesmo eixo vertical de
+todo o resto do projeto), e dentro do setor a ordem é o baricentro dos vizinhos já colocados no
+anel de dentro. Orientação foi escolhida no lugar de comunidade porque existe para TODA fonte
+(detecção de comunidade precisa do agregado privado) e é exatamente o que as três âncoras
+externas já significam.
+
+16 = a página (posição "arco", a sugestão literal do dono). 17 = a comparação, com as três
+posições e os três modos de âncora ao vivo mais a tabela medida. Ambas desenham o orçamento da
+15 no default (top 60): o corpus sem orçamento tem 141 ocorrências no anel 2 sozinho, e comparar
+molduras em cima disso é comparar dois emaranhados.
+
+**A invariante do dono (2026-09-01, refinamento):** em `fixo` **todo estado assenta NUM anel** —
+nenhum estado em posição livre entre dois. Isso descartou a relaxação cartesiana com que o
+`flow_layout` termina: o trabalho dela é mover uma caixa pelo eixo de MENOR penetração, que num
+layout de anel é quase sempre o RADIAL — ela estava silenciosamente levantando estados para fora
+do anel que a página existe para mostrar. A sobreposição passa a ser resolvida por
+`_separate_on_ring`, que só muda **ângulo**: caminha a ordem angular do anel para a frente
+impondo o mínimo que as duas meias-larguras de rótulo subtendem naquele raio, e re-centra a
+corrida na média original. Limites de setor CEDEM quando um anel está cheio demais — melhor um
+estado num ângulo um pouco errado do que um estado no raio errado, porque só o raio carrega uma
+afirmação sobre o dado. Verificado: `max |r/R − 1| = 0,0005` sobre as três posições × os dois
+viewports (o resto é arredondamento para 0,1 de unidade de mundo).
+
+Custo medido da invariante, bundle do dono, `arco|fixo`: cruzamentos **17 → 75**. Era a
+relaxação radial que estava comprando aqueles cruzamentos, e ela comprava fazendo o desenho
+mentir sobre o raio. As sobreposições de nome continuam em 0.
+
+**Quatro coisas que a medição corrigiu, e não foram ajustadas para bater:**
+
+1. **A dobra de viewport tem de rodar ANTES da relaxação final.** Rodando depois, ela esmaga um
+   eixo e devolve para cima uma da outra caixas de rótulo que a relaxação já tinha separado —
+   visível na captura de 390 px, num layout que media zero sobreposições. Movida para dentro de
+   `ring_layout` (mesma ordem do `flow_layout`), as sobreposições em toda fonte legível caíram
+   para **0**. Custo: um layout por viewport em vez de um só.
+2. **`RING_MIN_GAP` 230 → 170 / `RING_ANCHOR_GAP` 300 → 220**, por varredura sobre quatro fontes
+   (bundle do dono + três dossiês). A 170 o desenho tem ~75% mais tinta legível e texto 33%
+   maior pela MESMA contagem de sobreposição; a 140 a sobreposição começa em toda fonte.
+3. **Um membro SOZINHO de um setor mantém o baricentro dele** em vez de encostar na linha de
+   centro do setor. Encostar é o que transformava o mapa de 19 estados do dono numa CORDA
+   VERTICAL: quase todo anel tem um ou dois pontos por setor, "top" é 90° e "bottom" é 270°, e
+   quase tudo caía no mesmo x.
+4. **Rótulo de ação por CARACTERE ao longo da curva** (`gaArcText`, patch na cópia do `graph.js`),
+   cada glifo na tangente LOCAL, com a caminhada invertida quando o traço corre da direita para
+   a esquerda — assim nenhum rótulo fica de cabeça para baixo, e o sentido de leitura é o do
+   leitor enquanto a curva é a da aresta. Halo por glifo (`strokeText`), porque um retângulo
+   atrás de uma string arqueada seria uma corda. Nomes de ESTADO continuam horizontais.
+
+**Guias de anel são DESLIGADAS nos modos livres.** `_spread` move todo ponto, então um círculo
+no raio semeado deixaria de descrever onde as coisas estão — e uma guia que não descreve o
+desenho não é decoração, é uma afirmação falsa sobre o dado.
+
+### 15.4 Medido — posição × modo de âncora (canvas 880×800, tinta = cobertura legível)
+
+| fonte | posição | âncoras | tinta | cruzamentos | nomes sobrepostos | escala de fit |
+|---|---|---|---|---|---|---|
+| dono | arco | fixas | **6,5%** | 75 | 0 | 0,54 |
+| dono | bipolar | fixas | 5,9% | 76 | 0 | 0,51 |
+| dono | terços | fixas | 4,2% | **68** | 0 | 0,44 |
+| dono | arco | livres | 23,6% | **34** | 0 | 0,94 |
+| dono | terços | livre-total | **25,7%** | 28 | 0 | **1,07** |
+| Gordon | arco | fixas | **8,7%** | **114** | 1 | **0,62** |
+| Gordon | bipolar | fixas | 7,3% | 165 | 0 | 0,57 |
+| Gordon | terços | fixas | 5,1% | 155 | 2 | 0,47 |
+| Gordon | arco | livre-total | **31,2%** | 101 | 0 | 1,08 |
+| corpus | terços | fixas | 2,7% | **30 829** | 10 | 0,15 |
+| corpus | arco | fixas | 3,2% | 35 602 | 10 | 0,16 |
+| corpus | terços | livre-total | 16,9% | **17 757** | 12 | 0,37 |
+
+Leituras, na ordem em que importam:
+
+- **Fixo vs. livre é o efeito de PRIMEIRA ordem** — ~3,5× em tinta legível, ~1,8× em tamanho de
+  texto, e cruzamentos pela metade. O que o modo livre custa é a leitura de anel: as guias somem
+  e o raio deixa de significar proximidade de finalização. É a escolha entre "o desenho afirma
+  algo" e "o desenho cabe na tela", e é literalmente o que os dois botões da 16 comparam.
+- **A posição das âncoras é de SEGUNDA ordem** (±20-30% de cruzamentos) e **o arco — a sugestão
+  literal do dono — ganha em tinta legível e em escala de fit nas duas fontes legíveis**. Terços
+  compra alguns cruzamentos a menos e paga com um desenho menor. Bipolar fica no meio em tudo:
+  o segundo foco esvazia o setor neutro sem preencher nada.
+- **O corpus não é salvo pela moldura.** 85 estados, 589 famílias, ~31 000 cruzamentos com
+  âncoras fixas. Anel funciona na escala de UM atleta / UM bundle; o oceano continua precisando
+  de um corte de dado, não de um enquadramento.
+- Contagem de cruzamentos é capada em 600 traços (`_CROSSING_CAP`), o mesmo prefixo determinístico
+  nos dois lados de qualquer comparação — é comparação, não número absoluto.
+
+### 15.5 Provas
+
+`uv run pytest tests/test_render_map_prototypes.py tests/test_corpus_paths.py -q` (62 passed) e a
+suíte inteira (2 493 passed, 1 skipped); `ruff` e `mypy` limpos. Determinismo: dois runs completos
+com as oito fontes, `diff -r` byte-idêntico. Byte-identidade das variantes 1–14 verificada com
+`cmp` e, para a 13, com captura headless pixel a pixel (7 e 11 rodam simulação de força viva —
+uma captura por tempo não é oráculo estável para elas, verificado repetindo a MESMA página).
+Capturas 1280×800 e 390×840 em `data/processed/map_prototypes/screenshots/`
+(`scripts/shoot_map_prototypes.py`, playwright sob `uv run --with playwright`).

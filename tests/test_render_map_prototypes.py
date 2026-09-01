@@ -17,6 +17,7 @@ from scripts.render_map_prototypes import (
     _ANCHOR_STRUCTURES,
     _BOUNDARY_COLOR,
     _BRIDGE_COLOR,
+    _BUDGETS,
     _DEFAULT_ANCHOR_STRUCTURE,
     _FIG_HEX,
     _FINISH_COLOR,
@@ -34,6 +35,7 @@ from scripts.render_map_prototypes import (
     _anchor_slot,
     _anchor_units,
     _apply_gate,
+    _budget_payloads,
     _collapse_directed,
     _combo_key,
     _combo_payload,
@@ -52,6 +54,7 @@ from scripts.render_map_prototypes import (
     _paths_systems_payloads,
     _place_of,
     _qid,
+    _rings_payloads,
     _select_displayed_bridges,
     _selective_states_and_edges,
     _splice_inferred_states,
@@ -104,7 +107,8 @@ _EXPECTED_FILES = [
     "7-icones-categoria.html", "8-sistemas-colapsavel.html", "9-sistemas-expande-in-place.html",
     "10-gating-comparado.html", "11-sistemas-vista-separada.html",
     "12-sistemas-vista-separada-seletiva.html", "13-caminhos.html",
-    "14-caminhos-sistemas.html",
+    "14-caminhos-sistemas.html", "15-orcamento.html", "16-aneis.html",
+    "17-aneis-ancoras.html",
 ]
 
 _EXPECTED_VARIANT_KEYS = {
@@ -112,7 +116,7 @@ _EXPECTED_VARIANT_KEYS = {
     "4-migrado-oponente-seletivo", "5-hubs", "6-ghost-inferidos",
     "7-icones-categoria", "8-sistemas-colapsavel", "9-sistemas-expande-in-place",
     "11-sistemas-vista-separada", "12-sistemas-vista-separada-seletiva", "13-caminhos",
-    "14-caminhos-sistemas",
+    "14-caminhos-sistemas", "15-orcamento", "16-aneis", "17-aneis-ancoras",
 }
 
 
@@ -138,11 +142,14 @@ def test_render_all_produces_every_artifact_with_valid_counts(tmp_path: Path) ->
         assert "knobs" in m, name
         # 13/14 are fully positioned server-side, so their physics knobs are deliberately ZERO —
         # every other variant still hands graph.js a real repulsion budget.
-        assert m["knobs"]["charge"] > 0 or name in ("13-caminhos", "14-caminhos-sistemas"), name
+        assert m["knobs"]["charge"] > 0 or name in (
+            "13-caminhos", "14-caminhos-sistemas", "15-orcamento", "16-aneis",
+            "17-aneis-ancoras"), name
 
     # handovers only exist where you+partner are both rendered (variants 3-8); variant 1/2/13/14
     # never bridge actors (paths never cross actors — the compiler's own guarantee)
-    for name in ("1-baseline", "2-migrado-proprio", "13-caminhos", "14-caminhos-sistemas"):
+    for name in ("1-baseline", "2-migrado-proprio", "13-caminhos", "14-caminhos-sistemas",
+                 "15-orcamento", "16-aneis", "17-aneis-ancoras"):
         assert metrics["variants"][name]["handover_links"] == 0
     for name in ("3-migrado-oponente-completo", "4-migrado-oponente-seletivo", "5-hubs",
                  "6-ghost-inferidos", "7-icones-categoria"):
@@ -241,6 +248,8 @@ def test_render_all_is_deterministic(tmp_path: Path) -> None:
     assert (out1 / "13-caminhos.html").read_bytes() == (out2 / "13-caminhos.html").read_bytes()
     assert (out1 / "14-caminhos-sistemas.html").read_bytes() == \
         (out2 / "14-caminhos-sistemas.html").read_bytes()
+    for name in ("15-orcamento.html", "16-aneis.html", "17-aneis-ancoras.html"):
+        assert (out1 / name).read_bytes() == (out2 / name).read_bytes(), name
 
 
 def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path: Path) -> None:
@@ -1247,3 +1256,121 @@ def test_variant14_offers_the_same_structures_and_default_as_variant13() -> None
     assert {s["id"] for s in payload["structures"]} == set(_ANCHOR_STRUCTURES)
     assert payload["default"] == f"{_DEFAULT_ANCHOR_STRUCTURE}|{_PATH_SCOPE_GLOBAL}"
     assert payload["scopes"][0]["id"] == _PATH_SCOPE_GLOBAL
+
+
+# ── variants 15/16/17 (demo lote 2026-09-01) ──────────────────────────────────────
+
+
+def _owner_like_source() -> Any:
+    """The App's own mock bundle as a `PathSource` — the same object the pages take, built
+    through the public adapter so the test covers the adapter too."""
+    from scripts.render_map_prototypes import build_aggregate, owner_source
+
+    bundle = _load_mock_bundle()
+    return owner_source(build_aggregate(bundle), bundle)
+
+
+def test_variant15_folds_every_overflow_occurrence_and_never_drops_one() -> None:
+    """The owner's rule for FASE 5d: below the budget an occurrence FOLDS, it never disappears.
+    Drawn-as-itself and folded must partition the input exactly."""
+    src = _owner_like_source()
+    payload = _budget_payloads([src], _DEFAULT_ANCHOR_STRUCTURE)
+    every = {p.path_id for p in src.paths}
+    for budget in _BUDGETS:
+        page = payload["pages"][f"{src.id}|{budget}"]
+        folded = {m for f in page["foldMeta"].values() for m in f["members"]}
+        drawn_ids = set()
+        for meta in page["segMeta"].values():
+            drawn_ids.update(meta["pathIds"])
+        # every occurrence is either drawn under its own id or a member of exactly one fold
+        assert folded <= every
+        assert (drawn_ids | folded) >= every, budget
+        assert not (folded & (drawn_ids - set(page["foldMeta"]))), budget
+        assert page["stats"]["foldedPaths"] == len(folded)
+        assert page["stats"]["drawnPaths"] + page["stats"]["foldedPaths"] == len(every)
+
+
+def test_variant15_folding_never_touches_a_metric(_unused: None = None) -> None:
+    """§13: grouping is RENDER. Every real occurrence's panel row is byte-identical at every
+    budget, and a fold's own `count` is a display sum that exists nowhere else."""
+    src = _owner_like_source()
+    payload = _budget_payloads([src], _DEFAULT_ANCHOR_STRUCTURE)
+    rows = payload["sourceMeta"][src.id]["paths"]
+    assert rows == {p.path_id: rows[p.path_id] for p in src.paths}
+    for budget in _BUDGETS:
+        page = payload["pages"][f"{src.id}|{budget}"]
+        for fold_id, fold in page["foldMeta"].items():
+            assert fold_id not in rows, "a fold is never an occurrence"
+            assert fold["count"] == sum(rows[m]["count"] for m in fold["members"])
+
+
+def test_compress_actions_only_collapses_a_consecutive_run() -> None:
+    from analysis.render_budget import compress_actions
+
+    assert compress_actions(["Triangle", "Triangle", "Triangle"]) == ["Triangle ×3"]
+    # not global: a real back-and-forth must keep its order
+    assert compress_actions(["Armbar", "Sweep", "Armbar"]) == ["Armbar", "Sweep", "Armbar"]
+    assert compress_actions([]) == []
+
+
+def test_ring_index_is_hops_to_a_finish_and_leaves_unreachable_out() -> None:
+    from analysis.path_bundling import RenderPath
+    from analysis.ring_layout import ring_index
+
+    bundled = bundle_paths([
+        RenderPath("p0", "guard", "mount", ("sweep",), "you", 1),
+        RenderPath("p1", "mount", "finish", ("armbar",), "you", 1),
+        RenderPath("p2", "lonely", "island", ("shrug",), "you", 1),
+    ])
+    ring = ring_index(bundled, ["s:finish"])
+    assert ring["s:finish"] == 0
+    assert ring["s:mount"] == 1
+    assert ring["s:guard"] == 2
+    assert "s:lonely" not in ring and "s:island" not in ring  # no route -> caller decides
+
+
+def test_variant16_puts_finish_at_the_centre_and_the_three_anchors_outside() -> None:
+    src = _owner_like_source()
+    payload = _rings_payloads([src], ["arco"])
+    laid = payload["layouts"][f"{src.id}|arco|fixo"]
+    page = payload["pages"][src.id]
+    finish = [n for n in page["gv"]["nodes"] if n.get("stateKey") == _FINISH_KEY]
+    assert finish, "the unified finish is the centre and has to be drawn"
+    desktop = laid["desktop"]
+    assert desktop["centre"] == [desktop["pos"][finish[0]["id"]][0],
+                                  desktop["pos"][finish[0]["id"]][1]]
+    # OUTSIDE the outermost ring: measured radially, not on one axis — `arco` puts Neutro
+    # straight up, where its x offset from the centre is exactly zero.
+    outer = min(min(g["rx"], g["ry"]) for g in desktop["rings"])
+    for point_id, xy in desktop["anchorAt"].items():
+        assert math.dist(xy, desktop["centre"]) >= outer, point_id
+    assert set(laid["anchorDrift"]) == set(desktop["anchorAt"])
+    assert all(v == 0.0 for v in laid["anchorDrift"].values()), "fixo pins the anchors"
+
+
+def test_variant17_offers_every_placement_and_free_anchors_actually_move() -> None:
+    from analysis.ring_layout import ANCHOR_MODES, ANCHOR_PLACEMENTS
+
+    src = _owner_like_source()
+    payload = _rings_payloads([src], sorted(ANCHOR_PLACEMENTS))
+    for placement in ANCHOR_PLACEMENTS:
+        for mode in ANCHOR_MODES:
+            laid = payload["layouts"][f"{src.id}|{placement}|{mode}"]
+            drifted = any(v > 0 for v in laid["anchorDrift"].values())
+            assert drifted is bool(ANCHOR_MODES[mode]["free_anchors"]), (placement, mode)
+            for viewport in ("desktop", "phone"):
+                q = laid[viewport]["quality"]
+                assert 0.0 < q["occupancy"] <= 100.5, (placement, mode, viewport)
+                assert q["crossings"] >= 0 and q["inkCoverage"] >= 0.0
+    # the three placements really are three different pictures
+    seeds = {p: payload["layouts"][f"{src.id}|{p}|fixo"]["desktop"]["anchorAt"]
+              for p in ANCHOR_PLACEMENTS}
+    assert len({json.dumps(v, sort_keys=True) for v in seeds.values()}) == len(seeds)
+
+
+def test_new_pages_carry_the_source_selector_with_every_source() -> None:
+    src = _owner_like_source()
+    for payload in (_budget_payloads([src], _DEFAULT_ANCHOR_STRUCTURE),
+                     _rings_payloads([src], ["arco"])):
+        assert [s["id"] for s in payload["sources"]] == [src.id]
+        assert payload["sourceMeta"][src.id]["note"]

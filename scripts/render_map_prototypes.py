@@ -1,6 +1,6 @@
-"""Phase 1 (actions/states migration) — 8 comparison prototypes of ONE user's own map.
+"""Phase 1 (actions/states migration) — comparison prototypes of the SAME map, many ways.
 
-    uv run python -m scripts.render_map_prototypes --bundle PATH [--out DIR]
+    uv run python -m scripts.render_map_prototypes --bundle PATH [--out DIR] [--public-sources]
 
 Reads a raw App user bundle (LGPD: private, owner-only data — the JSON never leaves this
 machine, output is local-only). For every round, entries are partitioned by ``sequenceId``
@@ -21,7 +21,7 @@ outgoing actor's live state (``CompiledChain.state_after_event``) to the incomin
 state. Rendered as a neutral dashed link (``fighter:'x'``), the same convention the public site
 already uses for contested links.
 
-Renders 9 self-contained HTMLs (a single patched ``site/graph.js`` copy shared by all of
+Renders 17 self-contained HTMLs (a single patched ``site/graph.js`` copy shared by all of
 them — see ``_patch_graph_js``) + an ``index.html`` + ``metrics.json``. Deterministic:
 dict/list order follows bundle read order (no unordered ``set`` in the render path),
 community detection sorts every input/tie-break (cicatriz #10, same convention as
@@ -80,6 +80,20 @@ only ``labelMode`` moved from ``'main'`` to ``'all'``). Documented here because 
 byte difference in ``13-caminhos.html`` from before this change (``diff -r`` gate, see
 ``tests/test_render_map_prototypes.py``).
 
+**15/16/17 — the demo lote (owner request, 2026-09-01, plan FASE 5c/5d):** the first pages in
+this module that render MORE THAN ONE data source. A ``PathSource`` (``path_source``) normalises
+both aggregates in the repo — this file's private ``Aggregate`` and
+``analysis.corpus_paths.PathAggregate`` — so a page offers the owner's own bundle, the whole
+public corpus and one dossier per top-ranked athlete behind a selector (public sources loaded by
+``scripts/map_demo_sources.py``, DB read-only, never imported from here so the tests never need
+a database). ⚠️ The two data classes share a PAGE and never an aggregate: a source is the unit
+of every fold, metric and layout on all three. **15** is the render budget of FASE 5d
+(``analysis/render_budget.py`` — rank, keep the top N, FOLD the rest, never drop one; grouping
+is render, never topology, §13). **16** is the concentric-ring frame (``analysis/ring_layout.py``
+— finish at the centre, radius = hops to a finish, the three generic anchors outside on an arc).
+**17** is 16 with the anchor placement and the fixed/free toggle live, plus the measured
+comparison. Full write-up + the numbers: ``docs/taxonomy/03_ARESTA_COMO_CAMINHO.md`` §15.
+
 **14 — "Caminhos por sistema" (owner request, 2026-09-01):** 13's own paths with systems
 collapsible in the 11/12 model, ``_render_variant14``/``_paths_systems_view``. Same
 ``_detect_systems`` 11/12/13 already share; every system's members fold into one
@@ -107,7 +121,8 @@ import argparse
 import json
 import logging
 import math
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -125,8 +140,16 @@ from analysis.flow_layout import (
 from analysis.markov_weights import block_for_family, load_markov_weights
 from analysis.names import _normalize_name, canonicalize
 from analysis.network_metrics import edge_arrow
-from analysis.path_bundling import RenderPath, Segment, bundle_paths
+from analysis.path_bundling import BundledGraph, RenderPath, Segment, bundle_paths
 from analysis.path_metrics import PathMetrics, path_metrics
+from analysis.render_budget import BudgetResult, apply_budget, compress_actions
+from analysis.ring_layout import (
+    ANCHOR_MODES,
+    ANCHOR_PLACEMENTS,
+    RingLayout,
+    layout_quality,
+    ring_layout,
+)
 from analysis.taxonomy_kind import load_inference_table, orientation_of, resolve_library_entry
 
 logger = logging.getLogger(__name__)
@@ -2063,7 +2086,7 @@ def _paths_view(
             "id": seg.id, "from": seg.from_point, "to": seg.to_point,
             "weight": _clamp3(weight), "arrow": True,
             "label": " → ".join(acts),
-            "fighter": _ACTOR_SIDE[next(iter(sorted(fighters)))] if len(fighters) == 1 else "x",
+            "fighter": _SIDE_OF[next(iter(sorted(fighters)))] if len(fighters) == 1 else "x",
         }
         if all_ghost:
             link["inf"] = True   # named generic: still labelled, yields on a label collision
@@ -2344,7 +2367,7 @@ def _paths_systems_view(
             "id": seg.id, "from": seg.from_point, "to": seg.to_point,
             "weight": _clamp3(weight), "arrow": True,
             "label": " → ".join(acts),
-            "fighter": _ACTOR_SIDE[next(iter(sorted(fighters)))] if len(fighters) == 1 else "x",
+            "fighter": _SIDE_OF[next(iter(sorted(fighters)))] if len(fighters) == 1 else "x",
         }
         if all_ghost:
             link["inf"] = True
@@ -4002,6 +4025,1222 @@ def _render_variant14(out: Path, agg: Aggregate, bundle: dict[str, Any]) -> dict
     }
 
 
+# ── 2e. variants 15/16/17 — sources, the shared view builder, and the two new layouts ─────
+#
+# Everything below this line is the 2026-09-01 demo lote (plan FASE 5c/5d). Three new pages,
+# and ONE thing they all needed that 13/14 did not: more than one data source. 13 renders the
+# owner's own bundle and nothing else; the clutter these pages exist to answer only appears at
+# corpus/dossier volume, so a source is now a first-class object and each page carries a source
+# selector instead of the module carrying a second entry point per corpus.
+#
+# A `PathSource` is deliberately built from the AGGREGATE, not from a rendered payload: the
+# private `Aggregate` (this file) and the public `analysis.corpus_paths.PathAggregate` expose
+# the same three attributes this needs — `states` keyed `(node_key, actor)`, `edges` carrying
+# `actions`/`action_labels`/`action_inferred`, and `edge_sample` carrying one `ChainEdge` per
+# key — so ONE adapter covers both without either module growing a shim. What differs (the
+# actor model, the perspective rule) is already resolved by the time the aggregate exists.
+#
+# ⚠️ Privacy (root CLAUDE.md): a source is one class of data or the other, never a mix. The
+# owner's bundle is PRIVATE and only ever renders into the owner's own local page; the corpus
+# and per-athlete sources are PUBLIC competition footage. Nothing here aggregates across the
+# boundary — the pages hold several sources side by side, and a source is the unit of every
+# fold, every metric and every layout on them.
+
+
+@dataclass(frozen=True)
+class PathSource:
+    """One map's worth of data, normalised out of either aggregate."""
+
+    id: str
+    label: str
+    note: str                                   #: provenance line printed on the page
+    paths: tuple[RenderPath, ...]
+    meta: dict[str, dict[str, Any]]             #: path_id -> the panel's own row
+    score: dict[str, tuple[float, float]]       #: path_id -> (support, strength) for the budget
+    state: dict[str, dict[str, Any]]            #: qid -> {label, cat, size, actor, node_key}
+    action_label: dict[str, str]
+    action_type: dict[str, str]
+    ghosts: frozenset[str]
+    unresolved: int                             #: §13.4 family context, panel only
+
+
+#: Both aggregates name the two sides differently — the private one ``you``/``partner``, the
+#: public one ``a``/``b``. Normalising ONCE, here, is what lets every helper below (`_qid`,
+#: `_finish_label`, `_apply_finish_style`, `_ACTOR_SIDE`) be reused verbatim for both.
+_CORPUS_ACTOR = {"a": "you", "b": "partner"}
+_SIDE_OF = {"you": "a", "partner": "b", "a": "a", "b": "b"}
+
+
+def _metrics_of(agg: Any, rating_of: Callable[[str], float | None]
+                 ) -> dict[str, PathMetrics]:
+    """Fase 3 metrics for every aggregated occurrence, in `render_paths`'s own id order.
+
+    Same body as ``_paths_and_metrics``'s second half; kept separate so variants 13/14 keep
+    their byte-identity guarantee while the new pages take an aggregate they did not build.
+    """
+    block = block_for_family(None, load_markov_weights())
+    support: dict[tuple[str, str, str], int] = {}
+    for key, v in agg.edges.items():
+        rel = (key[0], key[1], key[3])
+        support[rel] = support.get(rel, 0) + v["count"]
+    out: dict[str, PathMetrics] = {}
+    for i, key in enumerate(sorted(agg.edges)):
+        rel = (key[0], key[1], key[3])
+        out[f"p{i}"] = path_metrics(agg.edge_sample[key], support=support[rel],
+                                     rating_of=rating_of, block=block)
+    return out
+
+
+def path_source(agg: Any, paths: list[RenderPath], *, id: str, label: str, note: str,
+                 rating_of: Callable[[str], float | None] | None = None) -> PathSource:
+    """Normalise either aggregate into the shape variants 15/16/17 read.
+
+    ``paths`` comes from that aggregate's OWN ``render_paths`` (this module's for the private
+    bundle, ``analysis.corpus_paths``'s for a public one) — both id occurrences ``p{i}`` over
+    the same ``sorted(agg.edges)``, so the ids line up with ``_metrics_of`` by construction.
+    """
+    rate = rating_of or (lambda _k: None)
+    metrics = _metrics_of(agg, rate)
+    state: dict[str, dict[str, Any]] = {}
+    for (node_key, actor), row in agg.states.items():
+        who = _CORPUS_ACTOR.get(actor, actor)
+        qid = node_key if who == "you" else f"opp:{node_key}"
+        state[qid] = {
+            "node_key": node_key,
+            "actor": who,
+            # An ANCHOR's name comes from the vocabulary, never from the compiled state: the
+            # compiler names the opening anchor from the action's own orientation and
+            # `_perspective_key` then MIRRORS the key for the b side without touching the label,
+            # so reading `row["label"]` prints "Por Cima" on the node the flip just renamed
+            # `start bottom`. Same correction `analysis.corpus_paths` makes with `_ANCHOR_LABELS`.
+            "label": _START_LABELS.get(node_key) or str(row["label"]),
+            "cat": _cat_of(str(row["type"])), "count": int(row["count"]),
+        }
+    action_label: dict[str, str] = {}
+    action_type: dict[str, str] = {}
+    observed: set[str] = set()
+    inferred: set[str] = set()
+    for row in agg.edges.values():
+        for key, text, is_inf in zip(row["actions"], row["action_labels"],
+                                      row["action_inferred"], strict=True):
+            action_label.setdefault(key, text)
+            (inferred if is_inf else observed).add(key)
+    for edge in agg.edge_sample.values():
+        for action in edge.actions:
+            action_type.setdefault(action.key, action.type)
+    meta: dict[str, dict[str, Any]] = {}
+    score: dict[str, tuple[float, float]] = {}
+    for p in paths:
+        m = metrics[p.path_id]
+        meta[p.path_id] = {
+            "actor": _CORPUS_ACTOR.get(p.actor, p.actor), "count": p.count,
+            "actions": compress_actions([action_label.get(k, k) for k in p.actions]),
+            "source": p.source, "target": p.target,
+            "length": m.length, "observed": m.observed,
+            "observedRatio": round(m.observed_ratio, 3), "support": m.support,
+            "terminal": m.terminal, "roleDelta": m.role_delta,
+            "strength": None if m.strength is None else round(m.strength, 1),
+        }
+        score[p.path_id] = (float(m.support), 0.0 if m.strength is None else float(m.strength))
+    return PathSource(
+        id=id, label=label, note=note, paths=tuple(paths), meta=meta, score=score,
+        state=state, action_label=action_label, action_type=action_type,
+        ghosts=frozenset(inferred - observed),
+        unresolved=sum(int(v["count"]) for v in getattr(agg, "unresolved", {}).values()),
+    )
+
+
+def owner_source(agg: Aggregate, bundle: dict[str, Any]) -> PathSource:
+    """The owner's own App bundle — PRIVATE data, local page only (root CLAUDE.md)."""
+    ratings = _rating_of_bundle(bundle)
+    return path_source(agg, render_paths(agg), id="dono", label="Bundle do dono",
+                        note="dado privado do App (LGPD) — nunca sai desta máquina",
+                        rating_of=lambda k: ratings.get(k))
+
+
+# ── the shared view builder ───────────────────────────────────────────────────────
+# 13's `_paths_view` bakes its layout in. The new pages need the same nodes/links/panel out of
+# THREE layouts (flow, rings, rings-with-free-anchors) over FOUR-plus sources, so the assembly
+# and the geometry are split: `_view_of` builds everything that does not depend on where a
+# point lands, and calls a layout function for the positions.
+
+
+@dataclass(frozen=True)
+class _LayoutCtx:
+    bundled: Any
+    anchor_slots: dict[str, str]       #: point id -> 'top'|'bottom'|'neutral'|'finish'|...
+    centre_ids: tuple[str, ...]        #: the finish point(s)
+    sector_of: dict[str, str]          #: state point id -> orientation
+    support: dict[str, float]          #: point id -> summed stroke frequency
+    label_len: dict[str, int]
+    node_weight: dict[str, float]
+
+
+def _view_of(src: PathSource, paths: list[RenderPath], *, structure: str,
+              layout: Callable[[Any, _LayoutCtx], dict[str, tuple[float, float]]],
+              extra_labels: Mapping[str, str] | None = None) -> dict[str, Any]:
+    """One page payload: the bundled graph positioned by ``layout``, plus the panel's data.
+
+    ``extra_labels`` names the synthetic action keys a render fold introduces (§5d) — they are
+    never in the source's own vocabulary, and a stroke with no label would be the one thing a
+    fold must not be: silent.
+    """
+    unified = bool(_ANCHOR_STRUCTURES[structure]["unified_finish"])
+    opp_finish = f"opp:{_FINISH_KEY}"
+    if unified:
+        paths = [
+            RenderPath(path_id=p.path_id,
+                       source=_FINISH_KEY if p.source == opp_finish else p.source,
+                       target=_FINISH_KEY if p.target == opp_finish else p.target,
+                       actions=p.actions, actor=p.actor, count=p.count)
+            for p in paths
+        ]
+    bundled = bundle_paths(paths)
+    labels = dict(src.action_label)
+    labels.update(extra_labels or {})
+    count_of = {p.path_id: p.count for p in paths}
+    actor_of = {p.path_id: p.actor for p in paths}
+
+    node_weight: dict[str, float] = {}
+    for seg in bundled.segments:
+        w = float(_segment_weight(seg, count_of))
+        node_weight[seg.from_point] = node_weight.get(seg.from_point, 0.0) + w
+        node_weight[seg.to_point] = node_weight.get(seg.to_point, 0.0) + w
+
+    anchor_slots: dict[str, str] = {}
+    centre_ids: list[str] = []
+    sector_of: dict[str, str] = {}
+    label_len: dict[str, int] = {}
+    for pt in bundled.points:
+        if pt.state_key is None:
+            continue
+        row = src.state.get(pt.state_key) or src.state.get(opp_finish) or {}
+        node_key = str(row.get("node_key") or pt.state_key.removeprefix("opp:"))
+        actor = str(row.get("actor") or ("partner" if pt.state_key.startswith("opp:") else "you"))
+        slot = _anchor_slot(node_key, actor, structure)
+        if slot is not None:
+            anchor_slots[pt.id] = slot
+            if node_key == _FINISH_KEY:
+                centre_ids.append(pt.id)
+        if node_key != _FINISH_KEY:
+            sector_of[pt.id] = orientation_of(node_key)
+        text = (str(row.get("label") or node_key) if (unified and node_key == _FINISH_KEY)
+                else _finish_label(node_key, actor, str(row.get("label") or node_key)))
+        label_len[pt.id] = len(text)
+    for seg in bundled.segments:
+        label_len[seg.id] = len(" → ".join(
+            compress_actions([labels.get(k, k) for k in seg.actions])))
+
+    ctx = _LayoutCtx(bundled=bundled, anchor_slots=anchor_slots,
+                      centre_ids=tuple(sorted(centre_ids)), sector_of=sector_of,
+                      support=node_weight, label_len=label_len, node_weight=node_weight)
+    pos = layout(bundled, ctx)
+
+    nodes: list[dict[str, Any]] = []
+    for pt in sorted(bundled.points, key=lambda p: p.id):
+        x, y = pos[pt.id]
+        if pt.state_key is None:
+            nodes.append({"id": pt.id, "label": "", "cat": "control", "size": 1,
+                           "color": _JUNCTION_COLOR, "junction": True, "kind": pt.kind,
+                           "x": round(x, 1), "y": round(y, 1), "pin": True})
+            continue
+        row = src.state.get(pt.state_key) or src.state.get(opp_finish) or {}
+        node_key = str(row.get("node_key") or pt.state_key.removeprefix("opp:"))
+        actor = str(row.get("actor") or ("partner" if pt.state_key.startswith("opp:") else "you"))
+        node: dict[str, Any] = {
+            "id": pt.id, "stateKey": pt.state_key, "kind": "state",
+            "label": (str(row.get("label") or node_key) if (unified and node_key == _FINISH_KEY)
+                       else _finish_label(node_key, actor, str(row.get("label") or node_key))),
+            "cat": str(row.get("cat") or "control"),
+            "size": _clamp3(int(row.get("count") or 1)),
+            "fighter": _ACTOR_SIDE[actor],
+            "x": round(x, 1), "y": round(y, 1), "pin": True,
+        }
+        _apply_finish_style(node, node_key, actor)
+        _apply_start_style(node, node_key)
+        if unified and node_key == _FINISH_KEY:
+            # Owner call 2026-09-01: a UNIFIED finish is a solid YELLOW disc, not the split fill
+            # 13/14 use. The arrowhead arriving already carries the actor's colour, so the split
+            # was answering a question the drawing had already answered — and half a node in each
+            # athlete's colour reads as "this vertex belongs to both", which is not what it means.
+            # 13/14 keep the split (they carry a byte-identity guarantee); only the new pages move.
+            node.pop("split", None)
+            node.pop("ring", None)
+        nodes.append(node)
+
+    links: list[dict[str, Any]] = []
+    seg_meta: dict[str, Any] = {}
+    for seg in bundled.segments:
+        acts = compress_actions([labels.get(k, k) for k in seg.actions])
+        weight = _segment_weight(seg, count_of)
+        all_ghost = all(k in src.ghosts for k in seg.actions)
+        fighters = {actor_of[p] for p in seg.path_ids}
+        link: dict[str, Any] = {
+            "id": seg.id, "from": seg.from_point, "to": seg.to_point,
+            "weight": _clamp3(weight), "arrow": True, "label": " → ".join(acts),
+            "fighter": _SIDE_OF[next(iter(sorted(fighters)))] if len(fighters) == 1 else "x",
+        }
+        if all_ghost:
+            link["inf"] = True
+            link["dash"] = [3, 4]
+        if pos[seg.to_point][0] <= pos[seg.from_point][0]:
+            link["bow"], link["back"] = 0.22, True
+        links.append(link)
+        seg_meta[seg.id] = {"pathIds": sorted(seg.path_ids), "actions": acts, "weight": weight,
+                             "shared": len(seg.path_ids) > 1}
+    _index_parallel_links(links)
+
+    lengths: dict[str, int] = {}
+    for p in paths:
+        lengths[str(len(p.actions))] = lengths.get(str(len(p.actions)), 0) + 1
+    shared_actions = sum(len(s.actions) for s in bundled.segments if len(s.path_ids) > 1)
+    total_actions = sum(len(s.actions) for s in bundled.segments)
+    return {
+        "gv": {"nodes": nodes, "links": links},
+        "segMeta": seg_meta,
+        "stats": {
+            "paths": len(paths), "segments": len(bundled.segments),
+            "points": len(bundled.points),
+            "statePoints": sum(1 for p in bundled.points if p.kind == "state"),
+            "branchPoints": sum(1 for p in bundled.points if p.kind in ("branch", "branch-merge")),
+            "mergePoints": sum(1 for p in bundled.points if p.kind in ("merge", "branch-merge")),
+            "sharedActionPct": _pct(shared_actions, total_actions),
+            "lengths": lengths,
+        },
+        "_bundled": bundled,
+        "_ctx": ctx,
+        "_pos": pos,
+    }
+
+
+# ── 2f. variant 15 — render budget under volume (plan FASE 5d) ────────────────────
+#
+# The owner's rule, in one line: a stroke that does not make the budget FOLDS, it never
+# disappears. `analysis.render_budget` owns the decision (pure, tested); this half draws it and
+# reports how much was folded. Three budgets plus "sem limite" are precomputed per source, so
+# the hairball and its folded reading sit one click apart on the same page — which is the
+# comparison the ocean's static `min_count=2` gate cannot show, because the dropped paths are
+# simply not in its payload.
+#
+# ⚠️ §13 holds by construction: a fold's `count` is a DISPLAY sum on a synthetic occurrence,
+# every real occurrence keeps its own untouched row in `pathMeta`, and no metric is recomputed
+# anywhere in this path. `tests/test_render_map_prototypes.py` asserts the partition
+# (drawn ∪ folded == every occurrence, disjoint) and the invariance of the rows.
+
+# 0 = sem limite (the hairball, kept on purpose). 10 is there because the owner's own bundle is
+# 42 occurrences over 40 families — nothing folds at 30 or above, and a fold demo that cannot
+# fold on the demo's own default source shows nothing.
+_BUDGETS = (10, 30, 60, 120, 0)
+_BUDGET_DEFAULT = 60
+
+
+def _flow_layout_fn(structure: str) -> Callable[[Any, _LayoutCtx], dict[str, tuple[float, float]]]:
+    def run(bundled: Any, ctx: _LayoutCtx) -> dict[str, tuple[float, float]]:
+        return flow_layout(bundled, structure=structure, anchor_slots=ctx.anchor_slots,
+                            weight=ctx.node_weight, label_len=ctx.label_len)
+    return run
+
+
+def _budget_view(src: PathSource, budget: int, structure: str) -> dict[str, Any]:
+    result: BudgetResult = apply_budget(
+        list(src.paths), budget=budget, score=src.score, category_of=src.action_type)
+    fold_labels = {f"$fold:{f.path.path_id}": f.label for f in result.folds}
+    view = _view_of(src, list(result.drawn), structure=structure,
+                     layout=_flow_layout_fn(structure), extra_labels=fold_labels)
+    view.pop("_bundled"), view.pop("_ctx"), view.pop("_pos")
+    view["foldMeta"] = {
+        f.path.path_id: {"label": f.label, "kind": f.kind, "category": f.category,
+                          "members": list(f.members), "count": f.path.count}
+        for f in result.folds
+    }
+    # The floor a fold can reach, and why it is not the owner's "~60": every FAMILY (state pair
+    # + actor) that has an occurrence needs at least one stroke, because a fold may never move
+    # an endpoint — a stroke that started somewhere else would draw a transition nobody walked.
+    families = len({(p.source, p.target, p.actor) for p in src.paths})
+    view["stats"].update({
+        "budget": budget,
+        "families": families,
+        "occurrences": len(src.paths),
+        "drawnPaths": len(result.kept),
+        "foldedPaths": len(result.folded),
+        "folds": len(result.folds),
+        "categoryFolds": sum(1 for f in result.folds if f.kind == "category"),
+        "mixedFolds": sum(1 for f in result.folds if f.kind == "mixed"),
+        "strokes": len(view["gv"]["links"]),
+    })
+    return view
+
+
+def _budget_payloads(sources: list[PathSource], structure: str) -> dict[str, Any]:
+    """One payload per (source × budget). ``pathMeta`` is shared per SOURCE — it does not
+    change with the budget, and duplicating 2 370 corpus rows four times is the difference
+    between a page that opens and one that does not."""
+    pages: dict[str, Any] = {}
+    meta: dict[str, Any] = {}
+    for src in sources:
+        meta[src.id] = {"paths": src.meta, "label": src.label, "note": src.note,
+                         "unresolved": src.unresolved}
+        for budget in _BUDGETS:
+            pages[f"{src.id}|{budget}"] = _budget_view(src, budget, structure)
+    return {
+        "pages": pages, "sourceMeta": meta,
+        "sources": [{"id": s.id, "label": s.label} for s in sources],
+        "budgets": [{"id": str(b), "label": "sem limite" if b == 0 else f"top {b}"}
+                     for b in _BUDGETS],
+        "default": f"{sources[0].id}|{_BUDGET_DEFAULT}",
+    }
+
+
+# ── 2g. variants 16/17 — concentric rings (owner request 2026-09-01) ──────────────
+#
+# Finish in the CENTRE, every other state on a ring whose radius is its distance to a finish,
+# the three generic anchors OUTSIDE. `analysis.ring_layout` owns the geometry and documents the
+# semantics; here it is wired to the same `_view_of` the budget page uses, plus the ring guides
+# and the per-layout quality numbers the owner asked to be measured.
+#
+# 16 is the page: one placement (the owner's own "arc"), the source selector, and the
+# fixed/free anchor toggle. 17 is the COMPARISON: the same engine with all three placements
+# live and a table of occupancy/crossings/anchor drift, so the choice is made by looking rather
+# than by argument.
+
+_RING_STRUCTURE = "triangulo"  # unified finish — a ring layout has ONE centre, by definition
+_RING_PLACEMENT_DEFAULT = "arco"
+_RING_MODE_DEFAULT = "fixo"
+#: The CANVAS box each page hands the map, not the browser window: the panel takes 400px on
+#: desktop and the canvas is 62dvh on a phone (both from `_SHELL_CSS`). Bending to the window
+#: would bend to a surface the map never gets.
+_RING_VIEWPORTS = {"desktop": (880.0, 800.0), "phone": (390.0, 520.0)}
+
+
+def _ring_of(ctx: _LayoutCtx, bundled: BundledGraph, placement: str, mode: str,
+              aspect: float | None) -> RingLayout:
+    return ring_layout(bundled, centre_ids=ctx.centre_ids,
+                        anchor_slots={p: s for p, s in ctx.anchor_slots.items()
+                                       if s != "finish"},
+                        sector_of=ctx.sector_of, support=ctx.support,
+                        label_len=ctx.label_len, placement=placement, mode=mode,
+                        target_aspect=aspect)
+
+
+def _ring_layout_fn(placement: str, mode: str
+                     ) -> Callable[[Any, _LayoutCtx], dict[str, tuple[float, float]]]:
+    """`_view_of`'s layout hook. The positions it produces are only a placeholder — every page
+    reads the per-viewport map out of ``layouts`` — so it runs unbent."""
+    def run(bundled: Any, ctx: _LayoutCtx) -> dict[str, tuple[float, float]]:
+        return _ring_of(ctx, bundled, placement, mode, None).pos
+    return run
+
+
+def _ring_geometry(ctx: _LayoutCtx, bundled: BundledGraph, placement: str,
+                    mode: str) -> dict[str, Any]:
+    """The drawn geometry, per viewport, plus the numbers the owner asked to be measured.
+
+    One full layout PER VIEWPORT, because the viewport bend now runs inside ``ring_layout``
+    (before the final relaxation). Bending afterwards was measurably wrong: it squashed one axis
+    and put two state names back on top of each other on the 390-wide phone shot, in a layout
+    that had measured zero overlaps.
+
+    The ring guides are DROPPED in a free mode. ``_spread`` moves every point, so a circle drawn
+    at the seeded radius would no longer describe where anything is — and a guide that does not
+    describe the picture is not decoration, it is a false claim about the data.
+    """
+    guides = not ANCHOR_MODES[mode]["spread"]
+    seed = _ring_of(ctx, bundled, placement, mode, None)
+    out: dict[str, Any] = {
+        "ringCounts": {}, "unreachable": len(seed.unreachable),
+    }
+    for point_id, k in sorted(seed.ring.items()):
+        if point_id not in seed.anchor_seed:
+            out["ringCounts"][str(k)] = out["ringCounts"].get(str(k), 0) + 1
+    for name, (vw, vh) in sorted(_RING_VIEWPORTS.items()):
+        laid = _ring_of(ctx, bundled, placement, mode, vw / vh)
+        kx, ky = laid.bend
+        centre = laid.pos.get(ctx.centre_ids[0], (0.0, 0.0)) if ctx.centre_ids else (0.0, 0.0)
+        out[name] = {
+            "pos": {p: [round(x, 1), round(y, 1)] for p, (x, y) in sorted(laid.pos.items())},
+            "centre": [round(centre[0], 1), round(centre[1], 1)],
+            "rings": [{"rx": round(laid.radius[k] * kx, 1), "ry": round(laid.radius[k] * ky, 1),
+                        "ring": k}
+                       for k in sorted(laid.radius) if guides and laid.radius[k] > 0],
+            "anchorAt": {p: [round(laid.pos[p][0], 1), round(laid.pos[p][1], 1)]
+                          for p in sorted(laid.anchor_seed)},
+            "anchorDrift": {p: round(math.dist(laid.anchor_seed[p], laid.pos[p]), 1)
+                             for p in sorted(laid.anchor_seed)},
+            "quality": layout_quality(laid.pos, ctx.bundled, ctx.label_len, (vw, vh)),
+        }
+    # the panel's single "deriva" line reads the desktop layout; both are in the payload
+    out["anchorDrift"] = out["desktop"]["anchorDrift"]
+    return out
+
+
+def _rings_payloads(sources: list[PathSource], placements: list[str]) -> dict[str, Any]:
+    """Per source: ONE bundled graph + panel (identical across placements/modes) and one small
+    position map per (placement × mode). Splitting them is what keeps 8 sources × 3 placements
+    × 3 modes from being 72 copies of the same 2 000-row payload."""
+    pages: dict[str, Any] = {}
+    layouts: dict[str, Any] = {}
+    meta: dict[str, Any] = {}
+    ring_of: dict[str, int] = {}
+    for src in sources:
+        # 16/17 draw variant 15's OWN budget, at the default. Measured: the ungated corpus is
+        # 2 221 occurrences over 85 states, and its ring 2 alone holds 141 of them — a frame
+        # comparison read off that is a comparison of two hairballs. 15 is where the criterion
+        # is explored (its "sem limite" pill is the honest hairball); here the criterion is
+        # settled and the FRAME is the subject.
+        budgeted = apply_budget(list(src.paths), budget=_BUDGET_DEFAULT, score=src.score,
+                                 category_of=src.action_type)
+        fold_labels = {f"$fold:{f.path.path_id}": f.label for f in budgeted.folds}
+        base = _view_of(src, list(budgeted.drawn), structure=_RING_STRUCTURE,
+                         layout=_ring_layout_fn(placements[0], _RING_MODE_DEFAULT),
+                         extra_labels=fold_labels)
+        base["foldMeta"] = {
+            f.path.path_id: {"label": f.label, "kind": f.kind, "members": list(f.members),
+                              "count": f.path.count}
+            for f in budgeted.folds
+        }
+        base["stats"]["occurrences"] = len(src.paths)
+        base["stats"]["folded"] = len(budgeted.folded)
+        ctx: _LayoutCtx = base["_ctx"]
+        bundled = base["_bundled"]
+        for key in ("_bundled", "_ctx", "_pos"):
+            base.pop(key)
+        base["sector"] = {p: s for p, s in sorted(ctx.sector_of.items())}
+        pages[src.id] = base
+        meta[src.id] = {"paths": src.meta, "label": src.label, "note": src.note,
+                         "unresolved": src.unresolved}
+        for placement in placements:
+            for mode in sorted(ANCHOR_MODES):
+                geom = _ring_geometry(ctx, bundled, placement, mode)
+                ring_of.update(_ring_of(ctx, bundled, placement, mode, None).ring)
+                layouts[f"{src.id}|{placement}|{mode}"] = geom
+    return {
+        "pages": pages, "layouts": layouts, "sourceMeta": meta, "ringOf": ring_of,
+        "sources": [{"id": s.id, "label": s.label} for s in sources],
+        "placements": [{"id": p, "label": ANCHOR_PLACEMENTS[p]["label"]} for p in placements],
+        "modes": [{"id": m, "label": ANCHOR_MODES[m]["label"]} for m in sorted(ANCHOR_MODES)],
+        "default": f"{sources[0].id}|{placements[0] if len(placements) == 1 else _RING_PLACEMENT_DEFAULT}|{_RING_MODE_DEFAULT}",
+    }
+
+
+# Shared shell for the three 2026-09-01 pages. Cloned from `_PAGE13` rather than parametrised —
+# module convention (no `.format()`-shared JS body across variants); only the CSS is identical.
+_SHELL_CSS = """
+:root{--bg:#0b0b0f;--panel:#14141a;--line:#26262e;--ink:#e9e9ee;--ink2:#9a9aa6;--accent:#4d86ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,sans-serif;display:flex;height:100vh;height:100dvh}
+#canvas{flex:1;position:relative;min-width:0}#canvas canvas{width:100%;height:100%;display:block;touch-action:none}
+#side{width:400px;flex:none;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:16px;-webkit-overflow-scrolling:touch}
+h1{font-size:15px;margin:0 0 2px;letter-spacing:-.01em}
+.muted{color:var(--ink2);font-size:12px}
+.sechead{font-size:10px;color:var(--ink2);margin:16px 0 6px;text-transform:uppercase;letter-spacing:.09em}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;cursor:pointer;font:11px system-ui;white-space:nowrap}
+.pill.active{border-color:var(--accent);background:#141c2e;color:var(--ink)}
+.row{padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin-bottom:5px;font-size:12px;cursor:pointer}
+.row:hover{border-color:var(--accent)}
+.row.on{border-color:var(--accent);background:#141c2e}
+.row .n{font:11px/1.4 'Spline Sans Mono',ui-monospace,monospace;color:var(--ink2)}
+.g{opacity:.5;border-style:dashed}
+.fold{border-color:#7c5cff}
+.legend{font-size:11px;color:var(--ink2);margin:10px 0 0;line-height:1.65}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font:11px/1.6 'Spline Sans Mono',ui-monospace,monospace;margin-top:6px}
+.kv b{color:var(--ink2);font-weight:400}
+.kv span{text-align:right}
+.card{border:1px solid var(--accent);border-radius:10px;padding:10px 11px;background:#111726}
+table.cmp{width:100%;border-collapse:collapse;font:11px 'Spline Sans Mono',ui-monospace,monospace;margin-top:6px}
+table.cmp th{color:var(--ink2);font-weight:400;text-align:right;padding:3px 4px;border-bottom:1px solid var(--line)}
+table.cmp th:first-child{text-align:left}
+table.cmp td{text-align:right;padding:3px 4px;border-bottom:1px solid #1c1c22}
+table.cmp td:first-child{text-align:left;color:var(--ink2)}
+table.cmp tr.on td{color:var(--ink);background:#141c2e}
+button.reset{background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;font:11px system-ui;margin-top:8px}
+@media (max-width:760px){
+  body{flex-direction:column;height:auto;min-height:100dvh}
+  #canvas{height:62dvh;flex:none}
+  #side{width:auto;border-left:none;border-top:1px solid var(--line);max-height:none;overflow:visible;padding:14px}
+  .row{padding:10px 11px;font-size:13px}
+  .pill{padding:7px 13px;font-size:12px}
+}
+"""
+
+# Shared JS helpers for the three pages — two functions, identical text, no page model in them.
+# The viewport bend the ring pages need is NOT here: it is done in Python, once per viewport
+# (`_ring_geometry`), so the occupancy the panel prints is the occupancy the screen shows.
+_SHELL_JS = """
+function freshCanvas() {
+  const old = document.getElementById('cv');
+  const next = old.cloneNode(false);
+  old.parentNode.replaceChild(next, old);
+  return next;
+}
+function fmt(v) { return v === null || v === undefined ? '\\u2014' : v; }
+"""
+
+
+# Variant 15's page. Same shell as 13 (canvas + panel, structure of pills, one selection model);
+# what is new is the SOURCE selector and the BUDGET selector, and a fourth selectable kind — a
+# FOLD, which expands in the panel into the occurrences it stands for. A folded stroke is drawn
+# in the fold colour and never shares bundled ink with a real action (its action key is
+# synthetic), so "this line is editorial" is visible before anything is clicked.
+_PAGE15 = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>__CSS__</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1>__TITLE__</h1><div class="muted" id="sub"></div>
+
+<div class="sechead">Fonte</div><div class="pills" id="sources"></div>
+<div class="muted" id="srcNote"></div>
+<div class="sechead">Orçamento de traços</div><div class="pills" id="budgets"></div>
+<div class="sechead">Rótulos das ações</div><div class="pills" id="labels"></div>
+
+<div class="sechead">Dobra</div>
+<div class="card" id="foldStats"></div>
+
+<div class="sechead">Seleção</div>
+<div id="sel"></div>
+
+<div class="sechead">Grupos dobrados</div><div id="foldList"></div>
+<div class="sechead">Caminhos mais frequentes</div><div id="freq"></div>
+
+<div class="legend">Orçamento dinâmico: as ocorrências são ranqueadas por <b>support</b> e
+<b>strength</b> e as N melhores são desenhadas como elas mesmas. O resto <b>DOBRA</b> — nunca
+some. Variantes da mesma família (mesmo par de estados, mesmo ator) cujas ações são todas de um
+tipo viram UM traço de categoria ("Finalizações ×4"); cadeias mistas viram "outros caminhos ×N".
+Um traço dobrado é roxo, mais grosso, e abre na seleção listando as ocorrências que ele
+representa. Repetição do mesmo action comprime só no rótulo ("Triangle ×3").
+<b>Agrupamento é RENDER, nunca topologia</b> (§13): nenhum <span class="n">count</span>,
+<span class="n">support</span> ou rating muda — a soma que um traço dobrado mostra é de
+exibição, e cada ocorrência mantém a própria linha no painel.</div>
+</div>
+<script src="graph.js"></script>
+<script>
+const PAGES = __PAGES_JSON__;
+const SOURCE_META = __SOURCE_META_JSON__;
+const SOURCES = __SOURCES_JSON__;
+const BUDGETS = __BUDGETS_JSON__;
+let source = __DEFAULT_SOURCE__;
+let budget = __DEFAULT_BUDGET__;
+let sel = null;           // {kind:'path'|'segment'|'state'|'fold', id}
+let mounted = null;
+const LABEL_MODES = [{ id: 'main', label: 'principais' }, { id: 'all', label: 'todos' },
+                     { id: 'none', label: 'nenhum' }];
+let labelMode = 'all';
+__SHELL_JS__
+const vertical = () => window.matchMedia('(max-width:760px)').matches;
+function page() { return PAGES[source + '|' + budget]; }
+function meta() { return SOURCE_META[source]; }
+function pathOf(id) { return meta().paths[id]; }
+
+// Which links/nodes stay lit. A FOLD lights its own stroke and every member's row; the other
+// three kinds behave exactly as in variant 13 (one resolver, four entry points).
+function highlightOf(p) {
+  if (!sel) return null;
+  const segs = new Set();
+  const pathIds = new Set();
+  if (sel.kind === 'path') pathIds.add(sel.id);
+  else if (sel.kind === 'fold') pathIds.add(sel.id);
+  else if (sel.kind === 'segment') for (const id of p.segMeta[sel.id].pathIds) pathIds.add(id);
+  else if (sel.kind === 'state') {
+    for (const l of p.gv.links) {
+      if (l.from !== sel.id && l.to !== sel.id) continue;
+      for (const id of p.segMeta[l.id].pathIds) pathIds.add(id);
+    }
+  }
+  const nodes = new Set();
+  for (const l of p.gv.links) if (p.segMeta[l.id].pathIds.some(id => pathIds.has(id))) { segs.add(l.id); nodes.add(l.from); nodes.add(l.to); }
+  if (sel.kind === 'state') nodes.add(sel.id);
+  return { links: segs, nodes: nodes, paths: pathIds };
+}
+
+function pathRow(id, extra) {
+  const m = pathOf(id);
+  const div = document.createElement('div');
+  if (!m) { div.className = 'row'; div.textContent = id; return div; }
+  const on = sel && sel.kind === 'path' && sel.id === id ? ' on' : '';
+  const ghost = m.observedRatio === 0 ? ' g' : '';
+  div.className = 'row' + on + ghost;
+  div.innerHTML = labelOfState(m.source) + ' <b>\\u2014' + m.actions.join(' \\u2192 ') + '\\u2192</b> '
+    + labelOfState(m.target) + '<div class="n">' + extra
+    + (m.actor === 'partner' ? ' \\u00b7 oponente' : '') + '</div>';
+  div.onclick = function () { sel = { kind: 'path', id: id }; rebuild(); };
+  return div;
+}
+
+let STATE_LABEL = {};
+function labelOfState(qid) { return STATE_LABEL[qid] || qid; }
+
+function foldRow(p, id) {
+  const f = p.foldMeta[id];
+  const div = document.createElement('div');
+  div.className = 'row fold' + (sel && sel.kind === 'fold' && sel.id === id ? ' on' : '');
+  div.innerHTML = '<b>' + f.label + '</b><div class="n">'
+    + f.members.length + ' ocorrência(s) \\u00b7 ' + f.count + ' vez(es) somadas \\u00b7 '
+    + (f.kind === 'category' ? 'categoria' : 'cadeias mistas') + '</div>';
+  div.onclick = function () { sel = { kind: 'fold', id: id }; rebuild(); };
+  return div;
+}
+
+function renderSelection(p) {
+  const box = document.getElementById('sel');
+  box.innerHTML = '';
+  if (!sel) {
+    box.innerHTML = '<div class="muted">Nada selecionado — clique num traço, num estado ou num grupo dobrado.</div>';
+    return;
+  }
+  const hl = highlightOf(p);
+  if (sel.kind === 'fold') {
+    const f = p.foldMeta[sel.id];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + f.label + '</b><div class="n">traço de RENDER \\u2014 '
+      + f.members.length + ' ocorrências dobradas, soma de exibição ' + f.count
+      + '. Nenhum count/support/rating foi alterado.</div>';
+    box.appendChild(card);
+    for (const id of f.members) box.appendChild(pathRow(id, 'x' + pathOf(id).count + ' \\u00b7 support ' + pathOf(id).support));
+  } else if (sel.kind === 'path') {
+    const m = pathOf(sel.id);
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + labelOfState(m.source) + ' \\u2014' + m.actions.join(' \\u2192 ') + '\\u2192 ' + labelOfState(m.target) + '</b>'
+      + '<div class="kv">'
+      + '<b>length</b><span>' + m.length + '</span>'
+      + '<b>observed</b><span>' + m.observed + '/' + m.length + '</span>'
+      + '<b>observed_ratio</b><span>' + m.observedRatio.toFixed(2) + '</span>'
+      + '<b>support</b><span>' + m.support + '</span>'
+      + '<b>ocorrências</b><span>' + m.count + '</span>'
+      + '<b>terminal</b><span>' + (m.terminal ? 'sim' : 'não') + '</span>'
+      + '<b>role_delta</b><span>' + m.roleDelta + '</span>'
+      + '<b>strength</b><span>' + fmt(m.strength) + '</span>'
+      + '</div>';
+    box.appendChild(card);
+  } else if (sel.kind === 'segment') {
+    const s = p.segMeta[sel.id];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + s.actions.join(' \\u2192 ') + '</b><div class="n">'
+      + (s.shared ? s.pathIds.length + ' caminhos dividem este traço' : 'traço exclusivo de um caminho')
+      + ' \\u00b7 frequência ' + s.weight + '</div>';
+    box.appendChild(card);
+    for (const id of s.pathIds) { if (p.foldMeta[id]) box.appendChild(foldRow(p, id)); else box.appendChild(pathRow(id, 'x' + pathOf(id).count)); }
+  } else {
+    const node = p.gv.nodes.find(function (n) { return n.id === sel.id; });
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + (node ? node.label : sel.id) + '</b><div class="n">'
+      + hl.paths.size + ' traço(s) passam por aqui</div>';
+    box.appendChild(card);
+    for (const id of Array.from(hl.paths).sort()) { if (p.foldMeta[id]) box.appendChild(foldRow(p, id)); else box.appendChild(pathRow(id, 'x' + pathOf(id).count)); }
+  }
+  const reset = document.createElement('button');
+  reset.className = 'reset';
+  reset.textContent = 'limpar seleção';
+  reset.onclick = function () { sel = null; rebuild(); };
+  box.appendChild(reset);
+}
+
+function pills(elId, items, current, onPick) {
+  const box = document.getElementById(elId); box.innerHTML = '';
+  for (const it of items) {
+    const b = document.createElement('div');
+    b.className = 'pill' + (it.id === current ? ' active' : '');
+    b.textContent = it.label;
+    b.onclick = (function (id) { return function () { onPick(id); }; })(it.id);
+    box.appendChild(b);
+  }
+}
+
+function rebuild() {
+  const p = page();
+  const st = p.stats;
+  STATE_LABEL = {};
+  for (const n of p.gv.nodes) if (n.stateKey) STATE_LABEL[n.stateKey] = n.label;
+  document.getElementById('sub').textContent =
+    st.occurrences + ' ocorrências \\u00b7 ' + st.strokes + ' traços \\u00b7 '
+    + st.statePoints + ' estados \\u00b7 ' + st.branchPoints + ' bifurcações / ' + st.mergePoints + ' convergências';
+  document.getElementById('srcNote').textContent = meta().note;
+  document.getElementById('foldStats').innerHTML =
+    '<div class="kv">'
+    + '<b>ocorrências</b><span>' + st.occurrences + '</span>'
+    + '<b>desenhadas</b><span>' + st.drawnPaths + '</span>'
+    + '<b>dobradas</b><span>' + st.foldedPaths + '</span>'
+    + '<b>grupos</b><span>' + st.folds + ' (' + st.categoryFolds + ' cat. / ' + st.mixedFolds + ' mistos)</span>'
+    + '<b>traços desenhados</b><span>' + st.strokes + '</span>'
+    + '<b>piso (famílias)</b><span>' + st.families + '</span>'
+    + '<b>tinta compartilhada</b><span>' + st.sharedActionPct + '%</span>'
+    + '<b>não resolvidas (§13)</b><span>' + meta().unresolved + '</span>'
+    + '</div>';
+
+  pills('sources', SOURCES, source, function (id) { source = id; sel = null; rebuild(); });
+  pills('budgets', BUDGETS, String(budget), function (id) { budget = id; sel = null; rebuild(); });
+  pills('labels', LABEL_MODES, labelMode, function (id) { labelMode = id; rebuild(); });
+
+  renderSelection(p);
+
+  const fBox = document.getElementById('foldList'); fBox.innerHTML = '';
+  const foldIds = Object.keys(p.foldMeta).sort(function (a, b) { return p.foldMeta[b].members.length - p.foldMeta[a].members.length || (a < b ? -1 : 1); });
+  for (const id of foldIds.slice(0, 12)) fBox.appendChild(foldRow(p, id));
+  if (!foldIds.length) fBox.innerHTML = '<div class="muted">Nada foi dobrado neste orçamento — o mapa cabe inteiro.</div>';
+
+  const qBox = document.getElementById('freq'); qBox.innerHTML = '';
+  const ids = Object.keys(meta().paths).sort(function (a, b) { return meta().paths[b].count - meta().paths[a].count || meta().paths[b].support - meta().paths[a].support || (a < b ? -1 : 1); });
+  for (const id of ids.slice(0, 10)) qBox.appendChild(pathRow(id, 'x' + pathOf(id).count + ' \\u00b7 support ' + pathOf(id).support));
+
+  const hl = highlightOf(p);
+  const flip = vertical();
+  const nodes = p.gv.nodes.map(function (n) {
+    let label = n.label;
+    if (flip) {
+      const primary = n.shape === 'diamond' || n.color === '#facc15';
+      if (!primary && (n.size || 1) < 3 && !(hl && hl.nodes.has(n.id))) label = '';
+      else if (label.length > 16) label = label.slice(0, 15) + '\\u2026';
+    }
+    const base = label === n.label ? n : Object.assign({}, n, { label: label });
+    return flip ? Object.assign({}, base, { x: n.y, y: n.x }) : base;
+  });
+  const links = p.gv.links.map(function (l) {
+    const isFold = !!p.foldMeta[(p.segMeta[l.id].pathIds || [])[0]] && p.segMeta[l.id].pathIds.length === 1;
+    const lit = hl && hl.links.has(l.id);
+    const show = lit || (!flip && (labelMode === 'all' || (labelMode === 'main' && l.weight >= 2)));
+    const out = Object.assign({}, l, isFold ? { color: '#7c5cff' } : {});
+    if (!show) out.label = undefined;
+    return out;
+  });
+  if (mounted && mounted.destroy) mounted.destroy();
+  mounted = GAGraph.mount(freshCanvas(), {
+    mode: 'map', nodes: nodes, links: links, pan: true, zoom: true,
+    collide: false, bounded: false, charge: 0, linkDist: 1, gravity: 0,
+    forceLabels: true, minZoom: 0.05,
+    highlightLinks: hl ? Array.from(hl.links) : null,
+    highlightNodes: hl ? Array.from(hl.nodes) : null,
+    onSelect: function (n) {
+      if (!n) { sel = null; rebuild(); return; }
+      if (n.junction) return;
+      sel = { kind: 'state', id: n.id };
+      rebuild();
+    },
+    onLinkSelect: function (l) {
+      const ids = page().segMeta[l.id].pathIds;
+      sel = (ids.length === 1 && page().foldMeta[ids[0]]) ? { kind: 'fold', id: ids[0] } : { kind: 'segment', id: l.id };
+      rebuild();
+    },
+  });
+}
+let lastVertical = vertical();
+window.addEventListener('resize', function () {
+  if (vertical() !== lastVertical) { lastVertical = vertical(); rebuild(); }
+});
+rebuild();
+</script></body></html>"""
+
+
+def _render_variant15(out: Path, sources: list[PathSource]) -> dict[str, Any]:
+    payload = _budget_payloads(sources, _RING_STRUCTURE)
+    default_source, default_budget = payload["default"].split("|")
+    html = (
+        _PAGE15
+        .replace("__CSS__", _SHELL_CSS)
+        .replace("__SHELL_JS__", _SHELL_JS)
+        .replace("__TITLE__", "15 — Orçamento de traços")
+        .replace("__PAGES_JSON__", json.dumps(payload["pages"], ensure_ascii=False))
+        .replace("__SOURCE_META_JSON__", json.dumps(payload["sourceMeta"], ensure_ascii=False))
+        .replace("__SOURCES_JSON__", json.dumps(payload["sources"], ensure_ascii=False))
+        .replace("__BUDGETS_JSON__", json.dumps(payload["budgets"], ensure_ascii=False))
+        .replace("__DEFAULT_SOURCE__", json.dumps(default_source))
+        .replace("__DEFAULT_BUDGET__", json.dumps(default_budget))
+    )
+    (out / "15-orcamento.html").write_text(html, encoding="utf-8")
+    default = payload["pages"][payload["default"]]
+    st = default["stats"]
+    return {
+        "nodes": len(default["gv"]["nodes"]), "edges": len(default["gv"]["links"]),
+        "edges_per_node": round(len(default["gv"]["links"]) / len(default["gv"]["nodes"]), 2)
+        if default["gv"]["nodes"] else 0.0,
+        "pct_inferred_edges": _pct(
+            sum(1 for link in default["gv"]["links"] if link.get("inf")),
+            len(default["gv"]["links"])),
+        "partner_elements": sum(1 for n in default["gv"]["nodes"] if n.get("fighter") == "b"),
+        "handover_links": 0,
+        "knobs": {"charge": 0, "linkDist": 1, "gravity": 0},
+        "sources": [s.id for s in sources],
+        "budgets": list(_BUDGETS),
+        "fold_by_source": {
+            f"{src.id}|{b}": {
+                k: payload["pages"][f"{src.id}|{b}"]["stats"][k]
+                for k in ("occurrences", "families", "drawnPaths", "foldedPaths", "folds",
+                           "categoryFolds", "mixedFolds", "strokes")
+            }
+            for src in sources for b in _BUDGETS
+        },
+    }
+
+
+# Variants 16/17's shared JS body. The two pages differ only in which controls are live (16
+# fixes the placement to the owner's own "arc"; 17 makes it a pill and adds the comparison
+# table), so the model — source, mode, ring guides, selection — is written once here and each
+# template pastes it. This is a deliberate exception to the module's "clone the template"
+# convention: 16 and 17 are the SAME view with a different number of knobs, and two copies of
+# the ring bookkeeping would be two places to fix a ring bug.
+_RINGS_JS = """
+const PAGES = __PAGES_JSON__;
+const LAYOUTS = __LAYOUTS_JSON__;
+const SOURCE_META = __SOURCE_META_JSON__;
+const SOURCES = __SOURCES_JSON__;
+const PLACEMENTS = __PLACEMENTS_JSON__;
+const MODES = __MODES_JSON__;
+let source = __DEFAULT_SOURCE__;
+let placement = __DEFAULT_PLACEMENT__;
+let mode = __DEFAULT_MODE__;
+let sel = null;
+let mounted = null;
+const LABEL_MODES = [{ id: 'main', label: 'principais' }, { id: 'all', label: 'todos' },
+                     { id: 'none', label: 'nenhum' }];
+let labelMode = 'all';
+__SHELL_JS__
+const vertical = () => window.matchMedia('(max-width:760px)').matches;
+function page() { return PAGES[source]; }
+function meta() { return SOURCE_META[source]; }
+function pathOf(id) { return meta().paths[id]; }
+function layout() { return LAYOUTS[source + '|' + placement + '|' + mode]; }
+function geom() { return layout()[vertical() ? 'phone' : 'desktop']; }
+
+let STATE_LABEL = {};
+function labelOfState(qid) { return STATE_LABEL[qid] || qid; }
+
+function highlightOf(p) {
+  if (!sel) return null;
+  const pathIds = new Set();
+  if (sel.kind === 'path') pathIds.add(sel.id);
+  else if (sel.kind === 'segment') for (const id of p.segMeta[sel.id].pathIds) pathIds.add(id);
+  else if (sel.kind === 'state') {
+    for (const l of p.gv.links) {
+      if (l.from !== sel.id && l.to !== sel.id) continue;
+      for (const id of p.segMeta[l.id].pathIds) pathIds.add(id);
+    }
+  }
+  const segs = new Set();
+  const nodes = new Set();
+  for (const l of p.gv.links) if (p.segMeta[l.id].pathIds.some(id => pathIds.has(id))) { segs.add(l.id); nodes.add(l.from); nodes.add(l.to); }
+  if (sel.kind === 'state') nodes.add(sel.id);
+  return { links: segs, nodes: nodes, paths: pathIds };
+}
+
+function pathRow(id, extra) {
+  const m = pathOf(id);
+  const div = document.createElement('div');
+  if (!m) { div.className = 'row'; div.textContent = id; return div; }
+  div.className = 'row' + (sel && sel.kind === 'path' && sel.id === id ? ' on' : '')
+    + (m.observedRatio === 0 ? ' g' : '');
+  div.innerHTML = labelOfState(m.source) + ' <b>\\u2014' + m.actions.join(' \\u2192 ') + '\\u2192</b> '
+    + labelOfState(m.target) + '<div class="n">' + extra
+    + (m.actor === 'partner' ? ' \\u00b7 oponente' : '') + '</div>';
+  div.onclick = function () { sel = { kind: 'path', id: id }; rebuild(); };
+  return div;
+}
+
+function pills(elId, items, current, onPick) {
+  const box = document.getElementById(elId); box.innerHTML = '';
+  for (const it of items) {
+    const b = document.createElement('div');
+    b.className = 'pill' + (it.id === current ? ' active' : '');
+    b.textContent = it.label;
+    b.onclick = (function (id) { return function () { onPick(id); }; })(it.id);
+    box.appendChild(b);
+  }
+}
+
+function renderSelection(p) {
+  const box = document.getElementById('sel');
+  box.innerHTML = '';
+  if (!sel) { box.innerHTML = '<div class="muted">Nada selecionado — clique num traço ou num estado.</div>'; return; }
+  const hl = highlightOf(p);
+  if (sel.kind === 'path') {
+    const m = pathOf(sel.id);
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + labelOfState(m.source) + ' \\u2014' + m.actions.join(' \\u2192 ') + '\\u2192 ' + labelOfState(m.target) + '</b>'
+      + '<div class="kv">'
+      + '<b>anel origem</b><span>' + fmt(RING_OF[m.source]) + '</span>'
+      + '<b>anel destino</b><span>' + fmt(RING_OF[m.target]) + '</span>'
+      + '<b>length</b><span>' + m.length + '</span>'
+      + '<b>observed</b><span>' + m.observed + '/' + m.length + '</span>'
+      + '<b>support</b><span>' + m.support + '</span>'
+      + '<b>ocorrências</b><span>' + m.count + '</span>'
+      + '<b>terminal</b><span>' + (m.terminal ? 'sim' : 'não') + '</span>'
+      + '<b>strength</b><span>' + fmt(m.strength) + '</span>'
+      + '</div>';
+    box.appendChild(card);
+  } else if (sel.kind === 'segment') {
+    const s = p.segMeta[sel.id];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + s.actions.join(' \\u2192 ') + '</b><div class="n">'
+      + (s.shared ? s.pathIds.length + ' caminhos dividem este traço' : 'traço exclusivo de um caminho')
+      + ' \\u00b7 frequência ' + s.weight + '</div>';
+    box.appendChild(card);
+    for (const id of s.pathIds) box.appendChild(pathRow(id, 'x' + pathOf(id).count));
+  } else {
+    const node = p.gv.nodes.find(function (n) { return n.id === sel.id; });
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + (node ? node.label : sel.id) + '</b><div class="n">anel '
+      + fmt(RING_OF[node ? node.stateKey : '']) + ' \\u00b7 setor ' + fmt(p.sector[sel.id])
+      + ' \\u00b7 ' + hl.paths.size + ' cadeia(s) passam por aqui</div>';
+    box.appendChild(card);
+    for (const id of Array.from(hl.paths).sort()) box.appendChild(pathRow(id, 'x' + pathOf(id).count));
+  }
+  const reset = document.createElement('button');
+  reset.className = 'reset'; reset.textContent = 'limpar seleção';
+  reset.onclick = function () { sel = null; rebuild(); };
+  box.appendChild(reset);
+}
+
+let RING_OF = {};
+function rebuild() {
+  const p = page(), L = layout(), g = geom();
+  STATE_LABEL = {};
+  RING_OF = {};
+  for (const n of p.gv.nodes) if (n.stateKey) STATE_LABEL[n.stateKey] = n.label;
+  document.getElementById('sub').textContent =
+    p.stats.occurrences + ' ocorrências (' + p.stats.folded + ' dobradas, orçamento top __BUDGET__) \\u00b7 '
+    + p.stats.segments + ' traços \\u00b7 ' + p.stats.statePoints + ' estados \\u00b7 '
+    + (Object.keys(L.ringCounts).length) + ' anéis';
+  document.getElementById('srcNote').textContent = meta().note;
+
+  pills('sources', SOURCES, source, function (id) { source = id; sel = null; rebuild(); });
+  if (document.getElementById('placements')) pills('placements', PLACEMENTS, placement, function (id) { placement = id; rebuild(); });
+  pills('modes', MODES, mode, function (id) { mode = id; rebuild(); });
+  pills('labels', LABEL_MODES, labelMode, function (id) { labelMode = id; rebuild(); });
+
+  const q = g.quality;
+  document.getElementById('ringStats').innerHTML =
+    '<div class="kv">'
+    + '<b>ocupação (caixa)</b><span>' + q.occupancy + '%</span>'
+    + '<b>cobertura legível</b><span>' + q.inkCoverage + '%</span>'
+    + '<b>cruzamentos</b><span>' + q.crossings + '</span>'
+    + '<b>nomes sobrepostos</b><span>' + q.labelOverlaps + '</span>'
+    + '<b>escala de fit</b><span>' + q.fitScale + '</span>'
+    + '<b>sem rota até finalização</b><span>' + L.unreachable + '</span>'
+    + '<b>deriva das âncoras</b><span>' + Object.keys(L.anchorDrift).sort().map(function (k) { return L.anchorDrift[k]; }).join(' / ') + '</span>'
+    + '</div>'
+    + '<div class="n" style="margin-top:6px">por anel: '
+    + Object.keys(L.ringCounts).sort(function (a, b) { return a - b; }).map(function (k) { return k + ':' + L.ringCounts[k]; }).join('  ')
+    + (g.rings.length ? '' : '<br/>guias de anel escondidas: neste modo o espalhamento move todo ponto, e um círculo no raio semeado deixaria de descrever o desenho')
+    + '</div>';
+
+  renderSelection(p);
+  if (typeof renderCompare === 'function') renderCompare();
+
+  const fBox = document.getElementById('freq'); fBox.innerHTML = '';
+  const ids = Object.keys(meta().paths).sort(function (a, b) { return meta().paths[b].count - meta().paths[a].count || (a < b ? -1 : 1); });
+  for (const id of ids.slice(0, 10)) fBox.appendChild(pathRow(id, 'x' + pathOf(id).count + ' \\u00b7 support ' + pathOf(id).support));
+
+  const hl = highlightOf(p);
+  const nodes = p.gv.nodes.map(function (n) {
+    const xy = g.pos[n.id] || [n.x, n.y];
+    if (n.stateKey) RING_OF[n.stateKey] = RINGS_BY_POINT[n.id];
+    let label = n.label;
+    if (vertical() && !(n.shape === 'diamond' || n.color === '#facc15') && (n.size || 1) < 3 && !(hl && hl.nodes.has(n.id))) label = '';
+    return Object.assign({}, n, { x: xy[0], y: xy[1], label: label });
+  });
+  const links = p.gv.links.map(function (l) {
+    const lit = hl && hl.links.has(l.id);
+    const show = lit || (!vertical() && (labelMode === 'all' || (labelMode === 'main' && l.weight >= 2)));
+    return show ? l : Object.assign({}, l, { label: undefined });
+  });
+  if (mounted && mounted.destroy) mounted.destroy();
+  mounted = GAGraph.mount(freshCanvas(), {
+    mode: 'map', nodes: nodes, links: links, pan: true, zoom: true,
+    collide: false, bounded: false, charge: 0, linkDist: 1, gravity: 0,
+    forceLabels: true, minZoom: 0.05,
+    rings: g.rings, ringCentre: g.centre, arcLabels: true,
+    highlightLinks: hl ? Array.from(hl.links) : null,
+    highlightNodes: hl ? Array.from(hl.nodes) : null,
+    onSelect: function (n) {
+      if (!n) { sel = null; rebuild(); return; }
+      if (n.junction) return;
+      sel = { kind: 'state', id: n.id }; rebuild();
+    },
+    onLinkSelect: function (l) { sel = { kind: 'segment', id: l.id }; rebuild(); },
+  });
+}
+let RINGS_BY_POINT = __RINGS_BY_POINT__;
+let lastVertical = vertical();
+window.addEventListener('resize', function () {
+  if (vertical() !== lastVertical) { lastVertical = vertical(); rebuild(); }
+});
+rebuild();
+"""
+
+_RING_LEGEND = """<div class="legend"><b>O que um anel significa.</b> O raio de um estado é a
+<b>proximidade de finalização</b>: o menor número de traços de uma caminhada DIRIGIDA dele até
+uma finalização observada. Anel 0 = a própria finalização, no centro: vértice único, disco
+AMARELO CHEIO — a cor da seta que chega já diz quem finalizou (decisão do dono, 2026-09-01). Anel 1 = tudo a uma ação de finalizar. Um estado sem nenhuma
+rota observada até uma finalização não é escondido nem chutado: cai um anel além do mais
+profundo alcançável — é assim que "nunca vimos isso terminar uma luta" se parece. Empates dentro
+do anel são desempatados por support e depois por id, então dois runs dão o mesmo desenho.
+<br/><br/><b>O ângulo</b> é a outra metade, e é o que impede os raios de virarem spaghetti: cada
+ponto fica no setor da própria orientação (<b>Por Cima</b> em cima, <b>Neutro</b> à esquerda,
+<b>Por Baixo</b> embaixo — o mesmo eixo vertical de todos os outros displays), e dentro do setor
+a ordem é o baricentro dos vizinhos já colocados no anel de dentro. Orientação foi escolhida no
+lugar de comunidade por duas razões: existe para TODA fonte (detecção de comunidade precisa do
+agregado privado, que as fontes públicas não têm) e é exatamente o que as três âncoras externas
+já significam — um estado <i>top</i> fica do lado da âncora dele.
+<br/><br/><b>O orçamento da 15 está aplicado</b> (top __BUDGET__ + dobra por categoria):
+medido, o corpus sem orçamento é 2 221 ocorrências sobre 85 estados e o anel 2 sozinho segura
+141 delas — comparar molduras em cima disso é comparar dois emaranhados. A 15 é onde o critério
+se explora (lá existe a pill "sem limite", que é o emaranhado honesto); aqui o critério está
+resolvido e o assunto é a MOLDURA.
+<br/><br/>Traço = segmento (tinta compartilhada); espessura = frequência somada; tracejado curto
+= ação nunca observada em lugar nenhum (inferida pela regra, §13); rótulo de ação acompanha a
+tangente da curva. O desenho é dobrado ao aspecto do viewport a área constante — um disco numa
+tela 16:10 desperdiça o que não é quadrado (medido: 35% de ocupação sem a dobra, 100% com).</div>"""
+
+
+_PAGE16 = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>__CSS__</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1>__TITLE__</h1><div class="muted" id="sub"></div>
+
+<div class="sechead">Fonte</div><div class="pills" id="sources"></div>
+<div class="muted" id="srcNote"></div>
+<div class="sechead">Âncoras genéricas</div><div class="pills" id="modes"></div>
+<div class="sechead">Rótulos das ações</div><div class="pills" id="labels"></div>
+
+<div class="sechead">Medido neste desenho</div>
+<div class="card" id="ringStats"></div>
+
+<div class="sechead">Seleção</div>
+<div id="sel"></div>
+
+<div class="sechead">Caminhos mais frequentes</div><div id="freq"></div>
+
+__LEGEND__
+</div>
+<script src="graph.js"></script>
+<script>__RINGS_JS__</script></body></html>"""
+
+_PAGE17 = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>__CSS__</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1>__TITLE__</h1><div class="muted" id="sub"></div>
+
+<div class="sechead">Fonte</div><div class="pills" id="sources"></div>
+<div class="muted" id="srcNote"></div>
+<div class="sechead">Posição das âncoras genéricas</div><div class="pills" id="placements"></div>
+<div class="sechead">Âncoras fixas ou na simulação</div><div class="pills" id="modes"></div>
+<div class="sechead">Rótulos das ações</div><div class="pills" id="labels"></div>
+
+<div class="sechead">Medido neste desenho</div>
+<div class="card" id="ringStats"></div>
+
+<div class="sechead">Comparação (viewport atual)</div>
+<div id="cmp"></div>
+
+<div class="sechead">Seleção</div>
+<div id="sel"></div>
+
+<div class="sechead">Caminhos mais frequentes</div><div id="freq"></div>
+
+__LEGEND__
+<div class="legend"><b>As três posições.</b> <i>Arco externo</i> é a sugestão literal do dono:
+são só três âncoras, então um ARCO no topo em vez de um anel completo (Por Cima 115°, Neutro
+90°, Por Baixo 65°) — lê-se da esquerda para a direita na mesma ordem da coluna esquerda do
+pentágono. <i>Terços</i> põe uma âncora por setor, na linha de centro do próprio setor: toda
+aresta radial que chega numa âncora corre pelo setor de onde veio em vez de atravessar o disco.
+<i>Bipolar</i> puxa o Neutro para DENTRO do disco (45% do raio externo, à esquerda), fazendo dele
+um segundo foco: o setor neutro vira o corredor entre os dois polos, e Por Cima/Por Baixo
+continuam externos. Os anéis e a regra de setor são idênticos nos três — só estes três pontos
+mudam, que é o ponto da comparação.</div>
+</div>
+<script src="graph.js"></script>
+<script>__RINGS_JS__
+function renderCompare() {
+  const box = document.getElementById('cmp');
+  const vp = vertical() ? 'phone' : 'desktop';
+  let html = '<table class="cmp"><tr><th>posição / modo</th><th>ocup.</th><th>tinta</th><th>cruz.</th><th>sobrep.</th><th>deriva</th></tr>';
+  for (const pl of PLACEMENTS) {
+    for (const md of MODES) {
+      const L = LAYOUTS[source + '|' + pl.id + '|' + md.id];
+      if (!L) continue;
+      const q = L[vp].quality;
+      const drift = Object.keys(L.anchorDrift).sort().map(function (k) { return Math.round(L.anchorDrift[k]); });
+      const on = (pl.id === placement && md.id === mode) ? ' class="on"' : '';
+      html += '<tr' + on + '><td>' + pl.label.split(' ')[0] + ' / ' + md.id + '</td><td>'
+        + q.occupancy + '%</td><td>' + q.inkCoverage + '%</td><td>' + q.crossings + '</td><td>' + q.labelOverlaps + '</td><td>'
+        + (drift.every(function (d) { return d === 0; }) ? 'fixas' : drift.join('/')) + '</td></tr>';
+    }
+  }
+  box.innerHTML = html + '</table>';
+}
+renderCompare();
+</script></body></html>"""
+
+
+def _render_rings_page(out: Path, filename: str, title: str, template: str,
+                        payload: dict[str, Any], placement: str) -> dict[str, Any]:
+    default_source, default_placement, default_mode = payload["default"].split("|")
+    body = (
+        _RINGS_JS
+        .replace("__SHELL_JS__", _SHELL_JS)
+        .replace("__PAGES_JSON__", json.dumps(payload["pages"], ensure_ascii=False))
+        .replace("__LAYOUTS_JSON__", json.dumps(payload["layouts"], ensure_ascii=False))
+        .replace("__SOURCE_META_JSON__", json.dumps(payload["sourceMeta"], ensure_ascii=False))
+        .replace("__SOURCES_JSON__", json.dumps(payload["sources"], ensure_ascii=False))
+        .replace("__PLACEMENTS_JSON__", json.dumps(payload["placements"], ensure_ascii=False))
+        .replace("__MODES_JSON__", json.dumps(payload["modes"], ensure_ascii=False))
+        .replace("__RINGS_BY_POINT__", json.dumps(payload["ringOf"], ensure_ascii=False))
+        .replace("__BUDGET__", str(_BUDGET_DEFAULT))
+        .replace("__DEFAULT_SOURCE__", json.dumps(default_source))
+        .replace("__DEFAULT_PLACEMENT__", json.dumps(default_placement))
+        .replace("__DEFAULT_MODE__", json.dumps(default_mode))
+    )
+    html = (template.replace("__CSS__", _SHELL_CSS).replace("__LEGEND__", _RING_LEGEND)
+             .replace("__RINGS_JS__", body).replace("__TITLE__", title))
+    (out / filename).write_text(html, encoding="utf-8")
+    src_id = payload["sources"][0]["id"]
+    page = payload["pages"][src_id]
+    laid = payload["layouts"][f"{src_id}|{placement}|{_RING_MODE_DEFAULT}"]
+    return {
+        "nodes": len(page["gv"]["nodes"]), "edges": len(page["gv"]["links"]),
+        "edges_per_node": round(len(page["gv"]["links"]) / len(page["gv"]["nodes"]), 2)
+        if page["gv"]["nodes"] else 0.0,
+        "pct_inferred_edges": _pct(sum(1 for link in page["gv"]["links"] if link.get("inf")),
+                                    len(page["gv"]["links"])),
+        "partner_elements": sum(1 for n in page["gv"]["nodes"] if n.get("fighter") == "b"),
+        "handover_links": 0,
+        "knobs": {"charge": 0, "linkDist": 1, "gravity": 0},
+        "sources": [s["id"] for s in payload["sources"]],
+        "placements": [p["id"] for p in payload["placements"]],
+        "modes": [m["id"] for m in payload["modes"]],
+        "rings": len(laid["ringCounts"]),
+        "ring_counts": laid["ringCounts"],
+        "unreachable": laid["unreachable"],
+        # every (placement x mode) measured at both viewports — this is the comparison table
+        "quality": {
+            key: {vp: row[vp]["quality"] for vp in ("desktop", "phone")}
+            for key, row in sorted(payload["layouts"].items())
+        },
+    }
+
+
+def _render_variant16(out: Path, sources: list[PathSource]) -> dict[str, Any]:
+    payload = _rings_payloads(sources, [_RING_PLACEMENT_DEFAULT])
+    return _render_rings_page(out, "16-aneis.html", "16 — Anéis concêntricos", _PAGE16,
+                               payload, _RING_PLACEMENT_DEFAULT)
+
+
+def _render_variant17(out: Path, sources: list[PathSource]) -> dict[str, Any]:
+    payload = _rings_payloads(sources, sorted(ANCHOR_PLACEMENTS))
+    return _render_rings_page(out, "17-aneis-ancoras.html",
+                               "17 — Anéis: posição das âncoras", _PAGE17,
+                               payload, _RING_PLACEMENT_DEFAULT)
+
+
 _VARIANT_DESCRIPTIONS = [
     ("1-baseline.html", "the app's CURRENT graph — technique=node — the comparison ruler"),
     ("2-migrado-proprio.html", "new model, YOU only — states=nodes, edges=action"),
@@ -4016,6 +5255,9 @@ _VARIANT_DESCRIPTIONS = [
     ("11-sistemas-vista-separada.html", "global (every node/edge, systems collapsed, ALL bridges) + a separate per-system view with a stub mini-node per boundary destination — locked combo, no controls"),
     ("12-sistemas-vista-separada-seletiva.html", "same as 11, controls live — 36 precomputed (policy x min_support x opponent mode) combos, client-side bridge/type/flow-bias filters"),
     ("13-caminhos.html", "edge = PATH: every occurrence expanded to state→a1→a2→state, contiguous shared runs bundled into segments with branch/merge points, hierarchical (non-force) layout, configurable anchor frame, per-path metrics panel"),
+    ("15-orcamento.html", "render budget under volume (plan FASE 5d): occurrences ranked by support/strength, the top N drawn as themselves, the rest FOLDED (never dropped) — one stroke per (family x action category), mixed chains into 'outros caminhos xN', repeated actions compressed in the label only. Grouping is RENDER, never topology: no count/support/rating moves"),
+    ("16-aneis.html", "concentric rings: Finish at the CENTRE, radius = hops to a finish, angle = the state's own orientation sector, the three generic anchors OUTSIDE on an arc; toggle for anchors fixed vs. anchors in the simulation"),
+    ("17-aneis-ancoras.html", "16's rings with the anchor placement live — external arc vs. thirds vs. Neutral as a second centre — plus the measured comparison (occupancy / crossings / overlapping names / anchor drift) at both viewports"),
     ("14-caminhos-sistemas.html", "13's own paths, systems collapsible in place: every detected system folds into one node (bridges/anchors/opponent stay first-class), a crossing path keeps its path_id and draws through the system's own node; click a system (node or pill) to expand it with 13's flow layout restricted to its subgraph + 11/12's own boundary stubs"),
 ]
 
@@ -4334,11 +5576,37 @@ def _patch_graph_js(js_text: str) -> str:
             "      ctx.globalAlpha = 1;\n"
             "\n"
             "      ",
+            "      // map-prototype patch: RING GUIDES (variants 16/17). Concentric ellipses drawn\n"
+            "      // UNDER everything, one per ring, with the ring index at the top of each. The\n"
+            "      // layout is a disc bent to the viewport's aspect at constant area, and an affine\n"
+            "      // map turns a concentric circle into a concentric ellipse — so rx/ry come from\n"
+            "      // the same bend the nodes went through, never from a second computation.\n"
+            "      if (opts.rings && opts.rings.length) {\n"
+            "        const rc = opts.ringCentre || [0, 0];\n"
+            "        ctx.save();\n"
+            "        ctx.lineWidth = 1 / (useCam ? cam.k : 1);\n"
+            "        for (const g of opts.rings) {\n"
+            "          ctx.globalAlpha = 0.16;\n"
+            "          ctx.strokeStyle = '#3a3a45';\n"
+            "          ctx.setLineDash([6 / (useCam ? cam.k : 1), 8 / (useCam ? cam.k : 1)]);\n"
+            "          ctx.beginPath();\n"
+            "          ctx.ellipse(rc[0], rc[1], Math.max(g.rx, 0.1), Math.max(g.ry, 0.1), 0, 0, Math.PI * 2);\n"
+            "          ctx.stroke();\n"
+            "          ctx.setLineDash([]);\n"
+            "          ctx.globalAlpha = 0.5;\n"
+            "          ctx.fillStyle = '#6b7280';\n"
+            "          ctx.font = `${useCam ? 11 / cam.k : 11}px 'Spline Sans Mono', monospace`;\n"
+            "          ctx.textAlign = 'center';\n"
+            "          ctx.fillText(String(g.ring), rc[0], rc[1] - g.ry - 4 / (useCam ? cam.k : 1));\n"
+            "        }\n"
+            "        ctx.restore();\n"
+            "        ctx.globalAlpha = 1;\n"
+            "      }\n"
             "      // links\n"
             "      for (const l of links) {\n"
             "        const active = gaHL ? gaHL.has(l.id) : (!hov || (conn.has(l.s.id) && conn.has(l.t.id) && (l.s === hov || l.t === hov)));  // map-prototype patch: explicit highlight set wins\n"
             "        const contested = l.fighter === 'x';\n"
-            "        const col = l.fighter ? FIG[l.fighter] : '#3a3a45';\n"
+            "        const col = l.color || (l.fighter ? FIG[l.fighter] : '#3a3a45');  // map-prototype patch: explicit per-link colour (variant 15's fold stroke is editorial, not an athlete)\n"
             "        // map-prototype patch: parallel edges (B) — offset the control point perpendicular\n"
             "        // to the line by l.par's slot among l.parCount siblings sharing the same node pair\n"
             "        // (unordered — both directions share one fan), so N different actions between the\n"
@@ -4395,8 +5663,21 @@ def _patch_graph_js(js_text: str) -> str:
             "        }\n"
             "        if (l.label && (opts.forceLabels || !useCam || cam.k >= 1)) {  // map-prototype patch: edge label — collected here, drawn in the label-collision pass\n"
             "          const mx = 0.25 * l.s.x + 0.5 * cpx + 0.25 * l.t.x, my = 0.25 * l.s.y + 0.5 * cpy + 0.25 * l.t.y;\n"
+            "          // map-prototype patch: ARCED action label (owner 2026-09-01) — on a ring\n"
+            "          // layout almost every stroke is a curve, and a horizontal label across it\n"
+            "          // reads as crossing it out. The tangent at the label's own point is the\n"
+            "          // quadratic's derivative there (t=0.5 => cp-s and t-cp, averaged); flipped\n"
+            "          // when it would come out upside down, because a rotated label is only worth\n"
+            "          // having while it is still readable left-to-right.\n"
+            "          let rot = 0, curve = null;\n"
+            "          if (opts.arcLabels) {\n"
+            "            rot = Math.atan2((l.t.y - cpy) + (cpy - l.s.y), (l.t.x - cpx) + (cpx - l.s.x));\n"
+            "            if (rot > Math.PI / 2) rot -= Math.PI;\n"
+            "            if (rot < -Math.PI / 2) rot += Math.PI;\n"
+            "            curve = { sx: l.s.x, sy: l.s.y, cx: cpx, cy: cpy, tx: l.t.x, ty: l.t.y };\n"
+            "          }\n"
             "          labelCandidates.push({\n"
-            "            text: l.label, x: mx, y: my,\n"
+            "            text: l.label, x: mx, y: my, rot: rot, curve: curve,\n"
             "            font: `${useCam ? 11 / cam.k : 11}px 'Spline Sans Mono', monospace`,\n"
             "            color: col, alpha: (gaHL || hov) ? (active ? 0.9 : 0.08) : 0.75,\n"
             "            kind: 'edge', priority: (l.weight || 1) - (l.inf ? 0.5 : 0),  // named generics yield to real actions\n"
@@ -4447,20 +5728,40 @@ def _patch_graph_js(js_text: str) -> str:
             "        for (const c of items) {\n"
             "          ctx.font = c.font;\n"
             "          const w = ctx.measureText(c.text).width;\n"
-            "          const pad = 3, rx = c.x - w / 2 - pad, ry = c.y - 9 - pad, rw = w + pad * 2, rh = 14 + pad * 2;\n"
+            "          const pad = 3;\n"
+            "          // map-prototype patch: a rotated label reserves the AABB of its rotated box —\n"
+            "          // cheap, always a superset of the true box, so it never lets two overlap.\n"
+            "          const ca = Math.abs(Math.cos(c.rot || 0)), sa = Math.abs(Math.sin(c.rot || 0));\n"
+            "          const bw = w + pad * 2, bh = 14 + pad * 2;\n"
+            "          const rw = c.rot ? bw * ca + bh * sa : bw, rh = c.rot ? bw * sa + bh * ca : bh;\n"
+            "          const rx = c.x - rw / 2, ry = c.y - 9 - pad + (bh - rh) / 2;\n"
             "          let hit = false;\n"
             "          for (const p of placed) {\n"
             "            if (rx < p.x + p.w && rx + rw > p.x && ry < p.y + p.h && ry + rh > p.y) { hit = true; break; }\n"
             "          }\n"
             "          if (hit) continue;\n"
             "          placed.push({ x: rx, y: ry, w: rw, h: rh });\n"
-            "          ctx.globalAlpha = 1;\n"
-            "          ctx.fillStyle = 'rgba(11,11,15,0.78)';\n"
-            "          ctx.fillRect(rx, ry, rw, rh);\n"
-            "          ctx.globalAlpha = c.alpha;\n"
-            "          ctx.fillStyle = c.color;\n"
-            "          ctx.textAlign = 'center';\n"
-            "          ctx.fillText(c.text, c.x, c.y);\n"
+            "          ctx.save();\n"
+            "          if (c.curve) {\n"
+            "            // map-prototype patch: ARCED action label, per character along the stroke\n"
+            "            // (owner 2026-09-01 — on a ring layout nearly every stroke is an arc, so\n"
+            "            // this is the central case, not the exception). Each glyph is placed at its\n"
+            "            // own arc-length position and rotated to the LOCAL tangent, so the text\n"
+            "            // follows the curve instead of chording it. The walk is reversed when the\n"
+            "            // edge runs right-to-left, so a label is never upside down — the reading\n"
+            "            // direction is the edge's, the text's orientation is the reader's.\n"
+            "            gaArcText(ctx, c);\n"
+            "          } else {\n"
+            "            if (c.rot) { ctx.translate(c.x, c.y); ctx.rotate(c.rot); ctx.translate(-c.x, -c.y); }\n"
+            "            ctx.globalAlpha = 1;\n"
+            "            ctx.fillStyle = 'rgba(11,11,15,0.78)';\n"
+            "            ctx.fillRect(c.x - w / 2 - pad, c.y - 9 - pad, w + pad * 2, 14 + pad * 2);\n"
+            "            ctx.globalAlpha = c.alpha;\n"
+            "            ctx.fillStyle = c.color;\n"
+            "            ctx.textAlign = 'center';\n"
+            "            ctx.fillText(c.text, c.x, c.y);\n"
+            "          }\n"
+            "          ctx.restore();\n"
             "        }\n"
             "        ctx.globalAlpha = 1;\n"
             "      }\n"
@@ -4478,6 +5779,55 @@ def _patch_graph_js(js_text: str) -> str:
             "    if (!(wMax > wMin)) return (EDGE_PX_MIN + EDGE_PX_MAX) / 2;  // every edge same weight\n"
             "    const t = (Math.sqrt(w) - Math.sqrt(wMin)) / (Math.sqrt(wMax) - Math.sqrt(wMin));\n"
             "    return EDGE_PX_MIN + Math.max(0, Math.min(1, t)) * (EDGE_PX_MAX - EDGE_PX_MIN);\n"
+            "  }\n"
+            "\n"
+            "  function gaArcText(ctx, c) {  // map-prototype patch: text laid along a quadratic\n"
+            "    const q = c.curve, N = 48;\n"
+            "    const pts = [], cum = [0];\n"
+            "    for (let i = 0; i <= N; i++) {\n"
+            "      const t = i / N, u = 1 - t;\n"
+            "      const x = u * u * q.sx + 2 * u * t * q.cx + t * t * q.tx;\n"
+            "      const y = u * u * q.sy + 2 * u * t * q.cy + t * t * q.ty;\n"
+            "      pts.push([x, y]);\n"
+            "      if (i) cum.push(cum[i - 1] + Math.hypot(x - pts[i - 1][0], y - pts[i - 1][1]));\n"
+            "    }\n"
+            "    const total = cum[N];\n"
+            "    // reversed when the stroke runs right-to-left: the glyphs then walk the curve\n"
+            "    // backwards and every tangent lands within +-90deg, i.e. never upside down.\n"
+            "    const back = q.tx < q.sx;\n"
+            "    const at = (d) => {  // arc-length -> point + local tangent angle\n"
+            "      const s = back ? total - d : d;\n"
+            "      let i = 1;\n"
+            "      while (i < N && cum[i] < s) i++;\n"
+            "      const span = cum[i] - cum[i - 1] || 1;\n"
+            "      const f = Math.max(0, Math.min(1, (s - cum[i - 1]) / span));\n"
+            "      const a = pts[i - 1], b = pts[i];\n"
+            "      let ang = Math.atan2(b[1] - a[1], b[0] - a[0]);\n"
+            "      if (back) ang += Math.PI;\n"
+            "      return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, ang];\n"
+            "    };\n"
+            "    const chars = Array.from(c.text);\n"
+            "    const widths = chars.map((ch) => ctx.measureText(ch).width);\n"
+            "    const textW = widths.reduce((s, w) => s + w, 0);\n"
+            "    let d = Math.max(0, (total - textW) / 2);\n"
+            "    ctx.textAlign = 'center';\n"
+            "    ctx.lineJoin = 'round';\n"
+            "    ctx.lineWidth = 3;\n"
+            "    for (let i = 0; i < chars.length; i++) {\n"
+            "      const w = widths[i];\n"
+            "      const p = at(Math.min(total, d + w / 2));\n"
+            "      ctx.save();\n"
+            "      ctx.translate(p[0], p[1]);\n"
+            "      ctx.rotate(p[2]);\n"
+            "      ctx.globalAlpha = 1;  // per-glyph halo: a rect behind an arced string would be a chord\n"
+            "      ctx.strokeStyle = 'rgba(11,11,15,0.85)';\n"
+            "      ctx.strokeText(chars[i], 0, -4);\n"
+            "      ctx.globalAlpha = c.alpha;\n"
+            "      ctx.fillStyle = c.color;\n"
+            "      ctx.fillText(chars[i], 0, -4);\n"
+            "      ctx.restore();\n"
+            "      d += w;\n"
+            "    }\n"
             "  }\n"
             "\n"
             "  function convexHull(points) {  // map-prototype patch: system regions (C) — Andrew's monotone chain\n"
@@ -4585,7 +5935,12 @@ def _orientation_counts(agg: Aggregate) -> dict[str, int]:
     return counts
 
 
-def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
+def render_all(bundle: dict[str, Any], out: Path,
+                extra_sources: list[PathSource] | None = None) -> dict[str, Any]:
+    """Every prototype page. ``extra_sources`` are PUBLIC path sources (the corpus, one per
+    athlete) offered alongside the owner's own bundle on variants 15/16/17 — supplied by the
+    caller (``scripts.map_demo_sources``) rather than loaded here, so this function, and every
+    test that drives it, never needs a database."""
     out.mkdir(parents=True, exist_ok=True)
     if _GRAPH_JS.exists():
         patched = _patch_graph_js(_GRAPH_JS.read_text(encoding="utf-8"))
@@ -4688,6 +6043,13 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
     # same layout engine, systems fold/expand instead of the plain hide-as-stub 13's own scopes do.
     metrics["variants"]["14-caminhos-sistemas"] = _render_variant14(out, agg, bundle)
 
+    # 15/16/17 — the 2026-09-01 demo lote (plan FASE 5c/5d). Multi-source by construction: the
+    # owner's private bundle first, then whatever public sources the caller loaded.
+    sources = [owner_source(agg, bundle), *(extra_sources or [])]
+    metrics["variants"]["15-orcamento"] = _render_variant15(out, sources)
+    metrics["variants"]["16-aneis"] = _render_variant16(out, sources)
+    metrics["variants"]["17-aneis-ancoras"] = _render_variant17(out, sources)
+
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,
         "states_inferred": agg.raw_states_inferred,
@@ -4732,13 +6094,23 @@ def _variant_metrics(gv: dict[str, Any], edges: list[dict[str, Any]] | None, par
 
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    ap = argparse.ArgumentParser(description="Render 9 actions/states map prototypes from a user bundle")
+    ap = argparse.ArgumentParser(description="Render every actions/states map prototype from a user bundle")
     ap.add_argument("--bundle", type=Path, required=True)
     ap.add_argument("--out", type=Path, default=_DEFAULT_OUT)
+    ap.add_argument("--public-sources", action="store_true",
+                     help="also offer the public corpus + per-athlete sources on variants "
+                          "15/16/17 (reads the DB; see scripts/map_demo_sources.py)")
+    ap.add_argument("--athletes", type=int, default=6,
+                     help="how many athletes from the published Grappling ELO board to load")
     args = ap.parse_args()
 
     bundle = json.loads(args.bundle.read_text(encoding="utf-8"))
-    metrics = render_all(bundle, args.out)
+    extra: list[PathSource] = []
+    if args.public_sources:
+        from scripts.map_demo_sources import public_sources
+
+        extra = public_sources(top_athletes=args.athletes)
+    metrics = render_all(bundle, args.out, extra)
 
     print(f"{'variant':32} {'nodes':>6} {'edges':>6} {'e/n':>6} {'%inf':>6} {'partner':>8} {'handover':>9}")
     for name, m in metrics["variants"].items():
