@@ -497,7 +497,10 @@ def test_finish_and_start_anchors_sit_on_the_owner_specified_pentagon() -> None:
     pushes. An earlier uniform pentagon was rejected because it scattered the semantics; this one
     keeps them and is a pentagon on purpose. Still pinned, still one choke point
     (`_apply_anchor`)."""
-    assert len({_anchor_slot(k, a) for k, a in
+    # Explicitly the PENTAGON row: the default frame is the triangle since 2026-09-01 (owner),
+    # and the triangle unifies the two finishes, so asking for five distinct vertices only means
+    # anything against the structure that has five.
+    assert len({_anchor_slot(k, a, "pentagono") for k, a in
                 (("start top", "you"), ("start neutral", "you"), ("start bottom", "you"),
                  (_FINISH_KEY, "you"), (_FINISH_KEY, "partner"))}) == 5  # 5 distinct anchor keys
     assert _anchor_slot("mount", "you") is None  # an ordinary node is never an anchor
@@ -1048,7 +1051,9 @@ def test_variant13_offers_every_anchor_structure_and_unifies_the_finish_when_ask
     payload = _paths_payloads(agg, bundle)
 
     assert {s["id"] for s in payload["structures"]} == set(_ANCHOR_STRUCTURES)
-    assert payload["default"].startswith("pentagono|")  # the approved frame stays the default
+    # Owner call 2026-09-01 (second pass): the TRIANGLE is the default frame, in the App, on the
+    # site and here. The other two rows stay renderable — this page is where they are compared.
+    assert payload["default"].startswith("triangulo|")
     for structure, cfg in _ANCHOR_STRUCTURES.items():
         page = payload["pages"][f"{structure}|global"]
         finishes = [n for n in page["gv"]["nodes"]
@@ -1066,8 +1071,9 @@ def test_variant13_anchors_sit_on_their_structures_own_vertices() -> None:
     """A structure is a TABLE now, not the one hardcoded pentagon — and the pentagon row is
     byte-identical to the constant it replaced, which is why variants 1-12 never moved."""
     assert _ANCHOR_STRUCTURES["pentagono"]["angles"] is _PENTAGON_ANGLES
-    assert _anchor_slot(_FINISH_KEY, "partner") == "finish_opp"
+    assert _anchor_slot(_FINISH_KEY, "partner", "pentagono") == "finish_opp"
     assert _anchor_slot(_FINISH_KEY, "partner", "losango") == "finish"
+    assert _anchor_slot(_FINISH_KEY, "partner") == "finish"  # the default is the triangle now
     assert _anchor_slot("closed guard", "you", "triangulo") is None
     for structure in _ANCHOR_STRUCTURES:
         units = _anchor_units(structure)

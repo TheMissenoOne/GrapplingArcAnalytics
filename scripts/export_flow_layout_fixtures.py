@@ -23,6 +23,13 @@ Quatro fixtures, e cada uma existe por uma classe de erro:
 Cada caso roda nas TRÊS estruturas de âncora (`pentagono`/`losango`/`triangulo`) para travar
 `ANCHOR_STRUCTURES` junto — a tabela é parte do contrato, não decoração.
 
+Cada caso carrega também um `label_len` (contagem de caracteres por ponto E por segmento, o
+mesmo mapa que a tela passa): é ele que liga as duas etapas novas de 2026-09-01 — a compactação
+de aspecto e a relaxação de bolhas de rótulo. Sem ele um porte poderia pular as duas e ainda
+passar, que é exatamente o modo de falha que uma golden existe para pegar. O bloco `bubbles`
+grava as meias-extensões que `label_half_extent` produz, para que uma divergência de FÓRMULA
+apareça como fórmula e não como posição.
+
 A entrada da fixture é o `BundledGraph` JÁ montado (pontos + segmentos), não os `RenderPath`:
 `bundle_paths` tem sua própria fixture (`export_path_bundling_fixtures`), e acoplar as duas faria
 uma falha de bundling parecer uma falha de layout.
@@ -46,15 +53,29 @@ sys.path.insert(0, str(ROOT))
 
 from analysis.flow_layout import (  # noqa: E402
     ANCHOR_STRUCTURES,
+    DEFAULT_ANCHOR_STRUCTURE,
     FLOW_ANCHOR_ROW_SPREAD,
     FLOW_ANCHOR_RX_SHARE,
     FLOW_ANCHOR_RY_SHARE,
     FLOW_BARYCENTRE_SWEEPS,
+    FLOW_COMPACT_MIN,
+    FLOW_LABEL_CHAR,
+    FLOW_LABEL_EM,
+    FLOW_LABEL_PAD_X,
+    FLOW_LABEL_PAD_Y,
+    FLOW_NODE_RADIUS,
     FLOW_RANK_GAP,
+    FLOW_RELAX_MAX_BUBBLES,
+    FLOW_RELAX_PULL,
+    FLOW_RELAX_PUSH,
+    FLOW_RELAX_ROUNDS,
+    FLOW_RELAX_SLACK,
     FLOW_ROW_GAP,
+    FLOW_TARGET_ASPECT,
     anchor_units,
     flow_layout,
     flow_ranks,
+    label_half_extent,
 )
 from analysis.path_bundling import RenderPath, bundle_paths  # noqa: E402
 
@@ -114,6 +135,22 @@ CASES: list[tuple[str, str, list[Spec], dict[str, str]]] = [
         {"start neutral": "neutral", "start bottom": "bottom", "start top": "top",
          "finish": "finish_you"},
     ),
+    (
+        "crowded",
+        "rótulos LONGOS em ranks vizinhos: sem a relaxação as caixas se cobrem mesmo com os "
+        "pontos a 300 unidades de distância — é o defeito que o dono viu na captura, e o único "
+        "caso em que a compactação de aspecto e as duas passadas de relaxação realmente pesam",
+        [
+            ("p1", "start neutral", ("double leg takedown",), "side control"),
+            ("p2", "start neutral", ("guard pull",), "de la riva guard"),
+            ("p3", "de la riva guard", ("berimbolo", "back take"), "back control"),
+            ("p4", "side control", ("knee on belly", "mount transition"), "mounted position"),
+            ("p5", "mounted position", ("americana",), "finish"),
+            ("p6", "back control", ("rear naked choke",), "finish"),
+            ("p7", "start bottom", ("scissor sweep",), "mounted position"),
+        ],
+        {"start neutral": "neutral", "start bottom": "bottom", "finish": "finish_you"},
+    ),
 ]
 
 
@@ -152,6 +189,23 @@ def build_fixture() -> dict[str, Any]:
         ids = [p.id for p in bundled.points]
         ranks = flow_ranks(ids, out_of, {p: len(in_of.get(p, [])) for p in ids})
 
+        # The label the renderer would draw: a state's own name, a segment's joined action
+        # sequence. Title-cased so the count is the DRAWN one, not the canonical key's.
+        label_len: dict[str, int] = {}
+        for pt in bundled.points:
+            if pt.state_key is not None:
+                label_len[pt.id] = len(pt.state_key.title())
+        for seg in bundled.segments:
+            label_len[seg.id] = len(" → ".join(a.title() for a in seg.actions))
+        bubbles = {
+            "points": {pid: [_r(hw), _r(hh)] for pid, (hw, hh) in sorted(
+                (p.id, label_half_extent(label_len.get(p.id, 0), node=True))
+                for p in bundled.points)},
+            "segments": {sid: [_r(hw), _r(hh)] for sid, (hw, hh) in sorted(
+                (s.id, label_half_extent(label_len.get(s.id, 0), node=False))
+                for s in bundled.segments)},
+        }
+
         per_structure: dict[str, Any] = {}
         for structure in sorted(ANCHOR_STRUCTURES):
             anchor_slots = {
@@ -160,7 +214,7 @@ def build_fixture() -> dict[str, Any]:
                 if any(p.state_key == state for p in bundled.points)
             }
             pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
-                              weight=weight)
+                              weight=weight, label_len=label_len)
             per_structure[structure] = {
                 "anchor_slots": dict(sorted(anchor_slots.items())),
                 "positions": {
@@ -184,6 +238,8 @@ def build_fixture() -> dict[str, Any]:
                               for s in bundled.segments],
             },
             "weight": dict(sorted(weight.items())),
+            "label_len": dict(sorted(label_len.items())),
+            "bubbles": bubbles,
             "ranks": dict(sorted(ranks.items())),
             "structures": per_structure,
         })
@@ -204,7 +260,20 @@ def build_fixture() -> dict[str, Any]:
             "FLOW_ANCHOR_RX_SHARE": FLOW_ANCHOR_RX_SHARE,
             "FLOW_ANCHOR_RY_SHARE": FLOW_ANCHOR_RY_SHARE,
             "FLOW_ANCHOR_ROW_SPREAD": FLOW_ANCHOR_ROW_SPREAD,
+            "FLOW_LABEL_EM": FLOW_LABEL_EM,
+            "FLOW_LABEL_CHAR": FLOW_LABEL_CHAR,
+            "FLOW_LABEL_PAD_X": FLOW_LABEL_PAD_X,
+            "FLOW_LABEL_PAD_Y": FLOW_LABEL_PAD_Y,
+            "FLOW_NODE_RADIUS": FLOW_NODE_RADIUS,
+            "FLOW_RELAX_ROUNDS": FLOW_RELAX_ROUNDS,
+            "FLOW_RELAX_PUSH": FLOW_RELAX_PUSH,
+            "FLOW_RELAX_SLACK": FLOW_RELAX_SLACK,
+            "FLOW_RELAX_PULL": FLOW_RELAX_PULL,
+            "FLOW_TARGET_ASPECT": FLOW_TARGET_ASPECT,
+            "FLOW_COMPACT_MIN": FLOW_COMPACT_MIN,
+            "FLOW_RELAX_MAX_BUBBLES": FLOW_RELAX_MAX_BUBBLES,
         },
+        "default_anchor_structure": DEFAULT_ANCHOR_STRUCTURE,
         "anchor_structures": {
             name: {
                 "angles": dict(sorted(row["angles"].items())),

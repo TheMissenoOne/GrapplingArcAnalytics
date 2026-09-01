@@ -517,7 +517,7 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
 # covers the bout's DB fields, which is the right contract for data — but a code change that
 # adds a key (2: `path_graph`) leaves every cached item valid and silently missing it, and the
 # renderer then falls back for the whole corpus. Same precedent as `PROFILE_VERSION`.
-BREAKDOWN_VERSION = 2
+BREAKDOWN_VERSION = 3
 
 # --only previews keep their own cache so a partial run can never overwrite the real one.
 _PREVIEW_CACHE_DIR = Path(__file__).resolve().parent.parent / ".export_cache" / "preview"
@@ -787,7 +787,7 @@ def _progression_example(
 
 # Same job as BREAKDOWN_VERSION, for the dossier's cached items (1: `:pg`, the path map).
 # Separate from PROFILE_VERSION because that one is style_profile's own contract, not ours.
-DOSSIER_VERSION = 1
+DOSSIER_VERSION = 2
 
 
 def build_fighters(

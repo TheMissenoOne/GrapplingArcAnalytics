@@ -207,7 +207,13 @@ _PENTAGON_ANGLES = PENTAGON_ANGLES
 _ANCHOR_STRUCTURES = ANCHOR_STRUCTURES
 _DEFAULT_ANCHOR_STRUCTURE = DEFAULT_ANCHOR_STRUCTURE
 _anchor_units = anchor_units
-_ANCHOR_UNIT = anchor_units(DEFAULT_ANCHOR_STRUCTURE)
+#: Variants 1-12 were BUILT as a pentagon frame and carry a byte-identity guarantee
+#: (`tests/test_render_map_prototypes.py`'s `diff -r` gate). They are pinned to that row by name,
+#: not to `DEFAULT_ANCHOR_STRUCTURE` — which moved to the triangle on 2026-09-01 and is now a
+#: statement about the PRODUCTS (the App's Map and the site's three path displays), not about a
+#: comparison page whose whole job is to hold the old arrangements still.
+_PENTAGON_STRUCTURE = "pentagono"
+_ANCHOR_UNIT = anchor_units(_PENTAGON_STRUCTURE)
 
 
 def _anchor_slot(node_key: str, actor: str,
@@ -324,7 +330,7 @@ def _apply_anchor(node: dict[str, Any], node_key: str, actor: str, radius: float
     ``graph.js``'s copy-only ``n.pin`` patch (`_patch_graph_js`) makes ``step()`` skip physics
     entirely for a pinned node, so once placed here it never drifts. Called last (after style
     helpers) so ``x``/``y``/``pin`` always win over a random seed."""
-    slot = _anchor_slot(node_key, actor)
+    slot = _anchor_slot(node_key, actor, _PENTAGON_STRUCTURE)
     if slot is not None:
         ux, uy = _ANCHOR_UNIT[slot]
         node["x"], node["y"] = radius * ux, radius * uy
@@ -1933,8 +1939,24 @@ def _paths_view(
         if slot is not None:
             anchor_slots[pt.id] = slot
 
+    # Label bubbles for the relaxation: the STATE's rendered name and the SEGMENT's joined
+    # action sequence — exactly the two strings this view draws.
+    label_len: dict[str, int] = {}
+    for pt in bundled.points:
+        if pt.state_key is None:
+            continue
+        found = qid_to_state.get(pt.state_key) or qid_to_state.get(opp_finish)
+        if found is None:
+            continue
+        (node_key, actor), v = found
+        text = (v["label"] if (unified and node_key == _FINISH_KEY)
+                else _finish_label(node_key, actor, v["label"]))
+        label_len[pt.id] = len(str(text))
+    for seg in bundled.segments:
+        label_len[seg.id] = len(" → ".join(labels.get(k, k) for k in seg.actions))
+
     pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
-                        weight=node_weight)
+                        weight=node_weight, label_len=label_len)
 
     nodes: list[dict[str, Any]] = []
     for pt in sorted(bundled.points, key=lambda p: p.id):

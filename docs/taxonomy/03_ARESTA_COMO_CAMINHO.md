@@ -607,6 +607,78 @@ fora da ordenação = 83 cruzamentos em 42 links (bundle do dono) e 16 em 21 (mo
 `spread` 0.35, 2 varreduras): **41 e 5**. Mais varreduras PIORAM (a heurística da mediana não é
 monótona): 6 varreduras custaram +6 cruzamentos.
 
+### 10.5.1 Relaxação de bolhas de rótulo, e o aspecto (dono, 2026-09-01)
+
+> *"the layout is clustering the labels because all the states are aligned in layers… use some
+> force simulation and create sort of bubbles… so that nothing that's readable is overlapped,
+> while keeping the anchor nodes fixed… it might be too stretched."*
+
+O rank é uma COLUNA, e o rótulo é ~10× mais largo que o ponto que ele nomeia: dois ranks vizinhos
+na mesma linha têm os pontos a 300 unidades um do outro e os NOMES por cima um do outro. A grade
+acerta a ORDEM e erra a única coisa que o olho lê. Então a grade virou o ponto de partida, e
+`flow_layout` ganhou duas etapas finais, nesta ordem:
+
+1. **Aspecto (`_compact`)** — o eixo longo encolhe por `k`, o curto cresce por `1/k`
+   (`FLOW_TARGET_ASPECT = 1.5`, piso `FLOW_COMPACT_MIN = 0.4`). **Área constante** é a metade que
+   precisou de medição: encolher só o x acertava o aspecto e deixava a caixa 2,4× pequena demais
+   para os rótulos que ela tem de conter — a relaxação ficava sem para onde empurrar e parava com
+   19 sobreposições. É uma transformação AFIM e uniforme, então não cria nem destrói um único
+   cruzamento: os 41-em-42 medidos em §10.5 sobrevivem intactos.
+2. **Relaxação (`_relax`)** — cada rótulo desenhado é uma CAIXA (`label_half_extent`, largura por
+   nº de caracteres × `FLOW_LABEL_EM` × `FLOW_LABEL_CHAR` + padding — a mesma constante 0.55 do
+   `labelLayout.AVERAGE_CHAR_RATIO` do App). Um número FIXO de rodadas (`FLOW_RELAX_ROUNDS = 120`)
+   empurra cada par sobreposto pela translação MÍNIMA (eixo de menor penetração, `+
+   FLOW_RELAX_SLACK` para o par assentar com folga em vez de convergir em "encostado"), com uma
+   mola que puxa de volta ao slot da camada e **decai a zero** — mola constante assenta em
+   `empurrão == mola`, que é um equilíbrio COM sobreposição (medido: 11 pares ainda encostados
+   depois de 400 rodadas). **As âncoras nunca se movem**: entram no laço como obstáculo e nunca
+   no mapa de deslocamento. Segunda passada, só com os nomes de ESTADO, porque a camada
+   secundária não pode desempatar contra a primária (medido: um nó em impasse de três corpos
+   assentava 13 unidades dentro do nome da âncora ao lado).
+
+É CAIXA e não disco de propósito: um rótulo tem ~200 unidades de largura e ~12 de altura, e um
+disco que o contivesse reservaria 200 unidades de altura também — o oposto exato da segunda
+metade do pedido.
+
+O `label_len` (contagem de caracteres por id de ponto E de segmento) é do CHAMADOR, porque só ele
+sabe a locale: "Finalização" tem 11 e `finish` tem 6, e uma bolha dimensionada na chave crua é
+uma bolha dimensionada para um desenho que ninguém vê. O critério vale "na escala de fit" porque
+os dois renderizadores desenham o rótulo DENTRO do transform do mundo — o zoom escala posição e
+glifa pelo mesmo fator, então sobreposição em unidades de mundo é invariante de escala.
+
+**Medido, `mock_user_bundle`, antes → depois** (o teste é `tests/test_flow_layout_relax.py`;
+pares "rótulo de aresta × sua própria ponta" ficam fora dos três, ver §10.7):
+
+| estrutura | caixa antes | aspecto antes | caixa depois | aspecto depois | nome×nome | nome×ação | ação×ação |
+|---|---|---|---|---|---|---|---|
+| `triangulo` | 1200 × 260 | **4,62** | 684 × 452 | **1,51** | 0 → **0** | 3 → 3 | 2 → 3 |
+| `losango` | 1200 × 338 | **3,55** | 780 × 520 | **1,50** | 2 → **0** | 3 → 4 | 2 → 1 |
+| `pentagono` | 1085 × 321 | **3,38** | 723 × 482 | **1,50** | 0 → **0** | 4 → 4 | 3 → 3 |
+
+Custo: 1,8 ms → 8,0 ms por página (`_paths_view` inteira). Determinismo: sem RNG, sem relógio,
+sem teste de convergência — rodada fixa sobre iteração ORDENADA, só `+,-,*,/` e comparações (o
+único `sqrt` está na compactação, e `math.sqrt`/`Math.sqrt` são ambos IEEE-corretos). A golden
+`flow_layout_golden.json` bateu bit a bit com o port TS na PRIMEIRA execução, incluindo o caso
+`crowded` que existe só para exercitar as duas etapas novas.
+
+### 10.5.2 Estrutura de âncora: o triângulo, em todo lugar (dono, 2026-09-01)
+
+`DEFAULT_ANCHOR_STRUCTURE` passou de `pentagono` para `triangulo`, e é o default de verdade: o
+App **removeu a fileira de pills** de estrutura (`NetworkScreen`, chaves de i18n apagadas nas duas
+locales) e os três displays do site (`the-ocean`, `grapple-*`, `breakdown-*`) herdam o default via
+`corpus_paths.path_payload`. A tabela `ANCHOR_STRUCTURES` continua com as três linhas — o
+protótipo é justamente a página onde elas são comparadas. A chave segue `triangulo` (pt-BR, como
+foi cunhada): renomear churnaria toda golden por uma grafia.
+
+⚠️ As variantes 1–12 do protótipo ficaram presas ao pentágono POR NOME (`_PENTAGON_STRUCTURE` em
+`render_map_prototypes`), não ao default. Elas carregam a garantia de byte-identidade do `diff -r`
+e o default agora é uma afirmação sobre os PRODUTOS, não sobre a página de comparação.
+
+⚠️ **O bundle do site precisa ser regerado**: as posições de `GA_OCEAN.pathGraph` e dos
+`pathGraph` inline mudaram (default novo + as duas etapas). É `export/site_data.py`, e a mudança
+de código não invalida o `item_hash` sozinha — mesmo precedente de `BREAKDOWN_VERSION`/`DOSSIER_VERSION`
+em §12.7.
+
 ### 10.6 Layout de âncoras configurável
 
 `_PENTAGON_ANGLES` virou uma linha de `_ANCHOR_STRUCTURES`; a linha do pentágono aponta para a
@@ -628,7 +700,22 @@ de quem é.
   Global, porque esconder caminho é esconder o objeto de estudo. As pills de sistema continuam
   como PREDICADO (um caminho entra quando uma das pontas é membro; a outra ponta vira stub).
 - Rótulos de ação são a camada secundária (`principais` por padrão = peso ≥ 2; no celular, só o
-  que estiver selecionado). É a exigência de mobile do dono, não uma economia.
+  que estiver selecionado). É a exigência de mobile do dono, não uma economia — e é também a
+  razão de a relaxação de §10.5.1 dar a última palavra aos nomes de estado.
+- **Teto declarado da relaxação: três classes de par que ela não resolve, todas por geometria de
+  TRAÇO e não de ponto.** (a) o rótulo de uma aresta contra a PRÓPRIA ponta — ele mora no meio do
+  traço, logo sempre a meia aresta das duas pontas, e nenhum arranjo de pontos separa um ponto
+  médio das suas próprias extremidades; (b) um LAÇO (`start top --[headquarters pass]--> start
+  top`) tem o ponto médio EM CIMA do nó; (c) traços PARALELOS entre o mesmo par têm o mesmo ponto
+  médio de corda, embora `mapEdgeArcGeometry` os abra em leque e rotule cada um no meio do ARCO.
+  (b) e (c) ficam fora do conjunto de bolhas; (a) fica fora do laço de pares. O conserto dos três
+  é do renderizador, e o site já o fez uma vez (§12.5: o rótulo de ação sai do traço, na
+  perpendicular). Caminho de upgrade: passar `parIndex`/`parCount` para dentro do layout e
+  deslocar a bolha na mesma perpendicular do leque.
+- **`FLOW_RELAX_MAX_BUBBLES = 240`**: acima disso a relaxação é PULADA inteira e o layout é a
+  grade de sempre. É o oceano (§12.4 já declara um layout em camadas errado para um grafo com 3
+  fontes e 139 nós num rank). O laço é O(bolhas²) por rodada; o upgrade é um grid hash, não um
+  orçamento maior.
 - `Point.id` de um estado é `s:{node_key}` e **contém espaços**. Nada aqui parte id por espaço —
   mas é exatamente o defeito vivo de `systemDominance.ts:167-174` no App, e o port da Fase 5 tem
   de nascer sabendo.

@@ -426,7 +426,25 @@ def path_payload(
         if slot is not None:
             anchor_slots[point.id] = slot
 
-    pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots, weight=node_weight)
+    # Label bubbles for the layout's relaxation pass: the name each node draws (anchors carry
+    # their own display label) and the joined action sequence each stroke draws. English on this
+    # side — the site's locale — which is exactly why the count is the caller's to supply.
+    label_len: dict[str, int] = {}
+    for point in bundled.points:
+        if point.state_key is None:
+            continue
+        found = state_rows.get(point.state_key) or state_rows.get(opp_finish)
+        if found is None:
+            continue
+        (node_key, _side), row = found
+        text = _ANCHOR_LABELS.get(node_key, str(row["label"])) \
+            if _anchor_slot(node_key, "a", structure) else str(row["label"])
+        label_len[point.id] = len(text)
+    for seg in bundled.segments:
+        label_len[seg.id] = len(" → ".join(labels.get(k, k) for k in seg.actions))
+
+    pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
+                      weight=node_weight, label_len=label_len)
 
     nodes: list[dict[str, Any]] = []
     for point in sorted(bundled.points, key=lambda p: p.id):
