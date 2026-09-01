@@ -11,8 +11,10 @@ from pathlib import Path
 import pytest
 
 from analysis.decision_flow import ACTION_TYPES
+from analysis.names import _normalize_name, canonicalize
 from analysis.perspective_sequence import STABLE_STATE_TYPES
 from analysis.taxonomy_kind import (
+    StanceReading,
     infer_action_for_state_pair,
     infer_state_for_action_pair,
     kind_of,
@@ -209,11 +211,9 @@ def test_pair_resolution_falls_back_to_wildcard_wildcard() -> None:
 
 def test_shipped_inference_table_resolves_the_documented_examples() -> None:
     table = load_inference_table()
-    assert infer_state_for_action_pair(table, "submission", "submission")["node_key"] == (
-        "chained submission"
-    )
-    assert infer_state_for_action_pair(table, "takedown", "pass")["node_key"] == "top transition"
-    assert infer_state_for_action_pair(table, "escape", "escape")["node_key"] == "bottom transition"
+    # Phase 1: the four dead generic states took their action_pair_to_state rows with them —
+    # an ordinary action-action pair no longer resolves to an anchor at all.
+    assert infer_state_for_action_pair(table, "submission", "submission") is None
     assert infer_action_for_state_pair(table, "guard", "guard")["action_key"] == "guard transition"
     assert infer_action_for_state_pair(table, "control", "guard")["action_key"] == "guard recovery"
 
@@ -222,24 +222,27 @@ def test_shipped_inference_table_resolves_the_documented_examples() -> None:
 def test_terminal_submission_resolves_to_finish_not_scramble() -> None:
     table = load_inference_table()
     assert resolve_pair(table["action_pair_to_state"], "submission", "$terminal") == "finish"
-    assert infer_state_for_action_pair(table, "submission", "$terminal")["node_key"] == "finish"
+    entry = infer_state_for_action_pair(table, "submission", "$terminal")
+    assert entry is not None and entry["node_key"] == "finish"
 
 
-def test_mid_chain_submission_is_unaffected_by_the_terminal_marker() -> None:
+def test_mid_chain_submission_no_longer_resolves_to_a_generic_state() -> None:
     """Only a REAL terminal call (the literal `$terminal` sentinel) resolves to 'finish' — a
-    submission followed by a real next action type still falls to the '*|*' fallback,
-    unchanged (D2's own spec: mid-chain submission stays exactly as it was)."""
+    submission followed by a real next action type used to fall to the '*|*' fallback
+    ('scramble'); Phase 1 removed that row along with the state (the two actions now just
+    stack in the caller's own transition instead), so resolution legitimately returns None."""
     table = load_inference_table()
-    assert resolve_pair(table["action_pair_to_state"], "submission", "pass") == "scramble"
-    assert infer_state_for_action_pair(table, "submission", "pass")["node_key"] == "scramble"
+    assert resolve_pair(table["action_pair_to_state"], "submission", "pass") is None
+    assert infer_state_for_action_pair(table, "submission", "pass") is None
 
 
-def test_terminal_takedown_sweep_pass_unaffected_by_the_new_marker() -> None:
-    """The pre-existing 'type|*' rows still catch the terminal marker the same way they catch
-    any other right-hand value — no behavior change for takedown/sweep/pass."""
+def test_terminal_takedown_sweep_pass_now_resolve_to_no_anchor() -> None:
+    """Phase 1 removed the 'type|*' rows (`data/taxonomy/inference_table.json`) — only
+    'submission|$terminal' survives as a closing anchor. A chain ending on takedown/sweep/pass
+    now closes with NO anchor, same spirit as `ChainState.nascent`."""
     table = load_inference_table()
     for typ in ("takedown", "sweep", "pass"):
-        assert infer_state_for_action_pair(table, typ, "$terminal")["node_key"] == "top transition"
+        assert infer_state_for_action_pair(table, typ, "$terminal") is None
 
 
 # ── D2: 2026-08-27 pairs — generic vocabulary differentiation ───────────────────
@@ -247,13 +250,15 @@ def test_start_pass_resolves_to_start_top() -> None:
     """A chain opening on a `pass` means you were already on top of their guard —
     established position, not scramble."""
     table = load_inference_table()
-    assert infer_state_for_action_pair(table, "$start", "pass")["node_key"] == "start top"
+    entry = infer_state_for_action_pair(table, "$start", "pass")
+    assert entry is not None and entry["node_key"] == "start top"
 
 
 def test_start_escape_resolves_to_start_bottom() -> None:
     """A chain opening on an `escape` means you were pinned — established bottom."""
     table = load_inference_table()
-    assert infer_state_for_action_pair(table, "$start", "escape")["node_key"] == "start bottom"
+    entry = infer_state_for_action_pair(table, "$start", "escape")
+    assert entry is not None and entry["node_key"] == "start bottom"
 
 
 def test_start_submission_folds_into_start_neutral() -> None:
@@ -264,18 +269,11 @@ def test_start_submission_folds_into_start_neutral() -> None:
     'engaged but unplaced'."""
     table = load_inference_table()
     entry = infer_state_for_action_pair(table, "$start", "submission")
+    assert entry is not None
     assert entry["node_key"] == "start neutral"
     assert entry["orientation"] == "neutral"
-    assert entry["role"] == "start"
+    assert entry["role"] == "anchor"
     assert "start engaged" not in table["generic_states"]
-
-
-def test_escape_star_resolves_to_bottom_transition_mirroring_top_transition() -> None:
-    table = load_inference_table()
-    assert infer_state_for_action_pair(table, "escape", "anything")["node_key"] == (
-        "bottom transition"
-    )
-    assert infer_state_for_action_pair(table, "escape", "anything")["orientation"] == "bottom"
 
 
 def test_control_control_resolves_to_control_transition() -> None:
@@ -299,27 +297,48 @@ def test_guard_control_resolves_to_guard_exit() -> None:
 def test_start_sentinel_resolves_takedown_to_start_neutral() -> None:
     table = load_inference_table()
     assert resolve_pair(table["action_pair_to_state"], "$start", "takedown") == "start neutral"
-    assert infer_state_for_action_pair(table, "$start", "takedown")["node_key"] == "start neutral"
+    entry = infer_state_for_action_pair(table, "$start", "takedown")
+    assert entry is not None and entry["node_key"] == "start neutral"
 
 
-def test_start_sentinel_unresolved_type_falls_back_to_scramble() -> None:
-    """'takedown'/'pass'/'escape'/'submission' now have declarative opening rows (2026-08-27) —
-    every OTHER type still falls through to the pre-existing '*|*' fallback via the `$start`
-    sentinel, same as the plain '*' sentinel it replaces did."""
+def test_start_sweep_resolves_to_start_bottom() -> None:
+    """Fase 1b (owner call, 2026-08-31): a sweep is EXECUTED from the bottom — the sweeper
+    starts underneath and reverses — so a chain opening on one anchors at 'start bottom'."""
     table = load_inference_table()
-    for typ in ("sweep", "transition"):
-        assert infer_state_for_action_pair(table, "$start", typ)["node_key"] == "scramble"
+    entry = infer_state_for_action_pair(table, "$start", "sweep")
+    assert entry is not None and entry["node_key"] == "start bottom"
+
+
+def test_start_transition_resolves_to_start_neutral() -> None:
+    """Fase 1b: a generic transition carries no orientation claim of its own, so a chain
+    opening on one anchors at 'start neutral'."""
+    table = load_inference_table()
+    entry = infer_state_for_action_pair(table, "$start", "transition")
+    assert entry is not None and entry["node_key"] == "start neutral"
+
+
+def test_start_sentinel_unmapped_type_now_resolves_to_no_declarative_row() -> None:
+    """'takedown'/'pass'/'escape'/'submission'/'sweep'/'transition' have declarative opening
+    rows — every OTHER type used to fall through to the '*|*' fallback ('scramble'); Phase 1
+    removed that catch-all, so an unmapped opening type resolves to no DECLARATIVE row here.
+    (Fase 1b: the caller, `chain_compiler._opening_state`, still resolves it — via
+    `resolve_anchor_by_role` — this function's contract stays 'declarative rows only'.)"""
+    table = load_inference_table()
+    for typ in ("guard", "control"):
+        assert infer_state_for_action_pair(table, "$start", typ) is None
 
 
 def test_generic_states_role_markers() -> None:
     table = load_inference_table()
     states = table["generic_states"]
     assert states["finish"]["role"] == "finish"
-    assert states["start neutral"]["role"] == "start"
-    assert states["start top"]["role"] == "start"
-    assert states["start bottom"]["role"] == "start"
-    for bridge_key in ("scramble", "top transition", "bottom transition", "chained submission"):
-        assert "role" not in states[bridge_key]
+    assert states["start neutral"]["role"] == "anchor"
+    assert states["start top"]["role"] == "anchor"
+    assert states["start bottom"]["role"] == "anchor"
+    # Phase 1 killed the four generics that never carried a role ('scramble', 'top transition',
+    # 'bottom transition', 'chained submission') — only the presentation anchors remain, and
+    # every one of them DOES carry a role.
+    assert set(states) == {"finish", "start neutral", "start top", "start bottom"}
 
 
 def test_start_nodes_carry_the_documented_orientation() -> None:
@@ -333,11 +352,9 @@ def test_start_nodes_carry_the_documented_orientation() -> None:
 # ── role_of: the standalone node_key -> role lookup ──────────────────────────────
 def test_role_of_generic_states() -> None:
     assert role_of("finish") == "finish"
-    assert role_of("start neutral") == "start"
-    assert role_of("start top") == "start"
-    assert role_of("start bottom") == "start"
-    assert role_of("scramble") is None
-    assert role_of("bottom transition") is None
+    assert role_of("start neutral") == "anchor"
+    assert role_of("start top") == "anchor"
+    assert role_of("start bottom") == "anchor"
 
 
 def test_role_of_unknown_or_real_technique_node_is_none() -> None:
@@ -368,15 +385,14 @@ def test_orientation_of_neutral_defaults_for_unknown_and_ambiguous_labels() -> N
 
 
 def test_orientation_of_generic_states() -> None:
-    assert orientation_of("Scramble") == "neutral"
-    assert orientation_of("Top Transition") == "top"
-    assert orientation_of("Bottom Transition") == "bottom"
-    assert orientation_of("Chained Submission") == "neutral"
+    """Phase 1 removed the four dead generics ('scramble', 'top transition', 'bottom
+    transition', 'chained submission') from `state_orientation.json` along with the states
+    themselves — only the presentation anchors remain curated."""
     assert orientation_of("Finish") == "neutral"
     assert orientation_of("Start Neutral") == "neutral"
     assert orientation_of("Start Top") == "top"
     assert orientation_of("Start Bottom") == "bottom"
-    assert orientation_of("Start Engaged") == "neutral"
+    assert orientation_of("Start Engaged") == "neutral"  # never existed — default, not curated
 
 
 def test_state_orientation_json_agrees_with_inference_table_generic_states() -> None:
@@ -396,6 +412,131 @@ def test_orientation_of_deterministic_across_calls() -> None:
 def test_orientation_table_only_carries_the_three_valid_values() -> None:
     table = load_orientation_table()
     assert set(table.values()) <= {"top", "bottom", "neutral"}
+
+
+# ── Fase 2: orientation on the inference path, and the exit axis ─────────────────
+def test_orientation_for_inference_prefers_the_declared_table() -> None:
+    from analysis.taxonomy_kind import orientation_for_inference
+    assert orientation_for_inference("control", "Mount") == StanceReading("top", "declared")
+    assert orientation_for_inference("guard", "Closed Guard") == StanceReading(
+        "bottom", "declared")
+
+
+def test_orientation_for_inference_resolves_through_the_library_before_deriving() -> None:
+    """"Back Take" is the corpus's third-largest state node (degree 211) and has NO row in
+    `state_orientation.json` — the curated row is under its library-canonical name, "Back
+    Control". Reading the label as written misses it; resolving through the library does not,
+    and the answer is still `declared`, not a guess."""
+    from analysis.taxonomy_kind import orientation_for_inference
+    assert orientation_of("Back Take") == "neutral"          # `orientation_of` is untouched
+    assert orientation_for_inference("control", "Back Take") == StanceReading("top", "declared")
+
+
+def test_orientation_for_inference_falls_back_to_attribution_and_says_so() -> None:
+    """The second level is explicitly labelled `derived`: `Kimura Grip` has no curated
+    orientation row, and `attribution` reads it as `controlling` — a real positional claim on
+    the OTHER of attribution's two axes, which is why the return type carries five values and
+    not three."""
+    from analysis.taxonomy_kind import orientation_for_inference
+    assert orientation_of("Kimura Grip") == "neutral"
+    assert orientation_for_inference("control", "Kimura Grip") == StanceReading(
+        "controlling", "derived")
+
+
+def test_orientation_for_inference_is_neutral_when_nothing_answers() -> None:
+    from analysis.taxonomy_kind import orientation_for_inference
+    assert orientation_for_inference("submission", "Armbar").value == "neutral"
+    assert orientation_for_inference("control", "Some Made Up State").value == "controlling"
+
+
+def test_orientation_of_is_untouched_by_fase_2() -> None:
+    """The owner's explicit constraint: `orientation_of`'s refusal to guess is the reason it
+    exists, and `export_taxonomy_kind_fixtures` mirrors its output into the App. Fase 2 added a
+    SECOND function instead of widening this one."""
+    assert orientation_of("Sweep") == "neutral"
+    assert orientation_of("Guard Pass") == "neutral"
+    assert set(load_orientation_table().values()) <= {"top", "bottom", "neutral"}
+
+
+def test_orientation_for_inference_covers_every_curated_label() -> None:
+    """The payoff, measured over `attribution`'s own curated lists: 52 of the 74 labels that
+    ought to carry an orientation read `neutral` through `state_orientation.json` alone (70%,
+    and all 13 grips), which left the inversion rule blind. The three-level reading takes that
+    to zero. `_GUARD_NEUTRAL` is excluded from the count on purpose — 50/50 is symmetric by
+    construction, so `neutral` is the correct answer there and stays."""
+    from analysis import attribution as attr
+    from analysis.taxonomy_kind import orientation_for_inference
+
+    curated = [(label, "guard") for label in attr._GUARD_BOTTOM]
+    curated += [(label, "control")
+                for group in (attr._CONTROL_TOP, attr._CONTROL_BACK, attr._CONTROL_GRIP)
+                for label in group]
+    assert len(curated) == 74
+    blind_before = [
+        label for label, _t in curated
+        if orientation_of(canonicalize(_normalize_name(label))) == "neutral"
+    ]
+    assert len(blind_before) == 52
+    blind_after = [label for label, t in curated
+                   if orientation_for_inference(t, label).value == "neutral"]
+    assert blind_after == []
+    # `_GUARD_NEUTRAL` keeps its `neutral`, EXCEPT for the four labels where the curated
+    # orientation table and `attribution` already contradict each other — a pre-existing item on
+    # the owner's explicit "não tocar agora" backlog, inherited here rather than silently
+    # resolved: the declared table stays the truth, and this pins exactly which labels it wins.
+    contradicted = {"5050 guard", "single leg x", "single leg x guard entry",
+                    "shin to shin guard"}
+    assert {label for label in attr._GUARD_NEUTRAL
+            if orientation_for_inference("guard", label).value != "neutral"} == contradicted
+
+
+def test_exit_orientation_is_curated_by_type_with_a_declared_default() -> None:
+    """The axis Fase 1b recorded as missing (§7 of the contract doc): where an action LEAVES
+    you. `classify(...).actor_role` answers `executor` for sweep/escape/takedown, which is a
+    relation and not a position, so 146 of 160 chain closes landed on `start neutral`."""
+    from analysis.taxonomy_kind import exit_orientation
+    table = load_inference_table()
+    assert exit_orientation(table, "sweep") == "top"
+    assert exit_orientation(table, "takedown") == "top"
+    assert exit_orientation(table, "pass") == "top"
+    assert exit_orientation(table, "guard") == "bottom"
+    assert exit_orientation(table, "reset") == "neutral"  # the declared "*" row
+
+
+def test_exit_orientation_of_escape_is_neutral_because_the_corpus_says_standing() -> None:
+    """MEASURED, and it contradicts the illustration in the owner's own plan ("uma cadeia que
+    termina em escapada chega em por baixo"). Of the 83 `escape` events in the 281-bout corpus,
+    75 are literally `Escape to Standing` (60) or `Stand-up Escape` (15) — 90% escape to the
+    FEET, which is neutral, not bottom. Only 2 escapes are followed by a state at all, so
+    there is no outcome evidence either way; the labels are the evidence."""
+    from analysis.taxonomy_kind import exit_orientation
+    assert exit_orientation(load_inference_table(), "escape") == "neutral"
+
+
+def test_closing_anchor_uses_exit_orientation_not_the_actor_role() -> None:
+    from analysis.taxonomy_kind import resolve_anchor_by_role, resolve_closing_anchor
+    table = load_inference_table()
+    assert resolve_closing_anchor(table, "sweep", "Hip Bump Sweep")["node_key"] == "start top"
+    assert resolve_closing_anchor(table, "takedown", "Double Leg")["node_key"] == "start top"
+    assert resolve_closing_anchor(table, "escape", "Escape to Standing")["node_key"] == (
+        "start neutral")
+    # the OPENING end still asks the opposite question and keeps its own resolver
+    assert resolve_anchor_by_role(table, "sweep", "Hip Bump Sweep")["node_key"] == "start neutral"
+
+
+def test_the_three_new_generics_collide_with_real_observed_action_keys() -> None:
+    """Recorded, not fixed. `sweep`/`reversal`/`guard pass` are the canonical keys of real
+    logged labels ("Sweep" 207 events, "Reversal" 16, "Guard Pass"+"Pass" 55), so an inferred
+    generic and an observed action share one `node_key`. That is what contract invariant 1
+    asks for — identity is `canonicalize(_normalize_name(label))`, full stop — and
+    `ChainAction.inferred` is the discriminator every consumer already has. It matters at Fase
+    6, where `graph_edges` would conflate the two without it; naming the generics something
+    the vocabulary does not contain would have been the worse trade."""
+    from analysis.names import _normalize_name
+    table = load_inference_table()
+    for key in ("sweep", "reversal", "guard pass"):
+        assert table["generic_actions"][key]["action_key"] == key
+        assert canonicalize(_normalize_name(table["generic_actions"][key]["label"])) != key
 
 
 # ── the cross-repo fixture ───────────────────────────────────────────────────────

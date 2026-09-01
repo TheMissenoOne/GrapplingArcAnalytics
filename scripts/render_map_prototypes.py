@@ -133,15 +133,17 @@ _TYPE_COLORS = {
 # the category. Keep in sync with graph.js's `const FIG` if that palette ever changes.
 _FIG_HEX = {"a": "#4d86ff", "b": "#fc4c02"}
 
-# D (owner addendum 2026-08-27) — organisational START nodes. The other builder's
-# `inference_table.json` carries three generic states — ``start neutral``/``start top``/
-# ``start bottom`` (node_key) — each tagged ``"role": "start"`` (singular; the node_key itself,
-# not the role value, carries the neutral/top/bottom distinction — same table's existing
-# ``orientation`` field / ``analysis.taxonomy_kind.orientation_of`` already encodes that, reused
-# here rather than re-deriving it from the key string). Finish carries ``"role": "finish"``,
-# already handled separately via ``_FINISH_KEY``/actor. Lookup stays defensive (``_role_of``
-# returns ``None`` on a missing entry/field) so nothing here depends on the table shape beyond
-# what's actually landed.
+# D (owner addendum 2026-08-27; role renamed 2026-08-31) — organisational ANCHOR nodes. The
+# other builder's `inference_table.json` carries three generic states — ``start neutral``/
+# ``start top``/``start bottom`` (node_key, unchanged) — each tagged ``"role": "anchor"``
+# (renamed from ``"start"`` — Fase 1b: the same three nodes now close a chain that ends
+# unanchored too, not just open one; the node_key itself, not the role value, carries the
+# neutral/top/bottom distinction — same table's existing ``orientation`` field /
+# ``analysis.taxonomy_kind.orientation_of`` already encodes that, reused here rather than
+# re-deriving it from the key string). Finish carries ``"role": "finish"``, already handled
+# separately via ``_FINISH_KEY``/actor. Lookup stays defensive (``_role_of`` returns ``None`` on
+# a missing entry/field) so nothing here depends on the table shape beyond what's actually
+# landed.
 _START_COLOR = "#34d399"  # teal — distinct from finish's yellow (_FINISH_COLOR)
 _START_ICON = "A"  # variant 7 only — "Âncora"; letters not emoji, see _TYPE_ICONS docstring
 
@@ -194,7 +196,7 @@ def _role_of(node_key: str) -> str | None:
 
 
 def _is_start(node_key: str) -> bool:
-    return _role_of(node_key) == "start"
+    return _role_of(node_key) == "anchor"
 
 
 def _is_shared(node_key: str) -> bool:
@@ -206,8 +208,10 @@ def _is_shared(node_key: str) -> bool:
 # Anchors are the map's frame, so their size is FIXED (owner 2026-08-27) — deriving it from
 # usage count made the landmark shrink or grow between renders and between gate combos.
 _ANCHOR_SIZE = 3
-_START_LABELS = {"start top": "Início por Cima", "start bottom": "Início por Baixo",
-                  "start neutral": "Início Neutro"}
+# Fase 1b (2026-08-31): labels lost the "Início" prefix — the anchors serve both ends of a
+# chain now, not just openings. Mirrors `data/taxonomy/inference_table.json`'s own `label`.
+_START_LABELS = {"start top": "Por Cima", "start bottom": "Por Baixo",
+                  "start neutral": "Neutro"}
 
 
 def _perspective_key(node_key: str, actor: str | None) -> str:
@@ -270,7 +274,7 @@ def _apply_start_style(node: dict[str, Any], node_key: str, *, icon: bool = Fals
     letters, not emoji)."""
     if _is_start(node_key):
         node["color"] = _START_COLOR
-        node["shape"] = "diamond"  # owner 2026-08-27 — shape, not just hue, marks where a chain opens
+        node["shape"] = "diamond"  # owner 2026-08-27 — shape, not just hue, marks where a chain opens or closes
         node["size"] = _ANCHOR_SIZE  # a landmark's size can't wobble with how often it was hit
         node.pop("ring", None)
         if icon:
@@ -451,7 +455,11 @@ class Aggregate:
 
     def __init__(self) -> None:
         self.states: dict[tuple[str, str], dict[str, Any]] = {}
-        self.edges: dict[tuple[str, str, str, str], dict[str, Any]] = {}
+        # Phase 1 (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md): keyed on the WHOLE canonical
+        # action sequence, not just `actions[0]` (the P3 gap `tests/test_actions_parity.py`
+        # documented) — an edge can now carry more than one action, and two edges whose
+        # sequences differ must land in different buckets even when their FIRST action matches.
+        self.edges: dict[tuple[str, str, tuple[str, ...], str], dict[str, Any]] = {}
         self.handovers: dict[tuple[str, str], dict[str, Any]] = {}
         self.raw_states_total = 0
         self.raw_states_inferred = 0
@@ -493,7 +501,8 @@ class Aggregate:
         self.raw_edges_inferred += 1 if e.inferred else 0
         source_key = _perspective_key(e.source_key, e.actor)
         target_key = _perspective_key(e.target_key, e.actor)
-        key = (source_key, target_key, e.action_key, e.actor)
+        action_seq = tuple(a.key for a in e.actions)
+        key = (source_key, target_key, action_seq, e.actor)
         row = self.edges.get(key)
         if row is None:
             action_label = self.display_labels.get(e.action_key, e.action_label)

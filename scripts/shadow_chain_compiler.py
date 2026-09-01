@@ -68,8 +68,14 @@ def compile_corpus(matches: list[dict[str, Any]]) -> dict[str, Any]:
     nodes: set[str] = set()
     edge_weight: Counter[tuple[str, str]] = Counter()
     degree: Counter[str] = Counter()
-    action_volume: Counter[str] = Counter()
+    # Phase 1: keyed on the WHOLE canonical action sequence, not just `actions[0]` (same fix as
+    # `render_map_prototypes.Aggregate.add_edge`) — an edge can now carry more than one action.
+    action_volume: Counter[tuple[str, ...]] = Counter()
+    actions_len_dist: Counter[int] = Counter()
     total_nodes = total_edges = inferred_nodes = inferred_edges = 0
+    # Fase 2: the split that matters — OBSERVED occurrences come one-for-one from the log and
+    # are invariant across every phase; INFERRED ones are the rule's own output and move with it.
+    observed_actions = inferred_actions = 0
 
     for ch in chains:
         for s in ch.states:
@@ -82,7 +88,10 @@ def compile_corpus(matches: list[dict[str, Any]]) -> dict[str, Any]:
             if e.inferred:
                 inferred_edges += 1
             edge_weight[(e.source_key, e.target_key)] += 1
-            action_volume[e.action_key] += 1
+            action_volume[tuple(a.key for a in e.actions)] += 1
+            observed_actions += sum(1 for a in e.actions if not a.inferred)
+            inferred_actions += sum(1 for a in e.actions if a.inferred)
+            actions_len_dist[len(e.actions)] += 1
             degree[e.source_key] += 1
             degree[e.target_key] += 1
 
@@ -92,10 +101,15 @@ def compile_corpus(matches: list[dict[str, Any]]) -> dict[str, Any]:
         "unique_transition_edges": len(edge_weight),
         "total_state_occurrences": total_nodes,
         "total_action_edges": total_edges,
+        "observed_action_occurrences": observed_actions,
+        "inferred_action_occurrences": inferred_actions,
         "inferred_node_pct": round(100 * inferred_nodes / total_nodes, 1) if total_nodes else 0.0,
         "inferred_edge_pct": round(100 * inferred_edges / total_edges, 1) if total_edges else 0.0,
         "top_states_by_degree": degree.most_common(10),
         "top_actions_by_volume": action_volume.most_common(10),
+        # Phase 1 measurement (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md): how many transitions
+        # now carry 1 / 2 / 3+ stacked actions.
+        "actions_per_edge_dist": dict(sorted(actions_len_dist.items())),
         "dropped_reasons": dict(dropped_reasons),
     }
 
@@ -139,8 +153,11 @@ def render_report(compiler: dict[str, Any], current: dict[str, Any]) -> str:
         f"- unique transition edges (state→state, deduped): {compiler['unique_transition_edges']}",
         f"- total state-node occurrences (raw walk, not deduped): {compiler['total_state_occurrences']}",
         f"- total action edges: {compiler['total_action_edges']}",
+        f"- action occurrences: {compiler['observed_action_occurrences']} observed "
+        f"(invariant) + {compiler['inferred_action_occurrences']} inferred (the rule's output)",
         f"- inferred state nodes: {compiler['inferred_node_pct']}%",
         f"- inferred action edges: {compiler['inferred_edge_pct']}%",
+        f"- actions per edge (length -> count): {compiler['actions_per_edge_dist']}",
         "",
         "### Top 10 states by degree",
     ]

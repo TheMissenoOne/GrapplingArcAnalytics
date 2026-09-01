@@ -1,0 +1,115 @@
+{
+  "contract": "P1 — (action_key, actor, inferred) -> count; the inferred=false rows are invariant across the whole actions[] migration, the inferred=true rows are the inference rule's own output and move with it",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_actions_parity_fixtures.py",
+  "multiset": [
+    {
+      "action_key": "armbar from guard",
+      "actor": "you",
+      "count": 2,
+      "inferred": false
+    },
+    {
+      "action_key": "berimbolo",
+      "actor": "you",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "bridge roll",
+      "actor": "partner",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "bridge upa escape",
+      "actor": "partner",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "control transition",
+      "actor": "you",
+      "count": 1,
+      "inferred": true
+    },
+    {
+      "action_key": "guard transition",
+      "actor": "you",
+      "count": 1,
+      "inferred": true
+    },
+    {
+      "action_key": "hip bump sweep",
+      "actor": "you",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "hip switch",
+      "actor": "partner",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "kimura",
+      "actor": "you",
+      "count": 2,
+      "inferred": false
+    },
+    {
+      "action_key": "knee cut pass",
+      "actor": "you",
+      "count": 3,
+      "inferred": false
+    },
+    {
+      "action_key": "scissor sweep",
+      "actor": "you",
+      "count": 3,
+      "inferred": false
+    },
+    {
+      "action_key": "single leg takedown",
+      "actor": "partner",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "single leg takedown",
+      "actor": "you",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "stack pressure",
+      "actor": "partner",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "standing guard pass",
+      "actor": "you",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "step around",
+      "actor": "partner",
+      "count": 1,
+      "inferred": false
+    },
+    {
+      "action_key": "sweep",
+      "actor": "you",
+      "count": 3,
+      "inferred": true
+    },
+    {
+      "action_key": "triangle choke",
+      "actor": "you",
+      "count": 2,
+      "inferred": false
+    }
+  ],
+  "source_bundle": "GrapplingArcApp/src/data/mockData/mock_user_bundle.json"
+}

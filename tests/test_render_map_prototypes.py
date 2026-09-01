@@ -457,9 +457,10 @@ def test_index_parallel_links_assigns_par_and_par_count_per_unordered_pair() -> 
 
 
 def test_start_role_node_always_qualifies_as_user_side() -> None:
-    """D — the other builder's ``inference_table.json`` now carries ``start neutral``/``start
-    top``/``start bottom`` tagged ``role: 'start'``: always the user's, even reached from the
-    opponent's own chain, and ``_qid`` never prefixes one ``opp:``."""
+    """D — the other builder's ``inference_table.json`` carries ``start neutral``/``start
+    top``/``start bottom`` tagged ``role: 'anchor'`` (renamed from ``'start'`` 2026-08-31):
+    always the user's, even reached from the opponent's own chain, and ``_qid`` never prefixes
+    one ``opp:``."""
     assert _actor_for("start neutral", "partner") == "you"
     assert _qid("partner", "start top") == "start top"  # never opp:start top
     assert _qid("partner", "mount") == "opp:mount"  # untouched for a normal node

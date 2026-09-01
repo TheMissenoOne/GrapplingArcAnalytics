@@ -11,36 +11,38 @@ actor-id split.
 - dropped events (by reason): {'transparent': 20, 'no_side': 180}
 
 ## chain_compiler (new structure)
-- unique state nodes: 77
-- unique transition edges (state→state, deduped): 344
-- total state-node occurrences (raw walk, not deduped): 2208
-- total action edges: 1827
-- inferred state nodes: 62.4%
-- inferred action edges: 23.9%
+- unique state nodes: 72
+- unique transition edges (state→state, deduped): 297
+- total state-node occurrences (raw walk, not deduped): 1370
+- total action edges: 989
+- action occurrences: 1390 observed (invariant) + 433 inferred (the rule's output)
+- inferred state nodes: 39.3%
+- inferred action edges: 40.7%
+- actions per edge (length -> count): {1: 666, 2: 144, 3: 63, 4: 46, 5: 28, 6: 13, 7: 11, 8: 5, 9: 2, 10: 4, 11: 4, 14: 1, 19: 1, 26: 1}
 
 ### Top 10 states by degree
-- scramble: 866
-- top transition: 461
-- chained submission: 412
-- mount: 367
+- mount: 349
+- start neutral: 277
 - back take: 211
-- half guard: 140
-- bottom transition: 130
+- half guard: 132
 - finish: 113
-- body triangle: 100
-- butterfly guard: 78
+- body triangle: 96
+- escape to turtle: 77
+- butterfly guard: 77
+- start top: 75
+- start bottom: 74
 
 ### Top 10 actions by volume
-- control transition: 223
-- sweep: 207
-- triangle attempt: 117
-- transition: 95
-- guillotine attempt: 62
-- escape to standing: 60
-- guard transition: 57
-- single leg takedown: 56
-- takedown: 55
-- guard pass: 55
+- ('control transition',): 202
+- ('transition',): 88
+- ('guard transition',): 57
+- ('sweep',): 39
+- ('reversal',): 30
+- ('rear naked choke',): 17
+- ('triangle attempt',): 17
+- ('guard pass',): 13
+- ('takedown',): 12
+- ('guard exit',): 11
 
 ## network_from_sequences (current derivation)
 - unique nodes: 172
