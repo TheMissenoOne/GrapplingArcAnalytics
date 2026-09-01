@@ -32,6 +32,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from analysis.athlete_elo import _points_for_entry
+from analysis.corpus_paths import aggregate_bouts, path_payload
 from analysis.decision_space import sequence_decision_space
 from analysis.names import _normalize_name, canonical_label, canonicalize
 from db.models import Athlete, Graph, Match
@@ -339,6 +340,11 @@ def build_match_breakdown(
         "event_timeline": _ui_timeline(match, a, b),  # all events (graph = clean subset only)
         "stats": _compute_stats(sequence, ptv_v),
         "transition_graph": _transition_graph(sequence),
+        # "Edge = path": the same bout compiled into states + transitions carrying an ordered
+        # actions[] (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md), bundled and laid out in Python.
+        # ADDITIVE — `transition_graph` above is untouched, so the small cards and anything
+        # still reading the every-event-is-a-node graph keep working unchanged.
+        "path_graph": path_payload(aggregate_bouts([sequence])),
         "fighters": {"a": _fighter_block(a), "b": _fighter_block(b)},
         # ── Strategic layer (RF14 / DS-12) — additive, backward-compatible ──
         "decision_space": sequence_decision_space(sequence, curated_ds),

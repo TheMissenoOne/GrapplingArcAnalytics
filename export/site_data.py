@@ -23,6 +23,7 @@ words and the numbers come from the same source.
 from __future__ import annotations
 
 import argparse
+import copy
 import html
 import json
 import logging
@@ -41,6 +42,7 @@ from analysis.athlete_systems import (
     from_career_graphview,
     profile_to_dict,
 )
+from analysis.corpus_paths import aggregate_bouts, path_payload
 from analysis.counter_moves import counter_moves
 from analysis.defense_rate import defense_profile
 from analysis.event_profile import build_event_profile, event_names
@@ -455,6 +457,51 @@ def _career_graphview(athlete: Athlete, profile: dict[str, Any], session: Sessio
 
 
 # ── data files ───────────────────────────────────────────────────────────────
+def _corpus_bouts(session: Session) -> list[list[dict[str, Any]]]:
+    """Every final bout as two-sided compiler input. Public data only (``matches.sequence``)."""
+    bouts: list[list[dict[str, Any]]] = []
+    for m in _final_matches(session):
+        rows: list[dict[str, Any]] = []
+        for e in (m.sequence or []):
+            if not isinstance(e, dict):
+                continue
+            aid = e.get("actor_id")
+            side = "a" if aid == m.athlete_a_id else ("b" if aid == m.athlete_b_id else None)
+            if side is None:
+                continue
+            rows.append({
+                "label": str(e.get("label", "")), "type": str(e.get("type", "")), "side": side,
+                **({"successful": e["successful"]} if "successful" in e else {}),
+            })
+        if rows:
+            bouts.append(rows)
+    return bouts
+
+
+def _athlete_path_graph(athlete_id: str, matches: list[Any]) -> dict[str, Any]:
+    """The dossier's "edge = path" map: this athlete's OWN chains across their bouts.
+
+    One-sided on purpose — the career graph has always been the athlete's execution graph, and
+    a dossier that also drew what was done TO them would be a different claim. Their events are
+    relabelled side ``a`` (the compiler works per side, so dropping the opponent's changes
+    nothing about the athlete's own chain), which also makes the anchors read from their
+    perspective without a second rule.
+
+    Public only: ``Match.sequence`` is competition footage. No ``graphs`` row is touched here.
+    """
+    bouts: list[list[dict[str, Any]]] = []
+    for m in matches:
+        own = [
+            {"label": str(e.get("label", "")), "type": str(e.get("type", "")), "side": "a",
+             **({"successful": e["successful"]} if "successful" in e else {})}
+            for e in (m.sequence or [])
+            if isinstance(e, dict) and e.get("actor_id") == athlete_id
+        ]
+        if own:
+            bouts.append(own)
+    return path_payload(aggregate_bouts(bouts))
+
+
 def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
     sa, sb = bd["stats"]["a"], bd["stats"]["b"]
     return [
@@ -466,11 +513,22 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
+# Bumped whenever the SHAPE of a cached breakdown changes, not just its inputs. `item_hash`
+# covers the bout's DB fields, which is the right contract for data — but a code change that
+# adds a key (2: `path_graph`) leaves every cached item valid and silently missing it, and the
+# renderer then falls back for the whole corpus. Same precedent as `PROFILE_VERSION`.
+BREAKDOWN_VERSION = 2
+
+# --only previews keep their own cache so a partial run can never overwrite the real one.
+_PREVIEW_CACHE_DIR = Path(__file__).resolve().parent.parent / ".export_cache" / "preview"
+
+
 def build_breakdowns(
     session: Session,
     cache: ItemCache | None = None,
     trusted: frozenset[str] = frozenset(),
     withheld: frozenset[str] = frozenset(),
+    only: frozenset[str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, dict[str, Any]]], dict[str, Any] | None, int]:
     """Returns (GA_BREAKDOWNS rows, [(slug, full breakdown)], GA_FEATURED, omitted_count)
     for sequence bouts where at least one side is in ``trusted`` (Wave 8 publish-
@@ -540,10 +598,13 @@ def build_breakdowns(
             slug = candidate
         slug_taken.add(slug)
         _SLUG_BY_MATCH[match.id] = slug
+        if only is not None and slug not in only:
+            continue   # --only preview: skip the per-bout analysis entirely (see export_site)
         if cache is None:
             bd = build_match_breakdown(match, a, b, ptv_v=ptv_v)
         else:
-            h = item_hash(match.sequence, match.timeline, match.year, match.winner_id,
+            h = item_hash(BREAKDOWN_VERSION,
+                          match.sequence, match.timeline, match.year, match.winner_id,
                           match.win_type, match.event, match.video_url,
                           a.rank_elo, b.rank_elo, a.name, b.name)
             bd = cache.get_or_compute(
@@ -724,10 +785,16 @@ def _progression_example(
     return best[1] if best else None
 
 
+# Same job as BREAKDOWN_VERSION, for the dossier's cached items (1: `:pg`, the path map).
+# Separate from PROFILE_VERSION because that one is style_profile's own contract, not ours.
+DOSSIER_VERSION = 1
+
+
 def build_fighters(
     session: Session,
     cache: ItemCache | None = None,
     trusted: frozenset[str] = frozenset(),
+    only: frozenset[str] | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, dict[str, Any]]]:
     """Returns (GA_FIGHTERS card rows, {slug: {athlete, profile, career}}) for fighters in
     ``trusted`` (Wave 8 publish-confidence gate — see ``_compute_trusted_athletes``: same
@@ -761,6 +828,8 @@ def build_fighters(
             athlete = athletes_by_id.get(aid)
             if athlete is None or aid not in trusted:
                 continue
+            if only is not None and slugify(athlete.name) not in only:
+                continue   # --only preview: skip build_style_profile (the export's slowest call)
             # Fighter cache key: everything the profile + career depend on — the athlete's own
             # fields and every one of their bouts, plus each opponent's rank_elo (defense_profile
             # scores against it, so an opponent's rating change must invalidate this dossier too).
@@ -769,7 +838,7 @@ def build_fighters(
                 _ams = get_matches_for_athlete(aid, session)
                 _opp = [athletes_by_id.get(m.athlete_b_id if m.athlete_a_id == aid
                                            else m.athlete_a_id) for m in _ams]
-                fh = item_hash(PROFILE_VERSION,
+                fh = item_hash(PROFILE_VERSION, DOSSIER_VERSION,
                                aid, athlete.name, athlete.rank_elo, athlete.weight_class,
                                [(m.id, m.sequence, m.timeline, m.year, m.winner_id, m.win_type)
                                 for m in _ams],
@@ -799,8 +868,11 @@ def build_fighters(
                 career = cache.get_or_compute(
                     f"{aid}:c", fh,
                     lambda: _career_graphview(athlete, profile, session, 12, _net()))
+                path_graph = cache.get_or_compute(
+                    f"{aid}:pg", fh, lambda: _athlete_path_graph(aid, athlete_matches))
             else:
                 career = _career_graphview(athlete, profile, session, 12, _net())
+                path_graph = _athlete_path_graph(aid, athlete_matches)
             card = _truncate_graph(career, 8)
             slug = slugify(athlete.name)
             rec = profile["fighter"]["record"]
@@ -844,6 +916,7 @@ def build_fighters(
                 "athlete": athlete,
                 "profile": profile,
                 "career": career,
+                "path_graph": path_graph,
                 "_systems": profile_to_dict(system_profile),
                 "_dilemmas": forks["dilemmas"],
                 "_counters": forks["counters"],
@@ -1113,13 +1186,24 @@ function gaSeek(t){
   gaPlayer.seekTo(Math.max(0,(t|0)+(BD.start||0)-5),true);gaPlayer.playVideo();  // -5s → show the setup
   document.getElementById('ytFrame').scrollIntoView({behavior:'smooth',block:'center'});
 }
-// decisive sequence graph
-GAGraph.mount(document.getElementById('seqGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:BD.graph.nodes,links:BD.graph.links,
-  onSelect:n=>{if(n&&n.ts!=null)gaSeek(n.ts);}});
+// the bout's paths — positions as nodes, the techniques between them on the stroke
+// ("edge = path"). Falls back to the legacy every-event-is-a-node graph if an older
+// bundle has no pathGraph, so a stale page never renders empty.
+var PG = BD.pathGraph && BD.pathGraph.nodes && BD.pathGraph.nodes.length ? BD.pathGraph : null;
+if (PG) {
+  GAGraph.mountPaths(document.getElementById('seqGraph'), {
+    nodes: PG.nodes, links: PG.links, paths: PG.paths,
+    onLinkSelect: l => { if (l && l.ts != null) gaSeek(l.ts); },
+  });
+} else {
+  GAGraph.mount(document.getElementById('seqGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:BD.graph.nodes,links:BD.graph.links,
+    onSelect:n=>{if(n&&n.ts!=null)gaSeek(n.ts);}});
+}
 const lc=[['takedown','Takedown'],['control','Control'],['guard','Guard'],['pass','Passing'],['sweep','Sweep'],['submission','Submission'],['escape','Escape'],['transition','Transition']];
 const dot=c=>'<span class="dot" style="background:'+c+'"></span>';
+var lgNodes=(PG||BD.graph).nodes;
 document.getElementById('seqLegend').innerHTML=
-  lc.filter(([k])=>BD.graph.nodes.some(n=>n.cat===k)).map(([k,l])=>'<span>'+dot(GAGraph.CAT[k])+l+'</span>').join('')
+  lc.filter(([k])=>lgNodes.some(n=>n.cat===k&&n.kind!=='anchor')).map(([k,l])=>'<span>'+dot(GAGraph.CAT[k])+l+'</span>').join('')
   +'<span style="margin-left:auto">'+dot('var(--blue)')+BD.a+'</span><span>'+dot('var(--orange)')+BD.b+'</span>';
 """
 
@@ -1244,6 +1328,17 @@ def render_breakdown_page(
     for n in tgraph.get("nodes", []):
         if "ts" in n:
             n["ts"] = sub_start(n["ts"])
+    # The path map's timestamps ride the ACTIONS (an action is what happened at a moment; in
+    # this model the action lives on the edge), so the same broadcast→bout-relative shift has
+    # to reach them. Copied, never mutated in place — `bd` may come straight from the
+    # incremental cache and a second run would then subtract `start` twice.
+    pgraph = copy.deepcopy(bd.get("path_graph") or {"nodes": [], "links": [], "paths": []})
+    for lk in pgraph.get("links", []):
+        if lk.get("ts") is not None:
+            lk["ts"] = sub_start(lk["ts"])
+        for act in lk.get("actions", []):
+            if act.get("ts") is not None:
+                act["ts"] = sub_start(act["ts"])
     timeline = bd.get("event_timeline", [])
     for e in timeline:
         if "ts" in e:
@@ -1252,17 +1347,21 @@ def render_breakdown_page(
     payload = {
         "a": a["name"], "b": b["name"],
         "graph": tgraph,
+        "pathGraph": pgraph,
         "stats": {"momentum_series": stats.get("momentum_series", []),
                   "momentum_ts": momentum_ts_adj},
         "timeline": timeline,
         "vid": ref[0] if ref else None,
         "start": start,
     }
-    has_seek = bool(ref) and any(n.get("ts") is not None
-                                 for n in bd["transition_graph_gv"]["nodes"])
-    seq_hint = ("Each node is a position; each edge a transition, coloured by who initiated it. "
-                + ("Click a node to jump the video to that moment; hover to isolate its connections."
-                   if has_seek else "Hover any node to isolate its connections."))
+    has_seek = bool(ref) and any(lk.get("ts") is not None for lk in pgraph.get("links", []))
+    seq_hint = (
+        "Each node is a POSITION; each stroke is the run of techniques that got from one to the "
+        "next, in order. A stroke shared by several sequences is drawn once and thicker — that "
+        "is where the game repeats. A short dash is a link the model read from the gap, never a "
+        "logged event. Click a position or a stroke to light the whole sequence it belongs to"
+        + ("; clicking a stroke also jumps the video to that moment." if has_seek else ".")
+    )
     body = f"""{_nav('breakdowns')}
 <section class="art-hero" role="img" aria-label="{html.escape(a['name'])} vs {html.escape(b['name'])}"><div class="wrap">
   <div class="center"><a href="breakdowns.html" class="tag" style="text-decoration:none">← Breakdowns</a></div>
@@ -1385,9 +1484,20 @@ function gaWatch(ref){
     var tag=document.createElement('script');tag.src='https://www.youtube.com/iframe_api';document.head.appendChild(tag);
   }
 }
-// career graph
-GAGraph.mount(document.getElementById('careerGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:P.graph.nodes,links:P.graph.links,
-  onSelect:n=>{if(n&&P.videos)gaWatch(P.videos[n.id]);}});
+// career map — positions as nodes, the techniques between them on the stroke ("edge = path").
+// Falls back to the legacy every-event-is-a-node graph when an older bundle has no pathGraph.
+var CPG = P.pathGraph && P.pathGraph.nodes && P.pathGraph.nodes.length ? P.pathGraph : null;
+if (CPG) {
+  GAGraph.mountPaths(document.getElementById('careerGraph'), {
+    nodes: CPG.nodes, links: CPG.links, paths: CPG.paths,
+    // footage still hangs off the TECHNIQUE, which is now an action on the stroke
+    onLinkSelect: l => { if (l && P.videos) { for (const a of (l.actions||[])) { if (P.videos[a.key]) { gaWatch(P.videos[a.key]); return; } } } },
+    onSelect: n => { if (n && P.videos && n.stateKey) gaWatch(P.videos[n.stateKey]); },
+  });
+} else {
+  GAGraph.mount(document.getElementById('careerGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:P.graph.nodes,links:P.graph.links,
+    onSelect:n=>{if(n&&P.videos)gaWatch(P.videos[n.id]);}});
+}
 const lg=[['guard','Guard'],['pass','Passing'],['control','Control'],['submission','Submission'],['takedown','Takedown'],['transition','Transition']];
 document.getElementById('legend').innerHTML=lg.map(([k,l])=>'<span><span class="dot" style="background:'+GAGraph.CAT[k]+'"></span>'+l+'</span>').join('');
 // signature frequency
@@ -1433,6 +1543,7 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     payload = {
         "radar": {"labels": _RADAR_LABELS, "values": radar_values},
         "graph": profile["_career_gv"],
+        "pathGraph": profile.get("_path_gv") or {"nodes": [], "links": [], "paths": []},
         "signature": profile["signature_techniques"],
         # link each bout to the page that was actually written, not the slug the profile
         # computed — they differ when a pair met twice in one year. Every one of THIS
@@ -1737,6 +1848,7 @@ document.addEventListener('DOMContentLoaded', function(){{
 def build_events(
     session: Session,
     cache: ItemCache | None = None,
+    only: frozenset[str] | None = None,
 ) -> tuple[list[dict[str, Any]], list[tuple[str, dict[str, Any]]]]:
     """Returns (GA_EVENTS card rows, [(slug, event profile)]) for cards with ≥3 bouts."""
     rows: list[dict[str, Any]] = []
@@ -1747,6 +1859,8 @@ def build_events(
             if m.event:
                 ev_matches.setdefault(m.event, []).append(m)
     for name in event_names(session):
+        if only is not None and slugify(name) not in only:
+            continue   # --only preview: skip build_event_profile (a full-corpus scan per event)
         if cache is not None:
             ms = sorted(ev_matches.get(name, []), key=lambda m: m.id)
             # ponytail: keyed on the bouts (id/seq/result/participants); a bare athlete rename
@@ -1894,13 +2008,35 @@ _OCEAN_BODY = """<section class="ocean-stage">
 _OCEAN_JS = """
 var O = window.GA_OCEAN || {nodes:[],links:[],regions:[],meta:{},markov:{},elo:{}};
 var byId = {}; O.nodes.forEach(function(n){ byId[n.id]=n; });
-document.getElementById('oceanMeta').textContent =
-  (O.meta.positions||0)+' of '+(O.meta.total_positions||O.meta.positions||0)+' techniques (top slice) · '+
-  (O.meta.transitions||0)+' transitions · '+(O.regions||[]).length+' regions';
+var __pg = O.pathGraph && O.pathGraph.stats;
+document.getElementById('oceanMeta').textContent = __pg
+  ? (__pg.states+' positions · '+__pg.paths+' recurring technique paths (seen 2+ times) · '
+     +__pg.segments+' strokes · '+__pg.sharedActionPct+'% of the ink is shared')
+  : ((O.meta.positions||0)+' of '+(O.meta.total_positions||O.meta.positions||0)+' techniques (top slice) · '+
+     (O.meta.transitions||0)+' transitions · '+(O.regions||[]).length+' regions');
 document.getElementById('oceanLegend').innerHTML = (O.regions||[]).map(function(r){
   return '<span class="ocean-chip"><i style="background:'+r.color+'"></i>'+r.name+'</span>'; }).join('');
 var panel = document.getElementById('oceanPanel');
-var g = GAGraph.mount(document.getElementById('oceanGraph'), {mode:'map',
+// The map is now the corpus's PATHS: a node is a position, a stroke is the run of techniques
+// that gets from one to the next. The panel/search/regions still key on node_key — a state
+// node carries it as `stateKey`, which is what onSelect/locate() resolve through. Older
+// bundles with no pathGraph fall back to the force graph so a stale page never renders empty.
+var PGO = O.pathGraph && O.pathGraph.nodes && O.pathGraph.nodes.length ? O.pathGraph : null;
+var g = PGO
+  ? GAGraph.mountPaths(document.getElementById('oceanGraph'), {
+      nodes: PGO.nodes, links: PGO.links, paths: PGO.paths,
+      // the HUD floats OVER the canvas — reserve the space it really occupies so the map is
+      // never fitted underneath it. MEASURED, not a constant: the region legend grows a row
+      // per detected system, and below 760px the HUD is a full-width top band instead of a
+      // left column (see the .ocean-hud media query), so a fixed number is wrong in both
+      // directions. Re-read on every fit, which is where a resize lands.
+      inset: function(w){
+        var h = document.querySelector('.ocean-hud');
+        var r = h ? h.getBoundingClientRect() : {right:0, bottom:0};
+        return w >= 760 ? {left: Math.round(r.right) + 18} : {top: Math.round(r.bottom) + 18};
+      },
+      onSelect: onSelect, onLinkSelect: onLinkSelect})
+  : GAGraph.mount(document.getElementById('oceanGraph'), {mode:'map',
   // x/y/imp: the importance-radial seed from export/ocean.py — deterministic across loads,
   // and imp (0..1) also scales gravity pull so the big central nodes stay central (graph.js).
   nodes:O.nodes.map(function(n){return {id:n.id,label:n.label,cat:n.type,size:n.size,color:n.color,
@@ -1936,17 +2072,53 @@ function bar(title, m){
     '<span class="muted">top '+top+'%'+note+'</span></div>'+
     '<div class="op-bar"><div class="op-fill" style="width:'+Math.max(3,m.pct)+'%"></div></div></div>';
 }
+function hidePanel(){
+  var s=document.getElementById('oceanSearch'), lg=document.getElementById('oceanLegend');
+  panel.hidden=true; if(s) s.style.display=''; if(lg) lg.style.display='';
+}
+// a stroke selected: name the run of techniques and how many chains share it. No metrics —
+// those are a POSITION's, and this is what happens between two of them.
+function onLinkSelect(link){
+  if(!link){ hidePanel(); return; }
+  var s=document.getElementById('oceanSearch'), lg=document.getElementById('oceanLegend');
+  if(s){ s.style.display='none'; s.blur(); }
+  if(lg){ lg.style.display='none'; }
+  var acts=(link.actions||[]).map(function(a){
+    return '<span class="tag"'+(a.inferred?' style="opacity:.6;border-style:dashed"':'')+'>'+a.label+'</span>'; }).join('');
+  document.getElementById('opName').textContent = (link.actions||[]).map(function(a){return a.label;}).join(' → ') || 'Transition';
+  document.getElementById('opMeta').innerHTML =
+    '<span class="muted">seen '+(link.count||1)+'× · '+((link.pathIds||[]).length)+
+    ' sequence'+(((link.pathIds||[]).length)===1?'':'s')+' share this stroke</span>';
+  document.getElementById('opMetrics').innerHTML = '<div class="op-tags">'+acts+'</div>';
+  document.getElementById('opNeighbours').innerHTML =
+    (link.actions||[]).some(function(a){return a.inferred;})
+      ? '<div class="op-sec">Note</div><div class="muted">A dashed technique was never logged anywhere in the corpus — the model read it from the gap.</div>' : '';
+  document.getElementById('opEdges').innerHTML = '';
+  panel.hidden=false;
+}
 function onSelect(node){
   var s=document.getElementById('oceanSearch'), lg=document.getElementById('oceanLegend');
-  if(!node || !byId[node.id]){ panel.hidden=true; if(s) s.style.display=''; if(lg) lg.style.display=''; return; }
+  var key = node ? (node.stateKey || node.id) : null;
+  if(!node || !byId[key]){ hidePanel(); return; }
   if(s){ s.style.display='none'; s.blur(); }   // hide search + region legend while a node is focused
   if(lg){ lg.style.display='none'; }
-  var n = byId[node.id], mt = n.metrics||{};
+  var n = byId[key], mt = n.metrics||{};
   var region = ((O.regions||[])[n.region]||{}).name || 'Unclustered';
   var nb = (n.neighbours||[]).map(function(x){var t=byId[x.node_key];
     return '<span class="tag">'+(t?t.label:x.node_key)+'</span>';}).join('');
   var outs = O.links.filter(function(e){return e.from===n.id;}).map(function(e){
     var t=byId[e.to];return t?t.label:e.to;}).slice(0,8).join(', ');
+  if(PGO){  // in the path model "leads to" is the TECHNIQUE that gets you there, not the node
+    var seen={}, runs=[];
+    PGO.links.forEach(function(l){
+      var src=PGO.nodes.filter(function(x){return x.id===l.from;})[0];
+      if(!src||src.stateKey!==n.id) return;
+      var txt=(l.actions||[]).map(function(a){return a.label;}).join(' → ');
+      if(txt&&!seen[txt]){ seen[txt]=1; runs.push({t:txt,w:l.count||1}); }
+    });
+    runs.sort(function(x,y){return y.w-x.w;});
+    outs = runs.slice(0,8).map(function(r){return r.t;}).join(', ');
+  }
   document.getElementById('opName').textContent = n.label;
   document.getElementById('opMeta').innerHTML =
     '<span class="tag" style="border-color:'+n.color+';color:'+n.color+'">'+region+'</span> '+
@@ -1961,6 +2133,13 @@ function onSelect(node){
 document.getElementById('oceanClose').addEventListener('click', function(){ panel.hidden=true; g.select(null); });
 function locate(){
   var q=(document.getElementById('oceanSearch').value||'').toLowerCase().trim(); if(!q) return;
+  // search the DRAWN map first (a position that is on screen is the one a click can find);
+  // fall back to the metric index for a technique that is now an action on a stroke.
+  if(PGO){
+    var pn = PGO.nodes.filter(function(n){return n.label&&n.label.toLowerCase().indexOf(q)>=0&&n.stateKey;})
+      .sort(function(a,b){return (b.size||1)-(a.size||1);})[0];
+    if(pn){ g.select(pn.stateKey); return; }
+  }
   var hit = O.nodes.filter(function(n){return n.label.toLowerCase().indexOf(q)>=0;})
     .sort(function(a,b){return (b.metrics.centrality.pct)-(a.metrics.centrality.pct);})[0];
   if(hit) g.select(hit.id);
@@ -2045,7 +2224,18 @@ def migrate_branding(out: Path) -> dict[str, int]:
     return {"scanned": len(pages), "changed": changed}
 
 
-def export_site(session: Session, out: Path, full: bool = False) -> dict[str, int]:
+def export_site(session: Session, out: Path, full: bool = False,
+                only: frozenset[str] | None = None) -> dict[str, int]:
+    """Regenerate the site bundle into ``out``.
+
+    ``only`` is a PREVIEW mode: build and render just these detail-page slugs (breakdown /
+    dossier / event, matched on the slug). It exists because a full run is a ~10-12 min N+1
+    over remote Supabase (see the ``site-export-perf-campaign`` skill) and iterating on a
+    renderer against that loop is not workable. The globals it writes are PARTIAL by
+    construction, so ``main()`` refuses to point it at the real site directory — a preview must
+    never be mistaken for the bundle. ``only=frozenset()`` builds no detail page at all, which
+    is the cheapest way to regenerate just ``the-ocean.html`` + ``ocean-data.js``.
+    """
     from time import perf_counter as _pc
 
     _AVAILABLE_IMAGES.clear()
@@ -2071,6 +2261,10 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
         if old.name != "grapple-like.html":
             old.unlink()
     cache_dir = Path(__file__).resolve().parent.parent / ".export_cache"
+    # A --only preview computes a HANDFUL of items. Saving that back would REPLACE the shared
+    # cache with those few and turn the next real export into a cold 10-12 min run, so a
+    # preview reads the cache and never writes it.
+    cache_dir = _PREVIEW_CACHE_DIR if only is not None else cache_dir
     bd_cache = ItemCache(cache_dir / "breakdowns.json", full=full)
     ft_cache = ItemCache(cache_dir / "fighters.json", full=full)
     ev_cache = ItemCache(cache_dir / "events.json", full=full)
@@ -2083,13 +2277,13 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
     withheld = _withheld_athlete_ids(session)
     _t = _phase(f"compute_trusted_athletes ({len(trusted)} trusted, {len(withheld)} withheld)", _t)
     rows, full_bds, featured, omitted_bouts = build_breakdowns(
-        session, cache=bd_cache, trusted=trusted, withheld=withheld)
+        session, cache=bd_cache, trusted=trusted, withheld=withheld, only=only)
     bd_cache.save()
     _t = _phase(f"build_breakdowns ({bd_cache.hits} cached, {bd_cache.misses} rebuilt)", _t)
-    fighters, details = build_fighters(session, cache=ft_cache, trusted=trusted)
+    fighters, details = build_fighters(session, cache=ft_cache, trusted=trusted, only=only)
     ft_cache.save()
     _t = _phase(f"build_fighters ({ft_cache.hits} cached, {ft_cache.misses} rebuilt)", _t)
-    events, event_details = build_events(session, cache=ev_cache)
+    events, event_details = build_events(session, cache=ev_cache, only=only)
     ev_cache.save()
     _t = _phase(f"build_events ({ev_cache.hits} cached, {ev_cache.misses} rebuilt)", _t)
     elo = build_elo(session)
@@ -2123,6 +2317,25 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
 
     from analysis.ocean import build_ocean
     ocean = build_ocean(session)
+    # The Ocean's own "edge = path" map: the WHOLE public corpus, actors collapsed (A's mount
+    # and B's mount are the same corpus fact here — this is the technique space, not a bout).
+    # ADDITIVE to GA_OCEAN: `nodes`/`links`/`regions`/`metrics` are untouched, so the panel,
+    # the search and the region legend keep reading exactly what they always read; the new
+    # `pathGraph` is what the canvas draws, and its state nodes carry `stateKey` (the node_key)
+    # so the panel lookup still resolves. NO GATE — hiding a path hides the object of study
+    # (§10.7); measured, gating on occurrence support keeps 391/2370 paths but drops the long
+    # chains that carry the branching, which is the whole reading.
+    # MEASURED, and the one place a gate is right. Ungated the corpus draws 2 370 paths over
+    # 221 points, and `flow_layout` collapses 139 of them into ONE rank — a 2 700 x 22 200 world,
+    # aspect 8.2, unreadable at any zoom. At `min_count=2` it is 52 points / 396 strokes /
+    # aspect 2.3, the same order as the force map this replaces (68 nodes / 964 links).
+    # The cost is stated, not hidden: single-occurrence chains drop, and with them most of the
+    # long trails (shared ink 14.6% -> 5.5%). That is the right editorial line HERE and only
+    # here — the Ocean has always published a "top slice", and a trail seen once in 742 bouts
+    # is an anecdote about the corpus. A dossier and a breakdown are claims about ONE athlete
+    # and ONE bout, so neither is gated: there, the single occurrence IS the subject.
+    ocean["pathGraph"] = path_payload(
+        aggregate_bouts(_corpus_bouts(session), collapse_actors=True), min_count=2)
     (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
     (out / "the-ocean.html").write_text(render_ocean_page(), encoding="utf-8")
     _t = _phase("build_ocean + data.js", _t)
@@ -2149,6 +2362,7 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
         _s = _pc()
         profile = d["profile"]
         profile["_career_gv"] = d["career"]
+        profile["_path_gv"] = d.get("path_graph") or {"nodes": [], "links": [], "paths": []}
         profile["_systems"] = d.get("_systems") or {}
         profile["_analogues"] = d.get("analogues") or []
         profile["_videos"] = d.get("_videos") or {}
@@ -2186,10 +2400,10 @@ def export_site(session: Session, out: Path, full: bool = False) -> dict[str, in
             "ocean": len(ocean["nodes"])}
 
 
-def run(out: Path, full: bool = False) -> int:
+def run(out: Path, full: bool = False, only: frozenset[str] | None = None) -> int:
     from db.base import db_session
     with db_session() as session:
-        counts = export_site(session, out, full=full)
+        counts = export_site(session, out, full=full, only=only)
     logger.info("Generated %d breakdowns, %d dossiers, %d events, %d ELO rows, %d ocean nodes → %s",
                 counts["breakdowns"], counts["fighters"], counts["events"],
                 counts["elo"], counts["ocean"], out)
@@ -2209,6 +2423,10 @@ def main() -> int:
                     help="ignore the incremental cache and rebuild every page")
     ap.add_argument("--branding-only", action="store_true",
                     help="update branding in existing generated detail pages without the DB")
+    ap.add_argument("--only", metavar="SLUG", nargs="*",
+                    help="PREVIEW: build only these detail-page slugs (breakdown/dossier/event). "
+                         "Pass with no value to build the ocean + globals alone. Requires an "
+                         "explicit --out — the bundle it writes is partial.")
     args = ap.parse_args()
     if args.branding_only:
         if args.out is None:
@@ -2217,7 +2435,12 @@ def main() -> int:
         logger.info("Updated branding in %d/%d generated detail pages → %s",
                     counts["changed"], counts["scanned"], args.out)
         return 0
-    return run(args.out or _DEFAULT_OUT, full=args.full)
+    only = None
+    if args.only is not None:
+        if args.out is None or args.out.resolve() == _DEFAULT_OUT.resolve():
+            ap.error("--only writes a PARTIAL bundle; give it a scratch --out, never the site")
+        only = frozenset(args.only)
+    return run(args.out or _DEFAULT_OUT, full=args.full, only=only)
 
 
 if __name__ == "__main__":

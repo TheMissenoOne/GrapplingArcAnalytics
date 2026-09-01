@@ -1,0 +1,31 @@
+{
+  "cases": [
+    {
+      "case": "apostrophe",
+      "expected_key": "darce",
+      "name": "D'Arce"
+    },
+    {
+      "case": "accented_vowel",
+      "expected_key": "chave de polcia",
+      "name": "Chave de Polícia"
+    },
+    {
+      "case": "digit_and_hyphen",
+      "expected_key": "guarda 5050",
+      "name": "Guarda 50-50"
+    },
+    {
+      "case": "hyphen_only",
+      "expected_key": "xpass",
+      "name": "X-Pass"
+    },
+    {
+      "case": "parenthetical",
+      "expected_key": "chave de p toe hold",
+      "name": "Chave de Pé (Toe Hold)"
+    }
+  ],
+  "contract": "analysis.names._normalize_name(name) == normalizeLabel(name), char-for-char",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_node_key_fixtures.py"
+}

@@ -635,3 +635,257 @@ de quem é.
 - Um ponto `branch-merge` é honesto quanto às rotas (§10.3), mas o olho ainda pode "seguir" uma
   entrada de p1 até uma saída de p2 num traço estático. O que desfaz isso é a seleção (destaque
   atravessa os troncos compartilhados). No bundle do dono não existe nenhum; no corpus são 26.
+
+---
+
+## 11. Fase 5 (2026-09-01) — o port para o App, e o que a paridade encontrou
+
+A camada de dados existia só em Python. Esta fase a espelha no App, com golden para cada peça, e
+fecha os 3 testes cross-repo que estavam vermelhos desde a Fase 2
+(`test_golden_fixture_matches_this_implementation`, `test_app_inference_table_matches_analytics_source`,
+`test_generator_check_flag_is_green`). Espelho curto do lado do App: `GrapplingArcApp/docs/EDGE_AS_PATH.md`.
+
+### 11.1 Os geradores, e a disciplina
+
+| gerador | golden (nos DOIS repos) | espelho no App |
+|---|---|---|
+| `export_taxonomy_kind_fixtures` | `data/rating/taxonomy_kind_golden.json` | `services/taxonomyInference.ts` |
+| `export_chain_compiler_fixtures` (novo) | `data/rating/chain_compiler_golden.json` | `services/chainCompiler.ts` |
+| `export_map_aggregate_fixtures` (novo) | `data/rating/map_aggregate_golden.json` | `services/map/mapAggregate.ts` |
+| `export_path_bundling_fixtures` (novo) | `data/rating/path_bundling_golden.json` | `services/map/pathBundling.ts` |
+| `export_path_metrics_fixtures` (novo) | `data/rating/path_metrics_golden.json` | `services/map/pathMetrics.ts` |
+| `export_flow_layout_fixtures` (novo) | `data/rating/flow_layout_golden.json` | `services/map/flowLayout.ts` |
+| `export_actions_parity_fixtures` (passou a escrever nos dois) | `data/rating/actions_parity_golden.json` | `__tests__/actionsParity.test.ts` |
+| `export_node_key_fixtures` | `data/rating/node_key_golden.json` | `utils/__fixtures__/nodeKeyGolden.json` |
+
+`tests/test_cross_repo_fixtures.py` roda, para cada um, os dois testes que pegam coisas
+diferentes: `--check` verde (o arquivo em disco é o que o código de HOJE gera — pega um golden
+obsoleto) e bytes idênticos nos dois lados (pega uma edição à mão de um lado só).
+
+### 11.2 `orientation_for_inference` no App sem um segundo port de `attribution.py`
+
+O nível 3 da regra é `attribution.classify(...).actor_role` — 74 rótulos curados num módulo
+Python. Em vez de um segundo port deles, o gerador **achata `classify`** em
+`actor_role` (`"tipo|rótulo" -> papel`) + `actor_role_default` (por tipo), dentro do
+`taxonomy_kind_golden.json`, junto com a `state_orientation` verbatim. `classify` é uma função
+PURA de tabelas finitas, então achatar não aproxima nada: as linhas curadas são enumeráveis, e
+cada linha é produzida CHAMANDO `classify`, nunca relendo as tabelas dela nesta ordem — a
+precedência (`_LABEL` > o conjunto curado do tipo > o default do tipo) fica preservada por
+construção. `test_golden_actor_role_block_answers_exactly_like_classify` é o que mantém isso
+honesto. Mesma disciplina de `library_lookup.json`, na direção contrária.
+
+O golden carrega também as **256 leituras compostas** de `orientation_for_inference`
+(`{value, source}`) — o `source` importa tanto quanto o `value`: dois lados podem concordar em
+`top` com um lendo a linha curada e o outro derivando via `attribution`, e no dia em que a linha
+curada mudar eles param de concordar sem nenhum teste dizendo isso.
+
+### 11.3 Três defeitos que a paridade encontrou, todos consertados na RAIZ
+
+1. **`Aggregate.add_edge` lia `actions[0].inferred`** — a dependência de posição que o §5 deste
+   documento registrou como "conhecida, documentada e não consertada". Estava VIVA no bundle do
+   dono: `half guard --[sweep(inferida), knee cut pass(observada)]--> side control` lia
+   "inferida", enquanto o espelho dela
+   `de la riva --[berimbolo(observada), sweep(inferida)]--> back control` lia "observada" — mesmo
+   conteúdo, resposta diferente, só pela ordem. As políticas de gate (`no_inferred_edges`,
+   `inferred_min2`) filtram por esse campo, então a leitura antiga escondia uma observação atrás
+   de uma inferida e derrubava a aresta. Agora: `all(a.inferred for a in e.actions)`.
+2. **`systemDominance.ts` partia a chave de agregação no espaço** (`key.split(' ')`) — o mesmo
+   defeito que `9e61921` consertou só no `mapCollapse.ts`. Um qid É um `node_key` e um `node_key`
+   CONTÉM espaços, então o Louvain recebia fragmentos ("closed", "guard") que não são nós: **toda
+   comunidade detectada em dado multi-palavra estava silenciosamente errada**, e as fixtures
+   escondiam isso usando chaves de uma palavra só. Os endpoints agora viajam NA LINHA.
+3. **O índice de identidade da biblioteca no App usava `getAllNames`**, que também devolve o
+   `type`/`tipo` do nó. Certo para BUSCA, errado para IDENTIDADE: pôs as dez palavras de tipo
+   (`guard`, `control`, `pass`, `sweep`, `submission`, `takedown`, `escape`, `transition`,
+   `defensive`, `concept`) no índice, então um evento com o rótulo literal "Sweep" — 207 deles no
+   corpus — resolvia para a primeira técnica que a biblioteca lista, e `resolveGroup`
+   REESCREVIA o nome e o tipo da entrada para os dela. A Analytics nunca fez isso (`_name_variants`
+   é name + translations + variations): **10 chaves divergentes de 689**, medidas. O App agora
+   espelha `_name_variants`. Achado pelo bloco de sondas de `orientation_for_inference` — que é o
+   teste que mantém o conserto.
+
+### 11.4 Medido
+
+| | |
+|---|---|
+| casos do golden do compilador | 22 de cadeia única + 3 de dois lados, **todos idênticos ao Python na primeira execução** |
+| casos de bundling | 13 (os 5 do dono + as 3 regras + ação repetida + laço + os degenerados), incluindo `walkable_routes` |
+| casos de métricas | 11 |
+| casos de layout | 4 fixtures × 3 estruturas de âncora = 12 conjuntos de posições + 4 de ranks |
+| sondas de orientação | 256 (`{value, source}`), 0 divergências depois do conserto 11.3.3 |
+| P1 sobre o `mock_user_bundle` | multiconjunto `(action_key, actor, inferred)` **idêntico** nos dois repos |
+| agregado sobre o `mock_user_bundle` | 13 estados, 21 arestas, 17 handovers — **idênticos** nos dois repos |
+| suíte Analytics | 2398 passed, 1 skipped; ruff e mypy limpos |
+| suíte App | 3004 passed, 304 suites; lint, tsc e `build-editor --check` limpos |
+
+### 11.5 Fora de escopo, por instrução
+
+Nenhuma tela e nenhum renderizador. `mapScreenViewModel` emite `mapActions: string[]` (o canal
+novo) e mantém `mapLabel` como uma ponte DERIVADA (o mesmo array unido) porque os dois
+renderizadores de aresta de hoje desenham uma string por arco; a onda das telas apaga `mapLabel`.
+Nada de Lamas/Markov/Glicko foi tocado — `test_p2_observations_for_side_is_byte_identical_pinned`
+continua verde e é a prova disso.
+
+---
+
+## 12. Onda A (2026-09-01) — os mapas do site público sobre o compilador
+
+Os três displays de mapa do site (`the-ocean.html`, `grapple-*.html`, `breakdown-*.html`) passam
+a desenhar o modelo "aresta = caminho". Derivação nova, renderizador novo, **contrato aditivo**:
+nenhum payload antigo mudou de forma.
+
+### 12.1 Derivação — `analysis/corpus_paths.py` (arquivo novo)
+
+Porta de entrada separada da do protótipo, de propósito. `scripts/render_map_prototypes.py`
+agrega `you`/`partner` do bundle PRIVADO do dono; o site agrega dois atletas REAIS de uma
+`matches.sequence` pública. Os três módulos de análise embaixo são os mesmos
+(`chain_compiler` → `path_bundling` → `path_metrics`/`flow_layout`); o que difere é o modelo de
+ator e a regra de perspectiva — exatamente as duas coisas que **não** podem ser compartilhadas
+entre um bundle privado e um artefato público.
+
+```
+aggregate_bouts(bouts, collapse_actors=False) -> PathAggregate   # camada 1
+render_paths(agg)                             -> [RenderPath]     # camada 2
+path_payload(agg, structure=…, min_count=1)   -> {nodes,links,paths,stats}   # camadas 3+4
+```
+
+| escopo | entrada | ator |
+|---|---|---|
+| breakdown | a luta, dois lados (`_sequence_view`) | `a`/`b` qualificados — a montada dela não é a dele |
+| dossiê | só os eventos DELE, em todas as lutas (`_athlete_path_graph`) | um lado só |
+| oceano | o corpus inteiro (`_corpus_bouts`) | **colapsado** — o oceano é o espaço técnico do corpus, e a montada de A e a de B são o mesmo fato |
+
+Regras herdadas do protótipo e reimplementadas aqui: a âncora do lado `b` é espelhada
+(`_perspective_key`) para o mapa ter **um** eixo vertical; âncoras e genéricos `shared` nunca são
+qualificados por ator; `_index_parallel_links` abre em leque duas arestas entre o mesmo par.
+
+Duas coisas que o lado do site precisou e o protótipo não: **rótulo em inglês** (o
+`inference_table.json` nomeia os genéricos em pt-BR, que é a locale do App — a `action_key` dos
+genéricos já É o nome em inglês, então title-case da chave é a tradução, sem segunda tabela para
+divergir), e o **timestamp do vídeo na AÇÃO** (uma ação é o que aconteceu num instante, e neste
+modelo a ação mora na aresta — então o seek do breakdown pendura em `link.ts`, não no nó).
+
+### 12.2 Custo — medido, não estimado (742 lutas finais, 10 016 eventos)
+
+| | tempo |
+|---|---|
+| compilar + agregar o corpus inteiro | **0,33 s** |
+| `path_payload` do oceano (bundling + layout) | **0,91 s** |
+| os 642 atletas, um payload cada | **1,6 s** |
+| uma luta (a maior, 84 eventos) | **0,01 s** |
+
+Nada aqui é o gargalo. O `build_ocean` que roda ao lado custa ~300 s e é anterior a este
+trabalho. Peso do oceano em bytes: 1,66 MB cru / **104 KB gzipped** (o Pages serve gzip).
+
+### 12.3 O único gate, e por que ele só existe no oceano
+
+Sem gate o corpus desenha **2 370 caminhos sobre 221 pontos**, e o `flow_layout` empilha **139
+deles no MESMO rank** — um mundo de 2 700 × 22 200, aspecto 8,2, ilegível em qualquer zoom. Com
+`min_count=2` (o caminho tem de ter acontecido pelo menos duas vezes): 52 pontos, 396 traços,
+aspecto 2,3 — a mesma ordem do mapa de força que ele substitui (68 nós / 964 arestas).
+
+O custo está declarado, não escondido: caem as ocorrências únicas e com elas quase todas as
+trilhas longas (tinta compartilhada 14,6% → 5,5%). Essa é a linha editorial **só aqui** — o
+oceano sempre publicou um "top slice", e uma trilha vista uma vez em 742 lutas é uma anedota
+sobre o corpus. O dossiê e o breakdown são afirmações sobre UM atleta e UMA luta, então nenhum
+dos dois é gateado: lá a ocorrência única é o assunto.
+
+⚠️ **Gates que foram medidos e recusados**: suporte da RELAÇÃO (`>=5` ainda deixa 1 741
+caminhos), top-K estados (`K=20` deixa 1 851 — os caminhos são muitos entre poucos estados),
+`count>=2 or length>=3` (1 111). Nenhum resolve a densidade sem virar arbitrário.
+
+### 12.4 Teto conhecido — `flow_layout` não escala para um grafo denso
+
+Diagnóstico medido: no corpus só 3 pontos (de 221) têm grau de entrada 0, e a BFS multi-fonte
+sai deles e alcança quase tudo em 1–2 saltos. Um layout em camadas então não tem o que
+estratificar: 9 ranks, um deles com 139 nós. O layout está certo para um grafo em forma de
+CADEIA (a luta, o dossiê — as capturas mostram os dois lendo bem); o oceano ganha uma moldura
+legível mas não um fluxo.
+
+Correção sugerida, **não aplicada** (é `analysis/flow_layout.py`, de outro dono): semear os ranks
+nas **âncoras**, que são as fontes e os sorvedouros semânticos e hoje ficam de fora da grade
+(`free = [p for p in ids if p not in anchor_slots]`).
+
+### 12.5 Renderizador — `GAGraph.mountPaths` em `GrapplingArc/site/graph.js`
+
+Uma SEGUNDA entrada, deliberadamente não uma flag no `mount()`. O payload já vem posicionado, e
+a simulação de forças não é só desnecessária aqui, é antagônica — a variante 13 do protótipo
+precisa desligá-la com `charge:0/linkDist:1/gravity:0/bounded:false/collide:false` e fixar todo
+nó. Um grafo estático também não precisa de laço de animação: `mountPaths` desenha sob demanda
+(resize, pan, zoom, seleção), que é o que torna 2 400 traços viáveis num celular.
+
+Três consequências que valem mais que a economia de linhas:
+
+1. **A retrocompatibilidade vira estrutural.** `git diff site/graph.js` tem exatamente dois
+   hunks: uma inserção depois do fim de `mount()` e a linha do `global.GAGraph = {…}`. **Zero
+   linhas dentro de `mount()` mudaram** — logo todo hero/card/dossiê/breakdown/oceano antigo
+   desenha idêntico, e isso é uma prova, não uma alegação.
+2. **`scripts/render_map_prototypes.py:_patch_graph_js` continua funcionando.** Ele aplica ~20
+   patches por âncora de string EXATA no `site/graph.js` real, e `tests/test_render_map_prototypes.py`
+   roda isso contra o arquivo de verdade. Portar as features para dentro do `mount()` teria
+   quebrado 8 dessas âncoras (o loop de links, `fitTarget`, a linha do raio, a do `dim`, a do
+   `mapLabel`, o par do preenchimento, o handler de clique) e deixado a suíte vermelha.
+3. `GrapplingArcWeb/src/vendor/graph.js` (cópia vendorizada) não diverge no caminho comum.
+
+Features portadas da variante 13: posições fixas (`n.pin`), losango de âncora, preenchimento
+partido (`n.split`), ponto de andaime (`n.junction`), curva quadrática com leque paralelo
+(`par`/`parCount`) e arco de retorno (`bow`/`back`), rótulo por segmento (`l.label`/`l.actions`),
+tracejado do fantasma (`l.inf`), realce explícito por `pathIds`, `minZoom`, seleção de aresta.
+
+Quatro correções que o dado real forçou e o protótipo não tinha visto (todas medidas em captura
+headless 1280×800 e 390×840):
+
+- **Rótulo em espaço de tela, não de mundo.** O raio do nó encolhe com o zoom, o texto não: um
+  deslocamento em unidades de mundo enterra o rótulo dentro do nó assim que o mapa é ajustado
+  (o fit de um mapa posicionado é ~0,3, nunca 1,0). O mesmo vale para o anel de seleção.
+- **Nenhum gate de zoom em rótulo.** Com `cam.k >= 0.85` um mapa de 6 nós saía com DOIS rótulos.
+  Todos são oferecidos e a passada de prioridade + colisão decide (nó antes de aresta, âncora
+  antes de estado).
+- **Rótulo de ação ACIMA do traço, de nó ABAIXO do nó.** Numa cadeia horizontal — que é o que um
+  layout de fluxo produz — os dois caem na mesma linha e os de nó, colocados primeiro, comiam
+  toda ação.
+- **A reserva de margem do fit tem teto.** "Scissor Sweep → Guard Pull → Scissor Sweep → Single
+  Leg Takedown" tem ~420 px; num telefone de 390 px isso reserva mais margem do que existe tela e
+  colapsa o mapa a uma miniatura.
+
+Mobile: fit sobre os limites reais (raio + rótulo), **orientação vertical** quando a tela é alta
+e o fluxo é largo (troca de coordenadas, não segundo layout), `touch-action: pan-y` (nunca
+`none` — a tela vira armadilha de scroll), pinça, e `inset` para o mapa não ser centrado
+embaixo do HUD flutuante do oceano.
+
+### 12.6 Prova
+
+| peça | prova |
+|---|---|
+| nenhuma rota fantasma | `tests/test_corpus_paths.py::test_no_phantom_route_over_a_corpus_shaped_aggregate` — `walkable_routes()` == entrada, sobre o agregado que o exportador realmente monta |
+| determinismo | dois runs + ordem de entrada trocada, JSON idêntico (o bundle é COMMITADO) |
+| dado privado nunca entra | teste de AST: `analysis/corpus_paths.py` não importa nada de `db.` nem de `schemas.app_types`; `_corpus_bouts`/`_athlete_path_graph` leem `Match.sequence` e nenhum campo de posse de grafo |
+| forma do payload | `pathIds` não vazio em todo traço, `actions[]` presente, todo nó fixado, âncoras dentro do vocabulário |
+| pt-BR não vaza | asserção explícita sobre o JSON inteiro |
+| ids do bundle | `scripts/check_site_bundle.py` (Q1) agora cobre `GA_OCEAN.pathGraph` — `stateKey` e chave de ação contra as DUAS canonizações do repo (com e sem `clean_label`), com os genéricos da tabela excluídos |
+| retrocompatibilidade | `git diff site/graph.js` = 2 hunks, nenhum dentro de `mount()`; `mount()` legado remontado em headless |
+| protótipo intacto | `tests/test_render_map_prototypes.py` 46 passed |
+| suíte | 2407 passed, 1 skipped; ruff e mypy limpos |
+
+### 12.7 Modo de preview do exportador
+
+`uv run python -m export.site_data --out <scratch> --only <slug> …` constrói e renderiza só
+aquelas páginas de detalhe. Existe porque um run completo é o N+1 de ~10–12 min sobre o Supabase
+remoto (skill `site-export-perf-campaign`) e iterar num renderizador contra esse laço não é
+viável. Os globais que ele escreve são PARCIAIS por construção, então `main()` recusa apontá-lo
+para o diretório do site de verdade, e ele usa `.export_cache/preview/` — um preview jamais pode
+substituir o cache compartilhado por meia dúzia de itens e transformar o próximo export real num
+run frio.
+
+`BREAKDOWN_VERSION` / `DOSSIER_VERSION`: o `item_hash` cobre os campos de DB do item, que é o
+contrato certo para DADO — mas uma mudança de CÓDIGO que acrescenta uma chave (`path_graph`)
+deixa todo item em cache válido e silenciosamente sem ela, e o renderizador cai no fallback no
+corpus inteiro. Mesmo precedente do `PROFILE_VERSION`.
+
+### 12.8 Fora de escopo
+
+`strength` sai `null` no site: o `rating_of` é injetável e nenhum dos três chamadores tem os
+ratings Glicko por nó à mão sem um N+1 novo. `GrapplingArcWeb/src/vendor/graph.js` continua na
+cópia antiga (item de backlog: re-vendorizar). Os cards pequenos das páginas escritas à mão
+(`index.html`, `breakdowns.html`, `grapple-like.html`) seguem no `graph` legado — são arte
+ambiente, e o payload novo é aditivo justamente para não os tocar.

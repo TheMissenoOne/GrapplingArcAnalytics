@@ -1,41 +1,41 @@
 {
- "generated": "2026-08-25",
- "source": "technique_nodes on prod, alembic 0048",
+ "generated": "2026-09-01",
+ "source": "technique_nodes on prod, alembic 0051",
  "node_count": 376,
  "attested_in_corpus": 283,
  "how_a_label_becomes_a_node": "label -> analysis.names._normalize_name (lowercase, strip punctuation and accents, collapse whitespace) -> canonicalize (the `synonyms` map below) -> node_key. Prefer a `label` from this file verbatim. A label that normalises to a key not listed here mints a new node instead of failing, which is how one technique ends up split across two spellings.",
  "event_types": [
   {
    "type": "control",
-   "corpus_events": 3279
+   "corpus_events": 3259
   },
   {
    "type": "submission",
-   "corpus_events": 2399
+   "corpus_events": 2395
   },
   {
    "type": "guard",
-   "corpus_events": 1462
+   "corpus_events": 1459
   },
   {
    "type": "takedown",
-   "corpus_events": 1187
+   "corpus_events": 1180
   },
   {
    "type": "pass",
-   "corpus_events": 518
+   "corpus_events": 520
   },
   {
    "type": "transition",
-   "corpus_events": 446
+   "corpus_events": 450
   },
   {
    "type": "sweep",
-   "corpus_events": 402
+   "corpus_events": 395
   },
   {
    "type": "escape",
-   "corpus_events": 348
+   "corpus_events": 349
   }
  ],
  "synonyms": {
@@ -63,7 +63,7 @@
    "type": "control",
    "node_type": "control",
    "taxonomy_id": null,
-   "corpus_events": 1964
+   "corpus_events": 1950
   },
   {
    "key": "triangle choke",
@@ -71,7 +71,7 @@
    "type": "technique",
    "node_type": "submission",
    "taxonomy_id": null,
-   "corpus_events": 541
+   "corpus_events": 539
   },
   {
    "key": "half guard",
@@ -79,7 +79,7 @@
    "type": "technique",
    "node_type": "guard",
    "taxonomy_id": "half-guard",
-   "corpus_events": 518
+   "corpus_events": 510
   },
   {
    "key": "mount",
@@ -87,7 +87,7 @@
    "type": "control",
    "node_type": "control",
    "taxonomy_id": null,
-   "corpus_events": 485
+   "corpus_events": 478
   },
   {
    "key": "sweep",
@@ -95,7 +95,7 @@
    "type": "technique",
    "node_type": "sweep",
    "taxonomy_id": "sweep",
-   "corpus_events": 315
+   "corpus_events": 309
   },
   {
    "key": "single leg takedown",
@@ -103,7 +103,7 @@
    "type": "takedown",
    "node_type": "takedown",
    "taxonomy_id": null,
-   "corpus_events": 293
+   "corpus_events": 289
   },
   {
    "key": "double leg takedown",
@@ -119,7 +119,7 @@
    "type": "technique",
    "node_type": "submission",
    "taxonomy_id": "arm-lock",
-   "corpus_events": 225
+   "corpus_events": 224
   },
   {
    "key": "guillotine choke",
@@ -127,7 +127,7 @@
    "type": "technique",
    "node_type": "submission",
    "taxonomy_id": null,
-   "corpus_events": 222
+   "corpus_events": 220
   },
   {
    "key": "arm drag",
@@ -135,7 +135,7 @@
    "type": "technique",
    "node_type": "concept",
    "taxonomy_id": null,
-   "corpus_events": 213
+   "corpus_events": 212
   },
   {
    "key": "guard pull",
@@ -143,7 +143,7 @@
    "type": "technique",
    "node_type": "transition",
    "taxonomy_id": null,
-   "corpus_events": 205
+   "corpus_events": 209
   },
   {
    "key": "foot lock",
@@ -159,7 +159,7 @@
    "type": "technique",
    "node_type": "submission",
    "taxonomy_id": "leg-lock",
-   "corpus_events": 176
+   "corpus_events": 175
   },
   {
    "key": "butterfly guard",
@@ -175,7 +175,7 @@
    "type": "technique",
    "node_type": "pass",
    "taxonomy_id": null,
-   "corpus_events": 162
+   "corpus_events": 164
   },
   {
    "key": "closed guard",
@@ -183,7 +183,7 @@
    "type": "technique",
    "node_type": "guard",
    "taxonomy_id": "closed-guard",
-   "corpus_events": 146
+   "corpus_events": 145
   },
   {
    "key": "front headlock",
@@ -191,7 +191,7 @@
    "type": "technique",
    "node_type": "control",
    "taxonomy_id": "front-headlock-control",
-   "corpus_events": 139
+   "corpus_events": 137
   },
   {
    "key": "takedown",
@@ -207,7 +207,7 @@
    "type": "technique",
    "node_type": "control",
    "taxonomy_id": null,
-   "corpus_events": 129
+   "corpus_events": 127
   },
   {
    "key": "straight ankle lock",
@@ -231,7 +231,7 @@
    "type": "technique",
    "node_type": "control",
    "taxonomy_id": null,
-   "corpus_events": 113
+   "corpus_events": 114
   },
   {
    "key": "finish",
@@ -287,7 +287,7 @@
    "type": "technique",
    "node_type": "transition",
    "taxonomy_id": "stand-up",
-   "corpus_events": 81
+   "corpus_events": 83
   },
   {
    "key": "5050 guard",
@@ -303,7 +303,7 @@
    "type": "technique",
    "node_type": "takedown",
    "taxonomy_id": "foot-sweep-trip-reap-ashi-waza",
-   "corpus_events": 79
+   "corpus_events": 78
   },
   {
    "key": "turtle position",
@@ -311,7 +311,7 @@
    "type": "technique",
    "node_type": "escape",
    "taxonomy_id": null,
-   "corpus_events": 75
+   "corpus_events": 73
   },
   {
    "key": "body lock",
@@ -322,19 +322,19 @@
    "corpus_events": 68
   },
   {
-   "key": "deep half guard",
-   "label": "Deep Half Guard",
-   "type": "technique",
-   "node_type": "guard",
-   "taxonomy_id": null,
-   "corpus_events": 65
-  },
-  {
    "key": "submission",
    "label": "Submission",
    "type": "technique",
    "node_type": "submission",
    "taxonomy_id": "submission",
+   "corpus_events": 66
+  },
+  {
+   "key": "deep half guard",
+   "label": "Deep Half Guard",
+   "type": "technique",
+   "node_type": "guard",
+   "taxonomy_id": null,
    "corpus_events": 65
   },
   {
@@ -359,7 +359,7 @@
    "type": "technique",
    "node_type": "escape",
    "taxonomy_id": null,
-   "corpus_events": 51
+   "corpus_events": 52
   },
   {
    "key": "toe hold",
@@ -391,7 +391,7 @@
    "type": "takedown",
    "node_type": "takedown",
    "taxonomy_id": null,
-   "corpus_events": 46
+   "corpus_events": 47
   },
   {
    "key": "smash pass",
@@ -402,20 +402,20 @@
    "corpus_events": 43
   },
   {
-   "key": "snap down",
-   "label": "Snap Down",
-   "type": "technique",
-   "node_type": "takedown",
-   "taxonomy_id": "snap-down",
-   "corpus_events": 42
-  },
-  {
    "key": "collar tie",
    "label": "Collar Tie",
    "type": "technique",
    "node_type": "control",
    "taxonomy_id": null,
-   "corpus_events": 41
+   "corpus_events": 42
+  },
+  {
+   "key": "snap down",
+   "label": "Snap Down",
+   "type": "technique",
+   "node_type": "takedown",
+   "taxonomy_id": "snap-down",
+   "corpus_events": 40
   },
   {
    "key": "stack pass",
@@ -442,6 +442,14 @@
    "corpus_events": 35
   },
   {
+   "key": "leg entanglement",
+   "label": "Leg Entanglement",
+   "type": "technique",
+   "node_type": "guard",
+   "taxonomy_id": null,
+   "corpus_events": 35
+  },
+  {
    "key": "saddle inside sankaku",
    "label": "Saddle (Inside Sankaku)",
    "type": "technique",
@@ -455,14 +463,6 @@
    "type": "technique",
    "node_type": "escape",
    "taxonomy_id": "guard-recovery",
-   "corpus_events": 34
-  },
-  {
-   "key": "leg entanglement",
-   "label": "Leg Entanglement",
-   "type": "technique",
-   "node_type": "guard",
-   "taxonomy_id": null,
    "corpus_events": 34
   },
   {
@@ -522,6 +522,14 @@
    "corpus_events": 28
   },
   {
+   "key": "open guard",
+   "label": "Open Guard",
+   "type": "technique",
+   "node_type": "guard",
+   "taxonomy_id": "open-guard",
+   "corpus_events": 27
+  },
+  {
    "key": "uchi mata",
    "label": "Uchi Mata",
    "type": "technique",
@@ -535,14 +543,6 @@
    "type": "technique",
    "node_type": "submission",
    "taxonomy_id": null,
-   "corpus_events": 26
-  },
-  {
-   "key": "open guard",
-   "label": "Open Guard",
-   "type": "technique",
-   "node_type": "guard",
-   "taxonomy_id": "open-guard",
    "corpus_events": 26
   },
   {
@@ -578,20 +578,20 @@
    "corpus_events": 23
   },
   {
-   "key": "reversal",
-   "label": "Reversal",
-   "type": "technique",
-   "node_type": "sweep",
-   "taxonomy_id": "reversal",
-   "corpus_events": 22
-  },
-  {
    "key": "single leg x",
    "label": "Single Leg X",
    "type": "technique",
    "node_type": "guard",
    "taxonomy_id": null,
    "corpus_events": 22
+  },
+  {
+   "key": "reversal",
+   "label": "Reversal",
+   "type": "technique",
+   "node_type": "sweep",
+   "taxonomy_id": "reversal",
+   "corpus_events": 21
   },
   {
    "key": "twister",
@@ -626,6 +626,14 @@
    "corpus_events": 20
   },
   {
+   "key": "back take",
+   "label": "Back Take",
+   "type": "technique",
+   "node_type": "transition",
+   "taxonomy_id": "back-take",
+   "corpus_events": 19
+  },
+  {
    "key": "double under pass",
    "label": "Double Under Pass",
    "type": "technique",
@@ -640,22 +648,6 @@
    "node_type": "transition",
    "taxonomy_id": null,
    "corpus_events": 19
-  },
-  {
-   "key": "back take",
-   "label": "Back Take",
-   "type": "technique",
-   "node_type": "transition",
-   "taxonomy_id": "back-take",
-   "corpus_events": 18
-  },
-  {
-   "key": "hooks in",
-   "label": "Hooks In",
-   "type": "technique",
-   "node_type": "control",
-   "taxonomy_id": null,
-   "corpus_events": 18
   },
   {
    "key": "worm guard",
@@ -674,11 +666,27 @@
    "corpus_events": 17
   },
   {
+   "key": "hooks in",
+   "label": "Hooks In",
+   "type": "technique",
+   "node_type": "control",
+   "taxonomy_id": null,
+   "corpus_events": 17
+  },
+  {
    "key": "inverted triangle",
    "label": "Inverted Triangle",
    "type": "technique",
    "node_type": "submission",
    "taxonomy_id": null,
+   "corpus_events": 17
+  },
+  {
+   "key": "leg lock",
+   "label": "Leg Lock",
+   "type": "technique",
+   "node_type": "submission",
+   "taxonomy_id": "leg-lock",
    "corpus_events": 17
   },
   {
@@ -695,14 +703,6 @@
    "type": "technique",
    "node_type": "takedown",
    "taxonomy_id": null,
-   "corpus_events": 16
-  },
-  {
-   "key": "leg lock",
-   "label": "Leg Lock",
-   "type": "technique",
-   "node_type": "submission",
-   "taxonomy_id": "leg-lock",
    "corpus_events": 16
   },
   {
@@ -778,8 +778,8 @@
    "corpus_events": 13
   },
   {
-   "key": "shin to shin guard",
-   "label": "Shin to Shin Guard",
+   "key": "seated guard",
+   "label": "Seated Guard",
    "type": "technique",
    "node_type": "guard",
    "taxonomy_id": null,
@@ -810,8 +810,8 @@
    "corpus_events": 12
   },
   {
-   "key": "seated guard",
-   "label": "Seated Guard",
+   "key": "shin to shin guard",
+   "label": "Shin to Shin Guard",
    "type": "technique",
    "node_type": "guard",
    "taxonomy_id": null,
@@ -824,14 +824,6 @@
    "node_type": "transition",
    "taxonomy_id": null,
    "corpus_events": 12
-  },
-  {
-   "key": "leg drag to straddle",
-   "label": "Leg Drag to Straddle",
-   "type": "technique",
-   "node_type": "pass",
-   "taxonomy_id": null,
-   "corpus_events": 11
   },
   {
    "key": "leg entry",
@@ -890,8 +882,24 @@
    "corpus_events": 10
   },
   {
+   "key": "leg drag to straddle",
+   "label": "Leg Drag to Straddle",
+   "type": "technique",
+   "node_type": "pass",
+   "taxonomy_id": null,
+   "corpus_events": 9
+  },
+  {
    "key": "top control half guard",
    "label": "Top Control (Half Guard)",
+   "type": "technique",
+   "node_type": "control",
+   "taxonomy_id": null,
+   "corpus_events": 9
+  },
+  {
+   "key": "turtle control",
+   "label": "Turtle Control",
    "type": "technique",
    "node_type": "control",
    "taxonomy_id": null,
@@ -930,10 +938,10 @@
    "corpus_events": 8
   },
   {
-   "key": "turtle control",
-   "label": "Turtle Control",
+   "key": "inversion",
+   "label": "Inversion",
    "type": "technique",
-   "node_type": "control",
+   "node_type": "guard",
    "taxonomy_id": null,
    "corpus_events": 8
   },
@@ -943,14 +951,6 @@
    "type": "technique",
    "node_type": "pass",
    "taxonomy_id": "half-guard-pass",
-   "corpus_events": 7
-  },
-  {
-   "key": "inversion",
-   "label": "Inversion",
-   "type": "technique",
-   "node_type": "guard",
-   "taxonomy_id": null,
    "corpus_events": 7
   },
   {
@@ -978,11 +978,27 @@
    "corpus_events": 7
   },
   {
+   "key": "clinch",
+   "label": "Clinch",
+   "type": "technique",
+   "node_type": "transition",
+   "taxonomy_id": null,
+   "corpus_events": 6
+  },
+  {
    "key": "de la riva guard",
    "label": "De La Riva Guard",
    "type": "guard",
    "node_type": "guard",
    "taxonomy_id": null,
+   "corpus_events": 6
+  },
+  {
+   "key": "guard",
+   "label": "Guard",
+   "type": "technique",
+   "node_type": "guard",
+   "taxonomy_id": "guard",
    "corpus_events": 6
   },
   {
@@ -1042,14 +1058,6 @@
    "corpus_events": 6
   },
   {
-   "key": "clinch",
-   "label": "Clinch",
-   "type": "technique",
-   "node_type": "transition",
-   "taxonomy_id": null,
-   "corpus_events": 5
-  },
-  {
    "key": "double underhooks",
    "label": "Double Underhooks",
    "type": "technique",
@@ -1074,18 +1082,18 @@
    "corpus_events": 5
   },
   {
-   "key": "guard",
-   "label": "Guard",
-   "type": "technique",
-   "node_type": "guard",
-   "taxonomy_id": "guard",
-   "corpus_events": 5
-  },
-  {
    "key": "inverted de la riva guard",
    "label": "Inverted De La Riva Guard",
    "type": "technique",
    "node_type": "guard",
+   "taxonomy_id": null,
+   "corpus_events": 5
+  },
+  {
+   "key": "leg entanglement entry",
+   "label": "Leg Entanglement Entry",
+   "type": "technique",
+   "node_type": "transition",
    "taxonomy_id": null,
    "corpus_events": 5
   },
@@ -1210,6 +1218,14 @@
    "corpus_events": 4
   },
   {
+   "key": "wrestleup",
+   "label": "Wrestle-Up",
+   "type": "technique",
+   "node_type": "transition",
+   "taxonomy_id": null,
+   "corpus_events": 4
+  },
+  {
    "key": "bow and arrow choke",
    "label": "Bow and Arrow Choke",
    "type": "technique",
@@ -1306,10 +1322,10 @@
    "corpus_events": 3
   },
   {
-   "key": "leg entanglement entry",
-   "label": "Leg Entanglement Entry",
+   "key": "leg lock escape",
+   "label": "Leg Lock Escape",
    "type": "technique",
-   "node_type": "transition",
+   "node_type": "escape",
    "taxonomy_id": null,
    "corpus_events": 3
   },
@@ -1390,14 +1406,6 @@
    "label": "Two-on-One Control",
    "type": "technique",
    "node_type": "control",
-   "taxonomy_id": null,
-   "corpus_events": 3
-  },
-  {
-   "key": "wrestleup",
-   "label": "Wrestle-Up",
-   "type": "technique",
-   "node_type": "transition",
    "taxonomy_id": null,
    "corpus_events": 3
   },
@@ -1546,14 +1554,6 @@
    "corpus_events": 2
   },
   {
-   "key": "leg lock escape",
-   "label": "Leg Lock Escape",
-   "type": "technique",
-   "node_type": "escape",
-   "taxonomy_id": null,
-   "corpus_events": 2
-  },
-  {
    "key": "leg staple pass",
    "label": "Leg Staple Pass",
    "type": "technique",
@@ -1622,6 +1622,14 @@
    "label": "Snap‑down Go‑behind Takedown",
    "type": "technique",
    "node_type": "takedown",
+   "taxonomy_id": null,
+   "corpus_events": 2
+  },
+  {
+   "key": "sprawl",
+   "label": "Sprawl",
+   "type": "technique",
+   "node_type": "defensive",
    "taxonomy_id": null,
    "corpus_events": 2
   },
@@ -2214,14 +2222,6 @@
    "label": "Smash Half Guard",
    "type": "technique",
    "node_type": "pass",
-   "taxonomy_id": null,
-   "corpus_events": 1
-  },
-  {
-   "key": "sprawl",
-   "label": "Sprawl",
-   "type": "technique",
-   "node_type": "defensive",
    "taxonomy_id": null,
    "corpus_events": 1
   },

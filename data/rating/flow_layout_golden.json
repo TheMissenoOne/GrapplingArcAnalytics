@@ -1,0 +1,799 @@
+{
+  "anchor_structures": {
+    "losango": {
+      "angles": {
+        "bottom": -90.0,
+        "finish": 0.0,
+        "neutral": 180.0,
+        "top": 90.0
+      },
+      "unified_finish": true,
+      "units": {
+        "bottom": [
+          0.0,
+          1.0
+        ],
+        "finish": [
+          1.0,
+          0.0
+        ],
+        "neutral": [
+          -1.0,
+          0.0
+        ],
+        "top": [
+          0.0,
+          -1.0
+        ]
+      }
+    },
+    "pentagono": {
+      "angles": {
+        "bottom": -108.0,
+        "finish_opp": -36.0,
+        "finish_you": 36.0,
+        "neutral": 180.0,
+        "top": 108.0
+      },
+      "unified_finish": false,
+      "units": {
+        "bottom": [
+          -0.309016994375,
+          0.951056516295
+        ],
+        "finish_opp": [
+          0.809016994375,
+          0.587785252292
+        ],
+        "finish_you": [
+          0.809016994375,
+          -0.587785252292
+        ],
+        "neutral": [
+          -1.0,
+          0.0
+        ],
+        "top": [
+          -0.309016994375,
+          -0.951056516295
+        ]
+      }
+    },
+    "triangulo": {
+      "angles": {
+        "bottom": -150.0,
+        "finish": 0.0,
+        "neutral": 180.0,
+        "top": 150.0
+      },
+      "unified_finish": true,
+      "units": {
+        "bottom": [
+          -0.866025403784,
+          0.5
+        ],
+        "finish": [
+          1.0,
+          0.0
+        ],
+        "neutral": [
+          -1.0,
+          0.0
+        ],
+        "top": [
+          -0.866025403784,
+          -0.5
+        ]
+      }
+    }
+  },
+  "cases": [
+    {
+      "bundled": {
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "1"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:B"
+          },
+          {
+            "actions": [
+              "2"
+            ],
+            "from_point": "s:B",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:C"
+          }
+        ]
+      },
+      "name": "linear",
+      "paths": [
+        {
+          "actions": [
+            "1"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "B"
+        },
+        {
+          "actions": [
+            "2"
+          ],
+          "path_id": "p2",
+          "source": "B",
+          "target": "C"
+        }
+      ],
+      "ranks": {
+        "s:A": 0,
+        "s:B": 1,
+        "s:C": 2
+      },
+      "structures": {
+        "losango": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              0.0
+            ],
+            "s:C": [
+              600.0,
+              0.0
+            ]
+          }
+        },
+        "pentagono": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              0.0
+            ],
+            "s:C": [
+              600.0,
+              0.0
+            ]
+          }
+        },
+        "triangulo": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              0.0
+            ],
+            "s:C": [
+              600.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "weight": {
+        "s:A": 1.0,
+        "s:B": 2.0,
+        "s:C": 1.0
+      },
+      "why": "cadeia trivial A->B->C: ranks 0,1,2 e uma linha só"
+    },
+    {
+      "bundled": {
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:D",
+            "kind": "state",
+            "state_key": "D"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "1"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:B"
+          },
+          {
+            "actions": [
+              "2"
+            ],
+            "from_point": "s:A",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "3"
+            ],
+            "from_point": "s:B",
+            "id": "g:2",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:D"
+          },
+          {
+            "actions": [
+              "4"
+            ],
+            "from_point": "s:C",
+            "id": "g:3",
+            "path_ids": [
+              "p4"
+            ],
+            "to_point": "s:D"
+          }
+        ]
+      },
+      "name": "fork_merge",
+      "paths": [
+        {
+          "actions": [
+            "1"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "B"
+        },
+        {
+          "actions": [
+            "2"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "3"
+          ],
+          "path_id": "p3",
+          "source": "B",
+          "target": "D"
+        },
+        {
+          "actions": [
+            "4"
+          ],
+          "path_id": "p4",
+          "source": "C",
+          "target": "D"
+        }
+      ],
+      "ranks": {
+        "s:A": 0,
+        "s:B": 1,
+        "s:C": 1,
+        "s:D": 2
+      },
+      "structures": {
+        "losango": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              -65.0
+            ],
+            "s:C": [
+              300.0,
+              65.0
+            ],
+            "s:D": [
+              600.0,
+              0.0
+            ]
+          }
+        },
+        "pentagono": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              -65.0
+            ],
+            "s:C": [
+              300.0,
+              65.0
+            ],
+            "s:D": [
+              600.0,
+              0.0
+            ]
+          }
+        },
+        "triangulo": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              -65.0
+            ],
+            "s:C": [
+              300.0,
+              65.0
+            ],
+            "s:D": [
+              600.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "weight": {
+        "s:A": 2.0,
+        "s:B": 2.0,
+        "s:C": 2.0,
+        "s:D": 2.0
+      },
+      "why": "bifurca em A e reconverge em D — onde as duas varreduras de baricentro têm de bater"
+    },
+    {
+      "bundled": {
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "1"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:B"
+          },
+          {
+            "actions": [
+              "2"
+            ],
+            "from_point": "s:B",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "3"
+            ],
+            "from_point": "s:C",
+            "id": "g:2",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:A"
+          }
+        ]
+      },
+      "name": "cycle",
+      "paths": [
+        {
+          "actions": [
+            "1"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "B"
+        },
+        {
+          "actions": [
+            "2"
+          ],
+          "path_id": "p2",
+          "source": "B",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "3"
+          ],
+          "path_id": "p3",
+          "source": "C",
+          "target": "A"
+        }
+      ],
+      "ranks": {
+        "s:A": 0,
+        "s:B": 1,
+        "s:C": 2
+      },
+      "structures": {
+        "losango": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              0.0
+            ],
+            "s:C": [
+              600.0,
+              0.0
+            ]
+          }
+        },
+        "pentagono": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              0.0
+            ],
+            "s:C": [
+              600.0,
+              0.0
+            ]
+          }
+        },
+        "triangulo": {
+          "anchor_slots": {},
+          "positions": {
+            "s:A": [
+              0.0,
+              0.0
+            ],
+            "s:B": [
+              300.0,
+              0.0
+            ],
+            "s:C": [
+              600.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "weight": {
+        "s:A": 2.0,
+        "s:B": 2.0,
+        "s:C": 2.0
+      },
+      "why": "volta fechada A->B->C->A: NENHUM ponto tem grau de entrada 0, então flow_ranks cai na própria semente e o visited-set é o que impede o laço infinito"
+    },
+    {
+      "bundled": {
+        "points": [
+          {
+            "id": "s:start neutral",
+            "kind": "state",
+            "state_key": "start neutral"
+          },
+          {
+            "id": "s:mount",
+            "kind": "state",
+            "state_key": "mount"
+          },
+          {
+            "id": "s:finish",
+            "kind": "state",
+            "state_key": "finish"
+          },
+          {
+            "id": "s:start bottom",
+            "kind": "state",
+            "state_key": "start bottom"
+          },
+          {
+            "id": "s:closed guard",
+            "kind": "state",
+            "state_key": "closed guard"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "kimura",
+              "armbar"
+            ],
+            "from_point": "s:closed guard",
+            "id": "g:0",
+            "path_ids": [
+              "p4"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "armbar"
+            ],
+            "from_point": "s:mount",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "sweep"
+            ],
+            "from_point": "s:start bottom",
+            "id": "g:2",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:mount"
+          },
+          {
+            "actions": [
+              "guard pull"
+            ],
+            "from_point": "s:start neutral",
+            "id": "g:3",
+            "path_ids": [
+              "p5"
+            ],
+            "to_point": "s:closed guard"
+          },
+          {
+            "actions": [
+              "takedown"
+            ],
+            "from_point": "s:start neutral",
+            "id": "g:4",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:mount"
+          }
+        ]
+      },
+      "name": "anchored",
+      "paths": [
+        {
+          "actions": [
+            "takedown"
+          ],
+          "path_id": "p1",
+          "source": "start neutral",
+          "target": "mount"
+        },
+        {
+          "actions": [
+            "armbar"
+          ],
+          "path_id": "p2",
+          "source": "mount",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "sweep"
+          ],
+          "path_id": "p3",
+          "source": "start bottom",
+          "target": "mount"
+        },
+        {
+          "actions": [
+            "kimura",
+            "armbar"
+          ],
+          "path_id": "p4",
+          "source": "closed guard",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "guard pull"
+          ],
+          "path_id": "p5",
+          "source": "start neutral",
+          "target": "closed guard"
+        }
+      ],
+      "ranks": {
+        "s:closed guard": 1,
+        "s:finish": 2,
+        "s:mount": 1,
+        "s:start bottom": 0,
+        "s:start neutral": 0
+      },
+      "structures": {
+        "losango": {
+          "anchor_slots": {
+            "s:finish": "finish",
+            "s:start bottom": "bottom",
+            "s:start neutral": "neutral"
+          },
+          "positions": {
+            "s:closed guard": [
+              300.0,
+              65.0
+            ],
+            "s:finish": [
+              600.0,
+              0.0
+            ],
+            "s:mount": [
+              300.0,
+              -65.0
+            ],
+            "s:start bottom": [
+              300.0,
+              130.0
+            ],
+            "s:start neutral": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "pentagono": {
+          "anchor_slots": {
+            "s:finish": "finish_you",
+            "s:start bottom": "bottom",
+            "s:start neutral": "neutral"
+          },
+          "positions": {
+            "s:closed guard": [
+              300.0,
+              65.0
+            ],
+            "s:finish": [
+              542.705098312,
+              -76.412082798
+            ],
+            "s:mount": [
+              300.0,
+              -65.0
+            ],
+            "s:start bottom": [
+              207.294901688,
+              123.637347118
+            ],
+            "s:start neutral": [
+              0.0,
+              0.0
+            ]
+          }
+        },
+        "triangulo": {
+          "anchor_slots": {
+            "s:finish": "finish",
+            "s:start bottom": "bottom",
+            "s:start neutral": "neutral"
+          },
+          "positions": {
+            "s:closed guard": [
+              300.0,
+              65.0
+            ],
+            "s:finish": [
+              600.0,
+              0.0
+            ],
+            "s:mount": [
+              300.0,
+              -65.0
+            ],
+            "s:start bottom": [
+              40.192378865,
+              65.0
+            ],
+            "s:start neutral": [
+              0.0,
+              0.0
+            ]
+          }
+        }
+      },
+      "weight": {
+        "s:closed guard": 2.0,
+        "s:finish": 2.0,
+        "s:mount": 3.0,
+        "s:start bottom": 1.0,
+        "s:start neutral": 2.0
+      },
+      "why": "o caso real: âncoras nas DUAS pontas. Elas não tomam vaga no grid mas a linha delas conta na baricentragem, e só depois são parafusadas nos vértices da estrutura"
+    }
+  ],
+  "constants": {
+    "FLOW_ANCHOR_ROW_SPREAD": 0.35,
+    "FLOW_ANCHOR_RX_SHARE": 2.0,
+    "FLOW_ANCHOR_RY_SHARE": 1.3,
+    "FLOW_BARYCENTRE_SWEEPS": 2,
+    "FLOW_RANK_GAP": 300.0,
+    "FLOW_ROW_GAP": 130.0
+  },
+  "contract": "flow_layout(bundled, structure, anchor_slots, weight) -> point id -> (x, y). Ranks by multi-source BFS with a visited set (a back edge is SKIPPED, never re-ranked); anchors never take a grid slot but their row counts in the barycentre sweeps, then they are bolted onto the structure's vertices on an ellipse sized to the grid. App mirror: src/services/map/flowLayout.ts.",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_flow_layout_fixtures.py"
+}

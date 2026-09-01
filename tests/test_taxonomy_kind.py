@@ -566,6 +566,42 @@ def test_golden_fixture_matches_this_implementation() -> None:
             expected["orientation"] = orientation_of(label)
         assert doc["kinds"][key] == expected
     assert doc["inference_table"] == load_inference_table()
+    assert doc["state_orientation"] == load_orientation_table()
+
+
+def test_golden_actor_role_block_answers_exactly_like_classify() -> None:
+    """The App reads `attribution.classify(...).actor_role` as a FLAT TABLE rather than as a
+    second port of `attribution.py`'s 74 curated labels. That is only legitimate while the
+    table answers identically for every curated pair AND for a label no table names (where the
+    per-type default has to carry it) — this is the test that keeps it legitimate."""
+    from analysis.attribution import classify
+    from scripts.export_taxonomy_kind_fixtures import _curated_pairs
+
+    doc = json.loads(GOLDEN.read_text(encoding="utf-8"))
+    rows: dict[str, str] = doc["actor_role"]
+    default: dict[str, str] = doc["actor_role_default"]
+
+    def lookup(typ: str, label: str) -> str:
+        key = f"{(typ or '').strip().lower()}|{_normalize_name(label)}"
+        return rows.get(key) or default.get((typ or "").strip().lower(), "unknown")
+
+    for typ, label in sorted(_curated_pairs()):
+        assert lookup(typ, label) == classify(typ, label).actor_role, (typ, label)
+    for typ in ("guard", "control", "pass", "sweep", "escape", "takedown", "submission",
+                "transition", "", "nao existe"):
+        unseen = "um rotulo que nenhuma tabela nomeia"
+        assert lookup(typ, unseen) == classify(typ, unseen).actor_role, typ
+
+
+def test_golden_orientation_probes_match_orientation_for_inference() -> None:
+    from analysis.taxonomy_kind import orientation_for_inference
+
+    doc = json.loads(GOLDEN.read_text(encoding="utf-8"))
+    assert doc["orientation_for_inference"], "probe set must not be empty"
+    for probe, expected in doc["orientation_for_inference"].items():
+        typ, _, label = probe.partition("|")
+        reading = orientation_for_inference(typ, label)
+        assert {"value": reading.value, "source": reading.source} == expected, probe
 
 
 def test_both_repos_carry_the_same_fixture_bytes() -> None:

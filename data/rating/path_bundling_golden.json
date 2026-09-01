@@ -1,0 +1,1843 @@
+{
+  "cases": [
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:A"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "j:0",
+            "kind": "branch",
+            "state_key": null
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:D",
+            "kind": "state",
+            "state_key": "D"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "3"
+            ],
+            "from_point": "j:0",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "4"
+            ],
+            "from_point": "j:0",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:D"
+          },
+          {
+            "actions": [
+              "1",
+              "2"
+            ],
+            "from_point": "s:A",
+            "id": "g:2",
+            "path_ids": [
+              "p1",
+              "p2"
+            ],
+            "to_point": "j:0"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "3"
+            ],
+            "C"
+          ],
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "4"
+            ],
+            "D"
+          ]
+        ]
+      },
+      "name": "case1_shared_prefix_forks_after_the_common_run",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2",
+            "3"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "1",
+            "2",
+            "4"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "D"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2",
+            "3"
+          ],
+          "C"
+        ],
+        "p2": [
+          "A",
+          [
+            "1",
+            "2",
+            "4"
+          ],
+          "D"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:2",
+          "g:0"
+        ],
+        "p2": [
+          "g:2",
+          "g:1"
+        ]
+      },
+      "why": "prefixo [1,2] compartilhado; a bifurcação acontece DEPOIS do 2"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:A",
+          "p3": "s:B"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "j:0",
+            "kind": "merge",
+            "state_key": null
+          },
+          {
+            "id": "j:1",
+            "kind": "branch",
+            "state_key": null
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:D",
+            "kind": "state",
+            "state_key": "D"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "2"
+            ],
+            "from_point": "j:0",
+            "id": "g:0",
+            "path_ids": [
+              "p1",
+              "p2",
+              "p3"
+            ],
+            "to_point": "j:1"
+          },
+          {
+            "actions": [
+              "3"
+            ],
+            "from_point": "j:1",
+            "id": "g:1",
+            "path_ids": [
+              "p1",
+              "p3"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "4"
+            ],
+            "from_point": "j:1",
+            "id": "g:2",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:D"
+          },
+          {
+            "actions": [
+              "1"
+            ],
+            "from_point": "s:A",
+            "id": "g:3",
+            "path_ids": [
+              "p1",
+              "p2"
+            ],
+            "to_point": "j:0"
+          },
+          {
+            "actions": [
+              "5"
+            ],
+            "from_point": "s:B",
+            "id": "g:4",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "j:0"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "3"
+            ],
+            "C"
+          ],
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "4"
+            ],
+            "D"
+          ],
+          [
+            "B",
+            [
+              "5",
+              "2",
+              "3"
+            ],
+            "C"
+          ]
+        ]
+      },
+      "name": "case2_internal_run_splits_where_the_path_set_changes",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2",
+            "3"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "1",
+            "2",
+            "4"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "D"
+        },
+        {
+          "actions": [
+            "5",
+            "2",
+            "3"
+          ],
+          "path_id": "p3",
+          "source": "B",
+          "target": "C"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2",
+            "3"
+          ],
+          "C"
+        ],
+        "p2": [
+          "A",
+          [
+            "1",
+            "2",
+            "4"
+          ],
+          "D"
+        ],
+        "p3": [
+          "B",
+          [
+            "5",
+            "2",
+            "3"
+          ],
+          "C"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:3",
+          "g:0",
+          "g:1"
+        ],
+        "p2": [
+          "g:3",
+          "g:0",
+          "g:2"
+        ],
+        "p3": [
+          "g:4",
+          "g:0",
+          "g:1"
+        ]
+      },
+      "why": "[2,3] é a corrida interna de p1/p3, mas p2 também anda o 2 — a corrida RACHA onde o conjunto muda, que é a definição inteira de segmento"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p3": "s:B"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "j:0",
+            "kind": "merge",
+            "state_key": null
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "2",
+              "3"
+            ],
+            "from_point": "j:0",
+            "id": "g:0",
+            "path_ids": [
+              "p1",
+              "p3"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "1"
+            ],
+            "from_point": "s:A",
+            "id": "g:1",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "j:0"
+          },
+          {
+            "actions": [
+              "5"
+            ],
+            "from_point": "s:B",
+            "id": "g:2",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "j:0"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "3"
+            ],
+            "C"
+          ],
+          [
+            "B",
+            [
+              "5",
+              "2",
+              "3"
+            ],
+            "C"
+          ]
+        ]
+      },
+      "name": "case2_in_isolation_keeps_the_internal_run_whole",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2",
+            "3"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "5",
+            "2",
+            "3"
+          ],
+          "path_id": "p3",
+          "source": "B",
+          "target": "C"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2",
+            "3"
+          ],
+          "C"
+        ],
+        "p3": [
+          "B",
+          [
+            "5",
+            "2",
+            "3"
+          ],
+          "C"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:1",
+          "g:0"
+        ],
+        "p3": [
+          "g:2",
+          "g:0"
+        ]
+      },
+      "why": "sem p2 nada racha a corrida: [2,3] é UM segmento"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:B"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "j:0",
+            "kind": "merge",
+            "state_key": null
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "6"
+            ],
+            "from_point": "j:0",
+            "id": "g:0",
+            "path_ids": [
+              "p1",
+              "p2"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "1",
+              "3"
+            ],
+            "from_point": "s:A",
+            "id": "g:1",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "j:0"
+          },
+          {
+            "actions": [
+              "4",
+              "5"
+            ],
+            "from_point": "s:B",
+            "id": "g:2",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "j:0"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "3",
+              "6"
+            ],
+            "C"
+          ],
+          [
+            "B",
+            [
+              "4",
+              "5",
+              "6"
+            ],
+            "C"
+          ]
+        ]
+      },
+      "name": "case3_shared_suffix_converges_at_the_first_common_action",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "3",
+            "6"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "4",
+            "5",
+            "6"
+          ],
+          "path_id": "p2",
+          "source": "B",
+          "target": "C"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "3",
+            "6"
+          ],
+          "C"
+        ],
+        "p2": [
+          "B",
+          [
+            "4",
+            "5",
+            "6"
+          ],
+          "C"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:1",
+          "g:0"
+        ],
+        "p2": [
+          "g:2",
+          "g:0"
+        ]
+      },
+      "why": "sufixo [6] compartilhado; convergência no primeiro elemento comum"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:B"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          },
+          {
+            "id": "s:D",
+            "kind": "state",
+            "state_key": "D"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "1",
+              "2"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "1",
+              "2"
+            ],
+            "from_point": "s:B",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:D"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2"
+            ],
+            "C"
+          ],
+          [
+            "B",
+            [
+              "1",
+              "2"
+            ],
+            "D"
+          ]
+        ]
+      },
+      "name": "case4_same_actions_different_endpoints_never_collapse",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "1",
+            "2"
+          ],
+          "path_id": "p2",
+          "source": "B",
+          "target": "D"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2"
+          ],
+          "C"
+        ],
+        "p2": [
+          "B",
+          [
+            "1",
+            "2"
+          ],
+          "D"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:0"
+        ],
+        "p2": [
+          "g:1"
+        ]
+      },
+      "why": "a armadilha do dono: mesmas ações, extremos diferentes ⇒ nada funde, e A->D / B->C não existem em walkable_routes"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:A",
+          "p3": "s:A"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "j:0",
+            "kind": "branch",
+            "state_key": null
+          },
+          {
+            "id": "j:1",
+            "kind": "branch",
+            "state_key": null
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:D",
+            "kind": "state",
+            "state_key": "D"
+          },
+          {
+            "id": "s:E",
+            "kind": "state",
+            "state_key": "E"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "3"
+            ],
+            "from_point": "j:0",
+            "id": "g:0",
+            "path_ids": [
+              "p1",
+              "p2"
+            ],
+            "to_point": "j:1"
+          },
+          {
+            "actions": [
+              "6"
+            ],
+            "from_point": "j:0",
+            "id": "g:1",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:E"
+          },
+          {
+            "actions": [
+              "4"
+            ],
+            "from_point": "j:1",
+            "id": "g:2",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "5"
+            ],
+            "from_point": "j:1",
+            "id": "g:3",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:D"
+          },
+          {
+            "actions": [
+              "1",
+              "2"
+            ],
+            "from_point": "s:A",
+            "id": "g:4",
+            "path_ids": [
+              "p1",
+              "p2",
+              "p3"
+            ],
+            "to_point": "j:0"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            "C"
+          ],
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "3",
+              "5"
+            ],
+            "D"
+          ],
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "6"
+            ],
+            "E"
+          ]
+        ]
+      },
+      "name": "case5_nested_fork_inside_a_shared_trunk",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "1",
+            "2",
+            "3",
+            "5"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "D"
+        },
+        {
+          "actions": [
+            "1",
+            "2",
+            "6"
+          ],
+          "path_id": "p3",
+          "source": "A",
+          "target": "E"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2",
+            "3",
+            "4"
+          ],
+          "C"
+        ],
+        "p2": [
+          "A",
+          [
+            "1",
+            "2",
+            "3",
+            "5"
+          ],
+          "D"
+        ],
+        "p3": [
+          "A",
+          [
+            "1",
+            "2",
+            "6"
+          ],
+          "E"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:4",
+          "g:0",
+          "g:2"
+        ],
+        "p2": [
+          "g:4",
+          "g:0",
+          "g:3"
+        ],
+        "p3": [
+          "g:4",
+          "g:1"
+        ]
+      },
+      "why": "tronco de {p1,p2,p3} contendo um trecho só de {p1,p2} — o aninhamento cai de graça porque os conjuntos de path_id são subconjuntos um do outro"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:A"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:X",
+            "kind": "state",
+            "state_key": "X"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "1",
+              "2"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "1"
+            ],
+            "from_point": "s:A",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:X"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1"
+            ],
+            "X"
+          ],
+          [
+            "A",
+            [
+              "1",
+              "2"
+            ],
+            "C"
+          ]
+        ]
+      },
+      "name": "rule2_an_internal_position_never_merges_into_a_state_point",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "1"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "X"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2"
+          ],
+          "C"
+        ],
+        "p2": [
+          "A",
+          [
+            "1"
+          ],
+          "X"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:0"
+        ],
+        "p2": [
+          "g:1"
+        ]
+      },
+      "why": "A--[1,2]-->C não pode ser redesenhado passando por X só porque A--[1]-->X existe — seria um estado inventado no meio da cadeia, exatamente o que a Fase 1 apagou"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:A",
+          "p3": "s:B"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "j:0",
+            "kind": "branch-merge",
+            "state_key": null
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "2"
+            ],
+            "from_point": "j:0",
+            "id": "g:0",
+            "path_ids": [
+              "p1",
+              "p3"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "3"
+            ],
+            "from_point": "j:0",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "1"
+            ],
+            "from_point": "s:A",
+            "id": "g:2",
+            "path_ids": [
+              "p1",
+              "p2"
+            ],
+            "to_point": "j:0"
+          },
+          {
+            "actions": [
+              "4"
+            ],
+            "from_point": "s:B",
+            "id": "g:3",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "j:0"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2"
+            ],
+            "C"
+          ],
+          [
+            "A",
+            [
+              "1",
+              "3"
+            ],
+            "C"
+          ],
+          [
+            "B",
+            [
+              "4",
+              "2"
+            ],
+            "C"
+          ]
+        ]
+      },
+      "name": "rule3_a_branch_merge_point_licenses_no_crossed_route",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "1",
+            "3"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "4",
+            "2"
+          ],
+          "path_id": "p3",
+          "source": "B",
+          "target": "C"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2"
+          ],
+          "C"
+        ],
+        "p2": [
+          "A",
+          [
+            "1",
+            "3"
+          ],
+          "C"
+        ],
+        "p3": [
+          "B",
+          [
+            "4",
+            "2"
+          ],
+          "C"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:2",
+          "g:0"
+        ],
+        "p2": [
+          "g:2",
+          "g:1"
+        ],
+        "p3": [
+          "g:3",
+          "g:0"
+        ]
+      },
+      "why": "o caso duro: várias entradas E várias saídas num ponto. Os conjuntos de path_id são o que proíbe pegar a entrada de p3 e sair pela saída de p2"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:A",
+          "p3": "s:A"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "j:0",
+            "kind": "branch",
+            "state_key": null
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "t"
+            ],
+            "from_point": "j:0",
+            "id": "g:0",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:A"
+          },
+          {
+            "actions": [
+              "t",
+              "t",
+              "t"
+            ],
+            "from_point": "j:0",
+            "id": "g:1",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:A"
+          },
+          {
+            "actions": [
+              "t"
+            ],
+            "from_point": "s:A",
+            "id": "g:2",
+            "path_ids": [
+              "p1",
+              "p2"
+            ],
+            "to_point": "j:0"
+          },
+          {
+            "actions": [
+              "t"
+            ],
+            "from_point": "s:A",
+            "id": "g:3",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:A"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "t"
+            ],
+            "A"
+          ],
+          [
+            "A",
+            [
+              "t",
+              "t"
+            ],
+            "A"
+          ],
+          [
+            "A",
+            [
+              "t",
+              "t",
+              "t",
+              "t"
+            ],
+            "A"
+          ]
+        ]
+      },
+      "name": "repeated_action_never_makes_a_path_cross_itself",
+      "paths": [
+        {
+          "actions": [
+            "t",
+            "t",
+            "t",
+            "t"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "A"
+        },
+        {
+          "actions": [
+            "t",
+            "t"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "A"
+        },
+        {
+          "actions": [
+            "t"
+          ],
+          "path_id": "p3",
+          "source": "A",
+          "target": "A"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "t",
+            "t",
+            "t",
+            "t"
+          ],
+          "A"
+        ],
+        "p2": [
+          "A",
+          [
+            "t",
+            "t"
+          ],
+          "A"
+        ],
+        "p3": [
+          "A",
+          [
+            "t"
+          ],
+          "A"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:2",
+          "g:1"
+        ],
+        "p2": [
+          "g:2",
+          "g:0"
+        ],
+        "p3": [
+          "g:3"
+        ]
+      },
+      "why": "REGRESSÃO achada no corpus público, não inventada aqui: back take --[t,t,t,t]--> back take e o irmão de duas tentativas dividem prefixo E sufixo, e fundir os dois punha a 1ª e a 3ª lacuna do caminho longo no MESMO ponto"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:A"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "x"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:A"
+          },
+          {
+            "actions": [
+              "x",
+              "y"
+            ],
+            "from_point": "s:A",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:B"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "x"
+            ],
+            "A"
+          ],
+          [
+            "A",
+            [
+              "x",
+              "y"
+            ],
+            "B"
+          ]
+        ]
+      },
+      "name": "self_loop_path_still_reconstructs",
+      "paths": [
+        {
+          "actions": [
+            "x"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "A"
+        },
+        {
+          "actions": [
+            "x",
+            "y"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "B"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "x"
+          ],
+          "A"
+        ],
+        "p2": [
+          "A",
+          [
+            "x",
+            "y"
+          ],
+          "B"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:0"
+        ],
+        "p2": [
+          "g:1"
+        ]
+      },
+      "why": "start top --[headquarters pass]--> start top, real no bundle do dono: as duas pontas são o mesmo ponto de estado, então não existe entrada de grau 0 para inferir"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:B"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          },
+          {
+            "id": "s:B",
+            "kind": "state",
+            "state_key": "B"
+          },
+          {
+            "id": "s:D",
+            "kind": "state",
+            "state_key": "D"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "1",
+              "2",
+              "3"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:C"
+          },
+          {
+            "actions": [
+              "4",
+              "2",
+              "5"
+            ],
+            "from_point": "s:B",
+            "id": "g:1",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:D"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "3"
+            ],
+            "C"
+          ],
+          [
+            "B",
+            [
+              "4",
+              "2",
+              "5"
+            ],
+            "D"
+          ]
+        ]
+      },
+      "name": "run_anchored_at_neither_end_is_deliberately_not_bundled",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2",
+            "3"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "4",
+            "2",
+            "5"
+          ],
+          "path_id": "p2",
+          "source": "B",
+          "target": "D"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2",
+            "3"
+          ],
+          "C"
+        ],
+        "p2": [
+          "B",
+          [
+            "4",
+            "2",
+            "5"
+          ],
+          "D"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:0"
+        ],
+        "p2": [
+          "g:1"
+        ]
+      },
+      "why": "os dois andam um 2 no meio e ficam com o seu: duas cadeias que nem abrem nem fecham no mesmo lugar não dividem base, só reusam um verbo"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A",
+          "p2": "s:A"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "1",
+              "2"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1",
+              "p2"
+            ],
+            "to_point": "s:C"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2"
+            ],
+            "C"
+          ]
+        ]
+      },
+      "name": "identical_paths_share_one_stroke",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        },
+        {
+          "actions": [
+            "1",
+            "2"
+          ],
+          "path_id": "p2",
+          "source": "A",
+          "target": "C"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2"
+          ],
+          "C"
+        ],
+        "p2": [
+          "A",
+          [
+            "1",
+            "2"
+          ],
+          "C"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:0"
+        ],
+        "p2": [
+          "g:0"
+        ]
+      },
+      "why": "dois caminhos idênticos são UM traço — o ponto inteiro do bundling"
+    },
+    {
+      "expected": {
+        "path_entry": {
+          "p1": "s:A"
+        },
+        "points": [
+          {
+            "id": "s:A",
+            "kind": "state",
+            "state_key": "A"
+          },
+          {
+            "id": "s:C",
+            "kind": "state",
+            "state_key": "C"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "1",
+              "2",
+              "3"
+            ],
+            "from_point": "s:A",
+            "id": "g:0",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:C"
+          }
+        ],
+        "walkable_routes": [
+          [
+            "A",
+            [
+              "1",
+              "2",
+              "3"
+            ],
+            "C"
+          ]
+        ]
+      },
+      "name": "a_single_path_is_untouched",
+      "paths": [
+        {
+          "actions": [
+            "1",
+            "2",
+            "3"
+          ],
+          "path_id": "p1",
+          "source": "A",
+          "target": "C"
+        }
+      ],
+      "reconstruct": {
+        "p1": [
+          "A",
+          [
+            "1",
+            "2",
+            "3"
+          ],
+          "C"
+        ]
+      },
+      "segments_of": {
+        "p1": [
+          "g:0"
+        ]
+      },
+      "why": "um caminho sozinho: um segmento, nenhum artefato"
+    }
+  ],
+  "contract": "bundle_paths(RenderPath[]) -> BundledGraph. A segment is the maximal contiguous run of actions walked by EXACTLY one set of paths; sharing is decided by canonical action-key equality on a common PREFIX or SUFFIX, transitively, and never by a free-standing k-gram. walkable_routes() must equal the input set — no invented route, none lost. App mirror: src/services/map/pathBundling.ts.",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_path_bundling_fixtures.py"
+}

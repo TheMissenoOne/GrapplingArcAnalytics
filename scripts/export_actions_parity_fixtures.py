@@ -41,6 +41,12 @@ MOCK_BUNDLE = (
     ROOT.parent / "GrapplingArcApp" / "src" / "data" / "mockData" / "mock_user_bundle.json"
 )
 OUT = ROOT / "data" / "rating" / "actions_parity_golden.json"
+# Fase 5: the App mirrors the compiler, so it mirrors this invariant too — same file, same
+# bytes, read by `src/services/__tests__/actionsParity.test.ts`.
+APP_OUT = (
+    ROOT.parent / "GrapplingArcApp" / "src" / "services" / "__fixtures__"
+    / "actionsParityGolden.json"
+)
 
 
 def action_multiset(bundle: dict[str, Any]) -> Counter[tuple[str, str, bool]]:
@@ -95,15 +101,18 @@ def main() -> int:
     args = ap.parse_args()
 
     text = render(build_fixture())
+    targets = [OUT, APP_OUT]
     if args.check:
-        if not OUT.is_file() or OUT.read_text(encoding="utf-8") != text:
-            print(f"DIVERGENTE: {OUT}")
-            return 1
+        for path in targets:
+            if not path.is_file() or path.read_text(encoding="utf-8") != text:
+                print(f"DIVERGENTE: {path}")
+                return 1
         print("fixture em dia")
         return 0
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(text, encoding="utf-8")
-    print(f"escrito: {OUT}")
+    for path in targets:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(text, encoding="utf-8")
+        print(f"escrito: {path}")
     return 0
 
 

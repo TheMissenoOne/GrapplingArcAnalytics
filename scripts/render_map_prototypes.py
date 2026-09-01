@@ -90,7 +90,7 @@ of the member's own (``_paths_scope_paths``) — a path fully swallowed by one s
 endpoints its members) draws nothing at the global level, that is the expansion's own job.
 Clicking a system (its node, via ``n.sysId``, or its own SCOPES pill — reused verbatim from 13,
 a system pill already IS "expand in place") swaps to that system's own page: its members become
-real states again under 13's own ``_flow_layout``, restricted to the paths that touch it, and
+real states again under 13's own ``flow_layout``, restricted to the paths that touch it, and
 every outside touch reduces to 11/12's own compact stub (``_stub_node``) with a boundary ring on
 the crossing member (``_system_boundary_view``'s own convention) — the stub/boundary STYLING is
 reused verbatim; only the node/link assembly around them is new, because a path (segments) is a
@@ -115,10 +115,17 @@ import networkx as nx
 
 from analysis.chain_compiler import ChainEdge, ChainState, CompiledChain, compile_two_sided
 from analysis.constellations.detect import detect as constellation_detect
+from analysis.flow_layout import (
+    ANCHOR_STRUCTURES,
+    DEFAULT_ANCHOR_STRUCTURE,
+    PENTAGON_ANGLES,
+    anchor_units,
+    flow_layout,
+)
 from analysis.markov_weights import block_for_family, load_markov_weights
 from analysis.names import _normalize_name, canonicalize
 from analysis.network_metrics import edge_arrow
-from analysis.path_bundling import BundledGraph, RenderPath, Segment, bundle_paths
+from analysis.path_bundling import RenderPath, Segment, bundle_paths
 from analysis.path_metrics import PathMetrics, path_metrics
 from analysis.taxonomy_kind import load_inference_table, orientation_of, resolve_library_entry
 
@@ -192,57 +199,15 @@ _START_ICON = "A"  # variant 7 only — "Âncora"; letters not emoji, see _TYPE_
 # then reading start -> finish, which is the same direction the flow bias pushes; reading top to
 # bottom on the left is the orientation axis it always was. Canvas convention: y grows DOWNWARD,
 # so a positive maths angle becomes a negative y.
-_PENTAGON_ANGLES = {  # degrees, maths convention (0 = east, counter-clockwise)
-    "neutral": 180.0,       # extreme left
-    "top": 108.0,           # upper left
-    "finish_you": 36.0,     # upper right
-    "finish_opp": -36.0,    # lower right
-    "bottom": -108.0,       # lower left
-}
-_ANCHOR_UNIT = {
-    slot: (math.cos(math.radians(deg)), -math.sin(math.radians(deg)))
-    for slot, deg in _PENTAGON_ANGLES.items()
-}
-
-# Owner call 2026-08-31 (plan, "Layout de âncoras configurável"): now that the oriented anchors
-# take a chain's END as well as its START (Fase 1b), "início à esquerda" stopped being true and
-# the frame can no longer be one hardcoded constant. The pentagon becomes ONE ROW of a table of
-# structures, byte-identical to what it always was so variants 1-12 do not move; the two new
-# ones are the shapes the owner named. ``unified_finish`` folds the two per-actor finishes into
-# a single vertex — the node is then drawn split in half by actor (``n.split``, a patch on the
-# graph.js COPY), because it is still two different athletes' finishes, only one place.
-_DEFAULT_ANCHOR_STRUCTURE = "pentagono"
-_ANCHOR_STRUCTURES: dict[str, dict[str, Any]] = {
-    "pentagono": {
-        "label": "Pentágono (atual)",
-        "angles": _PENTAGON_ANGLES,
-        "unified_finish": False,
-    },
-    "losango": {
-        # Four vertices, orientation on the VERTICAL axis (owner's own words) — neutral opens on
-        # the left, the finish closes on the right, top/bottom are the poles between them.
-        "label": "Losango",
-        "angles": {"neutral": 180.0, "top": 90.0, "bottom": -90.0, "finish": 0.0},
-        "unified_finish": True,
-    },
-    "triangulo": {
-        # Three vertices + the neutral anchor on the middle of the left edge: neutral makes no
-        # orientation claim, so it belongs where the two oriented openings meet, not on a corner
-        # of its own (same reasoning as the owner's original "neutral to the centre" spec).
-        "label": "Triângulo (finalização unificada)",
-        "angles": {"top": 150.0, "bottom": -150.0, "finish": 0.0, "neutral": 180.0},
-        "unified_finish": True,
-    },
-}
-
-
-def _anchor_units(structure: str) -> dict[str, tuple[float, float]]:
-    """Unit vectors for a structure's vertices. Canvas convention: y grows DOWNWARD, so a
-    positive maths angle becomes a negative y."""
-    return {
-        slot: (math.cos(math.radians(deg)), -math.sin(math.radians(deg)))
-        for slot, deg in _ANCHOR_STRUCTURES[structure]["angles"].items()
-    }
+# The table itself now lives in ``analysis/flow_layout.py`` — the App mirrors that module
+# (``src/services/map/flowLayout.ts``) against a golden fixture, and a layout constant with two
+# homes is a contract with two answers. Aliased to the private names this file has always used
+# so nothing else in it moves; variants 1-14 render byte-identically across the move.
+_PENTAGON_ANGLES = PENTAGON_ANGLES
+_ANCHOR_STRUCTURES = ANCHOR_STRUCTURES
+_DEFAULT_ANCHOR_STRUCTURE = DEFAULT_ANCHOR_STRUCTURE
+_anchor_units = anchor_units
+_ANCHOR_UNIT = anchor_units(DEFAULT_ANCHOR_STRUCTURE)
 
 
 def _anchor_slot(node_key: str, actor: str,
@@ -572,8 +537,17 @@ class Aggregate:
     def add_edge(self, e: ChainEdge) -> None:
         if e.actor not in ("you", "partner"):
             return
+        # Fase 5: an occurrence counts as INFERRED only when nothing on it was observed. This
+        # read `e.inferred`, i.e. `actions[0].inferred` — the position dependence the contract
+        # doc names in §5 and told this phase to fix. It was live on the owner's own bundle:
+        # `half guard --[sweep(inferred), knee cut pass(observed)]--> side control` read
+        # "inferred" while its mirror `de la riva --[berimbolo(observed), sweep(inferred)]-->
+        # back control` read "observed", for no reason but the order. The gate policies
+        # (`no_inferred_edges`, `inferred_min2`) filter on this field, so the old reading hid a
+        # real observation behind an inferred one and dropped the edge.
+        wholly_inferred = all(a.inferred for a in e.actions)
         self.raw_edges_total += 1
-        self.raw_edges_inferred += 1 if e.inferred else 0
+        self.raw_edges_inferred += 1 if wholly_inferred else 0
         source_key = _perspective_key(e.source_key, e.actor)
         target_key = _perspective_key(e.target_key, e.actor)
         action_seq = tuple(a.key for a in e.actions)
@@ -584,7 +558,7 @@ class Aggregate:
             self.edges[key] = {"source": source_key, "target": target_key,
                                 "action_key": e.action_key, "action_label": action_label,
                                 "action_type": e.action_type, "actor": e.actor,
-                                "count": 1, "inferred": e.inferred,
+                                "count": 1, "inferred": wholly_inferred,
                                 # Phase 4 — the WHOLE ordered path, not just actions[0]. Additive:
                                 # every variant 1-12 reads the scalar fields above and is
                                 # untouched by these three.
@@ -595,7 +569,7 @@ class Aggregate:
             self.edge_sample[key] = e
         else:
             row["count"] += 1
-            row["inferred"] = row["inferred"] and e.inferred
+            row["inferred"] = row["inferred"] and wholly_inferred
 
     def add_handover(self, from_actor: str, from_key: str, to_actor: str, to_key: str) -> None:
         from_id, to_id = _qid(from_actor, from_key), _qid(to_actor, to_key)
@@ -1814,7 +1788,7 @@ def _combo_payload(agg: Aggregate, opponent_mode: str, min_support: int, inferen
 #   1 semantic graph   — `Aggregate` (states + transitions keyed on the WHOLE action sequence)
 #   2 render paths     — `render_paths` below: one `RenderPath` per aggregated occurrence
 #   3 bundled graph    — `analysis.path_bundling.bundle_paths` (pure, tested on its own)
-#   4 renderer         — `_flow_layout` + `_PAGE13` + the graph.js copy's own patches
+#   4 renderer         — `flow_layout` + `_PAGE13` + the graph.js copy's own patches
 #
 # Layout is computed HERE, in Python, and shipped as pinned x/y — not ported into the page's
 # JavaScript as the plan first sketched. Three reasons, in the order they mattered:
@@ -1835,21 +1809,8 @@ def _combo_payload(agg: Aggregate, opponent_mode: str, min_support: int, inferen
 # elkjs/dagre stay out (userDecisionFlow.ts:32-45 — measured, the density was the problem, the
 # layout never was).
 
-_FLOW_RANK_GAP = 300.0    # world units between two consecutive ranks (x)
-_FLOW_ROW_GAP = 130.0     # world units between two nodes inside a rank (y)
-# Two sweeps, not more: measured, a longer run OSCILLATES (the median heuristic has no
-# monotonicity guarantee) and lands worse — 6 sweeps cost +6 crossings on the owner's bundle.
-_FLOW_BARYCENTRE_SWEEPS = 2
-# The anchor frame's ellipse, relative to the flow it has to contain, and how far outside the
-# widest rank an anchor's row counts in the barycentre. All three MEASURED, on both bundles, not
-# eyeballed — a circular frame with anchors excluded from the ordering drew 83 crossings over 42
-# links (owner) and 16 over 21 (the App's mock); these draw 41 and 5. Wide and flat on purpose:
-# a left-hand vertex has to clear the first rank horizontally while staying inside a readable
-# vertical band, and a circle put "Por Cima"/"Por Baixo" at mid-x with every edge into them
-# crossing the whole picture.
-_FLOW_ANCHOR_RX_SHARE = 2.00
-_FLOW_ANCHOR_RY_SHARE = 1.30
-_FLOW_ANCHOR_ROW_SPREAD = 0.35
+# Constants + the three layout functions moved to ``analysis/flow_layout.py`` (see the import
+# at the top of this file) so the App can mirror ONE source against a golden fixture.
 
 
 def render_paths(agg: Aggregate) -> list[RenderPath]:
@@ -1885,132 +1846,6 @@ def _rating_of_bundle(bundle: dict[str, Any]) -> dict[str, float]:
         if isinstance(elo, int | float) and not isinstance(elo, bool) and label:
             out.setdefault(canonicalize(_normalize_name(str(label))), float(elo))
     return out
-
-
-def _flow_ranks(points: list[str], out_of: dict[str, list[str]],
-                 in_deg: dict[str, int]) -> dict[str, int]:
-    """`decisionFlowLayout.computeRanks`, same shape: multi-source BFS from every point with no
-    incoming segment; a point already ranked is never re-queued, so a back edge (a real cycle in
-    a technique map) is skipped instead of looping or re-ranking. Anything unreached still gets
-    a slot at rank 0."""
-    seeds = sorted(p for p in points if in_deg.get(p, 0) == 0)
-    if not seeds and points:
-        seeds = [sorted(points)[0]]  # fully cyclic — still needs somewhere to start
-    rank: dict[str, int] = {p: 0 for p in seeds}
-    queue = list(seeds)
-    depth = 0
-    while queue:
-        nxt: list[str] = []
-        for p in queue:
-            for q in sorted(out_of.get(p, [])):
-                if q not in rank:
-                    rank[q] = depth + 1
-                    nxt.append(q)
-        queue = sorted(nxt)
-        depth += 1
-    for p in sorted(points):
-        rank.setdefault(p, 0)
-    return rank
-
-
-def _flow_order(by_rank: dict[int, list[str]], neighbours_in: dict[str, list[str]],
-                 neighbours_out: dict[str, list[str]], weight: dict[str, float],
-                 fixed_rows: dict[str, float]) -> None:
-    """Median/barycentre heuristic, in place — the crossing-minimisation half of a layered
-    layout. `decisionFlowLayout` sorts a rank by (branch order, support desc, id); there is no
-    narrative branch order here, so the initial sort is (support desc, id) and the sweeps below
-    then pull each node toward its neighbours' average row.
-
-    ``fixed_rows`` are the ANCHORS: they never take a grid slot (the frame is not a lane), but
-    their row still has to COUNT, because a state whose only neighbour is "Por Cima" belongs
-    next to it. Leaving them out of the barycentre was measured at 76 crossings over 42 links
-    on the owner's own bundle — an average computed from half the neighbours is not an average.
-
-    Every tie breaks on the id and the sweep count is fixed, so the result is a pure function of
-    the input."""
-    for rank in sorted(by_rank):
-        by_rank[rank].sort(key=lambda p: (-weight.get(p, 0.0), p))
-    row_of: dict[str, float] = {p: float(i) for rank in sorted(by_rank)
-                                for i, p in enumerate(by_rank[rank])}
-    # centre each rank on 0 so a fixed anchor row (also centred on 0) is comparable to it
-    for rank in sorted(by_rank):
-        span = (len(by_rank[rank]) - 1) / 2.0
-        for p in by_rank[rank]:
-            row_of[p] -= span
-    row_of.update(fixed_rows)
-
-    for sweep in range(_FLOW_BARYCENTRE_SWEEPS):
-        ranks = sorted(by_rank) if sweep % 2 == 0 else sorted(by_rank, reverse=True)
-        side = neighbours_in if sweep % 2 == 0 else neighbours_out
-        other = neighbours_out if sweep % 2 == 0 else neighbours_in
-        for rank in ranks:
-            members = by_rank[rank]
-            bary: dict[str, float] = {}
-            for p in members:
-                rows = sorted(row_of[q] for q in side.get(p, []) if q in row_of)
-                if not rows:  # a source (or a sink) has neighbours on the OTHER side only
-                    rows = sorted(row_of[q] for q in other.get(p, []) if q in row_of)
-                bary[p] = (sum(rows) / len(rows)) if rows else row_of[p]
-            members.sort(key=lambda p: (bary[p], -weight.get(p, 0.0), p))
-            span = (len(members) - 1) / 2.0
-            for i, p in enumerate(members):
-                row_of[p] = i - span
-
-
-def _flow_layout(bundled: BundledGraph, *, structure: str, anchor_slots: dict[str, str],
-                  weight: dict[str, float]) -> dict[str, tuple[float, float]]:
-    """Point id -> world (x, y). Free points land on a rank/row grid (flow reads left to right,
-    the same direction the owner's map has always read); the ANCHORS are then bolted onto the
-    chosen structure's vertices, on an ellipse sized to the grid it has to frame — so the frame
-    contains the map instead of being five more nodes in the crowd, and an arrival at an anchor
-    never has to cross the whole picture to reach it (the starts sit on the left arc, the
-    finishes on the right, which is where the ranks already put their neighbours)."""
-    ids = [p.id for p in bundled.points]
-    out_of: dict[str, list[str]] = {}
-    in_of: dict[str, list[str]] = {}
-    for seg in bundled.segments:
-        out_of.setdefault(seg.from_point, []).append(seg.to_point)
-        in_of.setdefault(seg.to_point, []).append(seg.from_point)
-    in_deg = {p: len(in_of.get(p, [])) for p in ids}
-
-    rank = _flow_ranks(ids, out_of, in_deg)
-    free = [p for p in ids if p not in anchor_slots]
-    by_rank: dict[int, list[str]] = {}
-    for p in sorted(free):
-        by_rank.setdefault(rank[p], []).append(p)
-
-    units = _anchor_units(structure)
-    widest = max((len(v) for v in by_rank.values()), default=1)
-    # The anchors' rows, in the same centred-on-0 units the grid uses, so the sweeps can see
-    # them. `_FLOW_ANCHOR_ROW_SPREAD` is how far outside the widest rank the frame sits.
-    fixed_rows = {p: units[slot][1] * (widest / 2.0) * _FLOW_ANCHOR_ROW_SPREAD
-                  for p, slot in sorted(anchor_slots.items())}
-    _flow_order(by_rank, in_of, out_of, weight, fixed_rows)
-
-    pos: dict[str, tuple[float, float]] = {}
-    for r in sorted(by_rank):
-        members = by_rank[r]
-        span = (len(members) - 1) / 2.0
-        for i, p in enumerate(members):
-            pos[p] = (r * _FLOW_RANK_GAP, (i - span) * _FLOW_ROW_GAP)
-
-    if pos:
-        xs = [x for x, _ in pos.values()]
-        ys = [y for _, y in pos.values()]
-        cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
-        half_w, half_h = (max(xs) - min(xs)) / 2, (max(ys) - min(ys)) / 2
-    else:  # every point is an anchor (a bundle with nothing but generic openings)
-        cx = cy = half_w = half_h = 0.0
-    # The frame is an ELLIPSE around the flow, not a circle: a left-hand vertex has to clear the
-    # first rank horizontally (hence the wide rx) while staying inside a readable vertical band
-    # (hence the tight ry) — a circle put "Por Cima"/"Por Baixo" at mid-x and 480 units up, and
-    # every edge into them then crossed the whole picture.
-    rx = max(half_w * _FLOW_ANCHOR_RX_SHARE, _FLOW_RANK_GAP)
-    ry = max(half_h * _FLOW_ANCHOR_RY_SHARE, _FLOW_ROW_GAP)
-    for p, slot in sorted(anchor_slots.items()):
-        ux, uy = units[slot]
-        pos[p] = (cx + rx * ux, cy + ry * uy)
-    return pos
 
 
 _JUNCTION_COLOR = "#6b7280"  # a branch/merge dot is scaffolding, never a technique — no category hue
@@ -2098,7 +1933,7 @@ def _paths_view(
         if slot is not None:
             anchor_slots[pt.id] = slot
 
-    pos = _flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
+    pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
                         weight=node_weight)
 
     nodes: list[dict[str, Any]] = []
@@ -2266,7 +2101,7 @@ def _paths_payloads(agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
 # the system's node instead of the member's own — a path fully swallowed by one system (both
 # endpoints its members) draws nothing at the global level, it is the expansion's own job.
 # Clicking a system node/pill "expands in place": that ONE system's members become real states
-# again (13's own `_flow_layout`, restricted to the touching paths), every outside touch reduced
+# again (13's own `flow_layout`, restricted to the touching paths), every outside touch reduced
 # to 11/12's own compact stub (`_stub_node`) with a boundary ring on the member that crosses
 # (`_system_boundary_view`'s own convention) — REUSED, not reimplemented; only the node/link
 # assembly around them is new, because a path (segments) is a different shape than a two-sided
@@ -2306,7 +2141,7 @@ def _paths_systems_view(
     excluded_by_qid: dict[str, tuple[tuple[str, str], dict[str, Any]]],
     bridge_qids: frozenset[str],
 ) -> dict[str, Any]:
-    """One (anchor structure × focus) page — `_paths_view`'s own model (bundle -> `_flow_layout`
+    """One (anchor structure × focus) page — `_paths_view`'s own model (bundle -> `flow_layout`
     -> panel metrics), with systems COLLAPSED instead of hidden-as-stub. `focus=None` is the
     GLOBAL page (every system folded); `focus="sys:N"` is that system expanded in place, its
     members real, every outside touch a compact stub."""
@@ -2349,7 +2184,7 @@ def _paths_systems_view(
         if slot is not None:
             anchor_slots[pt.id] = slot
 
-    pos = _flow_layout(bundled, structure=structure, anchor_slots=anchor_slots, weight=node_weight)
+    pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots, weight=node_weight)
 
     # Boundary marks (only meaningful once a system is expanded): a MEMBER point with a segment
     # reaching a non-member point is a crossing — `_system_boundary_view`'s own [->out <-in]
@@ -3391,7 +3226,7 @@ def _render_variant12(out: Path, agg: Aggregate) -> dict[str, Any]:
 # Variant 13 — "Caminhos". Own template (same double-brace reason as `_PAGE8`/`_PAGE9`): the
 # page swaps between precomputed (anchor structure × scope) payloads, and drives ONE selection
 # model across three entry points — a path row in the panel, a state node, or a shared segment.
-# Everything it draws is already positioned server-side (`_flow_layout`), so `GAGraph.mount` runs
+# Everything it draws is already positioned server-side (`flow_layout`), so `GAGraph.mount` runs
 # as a static painter with pan/zoom: no physics, no reshuffle between renders, no `charge` knob.
 # Mobile is first-class rather than a shrunk desktop: the panel becomes a sheet under the canvas,
 # the canvas keeps ~62vh instead of the ~25% the force layout used to leave it, and the flow
@@ -4763,7 +4598,7 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
 
     # 13 — Phase 4: render paths -> bundled visual graph. Its own layer, not a re-skin of the
     # others: nodes are POINTS (states + branch/merge artefacts), links are SEGMENTS of shared
-    # ink, and every position is computed here (`_flow_layout`) instead of simulated.
+    # ink, and every position is computed here (`flow_layout`) instead of simulated.
     metrics["variants"]["13-caminhos"] = _render_variant13(out, agg, bundle)
 
     # 14 — 13's paths with systems collapsible in place (owner request 2026-09-01): same layer,

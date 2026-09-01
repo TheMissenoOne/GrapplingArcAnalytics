@@ -1,0 +1,438 @@
+{
+  "cases": [
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "a1",
+            "label": "A1",
+            "source_event_index": null,
+            "type": "transition"
+          },
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": true,
+            "key": "a2",
+            "label": "A2",
+            "source_event_index": null,
+            "type": "transition"
+          },
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "a3",
+            "label": "A3",
+            "source_event_index": null,
+            "type": "transition"
+          }
+        ],
+        "source_key": "mount",
+        "target_key": "side control",
+        "terminal": false
+      },
+      "expected": {
+        "length": 3,
+        "observed": 2,
+        "observed_ratio": 0.666666666667,
+        "role_delta": "none",
+        "strength": null,
+        "support": 7,
+        "terminal": false
+      },
+      "name": "length_observed_and_ratio",
+      "ratings": {},
+      "support": 7,
+      "why": "uma ação inferida CONTA no comprimento e não conta como observada"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [],
+        "source_key": "mount",
+        "target_key": "side control",
+        "terminal": false
+      },
+      "expected": {
+        "length": 0,
+        "observed": 0,
+        "observed_ratio": 0.0,
+        "role_delta": "none",
+        "strength": null,
+        "support": 1,
+        "terminal": false
+      },
+      "name": "empty_path_has_ratio_zero",
+      "ratings": {},
+      "support": 1,
+      "why": "aresta sem ação: 0/0 é 0.0, nunca uma divisão por zero"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "armlock",
+            "label": "Armlock",
+            "source_event_index": null,
+            "type": "submission"
+          }
+        ],
+        "source_key": "armlock",
+        "target_key": "finish",
+        "terminal": true
+      },
+      "expected": {
+        "length": 1,
+        "observed": 1,
+        "observed_ratio": 1.0,
+        "role_delta": "unknown",
+        "strength": null,
+        "support": 1,
+        "terminal": true
+      },
+      "name": "terminal_passes_through_from_the_edge",
+      "ratings": {},
+      "support": 1,
+      "why": "terminal é campo de ARESTA, não de ação"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "k1",
+            "label": "L1",
+            "source_event_index": null,
+            "type": "transition"
+          },
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": true,
+            "key": "k2",
+            "label": "L2",
+            "source_event_index": null,
+            "type": "transition"
+          },
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "k3",
+            "label": "L3",
+            "source_event_index": null,
+            "type": "transition"
+          }
+        ],
+        "source_key": "s",
+        "target_key": "t",
+        "terminal": false
+      },
+      "expected": {
+        "length": 3,
+        "observed": 2,
+        "observed_ratio": 0.666666666667,
+        "role_delta": "unknown",
+        "strength": 1550.0,
+        "support": 1,
+        "terminal": false
+      },
+      "name": "strength_is_the_markov_weighted_mean_of_rated_observed_actions",
+      "ratings": {
+        "k1": 1500.0,
+        "k2": 9999.0,
+        "k3": 1600.0
+      },
+      "support": 1,
+      "why": "a inferida tem rating na tabela e ainda assim NÃO entra — nem no numerador nem na massa de peso; block=None deixa as shares uniformes, então a resposta é a média das duas observadas"
+    },
+    {
+      "block": {
+        "BTK": 1.6,
+        "BTKA": 1.45,
+        "CDP": 0.25,
+        "GPS": 1.3,
+        "GPSA": 1.15,
+        "PGD": 0.4,
+        "SUB": 1.9,
+        "SUBA": 1.75,
+        "SWP": 0.7,
+        "SWPA": 0.55,
+        "TKD": 1.0,
+        "TKDA": 0.85
+      },
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "armbar",
+            "label": "Armbar",
+            "source_event_index": null,
+            "type": "submission"
+          },
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "single leg takedown",
+            "label": "Single Leg Takedown",
+            "source_event_index": null,
+            "type": "takedown"
+          }
+        ],
+        "source_key": "s",
+        "target_key": "t",
+        "terminal": false
+      },
+      "expected": {
+        "length": 2,
+        "observed": 2,
+        "observed_ratio": 1.0,
+        "role_delta": "unknown",
+        "strength": 1434.615384615,
+        "support": 3,
+        "terminal": false
+      },
+      "name": "strength_with_a_real_markov_block_is_not_the_plain_mean",
+      "ratings": {
+        "armbar": 1500.0,
+        "single leg takedown": 1300.0
+      },
+      "support": 3,
+      "why": "com um bloco de pesos de verdade a média deixa de ser aritmética — é este caso que pega um porte que ignorou `relative_shares`"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "k1",
+            "label": "L1",
+            "source_event_index": null,
+            "type": "transition"
+          },
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "k2",
+            "label": "L2",
+            "source_event_index": null,
+            "type": "transition"
+          }
+        ],
+        "source_key": "s",
+        "target_key": "t",
+        "terminal": false
+      },
+      "expected": {
+        "length": 2,
+        "observed": 2,
+        "observed_ratio": 1.0,
+        "role_delta": "unknown",
+        "strength": null,
+        "support": 1,
+        "terminal": false
+      },
+      "name": "strength_is_none_when_nothing_is_rated",
+      "ratings": {},
+      "support": 1,
+      "why": "nada qualifica ⇒ None, nunca 0.0 (que seria um rating de verdade)"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": true,
+            "key": "k1",
+            "label": "L1",
+            "source_event_index": null,
+            "type": "transition"
+          }
+        ],
+        "source_key": "s",
+        "target_key": "t",
+        "terminal": false
+      },
+      "expected": {
+        "length": 1,
+        "observed": 0,
+        "observed_ratio": 0.0,
+        "role_delta": "unknown",
+        "strength": null,
+        "support": 1,
+        "terminal": false
+      },
+      "name": "strength_is_none_when_every_action_is_inferred",
+      "ratings": {
+        "k1": 1234.0
+      },
+      "support": 1,
+      "why": "uma aresta inteiramente inferida não foi observada em lugar nenhum"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "control transition",
+            "label": "Control Transition",
+            "source_event_index": null,
+            "type": "transition"
+          }
+        ],
+        "source_key": "mount",
+        "target_key": "side control",
+        "terminal": false
+      },
+      "expected": {
+        "length": 1,
+        "observed": 1,
+        "observed_ratio": 1.0,
+        "role_delta": "none",
+        "strength": null,
+        "support": 1,
+        "terminal": false
+      },
+      "name": "role_delta_none_when_both_ends_share_the_same_stance",
+      "ratings": {},
+      "support": 1,
+      "why": "mount e side control são os dois `top`: mesmo eixo, mesmo lado"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "sweep",
+            "label": "Sweep",
+            "source_event_index": null,
+            "type": "sweep"
+          }
+        ],
+        "source_key": "closed guard",
+        "target_key": "mount",
+        "terminal": false
+      },
+      "expected": {
+        "length": 1,
+        "observed": 1,
+        "observed_ratio": 1.0,
+        "role_delta": "same-actor-shift",
+        "strength": null,
+        "support": 1,
+        "terminal": false
+      },
+      "name": "role_delta_same_actor_shift_on_a_topology_flip",
+      "ratings": {},
+      "support": 1,
+      "why": "o 'Raspagem A' do modelo: o próprio dono da cadeia inverteu a própria posição"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": true,
+            "inferred": false,
+            "key": "reversal",
+            "label": "Reversal",
+            "source_event_index": null,
+            "type": "transition"
+          }
+        ],
+        "source_key": "closed guard",
+        "target_key": "mount",
+        "terminal": false
+      },
+      "expected": {
+        "length": 1,
+        "observed": 1,
+        "observed_ratio": 1.0,
+        "role_delta": "inversion",
+        "strength": null,
+        "support": 1,
+        "terminal": false
+      },
+      "name": "role_delta_inversion_when_an_action_is_attributed_to_the_opponent",
+      "ratings": {},
+      "support": 1,
+      "why": "o 'Inversão B' do modelo — `actor_is_opponent` é o ÚNICO discriminador entre este caso e o de cima, e as duas arestas são idênticas em todo o resto"
+    },
+    {
+      "block": null,
+      "edge": {
+        "actions": [
+          {
+            "actor": "a",
+            "actor_is_opponent": false,
+            "inferred": false,
+            "key": "control transition",
+            "label": "Control Transition",
+            "source_event_index": null,
+            "type": "transition"
+          }
+        ],
+        "source_key": "kimura grip",
+        "target_key": "mount",
+        "terminal": false
+      },
+      "expected": {
+        "length": 1,
+        "observed": 1,
+        "observed_ratio": 1.0,
+        "role_delta": "unknown",
+        "strength": null,
+        "support": 1,
+        "terminal": false
+      },
+      "name": "role_delta_unknown_when_an_endpoint_has_no_resolvable_stance",
+      "ratings": {},
+      "support": 1,
+      "why": "'kimura grip' não resolve nem pela tabela declarada nem pela biblioteca, e o `type` do estado não sobrevive na aresta (§9.3) — degrada honestamente para unknown"
+    }
+  ],
+  "contract": "path_metrics(edge, support, rating_of, block) -> PathMetrics. `strength` weighs ONLY the observed, rated actions, by Markov mean-1 shares computed over the WHOLE action tuple and then renormalised over the qualifying subset. `role_delta` compares the two endpoint stances within ONE axis. App mirror: src/services/map/pathMetrics.ts.",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_path_metrics_fixtures.py",
+  "lamas_states": [
+    "CDP",
+    "PGD",
+    "SWPA",
+    "SWP",
+    "TKDA",
+    "TKD",
+    "GPSA",
+    "GPS",
+    "BTKA",
+    "BTK",
+    "SUBA",
+    "SUB"
+  ]
+}

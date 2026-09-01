@@ -1,0 +1,547 @@
+{
+  "contract": "build_aggregate(bundle) -> deduped states/edges/handovers. The edge identity is (source, target, WHOLE action sequence, actor); `inferred` is true only while every occurrence folded in was wholly inferred. `label` is excluded on purpose — it is the owner's own wording, a presentation choice, not a contract. App mirror: src/services/map/mapAggregate.ts.",
+  "edges": [
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "kimura"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "back control",
+      "target": "finish"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "armbar from guard"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "closed guard",
+      "target": "finish"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "triangle choke"
+      ],
+      "actor": "you",
+      "count": 2,
+      "inferred": false,
+      "source": "closed guard",
+      "target": "finish"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "hip bump sweep"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "closed guard",
+      "target": "mount"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "scissor sweep"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "closed guard",
+      "target": "mount"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "scissor sweep"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "closed guard",
+      "target": "start top"
+    },
+    {
+      "action_inferred": [
+        false,
+        true
+      ],
+      "actions": [
+        "berimbolo",
+        "sweep"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "de la riva guard",
+      "target": "back control"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "scissor sweep"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "de la riva guard",
+      "target": "start top"
+    },
+    {
+      "action_inferred": [
+        true
+      ],
+      "actions": [
+        "guard transition"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": true,
+      "source": "half guard",
+      "target": "closed guard"
+    },
+    {
+      "action_inferred": [
+        true,
+        false
+      ],
+      "actions": [
+        "sweep",
+        "knee cut pass"
+      ],
+      "actor": "you",
+      "count": 2,
+      "inferred": false,
+      "source": "half guard",
+      "target": "side control"
+    },
+    {
+      "action_inferred": [
+        true
+      ],
+      "actions": [
+        "control transition"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": true,
+      "source": "mount",
+      "target": "back control"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "armbar from guard"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "mount",
+      "target": "finish"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "kimura"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "side control",
+      "target": "finish"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "stack pressure"
+      ],
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "source": "start bottom",
+      "target": "start bottom"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "step around"
+      ],
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "source": "start bottom",
+      "target": "start bottom"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "single leg takedown"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "start neutral",
+      "target": "closed guard"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "single leg takedown"
+      ],
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "source": "start neutral",
+      "target": "start bottom"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "hip switch"
+      ],
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "source": "start neutral",
+      "target": "start neutral"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "bridge roll"
+      ],
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "source": "start top",
+      "target": "start neutral"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
+        "bridge upa escape"
+      ],
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "source": "start top",
+      "target": "start neutral"
+    },
+    {
+      "action_inferred": [
+        false,
+        false
+      ],
+      "actions": [
+        "standing guard pass",
+        "knee cut pass"
+      ],
+      "actor": "you",
+      "count": 1,
+      "inferred": false,
+      "source": "start top",
+      "target": "start top"
+    }
+  ],
+  "generated_from": "GrapplingArcAnalytics/scripts/export_map_aggregate_fixtures.py",
+  "handovers": [
+    {
+      "count": 1,
+      "from": "closed guard",
+      "from_actor": "you",
+      "from_key": "closed guard",
+      "to": "start top",
+      "to_actor": "partner",
+      "to_key": "start top"
+    },
+    {
+      "count": 1,
+      "from": "de la riva guard",
+      "from_actor": "you",
+      "from_key": "de la riva guard",
+      "to": "start neutral",
+      "to_actor": "partner",
+      "to_key": "start neutral"
+    },
+    {
+      "count": 1,
+      "from": "de la riva guard",
+      "from_actor": "you",
+      "from_key": "de la riva guard",
+      "to": "start top",
+      "to_actor": "partner",
+      "to_key": "start top"
+    },
+    {
+      "count": 2,
+      "from": "half guard",
+      "from_actor": "you",
+      "from_key": "half guard",
+      "to": "opp:whizzer",
+      "to_actor": "partner",
+      "to_key": "whizzer"
+    },
+    {
+      "count": 1,
+      "from": "half guard",
+      "from_actor": "you",
+      "from_key": "half guard",
+      "to": "start top",
+      "to_actor": "partner",
+      "to_key": "start top"
+    },
+    {
+      "count": 2,
+      "from": "mount",
+      "from_actor": "you",
+      "from_key": "mount",
+      "to": "start neutral",
+      "to_actor": "partner",
+      "to_key": "start neutral"
+    },
+    {
+      "count": 1,
+      "from": "opp:open guard",
+      "from_actor": "partner",
+      "from_key": "open guard",
+      "to": "start top",
+      "to_actor": "you",
+      "to_key": "start top"
+    },
+    {
+      "count": 1,
+      "from": "opp:sprawl",
+      "from_actor": "partner",
+      "from_key": "sprawl",
+      "to": "closed guard",
+      "to_actor": "you",
+      "to_key": "closed guard"
+    },
+    {
+      "count": 2,
+      "from": "opp:whizzer",
+      "from_actor": "partner",
+      "from_key": "whizzer",
+      "to": "half guard",
+      "to_actor": "you",
+      "to_key": "half guard"
+    },
+    {
+      "count": 1,
+      "from": "start neutral",
+      "from_actor": "partner",
+      "from_key": "start neutral",
+      "to": "back control",
+      "to_actor": "you",
+      "to_key": "back control"
+    },
+    {
+      "count": 1,
+      "from": "start neutral",
+      "from_actor": "partner",
+      "from_key": "start neutral",
+      "to": "de la riva guard",
+      "to_actor": "you",
+      "to_key": "de la riva guard"
+    },
+    {
+      "count": 1,
+      "from": "start neutral",
+      "from_actor": "partner",
+      "from_key": "start neutral",
+      "to": "finish",
+      "to_actor": "you",
+      "to_key": "finish"
+    },
+    {
+      "count": 1,
+      "from": "start neutral",
+      "from_actor": "you",
+      "from_key": "start neutral",
+      "to": "opp:sprawl",
+      "to_actor": "partner",
+      "to_key": "sprawl"
+    },
+    {
+      "count": 1,
+      "from": "start top",
+      "from_actor": "partner",
+      "from_key": "start top",
+      "to": "closed guard",
+      "to_actor": "you",
+      "to_key": "closed guard"
+    },
+    {
+      "count": 1,
+      "from": "start top",
+      "from_actor": "partner",
+      "from_key": "start top",
+      "to": "finish",
+      "to_actor": "you",
+      "to_key": "finish"
+    },
+    {
+      "count": 1,
+      "from": "start top",
+      "from_actor": "you",
+      "from_key": "start top",
+      "to": "opp:open guard",
+      "to_actor": "partner",
+      "to_key": "open guard"
+    },
+    {
+      "count": 1,
+      "from": "start top",
+      "from_actor": "partner",
+      "from_key": "start top",
+      "to": "start top",
+      "to_actor": "you",
+      "to_key": "start top"
+    }
+  ],
+  "source_bundle": "GrapplingArcApp/src/data/mockData/mock_user_bundle.json",
+  "states": [
+    {
+      "actor": "you",
+      "count": 2,
+      "inferred": false,
+      "nascent": false,
+      "node_key": "back control",
+      "type": "control"
+    },
+    {
+      "actor": "you",
+      "count": 8,
+      "inferred": false,
+      "nascent": false,
+      "node_key": "closed guard",
+      "type": "guard"
+    },
+    {
+      "actor": "you",
+      "count": 2,
+      "inferred": false,
+      "nascent": true,
+      "node_key": "de la riva guard",
+      "type": "guard"
+    },
+    {
+      "actor": "you",
+      "count": 6,
+      "inferred": true,
+      "nascent": false,
+      "node_key": "finish",
+      "type": "control"
+    },
+    {
+      "actor": "you",
+      "count": 3,
+      "inferred": false,
+      "nascent": true,
+      "node_key": "half guard",
+      "type": "guard"
+    },
+    {
+      "actor": "you",
+      "count": 4,
+      "inferred": false,
+      "nascent": false,
+      "node_key": "mount",
+      "type": "control"
+    },
+    {
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "nascent": true,
+      "node_key": "open guard",
+      "type": "guard"
+    },
+    {
+      "actor": "you",
+      "count": 3,
+      "inferred": false,
+      "nascent": false,
+      "node_key": "side control",
+      "type": "control"
+    },
+    {
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "nascent": true,
+      "node_key": "sprawl",
+      "type": "defensive"
+    },
+    {
+      "actor": "you",
+      "count": 5,
+      "inferred": true,
+      "nascent": false,
+      "node_key": "start bottom",
+      "type": "control"
+    },
+    {
+      "actor": "you",
+      "count": 6,
+      "inferred": true,
+      "nascent": false,
+      "node_key": "start neutral",
+      "type": "control"
+    },
+    {
+      "actor": "you",
+      "count": 6,
+      "inferred": true,
+      "nascent": false,
+      "node_key": "start top",
+      "type": "control"
+    },
+    {
+      "actor": "partner",
+      "count": 2,
+      "inferred": false,
+      "nascent": true,
+      "node_key": "whizzer",
+      "type": "defensive"
+    }
+  ]
+}

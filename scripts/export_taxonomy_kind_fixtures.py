@@ -12,6 +12,14 @@ Mesmo padrão de `scripts/export_markov_weight_fixtures.py`. Três peças do con
    em `kind_of` já absorve o segundo caso que existiria sem ele ("Costas"/"Back Control" dá
    estado nas duas leituras, porque agora é sempre estado).
 2. **A tabela de inferência D2** — copiada verbatim de ``data/taxonomy/inference_table.json``.
+2b. **Os dois insumos da Fase 2** que o App não tem como derivar sozinho, porque moram em
+   módulos Python curados (``data/taxonomy/state_orientation.json`` e ``analysis/attribution``):
+   ``state_orientation`` (a tabela curada, verbatim) e ``actor_role``/``actor_role_default``
+   (``attribution.classify(type,label).actor_role`` ACHATADO em ``"tipo|rótulo" -> papel`` mais
+   um default por tipo). `classify` é uma função pura de tabelas finitas — as linhas curadas
+   são enumeráveis, então achatar não é uma aproximação: é a mesma função, sem o segundo port
+   das 74 linhas de `attribution`. É a mesma disciplina de `library_lookup.json`, na direção
+   contrária (lá o Python lê um artefato derivado do App; aqui o App lê um derivado do Python).
 3. **O lookup de biblioteca** (``data/taxonomy/library_lookup.json``) — o ÚNICO artefato que
    ``analysis.taxonomy_kind.resolve_library_entry``/``kind_of_entry`` leem em runtime. Este
    script é o único lugar autorizado a abrir o arquivo do App (é o gerador); CI roda esta
@@ -37,8 +45,15 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from analysis import attribution  # noqa: E402
 from analysis.names import _normalize_name  # noqa: E402
-from analysis.taxonomy_kind import kind_of, load_inference_table, orientation_of  # noqa: E402
+from analysis.taxonomy_kind import (  # noqa: E402
+    kind_of,
+    load_inference_table,
+    load_orientation_table,
+    orientation_for_inference,
+    orientation_of,
+)
 from export.app_node_scores import _name_variants, canonical_label  # noqa: E402
 
 APP_NODES_PATH = ROOT.parent / "GrapplingArcApp" / "src" / "data" / "grappling-arch.nodes.json"
@@ -104,15 +119,98 @@ def build_library_lookup() -> dict[str, list[str]]:
     return lookup
 
 
+def _curated_pairs() -> set[tuple[str, str]]:
+    """Every ``(event_type, label)`` pair ``attribution.classify`` names explicitly — the
+    ``_LABEL`` exact rows plus each type's own curated label sets. Read off the module rather
+    than re-listed here, so a new curated row lands in the fixture on the next regeneration
+    instead of silently staying out of the contract."""
+    pairs: set[tuple[str, str]] = set(attribution._LABEL)
+    for label_set, typ in (
+        (attribution._GUARD_BOTTOM, "guard"),
+        (attribution._GUARD_NEUTRAL, "guard"),
+        (attribution._CONTROL_TOP, "control"),
+        (attribution._CONTROL_BACK, "control"),
+        (attribution._CONTROL_GRIP, "control"),
+    ):
+        for label in label_set:
+            pairs.add((typ, label))
+    return pairs
+
+
+def build_actor_roles() -> tuple[dict[str, str], dict[str, str]]:
+    """``({"<type>|<normalized label>": actor_role}, {"<type>": default_actor_role})`` —
+    ``analysis.attribution.classify(...).actor_role`` flattened.
+
+    Every row is produced by CALLING ``classify``, never by re-reading its tables in this
+    file's own order, so the precedence inside it (``_LABEL`` exact row > the type's curated
+    label set > the type default) is preserved by construction rather than re-implemented. The
+    key domain is the union of every curated ``(type, label)`` pair, which is finite and small;
+    a pair outside it is exactly what the per-type default answers, and a type outside THAT is
+    ``unknown`` (``classify``'s own last line).
+
+    This is level 3 of ``orientation_for_inference`` — the level the App would otherwise need a
+    second copy of ``attribution.py`` to reach.
+    """
+    labelled = _curated_pairs()
+    # A label the tables never name: forces `classify` down to its own per-type answer. The
+    # sentinel cannot collide with a real row (`_normalize_name` strips punctuation, so no
+    # curated key can contain it).
+    unnamed = "\x00 nao curado \x00"
+    types = sorted({t for t, _ in labelled} | set(attribution.EVENT_TYPES))
+    default = {t: attribution.classify(t, unnamed).actor_role for t in types}
+    default[""] = attribution.classify("", unnamed).actor_role
+
+    rows: dict[str, str] = {}
+    for typ, label in sorted(labelled):
+        role = attribution.classify(typ, label).actor_role
+        if role != default.get(typ, "unknown"):
+            rows[f"{typ}|{_normalize_name(label)}"] = role
+    return rows, default
+
+
+def build_orientation_probes() -> dict[str, dict[str, str]]:
+    """``{"<type>|<label>": {"value", "source"}}`` for ``orientation_for_inference`` — the
+    three-level reading the Fase 2 rule runs on BOTH endpoint states.
+
+    Not a fourth input: it is the OUTPUT of composing the three above, pinned so the App's port
+    is checked end to end instead of only on its parts. Probe set = every curated
+    ``attribution`` pair (where levels 1 and 2 miss and level 3 has to answer) + every technique
+    -library entry under its own library type (where level 1 or 2 usually answers) + the D2
+    generic states (the anchors the rule compares against).
+    """
+    probes = _curated_pairs()
+    for node in json.loads(APP_NODES_PATH.read_text(encoding="utf-8")):
+        label = canonical_label(node)
+        if label:
+            probes.add((str(node.get("type") or ""), label))
+    for entry in load_inference_table()["generic_states"].values():
+        probes.add((str(entry["type"]), str(entry["node_key"])))
+    out: dict[str, dict[str, str]] = {}
+    for typ, label in sorted(probes):
+        reading = orientation_for_inference(typ, label)
+        out[f"{typ}|{label}"] = {"value": reading.value, "source": reading.source}
+    return out
+
+
 def build_fixture() -> dict[str, Any]:
+    actor_role, actor_role_default = build_actor_roles()
     return {
         "generated_from": "GrapplingArcAnalytics/scripts/export_taxonomy_kind_fixtures.py",
         "contract": (
             "kind_of(label, type) -> 'action'|'state'|'transparent' (D1); "
-            "inference_table = D2's structural pair -> generic node/edge lookup, verbatim."
+            "inference_table = D2's structural pair -> generic node/edge lookup, verbatim; "
+            "state_orientation = the curated orientation table, verbatim; "
+            "actor_role[type|label] (falling back to actor_role_default[type], then 'unknown') "
+            "= attribution.classify(type,label).actor_role, level 3 of "
+            "orientation_for_inference; orientation_for_inference[type|label] = the composed "
+            "three-level reading."
         ),
         "kinds": build_kinds(),
         "inference_table": load_inference_table(),
+        "state_orientation": load_orientation_table(),
+        "actor_role": actor_role,
+        "actor_role_default": actor_role_default,
+        "orientation_for_inference": build_orientation_probes(),
     }
 
 
