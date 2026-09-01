@@ -93,7 +93,11 @@ class EngineConfig:
 # Seventh pin, 2026-08-26: batch-3 audited imports (+4 bouts, 913 matches) — incl. one more
 # Nadia Frankland bout (Bangkok 65kg final vs Loewenthal) and the Michell win_type corrected
 # to POINTS by the audit. Same corpus discipline as the sixth pin.
-SITE_RATING_RUN_ID: str | None = "694579a2-469d-4f30-bed8-9fce6b6ac071"
+# Eighth pin, 2026-09-01: Bruno Rocha frame-read batch (Gemini -> concordance; 3 bouts from
+# CBJJE Paulista / CBJJ Brasileiro No-Gi 2026, 3 new athletes; 914 matches, 719 eligible,
+# 672 athletes with state). Re-pinned together with the "edge = path" map ship so the
+# published Grappling ELO and athletes.elo read the same corpus again.
+SITE_RATING_RUN_ID: str | None = "8ff9fb45-ab30-4385-87c1-402c9918ee53"
 
 # Publish-confidence cut. An editorial decision calibrated against measured impact
 # (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87
