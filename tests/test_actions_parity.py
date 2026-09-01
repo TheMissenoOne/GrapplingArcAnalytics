@@ -36,6 +36,10 @@ def _ev(label: str, type_: str, actor: str = "a", **kw: Any) -> dict[str, Any]:
 # ── P1 — canonical multiset invariance ───────────────────────────────────────────────────
 
 
+@pytest.mark.skipif(
+    not MOCK_BUNDLE_PATH.exists(),
+    reason="sibling GrapplingArcApp checkout not present (CI runner) — mock bundle unreadable",
+)
 def test_p1_action_multiset_matches_golden() -> None:
     """The App's mock bundle, compiled today, produces the same
     ``(action_key, actor, inferred) -> count`` multiset the golden fixture pins
@@ -52,6 +56,10 @@ def test_p1_action_multiset_matches_golden() -> None:
     assert got == golden["multiset"]
 
 
+@pytest.mark.skipif(
+    not MOCK_BUNDLE_PATH.exists(),
+    reason="sibling GrapplingArcApp checkout not present (CI runner) — mock bundle unreadable",
+)
 def test_p1_observed_actions_are_the_invariant_the_inference_rule_may_never_move() -> None:
     """The half of P1 that is a real invariant, split out so it cannot be regenerated away.
     OBSERVED actions come one-for-one from the log: 22 occurrences on the mock bundle, before
