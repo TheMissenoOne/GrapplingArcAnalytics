@@ -32,6 +32,9 @@ from analysis.flow_layout import (
     ANCHOR_STRUCTURES,
     DEFAULT_ANCHOR_STRUCTURE,
     FLOW_TARGET_ASPECT,
+    _bubbles,
+    _relax,
+    _spread,
     flow_layout,
     label_half_extent,
 )
@@ -125,7 +128,8 @@ def test_no_two_state_names_overlap(name: str, case: dict[str, Any], structure: 
     bundled, weight, label_len = _case_inputs(case)
     slots = case["structures"][structure]["anchor_slots"]
     pos = flow_layout(bundled, structure=structure, anchor_slots=slots,
-                      weight=weight, label_len=label_len)
+                      weight=weight, label_len=label_len,
+                      target_aspect=case["target_aspect"])
     hits = _overlaps(_boxes(bundled, label_len, pos), _ends_of(bundled))
     assert hits["node/node"] == []
 
@@ -139,28 +143,69 @@ def test_two_runs_are_bit_identical(name: str, case: dict[str, Any], structure: 
     bundled, weight, label_len = _case_inputs(case)
     slots = case["structures"][structure]["anchor_slots"]
     first = flow_layout(bundled, structure=structure, anchor_slots=slots, weight=weight,
-                        label_len=label_len)
+                        label_len=label_len, target_aspect=case["target_aspect"])
     second = flow_layout(bundled, structure=structure, anchor_slots=slots, weight=weight,
-                         label_len=label_len)
+                         label_len=label_len, target_aspect=case["target_aspect"])
     assert json.dumps(first, sort_keys=True) == json.dumps(second, sort_keys=True)
 
 
 @pytest.mark.parametrize(("name", "case", "structure"), _MATRIX,
                           ids=[f"{n}-{s}" for n, _, s in _MATRIX])
-def test_anchors_never_move_for_the_labels(name: str, case: dict[str, Any],
-                                            structure: str) -> None:
-    """"...while keeping the anchor nodes fixed" — owner, verbatim. The frame is placed by the
-    ellipse and bent by the aspect pass, and NEITHER reads a label; the relaxation reads every
-    label and never writes an anchor. So changing every label in the picture has to leave the
-    frame byte-identical."""
+def test_no_force_ever_writes_an_anchor(name: str, case: dict[str, Any], structure: str) -> None:
+    """"...while keeping the anchor nodes fixed" — owner, verbatim.
+
+    The two force stages are the only code that reads a label, so this is where an anchor could
+    be pushed by a name. Both are called directly with the same `fixed` set `flow_layout` passes
+    them, and every anchor entry has to come out byte-identical."""
     del name
     bundled, weight, label_len = _case_inputs(case)
     slots = case["structures"][structure]["anchor_slots"]
-    bare = flow_layout(bundled, structure=structure, anchor_slots=slots, weight=weight)
-    named = flow_layout(bundled, structure=structure, anchor_slots=slots, weight=weight,
-                        label_len=label_len)
+    pos = flow_layout(bundled, structure=structure, anchor_slots=slots, weight=weight,
+                      label_len=label_len, target_aspect=case["target_aspect"])
+    before = dict(pos)
+    bubbles = _bubbles(bundled, label_len)
+    neighbours: dict[str, list[str]] = {}
+    for seg in bundled.segments:
+        neighbours.setdefault(seg.from_point, []).append(seg.to_point)
+        neighbours.setdefault(seg.to_point, []).append(seg.from_point)
+    _spread(pos, bubbles, set(slots), neighbours)
+    _relax(pos, bubbles, set(slots))
     for point_id in slots:
-        assert bare[point_id] == named[point_id]
+        assert pos[point_id] == before[point_id]
+
+
+@pytest.mark.parametrize(("name", "case", "structure"), _MATRIX,
+                          ids=[f"{n}-{s}" for n, _, s in _MATRIX])
+def test_the_frame_is_bent_with_the_picture_never_pushed_by_a_name(
+        name: str, case: dict[str, Any], structure: str) -> None:
+    """An anchor's world position DOES move when the labels change, and that is not a defect:
+    `_compact` is a global affine bend, its factor is read off the picture's own bounds, and
+    since 2026-09-01 the picture reaching it has been through `_spread`, which reads labels. So
+    the anchors ride the bend.
+
+    What must stay true is that they ride it TOGETHER — one affine map for all of them, no
+    per-anchor push. Solve the map from the two extreme anchors on each axis and check the rest;
+    an axis with fewer than three distinct anchor coordinates cannot falsify anything and is
+    skipped."""
+    del name
+    bundled, weight, label_len = _case_inputs(case)
+    slots = case["structures"][structure]["anchor_slots"]
+    common = {"structure": structure, "anchor_slots": slots, "weight": weight,
+              "target_aspect": case["target_aspect"]}
+    bare = flow_layout(bundled, **common)
+    named = flow_layout(bundled, label_len=label_len, **common)
+    ids = sorted(slots)
+    for axis in (0, 1):
+        coords = sorted({bare[i][axis] for i in ids})
+        if len(coords) < 3:
+            continue
+        lo = min(ids, key=lambda i: bare[i][axis])
+        hi = max(ids, key=lambda i: bare[i][axis])
+        scale = ((named[hi][axis] - named[lo][axis])
+                 / (bare[hi][axis] - bare[lo][axis]))
+        offset = named[lo][axis] - scale * bare[lo][axis]
+        for i in ids:
+            assert named[i][axis] == pytest.approx(scale * bare[i][axis] + offset, abs=1e-6)
 
 
 def test_a_flat_chain_is_left_alone_by_the_aspect_pass() -> None:

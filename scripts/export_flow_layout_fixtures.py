@@ -71,6 +71,9 @@ from analysis.flow_layout import (  # noqa: E402
     FLOW_RELAX_ROUNDS,
     FLOW_RELAX_SLACK,
     FLOW_ROW_GAP,
+    FLOW_SPREAD_MARGIN,
+    FLOW_SPREAD_PULL,
+    FLOW_SPREAD_ROUNDS,
     FLOW_TARGET_ASPECT,
     anchor_units,
     flow_layout,
@@ -97,15 +100,19 @@ APP_OUT = (
 #: ``(path_id, source, actions, target)``
 Spec = tuple[str, str, tuple[str, ...], str]
 
-#: ``(name, why, paths, anchor node_keys)`` — an anchor entry maps a STATE key to its slot name
-#: (`neutral`/`top`/`bottom`/`finish_you`/`finish_opp`, resolved per structure below, exactly as
-#: `render_map_prototypes._anchor_slot` does).
-CASES: list[tuple[str, str, list[Spec], dict[str, str]]] = [
+#: ``(name, why, paths, anchor node_keys, target_aspect)`` — an anchor entry maps a STATE key to
+#: its slot name (`neutral`/`top`/`bottom`/`finish_you`/`finish_opp`, resolved per structure
+#: below, exactly as `render_map_prototypes._anchor_slot` does). ``target_aspect`` is ``None``
+#: everywhere but the one case that exists to lock the parameter: every OTHER case is generated
+#: at the fixed `FLOW_TARGET_ASPECT`, so the fixture stays a statement about the algorithm and
+#: not about anybody's screen.
+CASES: list[tuple[str, str, list[Spec], dict[str, str], float | None]] = [
     (
         "linear",
         "cadeia trivial A->B->C: ranks 0,1,2 e uma linha só",
         [("p1", "A", ("1",), "B"), ("p2", "B", ("2",), "C")],
         {},
+        None,
     ),
     (
         "fork_merge",
@@ -113,6 +120,7 @@ CASES: list[tuple[str, str, list[Spec], dict[str, str]]] = [
         [("p1", "A", ("1",), "B"), ("p2", "A", ("2",), "C"),
          ("p3", "B", ("3",), "D"), ("p4", "C", ("4",), "D")],
         {},
+        None,
     ),
     (
         "cycle",
@@ -120,6 +128,7 @@ CASES: list[tuple[str, str, list[Spec], dict[str, str]]] = [
         "própria semente e o visited-set é o que impede o laço infinito",
         [("p1", "A", ("1",), "B"), ("p2", "B", ("2",), "C"), ("p3", "C", ("3",), "A")],
         {},
+        None,
     ),
     (
         "anchored",
@@ -134,6 +143,7 @@ CASES: list[tuple[str, str, list[Spec], dict[str, str]]] = [
         ],
         {"start neutral": "neutral", "start bottom": "bottom", "start top": "top",
          "finish": "finish_you"},
+        None,
     ),
     (
         "crowded",
@@ -150,6 +160,24 @@ CASES: list[tuple[str, str, list[Spec], dict[str, str]]] = [
             ("p7", "start bottom", ("scissor sweep",), "mounted position"),
         ],
         {"start neutral": "neutral", "start bottom": "bottom", "finish": "finish_you"},
+        None,
+    ),
+    (
+        "phone_aspect",
+        "os mesmos caminhos de `crowded`, com o aspecto de um celular em pe (700/390). Existe "
+        "para travar o PARAMETRO `target_aspect`: um porte que ignorasse o argumento e usasse "
+        "`FLOW_TARGET_ASPECT` passaria em todos os outros casos e falharia so aqui",
+        [
+            ("p1", "start neutral", ("double leg takedown",), "side control"),
+            ("p2", "start neutral", ("guard pull",), "de la riva guard"),
+            ("p3", "de la riva guard", ("berimbolo", "back take"), "back control"),
+            ("p4", "side control", ("knee on belly", "mount transition"), "mounted position"),
+            ("p5", "mounted position", ("americana",), "finish"),
+            ("p6", "back control", ("rear naked choke",), "finish"),
+            ("p7", "start bottom", ("scissor sweep",), "mounted position"),
+        ],
+        {"start neutral": "neutral", "start bottom": "bottom", "finish": "finish_you"},
+        700.0 / 390.0,
     ),
 ]
 
@@ -164,7 +192,7 @@ def _slot_for(base_slot: str, structure: str) -> str:
 
 def build_fixture() -> dict[str, Any]:
     cases: list[dict[str, Any]] = []
-    for name, why, specs, anchors in CASES:
+    for name, why, specs, anchors, target_aspect in CASES:
         paths = [
             RenderPath(path_id=pid, source=src, target=tgt, actions=actions,
                        actor="you", count=1)
@@ -214,7 +242,8 @@ def build_fixture() -> dict[str, Any]:
                 if any(p.state_key == state for p in bundled.points)
             }
             pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
-                              weight=weight, label_len=label_len)
+                              weight=weight, label_len=label_len,
+                              target_aspect=target_aspect)
             per_structure[structure] = {
                 "anchor_slots": dict(sorted(anchor_slots.items())),
                 "positions": {
@@ -225,6 +254,7 @@ def build_fixture() -> dict[str, Any]:
         cases.append({
             "name": name,
             "why": why,
+            "target_aspect": target_aspect,
             "paths": [
                 {"path_id": pid, "source": src, "actions": list(actions), "target": tgt}
                 for pid, src, actions, tgt in specs
@@ -247,11 +277,15 @@ def build_fixture() -> dict[str, Any]:
     return {
         "generated_from": "GrapplingArcAnalytics/scripts/export_flow_layout_fixtures.py",
         "contract": (
-            "flow_layout(bundled, structure, anchor_slots, weight) -> point id -> (x, y). "
+            "flow_layout(bundled, structure, anchor_slots, weight, label_len, "
+            "target_aspect) -> point id -> (x, y). "
             "Ranks by multi-source BFS with a visited set (a back edge is SKIPPED, never "
             "re-ranked); anchors never take a grid slot but their row counts in the barycentre "
             "sweeps, then they are bolted onto the structure's vertices on an ellipse sized to "
-            "the grid. App mirror: src/services/map/flowLayout.ts."
+            "the grid. The label boxes are then SPREAD (all-pairs repulsion + a pull "
+            "toward each point's neighbours), the picture is bent to target_aspect at constant "
+            "area, and overlapping boxes are relaxed apart, names last. App mirror: "
+            "src/services/map/flowLayout.ts."
         ),
         "constants": {
             "FLOW_RANK_GAP": FLOW_RANK_GAP,
@@ -269,6 +303,9 @@ def build_fixture() -> dict[str, Any]:
             "FLOW_RELAX_PUSH": FLOW_RELAX_PUSH,
             "FLOW_RELAX_SLACK": FLOW_RELAX_SLACK,
             "FLOW_RELAX_PULL": FLOW_RELAX_PULL,
+            "FLOW_SPREAD_ROUNDS": FLOW_SPREAD_ROUNDS,
+            "FLOW_SPREAD_MARGIN": FLOW_SPREAD_MARGIN,
+            "FLOW_SPREAD_PULL": FLOW_SPREAD_PULL,
             "FLOW_TARGET_ASPECT": FLOW_TARGET_ASPECT,
             "FLOW_COMPACT_MIN": FLOW_COMPACT_MIN,
             "FLOW_RELAX_MAX_BUBBLES": FLOW_RELAX_MAX_BUBBLES,

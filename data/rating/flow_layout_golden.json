@@ -194,7 +194,7 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              0.0,
+              247.678571429,
               0.0
             ],
             "s:B": [
@@ -202,7 +202,7 @@
               0.0
             ],
             "s:C": [
-              600.0,
+              352.321428571,
               0.0
             ]
           }
@@ -211,7 +211,7 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              0.0,
+              247.678571429,
               0.0
             ],
             "s:B": [
@@ -219,7 +219,7 @@
               0.0
             ],
             "s:C": [
-              600.0,
+              352.321428571,
               0.0
             ]
           }
@@ -228,7 +228,7 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              0.0,
+              247.678571429,
               0.0
             ],
             "s:B": [
@@ -236,12 +236,13 @@
               0.0
             ],
             "s:C": [
-              600.0,
+              352.321428571,
               0.0
             ]
           }
         }
       },
+      "target_aspect": null,
       "weight": {
         "s:A": 1.0,
         "s:B": 2.0,
@@ -414,19 +415,19 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              128.973686235,
+              240.704214139,
               0.0
             ],
             "s:B": [
               300.0,
-              -114.01754251
+              -39.530523907
             ],
             "s:C": [
               300.0,
-              114.01754251
+              39.530523907
             ],
             "s:D": [
-              471.026313765,
+              359.295785861,
               0.0
             ]
           }
@@ -435,19 +436,19 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              128.973686235,
+              240.704214139,
               0.0
             ],
             "s:B": [
               300.0,
-              -114.01754251
+              -39.530523907
             ],
             "s:C": [
               300.0,
-              114.01754251
+              39.530523907
             ],
             "s:D": [
-              471.026313765,
+              359.295785861,
               0.0
             ]
           }
@@ -456,24 +457,25 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              128.973686235,
+              240.704214139,
               0.0
             ],
             "s:B": [
               300.0,
-              -114.01754251
+              -39.530523907
             ],
             "s:C": [
               300.0,
-              114.01754251
+              39.530523907
             ],
             "s:D": [
-              471.026313765,
+              359.295785861,
               0.0
             ]
           }
         }
       },
+      "target_aspect": null,
       "weight": {
         "s:A": 2.0,
         "s:B": 2.0,
@@ -612,15 +614,15 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              -11.937544035,
+              187.60876584,
               0.0
             ],
             "s:B": [
-              323.875088069,
+              322.234787278,
               0.0
             ],
             "s:C": [
-              588.062455965,
+              390.156446881,
               0.0
             ]
           }
@@ -629,15 +631,15 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              -11.937544035,
+              187.60876584,
               0.0
             ],
             "s:B": [
-              323.875088069,
+              322.234787278,
               0.0
             ],
             "s:C": [
-              588.062455965,
+              390.156446881,
               0.0
             ]
           }
@@ -646,20 +648,21 @@
           "anchor_slots": {},
           "positions": {
             "s:A": [
-              -11.937544035,
+              187.60876584,
               0.0
             ],
             "s:B": [
-              323.875088069,
+              322.234787278,
               0.0
             ],
             "s:C": [
-              588.062455965,
+              390.156446881,
               0.0
             ]
           }
         }
       },
+      "target_aspect": null,
       "weight": {
         "s:A": 2.0,
         "s:B": 2.0,
@@ -874,23 +877,23 @@
           "positions": {
             "s:closed guard": [
               300.0,
-              85.781769193
+              -10.184902745
             ],
             "s:finish": [
-              509.463600657,
-              -14.047466813
+              502.161630428,
+              -18.961247445
             ],
             "s:mount": [
               300.0,
-              -110.509551628
+              -88.213040969
             ],
             "s:start bottom": [
               300.0,
-              172.142400438
+              173.953698469
             ],
             "s:start neutral": [
-              90.536399343,
-              -14.047466813
+              97.838369572,
+              -18.961247445
             ]
           }
         },
@@ -902,16 +905,16 @@
           },
           "positions": {
             "s:closed guard": [
-              291.770084729,
-              81.858928635
+              309.375265516,
+              33.599283252
             ],
             "s:finish": [
               473.127032364,
               -110.903689978
             ],
             "s:mount": [
-              293.538811537,
-              -103.57380602
+              224.2819772,
+              81.53731391
             ],
             "s:start bottom": [
               223.720054994,
@@ -931,28 +934,29 @@
           },
           "positions": {
             "s:closed guard": [
-              300.0,
-              114.01754251
+              304.47193331,
+              -64.836904822
             ],
             "s:finish": [
-              471.026313765,
-              0.0
+              420.933866224,
+              -48.122577483
             ],
             "s:mount": [
-              300.0,
-              -114.01754251
+              261.638016931,
+              28.09286942
             ],
             "s:start bottom": [
-              151.886867564,
-              114.01754251
+              195.268199672,
+              113.122577483
             ],
             "s:start neutral": [
-              128.973686235,
-              0.0
+              179.066133776,
+              -48.122577483
             ]
           }
         }
       },
+      "target_aspect": null,
       "weight": {
         "s:closed guard": 2.0,
         "s:finish": 2.0,
@@ -1240,32 +1244,32 @@
           },
           "positions": {
             "s:back control": [
-              579.687123493,
-              15.512397611
+              535.124137617,
+              -48.68200669
             ],
             "s:de la riva guard": [
-              320.312876507,
-              -1.01604237
+              400.330773649,
+              -96.047496059
             ],
             "s:finish": [
-              709.374246987,
-              -3.054282347
+              658.305010322,
+              -31.947476576
             ],
             "s:mounted position": [
-              324.589434084,
-              -78.249952609
+              473.169569838,
+              64.130282285
             ],
             "s:side control": [
-              316.674930418,
-              160.58319145
+              335.638695245,
+              44.871594209
             ],
             "s:start bottom": [
               450.0,
-              192.416164658
+              211.445612825
             ],
             "s:start neutral": [
-              190.625753013,
-              -3.054282347
+              241.694989678,
+              -31.947476576
             ]
           }
         },
@@ -1277,32 +1281,32 @@
           },
           "positions": {
             "s:back control": [
-              581.494215939,
-              -29.111191344
+              548.99206322,
+              -7.199654379
             ],
             "s:de la riva guard": [
-              312.485735187,
-              -67.438144561
+              391.008589484,
+              2.393740828
             ],
             "s:finish": [
-              664.596151583,
-              -112.590303801
+              651.410856322,
+              -122.675782969
             ],
             "s:mounted position": [
-              354.993192562,
-              -143.650617112
+              427.644364026,
+              -73.88296256
             ],
             "s:side control": [
-              354.908224617,
-              100.860283084
+              302.127159021,
+              -75.274424618
             ],
             "s:start bottom": [
-              363.930523892,
-              177.526677245
+              367.043149877,
+              184.068626585
             ],
             "s:start neutral": [
-              178.10894673,
-              -1.775477755
+              191.294241991,
+              -5.509844378
             ]
           }
         },
@@ -1314,36 +1318,37 @@
           },
           "positions": {
             "s:back control": [
-              570.933866224,
-              -0.00568568
+              532.544497305,
+              -51.476137825
             ],
             "s:de la riva guard": [
-              331.915103659,
-              3.114521551
+              389.843451087,
+              -94.341361584
             ],
             "s:finish": [
-              691.867732449,
-              0.0
+              620.902808826,
+              -14.800870044
             ],
             "s:mounted position": [
-              329.066133776,
-              -241.555792532
+              540.541129905,
+              73.113799053
             ],
             "s:side control": [
-              348.702395657,
-              133.95748831
+              389.90649972,
+              49.254436822
             ],
             "s:start bottom": [
-              240.536399343,
-              104.809350728
+              301.993825978,
+              133.529050185
             ],
             "s:start neutral": [
-              208.132267551,
-              0.0
+              279.097191174,
+              -14.800870044
             ]
           }
         }
       },
+      "target_aspect": null,
       "weight": {
         "s:back control": 2.0,
         "s:de la riva guard": 2.0,
@@ -1354,6 +1359,400 @@
         "s:start neutral": 2.0
       },
       "why": "rótulos LONGOS em ranks vizinhos: sem a relaxação as caixas se cobrem mesmo com os pontos a 300 unidades de distância — é o defeito que o dono viu na captura, e o único caso em que a compactação de aspecto e as duas passadas de relaxação realmente pesam"
+    },
+    {
+      "bubbles": {
+        "points": {
+          "s:back control": [
+            53.6,
+            38.0
+          ],
+          "s:de la riva guard": [
+            66.8,
+            38.0
+          ],
+          "s:finish": [
+            33.8,
+            38.0
+          ],
+          "s:mounted position": [
+            66.8,
+            38.0
+          ],
+          "s:side control": [
+            53.6,
+            38.0
+          ],
+          "s:start bottom": [
+            53.6,
+            38.0
+          ],
+          "s:start neutral": [
+            56.9,
+            38.0
+          ]
+        },
+        "segments": {
+          "g:0": [
+            66.8,
+            16.0
+          ],
+          "g:1": [
+            83.3,
+            16.0
+          ],
+          "g:2": [
+            43.7,
+            16.0
+          ],
+          "g:3": [
+            119.6,
+            16.0
+          ],
+          "g:4": [
+            56.9,
+            16.0
+          ],
+          "g:5": [
+            47.0,
+            16.0
+          ],
+          "g:6": [
+            76.7,
+            16.0
+          ]
+        }
+      },
+      "bundled": {
+        "points": [
+          {
+            "id": "s:start neutral",
+            "kind": "state",
+            "state_key": "start neutral"
+          },
+          {
+            "id": "s:side control",
+            "kind": "state",
+            "state_key": "side control"
+          },
+          {
+            "id": "s:de la riva guard",
+            "kind": "state",
+            "state_key": "de la riva guard"
+          },
+          {
+            "id": "s:back control",
+            "kind": "state",
+            "state_key": "back control"
+          },
+          {
+            "id": "s:mounted position",
+            "kind": "state",
+            "state_key": "mounted position"
+          },
+          {
+            "id": "s:finish",
+            "kind": "state",
+            "state_key": "finish"
+          },
+          {
+            "id": "s:start bottom",
+            "kind": "state",
+            "state_key": "start bottom"
+          }
+        ],
+        "segments": [
+          {
+            "actions": [
+              "rear naked choke"
+            ],
+            "from_point": "s:back control",
+            "id": "g:0",
+            "path_ids": [
+              "p6"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "berimbolo",
+              "back take"
+            ],
+            "from_point": "s:de la riva guard",
+            "id": "g:1",
+            "path_ids": [
+              "p3"
+            ],
+            "to_point": "s:back control"
+          },
+          {
+            "actions": [
+              "americana"
+            ],
+            "from_point": "s:mounted position",
+            "id": "g:2",
+            "path_ids": [
+              "p5"
+            ],
+            "to_point": "s:finish"
+          },
+          {
+            "actions": [
+              "knee on belly",
+              "mount transition"
+            ],
+            "from_point": "s:side control",
+            "id": "g:3",
+            "path_ids": [
+              "p4"
+            ],
+            "to_point": "s:mounted position"
+          },
+          {
+            "actions": [
+              "scissor sweep"
+            ],
+            "from_point": "s:start bottom",
+            "id": "g:4",
+            "path_ids": [
+              "p7"
+            ],
+            "to_point": "s:mounted position"
+          },
+          {
+            "actions": [
+              "guard pull"
+            ],
+            "from_point": "s:start neutral",
+            "id": "g:5",
+            "path_ids": [
+              "p2"
+            ],
+            "to_point": "s:de la riva guard"
+          },
+          {
+            "actions": [
+              "double leg takedown"
+            ],
+            "from_point": "s:start neutral",
+            "id": "g:6",
+            "path_ids": [
+              "p1"
+            ],
+            "to_point": "s:side control"
+          }
+        ]
+      },
+      "label_len": {
+        "g:0": 16,
+        "g:1": 21,
+        "g:2": 9,
+        "g:3": 32,
+        "g:4": 13,
+        "g:5": 10,
+        "g:6": 19,
+        "s:back control": 12,
+        "s:de la riva guard": 16,
+        "s:finish": 6,
+        "s:mounted position": 16,
+        "s:side control": 12,
+        "s:start bottom": 12,
+        "s:start neutral": 13
+      },
+      "name": "phone_aspect",
+      "paths": [
+        {
+          "actions": [
+            "double leg takedown"
+          ],
+          "path_id": "p1",
+          "source": "start neutral",
+          "target": "side control"
+        },
+        {
+          "actions": [
+            "guard pull"
+          ],
+          "path_id": "p2",
+          "source": "start neutral",
+          "target": "de la riva guard"
+        },
+        {
+          "actions": [
+            "berimbolo",
+            "back take"
+          ],
+          "path_id": "p3",
+          "source": "de la riva guard",
+          "target": "back control"
+        },
+        {
+          "actions": [
+            "knee on belly",
+            "mount transition"
+          ],
+          "path_id": "p4",
+          "source": "side control",
+          "target": "mounted position"
+        },
+        {
+          "actions": [
+            "americana"
+          ],
+          "path_id": "p5",
+          "source": "mounted position",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "rear naked choke"
+          ],
+          "path_id": "p6",
+          "source": "back control",
+          "target": "finish"
+        },
+        {
+          "actions": [
+            "scissor sweep"
+          ],
+          "path_id": "p7",
+          "source": "start bottom",
+          "target": "mounted position"
+        }
+      ],
+      "ranks": {
+        "s:back control": 2,
+        "s:de la riva guard": 1,
+        "s:finish": 2,
+        "s:mounted position": 1,
+        "s:side control": 1,
+        "s:start bottom": 0,
+        "s:start neutral": 0
+      },
+      "structures": {
+        "losango": {
+          "anchor_slots": {
+            "s:finish": "finish",
+            "s:start bottom": "bottom",
+            "s:start neutral": "neutral"
+          },
+          "positions": {
+            "s:back control": [
+              543.115892898,
+              -38.274962994
+            ],
+            "s:de la riva guard": [
+              377.194884081,
+              -54.37575766
+            ],
+            "s:finish": [
+              677.861421853,
+              -22.976688982
+            ],
+            "s:mounted position": [
+              475.344811048,
+              64.855109786
+            ],
+            "s:side control": [
+              333.485093569,
+              41.264487963
+            ],
+            "s:start bottom": [
+              450.0,
+              199.526969547
+            ],
+            "s:start neutral": [
+              222.138578147,
+              -22.976688982
+            ]
+          }
+        },
+        "pentagono": {
+          "anchor_slots": {
+            "s:finish": "finish_you",
+            "s:start bottom": "bottom",
+            "s:start neutral": "neutral"
+          },
+          "positions": {
+            "s:back control": [
+              558.608294715,
+              -8.22948365
+            ],
+            "s:de la riva guard": [
+              382.517864825,
+              -4.069963895
+            ],
+            "s:finish": [
+              673.009544342,
+              -109.51247551
+            ],
+            "s:mounted position": [
+              430.370247339,
+              -80.563497595
+            ],
+            "s:side control": [
+              290.903005432,
+              -81.438823115
+            ],
+            "s:start bottom": [
+              361.944391279,
+              170.905319126
+            ],
+            "s:start neutral": [
+              169.695553971,
+              -2.402409009
+            ]
+          }
+        },
+        "triangulo": {
+          "anchor_slots": {
+            "s:finish": "finish",
+            "s:start bottom": "bottom",
+            "s:start neutral": "neutral"
+          },
+          "positions": {
+            "s:back control": [
+              523.667770928,
+              -45.37649267
+            ],
+            "s:de la riva guard": [
+              387.363513243,
+              -84.562770034
+            ],
+            "s:finish": [
+              636.947769319,
+              -11.848912741
+            ],
+            "s:mounted position": [
+              529.718341386,
+              80.288543843
+            ],
+            "s:side control": [
+              385.853823666,
+              47.598978633
+            ],
+            "s:start bottom": [
+              288.098482589,
+              123.750458636
+            ],
+            "s:start neutral": [
+              263.052230681,
+              -11.848912741
+            ]
+          }
+        }
+      },
+      "target_aspect": 1.794871794871795,
+      "weight": {
+        "s:back control": 2.0,
+        "s:de la riva guard": 2.0,
+        "s:finish": 2.0,
+        "s:mounted position": 3.0,
+        "s:side control": 2.0,
+        "s:start bottom": 1.0,
+        "s:start neutral": 2.0
+      },
+      "why": "os mesmos caminhos de `crowded`, com o aspecto de um celular em pe (700/390). Existe para travar o PARAMETRO `target_aspect`: um porte que ignorasse o argumento e usasse `FLOW_TARGET_ASPECT` passaria em todos os outros casos e falharia so aqui"
     }
   ],
   "constants": {
@@ -1374,9 +1773,12 @@
     "FLOW_RELAX_ROUNDS": 120,
     "FLOW_RELAX_SLACK": 2.0,
     "FLOW_ROW_GAP": 130.0,
+    "FLOW_SPREAD_MARGIN": 24.0,
+    "FLOW_SPREAD_PULL": 0.06,
+    "FLOW_SPREAD_ROUNDS": 60,
     "FLOW_TARGET_ASPECT": 1.5
   },
-  "contract": "flow_layout(bundled, structure, anchor_slots, weight) -> point id -> (x, y). Ranks by multi-source BFS with a visited set (a back edge is SKIPPED, never re-ranked); anchors never take a grid slot but their row counts in the barycentre sweeps, then they are bolted onto the structure's vertices on an ellipse sized to the grid. App mirror: src/services/map/flowLayout.ts.",
+  "contract": "flow_layout(bundled, structure, anchor_slots, weight, label_len, target_aspect) -> point id -> (x, y). Ranks by multi-source BFS with a visited set (a back edge is SKIPPED, never re-ranked); anchors never take a grid slot but their row counts in the barycentre sweeps, then they are bolted onto the structure's vertices on an ellipse sized to the grid. The label boxes are then SPREAD (all-pairs repulsion + a pull toward each point's neighbours), the picture is bent to target_aspect at constant area, and overlapping boxes are relaxed apart, names last. App mirror: src/services/map/flowLayout.ts.",
   "default_anchor_structure": "triangulo",
   "generated_from": "GrapplingArcAnalytics/scripts/export_flow_layout_fixtures.py"
 }

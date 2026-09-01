@@ -661,6 +661,65 @@ sem teste de convergência — rodada fixa sobre iteração ORDENADA, só `+,-,*
 `flow_layout_golden.json` bateu bit a bit com o port TS na PRIMEIRA execução, incluindo o caso
 `crowded` que existe só para exercitar as duas etapas novas.
 
+### 10.5.3 Espalhamento e aspecto do VIEWPORT (dono, 2026-09-01, terceira passada)
+
+> *"The force graph on the app has not been applied. It still too stretched."*
+
+A relaxação de §10.5.1 só separa caixas que JÁ se sobrepõem, e pelo eixo de MENOR penetração —
+para um rank cheio de caixas largas e baixas esse eixo é sempre o vertical, então o rank continuou
+uma COLUNA. Medido no bundle do dono (15 estados, 33 segmentos, rótulos em pt-BR): 11 pontos
+livres em **5** valores distintos de `x`, 36 cruzamentos, **8,3%** do quadro coberto por algo
+legível. Nenhuma relaxação conserta isso, porque não havia sobreposição.
+
+Duas etapas novas, nesta ordem — **espalhar, depois dobrar**:
+
+1. **`_spread`** (`FLOW_SPREAD_ROUNDS = 60`, `FLOW_SPREAD_MARGIN = 24`, `FLOW_SPREAD_PULL = 0.06`)
+   — toda bolha de ESTADO repele toda outra dentro da própria caixa de rótulo mais uma margem
+   (elipse normalizada pela caixa do par), e uma mola fraca puxa cada ponto para a MÉDIA dos
+   vizinhos. A repulsão preenche o quadro; a atração é o que deixa um ponto sair do `x` do seu
+   rank — com ela em 0 os cruzamentos SOBEM (36 → 57) e as colunas sobrevivem (5 → 8 valores de
+   `x`). Âncoras entram como obstáculo e como vizinho, nunca no mapa de deslocamento.
+2. **`_compact(target_aspect)`** — o alvo deixou de ser a constante 1,5 e virou PARÂMETRO: 1,5 não
+   é propriedade do grafo, é um chute sobre a superfície onde ele é desenhado. Quem mediu o
+   próprio container passa `max(w, h) / min(w, h)`; o site, o protótipo e as goldens continuam na
+   constante (a fixture cruzada é gerada com aspecto fixo, mais um caso `phone_aspect` que existe
+   só para travar o argumento). Espalhar ANTES de dobrar é medido: na ordem inversa o
+   espalhamento achatava o desenho de volta para aspecto 2,65 numa tela que pedia 1,79.
+
+**`_pinned_axes`** é o terceiro conserto e é de raiz. Um ponto livre espremido entre DUAS âncoras
+imóveis no mesmo eixo está num ciclo-limite: empurrá-lo para longe de uma o enfia na outra pela
+mesma quantidade. Medido no caso `crowded`/`triangulo`: `side control` ficou 1,84 unidades dentro
+de `start neutral` E de `start bottom` pelas 120 rodadas, e subir para 200 rodadas não mudou nada,
+porque o ponto fixo daquele par de forças É a sobreposição. O par cuja saída barata está travada
+passa a resolver pelo outro eixo — a saída sempre esteve lá (44,5 unidades na horizontal).
+
+**Medido, bundle do dono, antes → depois** (viewport útil 390×700 e 1280×700; ocupação = caixa
+desenhada na escala de fit sobre a área do viewport):
+
+| | antes | depois |
+|---|---|---|
+| ocupação, 390×700 | 49,2% | **83,2%** |
+| ocupação, 1280×700 | 52,2% | **89,8%** |
+| escala de fit (tamanho do texto) | 0,309 / 0,576 | **0,534 / 1,005** |
+| `x` distintos entre 11 pontos livres | 5 | **11** |
+| cruzamentos | 36 | **14** |
+| cobertura legível do quadro | 8,3% | **14,8%** |
+| pares nome×nome sobrepostos | 0 | **0** |
+
+Duas das três parcelas foram medidas isoladas: o aspecto do viewport sozinho vale +12/+15 pontos
+de ocupação, o espalhamento sozinho +6/+9, e o resto é o enquadramento (App: `computeFitTransform`
+passou a enquadrar a CAIXA em vez de uma caixa centrada no centróide ponderado num layout pinado —
+0,3086 → 0,3413 de escala, 49,2% → 60,2% de ocupação, antes de qualquer mudança de layout).
+
+⚠️ **Rejeitado por medição:** encolher a elipse da moldura (`FLOW_ANCHOR_RX_SHARE` 2,0 → 1,5/1,2/1,0)
+aumenta a cobertura legível (14,8% → 19,8/24/27%) e QUEBRA o critério duro — 1 a 2 pares de nomes
+de estado sobrepostos no aspecto do celular em todas as variantes menores — além de piorar
+ocupação (83 → 74/67%) e cruzamentos (14 → 27/31). A moldura larga fica.
+
+⚠️ **O bundle do site precisa ser regerado**: `_spread` move toda posição de `pathGraph`
+(`GA_OCEAN` e os inline de `grapple-*`/`breakdown-*`). É `export/site_data.py`, mesmo precedente
+de §10.5.2 — a mudança de código não invalida o `item_hash` sozinha.
+
 ### 10.5.2 Estrutura de âncora: o triângulo, em todo lugar (dono, 2026-09-01)
 
 `DEFAULT_ANCHOR_STRUCTURE` passou de `pentagono` para `triangulo`, e é o default de verdade: o

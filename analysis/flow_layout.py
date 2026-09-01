@@ -1,10 +1,12 @@
 """Deterministic left-to-right layout for a bundled path graph (Fase 4/5,
 ``docs/taxonomy/03_ARESTA_COMO_CAMINHO.md`` §10.5).
 
-Four stages, in this order: **rank** (multi-source BFS) -> **order** (barycentre sweeps) ->
-**bend** (``_compact``, the long axis toward ``FLOW_TARGET_ASPECT`` at constant area) ->
-**relax** (``_relax``, label boxes push each other apart while a decaying spring holds the
-layer). The last two are the owner call of 2026-09-01 — see §10.5 of the contract doc.
+Five stages, in this order: **rank** (multi-source BFS) -> **order** (barycentre sweeps) ->
+**spread** (``_spread``, every state repels every other one while a weak spring pulls it toward
+its neighbours — the force half) -> **bend** (``_compact``, the long axis toward the target
+aspect at constant area) -> **relax** (``_relax``, overlapping label boxes push each other apart
+while a decaying spring holds the layer). The last three are the owner calls of 2026-09-01 — see
+§10.5.1 and §10.5.3 of the contract doc.
 
 Extracted VERBATIM from ``scripts/render_map_prototypes.py``'s variant-13 layout so the App can
 mirror it (``src/services/map/flowLayout.ts``) against a golden fixture. The prototype now
@@ -58,6 +60,9 @@ __all__ = [
     "FLOW_RELAX_SLACK",
     "FLOW_RELAX_ROUNDS",
     "FLOW_ROW_GAP",
+    "FLOW_SPREAD_MARGIN",
+    "FLOW_SPREAD_PULL",
+    "FLOW_SPREAD_ROUNDS",
     "FLOW_TARGET_ASPECT",
     "PENTAGON_ANGLES",
     "anchor_units",
@@ -134,6 +139,41 @@ FLOW_RELAX_PULL = 0.06
 #: edge crossing — the 41-over-42 measurement the ellipse constants were tuned on survives it.
 FLOW_TARGET_ASPECT = 1.5
 FLOW_COMPACT_MIN = 0.4
+#: Owner, 2026-09-01 (third pass): *"the force graph on the app has not been applied. It still
+#: too stretched."* The relaxation of §10.5.1 only separates boxes that ALREADY overlap, and it
+#: does it on the axis of LEAST penetration — for a rank full of wide, short label boxes that
+#: axis is always the vertical one, so a rank stayed a perfect COLUMN. Measured on the owner's
+#: own bundle: 11 free points on 5 distinct x values, 36 edge crossings, 8.3% of the frame
+#: covered by anything readable. A relaxation cannot fix that, because nothing was overlapping.
+#:
+#: `_spread` is the missing force: every STATE bubble repels every other one inside its own
+#: label box (plus a margin), and a weak spring pulls each point toward the MEAN of its
+#: neighbours. The repulsion is what fills the frame; the neighbour pull is what lets a point
+#: leave its rank's x, which is the only thing that breaks the column — measured, with the pull
+#: at 0 the crossings go UP (36 -> 57) and the columns survive (5 -> 8 distinct x).
+#:
+#: Measured on the owner's bundle, before -> after (`_spread` + a viewport-shaped target
+#: aspect): 11 free points on 5 distinct x -> 11 on 11, crossings 36 -> 14, readable coverage
+#: 8.3% -> 14.8%, and state-name overlaps stay at 0. Rounds/margin/pull were swept, not picked:
+#: 30 rounds under-packs (occupancy 74.8), 120 costs crossings (14 -> 27), pull 0.10 costs more
+#: (14 -> 33), margin 36 buys nothing the margin 12 does not.
+FLOW_SPREAD_ROUNDS = 60
+#: Breathing room beyond the two label boxes, in world units, and the value that carries the
+#: "no two state names overlap" guarantee. Swept on the owner's own bundle at a phone's target
+#: aspect: 0 leaves 2 overlapping name pairs, 12 and 20 leave 1, 24 and 36 leave 0, 48 costs
+#: occupancy (89.8% -> 83.2% on a desktop) and puts one back. 24 is the smallest that leaves
+#: zero, so it is the one.
+#:
+#: It has to be the spread and not the relaxation: raising ``FLOW_RELAX_ROUNDS`` to 200 did NOT
+#: clear the same pair. ``_relax`` separates on the axis of least penetration, and a pair wedged
+#: between two other names and a fixed anchor sits in a limit cycle where each round's move
+#: recreates the previous round's overlap. The spread has no such cycle — it is a soft disc with
+#: an equilibrium — so the slack has to be there before the relaxation starts.
+FLOW_SPREAD_MARGIN = 24.0
+#: How hard a point is pulled toward the mean of its neighbours during the spread. This is the
+#: "attraction" half of a force layout, and the reason the picture stays a readable flow instead
+#: of an even scatter.
+FLOW_SPREAD_PULL = 0.06
 #: ponytail: the relaxation is O(bubbles^2) per round. Under this many it is microseconds; over
 #: it, it is skipped entirely and the layout is the grid it always was. That is the ocean
 #: (§12.4 of the contract doc already declares a layered layout wrong for a graph with 3 sources
@@ -336,9 +376,19 @@ def _bubbles(bundled: BundledGraph, label_len: dict[str, int]) -> list[_Bubble]:
     return out
 
 
-def _compact(pos: dict[str, tuple[float, float]]) -> dict[str, tuple[float, float]]:
-    """Bend the picture toward ``FLOW_TARGET_ASPECT`` about its own centre, at CONSTANT AREA:
-    the long axis shrinks by ``k``, the short one grows by ``1/k``.
+def _compact(pos: dict[str, tuple[float, float]],
+             target: float = FLOW_TARGET_ASPECT) -> dict[str, tuple[float, float]]:
+    """Bend the picture toward ``target`` about its own centre, at CONSTANT AREA: the long axis
+    shrinks by ``k``, the short one grows by ``1/k``.
+
+    ``target`` is a PARAMETER and not the constant it used to be because 1.5 is not a property
+    of the graph — it is a guess at the shape of the surface the graph is drawn on. A phone in
+    portrait wants a tall picture and a desktop wants a wide one, and a layout bent to 1.5 on
+    both wastes whatever the mismatch is: measured on the owner's bundle, a fixed 1.5 fills
+    65.5% of a 390x700 viewport and 72.8% of a 1280x700 one, while the viewport's OWN long-axis
+    ratio fills 77.7% and 87.3%. The caller that knows the surface passes it; everyone else
+    (the site export, the prototype, the goldens) keeps the constant, so the cross-repo fixture
+    is still generated at one fixed aspect.
 
     Area is the half of this that took a measurement to learn. Squashing x alone hit the target
     aspect and made the box 2.4x too small to hold the labels it has to hold — the relaxation
@@ -359,16 +409,137 @@ def _compact(pos: dict[str, tuple[float, float]]) -> dict[str, tuple[float, floa
     if width <= 0.0 or height <= 0.0:
         return pos
     aspect = width / height
-    k = math.sqrt(FLOW_TARGET_ASPECT / aspect) if aspect > FLOW_TARGET_ASPECT \
-        else math.sqrt(aspect / FLOW_TARGET_ASPECT)
+    k = math.sqrt(target / aspect) if aspect > target else math.sqrt(aspect / target)
     if k >= 1.0:
         return pos
     k = max(k, FLOW_COMPACT_MIN)
     cx = (min(xs) + max(xs)) / 2.0
     cy = (min(ys) + max(ys)) / 2.0
-    if aspect > FLOW_TARGET_ASPECT:
+    if aspect > target:
         return {p: (cx + (x - cx) * k, cy + (y - cy) / k) for p, (x, y) in pos.items()}
     return {p: (cx + (x - cx) / k, cy + (y - cy) * k) for p, (x, y) in pos.items()}
+
+
+def _spread(pos: dict[str, tuple[float, float]], bubbles: list[_Bubble], fixed: set[str],
+            neighbours: dict[str, list[str]]) -> None:
+    """Push every STATE bubble off every other one — not only the pairs that already overlap —
+    and pull each point toward the mean of its neighbours. In place, fixed rounds.
+
+    This is the half the relaxation cannot do. ``_relax`` resolves a PAIR that overlaps, on the
+    axis of least penetration; a rank of wide, short label boxes stacked in one column overlaps
+    on nothing, so the column survives every round of it. Here the "overlap" is measured against
+    an ELLIPSE the size of the two label boxes plus ``FLOW_SPREAD_MARGIN`` — a pair inside it is
+    pushed apart along the line between them, which has an x component, which is what lets a
+    point leave its rank.
+
+    The neighbour pull is the attraction of a force layout and it is not optional: with it at 0
+    the repulsion alone scattered the picture and the crossings went from 36 to 57 on the
+    owner's bundle. Anchors are read as neighbours and as obstacles, and never written.
+
+    Determinism, same as ``_relax``: fixed rounds over lists sorted by id, ``+,-,*,/`` and one
+    ``sqrt``. Every accumulation walks the same order the TS port walks.
+    """
+    if len(bubbles) > FLOW_RELAX_MAX_BUBBLES:
+        return
+    node_bubbles = [b for b in bubbles if len(b[3]) == 1]
+    movable = sorted(p for p in pos if p not in fixed)
+    if not movable:
+        return
+    n = len(node_bubbles)
+    for _round in range(FLOW_SPREAD_ROUNDS):
+        dx: dict[str, float] = {p: 0.0 for p in movable}
+        dy: dict[str, float] = {p: 0.0 for p in movable}
+        for i in range(n):
+            a_id, a_hw, a_hh, _a_riders = node_bubbles[i]
+            ax, ay = pos[a_id]
+            for j in range(i + 1, n):
+                b_id, b_hw, b_hh, _b_riders = node_bubbles[j]
+                bx, by = pos[b_id]
+                want_x = a_hw + b_hw + FLOW_SPREAD_MARGIN
+                want_y = a_hh + b_hh + FLOW_SPREAD_MARGIN
+                # Normalised to the pair's own box, so one distance covers a wide name and a
+                # bare dot without either of them reserving the other's room.
+                ex = (ax - bx) / want_x
+                ey = (ay - by) / want_y
+                d = math.sqrt(ex * ex + ey * ey)
+                if d >= 1.0:
+                    continue
+                gap = 1.0 - d
+                if d > 0.0:
+                    ux, uy = ex / d, ey / d
+                else:  # exactly coincident — the id is the only thing left to break the tie
+                    ux, uy = (1.0 if a_id > b_id else -1.0), 0.0
+                sx = FLOW_RELAX_PUSH * gap * want_x * ux
+                sy = FLOW_RELAX_PUSH * gap * want_y * uy
+                if a_id in dx:
+                    dx[a_id] += sx
+                    dy[a_id] += sy
+                if b_id in dx:
+                    dx[b_id] -= sx
+                    dy[b_id] -= sy
+        for p in movable:
+            near = sorted(neighbours.get(p, []))
+            if not near:
+                continue
+            x, y = pos[p]
+            mx = sum(pos[q][0] for q in near) / float(len(near))
+            my = sum(pos[q][1] for q in near) / float(len(near))
+            dx[p] += (mx - x) * FLOW_SPREAD_PULL
+            dy[p] += (my - y) * FLOW_SPREAD_PULL
+        for p in movable:
+            x, y = pos[p]
+            pos[p] = (x + dx[p], y + dy[p])
+
+
+def _pinned_axes(pos: dict[str, tuple[float, float]], bubbles: list[_Bubble],
+                 fixed: set[str]) -> tuple[set[str], set[str]]:
+    """Axes a movable name cannot escape on, because an IMMOVABLE name is pressing it from both
+    sides.
+
+    ``_relax`` separates each pair on the axis of least penetration, which is right for two free
+    boxes and a LIMIT CYCLE when the cheap axis is the pinned one. Measured on the golden's own
+    ``crowded`` case, triangle frame: ``side control`` sat 1.84 units inside BOTH ``start
+    neutral`` and ``start bottom`` — the same 1.84 — for all 120 rounds. Pushing it down cleared
+    the top anchor and re-entered the bottom one by exactly as much, and back. Raising the round
+    count to 200 changed nothing, because the fixed point of that pair of forces IS the overlap.
+
+    The exit was always there: the same pair overlapped by 44.5 units horizontally, and the
+    picture is wide open on that side. So a pair whose cheap axis is pinned resolves on the other
+    one. Both axes pinned = genuinely nowhere to go, and the cheap axis stands.
+
+    Returns ``(pinned_x, pinned_y)`` as point ids — only single-rider (name) bubbles can be
+    pinned, which is the class this failure lives in; a stroke's label rides two points and is
+    the secondary layer anyway.
+    """
+    immovable = [b for b in bubbles if all(r in fixed for r in b[3])]
+    if not immovable:
+        return set(), set()
+    pinned_x: set[str] = set()
+    pinned_y: set[str] = set()
+    for bid, hw, hh, riders in bubbles:
+        if len(riders) != 1 or riders[0] in fixed:
+            continue
+        x, y = pos[bid]
+        left = right = above = below = False
+        for _fid, fhw, fhh, friders in immovable:
+            fx, fy = pos[friders[0]]
+            gap_x = x - fx
+            gap_y = y - fy
+            if (hw + fhw) - abs(gap_x) <= 0.0 or (hh + fhh) - abs(gap_y) <= 0.0:
+                continue
+            if gap_x >= 0.0:
+                right = True
+            else:
+                left = True
+            if gap_y >= 0.0:
+                below = True
+            else:
+                above = True
+        if left and right:
+            pinned_x.add(bid)
+        if above and below:
+            pinned_y.add(bid)
+    return pinned_x, pinned_y
 
 
 def _relax(pos: dict[str, tuple[float, float]], bubbles: list[_Bubble],
@@ -394,6 +565,7 @@ def _relax(pos: dict[str, tuple[float, float]], bubbles: list[_Bubble],
         # after 400 rounds. Nothing readable overlapping is the requirement; "close to its rank"
         # is only the taste.
         pull = FLOW_RELAX_PULL * (1.0 - float(round_) / float(FLOW_RELAX_ROUNDS))
+        pinned_x, pinned_y = _pinned_axes(pos, bubbles, fixed)
         centre: dict[str, tuple[float, float]] = {}
         for bid, _hw, _hh, riders in bubbles:
             if len(riders) == 1:
@@ -433,7 +605,17 @@ def _relax(pos: dict[str, tuple[float, float]], bubbles: list[_Bubble],
                 over_y = (a_hh + b_hh) - (gap_y if gap_y >= 0.0 else -gap_y)
                 if over_y <= 0.0:
                     continue
-                if over_x <= over_y:  # separate on the axis that needs the smaller move
+                # Separate on the axis that needs the smaller move — unless that axis is one the
+                # movable side is PINNED on (see `_pinned_axes`), in which case the cheap move is
+                # a limit cycle and the expensive one is the only exit.
+                use_x = over_x <= over_y
+                if use_x and (a_id in pinned_x or b_id in pinned_x) \
+                        and a_id not in pinned_y and b_id not in pinned_y:
+                    use_x = False
+                elif not use_x and (a_id in pinned_y or b_id in pinned_y) \
+                        and a_id not in pinned_x and b_id not in pinned_x:
+                    use_x = True
+                if use_x:
                     step = FLOW_RELAX_PUSH * (over_x + FLOW_RELAX_SLACK)
                     sign = 1.0 if (gap_x > 0.0 or (gap_x == 0.0 and a_id > b_id)) else -1.0
                     _push(a_riders, dx, step * sign)
@@ -452,8 +634,8 @@ def _relax(pos: dict[str, tuple[float, float]], bubbles: list[_Bubble],
 
 
 def flow_layout(bundled: BundledGraph, *, structure: str, anchor_slots: dict[str, str],
-                weight: dict[str, float],
-                label_len: dict[str, int] | None = None) -> dict[str, tuple[float, float]]:
+                weight: dict[str, float], label_len: dict[str, int] | None = None,
+                target_aspect: float | None = None) -> dict[str, tuple[float, float]]:
     """Point id -> world (x, y). Free points land on a rank/row grid (flow reads left to right,
     the same direction the owner's map has always read); the ANCHORS are then bolted onto the
     chosen structure's vertices, on an ellipse sized to the grid it has to frame — so the frame
@@ -463,9 +645,13 @@ def flow_layout(bundled: BundledGraph, *, structure: str, anchor_slots: dict[str
 
     The grid is where the picture STARTS. ``label_len`` — character counts keyed by point id and
     by segment id, in the caller's own locale — turns every drawn name into a box, and the last
-    two stages bend the picture to a readable aspect and push those boxes off each other. Pass
-    nothing and every point is a bare 16-unit dot: the layout still runs, it just has no names
-    to keep apart."""
+    three stages spread those boxes over the frame, bend the frame to the shape it will be drawn
+    at, and push apart whatever the bend put back on top of something. Pass nothing and every
+    point is a bare 16-unit dot: the layout still runs, it just has no names to keep apart.
+
+    ``target_aspect`` is the long-axis ratio of the SURFACE (a caller that has measured its
+    container passes ``max(w, h) / min(w, h)``); ``None`` keeps ``FLOW_TARGET_ASPECT``, which is
+    what every generated artefact and every golden uses."""
     ids = [p.id for p in bundled.points]
     out_of: dict[str, list[str]] = {}
     in_of: dict[str, list[str]] = {}
@@ -512,12 +698,22 @@ def flow_layout(bundled: BundledGraph, *, structure: str, anchor_slots: dict[str
         ux, uy = units[slot]
         pos[p] = (cx + rx * ux, cy + ry * uy)
 
-    # The grid is now the STARTING point, not the answer: compact the long axis, then let the
-    # label boxes push each other out of the layers they were stacked in. Anchors are obstacles
-    # in that pass and never move.
-    pos = _compact(pos)
+    # The grid is now the STARTING point, not the answer. Three stages, in this order:
+    #   SPREAD  — every state repels every other one and is pulled toward its neighbours, so the
+    #             ranks stop being columns and the picture fills its own frame;
+    #   COMPACT — bend the result to the surface it will be drawn on, at constant area;
+    #   RELAX   — clean up whatever the bend put back on top of something, names last.
+    # Spread BEFORE compact on purpose: the bend is the last word on the SHAPE, and measured the
+    # other way round (compact, then spread) the spread flattened the picture back to aspect
+    # 2.65 on a viewport that asked for 1.79.
     fixed = set(anchor_slots)
     bubbles = _bubbles(bundled, label_len or {})
+    neighbours: dict[str, list[str]] = {}
+    for seg in bundled.segments:
+        neighbours.setdefault(seg.from_point, []).append(seg.to_point)
+        neighbours.setdefault(seg.to_point, []).append(seg.from_point)
+    _spread(pos, bubbles, fixed, neighbours)
+    pos = _compact(pos, FLOW_TARGET_ASPECT if target_aspect is None else target_aspect)
     _relax(pos, bubbles, fixed)
     # Second pass, STATE NAMES ONLY, and it is not a retry — it is the priority order the
     # contract doc already states ("rótulos de ação são a camada secundária", §10.7). Measured:
