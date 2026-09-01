@@ -67,6 +67,14 @@ class Profile(Base):
         Boolean, nullable=False, default=False, server_default="false"
     )
     archetype_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("archetypes.id"))
+    # This user is also a published athlete in the public corpus (alembic 0051). Nullable,
+    # one-way (private -> public, never the reverse — same shape as GraphNode.canonical_node_key),
+    # partial-unique so one athlete can't be claimed by two profiles. `authenticated` has no
+    # column grant for it (0023's explicit insert/update column lists don't name it) — only an
+    # admin/service-role write (e.g. scripts/import_user_bundle.py --athlete) can set it.
+    athlete_id: Mapped[str | None] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("athletes.id", ondelete="SET NULL")
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

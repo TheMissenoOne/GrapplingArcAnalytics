@@ -190,6 +190,7 @@ module = [
     "tests.test_elo_convergence",
     "tests.test_embeddings",
     "tests.test_grapplemap",
+    "tests.test_import_user_bundle",
     "tests.test_inference",
     "tests.test_match_breakdown",
     "tests.test_merge_attempt_nodes",

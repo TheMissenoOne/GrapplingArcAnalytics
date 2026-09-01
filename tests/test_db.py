@@ -615,3 +615,46 @@ def test_get_user_sessions_since_includes_tombstones(session):
     assert {r.id for r in rows} == {"s-live", "s-tomb"}  # tombstone not filtered out
     tomb = next(r for r in rows if r.id == "s-tomb")
     assert tomb.deleted_at is not None
+
+
+def test_profile_athlete_link_column_and_partial_unique(engine, session):
+    """Alembic 0051: ``profiles.athlete_id`` column exists and round-trips, and the
+    partial unique index (raw SQL in the migration, not represented in db/models.py —
+    same convention as 0048's ``ix_athletes_anonymized``) is re-created here directly
+    against SQLite (same partial-index syntax) so the CONSTRAINT is proven, not just
+    the column."""
+    from sqlalchemy import text
+    from sqlalchemy.exc import IntegrityError
+
+    from db.models import Athlete, Profile
+
+    with engine.connect() as conn:
+        conn.execute(
+            text(
+                "create unique index ux_profiles_athlete_id "
+                "on profiles (athlete_id) where athlete_id is not null"
+            )
+        )
+        conn.commit()
+
+    athlete = Athlete(name="Test Athlete")
+    session.add(athlete)
+    session.flush()
+
+    p1 = Profile(id=str(uuid.uuid4()), athlete_id=athlete.id)
+    session.add(p1)
+    session.commit()
+    assert session.get(Profile, p1.id).athlete_id == athlete.id
+
+    # A second profile claiming the SAME athlete violates the partial unique index.
+    p2 = Profile(id=str(uuid.uuid4()), athlete_id=athlete.id)
+    session.add(p2)
+    with pytest.raises(IntegrityError):
+        session.flush()
+    session.rollback()
+
+    # Two unlinked profiles (NULL athlete_id) never collide — the index is partial.
+    p3 = Profile(id=str(uuid.uuid4()))
+    p4 = Profile(id=str(uuid.uuid4()))
+    session.add_all([p3, p4])
+    session.commit()  # no error
