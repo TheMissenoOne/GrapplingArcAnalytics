@@ -17,12 +17,14 @@ from scripts.render_map_prototypes import (
     _ANCHOR_STRUCTURES,
     _BOUNDARY_COLOR,
     _BRIDGE_COLOR,
+    _DEFAULT_ANCHOR_STRUCTURE,
     _FIG_HEX,
     _FINISH_COLOR,
     _FINISH_ICON,
     _FINISH_KEY,
     _GATE_POLICY_DEFAULT,
     _GRAPH_JS,
+    _PATH_SCOPE_GLOBAL,
     _PENTAGON_ANGLES,
     _START_COLOR,
     _SYSTEM_COLOR,
@@ -46,6 +48,8 @@ from scripts.render_map_prototypes import (
     _own_graphview,
     _patch_graph_js,
     _paths_payloads,
+    _paths_scope_paths,
+    _paths_systems_payloads,
     _place_of,
     _qid,
     _select_displayed_bridges,
@@ -100,6 +104,7 @@ _EXPECTED_FILES = [
     "7-icones-categoria.html", "8-sistemas-colapsavel.html", "9-sistemas-expande-in-place.html",
     "10-gating-comparado.html", "11-sistemas-vista-separada.html",
     "12-sistemas-vista-separada-seletiva.html", "13-caminhos.html",
+    "14-caminhos-sistemas.html",
 ]
 
 _EXPECTED_VARIANT_KEYS = {
@@ -107,6 +112,7 @@ _EXPECTED_VARIANT_KEYS = {
     "4-migrado-oponente-seletivo", "5-hubs", "6-ghost-inferidos",
     "7-icones-categoria", "8-sistemas-colapsavel", "9-sistemas-expande-in-place",
     "11-sistemas-vista-separada", "12-sistemas-vista-separada-seletiva", "13-caminhos",
+    "14-caminhos-sistemas",
 }
 
 
@@ -130,13 +136,13 @@ def test_render_all_produces_every_artifact_with_valid_counts(tmp_path: Path) ->
         assert m["edges"] >= 0, name
         assert m["handover_links"] >= 0, name
         assert "knobs" in m, name
-        # 13 is fully positioned server-side, so its physics knobs are deliberately ZERO —
+        # 13/14 are fully positioned server-side, so their physics knobs are deliberately ZERO —
         # every other variant still hands graph.js a real repulsion budget.
-        assert m["knobs"]["charge"] > 0 or name == "13-caminhos", name
+        assert m["knobs"]["charge"] > 0 or name in ("13-caminhos", "14-caminhos-sistemas"), name
 
-    # handovers only exist where you+partner are both rendered (variants 3-8); variant 1/2
-    # never bridge actors
-    for name in ("1-baseline", "2-migrado-proprio", "13-caminhos"):
+    # handovers only exist where you+partner are both rendered (variants 3-8); variant 1/2/13/14
+    # never bridge actors (paths never cross actors — the compiler's own guarantee)
+    for name in ("1-baseline", "2-migrado-proprio", "13-caminhos", "14-caminhos-sistemas"):
         assert metrics["variants"][name]["handover_links"] == 0
     for name in ("3-migrado-oponente-completo", "4-migrado-oponente-seletivo", "5-hubs",
                  "6-ghost-inferidos", "7-icones-categoria"):
@@ -233,6 +239,8 @@ def test_render_all_is_deterministic(tmp_path: Path) -> None:
     assert (out1 / "12-sistemas-vista-separada-seletiva.html").read_bytes() == \
         (out2 / "12-sistemas-vista-separada-seletiva.html").read_bytes()
     assert (out1 / "13-caminhos.html").read_bytes() == (out2 / "13-caminhos.html").read_bytes()
+    assert (out1 / "14-caminhos-sistemas.html").read_bytes() == \
+        (out2 / "14-caminhos-sistemas.html").read_bytes()
 
 
 def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path: Path) -> None:
@@ -1095,3 +1103,141 @@ def test_variant13_every_segment_id_in_a_path_exists_as_a_drawn_link() -> None:
         assert drawn == set(page["segMeta"])
         for meta in page["pathMeta"].values():
             assert set(meta["segIds"]) <= drawn
+
+
+# ── variant 14 — "Caminhos por sistema" ─────────────────────────────────────────────
+
+
+def _detect(agg: Any) -> dict[str, Any]:
+    return _detect_systems(dict(agg.states), list(agg.edges.values()), list(agg.handovers.values()))
+
+
+def _variant14_context(agg: Any) -> tuple[list[Any], dict[str, Any], dict[str, str]]:
+    """The three pieces every variant-14 test needs: the raw (unfolded) paths, the detected
+    systems, and the qid -> place map (`_place_of`) the fold is built from."""
+    paths = render_paths(agg)
+    detected = _detect(agg)
+    excluded = _excluded_states(agg.states, detected["system_of"])
+    place_of = _place_of(detected["system_of"], excluded)
+    return paths, detected, place_of
+
+
+def test_variant14_draws_no_route_the_data_never_contained() -> None:
+    """13's own absolute requirement, over the FOLDED graph: the global page and every system's
+    own expansion may only license routes their own (folded) path list actually walks — reuses
+    `BundledGraph.walkable_routes()`, never a new check."""
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+    paths, detected, place_of = _variant14_context(agg)
+
+    global_scoped = _paths_scope_paths(paths, place_of, None, None)
+    global_bundled = bundle_paths(global_scoped)
+    global_routes = {(p.source, p.actions, p.target) for p in global_scoped}
+    assert global_bundled.walkable_routes() == global_routes
+
+    for s in detected["systems"]:
+        members = frozenset(s["members"])
+        scoped = _paths_scope_paths(paths, place_of, s["id"], members)
+        bundled = bundle_paths(scoped)
+        routes = {(p.source, p.actions, p.target) for p in scoped}
+        assert bundled.walkable_routes() == routes, s["id"]
+
+
+def test_variant14_every_path_touching_a_system_reappears_in_its_expansion() -> None:
+    """The owner's own invariant for 14: a path_id never disappears. One touching an ORIGINAL
+    (unfolded) system member shows up in that system's own expanded page too (not just at the
+    global level, where it may only draw up to the collapsed node); a path fully swallowed by
+    ONE system (both endpoints its members — dropped from the global page entirely, §10.1) shows
+    up in that system's expansion instead, never nowhere."""
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+    payload = _paths_systems_payloads(agg, bundle)
+    _paths, detected, _place_of_map = _variant14_context(agg)
+    system_of = detected["system_of"]
+    raw_by_id = {p.path_id: p for p in render_paths(agg)}
+
+    structure = _DEFAULT_ANCHOR_STRUCTURE
+    global_page = payload["pages"][f"{structure}|{_PATH_SCOPE_GLOBAL}"]
+    assert global_page["pathMeta"], "the mock bundle should draw at least one global path"
+
+    for path_id in global_page["pathMeta"]:
+        orig = raw_by_id[path_id]
+        touched = {system_of.get(orig.source), system_of.get(orig.target)} - {None}
+        for sys_id in touched:
+            sys_page = payload["pages"][f"{structure}|{sys_id}"]
+            assert path_id in sys_page["pathMeta"], (path_id, sys_id)
+
+    # every path_id NOT on the global page is exactly the ones fully swallowed by one system —
+    # and each of those reappears in that system's own expansion.
+    internal_ids = set(raw_by_id) - set(global_page["pathMeta"])
+    for path_id in internal_ids:
+        orig = raw_by_id[path_id]
+        sys_id = system_of.get(orig.source)
+        assert sys_id is not None and sys_id == system_of.get(orig.target), path_id
+        assert path_id in payload["pages"][f"{structure}|{sys_id}"]["pathMeta"]
+
+
+def test_variant14_global_page_collapses_systems_and_keeps_bridges_first_class() -> None:
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+    payload = _paths_systems_payloads(agg, bundle)
+    detected = _detect(agg)
+    systems = detected["systems"]
+    assert systems, "the mock bundle should detect at least one system"
+
+    global_page = payload["pages"][f"{_DEFAULT_ANCHOR_STRUCTURE}|{_PATH_SCOPE_GLOBAL}"]
+    system_nodes = [n for n in global_page["gv"]["nodes"] if n.get("system")]
+    assert {n["sysId"] for n in system_nodes} == {s["id"] for s in systems}
+    # a member state never draws as its own raw node at the global level — it is always folded
+    member_qids = {q for s in systems for q in s["members"]}
+    drawn_state_keys = {n["stateKey"] for n in global_page["gv"]["nodes"] if n.get("stateKey")}
+    assert drawn_state_keys.isdisjoint(member_qids)
+
+
+def test_variant14_expanded_system_marks_boundary_members_with_stub_destinations() -> None:
+    """§ owner request: a member that crosses gets the boundary ring + `[->out <-in]` suffix
+    (reused from `_system_boundary_view`), and every outside touch is a compact stub, never a
+    full-detail node — mirrors 11/12's own convention, on the path-shaped graph."""
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+    payload = _paths_systems_payloads(agg, bundle)
+    detected = _detect(agg)
+
+    saw_boundary_ring = False
+    saw_stub = False
+    for s in detected["systems"]:
+        page = payload["pages"][f"{_DEFAULT_ANCHOR_STRUCTURE}|{s['id']}"]
+        members = frozenset(s["members"])
+        for n in page["gv"]["nodes"]:
+            if n.get("stateKey") in members and n.get("ring") == _BOUNDARY_COLOR:
+                saw_boundary_ring = True
+                assert "[→" in n["label"] and "←" in n["label"], n
+            if n.get("stub"):
+                saw_stub = True
+                assert n.get("stateKey") not in members  # never a member of the OPEN system
+    assert saw_boundary_ring, "expected a crossing member across the mock bundle's systems"
+    assert saw_stub, "expected a boundary stub across the mock bundle's systems"
+
+
+def test_variant14_panel_carries_systems_info_and_crossing_histogram() -> None:
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+    payload = _paths_systems_payloads(agg, bundle)
+    global_page = payload["pages"][f"{_DEFAULT_ANCHOR_STRUCTURE}|{_PATH_SCOPE_GLOBAL}"]
+    stats = global_page["stats"]
+
+    assert stats["systems"] == payload["systems"] > 0
+    assert set(stats["systemMembers"]) == {s["id"] for s in _detect(agg)["systems"]}
+    assert sum(stats["systemMembers"].values()) > 0
+    assert set(stats["crossingHistogram"]) == {"0", "1", "2"}
+    assert sum(stats["crossingHistogram"].values()) == stats["paths"]
+
+
+def test_variant14_offers_the_same_structures_and_default_as_variant13() -> None:
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+    payload = _paths_systems_payloads(agg, bundle)
+
+    assert {s["id"] for s in payload["structures"]} == set(_ANCHOR_STRUCTURES)
+    assert payload["default"] == f"{_DEFAULT_ANCHOR_STRUCTURE}|{_PATH_SCOPE_GLOBAL}"
+    assert payload["scopes"][0]["id"] == _PATH_SCOPE_GLOBAL

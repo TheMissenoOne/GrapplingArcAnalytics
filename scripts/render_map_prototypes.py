@@ -73,6 +73,30 @@ here a crossing collapses to one STUB mini-node per destination PLACE, from
 cut / action-type hide / flow-bias live on the client. Direction: a per-action/handover/stub
 link is always structurally arrowed; only the GLOBAL aggregate link (``_collapse_directed``)
 asks ``analysis.network_metrics.edge_arrow`` whether the volume earns a direction.
+
+**13 default (owner call, 2026-09-01):** pentágono + Global + rótulos "todos" — every control
+still there, only the three defaults changed (structure/scope were already the approved default;
+only ``labelMode`` moved from ``'main'`` to ``'all'``). Documented here because it is the ONLY
+byte difference in ``13-caminhos.html`` from before this change (``diff -r`` gate, see
+``tests/test_render_map_prototypes.py``).
+
+**14 — "Caminhos por sistema" (owner request, 2026-09-01):** 13's own paths with systems
+collapsible in the 11/12 model, ``_render_variant14``/``_paths_systems_view``. Same
+``_detect_systems`` 11/12/13 already share; every system's members fold into one
+``_system_node`` at the GLOBAL page (bridges/anchors/opponent states stay first-class, never
+folded — owner call). A path is still a PATH through the fold: its ``path_id`` and metrics never
+change, only an endpoint that sits inside a collapsed system draws at the system's node instead
+of the member's own (``_paths_scope_paths``) — a path fully swallowed by one system (both
+endpoints its members) draws nothing at the global level, that is the expansion's own job.
+Clicking a system (its node, via ``n.sysId``, or its own SCOPES pill — reused verbatim from 13,
+a system pill already IS "expand in place") swaps to that system's own page: its members become
+real states again under 13's own ``_flow_layout``, restricted to the paths that touch it, and
+every outside touch reduces to 11/12's own compact stub (``_stub_node``) with a boundary ring on
+the crossing member (``_system_boundary_view``'s own convention) — the stub/boundary STYLING is
+reused verbatim; only the node/link assembly around them is new, because a path (segments) is a
+different shape than a two-sided graphview edge. Same shell as 13 (structure pills, label modes,
+selection model) — ``_PAGE14`` is a clone of ``_PAGE13`` (module convention: no
+``.format()``-shared JS body across variants), not a parametrisation of it.
 """
 
 # ruff: noqa: E501  (HTML/JS template strings are content)
@@ -2183,10 +2207,11 @@ def _paths_view(
     }
 
 
-def _paths_payloads(agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
-    """Every (anchor structure × scope) combo variant 13 can show, precomputed. Structures are
-    the owner's configurable frame; scopes are Global + one per detected system (the 11/12 pills,
-    reused as a PREDICATE over paths)."""
+def _paths_and_metrics(agg: Aggregate, bundle: dict[str, Any]
+                        ) -> tuple[list[RenderPath], dict[str, PathMetrics]]:
+    """Layer 2 (``render_paths``) + Fase 3's per-path metrics (``analysis.path_metrics``), shared
+    by variant 13's own view (``_paths_payloads``) and variant 14's collapsed-systems view
+    (``_paths_systems_payloads``) — same paths, same metrics, only the DRAWING differs."""
     paths = render_paths(agg)
     ratings = _rating_of_bundle(bundle)
     block = block_for_family(None, load_markov_weights())  # the App has no ruleset -> `global`
@@ -2201,6 +2226,14 @@ def _paths_payloads(agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
         metrics_by_path[f"p{i}"] = path_metrics(
             agg.edge_sample[key], support=support[rel],
             rating_of=lambda k: ratings.get(k), block=block)
+    return paths, metrics_by_path
+
+
+def _paths_payloads(agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
+    """Every (anchor structure × scope) combo variant 13 can show, precomputed. Structures are
+    the owner's configurable frame; scopes are Global + one per detected system (the 11/12 pills,
+    reused as a PREDICATE over paths)."""
+    paths, metrics_by_path = _paths_and_metrics(agg, bundle)
 
     detected = _detect_systems(dict(agg.states), list(agg.edges.values()),
                                list(agg.handovers.values()))
@@ -2220,6 +2253,285 @@ def _paths_payloads(agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
                         for k in sorted(_ANCHOR_STRUCTURES)],
         "scopes": [{"id": s["id"], "label": s["label"]} for s in scopes],
         "default": f"{_DEFAULT_ANCHOR_STRUCTURE}|{_PATH_SCOPE_GLOBAL}",
+    }
+
+
+# ── 2d. variant 14 — "Caminhos por sistema" (owner request, 2026-09-01) ────────────
+#
+# 13 with COLLAPSIBLE systems, in the 11/12 model: every detected system (same
+# `_detect_systems` 11/12/13 already share) folds into one node (`_system_node`, reused
+# verbatim) at the GLOBAL level — bridges/anchors/opponent states stay first-class (never
+# folded, owner call: "pontes como nós de primeira classe"). A path is still a PATH: its
+# `path_id` survives the fold, only its endpoint(s) that sit inside a collapsed system draw at
+# the system's node instead of the member's own — a path fully swallowed by one system (both
+# endpoints its members) draws nothing at the global level, it is the expansion's own job.
+# Clicking a system node/pill "expands in place": that ONE system's members become real states
+# again (13's own `_flow_layout`, restricted to the touching paths), every outside touch reduced
+# to 11/12's own compact stub (`_stub_node`) with a boundary ring on the member that crosses
+# (`_system_boundary_view`'s own convention) — REUSED, not reimplemented; only the node/link
+# assembly around them is new, because a path (segments) is a different shape than a two-sided
+# graphview edge.
+
+
+def _paths_scope_paths(paths: list[RenderPath], place_of: dict[str, str], focus: str | None,
+                        members: frozenset[str] | None) -> list[RenderPath]:
+    """Fold every path's endpoints through the system collapse: every system's members map to
+    its own node EXCEPT `focus`'s own members, which stay real states (the system currently
+    expanded in place). `members` (``focus``'s own member set, or ``None`` for the global page —
+    no touch filter) restricts entry to paths that actually touch `focus` — a member never draws
+    on a page it has nothing to do with just because it also touches something else. A path
+    entirely swallowed by ONE collapsed system (both folded endpoints land on the same "sys:"
+    place) draws nothing here — that is exactly what the expansion is for."""
+    def fold(qid: str) -> str:
+        place = place_of.get(qid, qid)
+        return qid if (focus is not None and place == focus) else place
+
+    out = []
+    for p in paths:
+        if members is not None and p.source not in members and p.target not in members:
+            continue
+        src, tgt = fold(p.source), fold(p.target)
+        if src == tgt and src.startswith("sys:"):
+            continue
+        out.append(RenderPath(path_id=p.path_id, source=src, target=tgt,
+                               actions=p.actions, actor=p.actor, count=p.count))
+    return out
+
+
+def _paths_systems_view(
+    agg: Aggregate, *, structure: str, focus: str | None,
+    metrics_by_path: dict[str, PathMetrics], paths: list[RenderPath],
+    detected: dict[str, Any], place_of: dict[str, str],
+    systems_by_id: dict[str, dict[str, Any]],
+    excluded_by_qid: dict[str, tuple[tuple[str, str], dict[str, Any]]],
+    bridge_qids: frozenset[str],
+) -> dict[str, Any]:
+    """One (anchor structure × focus) page — `_paths_view`'s own model (bundle -> `_flow_layout`
+    -> panel metrics), with systems COLLAPSED instead of hidden-as-stub. `focus=None` is the
+    GLOBAL page (every system folded); `focus="sys:N"` is that system expanded in place, its
+    members real, every outside touch a compact stub."""
+    unified = bool(_ANCHOR_STRUCTURES[structure]["unified_finish"])
+    opp_finish = _qid("partner", _FINISH_KEY)
+    members = frozenset(systems_by_id[focus]["members"]) if focus is not None else None
+
+    def _fold_unified(qid: str) -> str:
+        return _FINISH_KEY if (unified and qid == opp_finish) else qid
+
+    scoped = _paths_scope_paths(paths, place_of, focus, members)
+    if unified:
+        scoped = [
+            RenderPath(path_id=p.path_id, source=_fold_unified(p.source),
+                       target=_fold_unified(p.target), actions=p.actions,
+                       actor=p.actor, count=p.count)
+            for p in scoped
+        ]
+    bundled = bundle_paths(scoped)
+
+    count_of = {p.path_id: p.count for p in scoped}
+    actor_of = {p.path_id: p.actor for p in scoped}
+    labels = _display_action_labels(agg)
+    ghosts = _inferred_action_keys(agg)
+    qid_to_state = {_qid(k[1], k[0]): (k, v) for k, v in agg.states.items()}
+
+    anchor_slots: dict[str, str] = {}
+    node_weight: dict[str, float] = {}
+    for seg in bundled.segments:
+        w = float(_segment_weight(seg, count_of))
+        node_weight[seg.from_point] = node_weight.get(seg.from_point, 0.0) + w
+        node_weight[seg.to_point] = node_weight.get(seg.to_point, 0.0) + w
+    for pt in bundled.points:
+        if pt.state_key is None or pt.state_key.startswith("sys:"):
+            continue  # a junction or a collapsed system never sits on an anchor slot
+        found = qid_to_state.get(pt.state_key)
+        node_key = found[0][0] if found else pt.state_key
+        actor = found[0][1] if found else "you"
+        slot = _anchor_slot(node_key, actor, structure)
+        if slot is not None:
+            anchor_slots[pt.id] = slot
+
+    pos = _flow_layout(bundled, structure=structure, anchor_slots=anchor_slots, weight=node_weight)
+
+    # Boundary marks (only meaningful once a system is expanded): a MEMBER point with a segment
+    # reaching a non-member point is a crossing — `_system_boundary_view`'s own [->out <-in]
+    # convention, counted here at the SEGMENT level (the visual object actually drawn) rather
+    # than re-deriving it from the raw pre-bundle crossings.
+    out_count: dict[str, int] = {}
+    in_count: dict[str, int] = {}
+    if focus is not None:
+        assert members is not None
+        for seg in bundled.segments:
+            f_key, t_key = bundled.point(seg.from_point).state_key, bundled.point(seg.to_point).state_key
+            f_member, t_member = f_key in members, t_key in members
+            if f_member and not t_member:
+                out_count[seg.from_point] = out_count.get(seg.from_point, 0) + 1
+            if t_member and not f_member:
+                in_count[seg.to_point] = in_count.get(seg.to_point, 0) + 1
+
+    nodes: list[dict[str, Any]] = []
+    for pt in sorted(bundled.points, key=lambda p: p.id):
+        x, y = pos[pt.id]
+        if pt.state_key is None:
+            nodes.append({"id": pt.id, "label": "", "cat": "control", "size": 1,
+                           "color": _JUNCTION_COLOR, "junction": True, "kind": pt.kind,
+                           "x": x, "y": y, "pin": True})
+            continue
+        if pt.state_key.startswith("sys:"):
+            node = dict(_system_node(systems_by_id[pt.state_key]))
+            node["id"], node["sysId"] = pt.id, pt.state_key
+            node["x"], node["y"], node["pin"] = x, y, True
+            nodes.append(node)
+            continue
+        is_member = focus is not None and members is not None and pt.state_key in members
+        if focus is not None and not is_member:
+            # an outside touch while a system is expanded — always a bridge/anchor/opponent
+            # state (a member of ANOTHER system already folded to "sys:" above), reduced to the
+            # SAME compact stub 11/12 draws for exactly this situation.
+            node = dict(_stub_node(pt.state_key, systems_by_id, excluded_by_qid, bridge_qids))
+            node["id"] = pt.id
+            node["x"], node["y"], node["pin"] = x, y, True
+            nodes.append(node)
+            continue
+        found = qid_to_state.get(pt.state_key) or qid_to_state.get(opp_finish)
+        if found is not None:
+            (node_key, actor), v = found
+        else:  # defensive only — every state point comes from a row `Aggregate` already holds
+            node_key, actor = "", "you"
+            v = {"label": pt.state_key, "type": "control", "count": 1}
+        node = {
+            "id": pt.id, "stateKey": pt.state_key, "kind": "state",
+            "label": v["label"] if (unified and node_key == _FINISH_KEY)
+                      else _finish_label(node_key, actor, v["label"]),
+            "cat": _cat_of(v["type"]), "size": _clamp3(v["count"]),
+            "fighter": _ACTOR_SIDE[actor], "x": x, "y": y, "pin": True,
+        }
+        _apply_finish_style(node, node_key, actor)
+        _apply_start_style(node, node_key)
+        if unified and node_key == _FINISH_KEY:
+            node["split"] = [_FIG_HEX["a"], _FIG_HEX["b"]]
+            node.pop("ring", None)
+        o, i = out_count.get(pt.id, 0), in_count.get(pt.id, 0)
+        if o or i:
+            node["ring"] = _BOUNDARY_COLOR
+            node["label"] = f"{node['label']} [→{o} ←{i}]"
+        nodes.append(node)
+
+    links: list[dict[str, Any]] = []
+    seg_meta: dict[str, Any] = {}
+    for seg in bundled.segments:
+        acts = [labels.get(k, k) for k in seg.actions]
+        weight = _segment_weight(seg, count_of)
+        all_ghost = all(k in ghosts for k in seg.actions)
+        fighters = {actor_of[p] for p in seg.path_ids}
+        link = {
+            "id": seg.id, "from": seg.from_point, "to": seg.to_point,
+            "weight": _clamp3(weight), "arrow": True,
+            "label": " → ".join(acts),
+            "fighter": _ACTOR_SIDE[next(iter(sorted(fighters)))] if len(fighters) == 1 else "x",
+        }
+        if all_ghost:
+            link["inf"] = True
+            link["dash"] = [3, 4]
+        if pos[seg.to_point][0] <= pos[seg.from_point][0]:
+            link["bow"], link["back"] = 0.22, True
+        links.append(link)
+        seg_meta[seg.id] = {"pathIds": sorted(seg.path_ids), "actions": acts, "weight": weight,
+                             "shared": len(seg.path_ids) > 1}
+    _index_parallel_links(links)
+
+    label_of_state = {n["stateKey"]: n["label"] for n in nodes if n.get("stateKey")}
+    path_meta: dict[str, Any] = {}
+    for p in scoped:
+        m = metrics_by_path[p.path_id]
+        segs = [s.id for s in bundled.segments_of(p.path_id)]
+        path_meta[p.path_id] = {
+            "actor": p.actor, "count": p.count, "segIds": segs,
+            "actions": [labels.get(k, k) for k in p.actions],
+            "source": p.source, "target": p.target,
+            "sourceLabel": label_of_state.get(p.source, p.source),
+            "targetLabel": label_of_state.get(p.target, p.target),
+            "length": m.length, "observed": m.observed,
+            "observedRatio": round(m.observed_ratio, 3), "support": m.support,
+            "terminal": m.terminal, "roleDelta": m.role_delta,
+            "strength": None if m.strength is None else round(m.strength, 1),
+        }
+
+    lengths: dict[str, int] = {}
+    for p in scoped:
+        lengths[str(len(p.actions))] = lengths.get(str(len(p.actions)), 0) + 1
+    shared_actions = sum(len(s.actions) for s in bundled.segments if len(s.path_ids) > 1)
+    total_actions = sum(len(s.actions) for s in bundled.segments)
+    biggest = max(bundled.segments, key=lambda s: (len(s.path_ids), s.id), default=None)
+
+    # Systems panel extra: how many DISTINCT systems each rendered path's own ORIGINAL (unfolded)
+    # endpoints touch — 0, 1 or 2, never more (one path is exactly one state->state hop).
+    orig_by_id = {p.path_id: p for p in paths}
+    crossing = {"0": 0, "1": 0, "2": 0}
+    for p in scoped:
+        orig = orig_by_id[p.path_id]
+        touched = len({s for s in (detected["system_of"].get(orig.source),
+                                    detected["system_of"].get(orig.target)) if s is not None})
+        crossing[str(touched)] = crossing.get(str(touched), 0) + 1
+
+    return {
+        "gv": {"nodes": nodes, "links": links},
+        "segMeta": seg_meta,
+        "pathMeta": path_meta,
+        "stats": {
+            "paths": len(scoped),
+            "segments": len(bundled.segments),
+            "points": len(bundled.points),
+            "branchPoints": sum(1 for p in bundled.points if p.kind in ("branch", "branch-merge")),
+            "mergePoints": sum(1 for p in bundled.points if p.kind in ("merge", "branch-merge")),
+            "statePoints": sum(1 for p in bundled.points if p.kind == "state"),
+            "sharedActionPct": _pct(shared_actions, total_actions),
+            "biggestTrunk": None if biggest is None else {
+                "id": biggest.id, "paths": len(biggest.path_ids),
+                "actions": [labels.get(k, k) for k in biggest.actions],
+            },
+            "lengths": lengths,
+            "systems": len(systems_by_id),
+            "systemMembers": {sid: len(s["members"]) for sid, s in sorted(systems_by_id.items())},
+            "crossingHistogram": crossing,
+        },
+    }
+
+
+def _paths_systems_payloads(agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
+    """Variant 14's own payload builder — same (structure × scope) combinatorics as `_paths_payloads`
+    (13's), so 14 reuses 13's exact scope-pill/structure-pill navigation chrome; only the page
+    itself comes from `_paths_systems_view` (systems collapse/expand) instead of `_paths_view`
+    (systems only ever hidden-as-stub)."""
+    paths, metrics_by_path = _paths_and_metrics(agg, bundle)
+
+    states = dict(agg.states)
+    edges = list(agg.edges.values())
+    handovers = list(agg.handovers.values())
+    detected = _detect_systems(states, edges, handovers)
+    systems = detected["systems"]
+    bridge_qids = frozenset(detected["bridge_qids"])
+    excluded = _excluded_states(states, detected["system_of"])
+    place_of = _place_of(detected["system_of"], excluded)
+    systems_by_id = {s["id"]: s for s in systems}
+    excluded_by_qid = {_qid(k[1], k[0]): (k, v) for k, v in excluded.items()}
+
+    scopes: list[dict[str, Any]] = [{"id": _PATH_SCOPE_GLOBAL, "label": "Global"}]
+    scopes += [{"id": s["id"], "label": s["label"]} for s in systems]
+
+    pages: dict[str, Any] = {}
+    for structure in sorted(_ANCHOR_STRUCTURES):
+        for scope in scopes:
+            focus = None if scope["id"] == _PATH_SCOPE_GLOBAL else scope["id"]
+            pages[f"{structure}|{scope['id']}"] = _paths_systems_view(
+                agg, structure=structure, focus=focus, metrics_by_path=metrics_by_path,
+                paths=paths, detected=detected, place_of=place_of, systems_by_id=systems_by_id,
+                excluded_by_qid=excluded_by_qid, bridge_qids=bridge_qids)
+    return {
+        "pages": pages,
+        "structures": [{"id": k, "label": _ANCHOR_STRUCTURES[k]["label"]}
+                        for k in sorted(_ANCHOR_STRUCTURES)],
+        "scopes": scopes,
+        "default": f"{_DEFAULT_ANCHOR_STRUCTURE}|{_PATH_SCOPE_GLOBAL}",
+        "systems": len(systems),
     }
 
 
@@ -3163,7 +3475,7 @@ let mounted = null;
 // a selected path always names all of its own, whatever the mode.
 const LABEL_MODES = [{ id: 'main', label: 'principais' }, { id: 'all', label: 'todos' },
                      { id: 'none', label: 'nenhum' }];
-let labelMode = 'main';
+let labelMode = 'all';  // owner default 2026-09-01: pentágono + Global já eram default, faltava só isto
 
 const vertical = () => window.matchMedia('(max-width:760px)').matches;
 function page() { return PAGES[structure + '|' + scope]; }
@@ -3409,6 +3721,369 @@ def _render_variant13(out: Path, agg: Aggregate, bundle: dict[str, Any]) -> dict
     }
 
 
+# Variant 14 — "Caminhos por sistema". Same shell/navigation as 13's own template (structure
+# pills, scope pills, selection model, label modes) — the `SCOPES` pills already double as system
+# navigation (Global + one per detected system), so 14 only adds: a node click on a collapsed
+# system (`n.sysId`) jumps scope exactly like its own pill; clicking empty canvas also returns to
+# Global (13's background click only ever cleared the selection); and a small "Sistemas" panel
+# block for member/crossing counts. Cloned rather than parametrised — same reason `_PAGE8`/
+# `_PAGE9`/`_PAGE_SYSTEMS`/`_PAGE13` are each their own template (module convention: no
+# `.format()`-shared JS body across variants).
+_PAGE14 = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>
+:root{--bg:#0b0b0f;--panel:#14141a;--line:#26262e;--ink:#e9e9ee;--ink2:#9a9aa6;--accent:#4d86ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,sans-serif;display:flex;height:100vh;height:100dvh}
+#canvas{flex:1;position:relative;min-width:0}#canvas canvas{width:100%;height:100%;display:block;touch-action:none}
+#side{width:380px;flex:none;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:16px;-webkit-overflow-scrolling:touch}
+h1{font-size:15px;margin:0 0 2px;letter-spacing:-.01em}
+.muted{color:var(--ink2);font-size:12px}
+.sechead{font-size:10px;color:var(--ink2);margin:16px 0 6px;text-transform:uppercase;letter-spacing:.09em}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;cursor:pointer;font:11px system-ui;white-space:nowrap}
+.pill.active{border-color:var(--accent);background:#141c2e;color:var(--ink)}
+.row{padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin-bottom:5px;font-size:12px;cursor:pointer}
+.row:hover{border-color:var(--accent)}
+.row.on{border-color:var(--accent);background:#141c2e}
+.row .n{font:11px/1.4 'Spline Sans Mono',ui-monospace,monospace;color:var(--ink2)}
+.g{opacity:.5;border-style:dashed}
+.legend{font-size:11px;color:var(--ink2);margin:10px 0 0;line-height:1.65}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font:11px/1.6 'Spline Sans Mono',ui-monospace,monospace;margin-top:6px}
+.kv b{color:var(--ink2);font-weight:400}
+.kv span{text-align:right}
+.card{border:1px solid var(--accent);border-radius:10px;padding:10px 11px;background:#111726}
+.hist{display:flex;align-items:flex-end;gap:3px;height:44px;margin-top:6px}
+.hist i{flex:1;background:#2b3550;border-radius:2px 2px 0 0;position:relative;min-height:2px}
+.hist i b{position:absolute;bottom:-15px;left:0;right:0;text-align:center;font:9px 'Spline Sans Mono',monospace;color:var(--ink2);font-weight:400}
+.hist+.muted{margin-top:18px}
+button.reset{background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;font:11px system-ui;margin-top:8px}
+@media (max-width:760px){
+  body{flex-direction:column;height:auto;min-height:100dvh}
+  #canvas{height:62dvh;flex:none}
+  #side{width:auto;border-left:none;border-top:1px solid var(--line);max-height:none;overflow:visible;padding:14px}
+  .row{padding:10px 11px;font-size:13px}
+  .pill{padding:7px 13px;font-size:12px}
+}
+</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1>__TITLE__</h1><div class="muted" id="sub"></div>
+
+<div class="sechead">Âncoras</div><div class="pills" id="structs"></div>
+<div class="sechead">Sistemas (Global ou um sistema expandido)</div><div class="pills" id="scopes"></div>
+<div class="sechead">Rótulos das ações</div><div class="pills" id="labels"></div>
+
+<div class="sechead">Sistemas</div>
+<div id="sysInfo"></div>
+
+<div class="sechead">Seleção</div>
+<div id="sel"></div>
+
+<div class="sechead">Comprimento das trilhas</div>
+<div class="hist" id="hist"></div>
+<div class="muted" id="histNote"></div>
+
+<div class="sechead">Caminhos mais fortes</div><div id="strong"></div>
+<div class="sechead">Caminhos mais frequentes</div><div id="freq"></div>
+
+<div class="legend">Anel duplo = sistema colapsado (clique nele, ou na pill acima, para
+expandir NO LUGAR); voltar = pill Global ou clique no fundo. Um caminho que atravessa um
+sistema continua sendo UM caminho — desenha até o nó do sistema e sai dele, o path_id nunca se
+perde; ao expandir, a ocorrência inteira ainda acende, inclusive o trecho que estava escondido.
+Anel rosa = membro que cruza a fronteira do sistema aberto, com <code>[→saídas ←entradas]</code>
+no rótulo; mini-nó pontilhado = um stub por DESTINO (outro sistema, ponte, âncora ou oponente),
+nunca por travessia. Um traço = um SEGMENTO: a maior sequência contígua de ações percorrida pelo
+mesmo conjunto de caminhos. Ponto cinza pequeno = bifurcação/convergência — artefato de desenho,
+nunca um estado. Espessura = frequência somada dos caminhos que passam pelo traço. Tracejado
+curto = ação que NUNCA foi observada em lugar nenhum do bundle (inferida pela regra). Losango =
+âncora; amarelo = finalização. Clique num caminho da lista, num estado ou num segmento
+compartilhado: a ocorrência inteira acende através dos traços que ela divide com as outras.</div>
+</div>
+<script src="graph.js"></script>
+<script>
+const PAGES = __PAGES_JSON__;
+const STRUCTURES = __STRUCTURES_JSON__;
+const SCOPES = __SCOPES_JSON__;
+let structure = __DEFAULT_STRUCTURE__;
+let scope = __DEFAULT_SCOPE__;
+let sel = null;           // {kind:'path'|'segment'|'state', id}
+let mounted = null;
+// Same mobile requirement as 13: "rótulos principais legíveis sem zoom extremo, secundários sob
+// demanda" — default 'all' (owner call 2026-09-01, same as 13's own new default).
+const LABEL_MODES = [{ id: 'main', label: 'principais' }, { id: 'all', label: 'todos' },
+                     { id: 'none', label: 'nenhum' }];
+let labelMode = 'all';
+
+const vertical = () => window.matchMedia('(max-width:760px)').matches;
+function page() { return PAGES[structure + '|' + scope]; }
+function freshCanvas() {
+  const old = document.getElementById('cv');
+  const next = old.cloneNode(false);
+  old.parentNode.replaceChild(next, old);
+  return next;
+}
+function fmt(v) { return v === null || v === undefined ? '—' : v; }
+
+// Which links/nodes stay lit for the current selection. A PATH lights its own segments across
+// every trunk it shares; a SEGMENT lights every occurrence that uses it; a STATE lights every
+// chain passing through it. One resolver, three entry points — unchanged from 13: a path_id
+// still identifies one whole occurrence whether its endpoint is drawn as a real state, a
+// collapsed system, or a boundary stub.
+function highlightOf(p) {
+  if (!sel) return null;
+  const segs = new Set();
+  const pathIds = new Set();
+  if (sel.kind === 'path') pathIds.add(sel.id);
+  else if (sel.kind === 'segment') for (const id of p.segMeta[sel.id].pathIds) pathIds.add(id);
+  else if (sel.kind === 'state') {
+    for (const l of p.gv.links) {
+      if (l.from !== sel.id && l.to !== sel.id) continue;
+      for (const id of p.segMeta[l.id].pathIds) pathIds.add(id);
+    }
+  }
+  const nodes = new Set();
+  for (const id of pathIds) {
+    const meta = p.pathMeta[id];
+    if (!meta) continue;
+    for (const s of meta.segIds) segs.add(s);
+  }
+  for (const l of p.gv.links) if (segs.has(l.id)) { nodes.add(l.from); nodes.add(l.to); }
+  if (sel.kind === 'state') nodes.add(sel.id);
+  return { links: segs, nodes: nodes, paths: pathIds };
+}
+
+function pathRow(p, id, extra) {
+  const m = p.pathMeta[id];
+  const on = sel && sel.kind === 'path' && sel.id === id ? ' on' : '';
+  const ghost = m.observedRatio === 0 ? ' g' : '';
+  const div = document.createElement('div');
+  div.className = 'row' + on + ghost;
+  div.innerHTML = m.sourceLabel + ' <b>—' + m.actions.join(' → ') + '→</b> ' + m.targetLabel
+    + '<div class="n">' + extra + (m.actor === 'partner' ? ' · oponente' : '') + '</div>';
+  div.onclick = function () { sel = { kind: 'path', id: id }; rebuild(); };
+  return div;
+}
+
+function renderSelection(p) {
+  const box = document.getElementById('sel');
+  box.innerHTML = '';
+  if (!sel) {
+    box.innerHTML = '<div class="muted">Nada selecionado — clique num caminho, num estado, num sistema ou num segmento.</div>';
+    return;
+  }
+  const hl = highlightOf(p);
+  if (sel.kind === 'path') {
+    const m = p.pathMeta[sel.id];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + m.sourceLabel + ' —' + m.actions.join(' → ') + '→ ' + m.targetLabel + '</b>'
+      + '<div class="kv">'
+      + '<b>length</b><span>' + m.length + '</span>'
+      + '<b>observed</b><span>' + m.observed + '/' + m.length + '</span>'
+      + '<b>observed_ratio</b><span>' + m.observedRatio.toFixed(2) + '</span>'
+      + '<b>support</b><span>' + m.support + '</span>'
+      + '<b>ocorrências</b><span>' + m.count + '</span>'
+      + '<b>terminal</b><span>' + (m.terminal ? 'sim' : 'não') + '</span>'
+      + '<b>role_delta</b><span>' + m.roleDelta + '</span>'
+      + '<b>strength</b><span>' + fmt(m.strength) + '</span>'
+      + '<b>segmentos</b><span>' + m.segIds.length + '</span>'
+      + '</div>';
+    box.appendChild(card);
+  } else if (sel.kind === 'segment') {
+    const s = p.segMeta[sel.id];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + s.actions.join(' → ') + '</b><div class="n">'
+      + (s.shared ? s.pathIds.length + ' caminhos dividem este traço' : 'traço exclusivo de um caminho')
+      + ' · frequência ' + s.weight + '</div>';
+    box.appendChild(card);
+    for (const id of s.pathIds) box.appendChild(pathRow(p, id, 'x' + p.pathMeta[id].count));
+  } else {
+    const node = p.gv.nodes.find(function (n) { return n.id === sel.id; });
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + (node ? node.label : sel.id) + '</b><div class="n">'
+      + hl.paths.size + ' cadeia(s) passam por aqui</div>';
+    box.appendChild(card);
+    for (const id of Array.from(hl.paths).sort()) box.appendChild(pathRow(p, id, 'x' + p.pathMeta[id].count));
+  }
+  const reset = document.createElement('button');
+  reset.className = 'reset';
+  reset.textContent = 'limpar seleção';
+  reset.onclick = function () { sel = null; rebuild(); };
+  box.appendChild(reset);
+}
+
+function renderLists(p) {
+  const ids = Object.keys(p.pathMeta);
+  const strong = ids.filter(function (i) { return p.pathMeta[i].strength !== null; })
+    .sort(function (a, b) { return p.pathMeta[b].strength - p.pathMeta[a].strength || (a < b ? -1 : 1); })
+    .slice(0, 10);
+  const freq = ids.slice()
+    .sort(function (a, b) { return p.pathMeta[b].count - p.pathMeta[a].count || (a < b ? -1 : 1); })
+    .slice(0, 10);
+  const sBox = document.getElementById('strong'); sBox.innerHTML = '';
+  for (const id of strong) sBox.appendChild(pathRow(p, id, 'strength ' + p.pathMeta[id].strength + ' · x' + p.pathMeta[id].count));
+  if (!strong.length) sBox.innerHTML = '<div class="muted">Nenhuma ação observada deste bundle tem rating — strength fica indefinida.</div>';
+  const fBox = document.getElementById('freq'); fBox.innerHTML = '';
+  for (const id of freq) fBox.appendChild(pathRow(p, id, 'x' + p.pathMeta[id].count + ' · length ' + p.pathMeta[id].length));
+
+  const hist = document.getElementById('hist'); hist.innerHTML = '';
+  const keys = Object.keys(p.stats.lengths).map(Number).sort(function (a, b) { return a - b; });
+  const max = Math.max.apply(null, keys.map(function (k) { return p.stats.lengths[k]; }).concat([1]));
+  for (const k of keys) {
+    const bar = document.createElement('i');
+    bar.style.height = Math.round(100 * p.stats.lengths[k] / max) + '%';
+    bar.innerHTML = '<b>' + k + '</b>';
+    bar.title = p.stats.lengths[k] + ' caminho(s) de ' + k + ' ação(ões)';
+    hist.appendChild(bar);
+  }
+  const t = p.stats.biggestTrunk;
+  document.getElementById('histNote').textContent =
+    p.stats.sharedActionPct + '% das ações desenhadas estão num traço compartilhado'
+    + (t ? ' · maior tronco: ' + t.actions.join(' → ') + ' (' + t.paths + ' caminhos)' : '');
+}
+
+// owner request: sistemas/membros + "caminhos que cruzam N sistemas" — additive to 13's own
+// panel, computed server-side per page (`_paths_systems_view`'s own `stats`).
+function renderSysInfo(p) {
+  const ids = Object.keys(p.stats.systemMembers).sort();
+  const rows = ids.map(function (id) {
+    return '<b>' + id + (id === scope ? ' (aberto)' : '') + '</b><span>'
+      + p.stats.systemMembers[id] + ' membro(s)</span>';
+  }).join('');
+  const c = p.stats.crossingHistogram;
+  document.getElementById('sysInfo').innerHTML =
+    '<div class="muted">' + ids.length + ' sistema(s) detectado(s)</div>'
+    + (rows ? '<div class="kv">' + rows + '</div>' : '')
+    + '<div class="muted" style="margin-top:6px">caminhos por nº de sistemas tocados — 0: '
+    + c['0'] + ' · 1: ' + c['1'] + ' · 2: ' + c['2'] + '</div>';
+}
+
+function rebuild() {
+  const p = page();
+  document.getElementById('sub').textContent =
+    p.stats.paths + ' caminhos · ' + p.stats.segments + ' segmentos · '
+    + p.stats.statePoints + ' estados · ' + p.stats.branchPoints + ' bifurcações / '
+    + p.stats.mergePoints + ' convergências';
+
+  const sBox = document.getElementById('structs'); sBox.innerHTML = '';
+  for (const s of STRUCTURES) {
+    const b = document.createElement('div');
+    b.className = 'pill' + (s.id === structure ? ' active' : '');
+    b.textContent = s.label;
+    b.onclick = (function (id) { return function () { structure = id; sel = null; rebuild(); }; })(s.id);
+    sBox.appendChild(b);
+  }
+  const cBox = document.getElementById('scopes'); cBox.innerHTML = '';
+  for (const s of SCOPES) {
+    const b = document.createElement('div');
+    b.className = 'pill' + (s.id === scope ? ' active' : '');
+    b.textContent = s.label;
+    b.onclick = (function (id) { return function () { scope = id; sel = null; rebuild(); }; })(s.id);
+    cBox.appendChild(b);
+  }
+
+  renderSelection(p);
+  renderLists(p);
+  renderSysInfo(p);
+
+  const lBox = document.getElementById('labels'); lBox.innerHTML = '';
+  for (const m of LABEL_MODES) {
+    const b = document.createElement('div');
+    b.className = 'pill' + (m.id === labelMode ? ' active' : '');
+    b.textContent = m.label;
+    b.onclick = (function (id) { return function () { labelMode = id; rebuild(); }; })(m.id);
+    lBox.appendChild(b);
+  }
+
+  const hl = highlightOf(p);
+  const flip = vertical();
+  // Phone rules, same as 13: the flow turns VERTICAL on a narrow viewport (coordinate swap, not
+  // a second layout); only PRIMARY labels stay up (anchors, systems — size>=3 by construction —
+  // and whatever is selected); a long label is elided rather than clipped.
+  const nodes = p.gv.nodes.map(function (n) {
+    let label = n.label;
+    if (flip) {
+      const primary = n.pin && (n.shape === 'diamond' || n.color === '#facc15' || n.system);
+      if (!primary && (n.size || 1) < 3 && !(hl && hl.nodes.has(n.id))) label = '';
+      else if (label.length > 16) label = label.slice(0, 15) + '…';
+    }
+    const base = label === n.label ? n : Object.assign({}, n, { label: label });
+    return flip ? Object.assign({}, base, { x: n.y, y: n.x }) : base;
+  });
+  const links = p.gv.links.map(function (l) {  // flip => phone: action labels are on demand only
+    const lit = hl && hl.links.has(l.id);
+    const show = lit || (!flip && (labelMode === 'all' || (labelMode === 'main' && l.weight >= 2)));
+    return show ? l : Object.assign({}, l, { label: undefined });
+  });
+  if (mounted && mounted.destroy) mounted.destroy();
+  mounted = GAGraph.mount(freshCanvas(), {
+    mode: 'map', nodes: nodes, links: links, pan: true, zoom: true,
+    collide: false, bounded: false, charge: 0, linkDist: 1, gravity: 0,
+    forceLabels: true, minZoom: 0.08,
+    highlightLinks: hl ? Array.from(hl.links) : null,
+    highlightNodes: hl ? Array.from(hl.nodes) : null,
+    onSelect: function (n) {
+      if (!n) {  // click no fundo: limpa a seleção e, se um sistema estava aberto, volta ao Global
+        sel = null;
+        if (scope !== __DEFAULT_SCOPE__) scope = __DEFAULT_SCOPE__;
+        rebuild();
+        return;
+      }
+      if (n.junction) return;              // a scaffolding dot is not a thing to select
+      if (n.sysId) { scope = n.sysId; sel = null; rebuild(); return; }  // system node = its own pill
+      sel = { kind: 'state', id: n.id };
+      rebuild();
+    },
+    onLinkSelect: function (l) { sel = { kind: 'segment', id: l.id }; rebuild(); },
+  });
+}
+let lastVertical = vertical();
+window.addEventListener('resize', function () {
+  if (vertical() !== lastVertical) { lastVertical = vertical(); rebuild(); }
+});
+rebuild();
+</script></body></html>"""
+
+
+def _render_variant14(out: Path, agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
+    payload = _paths_systems_payloads(agg, bundle)
+    default_structure, default_scope = payload["default"].split("|")
+    html = (
+        _PAGE14
+        .replace("__TITLE__", "14 — Caminhos por sistema")
+        .replace("__PAGES_JSON__", json.dumps(payload["pages"], ensure_ascii=False))
+        .replace("__STRUCTURES_JSON__", json.dumps(payload["structures"], ensure_ascii=False))
+        .replace("__SCOPES_JSON__", json.dumps(payload["scopes"], ensure_ascii=False))
+        .replace("__DEFAULT_STRUCTURE__", json.dumps(default_structure))
+        .replace("__DEFAULT_SCOPE__", json.dumps(default_scope))
+    )
+    (out / "14-caminhos-sistemas.html").write_text(html, encoding="utf-8")
+    default = payload["pages"][payload["default"]]
+    stats = default["stats"]
+    return {
+        "nodes": len(default["gv"]["nodes"]), "edges": len(default["gv"]["links"]),
+        "edges_per_node": round(len(default["gv"]["links"]) / len(default["gv"]["nodes"]), 2)
+        if default["gv"]["nodes"] else 0.0,
+        "pct_inferred_edges": _pct(
+            sum(1 for link in default["gv"]["links"] if link.get("inf")),
+            len(default["gv"]["links"])),
+        "partner_elements": sum(1 for n in default["gv"]["nodes"] if n.get("fighter") == "b"),
+        "handover_links": 0,  # paths never cross actors — the compiler's own guarantee
+        "knobs": {"charge": 0, "linkDist": 1, "gravity": 0},  # fully positioned, no physics
+        "paths": stats["paths"], "segments": stats["segments"], "points": stats["points"],
+        "branch_points": stats["branchPoints"], "merge_points": stats["mergePoints"],
+        "shared_action_pct": stats["sharedActionPct"],
+        "biggest_trunk_paths": (stats["biggestTrunk"] or {}).get("paths", 0),
+        "length_distribution": stats["lengths"],
+        "structures": len(payload["structures"]), "scopes": len(payload["scopes"]),
+        "systems": payload["systems"], "system_members": stats["systemMembers"],
+        "crossing_histogram": stats["crossingHistogram"],
+    }
+
+
 _VARIANT_DESCRIPTIONS = [
     ("1-baseline.html", "the app's CURRENT graph — technique=node — the comparison ruler"),
     ("2-migrado-proprio.html", "new model, YOU only — states=nodes, edges=action"),
@@ -3423,6 +4098,7 @@ _VARIANT_DESCRIPTIONS = [
     ("11-sistemas-vista-separada.html", "global (every node/edge, systems collapsed, ALL bridges) + a separate per-system view with a stub mini-node per boundary destination — locked combo, no controls"),
     ("12-sistemas-vista-separada-seletiva.html", "same as 11, controls live — 36 precomputed (policy x min_support x opponent mode) combos, client-side bridge/type/flow-bias filters"),
     ("13-caminhos.html", "edge = PATH: every occurrence expanded to state→a1→a2→state, contiguous shared runs bundled into segments with branch/merge points, hierarchical (non-force) layout, configurable anchor frame, per-path metrics panel"),
+    ("14-caminhos-sistemas.html", "13's own paths, systems collapsible in place: every detected system folds into one node (bridges/anchors/opponent stay first-class), a crossing path keeps its path_id and draws through the system's own node; click a system (node or pill) to expand it with 13's flow layout restricted to its subgraph + 11/12's own boundary stubs"),
 ]
 
 _INDEX_PAGE = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
@@ -4089,6 +4765,10 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
     # others: nodes are POINTS (states + branch/merge artefacts), links are SEGMENTS of shared
     # ink, and every position is computed here (`_flow_layout`) instead of simulated.
     metrics["variants"]["13-caminhos"] = _render_variant13(out, agg, bundle)
+
+    # 14 — 13's paths with systems collapsible in place (owner request 2026-09-01): same layer,
+    # same layout engine, systems fold/expand instead of the plain hide-as-stub 13's own scopes do.
+    metrics["variants"]["14-caminhos-sistemas"] = _render_variant14(out, agg, bundle)
 
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,
