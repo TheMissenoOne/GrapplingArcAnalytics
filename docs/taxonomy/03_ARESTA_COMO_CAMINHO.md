@@ -976,3 +976,94 @@ ratings Glicko por nó à mão sem um N+1 novo. `GrapplingArcWeb/src/vendor/grap
 cópia antiga (item de backlog: re-vendorizar). Os cards pequenos das páginas escritas à mão
 (`index.html`, `breakdowns.html`, `grapple-like.html`) seguem no `graph` legado — são arte
 ambiente, e o payload novo é aditivo justamente para não os tocar.
+
+## 13. Família de rota, variante e ocorrência não resolvida (decisão do dono, 2026-09-01)
+
+**Princípio:** inferência pode criar evidência que falta; nunca cria topologia canônica
+redundante. Caminho concreto domina caminho genérico. Uma transição genérica inferida é
+evidência PROVISÓRIA da família de rota e é refinada, absorvida ou rebaixada a evidência não
+resolvida assim que existe caminho concreto. Uma observação de sessão nunca é multiplicada
+entre várias variantes para pontuação.
+
+### 13.1 Três níveis — os mesmos três que o §1 já tinha, nomeados
+
+| nível | nome | identidade | já existia como |
+|---|---|---|---|
+| estado → estado | **família de rota** | `(source, target, actor)` | relação canônica (§1, invariante 2) |
+| cadeia de ações | **variante** | `(família, chave das ações OBSERVADAS)` | chave de agregação — hoje inclui as inferidas (§13.3 muda isso) |
+| travessia de uma sessão/luta | **ocorrência** | `occurrenceId` + `actions[]` próprio | ocorrência (§1) |
+
+Uma ocorrência **resolve** para uma variante ou fica **não resolvida** na família.
+`support` (§3) já é contagem da família; `count` de um caminho é contagem da variante.
+
+### 13.2 O que é concreto e o que é genérico
+
+- **Variante concreta**: pelo menos UMA ação observada na cadeia. `[Armbar(obs), Sweep(inf)]`
+  é concreta — carrega evidência real e tem chave própria (`armbar`). A lacuna inferida é
+  anotação da ocorrência, desenhada em fantasma, nunca identidade.
+- **Placeholder genérico**: a cadeia inteira é inferida (`all(a.inferred)`), ou vazia. Só ele
+  é substituível. O rótulo genérico (`sweep`/`reversal`/`transition`) é ANOTAÇÃO do balde não
+  resolvido, não identidade: `A→[sweep?]→B` e `A→[reversal?]→B` são UM balde,
+  "não resolvido (sweep ×3, reversal ×1)".
+- **Só o genérico é substituído.** Uma variante parcialmente inferida NUNCA é fundida em outra
+  (regra literal do dono): `A→[Armbar(obs), ?]→B` continua variante própria ao lado de
+  `A→[Armbar, Wrestle-Up]→B`; o bundling (§4) já compartilha o tronco `Armbar` visualmente,
+  e colapsar afirmaria que Wrestle-Up aconteceu.
+
+### 13.3 Regra do agregador (ordem executável)
+
+```
+estados   ← pontas observadas (âncoras nas pontas, §1b)
+ações     ← eventos observados entre elas; inferência preenche lacunas (§2)
+se alguma ação observada:            ocorrência → variante chave(subsequência observada); cria se nova
+senão, se a família tem ≥1 variante: ocorrência → família.unresolved (rótulo = palpite inferido)
+senão:                               emite placeholder genérico (fantasma) — é família.unresolved disfarçado
+```
+
+**Absorção é recomputação, não migração.** App, site e protótipo derivam o mapa de sessões/
+lutas a cada build; nada é guardado por variante. Quando uma variante concreta chega (sessão
+editada, vídeo processado, luta importada), no próximo compile o placeholder simplesmente não
+é emitido e as ocorrências dele contam na família. Só as tabelas da Fase 6 precisam da regra
+de migração (§13.6).
+
+### 13.4 Pontuação — o que "propagar pelos caminhos existentes" significa
+
+Uma ocorrência não resolvida entre A e B **propaga contexto de família**, não observação de
+técnica:
+
+| muda | não muda |
+|---|---|
+| `support` da família (todos os caminhos A→B a exibem) | `count` de cada variante |
+| tráfego estado→estado, importância do nó, limiares de filtro (avaliados na família) | rating por técnica / `strength` (§3 já ignora inferidas) |
+| painel: "A → B: 3 variantes · 2 não resolvidas" | evidência Glicko (`observations_for_side` lê eventos crus — inferidas nunca entram; `ratingV2Evidence.ts` idem) |
+
+**Invariante P5 (teste, nos dois repos):** uma ocorrência toda inferida contribui **0**
+observações de rating, **+1** em `support` da família e **0** em qualquer `count` de variante.
+É verdade por construção hoje; o teste é o que mantém a Fase 6 (ELO da aresta derivado de
+`actions[]`) honesta. Nenhum tronco fantasma A→B é desenhado para o tráfego não resolvido —
+com `[Sweep]`, `[Wrestle-Up]`, `[Armbar,Sweep]` não há prefixo de ação comum, o "tronco" é o
+próprio estado A; o não resolvido aparece na espessura/importância do estado e no painel.
+
+### 13.5 Proveniência (aditivo)
+
+`ChainAction.provenance ∈ {user, video_high, video_low, inferred}` (default `user`;
+`inferred=True ⇔ provenance='inferred'`, o booleano continua como adaptador). Ordem de
+autoridade: `user` ≥ `video_high` > `video_low` > `inferred`. Precedência só importa quando a
+MESMA sessão é relida (refinamento por vídeo): isso é edição da sessão, coerente com "ações
+observadas são imutáveis PARA A INFERÊNCIA" (§2), não para evidência melhor.
+
+### 13.6 Fase 6 — forma das tabelas e migração
+
+`graph_edges` (unique `(graph_id, source_key, target_key)`) É a linha da família.
+`graph_edge_variants(edge_id, observed_key, actions jsonb)`;
+`graph_edge_occurrences(variant_id NULL = não resolvida, session/match ref, provenance)`.
+Migração: aresta antiga toda inferida → ocorrência com `variant_id NULL`; só aresta com chave
+observada vira variante. Nunca escolher uma variante arbitrária, nunca duplicar entre todas.
+
+### 13.7 Onde mexe (implementação)
+
+`analysis/corpus_paths.aggregate_bouts`, `scripts/render_map_prototypes.Aggregate.add_edge`,
+App `services/map/mapAggregate.ts` (chave = subsequência observada; `unresolved` na relação),
+payload/view model (`unresolved` por relação), painel (`PathSelectionCard`, `graph.js`
+`mountPaths`), teste P5 nos dois repos, goldens `map_aggregate`/`path_bundling` regenerados.
+Rating, bundling e layout intocados.
