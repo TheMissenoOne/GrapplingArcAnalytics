@@ -1126,3 +1126,129 @@ App `services/map/mapAggregate.ts` (chave = subsequência observada; `unresolved
 payload/view model (`unresolved` por relação), painel (`PathSelectionCard`, `graph.js`
 `mountPaths`), teste P5 nos dois repos, goldens `map_aggregate`/`path_bundling` regenerados.
 Rating, bundling e layout intocados.
+
+---
+
+## 14. Fase 5c (2026-09-01) — a camada de rótulos, em espaço de TELA
+
+Esta fase não muda o layout de mundo. `analysis/flow_layout.py`, `services/map/flowLayout.ts` e
+`flow_layout_golden.json` estão **intocados** — nenhum byte de golden se moveu, e nada aqui exige
+regenerar o site.
+
+### 14.1 A causa raiz, medida
+
+Os dois renderizadores desenhavam o rótulo DENTRO do transform do mundo, com o corpo da fonte em
+unidades de MUNDO. Então a glifa escala com o zoom, e o tamanho real na tela é o corpo vezes a
+escala de fit. Medido no bundle do dono, na escala de fit de cada escopo/viewport:
+
+| escopo | viewport | escala de fit | um "12px" desenha a |
+|---|---|---|---|
+| Global | 390×700 | 0,534 | **6,4 px** |
+| Costas | 390×700 | 0,777 | 9,3 px |
+| Global | 1280×700 | 1,005 | 12,1 px |
+| Guarda Fechada | 1280×700 | 2,537 | **30,4 px** |
+
+O mapa do celular não estava poluído, estava **ilegível**; o do desktop estava grande demais e com
+9 pares sobrepostos em 48 rótulos. E o critério de "zero sobreposição" da §10.5.1 é medido em
+unidades de MUNDO, que sob um transform uniforme é **invariante de escala** — ele estava satisfeito
+exatamente enquanto o dono lia 6,4 px, e um rótulo que o olho não separa no fit continua
+inseparável a 4× de zoom. Por isso o zoom nunca revelava nada.
+
+O conserto tem uma peça: **a glifa é um número constante de pixels de TELA**, e por consequência a
+colocação também é decidida em pixels de tela. O rótulo continua ancorado no ponto de MUNDO que
+nomeia, dentro de um grupo `1/zoom` que cancela o zoom da câmera — `<Group transform>` aninhado no
+Skia, `translate(...) scale(1/k) translate(dx,dy) rotate(θ)` no SVG e no canvas do site.
+
+### 14.2 As duas metades, e por que só uma é compartilhada
+
+| metade | o quê | onde |
+|---|---|---|
+| **classificação** | classe e prioridade de cada nome, e o piso por zoom | `mapScreenViewModel.ts` (`mapNodeLabelPriority`/`mapSegmentLabelPriority`/`minLabelPriorityFor`) ↔ `site/graph.js` (`pathNodeLabelPriority`/`pathSegmentLabelPriority`/`pathMinLabelPriority`) |
+| **colocação** | qual slot, com que alias, dentro de que orçamento | `labelLayout.solveLabelPlacements` (App, um só para Skia e SVG) ↔ `pathSolveLabels` (site) |
+
+Ordem das classes, literal do dono: `selected > anchor > hub state > prominent segment (top-K) >
+state > action > minor action`.
+
+⚠️ **A classificação NÃO entra no payload.** Ela é derivada de campos que o payload já carrega —
+`node.kind`, `node.size`, `link.weight`, `link.inf` — nos dois lados. Serializar um `labelPriority`
+custaria um campo aditivo, um bump de `BREAKDOWN_VERSION`/`DOSSIER_VERSION` e uma regeneração
+completa do site por informação que já está lá. É o mesmo precedente de `directedEdges.ts` ↔
+`analysis/network_metrics.py`: uma regra, espelhada, com teste dos dois lados. `corpus_paths.py`
+fica intocado.
+
+### 14.3 O solver
+
+Guloso, prioridade primeiro, uma passada. `O(candidatos × slots × colocados)` — no mapa, ~50 × 6 × 30.
+
+1. ordem total: prioridade decrescente, id crescente (nunca a ordem do array);
+2. um candidato `pinned` (âncora, ou qualquer coisa que a seleção acendeu) ignora o orçamento mas
+   **gasta** dele — senão um celular orçado em 10 desenha 14 e o número deixa de significar algo;
+3. 4-6 slots em ordem fixa; slot que sai do viewport, encosta em rótulo já colocado ou cai sobre o
+   chrome é **rejeitado**, nunca só penalizado;
+4. penalidade = distância do slot preferido + área sobre obstáculos MOLES (discos de nó, os traços
+   proeminentes); acima do limiar tenta o **alias**; se nem ele couber, o nome é **descartado**.
+   Uma pilha ilegível é pior que uma palavra faltando, e o painel carrega o nome inteiro.
+
+**Orçamento** = `área / 28000`, travado em [8, 34]: 390×700 → 10, 1280×700 → 32. Um número, não dois.
+
+**Zoom semântico** é o piso de prioridade: `overview` = estados + troncos top-K, `medium` = ações,
+`detail` = tudo. O resto sai de graça — o conjunto de candidatos é o que está NA TELA, então ampliar
+também reduz a concorrência.
+
+**Rótulo arqueado** (dono, 2026-09-01): num traço curvo (bow de retorno, leque paralelo) o nome
+segue a **tangente** no ponto do rótulo (`MapEdgeArc.curveAngle`, `B'(t)`, virada para ficar de pé);
+traço reto continua horizontal. O solver reserva o **AABB da caixa girada**. Parou na tangente e não
+no arco real (`TextPath`/`<textPath>`) porque sobre um nome de ~70px a curvatura destes traços é de
+poucos graus — o upgrade está nomeado em `mapEdgeGeometry.curveAngle`.
+
+### 14.4 Chrome: remover o obstáculo saiu mais barato que encolher o mapa
+
+O chip de dica e o botão de reset são desenhados DENTRO da área do gráfico. Medido: com o botão de
+reset parado no canto inferior direito, o escopo `Guarda Fechada` a 390×700 fitava a âncora de
+finalização em y = 676 de 700 — todo slot abaixo saía do viewport, todo slot acima batia no botão, e
+o vértice da moldura ficava **sem nome** (1 de 2 âncoras).
+
+Insetar o FIT resolve e custa **10-15% da escala** (0,534 → 0,479 no celular; 1,005 → 0,856 no
+desktop), que é um terço da ocupação que a §10.5.3 mediu. Então o obstáculo saiu em vez do mapa
+encolher: o **reset só aparece quando há o que resetar** e a **dica some no primeiro gesto**. Com
+isso a âncora é nomeada na escala de fit CHEIA (2 de 2, escala inalterada). `computeFitTransform`
+ganhou um argumento `inset` mesmo assim, e o único chamador é o enquadramento de SELEÇÃO — onde o
+painel realmente cobre metade da tela.
+
+### 14.5 Experimento: fluxo esquerda→direita no celular (dono, 2026-09-01)
+
+Constante `MAP_TALL_SCREEN_FLOW` em `NetworkScreen`, porque os dois são o MESMO layout de mundo sob
+uma transformação de apresentação (troca de coordenadas + o `targetAspect` que a dobra mira). Medido
+no bundle do dono a 390×840, com esta camada de rótulos aplicada (0 pares sobrepostos em todas as
+células):
+
+| escopo | escala de fit (vertical / L→R) | ocupação | nomes |
+|---|---|---|---|
+| Global | 0,583 / 0,484 | 78,9% / 54,3% | 12 / 12 |
+| Costas | 0,992 / 0,717 | 71,0% / 38,7% | 12 / 12 |
+| Guarda Fechada | 1,642 / 0,728 | 59,6% / 11,7% | 11 / 8 |
+
+`vertical` ganha em todas. O eixo de rank é o eixo LONGO do desenho, e num celular em pé o eixo
+longo da superfície é o vertical; L→R espreme a mesma contagem de ranks em 390px e a dobra devolve
+17-56% da escala.
+
+### 14.6 A prova
+
+`GrapplingArcApp/src/services/map/__tests__/mapLabelProof.test.ts` roda o pipeline inteiro
+(sessões → escopo → `buildPathView` → view model → fit → solver) em 2 viewports × 3 zooms × todos os
+escopos, sobre o mock do App (portão de CI) **e** sobre o export real do dono quando ele está na
+máquina (privado, LGPD, `skip` se ausente — mesma forma de `tests/test_path_bundling.py`). Cinco
+asserções: nada sobreposto, orçamento respeitado, toda âncora visível nomeada, nada sob o chrome,
+nada fora do viewport. `labelSolver.test.ts` cobre o algoritmo (determinismo sob embaralhamento,
+prioridade, orçamento, exclusão de chrome, alias, caixa girada) e `mapLabelPriority.test.ts` a
+classificação e a paridade das duas cópias do piso de zoom.
+
+### 14.7 Adiado, com o motivo
+
+- **leader lines** — um nome longe do seu ponto precisa de uma linha até ele; sem isso o solver
+  prefere descartar a afastar demais, e é a escolha certa por ora (YAGNI v1).
+- **arco real de texto** — ver §14.3.
+- **traços proeminentes como obstáculo** são amostrados só no ponto do próprio rótulo; amostrar a
+  quadrática inteira é o upgrade, nomeado em `mapLabelLayer.ts`.
+- **física por rótulo** — o solver é guloso e determinístico de propósito; relaxação já existe no
+  layout de MUNDO, que é onde ela pode mover pontos.
