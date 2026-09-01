@@ -130,6 +130,10 @@ MARGIN = 48
 LABEL_H = 34
 
 _YT_ID = re.compile(r"(?:v=|youtu\.be/|/shorts/|/embed/)([A-Za-z0-9_-]{11})")
+# FloGrappling page urls carry a numeric id right after /video/ (the slug after it is
+# cosmetic and unstable). Without this the fallback returned the whole url, and a slug
+# with "https:/..." in it is a path with directories nobody created.
+_FLO_ID = re.compile(r"flograppling\.com/video/(\d+)")
 
 # YouTube answers an anonymous download of these uploads with HTTP 403 -- measured, not
 # assumed: --dump-json succeeds while the media request is refused, so metadata is not a
@@ -148,7 +152,7 @@ def video_id(url: str) -> str:
     the id, never the full url: the same video arrives as watch?v=, youtu.be/ and with a
     ``&t=`` offset glued on, and three spellings of one video would each render their own
     PDF and each look like a fight nobody had processed yet."""
-    m = _YT_ID.search(url)
+    m = _YT_ID.search(url) or _FLO_ID.search(url)
     return m.group(1) if m else url.strip()
 
 
