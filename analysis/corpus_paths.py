@@ -29,6 +29,17 @@ Public entry points, in pipeline order::
 ``path_payload``'s output is the site bundle contract: ``nodes`` carry fixed ``x``/``y`` +
 ``pin``, ``links`` carry ``actions[]`` + ``pathIds`` (the multi-label field ``site/graph.js``
 was missing, §0.2), ``paths`` carry the per-occurrence metrics.
+
+**§5d — dynamic variant budget + category folding** (``docs/taxonomy/03_ARESTA_COMO_CAMINHO.md``
+§FASE 5d). ``min_count`` (a static drop) is gone: every payload now ranks its own variants by
+``(support, strength)`` and keeps the top ``max_variants`` (~60) drawn individually; the rest are
+never dropped, only FOLDED — grouped by family (source, target, actor) and, within a family, by
+whether every action in the variant shares one category ("Submissions ×4") or not ("Other paths
+×N"). A fold is render-only: it is ONE additional synthetic single-action path fed through the
+same bundler/layout as everything else, so it gets a real stroke and position for free, and its
+own folded variants ride along unabridged in the additive ``folded`` payload field. A payload
+with fewer variants than the budget folds nothing — the mechanism is inert until there is volume
+to manage, which is why a single-bout breakdown almost never folds.
 """
 
 from __future__ import annotations
@@ -64,6 +75,25 @@ _START_COLOR = "#34d399"
 _JUNCTION_COLOR = "#6b7280"  # scaffolding dot — never a technique, so never a category hue
 _SIDES = ("a", "b")
 
+# §5d — how many variants a payload draws individually before the rest fold into category
+# strokes. ~60 is the owner's number (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md §FASE 5d);
+# below it the mechanism never fires, which is the whole point for a one-bout breakdown.
+PATH_VARIANT_BUDGET = 60
+
+# A folded stroke's synthetic single action key — unique per fold group by construction (each
+# carries its own bucket index), so it can never merge with a real action's segment and never
+# needs to pass the corpus/generic-vocabulary check `scripts/check_site_bundle.py` runs (the
+# fold link's `actions` stays empty — nothing here is offered as a node_key).
+_FOLD_PREFIX = "$fold:"
+
+# English plural for a folded category's label ("Submissions ×4") — site copy is English
+# (GrapplingArc AGENTS.md rule 4); `None` (mixed-type chain) falls back to "Other paths ×N".
+_CAT_PLURAL = {
+    "guard": "Guard Pulls", "pass": "Guard Passes", "sweep": "Sweeps",
+    "takedown": "Takedowns", "control": "Control Changes", "submission": "Submissions",
+    "escape": "Escapes", "transition": "Transitions",
+}
+
 # Anchors are the map's FRAME, so their size is fixed (owner 2026-08-27) — deriving it from
 # usage made the landmark grow and shrink between renders.
 _ANCHOR_SIZE = 3
@@ -95,6 +125,33 @@ def _clamp3(n: float) -> int:
 
 def _cat_of(event_type: str) -> str:
     return event_type if event_type in _CATS else "control"
+
+
+def _uniform_category(types: Sequence[str]) -> str | None:
+    """The one category every action of a variant shares, or ``None`` when the chain mixes
+    types — §5d's "cadeias mistas" case, which folds into "Other paths" instead of a named
+    category. An empty sequence (should not happen — a variant always has >=1 action) also
+    reads as mixed rather than guessing a category with nothing behind it."""
+    cats = {_cat_of(t) for t in types}
+    return next(iter(cats)) if len(cats) == 1 else None
+
+
+def _join_labels_compressed(labels: Sequence[str]) -> str:
+    """§5d item 3 — consecutive repeats of the SAME action label compress to ``"Triangle ×3"``.
+    Display only: the payload's own ``actions[]`` stays exploded (one entry per action, §1
+    invariant 3 — nothing here depends on position), this only shortens the joined string a
+    stroke's tooltip/label shows. A run of length 1 is unchanged, so a chain with no repeats
+    joins exactly as before."""
+    out: list[str] = []
+    i, n = 0, len(labels)
+    while i < n:
+        j = i
+        while j < n and labels[j] == labels[i]:
+            j += 1
+        run = j - i
+        out.append(labels[i] if run == 1 else f"{labels[i]} ×{run}")
+        i = j
+    return " → ".join(out)
 
 
 def _generic(node_key: str) -> Mapping[str, Any]:
@@ -222,6 +279,7 @@ class PathAggregate:
             for a in edge.actions
         )
         action_inferred = tuple(a.inferred for a in edge.actions)
+        action_types = tuple(a.type for a in edge.actions)  # §5d category folding
         # Video seek (breakdown pages): an ACTION is what happened at a moment, and in this
         # model the action rides the edge — so the timestamp does too. FIRST occurrence wins,
         # same convention as the display label.
@@ -238,6 +296,7 @@ class PathAggregate:
                 "family": (source, target, actor), "guess": action_seq[0] if action_seq else "",
                 "edge": edge, "actions": action_seq, "action_labels": action_labels,
                 "action_inferred": action_inferred, "action_ts": action_ts,
+                "action_types": action_types,
             })
             return
         key = (source, target, observed_seq, actor)
@@ -252,6 +311,7 @@ class PathAggregate:
                 "action_labels": action_labels,
                 "action_inferred": action_inferred,
                 "action_ts": action_ts,
+                "action_types": action_types,
             }
             self.edge_sample[key] = edge
         else:
@@ -292,6 +352,7 @@ class PathAggregate:
                 "count": len(occurrences), "actions": rep["actions"],
                 "action_labels": rep["action_labels"], "action_inferred": rep["action_inferred"],
                 "action_ts": rep["action_ts"], "unresolved_guesses": dict(sorted(guesses.items())),
+                "action_types": rep["action_types"],
             }
             self.edge_sample[placeholder_key] = rep["edge"]
         self._ghosts = []
@@ -425,30 +486,110 @@ def _index_parallel_links(links: list[dict[str, Any]]) -> None:
             link["par"], link["parCount"] = i, len(group)
 
 
+def _rank_key(path: RenderPath, metrics: PathMetrics) -> tuple[int, float, int, str]:
+    """§5d ranking — support first (the family's own traffic), then strength (an unrated
+    variant, ``None``, ranks behind a rated one at the same support), then the variant's own
+    occurrence count; ``path_id`` last only to make ties reproducible, never to break them on
+    its own."""
+    strength = metrics.strength if metrics.strength is not None else -1.0
+    return (-metrics.support, -strength, -path.count, path.path_id)
+
+
+def _variant_row(
+    path: RenderPath, metrics: PathMetrics, labels: Mapping[str, str]
+) -> dict[str, Any]:
+    """One folded variant's compact summary — enough for a client to list it, unabridged, once
+    its category stroke is expanded. Local `strength` avoids a `metrics_by_path[...]` re-lookup
+    mypy cannot narrow through the `is None` check twice."""
+    strength = metrics.strength
+    return {
+        "id": path.path_id, "count": path.count,
+        "actions": [labels.get(k, k) for k in path.actions],
+        "length": metrics.length, "support": metrics.support,
+        "strength": None if strength is None else round(strength, 1),
+    }
+
+
+def _fold_overflow(
+    overflow: Sequence[RenderPath],
+    family_of: Mapping[str, tuple[str, str, str]],
+    types_of: Mapping[str, tuple[str, ...]],
+    metrics_by_path: Mapping[str, PathMetrics],
+    labels: Mapping[str, str],
+) -> tuple[list[RenderPath], dict[str, dict[str, Any]]]:
+    """§5d, items 1-2 — group every budget-cut variant by family (source, target, actor), then
+    by whether all its own actions share one category. Each group becomes ONE synthetic
+    single-action ``RenderPath`` (fed through the same bundler/layout as everything else, so it
+    gets a real stroke and position for free) plus a metadata row carrying every folded variant
+    UNABRIDGED — folding is render-only (§13's own rule: agreggation never touches topology),
+    nothing here is dropped, and nothing here changes ``support``/rating (those are read straight
+    off ``metrics_by_path``, computed before any budget was applied)."""
+    buckets: dict[tuple[str, str, str, str | None], list[RenderPath]] = {}
+    for p in overflow:
+        source, target, actor = family_of[p.path_id]
+        cat = _uniform_category(types_of[p.path_id])
+        buckets.setdefault((source, target, actor, cat), []).append(p)
+
+    synth: list[RenderPath] = []
+    meta: dict[str, dict[str, Any]] = {}
+    for i, bkey in enumerate(sorted(buckets, key=repr)):
+        group = sorted(buckets[bkey], key=lambda p: p.path_id)
+        _source, _target, actor, cat = bkey
+        total = sum(p.count for p in group)
+        plural = _CAT_PLURAL.get(cat, "Other paths") if cat else "Other paths"
+        fold_id = f"{_FOLD_PREFIX}{i}"
+        synth.append(RenderPath(
+            path_id=fold_id, source=group[0].source, target=group[0].target,
+            actions=(fold_id,), actor=actor, count=total,
+        ))
+        meta[fold_id] = {
+            "id": fold_id, "source": group[0].source, "target": group[0].target,
+            "category": cat, "label": f"{plural} ×{len(group)}", "count": total,
+            "variantCount": len(group), "actor": actor,
+            "variants": [_variant_row(p, metrics_by_path[p.path_id], labels) for p in group],
+        }
+    return synth, meta
+
+
 def path_payload(
     agg: PathAggregate,
     *,
     structure: str = DEFAULT_ANCHOR_STRUCTURE,
     rating_of: Callable[[str], float | None] | None = None,
-    min_count: int = 1,
+    max_variants: int = PATH_VARIANT_BUDGET,
 ) -> dict[str, Any]:
-    """Layers 3 + 4 — the bundled graph, laid out, as the site's ``{nodes, links, paths}``.
+    """Layers 3 + 4 — the bundled graph, laid out, as the site's ``{nodes, links, paths,
+    folded}``.
 
-    ``min_count`` drops occurrences seen fewer than N times BEFORE bundling. It is a
-    legibility gate, not a perf one — the whole public corpus bundles in ~1 s (measured), but
-    2 370 paths on one canvas is the hairball ``userDecisionFlow.ts:32-45`` already measured
-    and already answered with the same knob (``minEdgeSupport = 2``): the density was the
-    problem, the layout never was. Deterministic: the gate is on the count alone, and the
-    surviving paths keep their original ids.
+    §5d replaced the old static ``min_count`` drop with a ranked budget: every variant is
+    ordered by ``(support, strength)`` (``_rank_key``) and the top ``max_variants`` (~60) draw
+    individually — the whole public corpus still bundles in under a second regardless of the
+    budget (measured), so this stays a legibility gate, not a perf one; 2 370 individual strokes
+    on one canvas is the hairball ``userDecisionFlow.ts:32-45`` already measured. What changed is
+    what happens to the rest: nothing is dropped, every variant beyond the budget folds into a
+    category stroke instead (``_fold_overflow``) — additive ``folded`` field below. A payload
+    with fewer variants than the budget folds nothing, which is why a single-bout breakdown
+    almost never does. Deterministic: the ranking key is total over the corpus, ties break on
+    ``path_id``.
     """
     unified = bool(ANCHOR_STRUCTURES[structure]["unified_finish"])
     collapse = agg.collapse_actors
     metrics_by_path = _metrics_by_path(agg, rating_of)
-    paths = [p for p in render_paths(agg) if p.count >= min_count]
+    labels = {
+        key: label
+        for row in agg.edges.values()
+        for key, label in zip(row["actions"], row["action_labels"], strict=True)
+    }
+    family_of = {f"p{i}": (key[0], key[1], key[3]) for i, key in enumerate(sorted(agg.edges))}
+    types_of = {
+        f"p{i}": agg.edges[key]["action_types"] for i, key in enumerate(sorted(agg.edges))
+    }
+
+    all_paths = render_paths(agg)
 
     opp_finish = _qid("b", _FINISH_KEY, collapse=collapse)
     if unified and opp_finish != _FINISH_KEY:
-        paths = [
+        all_paths = [
             RenderPath(
                 path_id=p.path_id,
                 source=_FINISH_KEY if p.source == opp_finish else p.source,
@@ -457,17 +598,25 @@ def path_payload(
                 actor=p.actor,
                 count=p.count,
             )
-            for p in paths
+            for p in all_paths
         ]
 
-    bundled = bundle_paths(paths)
-    count_of = {p.path_id: p.count for p in paths}
-    actor_of = {p.path_id: p.actor for p in paths}
-    labels = {
-        key: label
-        for row in agg.edges.values()
-        for key, label in zip(row["actions"], row["action_labels"], strict=True)
-    }
+    fold_meta: dict[str, dict[str, Any]] = {}
+    if len(all_paths) <= max_variants:
+        paths, bundle_input = all_paths, all_paths
+    else:
+        ranked = sorted(all_paths, key=lambda p: _rank_key(p, metrics_by_path[p.path_id]))
+        keep_ids = {p.path_id for p in ranked[:max_variants]}
+        paths = [p for p in all_paths if p.path_id in keep_ids]
+        overflow = [p for p in all_paths if p.path_id not in keep_ids]
+        synth_paths, fold_meta = _fold_overflow(
+            overflow, family_of, types_of, metrics_by_path, labels
+        )
+        bundle_input = paths + synth_paths
+
+    bundled = bundle_paths(bundle_input)
+    count_of = {p.path_id: p.count for p in bundle_input}
+    actor_of = {p.path_id: p.actor for p in bundle_input}
     ghosts = _ghost_action_keys(agg)
     ts_by_action: dict[str, int] = {}
     for row in agg.edges.values():
@@ -513,7 +662,10 @@ def path_payload(
             if _anchor_slot(node_key, "a", structure) else str(row["label"])
         label_len[point.id] = len(text)
     for seg in bundled.segments:
-        label_len[seg.id] = len(" → ".join(labels.get(k, k) for k in seg.actions))
+        fold = fold_meta.get(seg.actions[0]) if len(seg.actions) == 1 else None
+        label_len[seg.id] = len(fold["label"]) if fold else len(
+            _join_labels_compressed([labels.get(k, k) for k in seg.actions])
+        )
 
     pos = flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
                       weight=node_weight, label_len=label_len)
@@ -554,38 +706,56 @@ def path_payload(
             node["shape"] = "diamond"
             node["color"] = _FINISH_COLOR if node_key == _FINISH_KEY else _START_COLOR
             node["label"] = _ANCHOR_LABELS.get(node_key, node["label"])
-            if node_key == _FINISH_KEY and unified:
-                # one vertex, two athletes — the split fill is what keeps that honest
-                node["split"] = ["a", "b"]
-            elif node_key == _FINISH_KEY and side == "b":
+            # A unified finish draws as a SOLID yellow disc (owner, 2026-09-01) — the arrowhead
+            # arriving already carries the actor's colour, so who finished is said by the
+            # stroke, not by the node. `_FINISH_COLOR` above already applies unconditionally.
+            if node_key == _FINISH_KEY and not unified and side == "b":
                 node["label"] = "Finish (opponent)"
         nodes.append(node)
 
     links: list[dict[str, Any]] = []
     for seg in bundled.segments:
         weight = _segment_weight(seg, count_of)
-        acts = [
-            {"key": k, "label": labels.get(k, k), "inferred": k in ghosts} for k in seg.actions
-        ]
-        for act in acts:
-            ts = ts_by_action.get(act["key"])
-            if ts is not None:
-                act["ts"] = ts
-        fighters = {actor_of[pid] for pid in seg.path_ids}
-        link: dict[str, Any] = {
-            "id": seg.id, "from": seg.from_point, "to": seg.to_point,
-            "weight": _clamp3(weight), "count": weight, "arrow": True,
-            "actions": acts,
-            "label": " → ".join(a["label"] for a in acts),
-            "pathIds": sorted(seg.path_ids),
-            # first moment on this stroke — what a click seeks the bout video to
-            **({"ts": next((a["ts"] for a in acts if "ts" in a), None)}
-               if any("ts" in a for a in acts) else {}),
-            "shared": len(seg.path_ids) > 1,
-            "fighter": next(iter(sorted(fighters))) if len(fighters) == 1 else "x",
-        }
-        if all(a["inferred"] for a in acts):
-            link["inf"] = True   # a named generic — still labelled, yields on a label collision
+        fold = fold_meta.get(seg.actions[0]) if len(seg.actions) == 1 else None
+        link: dict[str, Any]
+        if fold is not None:
+            # §5d — a folded category stroke. `actions` stays EMPTY on purpose:
+            # `scripts/check_site_bundle.py` walks every link's `actions[].key` against the
+            # canonical corpus, and the synthetic fold id is not a real node_key — offering it
+            # there would false-flag as stale. The folded variants ride, unabridged, in
+            # `folded.variants` for the client to reveal on selection (§5d item 2).
+            link = {
+                "id": seg.id, "from": seg.from_point, "to": seg.to_point,
+                "weight": _clamp3(weight), "count": weight, "arrow": True,
+                "actions": [], "label": fold["label"], "pathIds": sorted(seg.path_ids),
+                "shared": False, "fighter": fold["actor"], "folded": fold,
+            }
+        else:
+            acts = [
+                {"key": k, "label": labels.get(k, k), "inferred": k in ghosts}
+                for k in seg.actions
+            ]
+            for act in acts:
+                ts = ts_by_action.get(act["key"])
+                if ts is not None:
+                    act["ts"] = ts
+            fighters = {actor_of[pid] for pid in seg.path_ids}
+            link = {
+                "id": seg.id, "from": seg.from_point, "to": seg.to_point,
+                "weight": _clamp3(weight), "count": weight, "arrow": True,
+                "actions": acts,
+                # §5d item 3: consecutive repeats of the same action compress ("Triangle ×3");
+                # a chain with no repeats joins exactly as before.
+                "label": _join_labels_compressed([a["label"] for a in acts]),
+                "pathIds": sorted(seg.path_ids),
+                # first moment on this stroke — what a click seeks the bout video to
+                **({"ts": next((a["ts"] for a in acts if "ts" in a), None)}
+                   if any("ts" in a for a in acts) else {}),
+                "shared": len(seg.path_ids) > 1,
+                "fighter": next(iter(sorted(fighters))) if len(fighters) == 1 else "x",
+            }
+            if all(a["inferred"] for a in acts):
+                link["inf"] = True  # a named generic — still labelled, yields on a collision
         # A RETURN edge (target at or behind the source in the flow) is a real cycle in a
         # technique map, not a defect — bowed out and thinner, so the forward reading stays loud.
         if pos[seg.to_point][0] <= pos[seg.from_point][0]:
@@ -618,6 +788,15 @@ def path_payload(
     shared_actions = sum(len(s.actions) for s in bundled.segments if len(s.path_ids) > 1)
     total_actions = sum(len(s.actions) for s in bundled.segments)
 
+    # §5d — the additive fold field. `fold_meta`'s `source`/`target` were qid strings (the
+    # RenderPath's own, pre-layout); rewritten to POINT ids in place so `link["folded"]` (the
+    # same dict, assigned above) and this top-level list agree with everything else the
+    # payload addresses nodes by.
+    for fm in fold_meta.values():
+        fm["source"] = point_of_state.get(fm["source"], f"s:{fm['source']}")
+        fm["target"] = point_of_state.get(fm["target"], f"s:{fm['target']}")
+    folded_rows = [fold_meta[k] for k in sorted(fold_meta)]
+
     # §13.4/13.7: family context ONLY — never a variant's count, never rating. A relation with
     # no concrete variant at all has nothing to list here; its whole story is the disguised
     # placeholder edge already in `links` (`unresolved_guesses`).
@@ -643,8 +822,12 @@ def path_payload(
         "links": links,
         "paths": path_rows,
         "unresolved": unresolved_rows,
+        "folded": folded_rows,
         "stats": {
             "paths": len(paths),
+            "variants": len(all_paths),
+            "foldedGroups": len(fold_meta),
+            "foldedVariants": sum(fm["variantCount"] for fm in fold_meta.values()),
             "segments": len(bundled.segments),
             "states": sum(1 for p in bundled.points if p.kind == "state"),
             "branchPoints": sum(

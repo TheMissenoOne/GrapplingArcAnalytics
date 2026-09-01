@@ -17,6 +17,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from analysis import corpus_paths
 from analysis.corpus_paths import aggregate_bouts, path_payload, render_paths
 from analysis.path_bundling import bundle_paths
 
@@ -103,8 +104,10 @@ def test_site_path_graph_builders_read_only_public_match_sequences() -> None:
 def test_payload_carries_what_the_renderer_contracts_on() -> None:
     payload = path_payload(aggregate_bouts([BOUT_A, BOUT_B]))
     # §13.7: `unresolved` is new and additive — family-only context (support/traffic), never a
-    # variant's own count or rating (P5, tests/test_actions_parity.py).
-    assert set(payload) == {"nodes", "links", "paths", "stats", "unresolved"}
+    # variant's own count or rating (P5, tests/test_actions_parity.py). §5d: `folded` is new and
+    # additive too — always present, empty here because two tiny bouts never cross the budget.
+    assert set(payload) == {"nodes", "links", "paths", "stats", "unresolved", "folded"}
+    assert payload["folded"] == []
 
     ids = {n["id"] for n in payload["nodes"]}
     for node in payload["nodes"]:
@@ -115,6 +118,7 @@ def test_payload_carries_what_the_renderer_contracts_on() -> None:
 
     path_ids = {p["id"] for p in payload["paths"]}
     for link in payload["links"]:
+        assert not link.get("folded"), "no fold expected under the default budget here"
         assert link["from"] in ids and link["to"] in ids
         assert link["pathIds"], "a stroke with no occurrence would be a drawn claim with no data"
         assert set(link["pathIds"]) <= path_ids
@@ -148,16 +152,120 @@ def test_collapsing_actors_folds_both_athletes_onto_one_technique_space() -> Non
     assert {n["fighter"] for n in ocean["nodes"] if n.get("fighter")} == {"a"}
 
 
-def test_min_count_gate_keeps_ids_stable_and_only_drops_rare_paths() -> None:
-    """The Ocean's only gate. It must be a pure filter — a gated payload's paths keep the ids
-    an ungated one gave them, or two exports of the same corpus disagree about what ``p7`` is."""
-    agg = aggregate_bouts([BOUT_A, BOUT_A, BOUT_B])
-    every = {p["id"]: p for p in path_payload(agg)["paths"]}
-    gated = {p["id"]: p for p in path_payload(agg, min_count=2)["paths"]}
-    assert gated.keys() < every.keys()
-    for pid, row in gated.items():
-        assert row["count"] >= 2
+# §5d fixtures: four single-submission variants sharing one family (Mount -> Finish, actor
+# 'a') and one mixed-type variant (submission attempt + a pass, inferred sweep between) on a
+# DIFFERENT family — enough to force both a category fold ("Submissions") and the "Other
+# paths" bucket at a small budget.
+def _submission_bout(label: str) -> list[dict[str, object]]:
+    return [
+        {"label": "Mount", "type": "control", "side": "a"},
+        {"label": label, "type": "submission", "side": "a", "successful": True},
+    ]
+
+
+_MIXED_BOUT: list[dict[str, object]] = [
+    {"label": "Closed Guard", "type": "guard", "side": "a"},
+    {"label": "Armbar", "type": "submission", "side": "a", "successful": False},
+    {"label": "Knee Cut", "type": "pass", "side": "a", "successful": True},
+    {"label": "Mount", "type": "control", "side": "a"},
+]
+
+_FOLD_BOUTS = [
+    _submission_bout("Armbar"), _submission_bout("Triangle Choke"),
+    _submission_bout("Rear Naked Choke"), _submission_bout("Kimura"), _MIXED_BOUT,
+]
+
+
+def test_budget_never_drops_a_variant_only_folds_it() -> None:
+    """§5d item 1 — the dynamic budget replaces the old static drop. Every variant beyond
+    ``max_variants`` must still be reachable, just under a fold group instead of its own
+    stroke: ``variants == paths (kept) + foldedVariants``, and every kept id keeps the exact
+    same shape a wide-open payload gave it (no renumbering)."""
+    agg = aggregate_bouts(_FOLD_BOUTS)
+    wide = path_payload(agg, max_variants=100)
+    assert wide["folded"] == []  # 5 variants, budget 100 — nothing to fold
+    every = {p["id"]: p for p in wide["paths"]}
+
+    narrow = path_payload(agg, max_variants=1)
+    assert narrow["stats"]["variants"] == wide["stats"]["variants"] == 5
+    assert narrow["stats"]["paths"] == 1
+    assert narrow["stats"]["foldedVariants"] == 4
+    assert narrow["stats"]["paths"] + narrow["stats"]["foldedVariants"] == \
+        narrow["stats"]["variants"]
+    kept = {p["id"]: p for p in narrow["paths"]}
+    assert kept.keys() < every.keys()
+    for pid, row in kept.items():
         assert row["actions"] == every[pid]["actions"]
+
+    folded_ids = {v["id"] for f in narrow["folded"] for v in f["variants"]}
+    assert folded_ids == every.keys() - kept.keys(), "every dropped id must resurface, folded"
+
+
+def test_category_fold_only_when_every_action_shares_one_type() -> None:
+    """§5d item 2 — variants whose OWN actions are all one category fold under a named category
+    ("Submissions ×N"); a variant that mixes categories in its own chain never gets a category
+    name, it folds under "Other paths" instead."""
+    payload = path_payload(aggregate_bouts(_FOLD_BOUTS), max_variants=1)
+    by_label = {f["label"]: f for f in payload["folded"]}
+    assert by_label.keys() == {"Submissions ×3", "Other paths ×1"}
+    subs = by_label["Submissions ×3"]
+    assert subs["category"] == "submission" and subs["variantCount"] == 3
+    other = by_label["Other paths ×1"]
+    assert other["category"] is None and other["variantCount"] == 1
+    assert other["variants"][0]["actions"] == ["Armbar", "Sweep", "Knee Cut"]
+
+    fold_link = next(lk for lk in payload["links"] if lk.get("folded") is subs)
+    assert fold_link["label"] == "Submissions ×3"
+    assert fold_link["actions"] == [], "a synthetic fold id is not a real node_key"
+
+
+def test_folded_bundle_still_walks_only_real_routes() -> None:
+    """PROVA — folding must never draw a phantom route. Every walk the bundler licenses under a
+    tight budget resolves to either a kept variant's own occurrence or a fold group's own
+    synthetic stroke; nothing else. Mirrors
+    ``test_no_phantom_route_over_a_corpus_shaped_aggregate`` for the §5d code path."""
+    agg = aggregate_bouts(_FOLD_BOUTS)
+    all_paths = render_paths(agg)
+    metrics = corpus_paths._metrics_by_path(agg, None)
+    family_of = {f"p{i}": (k[0], k[1], k[3]) for i, k in enumerate(sorted(agg.edges))}
+    types_of = {f"p{i}": agg.edges[k]["action_types"] for i, k in enumerate(sorted(agg.edges))}
+    labels = {
+        key: label for row in agg.edges.values()
+        for key, label in zip(row["actions"], row["action_labels"], strict=True)
+    }
+    ranked = sorted(all_paths, key=lambda p: corpus_paths._rank_key(p, metrics[p.path_id]))
+    keep_ids = {p.path_id for p in ranked[:1]}
+    kept = [p for p in all_paths if p.path_id in keep_ids]
+    overflow = [p for p in all_paths if p.path_id not in keep_ids]
+    synth, _meta = corpus_paths._fold_overflow(overflow, family_of, types_of, metrics, labels)
+
+    bundled = bundle_paths(kept + synth)
+    expected = {(p.source, p.actions, p.target) for p in kept + synth}
+    assert bundled.walkable_routes() == expected
+
+
+def test_folded_payload_is_still_deterministic() -> None:
+    """Same corpus-bundle guarantee as
+    ``test_payload_is_deterministic_across_runs_and_input_order``, now exercised with folding
+    actually engaged."""
+    one = path_payload(aggregate_bouts(_FOLD_BOUTS), max_variants=1)
+    two = path_payload(aggregate_bouts(_FOLD_BOUTS), max_variants=1)
+    flipped = path_payload(aggregate_bouts(list(reversed(_FOLD_BOUTS))), max_variants=1)
+    assert json.dumps(one, sort_keys=True) == json.dumps(two, sort_keys=True)
+    assert json.dumps(one, sort_keys=True) == json.dumps(flipped, sort_keys=True)
+
+
+def test_join_labels_compressed_collapses_consecutive_repeats() -> None:
+    """§5d item 3 — consecutive repeats of the SAME action label compress on display; a chain
+    with no repeats, or non-adjacent repeats, is untouched."""
+    j = corpus_paths._join_labels_compressed
+    assert j([]) == ""
+    assert j(["Triangle"]) == "Triangle"
+    assert j(["Triangle", "Triangle", "Triangle"]) == "Triangle ×3"
+    assert j(["Triangle", "Armbar", "Armbar"]) == "Triangle → Armbar ×2"
+    assert j(["Sweep", "Triangle", "Sweep"]) == "Sweep → Triangle → Sweep", (
+        "non-adjacent repeats are not the same run — must not compress"
+    )
 
 
 def test_anchor_labels_are_english_not_the_app_locale() -> None:

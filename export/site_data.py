@@ -517,7 +517,10 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
 # covers the bout's DB fields, which is the right contract for data — but a code change that
 # adds a key (2: `path_graph`) leaves every cached item valid and silently missing it, and the
 # renderer then falls back for the whole corpus. Same precedent as `PROFILE_VERSION`.
-BREAKDOWN_VERSION = 4
+# 4 -> 5 (§5d, docs/taxonomy/03_ARESTA_COMO_CAMINHO.md §FASE 5d): `path_graph` gained the
+# additive `folded` field and its `min_count` drop became the ranked `max_variants` budget — a
+# cached breakdown built before this would silently render with the old static gate's shape.
+BREAKDOWN_VERSION = 5
 
 # --only previews keep their own cache so a partial run can never overwrite the real one.
 _PREVIEW_CACHE_DIR = Path(__file__).resolve().parent.parent / ".export_cache" / "preview"
@@ -787,7 +790,8 @@ def _progression_example(
 
 # Same job as BREAKDOWN_VERSION, for the dossier's cached items (1: `:pg`, the path map).
 # Separate from PROFILE_VERSION because that one is style_profile's own contract, not ours.
-DOSSIER_VERSION = 3
+# 3 -> 4 (§5d): same `folded`/`max_variants` shape change as BREAKDOWN_VERSION, above.
+DOSSIER_VERSION = 4
 
 
 def build_fighters(
@@ -2009,8 +2013,12 @@ _OCEAN_JS = """
 var O = window.GA_OCEAN || {nodes:[],links:[],regions:[],meta:{},markov:{},elo:{}};
 var byId = {}; O.nodes.forEach(function(n){ byId[n.id]=n; });
 var __pg = O.pathGraph && O.pathGraph.stats;
+// §5d counter: `paths` is what draws with its own stroke, `foldedGroups` is how many
+// category strokes stand in for everything past the budget — nothing here was dropped,
+// `foldedVariants` (of `variants` total) is still there, just folded.
 document.getElementById('oceanMeta').textContent = __pg
-  ? (__pg.states+' positions · '+__pg.paths+' recurring technique paths (seen 2+ times) · '
+  ? (__pg.states+' positions · '+__pg.paths+' technique paths drawn individually · '
+     +__pg.foldedGroups+' folded groups covering '+__pg.foldedVariants+' more (of '+__pg.variants+' total) · '
      +__pg.segments+' strokes · '+__pg.sharedActionPct+'% of the ink is shared')
   : ((O.meta.positions||0)+' of '+(O.meta.total_positions||O.meta.positions||0)+' techniques (top slice) · '+
      (O.meta.transitions||0)+' transitions · '+(O.regions||[]).length+' regions');
@@ -2083,6 +2091,26 @@ function onLinkSelect(link){
   var s=document.getElementById('oceanSearch'), lg=document.getElementById('oceanLegend');
   if(s){ s.style.display='none'; s.blur(); }
   if(lg){ lg.style.display='none'; }
+  // §5d — a folded category stroke stands in for `variantCount` real variants; selecting it
+  // expands the panel to list every one of them (unabridged, `folded.variants`), never just a
+  // count. The map itself keeps drawing ONE thicker stroke — the expansion is the reading, not
+  // a redraw.
+  if(link.folded){
+    var f = link.folded;
+    document.getElementById('opName').textContent = f.label;
+    document.getElementById('opMeta').innerHTML =
+      '<span class="muted">'+f.variantCount+' folded variant'+(f.variantCount===1?'':'s')+
+      ' · '+f.count+' occurrence'+(f.count===1?'':'s')+' total</span>';
+    document.getElementById('opMetrics').innerHTML = '';
+    document.getElementById('opNeighbours').innerHTML =
+      '<div class="op-sec">Folded variants</div><div class="op-tags">'+
+      (f.variants||[]).map(function(v){
+        return '<span class="tag">'+v.actions.join(' → ')+
+          (v.count>1?' ×'+v.count:'')+'</span>'; }).join('')+'</div>';
+    document.getElementById('opEdges').innerHTML = '';
+    panel.hidden=false;
+    return;
+  }
   var acts=(link.actions||[]).map(function(a){
     return '<span class="tag"'+(a.inferred?' style="opacity:.6;border-style:dashed"':'')+'>'+a.label+'</span>'; }).join('');
   document.getElementById('opName').textContent = (link.actions||[]).map(function(a){return a.label;}).join(' → ') || 'Transition';
@@ -2113,7 +2141,9 @@ function onSelect(node){
     PGO.links.forEach(function(l){
       var src=PGO.nodes.filter(function(x){return x.id===l.from;})[0];
       if(!src||src.stateKey!==n.id) return;
-      var txt=(l.actions||[]).map(function(a){return a.label;}).join(' → ');
+      // §5d: a folded stroke carries no `actions[]` — its own category label ("Submissions
+      // ×4") is the text to show, same as any other run.
+      var txt=l.folded ? l.label : (l.actions||[]).map(function(a){return a.label;}).join(' → ');
       if(txt&&!seen[txt]){ seen[txt]=1; runs.push({t:txt,w:l.count||1}); }
     });
     runs.sort(function(x,y){return y.w-x.w;});
@@ -2322,20 +2352,16 @@ def export_site(session: Session, out: Path, full: bool = False,
     # ADDITIVE to GA_OCEAN: `nodes`/`links`/`regions`/`metrics` are untouched, so the panel,
     # the search and the region legend keep reading exactly what they always read; the new
     # `pathGraph` is what the canvas draws, and its state nodes carry `stateKey` (the node_key)
-    # so the panel lookup still resolves. NO GATE — hiding a path hides the object of study
-    # (§10.7); measured, gating on occurrence support keeps 391/2370 paths but drops the long
-    # chains that carry the branching, which is the whole reading.
-    # MEASURED, and the one place a gate is right. Ungated the corpus draws 2 370 paths over
-    # 221 points, and `flow_layout` collapses 139 of them into ONE rank — a 2 700 x 22 200 world,
-    # aspect 8.2, unreadable at any zoom. At `min_count=2` it is 52 points / 396 strokes /
-    # aspect 2.3, the same order as the force map this replaces (68 nodes / 964 links).
-    # The cost is stated, not hidden: single-occurrence chains drop, and with them most of the
-    # long trails (shared ink 14.6% -> 5.5%). That is the right editorial line HERE and only
-    # here — the Ocean has always published a "top slice", and a trail seen once in 742 bouts
-    # is an anecdote about the corpus. A dossier and a breakdown are claims about ONE athlete
-    # and ONE bout, so neither is gated: there, the single occurrence IS the subject.
+    # so the panel lookup still resolves.
+    # §5d superseded the old static `min_count=2` drop (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md
+    # §FASE 5d) — hiding a path hides the object of study (§10.7), and `min_count=2` did exactly
+    # that: 391/2370 paths kept, most of the long chains that carry the branching gone with them.
+    # `path_payload`'s own default budget (~60 variants, ranked by support/strength) now decides
+    # what draws individually; the corpus still bundles in under a second regardless, so this was
+    # never a perf gate. Everything past the budget FOLDS into a category stroke instead of
+    # dropping — see `path_payload`'s docstring and `analysis.corpus_paths._fold_overflow`.
     ocean["pathGraph"] = path_payload(
-        aggregate_bouts(_corpus_bouts(session), collapse_actors=True), min_count=2)
+        aggregate_bouts(_corpus_bouts(session), collapse_actors=True))
     (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
     (out / "the-ocean.html").write_text(render_ocean_page(), encoding="utf-8")
     _t = _phase("build_ocean + data.js", _t)
