@@ -16,6 +16,7 @@ on any problem.
 from __future__ import annotations
 
 import argparse
+import datetime as dt
 import json
 import sys
 from pathlib import Path
@@ -62,8 +63,11 @@ def main() -> int:
             bout["notes"] = " | ".join(str(n) for n in notes)
 
         answer = {"bout": bout, "events": kept,
+                  # The date is the run's own, not a literal: this stamp is the file's
+                  # provenance, and batch 1's hardcoded date would have every later batch
+                  # claiming to have been audited on the day batch 1 was.
                   "source": f"gemini reading, concordance-audited (kept {len(kept)}/{n_read}) "
-                            "2026-08-25"}
+                            f"{dt.date.today().isoformat()}"}
         probs = validate(answer, labels, [])
         lo, hi = raw["audit"]["curated_start"] - 5, raw["audit"]["curated_end"] + 30
         probs += [f"events[{i}].ts {e['ts']} outside curated bout {lo}..{hi}"

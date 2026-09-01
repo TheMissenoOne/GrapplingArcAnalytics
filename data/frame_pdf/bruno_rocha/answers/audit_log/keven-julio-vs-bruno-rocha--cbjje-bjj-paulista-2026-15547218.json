@@ -1,0 +1,94 @@
+{
+ "log": [
+  {
+   "ts": 30,
+   "gemini": "Front Headlock / Keven Julio / control / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "t=29-33 both athletes are standing (Bruno alone in stance at t=33); no head control visible in any sampled frame of that window."
+  },
+  {
+   "ts": 35,
+   "gemini": "Guard / Keven Julio / guard / true",
+   "verdict": "CONCORDANT -> kept",
+   "why": "t=36-40 at 720p: the light-blue athlete (Keven) is on the bottom with Bruno over him. Actor and type both hold; kept verbatim."
+  },
+  {
+   "ts": 35,
+   "gemini": "Top Control / Bruno Rocha / control / true",
+   "verdict": "CONCORDANT -> kept (name normalised)",
+   "kept_as": "Top Control / Bruno Fernandes Rocha",
+   "why": "same instant, same frames: the royal-blue/cyan-tape athlete (Bruno) is on top at t=36-40. The pair of same-ts events is not a contradiction -- docs/match_event_model.md assigns the guard to the bottom player and the control to the top player, so one moment is correctly two events with different owners. Only the spelling changed, to the DB's 'Bruno Fernandes Rocha'."
+  },
+  {
+   "ts": 50,
+   "gemini": "Inversion / Keven Julio / guard / true",
+   "verdict": "DISCORDANT -> dropped",
+   "why": "t=50 both are on their feet -- Bruno upright, Keven bent forward into him. Nobody is inverted."
+  },
+  {
+   "ts": 65,
+   "gemini": "Seated Guard / Keven Julio / guard / true",
+   "verdict": "DISCORDANT -> dropped",
+   "why": "at t=65 Keven is already the TOP man with Bruno flat under him; the claim has the roles the wrong way round and no seated guard is on screen."
+  },
+  {
+   "ts": 110,
+   "gemini": "Turtle Position / Keven Julio / escape / true",
+   "verdict": "DISCORDANT -> dropped",
+   "why": "t=108: Bruno is on his BACK with Keven on top. Nobody turtles, and the claimed actor is the one on top."
+  },
+  {
+   "ts": 115,
+   "gemini": "Side Control / Bruno Rocha / control / true",
+   "verdict": "DISCORDANT -> kept corrected",
+   "kept_as": "Side Control / Keven Julio / control / true @ts 115",
+   "why": "t=113/117: KEVEN is the one chest-to-chest across Bruno with an arm under his head, Bruno flat underneath -- the position is real and it is the other athlete's. Actor swapped; the label survives the second look."
+  },
+  {
+   "ts": 120,
+   "gemini": "Guard Recovery / Keven Julio / escape / true",
+   "verdict": "DISCORDANT -> kept corrected",
+   "kept_as": "Guard Recovery / Bruno Fernandes Rocha / escape / true @ts 120",
+   "why": "t=121: Keven is still on top and BRUNO's legs are back in between them -- so a guard was recovered and it is Bruno's, the man underneath. Actor swapped, the escape itself is visible."
+  },
+  {
+   "ts": 130,
+   "gemini": "Side Control / Bruno Rocha / control / true",
+   "verdict": "DISCORDANT -> dropped",
+   "why": "t=128/132 show the same Keven-on-top pin already kept at ts 115; the guard recovery that would separate them into two distinct controls is not visible, so this is a duplicate of a continuous position and would double-count it."
+  },
+  {
+   "ts": 145,
+   "gemini": "Guard Recovery / Keven Julio / escape / true",
+   "verdict": "DISCORDANT -> dropped",
+   "why": "t=146 Keven is on top and Bruno is flattened; no guard is being recovered by anyone, and the claimed actor is again the top man."
+  },
+  {
+   "ts": 150,
+   "gemini": "Guard / Keven Julio / guard / true",
+   "verdict": "DISCORDANT -> dropped",
+   "why": "t=151: Keven still on top. Same defect as ts 145."
+  },
+  {
+   "ts": 160,
+   "gemini": "Submission / Keven Julio / submission / false",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "t=158 shows the finishing sequence already under way; a distinct FAILED attempt separate from the finish kept at ts 168 is not distinguishable at this sampling rate, and logging both would count one finish twice."
+  },
+  {
+   "ts": 165,
+   "gemini": "Submission / Keven Julio / submission / true",
+   "verdict": "CONCORDANT -> kept, ts snapped",
+   "kept_as": "Submission / Keven Julio / submission / true @ts 168",
+   "why": "t=166/169 at 720p: Keven on top with Bruno flattened face-down and Keven's arm around his neck; the referee moves in at t=169 and the clock freezes at 3:21 at t=171. Actor, type and successful all hold; ts moved from 165 to 168 to sit on the finish itself. Generic 'Submission' kept -- which submission it is is not readable."
+  },
+  {
+   "ts": 170,
+   "gemini": "Tap / Bruno Rocha / submission / true",
+   "verdict": "DROPPED BY MODEL RULE",
+   "why": "'Tap' is not an event in docs/match_event_model.md -- the finisher's own event carries successful: true and the tap is that same fact recorded twice, on the wrong athlete's graph. Also not a library label."
+  }
+ ],
+ "identity_check": "GEMINI'S IDENTITY STATEMENT IS WRONG AND WAS OVERTURNED. It says 'Keven Julio is the blonde competitor wearing blue ankle bands', derived from the lower-third graphic's blue bar -- the one inference the sheet's own instructions forbid, because that bar is left/right design (the same broadcast puts Bruno on the blue side in video 15546999 and on the red side here). Correct mapping, from the bodies: Bruno Fernandes Rocha = ROYAL-BLUE rashguard, black shorts, CYAN tape on the LEFT ankle, right-shin tattoo -- the same man, kit for kit, whose arm is raised as the winner of video 15546999 (same event, same day), and Bruno is the only athlete common to both videos. Keven Julio = the LIGHTER sky-blue rashguard, black shorts, GREEN band on the right ankle, dark hair, tattooed left arm. The referee raises the LIGHT-blue athlete's arm at t=183-186 -> Keven Julio won, which is also the published result. Every actor below was therefore re-derived from the frames, not taken from the reading: Gemini's own actor names turn out to be swapped on the mid-bout control events and right on the finish, so no blanket inversion was applied.",
+ "notes": "Bout window: the graphic shows a STALE 4:57 at t=20 and t=25 (leftover from the previous bout) and then jumps to 5:42 at t=30 -- so the real clock starts at t~30 and reads 5:42, giving bout_start = 12 on a 6:00 match. Independently, 3:25@167 / 3:23@169 / 3:21@171-then-frozen gives 171 - 159 = 12 as well, so there is no stoppage and the two anchors agree exactly. Finish at t~169-171; referee steps in at t=169. This graphic has no points column, so nothing here is scoreboard-corroborated. Verified from 720p crops: Bruno on top / Keven on bottom at t=36-40; Keven on top from t~65 through the finish (t=108/113/117/128/132/146/151/158/166), Bruno underneath throughout. Kept 5 of 14 events read."
+}

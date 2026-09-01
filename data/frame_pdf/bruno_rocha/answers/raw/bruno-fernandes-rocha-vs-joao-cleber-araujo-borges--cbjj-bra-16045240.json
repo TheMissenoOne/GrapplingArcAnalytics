@@ -1,0 +1,125 @@
+{
+ "bout": {
+  "athlete_a": "Joao Cleber Araujo Borges",
+  "athlete_b": "Bruno Fernandes Rocha",
+  "event": "CBJJ Brasileiro No-Gi 2026",
+  "winner": "Joao Cleber Araujo Borges",
+  "year": 2026,
+  "win_type": "Points",
+  "identity_discriminator": "João Cleber Araújo Borges wears the black rashguard, confirmed when he is awarded 4 points on the scoreboard at 1:25 while maintaining back control over the athlete in the white and purple rashguard."
+ },
+ "events": [
+  {
+   "ts": 15,
+   "label": "Guard Pull",
+   "actor": "Bruno Fernandes Rocha",
+   "type": "transition",
+   "successful": true
+  },
+  {
+   "ts": 70,
+   "label": "Back Take",
+   "actor": "João Cleber Araújo Borges",
+   "type": "transition",
+   "successful": true
+  },
+  {
+   "ts": 85,
+   "label": "Back Control",
+   "actor": "João Cleber Araújo Borges",
+   "type": "control",
+   "successful": true,
+   "points": 4
+  },
+  {
+   "ts": 175,
+   "label": "Back Escape",
+   "actor": "Bruno Fernandes Rocha",
+   "type": "escape",
+   "successful": true
+  },
+  {
+   "ts": 295,
+   "label": "Guard Pass to Mount",
+   "actor": "João Cleber Araújo Borges",
+   "type": "pass",
+   "successful": true
+  },
+  {
+   "ts": 305,
+   "label": "Mount",
+   "actor": "João Cleber Araújo Borges",
+   "type": "control",
+   "successful": true,
+   "points": 4
+  },
+  {
+   "ts": 330,
+   "label": "Mount Escape",
+   "actor": "Bruno Fernandes Rocha",
+   "type": "escape",
+   "successful": true
+  },
+  {
+   "ts": 340,
+   "label": "Back Take",
+   "actor": "João Cleber Araújo Borges",
+   "type": "transition",
+   "successful": true
+  },
+  {
+   "ts": 345,
+   "label": "Back Control",
+   "actor": "João Cleber Araújo Borges",
+   "type": "control",
+   "successful": true,
+   "points": 4
+  },
+  {
+   "ts": 385,
+   "label": "Escape to Standing",
+   "actor": "Bruno Fernandes Rocha",
+   "type": "escape",
+   "successful": true
+  },
+  {
+   "ts": 425,
+   "label": "Guard Pull",
+   "actor": "Bruno Fernandes Rocha",
+   "type": "transition",
+   "successful": true
+  },
+  {
+   "ts": 470,
+   "label": "Scramble to Standing",
+   "actor": "Bruno Fernandes Rocha",
+   "type": "transition",
+   "successful": true
+  },
+  {
+   "ts": 480,
+   "label": "Guard Pull",
+   "actor": "Bruno Fernandes Rocha",
+   "type": "transition",
+   "successful": true
+  }
+ ],
+ "audit": {
+  "division": "",
+  "source_file": "joao-cleber-16045240.md",
+  "curated_start": 0,
+  "curated_end": 535,
+  "gemini_winner": "João Cleber Araújo Borges",
+  "flags": [
+   "ts 70: actor 'João Cleber Araújo Borges' is neither competitor",
+   "ts 85: actor 'João Cleber Araújo Borges' is neither competitor",
+   "ts 295: actor 'João Cleber Araújo Borges' is neither competitor",
+   "ts 305: actor 'João Cleber Araújo Borges' is neither competitor",
+   "ts 340: actor 'João Cleber Araújo Borges' is neither competitor",
+   "ts 345: actor 'João Cleber Araújo Borges' is neither competitor",
+   "gemini winner 'João Cleber Araújo Borges' CONTRADICTS published winner 'Joao Cleber Araujo Borges' -- identity of every actor in this bout is suspect",
+   "final_score was a string ('12-0') -- dropped, orientation undeclared"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

@@ -94,7 +94,103 @@ def readings(payload: Any) -> list[tuple[dict[str, Any], list[dict[str, Any]]]]:
     return []
 
 
-def match_bout(events: list[dict[str, Any]], index: list[dict[str, Any]]) -> dict[str, Any] | None:
+# Markdown readings: a metadata bullet list + one pipe table. Column and key names vary
+# between pastes, so both are matched through an alias map rather than by position.
+_MD_COLUMNS = {
+    "ts": "ts", "time": "ts", "time (ts)": "ts", "timestamp": "ts",
+    "actor": "actor", "athlete": "actor", "fighter": "actor",
+    "label": "label", "technique": "label", "action": "label",
+    "type": "type", "event type": "type",
+    "successful": "successful", "success": "successful", "landed": "successful",
+    "points": "points", "note": "note", "notes": "note",
+}
+_MD_META = {
+    "event": "event", "event name": "event", "year": "year",
+    "competitors": "competitors", "winner": "winner",
+    "method": "win_type", "win method": "win_type", "win type": "win_type",
+    "bout start": "bout_start_seconds", "bout start seconds": "bout_start_seconds",
+    "bout end": "bout_end_seconds",
+    "final score": "final_score", "score": "final_score",
+    "identity discriminator": "identity_discriminator",
+    "identity verification": "identity_discriminator",
+    "identity verified by": "identity_verified_by",
+    "notes": "notes",
+}
+
+
+def _md_seconds(raw: str) -> int | None:
+    """'1:25' and '85' are both written for the same second by different pastes."""
+    raw = raw.strip()
+    if m := re.fullmatch(r"(\d+):([0-5]\d)", raw):
+        return int(m.group(1)) * 60 + int(m.group(2))
+    return int(raw) if re.fullmatch(r"\d+", raw) else None
+
+
+def _md_cells(line: str) -> list[str]:
+    return [c.strip() for c in line.strip().strip("|").split("|")]
+
+
+def markdown_readings(text: str) -> list[tuple[dict[str, Any], list[dict[str, Any]]]]:
+    """One (bout_meta, events) pair from a markdown paste, or [] if there is no table.
+
+    Same output shape as ``readings()`` -- everything downstream (bout matching, label
+    snapping, the audit flags) is unchanged, so a markdown paste and a JSON dump reach the
+    audit through exactly the same checks.
+    """
+    meta: dict[str, Any] = {}
+    for line in text.splitlines():
+        m = re.match(r"^\s*[-*]?\s*\**([A-Za-z][A-Za-z ()]*?)\**\s*:\s*(.+?)\s*$", line)
+        if not m or "|" in line:
+            continue
+        key = _MD_META.get(re.sub(r"\s+", " ", m.group(1)).strip().lower())
+        if key and key not in meta:
+            meta[key] = m.group(2).strip()
+    if (comp := str(meta.pop("competitors", ""))) and re.search(r"\bvs\.?\b", comp):
+        a, b = re.split(r"\s+vs\.?\s+", comp, maxsplit=1)
+        meta["athlete_a"], meta["athlete_b"] = a.strip(), b.strip()
+    if "year" in meta:
+        meta["year"] = int(str(meta["year"]).strip())
+    if "bout_start_seconds" in meta:
+        meta["bout_start_seconds"] = _md_seconds(str(meta["bout_start_seconds"]))
+    if "bout_end_seconds" in meta:
+        meta["bout_end_seconds"] = _md_seconds(str(meta["bout_end_seconds"]))
+
+    rows = [ln for ln in text.splitlines() if ln.count("|") >= 3]
+    if len(rows) < 3:
+        return []
+    header = [_MD_COLUMNS.get(c.lower(), "") for c in _md_cells(rows[0])]
+    if "ts" not in header or "label" not in header:
+        return []
+    events: list[dict[str, Any]] = []
+    for line in rows[1:]:
+        cells = _md_cells(line)
+        if len(cells) != len(header) or set("".join(cells)) <= set("-: "):
+            continue          # separator row, or a ragged line that is not this table
+        row = {k: v for k, v in zip(header, cells, strict=True) if k and v}
+        ts = _md_seconds(str(row.get("ts", "")))
+        if ts is None:
+            continue
+        e: dict[str, Any] = {"ts": ts, "label": row.get("label", ""),
+                             "actor": row.get("actor", ""), "type": row.get("type", "")}
+        if (suc := row.get("successful", "").lower()) in ("true", "false", "yes", "no"):
+            e["successful"] = suc in ("true", "yes")
+        if (pts := row.get("points", "")).isdigit():
+            e["points"] = int(pts)
+        if row.get("note"):
+            e["note"] = row["note"]
+        events.append(e)
+    return [(meta, events)] if events else []
+
+
+def match_bout(events: list[dict[str, Any]], index: list[dict[str, Any]],
+               filename: str = "") -> dict[str, Any] | None:
+    # A curated `video_id` beats the timestamp scan: several single-bout videos in one batch
+    # all run from ~0, so every one of them fits the FIRST entry's range and the scan below
+    # silently files them all under that bout.
+    for b in index:
+        vid = str(b.get("video_id") or "")
+        if vid and vid in filename:
+            return b
     tss = [e["ts"] for e in events if isinstance(e.get("ts"), int)]
     if not tss:
         return None
@@ -132,6 +228,13 @@ def normalize_one(bout_meta: dict[str, Any], events: list[dict[str, Any]],
             flags.append(f"ts {e.get('ts')}: actor {e.get('actor')!r} is neither competitor")
         kept.append(e)
 
+    for alias in ("method", "win_method"):
+        # Readings name the finish "method"/"win_method"; the schema field is `win_type`, and
+        # without this a "Submission" reading reaches the dump as an empty method, which
+        # dump_import maps to DECISION.
+        if not bout_meta.get("win_type") and bout_meta.get(alias):
+            bout_meta = {**bout_meta, "win_type": bout_meta[alias]}
+
     gemini_winner = str(bout_meta.get("winner") or "").strip()
     if gemini_winner and gemini_winner != athlete_a:
         flags.append(f"gemini winner {gemini_winner!r} CONTRADICTS published winner {athlete_a!r}"
@@ -150,6 +253,15 @@ def normalize_one(bout_meta: dict[str, Any], events: list[dict[str, Any]],
                 flags.append(f"{k} was a string ({bout_meta[k]!r}) -- dropped, orientation undeclared")
                 continue
             bout[k] = bout_meta[k]
+    if "bout_start" in curated:
+        # Curated wins, like the winner does: a clock-derived start read off the sheet by the
+        # curator outranks the reading's own guess, which is routinely a few seconds out. An
+        # explicit null says the bout starts before this video does, so no value is true --
+        # different from the key being absent, which leaves the reading's own claim standing.
+        if curated["bout_start"] is None:
+            bout.pop("bout_start_seconds", None)
+        else:
+            bout["bout_start_seconds"] = curated["bout_start"]
     if penalties:
         bout["penalties"] = "; ".join(penalties)
 
@@ -164,9 +276,11 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("input_dir", type=Path)
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    ap.add_argument("--bouts", type=Path, default=BOUTS_INDEX,
+                     help="curated bout index to match readings against")
     a = ap.parse_args()
 
-    index = json.loads(BOUTS_INDEX.read_text(encoding="utf-8"))["bouts"]
+    index = json.loads(a.bouts.read_text(encoding="utf-8"))["bouts"]
     labels = load_labels()
     a.out.mkdir(parents=True, exist_ok=True)
 
@@ -175,19 +289,22 @@ def main() -> int:
     for f in sorted(a.input_dir.iterdir()):
         if not f.is_file():
             continue
+        text = f.read_text(encoding="utf-8", errors="replace")
         try:
-            payload = tolerant_json(f.read_text(encoding="utf-8", errors="replace"))
+            parsed = readings(tolerant_json(text))
         except json.JSONDecodeError as exc:
-            print(f"UNPARSEABLE {f.name}: {exc}")
-            problems += 1
-            continue
-        for bout_meta, events in readings(payload):
-            curated = match_bout(events, index)
+            parsed = markdown_readings(text)
+            if not parsed:
+                print(f"UNPARSEABLE {f.name}: {exc}")
+                problems += 1
+                continue
+        for bout_meta, events in parsed:
+            curated = match_bout(events, index, f.name)
             if curated is None:
                 print(f"NO BOUT MATCH {f.name}: {len(events)} events do not fit one curated bout")
                 problems += 1
                 continue
-            slug = slugify(curated["label"])
+            slug = str(curated.get("slug") or slugify(curated["label"]))
             # ts can be absent on a raw reading; sort None-safe (batch 3 crashed here).
             sig = json.dumps(sorted((e.get("ts") if isinstance(e.get("ts"), int) else -1,
                                      str(e.get("label"))) for e in events))

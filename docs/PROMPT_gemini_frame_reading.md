@@ -104,3 +104,40 @@ dropped**. Recurring defect classes to watch: whole-bout identity swaps when bot
 dark and there is no commentary (2 of 41 bouts — caught by the published-winner check);
 actor flipped on guard/pass exchanges; ts a few frames late relative to the scoreboard
 change; ASCII hyphens where the vocabulary carries U+2011 (auto-snapped by the normalizer).
+
+### Bruno Rocha batch (2026-09-01) — the low-water mark, and why
+
+4 bouts / 43 events read over `data/frame_pdf/bruno_rocha/` (four single-bout FloGrappling
+uploads). Audit: **15 kept (35%), 9 of them corrected, 28 dropped**. Per bout: FPJJ Circuito
+Paulista 6/7, CBJJE vs Bryan Silva 3/9, CBJJE vs Keven Julio 5/14, CBJJ Brasileiro No-Gi 1/13.
+
+The spread is the finding, and it tracks ONE variable — whether the broadcast shows points:
+
+- The **FPJJ** bout has a full gi scoreboard (points, vantagens, running clock) and a
+  `VENCEDOR` card. Every claim could be checked against a score change, so 6 of 7 survived and
+  five of those only needed their `ts` snapped onto the scoreboard, 6–13 s later than read.
+- The **CBJJ Brasileiro** bout has a scoreboard but is filmed from across the whole hall. The
+  three 4-point awards are certain and their owner is certain; the POSITION behind two of them
+  is not, and `+4` is mount *or* back control. Both were dropped rather than guessed — the
+  fact is preserved in the answer's `notes`, where it cannot become a node.
+- The two **CBJJE** bouts have a lower third with names and a clock and **no points column at
+  all**, so nothing bounds a positional claim. That is where the drops concentrate.
+
+Two defect classes from batch 1 recurred, one of them worse:
+
+- **Whole-bout identity swap**, again justified by the graphic: Gemini bound "Keven Julio" to
+  the athlete with the blue ankle bands "where the scoreboard's blue bar aligns with his ankle
+  bands" — the exact inference the prompt forbids, and here demonstrably wrong (the same
+  broadcast puts the same athlete on the blue side in one bout and the red side in the other).
+  New wrinkle: the swap was **not uniform**. Gemini's actor names came out inverted on the
+  mid-bout controls and *correct* on the finish, apparently because the finish was assigned
+  from the published winner. So a blanket inversion is NOT a safe repair — every actor has to
+  be re-derived from the frames.
+- **`ts` early rather than late**: in the scored bout every timestamp sat 6–13 s BEFORE its
+  score change, the mirror of batch 1's late reads. Snap to the scoreboard either way.
+
+What made the identity call decidable was cheap and reusable: two of the four bouts are the
+same athlete at the same event on the same day, so the body that appears in BOTH videos must
+be the athlete both bouts have in common — kit, tape and tattoos matched frame to frame, with
+no reliance on any graphic. Worth reaching for whenever a batch contains two bouts of one
+athlete.

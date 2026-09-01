@@ -1,0 +1,52 @@
+{
+ "bout": {
+  "athlete_a": "Keven Julio",
+  "athlete_b": "Bruno Fernandes Rocha",
+  "event": "CBJJE BJJ Paulista 2026",
+  "winner": "Keven Julio",
+  "year": 2026,
+  "win_type": "Submission",
+  "bout_start_seconds": 12,
+  "identity_discriminator": "GEMINI'S IDENTITY STATEMENT IS WRONG AND WAS OVERTURNED. It says 'Keven Julio is the blonde competitor wearing blue ankle bands', derived from the lower-third graphic's blue bar -- the one inference the sheet's own instructions forbid, because that bar is left/right design (the same broadcast puts Bruno on the blue side in video 15546999 and on the red side here). Correct mapping, from the bodies: Bruno Fernandes Rocha = ROYAL-BLUE rashguard, black shorts, CYAN tape on the LEFT ankle, right-shin tattoo -- the same man, kit for kit, whose arm is raised as the winner of video 15546999 (same event, same day), and Bruno is the only athlete common to both videos. Keven Julio = the LIGHTER sky-blue rashguard, black shorts, GREEN band on the right ankle, dark hair, tattooed left arm. The referee raises the LIGHT-blue athlete's arm at t=183-186 -> Keven Julio won, which is also the published result. Every actor below was therefore re-derived from the frames, not taken from the reading: Gemini's own actor names turn out to be swapped on the mid-bout control events and right on the finish, so no blanket inversion was applied.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "Bout window: the graphic shows a STALE 4:57 at t=20 and t=25 (leftover from the previous bout) and then jumps to 5:42 at t=30 -- so the real clock starts at t~30 and reads 5:42, giving bout_start = 12 on a 6:00 match. Independently, 3:25@167 / 3:23@169 / 3:21@171-then-frozen gives 171 - 159 = 12 as well, so there is no stoppage and the two anchors agree exactly. Finish at t~169-171; referee steps in at t=169. This graphic has no points column, so nothing here is scoreboard-corroborated. Verified from 720p crops: Bruno on top / Keven on bottom at t=36-40; Keven on top from t~65 through the finish (t=108/113/117/128/132/146/151/158/166), Bruno underneath throughout. Kept 5 of 14 events read."
+ },
+ "events": [
+  {
+   "ts": 35,
+   "label": "Guard",
+   "actor": "Keven Julio",
+   "successful": true,
+   "type": "guard"
+  },
+  {
+   "ts": 35,
+   "label": "Top Control",
+   "actor": "Bruno Fernandes Rocha",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 115,
+   "label": "Side Control",
+   "actor": "Keven Julio",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 120,
+   "label": "Guard Recovery",
+   "actor": "Bruno Fernandes Rocha",
+   "successful": true,
+   "type": "escape"
+  },
+  {
+   "ts": 168,
+   "label": "Submission",
+   "actor": "Keven Julio",
+   "successful": true,
+   "type": "submission"
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 5/14) 2026-09-01"
+}

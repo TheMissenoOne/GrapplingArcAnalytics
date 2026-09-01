@@ -1,0 +1,78 @@
+{
+ "bout": {
+  "athlete_a": "Rafael Silverio da Fonseca",
+  "athlete_b": "Bruno Fernandes Rocha",
+  "event": "FPJJ Circuito Paulista Gi Etapa 3 2026",
+  "winner": "Rafael Silverio da Fonseca",
+  "year": 2026,
+  "win_type": "points",
+  "bout_start_seconds": 30
+ },
+ "events": [
+  {
+   "ts": 75,
+   "label": "Single Leg Takedown",
+   "actor": "Bruno Rocha",
+   "successful": false,
+   "type": "takedown"
+  },
+  {
+   "ts": 115,
+   "label": "Takedown",
+   "actor": "Rafael Silverio da Fonseca",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  },
+  {
+   "ts": 180,
+   "label": "Guard Pass",
+   "actor": "Rafael Silverio da Fonseca",
+   "successful": true,
+   "type": "pass"
+  },
+  {
+   "ts": 220,
+   "label": "North-South Position",
+   "actor": "Rafael Silverio da Fonseca",
+   "successful": true,
+   "type": "control"
+  },
+  {
+   "ts": 280,
+   "label": "Takedown",
+   "actor": "Rafael Silverio da Fonseca",
+   "successful": true,
+   "type": "takedown",
+   "points": 2
+  },
+  {
+   "ts": 285,
+   "label": "Guard Pass",
+   "actor": "Rafael Silverio da Fonseca",
+   "successful": true,
+   "type": "pass",
+   "points": 3
+  },
+  {
+   "ts": 290,
+   "label": "Knee on Belly",
+   "actor": "Rafael Silverio da Fonseca",
+   "successful": true,
+   "type": "control",
+   "points": 2
+  }
+ ],
+ "audit": {
+  "division": "Faixa Branca / Master 2 / Meio-Pesado (quartas-final)",
+  "source_file": "rafael-silverio-16132708.json",
+  "curated_start": 0,
+  "curated_end": 380,
+  "gemini_winner": "Rafael Silverio da Fonseca",
+  "flags": [
+   "ts 75: actor 'Bruno Rocha' is neither competitor",
+   "final_score was a string ('0-9') -- dropped, orientation undeclared"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

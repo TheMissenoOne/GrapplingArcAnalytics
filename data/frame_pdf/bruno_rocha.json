@@ -1,0 +1,32 @@
+{
+  "_comment": [
+    "Bruno Fernandes Rocha (athlete 7558d1f1) — bouts with Flo footage and no sequence in the DB yet. Sourced 2026-09-01 from Downloads/transcricoes_compiladas_bruno_rocha.md §'Lutas válidas ainda sem transcrição'. Hugo Maradona 'intermediário' has a transcript but no video link → transcript path, not here."
+  ],
+  "videos": [
+    {
+      "url": "https://www.flograppling.com/video/16132708-rafael-silverio-da-fonseca-vs-bruno-rocha-2026-fpjj-circuito-paulista-gi-etapa-3",
+      "kind": "full_match",
+      "label": "Rafael Silverio da Fonseca vs Bruno Rocha, FPJJ Circuito Paulista Gi Etapa 3 2026",
+      "note": "flo; gi",
+      "skip": "homônimo — faixa branca/master 2 na ficha; atleta é roxa (dono, 2026-09-01)"
+    },
+    {
+      "url": "https://www.flograppling.com/video/15547218-keven-julio-vs-bruno-rocha-2026-cbjje-bjj-paulista",
+      "kind": "full_match",
+      "label": "Keven Julio vs Bruno Rocha, CBJJE BJJ Paulista 2026",
+      "note": "flo"
+    },
+    {
+      "url": "https://www.flograppling.com/video/15546999-bruno-rocha-vs-bryan-silva-2026-cbjje-bjj-paulista",
+      "kind": "full_match",
+      "label": "Bruno Rocha vs Bryan Silva, CBJJE BJJ Paulista 2026",
+      "note": "flo"
+    },
+    {
+      "url": "https://www.flograppling.com/video/16045240-bruno-fernandes-rocha-vs-joao-cleber-araujo-borges-2026-cbjj-brazilian-jiu-jitsu-championship-no-gi",
+      "kind": "full_match",
+      "label": "Bruno Fernandes Rocha vs Joao Cleber Araujo Borges, CBJJ Brasileiro No-Gi 2026",
+      "note": "flo"
+    }
+  ]
+}

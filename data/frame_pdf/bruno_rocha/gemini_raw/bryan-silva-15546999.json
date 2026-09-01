@@ -1,0 +1,77 @@
+[
+  {
+    "event_name": "CBJJE BJJ Paulista 2026",
+    "year": 2026,
+    "competitor_1": "Bruno Rocha",
+    "competitor_2": "Bryan Silva",
+    "winner": "Bruno Rocha",
+    "win_method": "Submission",
+    "bout_start_seconds": 0,
+    "identity_verified_by": "2:00 (referee raises the hand of the athlete in the solid blue rashguard, corresponding to the Bruno Rocha graphic on the left)",
+    "events": [
+      {
+        "ts": 15,
+        "label": "Guard Pull",
+        "actor": "Bryan Silva",
+        "successful": true,
+        "type": "transition"
+      },
+      {
+        "ts": 25,
+        "label": "Guard Pull",
+        "actor": "Bryan Silva",
+        "successful": true,
+        "type": "transition"
+      },
+      {
+        "ts": 30,
+        "label": "Open Guard",
+        "actor": "Bryan Silva",
+        "successful": true,
+        "type": "guard"
+      },
+      {
+        "ts": 40,
+        "label": "Guard Pass",
+        "actor": "Bruno Rocha",
+        "successful": true,
+        "type": "pass"
+      },
+      {
+        "ts": 45,
+        "label": "Side Control",
+        "actor": "Bruno Rocha",
+        "successful": true,
+        "type": "control"
+      },
+      {
+        "ts": 60,
+        "label": "Mount",
+        "actor": "Bruno Rocha",
+        "successful": true,
+        "type": "control"
+      },
+      {
+        "ts": 75,
+        "label": "Turtle Control",
+        "actor": "Bruno Rocha",
+        "successful": true,
+        "type": "control"
+      },
+      {
+        "ts": 80,
+        "label": "Back Control",
+        "actor": "Bruno Rocha",
+        "successful": true,
+        "type": "control"
+      },
+      {
+        "ts": 100,
+        "label": "Choke",
+        "actor": "Bruno Rocha",
+        "successful": true,
+        "type": "submission"
+      }
+    ]
+  }
+]

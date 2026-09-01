@@ -147,6 +147,12 @@ DATASETS: list[tuple[str, str | None, str]] = [
     ("scripts.dumps.european_nogi2025_frames_data", "European No-Gi 2025", "EuroNoGi2025-Frames"),
     ("scripts.dumps.pan_nogi2025_frames2_data", "Pan No-Gi 2025", "PanNoGi2025-Frames"),
     ("scripts.dumps.polaris36_frames_data", "Polaris 36", "Polaris36-Frames"),
+    # Bruno Rocha audited frame-read batch -- scripts/bruno_rocha_frames_to_dump.py, see
+    # docs/gemini_concordance_audit.md. Same one-module-per-event-tag convention.
+    ("scripts.dumps.cbjje_bjj_paulista_2026_frames_data",
+     "CBJJE BJJ Paulista 2026", "CBJJEBJJPaulista2026-Frames"),
+    ("scripts.dumps.cbjj_brasileiro_nogi_2026_frames_data",
+     "CBJJ Brasileiro No-Gi 2026", "CBJJBrasileiroNoGi2026-Frames"),
 ]
 
 

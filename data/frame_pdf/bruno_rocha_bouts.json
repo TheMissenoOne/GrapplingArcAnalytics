@@ -1,0 +1,65 @@
+{
+  "_comment": [
+    "Curated bout index for the Bruno Fernandes Rocha frame batch (4 bouts, manifest data/frame_pdf/bruno_rocha.json).",
+    "Procedure: docs/gemini_concordance_audit.md. Unlike data/frame_pdf/trials_2023_24_bouts.json (one shared event",
+    "recording), every entry here is its OWN single-bout FloGrappling video, so `start`/`end` are that video's own",
+    "frame span and `video_id` (the number after /video/ in the Flo URL, also the tail of the sheet slug) is what",
+    "matches a reading to its bout -- the timestamp scan cannot, because all four videos start at ts 0.",
+    "`label` is 'Winner vs. Loser': the winner is FORCED from it, so each one is recorded below with how it was",
+    "verified independently of any model reading.",
+    "  16132708 Rafael Silverio da Fonseca -- broadcast 'VENCEDOR RAFAEL SILVERIO DA FONSECA' card at t=382, plus",
+    "           the scoreboard reading 0 x 9 (+1 vantagem) and the referee raising the black-gi athlete's arm at t=379.",
+    "  15547218 Keven Julio -- referee raises the light-blue-rashguard athlete's arm at t=183-186; the OTHER body",
+    "           (royal-blue rashguard, cyan tape on the left ankle, right-shin tattoo) is the one whose arm is raised",
+    "           as the winner of video 15546999, and Bruno is the only athlete in both videos, so that body is Bruno.",
+    "  15546999 Bruno Fernandes Rocha -- referee raises his arm at t=123; same body/kit as in 15547218 (same event day).",
+    "  16045240 Joao Cleber Araujo Borges -- final scoreboard at t=520 reads JOAO CLEBER 12 (4 adv, 1 pen) x 0 BRUNO",
+    "           FERNANDES ROCHA (1 adv), and the referee raises the purple-rashguard athlete's arm at t=528.",
+    "`bout_start` is clock-derived by the curator (countdown clock read at 720p) and overrides whatever a reading",
+    "claimed. 16045240 has none: at the first sampled frame the bout is already running (clock 6:40, score 0x0 at",
+    "t=15), so the bout starts BEFORE this video does and no non-negative value is true."
+  ],
+  "bouts": [
+    {
+      "start": 0,
+      "end": 380,
+      "label": "Rafael Silverio da Fonseca vs. Bruno Fernandes Rocha",
+      "event": "FPJJ Circuito Paulista Gi Etapa 3 2026",
+      "division": "Faixa Branca / Master 2 / Meio-Pesado (quartas-final)",
+      "video_id": "16132708",
+      "slug": "rafael-silverio-da-fonseca-vs-bruno-rocha--fpjj-circuito-pau-16132708",
+      "bout_start": 30,
+      "skip": "homônimo — faixa branca/master 2 na ficha; atleta é roxa (dono, 2026-09-01)"
+    },
+    {
+      "start": 0,
+      "end": 190,
+      "label": "Keven Julio vs. Bruno Fernandes Rocha",
+      "event": "CBJJE BJJ Paulista 2026",
+      "division": "",
+      "video_id": "15547218",
+      "slug": "keven-julio-vs-bruno-rocha--cbjje-bjj-paulista-2026-15547218",
+      "bout_start": 12
+    },
+    {
+      "start": 0,
+      "end": 135,
+      "label": "Bruno Fernandes Rocha vs. Bryan Silva",
+      "event": "CBJJE BJJ Paulista 2026",
+      "division": "",
+      "video_id": "15546999",
+      "slug": "bruno-rocha-vs-bryan-silva--cbjje-bjj-paulista-2026-15546999",
+      "bout_start": 11
+    },
+    {
+      "start": 0,
+      "end": 535,
+      "label": "Joao Cleber Araujo Borges vs. Bruno Fernandes Rocha",
+      "event": "CBJJ Brasileiro No-Gi 2026",
+      "division": "",
+      "video_id": "16045240",
+      "slug": "bruno-fernandes-rocha-vs-joao-cleber-araujo-borges--cbjj-bra-16045240",
+      "bout_start": null
+    }
+  ]
+}
