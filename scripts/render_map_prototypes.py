@@ -91,8 +91,11 @@ import networkx as nx
 
 from analysis.chain_compiler import ChainEdge, ChainState, CompiledChain, compile_two_sided
 from analysis.constellations.detect import detect as constellation_detect
+from analysis.markov_weights import block_for_family, load_markov_weights
 from analysis.names import _normalize_name, canonicalize
 from analysis.network_metrics import edge_arrow
+from analysis.path_bundling import BundledGraph, RenderPath, Segment, bundle_paths
+from analysis.path_metrics import PathMetrics, path_metrics
 from analysis.taxonomy_kind import load_inference_table, orientation_of, resolve_library_entry
 
 logger = logging.getLogger(__name__)
@@ -177,11 +180,54 @@ _ANCHOR_UNIT = {
     for slot, deg in _PENTAGON_ANGLES.items()
 }
 
+# Owner call 2026-08-31 (plan, "Layout de âncoras configurável"): now that the oriented anchors
+# take a chain's END as well as its START (Fase 1b), "início à esquerda" stopped being true and
+# the frame can no longer be one hardcoded constant. The pentagon becomes ONE ROW of a table of
+# structures, byte-identical to what it always was so variants 1-12 do not move; the two new
+# ones are the shapes the owner named. ``unified_finish`` folds the two per-actor finishes into
+# a single vertex — the node is then drawn split in half by actor (``n.split``, a patch on the
+# graph.js COPY), because it is still two different athletes' finishes, only one place.
+_DEFAULT_ANCHOR_STRUCTURE = "pentagono"
+_ANCHOR_STRUCTURES: dict[str, dict[str, Any]] = {
+    "pentagono": {
+        "label": "Pentágono (atual)",
+        "angles": _PENTAGON_ANGLES,
+        "unified_finish": False,
+    },
+    "losango": {
+        # Four vertices, orientation on the VERTICAL axis (owner's own words) — neutral opens on
+        # the left, the finish closes on the right, top/bottom are the poles between them.
+        "label": "Losango",
+        "angles": {"neutral": 180.0, "top": 90.0, "bottom": -90.0, "finish": 0.0},
+        "unified_finish": True,
+    },
+    "triangulo": {
+        # Three vertices + the neutral anchor on the middle of the left edge: neutral makes no
+        # orientation claim, so it belongs where the two oriented openings meet, not on a corner
+        # of its own (same reasoning as the owner's original "neutral to the centre" spec).
+        "label": "Triângulo (finalização unificada)",
+        "angles": {"top": 150.0, "bottom": -150.0, "finish": 0.0, "neutral": 180.0},
+        "unified_finish": True,
+    },
+}
 
-def _anchor_slot(node_key: str, actor: str) -> str | None:
-    """Stable pentagon-vertex key for a bolted anchor (one of ``_ANCHOR_UNIT``), or ``None`` for
-    an ordinary node."""
+
+def _anchor_units(structure: str) -> dict[str, tuple[float, float]]:
+    """Unit vectors for a structure's vertices. Canvas convention: y grows DOWNWARD, so a
+    positive maths angle becomes a negative y."""
+    return {
+        slot: (math.cos(math.radians(deg)), -math.sin(math.radians(deg)))
+        for slot, deg in _ANCHOR_STRUCTURES[structure]["angles"].items()
+    }
+
+
+def _anchor_slot(node_key: str, actor: str,
+                  structure: str = _DEFAULT_ANCHOR_STRUCTURE) -> str | None:
+    """Stable vertex key for a bolted anchor in this structure, or ``None`` for an ordinary
+    node."""
     if node_key == _FINISH_KEY:
+        if _ANCHOR_STRUCTURES[structure]["unified_finish"]:
+            return "finish"
         return "finish_opp" if actor == "partner" else "finish_you"
     if _is_start(node_key):
         return orientation_of(node_key)  # "top" / "bottom" / "neutral" — same key set
@@ -460,6 +506,11 @@ class Aggregate:
         # documented) — an edge can now carry more than one action, and two edges whose
         # sequences differ must land in different buckets even when their FIRST action matches.
         self.edges: dict[tuple[str, str, tuple[str, ...], str], dict[str, Any]] = {}
+        # Phase 4: one representative ``ChainEdge`` per aggregation key — ``analysis.path_metrics``
+        # is keyed on a ChainEdge, and every occurrence under one key carries the same action
+        # sequence/terminality by construction (that IS the key). Kept OUT of the row dicts so
+        # nothing that walks a row's fields can trip over a dataclass.
+        self.edge_sample: dict[tuple[str, str, tuple[str, ...], str], ChainEdge] = {}
         self.handovers: dict[tuple[str, str], dict[str, Any]] = {}
         self.raw_states_total = 0
         self.raw_states_inferred = 0
@@ -509,7 +560,15 @@ class Aggregate:
             self.edges[key] = {"source": source_key, "target": target_key,
                                 "action_key": e.action_key, "action_label": action_label,
                                 "action_type": e.action_type, "actor": e.actor,
-                                "count": 1, "inferred": e.inferred}
+                                "count": 1, "inferred": e.inferred,
+                                # Phase 4 — the WHOLE ordered path, not just actions[0]. Additive:
+                                # every variant 1-12 reads the scalar fields above and is
+                                # untouched by these three.
+                                "actions": action_seq,
+                                "action_labels": tuple(
+                                    self.display_labels.get(a.key, a.label) for a in e.actions),
+                                "action_inferred": tuple(a.inferred for a in e.actions)}
+            self.edge_sample[key] = e
         else:
             row["count"] += 1
             row["inferred"] = row["inferred"] and e.inferred
@@ -1725,6 +1784,445 @@ def _combo_payload(agg: Aggregate, opponent_mode: str, min_support: int, inferen
     }
 
 
+# ── 2d. variant 13 — "Caminhos": render paths -> bundled visual graph ─────────────────
+#
+# Phase 4 of docs/taxonomy/03_ARESTA_COMO_CAMINHO.md, the owner's four layers:
+#   1 semantic graph   — `Aggregate` (states + transitions keyed on the WHOLE action sequence)
+#   2 render paths     — `render_paths` below: one `RenderPath` per aggregated occurrence
+#   3 bundled graph    — `analysis.path_bundling.bundle_paths` (pure, tested on its own)
+#   4 renderer         — `_flow_layout` + `_PAGE13` + the graph.js copy's own patches
+#
+# Layout is computed HERE, in Python, and shipped as pinned x/y — not ported into the page's
+# JavaScript as the plan first sketched. Three reasons, in the order they mattered:
+#   * `graph.js` already honours `n.x`/`n.y` + the copy's `n.pin` patch, so a fully positioned
+#     graph needs NO new renderer concept — the physics is simply never allowed to run;
+#   * determinism becomes provable by `pytest` and by the `diff -r` gate, instead of resting on
+#     a JS function nothing in this repo can execute;
+#   * this repo's own convention for "the App owns the TS, we own the mirror" is a PYTHON mirror
+#     (`network_metrics` ↔ `directedEdges.ts`, `presentation.py` ↔ `ratingV2Presentation.ts`).
+#     The App already HAS `decisionFlowLayout.ts`; a JS transcription living inside a Python
+#     string would be a third copy, not a shorter path to the port.
+# The algorithm below is `decisionFlowLayout.ts`'s, not a new one: multi-source BFS ranks with a
+# visited set (cycles are real here — `returns-to` back-edges), deterministic ordering inside a
+# rank, x from the rank. Its SPLIT/MERGE routing is the one part deliberately dropped: those
+# junctions exist there to fan a node's outgoing edges, and here the fan is already a first-class
+# object — `Point(kind='branch'|'merge'|'branch-merge')`, produced by the bundler from the ACTION
+# PREFIX, which is exactly the change the plan asked for ("o SPLIT vira por prefixo de ação").
+# elkjs/dagre stay out (userDecisionFlow.ts:32-45 — measured, the density was the problem, the
+# layout never was).
+
+_FLOW_RANK_GAP = 300.0    # world units between two consecutive ranks (x)
+_FLOW_ROW_GAP = 130.0     # world units between two nodes inside a rank (y)
+# Two sweeps, not more: measured, a longer run OSCILLATES (the median heuristic has no
+# monotonicity guarantee) and lands worse — 6 sweeps cost +6 crossings on the owner's bundle.
+_FLOW_BARYCENTRE_SWEEPS = 2
+# The anchor frame's ellipse, relative to the flow it has to contain, and how far outside the
+# widest rank an anchor's row counts in the barycentre. All three MEASURED, on both bundles, not
+# eyeballed — a circular frame with anchors excluded from the ordering drew 83 crossings over 42
+# links (owner) and 16 over 21 (the App's mock); these draw 41 and 5. Wide and flat on purpose:
+# a left-hand vertex has to clear the first rank horizontally while staying inside a readable
+# vertical band, and a circle put "Por Cima"/"Por Baixo" at mid-x with every edge into them
+# crossing the whole picture.
+_FLOW_ANCHOR_RX_SHARE = 2.00
+_FLOW_ANCHOR_RY_SHARE = 1.30
+_FLOW_ANCHOR_ROW_SPREAD = 0.35
+
+
+def render_paths(agg: Aggregate) -> list[RenderPath]:
+    """Layer 2. One `RenderPath` per aggregated occurrence — endpoints actor-qualified through
+    `_qid` (so your mount and the opponent's are different states, and the shared anchors merge
+    exactly as in every other variant). Deterministic ids from the sorted aggregation key, never
+    from dict order."""
+    out: list[RenderPath] = []
+    for i, key in enumerate(sorted(agg.edges)):
+        source_key, target_key, actions, actor = key
+        v = agg.edges[key]
+        out.append(RenderPath(
+            path_id=f"p{i}",
+            source=_qid(actor, source_key),
+            target=_qid(actor, target_key),
+            actions=actions,
+            actor=actor,
+            count=v["count"],
+        ))
+    return out
+
+
+def _rating_of_bundle(bundle: dict[str, Any]) -> dict[str, float]:
+    """`graph.nodes[].data.computedElo` keyed by the node's own CANONICAL label — the bundle is
+    what the App ships, and `computedElo` is the only per-node number in it (Rating V2 projects
+    onto that field at the producer, root CLAUDE.md's Rating V2 row). First value wins on a
+    duplicate canonical key, same convention as `_resolve_group`'s display map."""
+    out: dict[str, float] = {}
+    for n in (bundle.get("graph") or {}).get("nodes", []) or []:
+        data = n.get("data") or {}
+        elo = data.get("computedElo")
+        label = data.get("label") or n.get("label") or ""
+        if isinstance(elo, int | float) and not isinstance(elo, bool) and label:
+            out.setdefault(canonicalize(_normalize_name(str(label))), float(elo))
+    return out
+
+
+def _flow_ranks(points: list[str], out_of: dict[str, list[str]],
+                 in_deg: dict[str, int]) -> dict[str, int]:
+    """`decisionFlowLayout.computeRanks`, same shape: multi-source BFS from every point with no
+    incoming segment; a point already ranked is never re-queued, so a back edge (a real cycle in
+    a technique map) is skipped instead of looping or re-ranking. Anything unreached still gets
+    a slot at rank 0."""
+    seeds = sorted(p for p in points if in_deg.get(p, 0) == 0)
+    if not seeds and points:
+        seeds = [sorted(points)[0]]  # fully cyclic — still needs somewhere to start
+    rank: dict[str, int] = {p: 0 for p in seeds}
+    queue = list(seeds)
+    depth = 0
+    while queue:
+        nxt: list[str] = []
+        for p in queue:
+            for q in sorted(out_of.get(p, [])):
+                if q not in rank:
+                    rank[q] = depth + 1
+                    nxt.append(q)
+        queue = sorted(nxt)
+        depth += 1
+    for p in sorted(points):
+        rank.setdefault(p, 0)
+    return rank
+
+
+def _flow_order(by_rank: dict[int, list[str]], neighbours_in: dict[str, list[str]],
+                 neighbours_out: dict[str, list[str]], weight: dict[str, float],
+                 fixed_rows: dict[str, float]) -> None:
+    """Median/barycentre heuristic, in place — the crossing-minimisation half of a layered
+    layout. `decisionFlowLayout` sorts a rank by (branch order, support desc, id); there is no
+    narrative branch order here, so the initial sort is (support desc, id) and the sweeps below
+    then pull each node toward its neighbours' average row.
+
+    ``fixed_rows`` are the ANCHORS: they never take a grid slot (the frame is not a lane), but
+    their row still has to COUNT, because a state whose only neighbour is "Por Cima" belongs
+    next to it. Leaving them out of the barycentre was measured at 76 crossings over 42 links
+    on the owner's own bundle — an average computed from half the neighbours is not an average.
+
+    Every tie breaks on the id and the sweep count is fixed, so the result is a pure function of
+    the input."""
+    for rank in sorted(by_rank):
+        by_rank[rank].sort(key=lambda p: (-weight.get(p, 0.0), p))
+    row_of: dict[str, float] = {p: float(i) for rank in sorted(by_rank)
+                                for i, p in enumerate(by_rank[rank])}
+    # centre each rank on 0 so a fixed anchor row (also centred on 0) is comparable to it
+    for rank in sorted(by_rank):
+        span = (len(by_rank[rank]) - 1) / 2.0
+        for p in by_rank[rank]:
+            row_of[p] -= span
+    row_of.update(fixed_rows)
+
+    for sweep in range(_FLOW_BARYCENTRE_SWEEPS):
+        ranks = sorted(by_rank) if sweep % 2 == 0 else sorted(by_rank, reverse=True)
+        side = neighbours_in if sweep % 2 == 0 else neighbours_out
+        other = neighbours_out if sweep % 2 == 0 else neighbours_in
+        for rank in ranks:
+            members = by_rank[rank]
+            bary: dict[str, float] = {}
+            for p in members:
+                rows = sorted(row_of[q] for q in side.get(p, []) if q in row_of)
+                if not rows:  # a source (or a sink) has neighbours on the OTHER side only
+                    rows = sorted(row_of[q] for q in other.get(p, []) if q in row_of)
+                bary[p] = (sum(rows) / len(rows)) if rows else row_of[p]
+            members.sort(key=lambda p: (bary[p], -weight.get(p, 0.0), p))
+            span = (len(members) - 1) / 2.0
+            for i, p in enumerate(members):
+                row_of[p] = i - span
+
+
+def _flow_layout(bundled: BundledGraph, *, structure: str, anchor_slots: dict[str, str],
+                  weight: dict[str, float]) -> dict[str, tuple[float, float]]:
+    """Point id -> world (x, y). Free points land on a rank/row grid (flow reads left to right,
+    the same direction the owner's map has always read); the ANCHORS are then bolted onto the
+    chosen structure's vertices, on an ellipse sized to the grid it has to frame — so the frame
+    contains the map instead of being five more nodes in the crowd, and an arrival at an anchor
+    never has to cross the whole picture to reach it (the starts sit on the left arc, the
+    finishes on the right, which is where the ranks already put their neighbours)."""
+    ids = [p.id for p in bundled.points]
+    out_of: dict[str, list[str]] = {}
+    in_of: dict[str, list[str]] = {}
+    for seg in bundled.segments:
+        out_of.setdefault(seg.from_point, []).append(seg.to_point)
+        in_of.setdefault(seg.to_point, []).append(seg.from_point)
+    in_deg = {p: len(in_of.get(p, [])) for p in ids}
+
+    rank = _flow_ranks(ids, out_of, in_deg)
+    free = [p for p in ids if p not in anchor_slots]
+    by_rank: dict[int, list[str]] = {}
+    for p in sorted(free):
+        by_rank.setdefault(rank[p], []).append(p)
+
+    units = _anchor_units(structure)
+    widest = max((len(v) for v in by_rank.values()), default=1)
+    # The anchors' rows, in the same centred-on-0 units the grid uses, so the sweeps can see
+    # them. `_FLOW_ANCHOR_ROW_SPREAD` is how far outside the widest rank the frame sits.
+    fixed_rows = {p: units[slot][1] * (widest / 2.0) * _FLOW_ANCHOR_ROW_SPREAD
+                  for p, slot in sorted(anchor_slots.items())}
+    _flow_order(by_rank, in_of, out_of, weight, fixed_rows)
+
+    pos: dict[str, tuple[float, float]] = {}
+    for r in sorted(by_rank):
+        members = by_rank[r]
+        span = (len(members) - 1) / 2.0
+        for i, p in enumerate(members):
+            pos[p] = (r * _FLOW_RANK_GAP, (i - span) * _FLOW_ROW_GAP)
+
+    if pos:
+        xs = [x for x, _ in pos.values()]
+        ys = [y for _, y in pos.values()]
+        cx, cy = (min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2
+        half_w, half_h = (max(xs) - min(xs)) / 2, (max(ys) - min(ys)) / 2
+    else:  # every point is an anchor (a bundle with nothing but generic openings)
+        cx = cy = half_w = half_h = 0.0
+    # The frame is an ELLIPSE around the flow, not a circle: a left-hand vertex has to clear the
+    # first rank horizontally (hence the wide rx) while staying inside a readable vertical band
+    # (hence the tight ry) — a circle put "Por Cima"/"Por Baixo" at mid-x and 480 units up, and
+    # every edge into them then crossed the whole picture.
+    rx = max(half_w * _FLOW_ANCHOR_RX_SHARE, _FLOW_RANK_GAP)
+    ry = max(half_h * _FLOW_ANCHOR_RY_SHARE, _FLOW_ROW_GAP)
+    for p, slot in sorted(anchor_slots.items()):
+        ux, uy = units[slot]
+        pos[p] = (cx + rx * ux, cy + ry * uy)
+    return pos
+
+
+_JUNCTION_COLOR = "#6b7280"  # a branch/merge dot is scaffolding, never a technique — no category hue
+_PATH_SCOPE_GLOBAL = "global"
+
+
+def _display_action_labels(agg: Aggregate) -> dict[str, str]:
+    """Canonical action key -> the owner's own wording (first seen wins, same convention as
+    ``_resolve_group``'s display map)."""
+    out: dict[str, str] = {}
+    for v in agg.edges.values():
+        for key, label in zip(v["actions"], v["action_labels"], strict=True):
+            out.setdefault(key, label)
+    return out
+
+
+def _inferred_action_keys(agg: Aggregate) -> set[str]:
+    """Action keys that were NEVER observed anywhere in the bundle. A key that is inferred on one
+    path and logged on another is NOT a ghost — the Fase 2 collision (``sweep``/``reversal``/
+    ``guard pass`` are both generic verdicts and real corpus labels) is exactly that case, and
+    ghosting it would call the owner's own logged sweep an invention."""
+    observed: set[str] = set()
+    inferred: set[str] = set()
+    for v in agg.edges.values():
+        for key, is_inf in zip(v["actions"], v["action_inferred"], strict=True):
+            (inferred if is_inf else observed).add(key)
+    return inferred - observed
+
+
+def _segment_weight(seg: Segment, count_of: dict[str, int]) -> int:
+    """Thickness = frequency: the summed occurrence count of every path that walks this stroke."""
+    return sum(count_of.get(pid, 0) for pid in sorted(seg.path_ids))
+
+
+def _paths_view(
+    agg: Aggregate,
+    *,
+    structure: str,
+    member_qids: frozenset[str] | None,
+    metrics_by_path: dict[str, PathMetrics],
+    paths: list[RenderPath],
+) -> dict[str, Any]:
+    """One (anchor structure × scope) page payload: the bundled graph laid out, plus everything
+    the side panel reads. ``member_qids`` is ``None`` for the global view; for a system it is
+    that system's members, and a path enters when either of its state endpoints is one — the
+    endpoint OUTSIDE the system still draws, as a stub, so "para onde esse sistema vai" has an
+    answer instead of a severed edge (same frontier convention as 11/12)."""
+    unified = bool(_ANCHOR_STRUCTURES[structure]["unified_finish"])
+    opp_finish = _qid("partner", _FINISH_KEY)
+
+    def _fold(qid: str) -> str:
+        return _FINISH_KEY if (unified and qid == opp_finish) else qid
+
+    scoped = [
+        p for p in paths
+        if member_qids is None or _fold(p.source) in member_qids or _fold(p.target) in member_qids
+    ]
+    if unified:
+        scoped = [
+            RenderPath(path_id=p.path_id, source=_fold(p.source), target=_fold(p.target),
+                       actions=p.actions, actor=p.actor, count=p.count)
+            for p in scoped
+        ]
+    bundled = bundle_paths(scoped)
+
+    count_of = {p.path_id: p.count for p in scoped}
+    actor_of = {p.path_id: p.actor for p in scoped}
+    labels = _display_action_labels(agg)
+    ghosts = _inferred_action_keys(agg)
+    qid_to_state = {_qid(k[1], k[0]): (k, v) for k, v in agg.states.items()}
+
+    anchor_slots: dict[str, str] = {}
+    node_weight: dict[str, float] = {}
+    for seg in bundled.segments:
+        w = float(_segment_weight(seg, count_of))
+        node_weight[seg.from_point] = node_weight.get(seg.from_point, 0.0) + w
+        node_weight[seg.to_point] = node_weight.get(seg.to_point, 0.0) + w
+    for pt in bundled.points:
+        if pt.state_key is None:
+            continue
+        found = qid_to_state.get(pt.state_key)
+        node_key = found[0][0] if found else pt.state_key
+        actor = found[0][1] if found else "you"
+        slot = _anchor_slot(node_key, actor, structure)
+        if slot is not None:
+            anchor_slots[pt.id] = slot
+
+    pos = _flow_layout(bundled, structure=structure, anchor_slots=anchor_slots,
+                        weight=node_weight)
+
+    nodes: list[dict[str, Any]] = []
+    for pt in sorted(bundled.points, key=lambda p: p.id):
+        x, y = pos[pt.id]
+        if pt.state_key is None:
+            nodes.append({"id": pt.id, "label": "", "cat": "control", "size": 1,
+                           "color": _JUNCTION_COLOR, "junction": True, "kind": pt.kind,
+                           "x": x, "y": y, "pin": True})
+            continue
+        found = qid_to_state.get(pt.state_key) or qid_to_state.get(opp_finish)
+        if found is not None:
+            (node_key, actor), v = found
+        else:  # defensive only — every state point comes from a row `Aggregate` already holds
+            node_key, actor = "", "you"
+            v = {"label": pt.state_key, "type": "control", "count": 1}
+        in_scope = member_qids is None or pt.state_key in member_qids
+        node: dict[str, Any] = {
+            "id": pt.id, "stateKey": pt.state_key, "kind": "state",
+            "label": v["label"] if (unified and node_key == _FINISH_KEY)
+                      else _finish_label(node_key, actor, v["label"]),
+            "cat": _cat_of(v["type"]), "size": _clamp3(v["count"]),
+            "fighter": _ACTOR_SIDE[actor], "x": x, "y": y, "pin": True,
+        }
+        _apply_finish_style(node, node_key, actor)
+        _apply_start_style(node, node_key)
+        if unified and node_key == _FINISH_KEY:
+            # one vertex, two athletes — the split fill is what keeps that honest
+            node["split"] = [_FIG_HEX["a"], _FIG_HEX["b"]]
+            node.pop("ring", None)
+        if not in_scope:
+            node["stub"] = True
+            node["size"] = 1
+        nodes.append(node)
+
+    links: list[dict[str, Any]] = []
+    seg_meta: dict[str, Any] = {}
+    for seg in bundled.segments:
+        acts = [labels.get(k, k) for k in seg.actions]
+        weight = _segment_weight(seg, count_of)
+        all_ghost = all(k in ghosts for k in seg.actions)
+        fighters = {actor_of[p] for p in seg.path_ids}
+        link = {
+            "id": seg.id, "from": seg.from_point, "to": seg.to_point,
+            "weight": _clamp3(weight), "arrow": True,
+            "label": " → ".join(acts),
+            "fighter": _ACTOR_SIDE[next(iter(sorted(fighters)))] if len(fighters) == 1 else "x",
+        }
+        if all_ghost:
+            link["inf"] = True   # named generic: still labelled, yields on a label collision
+            link["dash"] = [3, 4]
+        # A RETURN edge (the target sits at or behind the source in the flow) is a real cycle in
+        # a technique map, not a defect — but drawn as a straight line it runs backwards through
+        # everything between. Bowed out and thinner, so the forward reading stays the loud one.
+        if pos[seg.to_point][0] <= pos[seg.from_point][0]:
+            link["bow"], link["back"] = 0.22, True
+        links.append(link)
+        seg_meta[seg.id] = {"pathIds": sorted(seg.path_ids), "actions": acts, "weight": weight,
+                             "shared": len(seg.path_ids) > 1}
+    _index_parallel_links(links)  # two segments between the SAME pair of points fan into arcs
+
+    label_of_state = {n["stateKey"]: n["label"] for n in nodes if n.get("stateKey")}
+    path_meta: dict[str, Any] = {}
+    for p in scoped:
+        m = metrics_by_path[p.path_id]
+        segs = [s.id for s in bundled.segments_of(p.path_id)]
+        path_meta[p.path_id] = {
+            "actor": p.actor, "count": p.count, "segIds": segs,
+            "actions": [labels.get(k, k) for k in p.actions],
+            "source": p.source, "target": p.target,
+            # the panel lists several paths that carry the SAME action; without the endpoints
+            # they read as duplicated rows instead of as different transitions
+            "sourceLabel": label_of_state.get(p.source, p.source),
+            "targetLabel": label_of_state.get(p.target, p.target),
+            "length": m.length, "observed": m.observed,
+            "observedRatio": round(m.observed_ratio, 3), "support": m.support,
+            "terminal": m.terminal, "roleDelta": m.role_delta,
+            "strength": None if m.strength is None else round(m.strength, 1),
+        }
+
+    lengths: dict[str, int] = {}
+    for p in scoped:
+        lengths[str(len(p.actions))] = lengths.get(str(len(p.actions)), 0) + 1
+    shared_actions = sum(len(s.actions) for s in bundled.segments if len(s.path_ids) > 1)
+    total_actions = sum(len(s.actions) for s in bundled.segments)
+    biggest = max(bundled.segments, key=lambda s: (len(s.path_ids), s.id), default=None)
+
+    return {
+        "gv": {"nodes": nodes, "links": links},
+        "segMeta": seg_meta,
+        "pathMeta": path_meta,
+        "stats": {
+            "paths": len(scoped),
+            "segments": len(bundled.segments),
+            "points": len(bundled.points),
+            "branchPoints": sum(1 for p in bundled.points if p.kind in ("branch", "branch-merge")),
+            "mergePoints": sum(1 for p in bundled.points if p.kind in ("merge", "branch-merge")),
+            "statePoints": sum(1 for p in bundled.points if p.kind == "state"),
+            "sharedActionPct": _pct(shared_actions, total_actions),
+            "biggestTrunk": None if biggest is None else {
+                "id": biggest.id, "paths": len(biggest.path_ids),
+                "actions": [labels.get(k, k) for k in biggest.actions],
+            },
+            "lengths": lengths,
+        },
+    }
+
+
+def _paths_payloads(agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
+    """Every (anchor structure × scope) combo variant 13 can show, precomputed. Structures are
+    the owner's configurable frame; scopes are Global + one per detected system (the 11/12 pills,
+    reused as a PREDICATE over paths)."""
+    paths = render_paths(agg)
+    ratings = _rating_of_bundle(bundle)
+    block = block_for_family(None, load_markov_weights())  # the App has no ruleset -> `global`
+    support: dict[tuple[str, str, str], int] = {}
+    for key, v in agg.edges.items():
+        rel = (key[0], key[1], key[3])
+        support[rel] = support.get(rel, 0) + v["count"]
+
+    metrics_by_path: dict[str, PathMetrics] = {}
+    for i, key in enumerate(sorted(agg.edges)):
+        rel = (key[0], key[1], key[3])
+        metrics_by_path[f"p{i}"] = path_metrics(
+            agg.edge_sample[key], support=support[rel],
+            rating_of=lambda k: ratings.get(k), block=block)
+
+    detected = _detect_systems(dict(agg.states), list(agg.edges.values()),
+                               list(agg.handovers.values()))
+    scopes: list[dict[str, Any]] = [{"id": _PATH_SCOPE_GLOBAL, "label": "Global", "members": None}]
+    for s in detected["systems"]:
+        scopes.append({"id": s["id"], "label": s["label"], "members": frozenset(s["members"])})
+
+    pages: dict[str, Any] = {}
+    for structure in sorted(_ANCHOR_STRUCTURES):
+        for scope in scopes:
+            pages[f"{structure}|{scope['id']}"] = _paths_view(
+                agg, structure=structure, member_qids=scope["members"],
+                metrics_by_path=metrics_by_path, paths=paths)
+    return {
+        "pages": pages,
+        "structures": [{"id": k, "label": _ANCHOR_STRUCTURES[k]["label"]}
+                        for k in sorted(_ANCHOR_STRUCTURES)],
+        "scopes": [{"id": s["id"], "label": s["label"]} for s in scopes],
+        "default": f"{_DEFAULT_ANCHOR_STRUCTURE}|{_PATH_SCOPE_GLOBAL}",
+    }
+
+
 # ── 3. HTML rendering ────────────────────────────────────────────────────────────
 
 _PAGE = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
@@ -2578,6 +3076,339 @@ def _render_variant12(out: Path, agg: Aggregate) -> dict[str, Any]:
         _ALL_SYSTEMS_COMBOS, default_combo=_adaptive_default(agg), controls=True)
 
 
+# Variant 13 — "Caminhos". Own template (same double-brace reason as `_PAGE8`/`_PAGE9`): the
+# page swaps between precomputed (anchor structure × scope) payloads, and drives ONE selection
+# model across three entry points — a path row in the panel, a state node, or a shared segment.
+# Everything it draws is already positioned server-side (`_flow_layout`), so `GAGraph.mount` runs
+# as a static painter with pan/zoom: no physics, no reshuffle between renders, no `charge` knob.
+# Mobile is first-class rather than a shrunk desktop: the panel becomes a sheet under the canvas,
+# the canvas keeps ~62vh instead of the ~25% the force layout used to leave it, and the flow
+# TRANSPOSES to vertical (x<->y) on a narrow viewport — reading a chain top-to-bottom is what
+# fits a phone, and it is a coordinate swap, not a second layout.
+_PAGE13 = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>
+:root{--bg:#0b0b0f;--panel:#14141a;--line:#26262e;--ink:#e9e9ee;--ink2:#9a9aa6;--accent:#4d86ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,sans-serif;display:flex;height:100vh;height:100dvh}
+#canvas{flex:1;position:relative;min-width:0}#canvas canvas{width:100%;height:100%;display:block;touch-action:none}
+#side{width:380px;flex:none;border-left:1px solid var(--line);background:var(--panel);overflow:auto;padding:16px;-webkit-overflow-scrolling:touch}
+h1{font-size:15px;margin:0 0 2px;letter-spacing:-.01em}
+.muted{color:var(--ink2);font-size:12px}
+.sechead{font-size:10px;color:var(--ink2);margin:16px 0 6px;text-transform:uppercase;letter-spacing:.09em}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:4px 11px;cursor:pointer;font:11px system-ui;white-space:nowrap}
+.pill.active{border-color:var(--accent);background:#141c2e;color:var(--ink)}
+.row{padding:7px 9px;border:1px solid var(--line);border-radius:8px;margin-bottom:5px;font-size:12px;cursor:pointer}
+.row:hover{border-color:var(--accent)}
+.row.on{border-color:var(--accent);background:#141c2e}
+.row .n{font:11px/1.4 'Spline Sans Mono',ui-monospace,monospace;color:var(--ink2)}
+.g{opacity:.5;border-style:dashed}
+.legend{font-size:11px;color:var(--ink2);margin:10px 0 0;line-height:1.65}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;font:11px/1.6 'Spline Sans Mono',ui-monospace,monospace;margin-top:6px}
+.kv b{color:var(--ink2);font-weight:400}
+.kv span{text-align:right}
+.card{border:1px solid var(--accent);border-radius:10px;padding:10px 11px;background:#111726}
+.hist{display:flex;align-items:flex-end;gap:3px;height:44px;margin-top:6px}
+.hist i{flex:1;background:#2b3550;border-radius:2px 2px 0 0;position:relative;min-height:2px}
+.hist i b{position:absolute;bottom:-15px;left:0;right:0;text-align:center;font:9px 'Spline Sans Mono',monospace;color:var(--ink2);font-weight:400}
+.hist+.muted{margin-top:18px}
+button.reset{background:transparent;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:5px 10px;cursor:pointer;font:11px system-ui;margin-top:8px}
+@media (max-width:760px){
+  body{flex-direction:column;height:auto;min-height:100dvh}
+  #canvas{height:62dvh;flex:none}
+  #side{width:auto;border-left:none;border-top:1px solid var(--line);max-height:none;overflow:visible;padding:14px}
+  .row{padding:10px 11px;font-size:13px}
+  .pill{padding:7px 13px;font-size:12px}
+}
+</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1>__TITLE__</h1><div class="muted" id="sub"></div>
+
+<div class="sechead">Âncoras</div><div class="pills" id="structs"></div>
+<div class="sechead">Escopo</div><div class="pills" id="scopes"></div>
+<div class="sechead">Rótulos das ações</div><div class="pills" id="labels"></div>
+
+<div class="sechead">Seleção</div>
+<div id="sel"></div>
+
+<div class="sechead">Comprimento das trilhas</div>
+<div class="hist" id="hist"></div>
+<div class="muted" id="histNote"></div>
+
+<div class="sechead">Caminhos mais fortes</div><div id="strong"></div>
+<div class="sechead">Caminhos mais frequentes</div><div id="freq"></div>
+
+<div class="legend">Um traço = um SEGMENTO: a maior sequência contígua de ações percorrida
+pelo mesmo conjunto de caminhos. Ponto cinza pequeno = bifurcação/convergência — artefato de
+desenho, nunca um estado (a Fase 1 apagou os estados inventados e eles não voltam por aqui).
+Espessura = frequência somada dos caminhos que passam pelo traço. Tracejado curto = ação que
+NUNCA foi observada em lugar nenhum do bundle (inferida pela regra). Losango = âncora; amarelo =
+finalização. Clique num caminho da lista, num estado ou num segmento compartilhado: a ocorrência
+inteira acende através dos traços que ela divide com as outras.</div>
+</div>
+<script src="graph.js"></script>
+<script>
+const PAGES = __PAGES_JSON__;
+const STRUCTURES = __STRUCTURES_JSON__;
+const SCOPES = __SCOPES_JSON__;
+let structure = __DEFAULT_STRUCTURE__;
+let scope = __DEFAULT_SCOPE__;
+let sel = null;           // {kind:'path'|'segment'|'state', id}
+let mounted = null;
+// Action labels are the SECONDARY layer (the owner's mobile requirement: "rótulos principais
+// legíveis sem zoom extremo, secundários sob demanda"). At 20 states / 42 segments every
+// midpoint label fights every other one, so by default only the recurring segments are named —
+// a selected path always names all of its own, whatever the mode.
+const LABEL_MODES = [{ id: 'main', label: 'principais' }, { id: 'all', label: 'todos' },
+                     { id: 'none', label: 'nenhum' }];
+let labelMode = 'main';
+
+const vertical = () => window.matchMedia('(max-width:760px)').matches;
+function page() { return PAGES[structure + '|' + scope]; }
+function freshCanvas() {
+  const old = document.getElementById('cv');
+  const next = old.cloneNode(false);
+  old.parentNode.replaceChild(next, old);
+  return next;
+}
+function fmt(v) { return v === null || v === undefined ? '—' : v; }
+
+// Which links/nodes stay lit for the current selection. A PATH lights its own segments across
+// every trunk it shares; a SEGMENT lights every occurrence that uses it; a STATE lights every
+// chain passing through it. One resolver, three entry points.
+function highlightOf(p) {
+  if (!sel) return null;
+  const segs = new Set();
+  const pathIds = new Set();
+  if (sel.kind === 'path') pathIds.add(sel.id);
+  else if (sel.kind === 'segment') for (const id of p.segMeta[sel.id].pathIds) pathIds.add(id);
+  else if (sel.kind === 'state') {
+    for (const l of p.gv.links) {
+      if (l.from !== sel.id && l.to !== sel.id) continue;
+      for (const id of p.segMeta[l.id].pathIds) pathIds.add(id);
+    }
+  }
+  const nodes = new Set();
+  for (const id of pathIds) {
+    const meta = p.pathMeta[id];
+    if (!meta) continue;
+    for (const s of meta.segIds) segs.add(s);
+  }
+  for (const l of p.gv.links) if (segs.has(l.id)) { nodes.add(l.from); nodes.add(l.to); }
+  if (sel.kind === 'state') nodes.add(sel.id);
+  return { links: segs, nodes: nodes, paths: pathIds };
+}
+
+function pathRow(p, id, extra) {
+  const m = p.pathMeta[id];
+  const on = sel && sel.kind === 'path' && sel.id === id ? ' on' : '';
+  const ghost = m.observedRatio === 0 ? ' g' : '';
+  const div = document.createElement('div');
+  div.className = 'row' + on + ghost;
+  div.innerHTML = m.sourceLabel + ' <b>—' + m.actions.join(' → ') + '→</b> ' + m.targetLabel
+    + '<div class="n">' + extra + (m.actor === 'partner' ? ' · oponente' : '') + '</div>';
+  div.onclick = function () { sel = { kind: 'path', id: id }; rebuild(); };
+  return div;
+}
+
+function renderSelection(p) {
+  const box = document.getElementById('sel');
+  box.innerHTML = '';
+  if (!sel) {
+    box.innerHTML = '<div class="muted">Nada selecionado — clique num caminho, num estado ou num segmento.</div>';
+    return;
+  }
+  const hl = highlightOf(p);
+  if (sel.kind === 'path') {
+    const m = p.pathMeta[sel.id];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + m.sourceLabel + ' —' + m.actions.join(' → ') + '→ ' + m.targetLabel + '</b>'
+      + '<div class="kv">'
+      + '<b>length</b><span>' + m.length + '</span>'
+      + '<b>observed</b><span>' + m.observed + '/' + m.length + '</span>'
+      + '<b>observed_ratio</b><span>' + m.observedRatio.toFixed(2) + '</span>'
+      + '<b>support</b><span>' + m.support + '</span>'
+      + '<b>ocorrências</b><span>' + m.count + '</span>'
+      + '<b>terminal</b><span>' + (m.terminal ? 'sim' : 'não') + '</span>'
+      + '<b>role_delta</b><span>' + m.roleDelta + '</span>'
+      + '<b>strength</b><span>' + fmt(m.strength) + '</span>'
+      + '<b>segmentos</b><span>' + m.segIds.length + '</span>'
+      + '</div>';
+    box.appendChild(card);
+  } else if (sel.kind === 'segment') {
+    const s = p.segMeta[sel.id];
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + s.actions.join(' → ') + '</b><div class="n">'
+      + (s.shared ? s.pathIds.length + ' caminhos dividem este traço' : 'traço exclusivo de um caminho')
+      + ' · frequência ' + s.weight + '</div>';
+    box.appendChild(card);
+    for (const id of s.pathIds) box.appendChild(pathRow(p, id, 'x' + p.pathMeta[id].count));
+  } else {
+    const node = p.gv.nodes.find(function (n) { return n.id === sel.id; });
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = '<b>' + (node ? node.label : sel.id) + '</b><div class="n">'
+      + hl.paths.size + ' cadeia(s) passam por aqui</div>';
+    box.appendChild(card);
+    for (const id of Array.from(hl.paths).sort()) box.appendChild(pathRow(p, id, 'x' + p.pathMeta[id].count));
+  }
+  const reset = document.createElement('button');
+  reset.className = 'reset';
+  reset.textContent = 'limpar seleção';
+  reset.onclick = function () { sel = null; rebuild(); };
+  box.appendChild(reset);
+}
+
+function renderLists(p) {
+  const ids = Object.keys(p.pathMeta);
+  const strong = ids.filter(function (i) { return p.pathMeta[i].strength !== null; })
+    .sort(function (a, b) { return p.pathMeta[b].strength - p.pathMeta[a].strength || (a < b ? -1 : 1); })
+    .slice(0, 10);
+  const freq = ids.slice()
+    .sort(function (a, b) { return p.pathMeta[b].count - p.pathMeta[a].count || (a < b ? -1 : 1); })
+    .slice(0, 10);
+  const sBox = document.getElementById('strong'); sBox.innerHTML = '';
+  for (const id of strong) sBox.appendChild(pathRow(p, id, 'strength ' + p.pathMeta[id].strength + ' · x' + p.pathMeta[id].count));
+  if (!strong.length) sBox.innerHTML = '<div class="muted">Nenhuma ação observada deste bundle tem rating — strength fica indefinida.</div>';
+  const fBox = document.getElementById('freq'); fBox.innerHTML = '';
+  for (const id of freq) fBox.appendChild(pathRow(p, id, 'x' + p.pathMeta[id].count + ' · length ' + p.pathMeta[id].length));
+
+  const hist = document.getElementById('hist'); hist.innerHTML = '';
+  const keys = Object.keys(p.stats.lengths).map(Number).sort(function (a, b) { return a - b; });
+  const max = Math.max.apply(null, keys.map(function (k) { return p.stats.lengths[k]; }).concat([1]));
+  for (const k of keys) {
+    const bar = document.createElement('i');
+    bar.style.height = Math.round(100 * p.stats.lengths[k] / max) + '%';
+    bar.innerHTML = '<b>' + k + '</b>';
+    bar.title = p.stats.lengths[k] + ' caminho(s) de ' + k + ' ação(ões)';
+    hist.appendChild(bar);
+  }
+  const t = p.stats.biggestTrunk;
+  document.getElementById('histNote').textContent =
+    p.stats.sharedActionPct + '% das ações desenhadas estão num traço compartilhado'
+    + (t ? ' · maior tronco: ' + t.actions.join(' → ') + ' (' + t.paths + ' caminhos)' : '');
+}
+
+function rebuild() {
+  const p = page();
+  document.getElementById('sub').textContent =
+    p.stats.paths + ' caminhos · ' + p.stats.segments + ' segmentos · '
+    + p.stats.statePoints + ' estados · ' + p.stats.branchPoints + ' bifurcações / '
+    + p.stats.mergePoints + ' convergências';
+
+  const sBox = document.getElementById('structs'); sBox.innerHTML = '';
+  for (const s of STRUCTURES) {
+    const b = document.createElement('div');
+    b.className = 'pill' + (s.id === structure ? ' active' : '');
+    b.textContent = s.label;
+    b.onclick = (function (id) { return function () { structure = id; sel = null; rebuild(); }; })(s.id);
+    sBox.appendChild(b);
+  }
+  const cBox = document.getElementById('scopes'); cBox.innerHTML = '';
+  for (const s of SCOPES) {
+    const b = document.createElement('div');
+    b.className = 'pill' + (s.id === scope ? ' active' : '');
+    b.textContent = s.label;
+    b.onclick = (function (id) { return function () { scope = id; sel = null; rebuild(); }; })(s.id);
+    cBox.appendChild(b);
+  }
+
+  renderSelection(p);
+  renderLists(p);
+
+  const lBox = document.getElementById('labels'); lBox.innerHTML = '';
+  for (const m of LABEL_MODES) {
+    const b = document.createElement('div');
+    b.className = 'pill' + (m.id === labelMode ? ' active' : '');
+    b.textContent = m.label;
+    b.onclick = (function (id) { return function () { labelMode = id; rebuild(); }; })(m.id);
+    lBox.appendChild(b);
+  }
+
+  const hl = highlightOf(p);
+  const flip = vertical();
+  // Phone rules, in the owner's own priority order: the flow turns VERTICAL (a chain reads
+  // top-to-bottom on a tall screen, and it is a coordinate swap, not a second layout); only the
+  // PRIMARY labels stay up (anchors + recurring states + whatever is selected), the rest are on
+  // demand via a tap; and a long label is elided rather than clipped by the fit margin.
+  const nodes = p.gv.nodes.map(function (n) {
+    const lit = !hl || hl.nodes.has(n.id);
+    let label = n.label;
+    if (flip) {
+      const primary = n.pin && (n.shape === 'diamond' || n.color === '#facc15');
+      if (!primary && (n.size || 1) < 3 && !(hl && hl.nodes.has(n.id))) label = '';
+      else if (label.length > 16) label = label.slice(0, 15) + '…';
+    }
+    const base = label === n.label ? n : Object.assign({}, n, { label: label });
+    return flip ? Object.assign({}, base, { x: n.y, y: n.x }) : base;
+  });
+  const links = p.gv.links.map(function (l) {  // flip => phone: action labels are on demand only
+    const lit = hl && hl.links.has(l.id);
+    const show = lit || (!flip && (labelMode === 'all' || (labelMode === 'main' && l.weight >= 2)));
+    return show ? l : Object.assign({}, l, { label: undefined });
+  });
+  if (mounted && mounted.destroy) mounted.destroy();
+  mounted = GAGraph.mount(freshCanvas(), {
+    mode: 'map', nodes: nodes, links: links, pan: true, zoom: true,
+    collide: false, bounded: false, charge: 0, linkDist: 1, gravity: 0,
+    forceLabels: true, minZoom: 0.08,
+    highlightLinks: hl ? Array.from(hl.links) : null,
+    highlightNodes: hl ? Array.from(hl.nodes) : null,
+    onSelect: function (n) {
+      if (!n) { sel = null; rebuild(); return; }
+      if (n.junction) return;              // a scaffolding dot is not a thing to select
+      sel = { kind: 'state', id: n.id };
+      rebuild();
+    },
+    onLinkSelect: function (l) { sel = { kind: 'segment', id: l.id }; rebuild(); },
+  });
+}
+let lastVertical = vertical();
+window.addEventListener('resize', function () {
+  if (vertical() !== lastVertical) { lastVertical = vertical(); rebuild(); }
+});
+rebuild();
+</script></body></html>"""
+
+
+def _render_variant13(out: Path, agg: Aggregate, bundle: dict[str, Any]) -> dict[str, Any]:
+    payload = _paths_payloads(agg, bundle)
+    default_structure, default_scope = payload["default"].split("|")
+    html = (
+        _PAGE13
+        .replace("__TITLE__", "13 — Caminhos")
+        .replace("__PAGES_JSON__", json.dumps(payload["pages"], ensure_ascii=False))
+        .replace("__STRUCTURES_JSON__", json.dumps(payload["structures"], ensure_ascii=False))
+        .replace("__SCOPES_JSON__", json.dumps(payload["scopes"], ensure_ascii=False))
+        .replace("__DEFAULT_STRUCTURE__", json.dumps(default_structure))
+        .replace("__DEFAULT_SCOPE__", json.dumps(default_scope))
+    )
+    (out / "13-caminhos.html").write_text(html, encoding="utf-8")
+    default = payload["pages"][payload["default"]]
+    stats = default["stats"]
+    return {
+        "nodes": len(default["gv"]["nodes"]), "edges": len(default["gv"]["links"]),
+        "edges_per_node": round(len(default["gv"]["links"]) / len(default["gv"]["nodes"]), 2)
+        if default["gv"]["nodes"] else 0.0,
+        "pct_inferred_edges": _pct(
+            sum(1 for link in default["gv"]["links"] if link.get("inf")),
+            len(default["gv"]["links"])),
+        "partner_elements": sum(1 for n in default["gv"]["nodes"] if n.get("fighter") == "b"),
+        "handover_links": 0,  # paths never cross actors — the compiler's own guarantee
+        "knobs": {"charge": 0, "linkDist": 1, "gravity": 0},  # fully positioned, no physics
+        "paths": stats["paths"], "segments": stats["segments"], "points": stats["points"],
+        "branch_points": stats["branchPoints"], "merge_points": stats["mergePoints"],
+        "shared_action_pct": stats["sharedActionPct"],
+        "biggest_trunk_paths": (stats["biggestTrunk"] or {}).get("paths", 0),
+        "length_distribution": stats["lengths"],
+        "structures": len(payload["structures"]), "scopes": len(payload["scopes"]),
+    }
+
+
 _VARIANT_DESCRIPTIONS = [
     ("1-baseline.html", "the app's CURRENT graph — technique=node — the comparison ruler"),
     ("2-migrado-proprio.html", "new model, YOU only — states=nodes, edges=action"),
@@ -2591,6 +3422,7 @@ _VARIANT_DESCRIPTIONS = [
     ("10-gating-comparado.html", "same gated base, side by side across inference policies — see the effect of the density gate before trusting the dominance/bridge numbers"),
     ("11-sistemas-vista-separada.html", "global (every node/edge, systems collapsed, ALL bridges) + a separate per-system view with a stub mini-node per boundary destination — locked combo, no controls"),
     ("12-sistemas-vista-separada-seletiva.html", "same as 11, controls live — 36 precomputed (policy x min_support x opponent mode) combos, client-side bridge/type/flow-bias filters"),
+    ("13-caminhos.html", "edge = PATH: every occurrence expanded to state→a1→a2→state, contiguous shared runs bundled into segments with branch/merge points, hierarchical (non-force) layout, configurable anchor frame, per-path metrics panel"),
 ]
 
 _INDEX_PAGE = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
@@ -2632,7 +3464,7 @@ def _patch_graph_js(js_text: str) -> str:
         ),
         (
             "      r: 5 + (n.size || 1) * 4,",
-            "      r: 4 + (n.size || 1) * 3.2,  // map-prototype patch: smaller radius, more room to breathe (adendo 2026-08-27)",
+            "      r: n.junction ? 3 : 4 + (n.size || 1) * 3.2,  // map-prototype patch: smaller radius, more room to breathe (adendo 2026-08-27); a variant-13 junction is a 3px scaffolding dot, not a node",
         ),
         (
             "        ctx.arc(n.x, n.y, r, 0, Math.PI * 2); ctx.fill();",
@@ -2664,6 +3496,20 @@ def _patch_graph_js(js_text: str) -> str:
             "        ctx.arc(n.x, n.y, Math.max(1, r - 4.5), 0, Math.PI * 2); ctx.fill();",
             "        ctx.fillStyle = col;\n"
             "        gaNodePath(ctx, n, Math.max(1, r - 4.5)); ctx.fill();  // map-prototype patch: diamond-aware fill\n"
+            "        if (n.split) {  // map-prototype patch: split fill — one vertex, two athletes\n"
+            "                        // (variant 13's unified finish). Half and half, vertically, so\n"
+            "                        // folding the two finishes into one place never hides WHOSE.\n"
+            "          const sr = Math.max(1, r - 4.5);\n"
+            "          for (let si = 0; si < 2; si++) {\n"
+            "            ctx.save();\n"
+            "            ctx.beginPath();\n"
+            "            ctx.rect(si === 0 ? n.x - sr - 1 : n.x, n.y - sr - 1, sr + 1, 2 * sr + 2);\n"
+            "            ctx.clip();\n"
+            "            ctx.fillStyle = n.split[si];\n"
+            "            gaNodePath(ctx, n, sr); ctx.fill();\n"
+            "            ctx.restore();\n"
+            "          }\n"
+            "        }\n"
             "        if (n.icon) {  // map-prototype patch: category/finish glyph — bold LETTER, not\n"
             "                       // emoji (A.4: colour-emoji font isn't guaranteed on every viewer,\n"
             "                       // and reads worse than a letter at the common size-1 node radius)\n"
@@ -2678,11 +3524,75 @@ def _patch_graph_js(js_text: str) -> str:
             "        }",
         ),
         (
+            # map-prototype patch: a node dims from the explicit highlight set when there is one
+            # (variant 13's path selection lights nodes that are nowhere near the clicked one).
+            "        const dim = hov && !conn.has(n.id);",
+            "        const dim = gaHN ? !gaHN.has(n.id) : (hov && !conn.has(n.id));  // map-prototype patch: explicit highlight set wins",
+        ),
+        (
+            # map-prototype patch: LINK picking + `opts.onLinkSelect` (variant 13). `pick()` only
+            # ever knew about nodes, so a shared segment — the thing the owner asked to be able to
+            # click — had no hit target at all. Samples each link's own quadratic (the same control
+            # point the draw pass computes) rather than the straight chord, so the hit area follows
+            # the arc a fanned parallel edge is actually drawn on.
+            "    function pick(mx, my) {  // screen \u2192 world, then nearest node",
+            "    function pickLink(mx, my) {  // map-prototype patch: link picking (variant 13)\n"
+            "      const wx = (mx - cam.x) / cam.k, wy = (my - cam.y) / cam.k;\n"
+            "      const tol = (10 / cam.k) ** 2;\n"
+            "      let best = null, bd = tol;\n"
+            "      for (const l of links) {\n"
+            "        const parN = l.parCount || 1, parI = l.par || 0;\n"
+            "        let cpx = (l.s.x + l.t.x) / 2, cpy = (l.s.y + l.t.y) / 2;\n"
+            "        if (l.bow) {\n"
+            "          const bdx = l.t.x - l.s.x, bdy = l.t.y - l.s.y;\n"
+            "          const bd = Math.sqrt(bdx * bdx + bdy * bdy) || 1;\n"
+            "          cpx += (-bdy / bd) * bd * l.bow; cpy += (bdx / bd) * bd * l.bow;\n"
+            "        }\n"
+            "        if (parN > 1) {\n"
+            "          const ddx = l.t.x - l.s.x, ddy = l.t.y - l.s.y;\n"
+            "          const dd = Math.sqrt(ddx * ddx + ddy * ddy) || 1;\n"
+            "          const step = Math.max(30, Math.min(dd * 0.13, 120));\n"
+            "          const off = (parI - (parN - 1) / 2) * step;\n"
+            "          cpx += (-ddy / dd) * off; cpy += (ddx / dd) * off;\n"
+            "        }\n"
+            "        for (let i = 0; i <= 16; i++) {\n"
+            "          const u = i / 16, v = 1 - u;\n"
+            "          const px = v * v * l.s.x + 2 * v * u * cpx + u * u * l.t.x;\n"
+            "          const py = v * v * l.s.y + 2 * v * u * cpy + u * u * l.t.y;\n"
+            "          const d = (px - wx) ** 2 + (py - wy) ** 2;\n"
+            "          if (d < bd) { bd = d; best = l; }\n"
+            "        }\n"
+            "      }\n"
+            "      return best;\n"
+            "    }\n"
+            "    function pick(mx, my) {  // screen \u2192 world, then nearest node",
+        ),
+        (
+            "      const n = pick(e.clientX - r.left, e.clientY - r.top);  // null on empty space \u2192 deselect + zoom out\n"
+            "      selected = n || null;\n"
+            "      focusOn(selected);\n"
+            "      if (onSelect) onSelect(selected);",
+            "      const n = pick(e.clientX - r.left, e.clientY - r.top);  // null on empty space \u2192 deselect + zoom out\n"
+            "      if (!n && opts.onLinkSelect) {  // map-prototype patch: a click that missed every node may still have hit a segment\n"
+            "        const l = pickLink(e.clientX - r.left, e.clientY - r.top);\n"
+            "        if (l) { opts.onLinkSelect(l); return; }\n"
+            "      }\n"
+            "      selected = n || null;\n"
+            "      focusOn(selected);\n"
+            "      if (onSelect) onSelect(selected);",
+        ),
+        (
             # A (label collision) + B (parallel edges) share one array + one draw pass, declared
             # at mount() scope (not per-frame) so a sibling helper doesn't need it passed around.
             "    let hover = null, selected = null, raf = null, t = 0;",
             "    let hover = null, selected = null, raf = null, t = 0;\n"
-            "    let labelCandidates = [];  // map-prototype patch: label collision — collected each frame, drawn after a priority sort",
+            "    let labelCandidates = [];  // map-prototype patch: label collision — collected each frame, drawn after a priority sort\n"
+            "    // map-prototype patch: explicit highlight sets (variant 13). The stock renderer can\n"
+            "    // only light a node's IMMEDIATE neighbours; a selected PATH is lit across every trunk\n"
+            "    // it shares with other paths, which is not a neighbourhood and cannot be derived here.\n"
+            "    // Caller-computed, ids only; absent -> every other variant behaves exactly as before.\n"
+            "    const gaHL = opts.highlightLinks ? new Set(opts.highlightLinks) : null;\n"
+            "    const gaHN = opts.highlightNodes ? new Set(opts.highlightNodes) : null;",
         ),
         (
             "        if (n === hover && pointer.active && pointer.moved) {  // pin to cursor (screen→world)\n"
@@ -2832,7 +3742,7 @@ def _patch_graph_js(js_text: str) -> str:
             "      ",
             "      // links\n"
             "      for (const l of links) {\n"
-            "        const active = !hov || (conn.has(l.s.id) && conn.has(l.t.id) && (l.s === hov || l.t === hov));\n"
+            "        const active = gaHL ? gaHL.has(l.id) : (!hov || (conn.has(l.s.id) && conn.has(l.t.id) && (l.s === hov || l.t === hov)));  // map-prototype patch: explicit highlight set wins\n"
             "        const contested = l.fighter === 'x';\n"
             "        const col = l.fighter ? FIG[l.fighter] : '#3a3a45';\n"
             "        // map-prototype patch: parallel edges (B) — offset the control point perpendicular\n"
@@ -2842,6 +3752,11 @@ def _patch_graph_js(js_text: str) -> str:
             "        // its own midpoint for the label. parCount<=1 degenerates to a straight line.\n"
             "        const parN = l.parCount || 1, parI = l.par || 0;\n"
             "        let cpx = (l.s.x + l.t.x) / 2, cpy = (l.s.y + l.t.y) / 2;\n"
+            "        if (l.bow) {  // map-prototype patch: return edge (variant 13) — bow it out of\n"
+            "          const bdx = l.t.x - l.s.x, bdy = l.t.y - l.s.y;   // the forward reading\n"
+            "          const bd = Math.sqrt(bdx * bdx + bdy * bdy) || 1;\n"
+            "          cpx += (-bdy / bd) * bd * l.bow; cpy += (bdx / bd) * bd * l.bow;\n"
+            "        }\n"
             "        if (parN > 1) {\n"
             "          const ddx = l.t.x - l.s.x, ddy = l.t.y - l.s.y;\n"
             "          const dd = Math.sqrt(ddx * ddx + ddy * ddy) || 1;\n"
@@ -2854,8 +3769,8 @@ def _patch_graph_js(js_text: str) -> str:
             "          cpx += opx * off; cpy += opy * off;\n"
             "        }\n"
             "        ctx.strokeStyle = col;\n"
-            "        ctx.globalAlpha = hov ? (active ? 0.85 : 0.08) : (contested ? 0.28 : (l.fighter ? 0.5 : 0.32));\n"
-            "        ctx.lineWidth = edgeWidth(l.weight, wMin, wMax) * (active ? 1.4 : 1) * (contested ? 0.85 : 1);\n"
+            "        ctx.globalAlpha = (gaHL || hov) ? (active ? 0.85 : 0.08) : (contested ? 0.28 : (l.fighter ? 0.5 : 0.32));  // map-prototype patch: a highlight set dims exactly like a hover does\n"
+            "        ctx.lineWidth = edgeWidth(l.weight, wMin, wMax) * (active ? 1.4 : 1) * (contested ? 0.85 : 1) * (l.back ? 0.6 : 1);  // map-prototype patch: a return edge draws thinner\n"
             "        ctx.setLineDash(l.dashed ? [5, 5] : (contested ? [3, 4] : []));  // low-success / handover dashed\n"
             "        ctx.beginPath(); ctx.moveTo(l.s.x, l.s.y); ctx.quadraticCurveTo(cpx, cpy, l.t.x, l.t.y); ctx.stroke();\n"
             "        ctx.setLineDash([]);\n"
@@ -2875,7 +3790,7 @@ def _patch_graph_js(js_text: str) -> str:
             "          const ax = l.t.x - ux * tip, ay = l.t.y - uy * tip;\n"
             "          const bx = ax - ux * back, by = ay - uy * back;\n"
             "          ctx.save();\n"
-            "          ctx.globalAlpha = Math.max(ctx.globalAlpha, hov && !active ? 0.08 : 0.85);\n"
+            "          ctx.globalAlpha = Math.max(ctx.globalAlpha, (gaHL || hov) && !active ? 0.08 : 0.85);\n"
             "          ctx.fillStyle = col;\n"
             "          ctx.beginPath();\n"
             "          ctx.moveTo(ax, ay);\n"
@@ -2889,7 +3804,7 @@ def _patch_graph_js(js_text: str) -> str:
             "          labelCandidates.push({\n"
             "            text: l.label, x: mx, y: my,\n"
             "            font: `${useCam ? 11 / cam.k : 11}px 'Spline Sans Mono', monospace`,\n"
-            "            color: col, alpha: hov ? (active ? 0.9 : 0.08) : 0.75,\n"
+            "            color: col, alpha: (gaHL || hov) ? (active ? 0.9 : 0.08) : 0.75,\n"
             "            kind: 'edge', priority: (l.weight || 1) - (l.inf ? 0.5 : 0),  // named generics yield to real actions\n"
             "          });\n"
             "        }\n"
@@ -3022,7 +3937,11 @@ def _patch_graph_js(js_text: str) -> str:
             "        maxR = Math.max(maxR, n.r || 5);\n"
             "      }\n"
             "      const pad = 2 * (maxHalfLabel + maxR + 8), spanX = (mxX - mnX) || 1, spanY = (mxY - mnY) || 1;\n"
-            "      const k = Math.max(0.25, Math.min(1.3, Math.min((W - pad) / spanX, (H - pad) / spanY)));\n"
+            "      // map-prototype patch: `opts.minZoom` — the 0.25 floor is right for a force graph\n"
+            "      // that can always settle tighter, and wrong for a FULLY POSITIONED one (variant 13),\n"
+            "      // where refusing to zoom out just clips the frame off the side of a phone.\n"
+            "      const kMin = opts.minZoom != null ? opts.minZoom : 0.25;\n"
+            "      const k = Math.max(kMin, Math.min(1.3, Math.min((W - pad) / spanX, (H - pad) / spanY)));\n"
             "      return { k, x: W / 2 - (mnX + mxX) / 2 * k, y: H / 2 - (mnY + mxY) / 2 * k };\n"
             "    }",
         ),
@@ -3165,6 +4084,11 @@ def render_all(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
     # a per-system boundary+stub view. 11 = locked combo, no controls; 12 = the same page, live.
     metrics["variants"]["11-sistemas-vista-separada"] = _render_variant11(out, agg)
     metrics["variants"]["12-sistemas-vista-separada-seletiva"] = _render_variant12(out, agg)
+
+    # 13 — Phase 4: render paths -> bundled visual graph. Its own layer, not a re-skin of the
+    # others: nodes are POINTS (states + branch/merge artefacts), links are SEGMENTS of shared
+    # ink, and every position is computed here (`_flow_layout`) instead of simulated.
+    metrics["variants"]["13-caminhos"] = _render_variant13(out, agg, bundle)
 
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,

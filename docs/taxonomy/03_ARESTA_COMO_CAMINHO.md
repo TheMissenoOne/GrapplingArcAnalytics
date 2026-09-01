@@ -430,3 +430,208 @@ Posição das 433 inferidas: **399** em arestas sem nenhuma observada (o caso bu
   comparam a tabela daqui com o espelho do App, que é dívida da **Fase 5**. Nenhum vermelho novo,
   e nada foi mascarado: regenerar o golden local deixaria
   `test_both_repos_carry_the_same_fixture_bytes` vermelho no lugar.
+
+## 9. Fase 3 (2026-09-01) — métricas de caminho (`analysis/path_metrics.py`)
+
+Módulo novo, puro, sem I/O além do artefato Markov já existente. Interface fixa — a Fase 4
+(protótipo) importa estes nomes como estão:
+
+```python
+@dataclass(frozen=True)
+class PathMetrics:
+    length: int             # nº de ações na trilha (observadas + inferidas)
+    observed: int           # ações NÃO inferidas
+    observed_ratio: float   # observed / length; 0.0 quando length == 0
+    support: int             # nº de ocorrências da relação (source, target, actor) — do caller
+    terminal: bool           # edge.terminal
+    role_delta: str          # 'none' | 'inversion' | 'same-actor-shift' | 'unknown'
+    strength: float | None   # média ponderada (Markov mean-1) das ações OBSERVADAS com rating
+
+def path_metrics(edge: ChainEdge, *, support: int, rating_of: Callable[[str], float | None],
+                 block: Mapping[str, float] | None) -> PathMetrics
+def metrics_for_paths(edges: Iterable[ChainEdge], *, support_of, rating_of, block) -> list[tuple[ChainEdge, PathMetrics]]
+```
+
+### 9.1 `strength`
+
+Reusa o contrato existente, não reimplementa peso: `analysis.markov_weights.relative_shares`
+sobre o código `analysis.lamas_chain.lamas_state` de CADA ação da tupla — as shares são
+calculadas sobre a **tupla inteira** de `edge.actions` (preserva a distribuição real da
+transição), e só DEPOIS a média pondera apenas o subconjunto OBSERVADO com rating: uma ação
+`inferred=True` nunca entra (não foi observada, mesmo que `rating_of` responda para a sua
+chave), e uma ação cuja `rating_of(key)` devolve `None` também não. Os pesos do subconjunto
+usado são renormalizados, então `strength` continua sendo uma média de verdade sobre quem
+qualifica — não fica achatada pela massa de peso excluída. `strength` é `None` quando nada na
+aresta qualifica.
+
+`rating_of` é injetado porque a fonte varia por chamador (Glicko-2 por `(athlete, node_key)` no
+corpus público, `computedElo` do bundle no lado App) — este módulo nunca abre um DB nem um
+bundle.
+
+### 9.2 `role_delta`
+
+Compara os dois estados-extremo da aresta (`source_key`/`target_key`) via
+`taxonomy_kind.orientation_for_inference`, nos dois eixos que `taxonomy_kind` já mantém
+separados (`_STANCE_AXIS`): topologia (`top`/`bottom`) e controle (`controlling`/`controlled`)
+— uma guarda fechada (`bottom`) e uma pegada de kimura (`controlling`) fazem afirmações em eixos
+diferentes e não são comparáveis.
+
+| condição | valor |
+|---|---|
+| mesmo eixo, mesmo lado (ex.: `mount` → `side control`, ambos `top`) | `none` |
+| eixos diferentes, ou algum extremo lê `neutral`/sem afirmação | `unknown` |
+| mesmo eixo, lado invertido, e alguma ação da aresta é atribuída ao **oponente** (`actor_is_opponent=True`) | `inversion` (o "Inversão B" do modelo — dominância passou para quem não é dono da cadeia) |
+| mesmo eixo, lado invertido, sem ação atribuída ao oponente | `same-actor-shift` (o "Raspagem A" do modelo — o próprio dono da cadeia inverteu a própria posição) |
+
+Aprovado como está pelo dono (2026-09-01).
+
+### 9.3 Limitação declarada — tipo do estado não sobrevive na aresta
+
+`ChainEdge` carrega só a CHAVE canônica de cada extremo (`source_key`/`target_key`), nunca o
+`(type, label)` original do evento — o `type` do estado nunca chega na aresta.
+`orientation_for_inference` precisa de `event_type` só para seu terceiro nível (o fallback via
+`attribution.classify`); os dois primeiros níveis (tabela declarada pela chave canônica, depois
+pelo nome canônico da biblioteca) não precisam de tipo e resolvem a maioria dos rótulos sem ele.
+
+`path_metrics` recupera o tipo via `taxonomy_kind.resolve_library_entry(key)` quando a chave é
+uma entrada conhecida da biblioteca de técnicas do App; quando não é, passa tipo vazio. Isso
+degrada honestamente (nunca chuta um tipo) — para os ~13 rótulos de pegada/controle em pé
+(`_CONTROL_GRIP` de `attribution.py`) que só resolvem pelo terceiro nível do §8.2 e não estão na
+biblioteca, o extremo lê `unknown` em vez do seu `stance` real. Medido sobre o corpus de 281
+lutas (989 arestas): `none` 388, `unknown` 481, `same-actor-shift` 75, `inversion` 45 — a fatia
+de `unknown` é dominada pelas âncoras `start neutral` (sem afirmação posicional por construção),
+não só por este gap.
+
+Teto: linkar o `type` real do estado até `ChainEdge` (ou aceitar um `state_type_of: Callable[[str],
+str | None]` ao lado de `rating_of`). Não vale o custo para um primeiro corte sobre 4 categorias
+de `role_delta`.
+
+---
+
+## 10. Fase 4 (2026-09-01) — bundling de caminhos e a variante 13 do protótipo
+
+Camadas 2 e 3 das quatro do dono. `analysis/path_bundling.py` é a lógica (pura, testada);
+`scripts/render_map_prototypes.py` ganhou a variante **13 — Caminhos** (`13-caminhos.html`), que
+só desenha. As variantes 1–12 saem **byte-idênticas** (verificado com `diff -r` antes/depois);
+mudam apenas `graph.js` (patches novos, todos condicionados a campos que só a 13 emite),
+`index.html` (a linha nova) e `metrics.json` (o bloco novo).
+
+### 10.1 O que é um segmento
+
+A maior sequência CONTÍGUA de ações percorrida por **exatamente** o mesmo conjunto de caminhos,
+entre dois pontos. `[1,2]` é um segmento só enquanto todo caminho que anda o `1` também anda o
+`2` e ninguém entra no meio; assim que um terceiro caminho divide só o `2`, a corrida racha,
+porque as duas metades deixam de carregar o mesmo conjunto.
+
+`Point.kind` é `state` (vértice real do grafo semântico) ou `branch`/`merge`/`branch-merge`
+(**artefato visual**, nunca persistido, nunca um `node_key`).
+
+### 10.2 As três regras que garantem que o desenho não mente
+
+1. **Igualdade de ação canônica é o único critério de compartilhamento** — nunca rótulo, nunca
+   similaridade. Duas posições de fronteira viram o mesmo ponto quando concordam num PREFIXO
+   (mesmo estado de origem + mesmas ações até ali) ou num SUFIXO (mesmas ações restantes + mesmo
+   estado de destino), transitivamente. Trie para frente + trie invertida; o índice de k-gramas
+   contíguos cai das mesmas duas tabelas — a TRANSITIVIDADE é o índice de k-gramas:
+   `A --[1,2,3]--> C` e `B --[5,2,3]--> C` dividem o `2` interno pelo sufixo comum, mesmo com
+   origens diferentes. O que fica DELIBERADAMENTE de fora é a corrida ancorada em NENHUMA das
+   pontas (`A --[1,2,3]--> C` vs `B --[4,2,5]--> D`): duas cadeias que nem abrem nem fecham no
+   mesmo lugar não dividem base, só reusam um verbo — e um índice de k-gramas solto colapsaria
+   todo `sweep` de meio de cadeia num traço só, entregando uma multidão de `branch-merge`, que é
+   a forma exata da "conectividade visual falsa" que o dono proibiu.
+2. **Uma posição interna nunca funde num ponto de estado.** Se `A --[1,2]--> C` e `A --[1]--> X`
+   dividissem o ponto depois do `1`, o desenho afirmaria que o primeiro caminho passa por `X` —
+   um estado inventado no meio da cadeia, exatamente o que a Fase 1 apagou.
+3. **Nenhuma fusão pode fazer um caminho cruzar a si mesmo.** ⚠️ Esta regra NÃO estava no
+   desenho original — foi descoberta rodando o algoritmo sobre o corpus público (668 caminhos,
+   989 ocorrências) e é o único ponto do plano da Fase 4 que o dado contradisse. Ações repetidas
+   (`back take --[triangle attempt ×4]--> back take`) fundem a 1ª e a 3ª lacuna do caminho longo
+   através de um irmão de duas tentativas: o caminho passa a se cruzar, `walkable_routes` deixa
+   de ser a cadeia dele, e **o desenho passou a licenciar 19 rotas que nunca aconteceram e a
+   perder 3 que aconteceram** (ex.: `half guard --[sweep, sweep]--> start top`, montada com
+   metades de `back take --[rear naked choke, sweep]--> start top`). A fusão que faria isso é
+   recusada (`_Union._owners`); com a recusa, sobre o mesmo corpus: **0 fantasmas, 0 perdidas**.
+   Fusões de posições de ESTADO nunca são recusadas — `A --[x]--> A` tem as duas pontas ali por
+   construção.
+
+### 10.3 A prova
+
+`BundledGraph.walkable_routes()` enumera TODA caminhada de ponto-de-estado a ponto-de-estado
+cujos segmentos compartilham pelo menos um `path_id` do começo ao fim, e o teste afirma que esse
+conjunto é **igual** ao de entrada. É o teste de "rota inexistente" no sentido forte: com a
+regra 3 valendo, a caminhada de cada `path_id` é simples, então uma caminhada com interseção
+global não-vazia só pode ser a de um caminho real. `tests/test_path_bundling.py` roda os cinco
+casos do dono + as três regras + o invariante, e repete o invariante sobre o bundle real dele.
+
+### 10.4 Medido
+
+| | bundle do dono (privado) | corpus público (281 lutas) |
+|---|---|---|
+| render paths | 42 (66 ocorrências) | 668 (989 ocorrências) |
+| distribuição de `len(actions)` | `{1: 40, 2: 2}` | `{1: 355, 2: 136, 3: 61, 4: 46, 5: 28, 6: 13, 7: 11, 8: 5, 9: 2, 10: 4, 11: 4, 14: 1, 19: 1, 26: 1}` |
+| pontos | 20 (20 estado, 0 artefato) | 136 (71 estado, 19 branch, 20 merge, 26 branch-merge) |
+| segmentos | 42 (0 compartilhados) | 736 (129 compartilhados) |
+| ações num traço compartilhado | **0,0%** | **11,6%** (135/1167) |
+| maior tronco | 1 caminho | 23 caminhos (`sweep`) |
+| `walkable_routes == entrada` | sim | sim |
+
+⚠️ **O bundling é inerte no bundle do dono, e isso é um fato do log, não do algoritmo.** 40 dos
+42 caminhos dele carregam UMA ação: as 114 entradas alternam estado/ação (73 estados, 41 ações),
+e uma transição entre dois estados observados consecutivos recebe exatamente uma ação. Sem
+posição interna não existe fronteira interna, logo não existe tronco. O que o dono ganha na
+variante 13 é o LAYOUT determinístico e o painel de métricas; o bundling passa a valer quando a
+cadeia tiver comprimento — o corpus de lutas já tem (39% dos caminhos com ≥2 ações).
+
+### 10.5 Layout — Python, não JS
+
+O plano pedia portar `decisionFlowLayout.ts` para o JS do protótipo. O layout foi escrito em
+**Python** e enviado como `x`/`y` fixados (`n.pin`). Três razões, na ordem em que pesaram:
+`graph.js` já honra `n.x`/`n.y` + o patch `n.pin`, então um grafo totalmente posicionado não
+precisa de NENHUM conceito novo no renderer; o determinismo vira provável por `pytest` e pelo
+`diff -r` em vez de morar numa função JS que nada neste repo executa; e a convenção deste repo
+para "o App é dono do TS, nós somos do espelho" é um espelho PYTHON (`network_metrics` ↔
+`directedEdges.ts`, `presentation.py` ↔ `ratingV2Presentation.ts`). O App já TEM
+`decisionFlowLayout.ts` — uma transcrição JS dentro de uma string Python seria uma terceira
+cópia, não um caminho mais curto para o port.
+
+O algoritmo é o dele: rank por BFS multi-fonte com visited-set (ciclos são reais aqui), ordenação
+determinística dentro do rank, `x` do rank. O roteamento SPLIT/MERGE é a única parte deixada de
+fora **de propósito**: lá as junções existem para abrir o leque de saída de um nó; aqui o leque
+já é objeto de primeira classe — `Point(kind='branch'|'merge'|'branch-merge')`, produzido pelo
+bundler a partir do PREFIXO DE AÇÃO, que é exatamente a mudança que o plano pediu. elkjs/dagre
+continuam fora (`userDecisionFlow.ts:32-45`).
+
+**Cruzamentos, medidos** (segmentos retos entre pontos fixados): moldura circular com as âncoras
+fora da ordenação = 83 cruzamentos em 42 links (bundle do dono) e 16 em 21 (mock do App). Com as
+âncoras contando na baricentragem e a moldura numa elipse larga e baixa (`rx` 2.00, `ry` 1.30,
+`spread` 0.35, 2 varreduras): **41 e 5**. Mais varreduras PIORAM (a heurística da mediana não é
+monótona): 6 varreduras custaram +6 cruzamentos.
+
+### 10.6 Layout de âncoras configurável
+
+`_PENTAGON_ANGLES` virou uma linha de `_ANCHOR_STRUCTURES`; a linha do pentágono aponta para a
+constante original, e é por isso que as variantes 1–12 não se mexeram.
+
+| estrutura | vértices | finalização |
+|---|---|---|
+| `pentagono` | os 5 de sempre | uma por atleta |
+| `losango` | neutro à esquerda, top em cima, bottom embaixo, finalização à direita | **unificada** |
+| `triangulo` | top acima-esq., bottom abaixo-esq., finalização à direita; neutro no meio da aresta esquerda | **unificada** |
+
+Finalização unificada é UM vértice com dois atletas: desenhada com preenchimento partido ao meio
+(`n.split`, patch na CÓPIA do `graph.js`), porque dobrar as duas num lugar só nunca pode esconder
+de quem é.
+
+### 10.7 Pendências e tetos conhecidos
+
+- `_paths_view` não aplica o gate adaptativo das 11/12 — a 13 mostra TODOS os caminhos no escopo
+  Global, porque esconder caminho é esconder o objeto de estudo. As pills de sistema continuam
+  como PREDICADO (um caminho entra quando uma das pontas é membro; a outra ponta vira stub).
+- Rótulos de ação são a camada secundária (`principais` por padrão = peso ≥ 2; no celular, só o
+  que estiver selecionado). É a exigência de mobile do dono, não uma economia.
+- `Point.id` de um estado é `s:{node_key}` e **contém espaços**. Nada aqui parte id por espaço —
+  mas é exatamente o defeito vivo de `systemDominance.ts:167-174` no App, e o port da Fase 5 tem
+  de nascer sabendo.
+- Um ponto `branch-merge` é honesto quanto às rotas (§10.3), mas o olho ainda pode "seguir" uma
+  entrada de p1 até uma saída de p2 num traço estático. O que desfaz isso é a seleção (destaque
+  atravessa os troncos compartilhados). No bundle do dono não existe nenhum; no corpus são 26.

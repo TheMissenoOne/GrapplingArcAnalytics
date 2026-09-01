@@ -11,8 +11,10 @@ from typing import Any
 import pytest
 
 from analysis.network_metrics import MIN_EDGE_ARROW, TWO_WAY_RATIO
+from analysis.path_bundling import bundle_paths
 from scripts.render_map_prototypes import (
     _ALL_SYSTEMS_COMBOS,
+    _ANCHOR_STRUCTURES,
     _BOUNDARY_COLOR,
     _BRIDGE_COLOR,
     _FIG_HEX,
@@ -21,12 +23,14 @@ from scripts.render_map_prototypes import (
     _FINISH_KEY,
     _GATE_POLICY_DEFAULT,
     _GRAPH_JS,
+    _PENTAGON_ANGLES,
     _START_COLOR,
     _SYSTEM_COLOR,
     _actor_for,
     _adaptive_default,
     _anchor_radius,
     _anchor_slot,
+    _anchor_units,
     _apply_gate,
     _collapse_directed,
     _combo_key,
@@ -41,6 +45,7 @@ from scripts.render_map_prototypes import (
     _opponent_scoped,
     _own_graphview,
     _patch_graph_js,
+    _paths_payloads,
     _place_of,
     _qid,
     _select_displayed_bridges,
@@ -52,6 +57,7 @@ from scripts.render_map_prototypes import (
     _two_sided_graphview,
     build_aggregate,
     render_all,
+    render_paths,
     sweep_gates,
 )
 
@@ -93,14 +99,14 @@ _EXPECTED_FILES = [
     "4-migrado-oponente-seletivo.html", "5-hubs.html", "6-ghost-inferidos.html",
     "7-icones-categoria.html", "8-sistemas-colapsavel.html", "9-sistemas-expande-in-place.html",
     "10-gating-comparado.html", "11-sistemas-vista-separada.html",
-    "12-sistemas-vista-separada-seletiva.html",
+    "12-sistemas-vista-separada-seletiva.html", "13-caminhos.html",
 ]
 
 _EXPECTED_VARIANT_KEYS = {
     "1-baseline", "2-migrado-proprio", "3-migrado-oponente-completo",
     "4-migrado-oponente-seletivo", "5-hubs", "6-ghost-inferidos",
     "7-icones-categoria", "8-sistemas-colapsavel", "9-sistemas-expande-in-place",
-    "11-sistemas-vista-separada", "12-sistemas-vista-separada-seletiva",
+    "11-sistemas-vista-separada", "12-sistemas-vista-separada-seletiva", "13-caminhos",
 }
 
 
@@ -123,11 +129,14 @@ def test_render_all_produces_every_artifact_with_valid_counts(tmp_path: Path) ->
         assert m["nodes"] > 0, name
         assert m["edges"] >= 0, name
         assert m["handover_links"] >= 0, name
-        assert "knobs" in m and m["knobs"]["charge"] > 0, name
+        assert "knobs" in m, name
+        # 13 is fully positioned server-side, so its physics knobs are deliberately ZERO —
+        # every other variant still hands graph.js a real repulsion budget.
+        assert m["knobs"]["charge"] > 0 or name == "13-caminhos", name
 
     # handovers only exist where you+partner are both rendered (variants 3-8); variant 1/2
     # never bridge actors
-    for name in ("1-baseline", "2-migrado-proprio"):
+    for name in ("1-baseline", "2-migrado-proprio", "13-caminhos"):
         assert metrics["variants"][name]["handover_links"] == 0
     for name in ("3-migrado-oponente-completo", "4-migrado-oponente-seletivo", "5-hubs",
                  "6-ghost-inferidos", "7-icones-categoria"):
@@ -223,6 +232,7 @@ def test_render_all_is_deterministic(tmp_path: Path) -> None:
         (out2 / "11-sistemas-vista-separada.html").read_bytes()
     assert (out1 / "12-sistemas-vista-separada-seletiva.html").read_bytes() == \
         (out2 / "12-sistemas-vista-separada-seletiva.html").read_bytes()
+    assert (out1 / "13-caminhos.html").read_bytes() == (out2 / "13-caminhos.html").read_bytes()
 
 
 def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path: Path) -> None:
@@ -257,6 +267,11 @@ def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path: Pa
         "map-prototype patch: arrowhead gate now respects forceLabels",
         "map-prototype patch: per-link custom dash",
         "map-prototype patch: flow-bias layout",
+        "map-prototype patch: explicit highlight set wins",
+        "map-prototype patch: link picking (variant 13)",
+        "map-prototype patch: split fill",
+        "map-prototype patch: `opts.minZoom`",
+        "map-prototype patch: return edge (variant 13)",
     ):
         assert marker in copy, marker
 
@@ -972,3 +987,111 @@ def test_adaptive_gate_only_ever_tightens_as_the_map_grows() -> None:
     assert seen == sorted(seen)
     assert [ceiling for ceiling, _c in _ADAPTIVE_GATE_LADDER] == \
         sorted(ceiling for ceiling, _c in _ADAPTIVE_GATE_LADDER)
+
+
+# ── variant 13 — "Caminhos" (Phase 4: render paths -> bundled visual graph) ────────────
+
+def test_render_paths_are_one_per_aggregated_occurrence_and_deterministic() -> None:
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+
+    paths = render_paths(agg)
+
+    assert len(paths) == len(agg.edges)
+    assert len({p.path_id for p in paths}) == len(paths)
+    assert render_paths(build_aggregate(bundle)) == paths  # ids from the sorted key, not dict order
+    # endpoints are actor-qualified, exactly like every other two-sided variant
+    assert all(p.source and p.target for p in paths)
+    assert {p.actor for p in paths} <= {"you", "partner"}
+
+
+def test_variant13_draws_no_route_the_data_never_contained() -> None:
+    """The owner's absolute requirement. Bundling is only allowed to share INK — the set of
+    (source, actions, target) the picture licenses must equal the set the compiler produced."""
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+    paths = render_paths(agg)
+
+    bundled = bundle_paths(paths)
+
+    assert bundled.walkable_routes() == {(p.source, p.actions, p.target) for p in paths}
+
+
+def test_variant13_positions_every_node_and_never_lets_physics_run() -> None:
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+
+    payload = _paths_payloads(agg, bundle)
+    page = payload["pages"][payload["default"]]
+
+    assert page["gv"]["nodes"], "the mock bundle should render at least one point"
+    for n in page["gv"]["nodes"]:
+        assert n["pin"] is True, n["id"]
+        assert isinstance(n["x"], float) and isinstance(n["y"], float), n["id"]
+    # two runs, identical coordinates — the layout is a pure function, not a settled simulation
+    again = _paths_payloads(build_aggregate(bundle), bundle)["pages"][payload["default"]]
+    assert again["gv"] == page["gv"]
+
+
+def test_variant13_offers_every_anchor_structure_and_unifies_the_finish_when_asked() -> None:
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+
+    payload = _paths_payloads(agg, bundle)
+
+    assert {s["id"] for s in payload["structures"]} == set(_ANCHOR_STRUCTURES)
+    assert payload["default"].startswith("pentagono|")  # the approved frame stays the default
+    for structure, cfg in _ANCHOR_STRUCTURES.items():
+        page = payload["pages"][f"{structure}|global"]
+        finishes = [n for n in page["gv"]["nodes"]
+                    if str(n.get("stateKey", "")).endswith(_FINISH_KEY)]
+        if not finishes:
+            continue
+        if cfg["unified_finish"]:
+            assert len(finishes) == 1, structure
+            assert finishes[0]["split"] == ["#4d86ff", "#fc4c02"], structure
+        else:
+            assert all("split" not in n for n in finishes), structure
+
+
+def test_variant13_anchors_sit_on_their_structures_own_vertices() -> None:
+    """A structure is a TABLE now, not the one hardcoded pentagon — and the pentagon row is
+    byte-identical to the constant it replaced, which is why variants 1-12 never moved."""
+    assert _ANCHOR_STRUCTURES["pentagono"]["angles"] is _PENTAGON_ANGLES
+    assert _anchor_slot(_FINISH_KEY, "partner") == "finish_opp"
+    assert _anchor_slot(_FINISH_KEY, "partner", "losango") == "finish"
+    assert _anchor_slot("closed guard", "you", "triangulo") is None
+    for structure in _ANCHOR_STRUCTURES:
+        units = _anchor_units(structure)
+        assert all(abs(math.hypot(ux, uy) - 1.0) < 1e-9 for ux, uy in units.values()), structure
+
+
+def test_variant13_panel_carries_every_path_metric_the_owner_asked_for() -> None:
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+
+    page = _paths_payloads(agg, bundle)["pages"]["pentagono|global"]
+
+    assert page["pathMeta"]
+    for meta in page["pathMeta"].values():
+        assert set(meta) >= {"length", "observedRatio", "support", "terminal", "roleDelta",
+                             "strength", "segIds", "actions", "count"}
+        assert meta["length"] == len(meta["actions"])
+        assert 0.0 <= meta["observedRatio"] <= 1.0
+        assert meta["support"] >= meta["count"]
+        assert meta["segIds"], "every path walks at least one segment"
+    assert set(page["stats"]) >= {"paths", "segments", "points", "branchPoints", "mergePoints",
+                                  "sharedActionPct", "biggestTrunk", "lengths"}
+
+
+def test_variant13_every_segment_id_in_a_path_exists_as_a_drawn_link() -> None:
+    """The panel's highlight walks `segIds` against the rendered links — a stale id would light
+    nothing and read as a broken selection."""
+    bundle = _load_mock_bundle()
+    agg = build_aggregate(bundle)
+
+    for page in _paths_payloads(agg, bundle)["pages"].values():
+        drawn = {link["id"] for link in page["gv"]["links"]}
+        assert drawn == set(page["segMeta"])
+        for meta in page["pathMeta"].values():
+            assert set(meta["segIds"]) <= drawn
