@@ -1,0 +1,67 @@
+[
+  {
+    "competitor_1": "Bruno Rocha",
+    "competitor_2": "Rafael Silverio da Fonseca",
+    "event": "FPJJ Circuito Paulista Gi Etapa 3",
+    "year": 2026,
+    "winner": "Rafael Silverio da Fonseca",
+    "method": "points",
+    "final_score": "0-9",
+    "bout_start_seconds": 30,
+    "events": [
+      {
+        "ts": 75,
+        "label": "Single Leg Takedown",
+        "actor": "Bruno Rocha",
+        "successful": false,
+        "type": "takedown"
+      },
+      {
+        "ts": 115,
+        "label": "Takedown",
+        "actor": "Rafael Silverio da Fonseca",
+        "successful": true,
+        "type": "takedown",
+        "points": 2
+      },
+      {
+        "ts": 180,
+        "label": "Guard Pass",
+        "actor": "Rafael Silverio da Fonseca",
+        "successful": true,
+        "type": "pass"
+      },
+      {
+        "ts": 220,
+        "label": "North-South Position",
+        "actor": "Rafael Silverio da Fonseca",
+        "successful": true,
+        "type": "control"
+      },
+      {
+        "ts": 280,
+        "label": "Takedown",
+        "actor": "Rafael Silverio da Fonseca",
+        "successful": true,
+        "type": "takedown",
+        "points": 2
+      },
+      {
+        "ts": 285,
+        "label": "Guard Pass",
+        "actor": "Rafael Silverio da Fonseca",
+        "successful": true,
+        "type": "pass",
+        "points": 3
+      },
+      {
+        "ts": 290,
+        "label": "Knee on Belly",
+        "actor": "Rafael Silverio da Fonseca",
+        "successful": true,
+        "type": "control",
+        "points": 2
+      }
+    ]
+  }
+]

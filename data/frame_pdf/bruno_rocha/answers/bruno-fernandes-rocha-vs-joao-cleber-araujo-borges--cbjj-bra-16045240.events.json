@@ -1,0 +1,24 @@
+{
+ "bout": {
+  "athlete_a": "Joao Cleber Araujo Borges",
+  "athlete_b": "Bruno Fernandes Rocha",
+  "event": "CBJJ Brasileiro No-Gi 2026",
+  "winner": "Joao Cleber Araujo Borges",
+  "year": 2026,
+  "win_type": "Points",
+  "identity_discriminator": "Joao Cleber Araujo Borges = PURPLE/white team rashguard, black shorts, GREEN band on the left ankle. Bruno Fernandes Rocha = plain BLACK rashguard, black shorts, bearded. Bound by two independent things, neither of them the name order: (1) the final scoreboard at t=520 reads JOAO CLEBER ARAUJO BORGES 12 (4 adv, 1 pen) x 0 (1 adv, 0 pen) BRUNO FERNANDES ROCHA, and at t=528 the referee raises the PURPLE-rashguard athlete's arm -- so purple is the 12-point scorer, Joao Cleber; (2) in the one close-up of the bout (t=76-82) the leg hooked over the black-clad athlete's body carries the green ankle band, i.e. the purple athlete is the one taking the back, which is what the +4 at t~87 pays for. NOTE: Gemini's discriminator sentence has this exactly backwards ('Joao Cleber wears the black rashguard'), so its actor names were re-derived from the frames rather than trusted.",
+  "identity_verified_by": "concordance audit (frames + narration + published result)",
+  "notes": "THIS VIDEO DOES NOT CONTAIN THE START OF THE BOUT: at the first sampled frame the athletes are already grappling, and at t=15 the clock reads 6:40 with the score 0 x 0, so the bout began before video t=0 and no non-negative bout_start_seconds is true -- the field is deliberately absent (ts stay video-absolute). Clock reaches 00:00 at t~515. Scoreboard read at 720p; only Joao Cleber ever scores: 0 -> 4 between t=85 and t=90, 4 -> 8 between t=300 and t=305, 8 -> 12 between t=340 and t=345; his advantages land at ~148, ~357, ~372, ~392 and his one penalty at ~418; Bruno's single advantage lands at ~472. Final 12 x 0. The camera is the widest of the four sheets (a whole IBJJF hall; the pair is well under 3% of the frame outside the one close-up at t=75-90), so the SECOND and THIRD 4-point positions could not be read at all: the scoreboard fact is recorded here in notes rather than minted as a possibly-wrong node, because +4 is mount OR back and choosing between them would be an invented technique. Kept 1 of 13 events read. Caveat for the owner, outside this audit's remit: the FPJJ sheet in the same batch shows Bruno as FAIXA BRANCA / MASTER 2 in a 5:00 match, while this bout runs a clock longer than 6:40 -- worth confirming this is the same person before the two records are merged under one athlete id."
+ },
+ "events": [
+  {
+   "ts": 85,
+   "label": "Back Control",
+   "actor": "Joao Cleber Araujo Borges",
+   "successful": true,
+   "type": "control",
+   "points": 4
+  }
+ ],
+ "source": "gemini reading, concordance-audited (kept 1/13) 2026-09-01"
+}

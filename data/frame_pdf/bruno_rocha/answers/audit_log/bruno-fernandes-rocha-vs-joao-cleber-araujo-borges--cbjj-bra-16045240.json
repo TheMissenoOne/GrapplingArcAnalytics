@@ -1,0 +1,84 @@
+{
+ "log": [
+  {
+   "ts": 15,
+   "gemini": "Guard Pull / Bruno Fernandes Rocha / transition / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "the bout is already on the ground when the video starts; nothing at t=10-20 shows a guard being pulled."
+  },
+  {
+   "ts": 70,
+   "gemini": "Back Take / Joao Cleber Araujo Borges / transition / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "by the first close-up frame (t=76) the back is ALREADY taken, so the entry itself falls in the sampling gap. The resulting position is kept at ts 85; the moment is not."
+  },
+  {
+   "ts": 85,
+   "gemini": "Back Control / Joao Cleber Araujo Borges / control / true / points 4",
+   "verdict": "CONCORDANT -> kept",
+   "why": "the only close-up in the bout. t=76/79: the purple-rashguard athlete has an arm around the black-clad athlete's neck from behind; t=79/82: a leg carrying the GREEN ankle band (the purple athlete's) is hooked over the black-clad athlete's torso -- back control with hooks, and it is Joao Cleber's. The board goes 0 -> 4 between t=85 and t=90, which is what a back take pays. Actor, label, type and points all hold."
+  },
+  {
+   "ts": 175,
+   "gemini": "Back Escape / Bruno Fernandes Rocha / escape / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "wide shot; the pair is unreadable and the board is flat across the window, so nothing corroborates it either."
+  },
+  {
+   "ts": 295,
+   "gemini": "Guard Pass to Mount / Joao Cleber Araujo Borges / pass / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "wide shot. And the board rules the label out as written: 4 -> 8 is +4, not the 3+4 a pass-to-mount pays, so at most one scoring position happened here."
+  },
+  {
+   "ts": 305,
+   "gemini": "Mount / Joao Cleber Araujo Borges / control / true / points 4",
+   "verdict": "UNVERIFIABLE label -> dropped",
+   "why": "the +4 to Joao Cleber between t=300 and t=305 is a solid scoreboard fact, but +4 is mount OR back control and the frames at t=296-308 are far too wide to tell which. Keeping either spelling would mint a node nobody saw; keeping a generic 'Top Control' would be wrong if it was the back. Recorded in bout notes instead."
+  },
+  {
+   "ts": 330,
+   "gemini": "Mount Escape / Bruno Fernandes Rocha / escape / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "wide shot, and it rests on the ts-305 position that itself could not be read."
+  },
+  {
+   "ts": 340,
+   "gemini": "Back Take / Joao Cleber Araujo Borges / transition / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "wide shot; only the referee's points signal at t~342 is legible, not the entry."
+  },
+  {
+   "ts": 345,
+   "gemini": "Back Control / Joao Cleber Araujo Borges / control / true / points 4",
+   "verdict": "UNVERIFIABLE label -> dropped",
+   "why": "same as ts 305: the +4 between t=340 and t=345 is real and Joao Cleber's, the position behind it is not readable at t=336-348. Kept as a note, not as a node."
+  },
+  {
+   "ts": 385,
+   "gemini": "Escape to Standing / Bruno Fernandes Rocha / escape / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "wide shot."
+  },
+  {
+   "ts": 425,
+   "gemini": "Guard Pull / Bruno Fernandes Rocha / transition / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "wide shot. The only scoreboard movement nearby is Joao Cleber's penalty at ~418, which corroborates nothing about this claim."
+  },
+  {
+   "ts": 470,
+   "gemini": "Scramble to Standing / Bruno Fernandes Rocha / transition / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "Bruno's one advantage does land at ~472, so SOMETHING of his nearly scored there -- but an advantage is given for a near takedown/sweep, not for standing up, and the frames cannot settle it. Dropped rather than guessed."
+  },
+  {
+   "ts": 480,
+   "gemini": "Guard Pull / Bruno Fernandes Rocha / transition / true",
+   "verdict": "UNVERIFIABLE -> dropped",
+   "why": "wide shot."
+  }
+ ],
+ "identity_check": "Joao Cleber Araujo Borges = PURPLE/white team rashguard, black shorts, GREEN band on the left ankle. Bruno Fernandes Rocha = plain BLACK rashguard, black shorts, bearded. Bound by two independent things, neither of them the name order: (1) the final scoreboard at t=520 reads JOAO CLEBER ARAUJO BORGES 12 (4 adv, 1 pen) x 0 (1 adv, 0 pen) BRUNO FERNANDES ROCHA, and at t=528 the referee raises the PURPLE-rashguard athlete's arm -- so purple is the 12-point scorer, Joao Cleber; (2) in the one close-up of the bout (t=76-82) the leg hooked over the black-clad athlete's body carries the green ankle band, i.e. the purple athlete is the one taking the back, which is what the +4 at t~87 pays for. NOTE: Gemini's discriminator sentence has this exactly backwards ('Joao Cleber wears the black rashguard'), so its actor names were re-derived from the frames rather than trusted.",
+ "notes": "THIS VIDEO DOES NOT CONTAIN THE START OF THE BOUT: at the first sampled frame the athletes are already grappling, and at t=15 the clock reads 6:40 with the score 0 x 0, so the bout began before video t=0 and no non-negative bout_start_seconds is true -- the field is deliberately absent (ts stay video-absolute). Clock reaches 00:00 at t~515. Scoreboard read at 720p; only Joao Cleber ever scores: 0 -> 4 between t=85 and t=90, 4 -> 8 between t=300 and t=305, 8 -> 12 between t=340 and t=345; his advantages land at ~148, ~357, ~372, ~392 and his one penalty at ~418; Bruno's single advantage lands at ~472. Final 12 x 0. The camera is the widest of the four sheets (a whole IBJJF hall; the pair is well under 3% of the frame outside the one close-up at t=75-90), so the SECOND and THIRD 4-point positions could not be read at all: the scoreboard fact is recorded here in notes rather than minted as a possibly-wrong node, because +4 is mount OR back and choosing between them would be an invented technique. Kept 1 of 13 events read. Caveat for the owner, outside this audit's remit: the FPJJ sheet in the same batch shows Bruno as FAIXA BRANCA / MASTER 2 in a 5:00 match, while this bout runs a clock longer than 6:40 -- worth confirming this is the same person before the two records are merged under one athlete id."
+}

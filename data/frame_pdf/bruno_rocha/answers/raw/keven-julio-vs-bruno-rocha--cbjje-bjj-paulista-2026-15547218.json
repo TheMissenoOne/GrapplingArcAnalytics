@@ -1,0 +1,140 @@
+{
+ "bout": {
+  "athlete_a": "Keven Julio",
+  "athlete_b": "Bruno Fernandes Rocha",
+  "event": "CBJJE BJJ Paulista 2026",
+  "winner": "Keven Julio",
+  "year": 2026,
+  "win_type": "Submission",
+  "bout_start_seconds": 12,
+  "identity_discriminator": "Keven Julio is the blonde competitor wearing blue ankle bands; this is established at 5s where the scoreboard's blue bar aligns with his ankle bands."
+ },
+ "events": [
+  {
+   "ts": 30,
+   "label": "Front Headlock",
+   "actor": "Keven Julio",
+   "type": "control",
+   "successful": true,
+   "note": "Keven snaps Bruno down and secures head control."
+  },
+  {
+   "ts": 35,
+   "label": "Guard",
+   "actor": "Keven Julio",
+   "type": "guard",
+   "successful": true,
+   "note": "Across the sampling gap, Keven moves to his back to play guard."
+  },
+  {
+   "ts": 35,
+   "label": "Top Control",
+   "actor": "Bruno Rocha",
+   "type": "control",
+   "successful": true,
+   "note": "Bruno achieves top position across the gap."
+  },
+  {
+   "ts": 50,
+   "label": "Inversion",
+   "actor": "Keven Julio",
+   "type": "guard",
+   "successful": true,
+   "note": "Keven inverts to defend a guard pass attempt."
+  },
+  {
+   "ts": 65,
+   "label": "Seated Guard",
+   "actor": "Keven Julio",
+   "type": "guard",
+   "successful": true,
+   "note": "Keven pushes Bruno away and sits up to guard."
+  },
+  {
+   "ts": 110,
+   "label": "Turtle Position",
+   "actor": "Keven Julio",
+   "type": "escape",
+   "successful": true,
+   "note": "Keven turns to turtle to defend a heavy pass attempt."
+  },
+  {
+   "ts": 115,
+   "label": "Side Control",
+   "actor": "Bruno Rocha",
+   "type": "control",
+   "successful": true,
+   "note": "Bruno passes Keven's guard and secures side control."
+  },
+  {
+   "ts": 120,
+   "label": "Guard Recovery",
+   "actor": "Keven Julio",
+   "type": "escape",
+   "successful": true,
+   "note": "Keven bridges and rolls back to recover his guard."
+  },
+  {
+   "ts": 130,
+   "label": "Side Control",
+   "actor": "Bruno Rocha",
+   "type": "control",
+   "successful": true,
+   "note": "Bruno passes the guard again to secure side control."
+  },
+  {
+   "ts": 145,
+   "label": "Guard Recovery",
+   "actor": "Keven Julio",
+   "type": "escape",
+   "successful": true,
+   "note": "Keven shrimps and brings his legs back in to recover guard."
+  },
+  {
+   "ts": 150,
+   "label": "Guard",
+   "actor": "Keven Julio",
+   "type": "guard",
+   "successful": true,
+   "note": "Keven settles into an open guard position."
+  },
+  {
+   "ts": 160,
+   "label": "Submission",
+   "actor": "Keven Julio",
+   "type": "submission",
+   "successful": false,
+   "note": "Keven wraps his legs high around Bruno's upper body in a submission setup."
+  },
+  {
+   "ts": 165,
+   "label": "Submission",
+   "actor": "Keven Julio",
+   "type": "submission",
+   "successful": true,
+   "note": "The submission is fully locked, forcing Bruno face down."
+  },
+  {
+   "ts": 170,
+   "label": "Tap",
+   "actor": "Bruno Rocha",
+   "type": "submission",
+   "successful": true,
+   "note": "The referee steps in to stop the match as Bruno submits."
+  }
+ ],
+ "audit": {
+  "division": "",
+  "source_file": "keven-julio-15547218.md",
+  "curated_start": 0,
+  "curated_end": 190,
+  "gemini_winner": "Keven Julio",
+  "flags": [
+   "ts 35: actor 'Bruno Rocha' is neither competitor",
+   "ts 115: actor 'Bruno Rocha' is neither competitor",
+   "ts 130: actor 'Bruno Rocha' is neither competitor",
+   "ts 170: actor 'Bruno Rocha' is neither competitor"
+  ],
+  "status": "normalized, awaiting concordance audit"
+ }
+}

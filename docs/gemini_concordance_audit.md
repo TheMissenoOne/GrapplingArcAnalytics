@@ -23,10 +23,11 @@ file into one folder; names don't matter, AI Studio's `.txt` copy-paste dumps wo
 ## 2. Normalize
 
 ```bash
-uv run python scripts/gemini_normalize.py <input_dir> [--out <dir>]
+uv run python scripts/gemini_normalize.py <input_dir> [--out <dir>] [--bouts <index.json>]
 ```
 
-Default `--out`: `data/frame_pdf/trials_2023_24/answers/raw` — one structured
+Default `--out`: `data/frame_pdf/trials_2023_24/answers/raw`; default `--bouts`
+`data/frame_pdf/trials_2023_24_bouts.json` — one structured
 `<slug>.json` per bout, matching `scripts/frame_answer.py`'s schema. What it does, so a
 human doesn't have to fix any of it by hand:
 
@@ -46,7 +47,28 @@ human doesn't have to fix any of it by hand:
   `-`) and matched against the vocabulary; a fold-match snaps to the library's exact label.
   An off-library label that doesn't fold-match is flagged for the audit, not silently kept
   or dropped.
+- **Markdown pastes.** A reading returned as a metadata bullet list plus one
+  `| ts | label | actor | … |` table parses too (column names and `m:ss` vs plain-seconds
+  timestamps are both matched through an alias map). AI Studio hands one back whenever the
+  prompt's JSON block is edited out; hand-converting it is exactly the transcription risk
+  this step exists to remove.
+- **`method`/`win_method` → `win_type`.** Readings name the finish under either key; without
+  the alias a "Submission" reading reached the dump with an empty method and `dump_import`
+  filed it as a DECISION (fixed 2026-09-01, found on the Bruno Rocha batch).
 - Exit 1 on any file it cannot parse or match to a bout in the index.
+
+**A curated index for a batch that is not the ADCC trials** goes in its own file passed to
+`--bouts`, same shape (`start`/`end`/`label`/`event`/`division`) plus three optional keys the
+trials set does not need, because that set is ONE long recording and a new batch is usually
+many single-bout videos:
+
+| key | why |
+|---|---|
+| `video_id` | matched against the reading's FILENAME. Several single-bout videos all start near ts 0, so the timestamp scan fits every one of them into the FIRST entry's range and silently files them all under that bout. |
+| `slug` | overrides the slugified label, so the answer file keeps the name of the frame sheet it was read off and a human can find the PDF. |
+| `bout_start` | the curator's own clock-derived bout start, which overrides the reading's (routinely a few seconds out) — same principle as the forced winner. An explicit `null` means the bout starts before the video does, so the field is removed rather than left at a value that cannot be true. |
+
+Worked example: `data/frame_pdf/bruno_rocha_bouts.json` (4 bouts, 4 videos, 3 events).
 
 ## 3. Concordance audit — the QA heart
 
@@ -199,6 +221,35 @@ rule — every consolidated change gets a dashboard log line).
 | Assemble validation problems | 0 across all 41 files |
 | Already in prod (§5) | 12 of 41 bouts, 4 behind a spelling variant (Mejia/Mahia, Nicky/Nikki Ryan, Dan/Daniel Manasoiu, Leve/Levy) |
 | New vs prod | 29 of 41 bouts, routed to §6 |
+
+## Batch 2 — Bruno Rocha (2026-09-01)
+
+4 bouts / 43 events over `data/frame_pdf/bruno_rocha/` (curated index
+`bruno_rocha_bouts.json`, manifest `bruno_rocha.json`, four single-bout FloGrappling uploads).
+
+| Stage | Result |
+|---|---|
+| Events read (Gemini) | 43 |
+| Kept after audit | 15 (35%) |
+| Corrected (kept, changed) | 9 — 4 actor swaps, 5 `ts` snapped to a scoreboard change, 2 labels generalised, 2 `successful` flipped to false by the scoreboard |
+| Dropped | 28 (26 unverifiable, 1 unresolved discordant, 1 `Tap`, which is not an event in this model) |
+| Assemble validation problems | 0 across all 4 files |
+| Already in prod (§5) | 0 — no `matches` row carries any of the four video ids |
+| New athletes (§5) | 4; the fuzzy surname pass found NO existing row for any opponent, so `db_name_map` is empty and only Bruno already exists (`Bruno Fernandes Rocha`, 7558d1f1) |
+
+35% vs batch 1's 99% is not a regression in the reader, it is the **footage**: keep rate
+tracked exactly one variable, whether the broadcast shows points (6/7 on the bout with a full
+gi scoreboard, 1/13 on a bout filmed from across an IBJJF hall, 3/9 and 5/14 on two whose
+lower third carries names and a clock and no points at all). Full breakdown, plus the two
+recurring defect classes it hit — a whole-bout identity swap that was NOT uniform (Gemini's
+actors inverted mid-bout but correct on the finish, so a blanket inversion is not a safe
+repair) and `ts` running EARLY rather than late — in `docs/PROMPT_gemini_frame_reading.md`'s
+measured-performance section.
+
+Reusable trick from this batch: when one batch holds two bouts of the same athlete at the same
+event, the body appearing in BOTH videos must be the athlete they have in common. That settles
+identity from kit and tattoos alone, with no reliance on the lower-third graphic — which is the
+thing that produced the swap in the first place.
 
 Recurring defect classes worth watching on future batches (from `docs/PROMPT_gemini_frame_reading.md`'s
 own measured-performance note): whole-bout identity swaps when both kits are dark and there
