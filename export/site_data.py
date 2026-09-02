@@ -530,7 +530,10 @@ def _featured_stats(bd: dict[str, Any]) -> list[dict[str, Any]]:
 # `layout`/`rings`/`ringCentre` plus a `ring` index on every state node. Every x/y in a cached
 # breakdown is from the old frame, so this is not merely a missing key — it is a different
 # picture, and the cache has to miss.
-BREAKDOWN_VERSION = 7
+# 7 -> 8 (owner follow-up, 2026-09-02, product cut of the variant-20 demo): the three generic
+# anchors (Top/Neutral/Bottom) drop the fixed pole and join the reverse-BFS ring/sector
+# computation like any other state. No new key, but every anchor's x/y moves.
+BREAKDOWN_VERSION = 8
 
 # --only previews keep their own cache so a partial run can never overwrite the real one.
 _PREVIEW_CACHE_DIR = Path(__file__).resolve().parent.parent / ".export_cache" / "preview"
@@ -804,7 +807,8 @@ def _progression_example(
 # 4 -> 5 (docs §12, 2026-09-01): same `drawn`/`undrawn` shape change as BREAKDOWN_VERSION 5 -> 6.
 # 5 -> 6 (§17, Fase 5e): same ring-layout change as BREAKDOWN_VERSION 6 -> 7 — every cached
 # position is from the old frame, so the cache has to miss, not merely gain a key.
-DOSSIER_VERSION = 6
+# 6 -> 7: same anchor-into-ring change as BREAKDOWN_VERSION 7 -> 8.
+DOSSIER_VERSION = 7
 
 
 def build_fighters(

@@ -611,7 +611,11 @@ def path_payload(
     ``layout`` (§17, Fase 5e) picks the FRAME. ``"flow"`` is the left-to-right reading every
     caller had; ``"ring"`` is the owner's 2026-09-01 decision for the dossier and the breakdown:
     Finish at the centre, every state on a discrete ring whose radius is the fewest strokes to a
-    finish, the three generic anchors fixed outside in the bipolar placement. Ring mode adds two
+    finish. The three generic anchors (Top/Neutral/Bottom) are no longer pinned to a fixed pole
+    (owner follow-up, 2026-09-02, promoting the ``render_map_prototypes`` variant-20 demo to the
+    product layout): they enter the same reverse-BFS ring/sector computation as every other
+    state, landing on the ring their OWN finish-distance gives them, in the sector of their own
+    orientation — Finish stays the one fixed centre. Ring mode adds two
     ADDITIVE fields — ``rings`` (the guide ellipses, in the same world units as the positions)
     and ``ringCentre`` — plus a ``ring`` index on every state node; a client that does not know
     about them draws exactly what it drew before. It also changes what ``back`` means on a
@@ -734,9 +738,12 @@ def path_payload(
     rings: list[dict[str, Any]] = []
     ring_centre: list[float] = [0.0, 0.0]
     if layout == "ring":
-        # The ring wants the same anchor decision split two ways: the FINISH is the centre, the
-        # three oriented generics are the outer frame. Everything else is a state and needs the
-        # orientation its own sector reads.
+        # The FINISH is still the one fixed centre (`centre_ids`). The three generic anchors
+        # used to get a fixed pole too (`ANCHOR_PLACEMENTS`); as of the owner's 2026-09-02
+        # follow-up (product cut of `render_map_prototypes._render_variant20`) they instead join
+        # `sector_of` under their own orientation and reach `ring_layout` with an EMPTY
+        # `anchor_slots` — nothing pulls them out of the reverse-BFS ring computation any more,
+        # so they land on the ring their own finish-distance gives them like any other state.
         centre_ids = tuple(sorted(p for p, slot in anchor_slots.items() if slot == "finish"))
         generic_anchors = {p: slot for p, slot in anchor_slots.items() if slot != "finish"}
         sector_of: dict[str, str] = {}
@@ -747,9 +754,10 @@ def path_payload(
             node_key = found[0][0] if found else point.state_key.removeprefix("opp:")
             if node_key != _FINISH_KEY:
                 sector_of[point.id] = orientation_of(node_key)
-        laid = ring_layout(bundled, centre_ids=centre_ids, anchor_slots=generic_anchors,
-                            sector_of=sector_of, support=node_weight, label_len=label_len,
-                            placement=DEFAULT_RING_PLACEMENT, target_aspect=target_aspect)
+        laid = ring_layout(bundled, centre_ids=centre_ids, anchor_slots={},
+                            sector_of={**sector_of, **generic_anchors}, support=node_weight,
+                            label_len=label_len, placement=DEFAULT_RING_PLACEMENT,
+                            target_aspect=target_aspect)
         pos = laid.pos
         ring_of = laid.ring
         rings = ring_guides(laid)
