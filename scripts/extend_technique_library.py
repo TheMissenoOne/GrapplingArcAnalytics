@@ -22,8 +22,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Any
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from analysis.names import _normalize_name  # noqa: E402
 
 LIB = Path(__file__).resolve().parents[1] / "analysis/data/technique_library.json"
 
@@ -197,13 +202,68 @@ ADDITIONS: list[tuple[str, str, str, list[str]]] = [
 ]
 
 
-def build(existing: list[dict[str, Any]]) -> list[dict[str, Any]]:
+class ResolutionConflictError(ValueError):
+    """Adding these entries would change what an already-resolvable label resolves to."""
+
+
+def build(
+    existing: list[dict[str, Any]],
+    entries: list[tuple[str, str, str, list[str]]] = ADDITIONS,
+) -> list[dict[str, Any]]:
     have = {e["en"] for e in existing}
     return [
         {"en": en, "pt": pt, "type": typ, "variants": variants}
-        for en, pt, typ, variants in ADDITIONS
+        for en, pt, typ, variants in entries
         if en not in have
     ]
+
+
+def _resolution_index(entries: list[dict[str, Any]]) -> dict[str, str]:
+    """normalized term (en/pt/variant) → canonical en, first-in-list wins.
+
+    Mirrors ``analysis.technique_match._index``'s collision rule (``setdefault`` over an
+    alphabetically-sorted file), without its ``lru_cache`` — this needs a fresh read of a
+    file that may have just changed.
+    """
+    idx: dict[str, str] = {}
+    for e in entries:
+        en = str(e.get("en", ""))
+        if not en:
+            continue
+        for term in [en, e.get("pt", ""), *e.get("variants", [])]:
+            key = _normalize_name(str(term))
+            if key:
+                idx.setdefault(key, en)
+    return idx
+
+
+def append_entries(entries: list[tuple[str, str, str, list[str]]]) -> list[dict[str, Any]]:
+    """Append new (en, pt, type, variants) entries to ``technique_library.json``.
+
+    Append-only — never edits an existing entry — and refuses (raises
+    ``ResolutionConflictError``, writes nothing) if the merge would change what any
+    already-resolvable label resolves to: the merged file is re-sorted alphabetically by
+    ``en``, and ``_index``/``clean_label`` pick the alphabetically-first match on a
+    collision, so a new entry sorted ahead of an existing one could silently steal one of
+    its terms. Returns the entries actually appended (``[]`` if every ``en`` already existed).
+    """
+    existing = json.loads(LIB.read_text(encoding="utf-8"))
+    new = build(existing, entries)
+    if not new:
+        return []
+
+    before = _resolution_index(existing)
+    merged = sorted(existing + new, key=lambda e: e["en"].lower())
+    after = _resolution_index(merged)
+    for key, en in before.items():
+        if after.get(key) != en:
+            raise ResolutionConflictError(
+                f"{key!r} resolved to {en!r} before this change, would resolve to "
+                f"{after.get(key)!r} after — refusing to write"
+            )
+
+    LIB.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return new
 
 
 def main() -> int:
@@ -221,9 +281,9 @@ def main() -> int:
             print(f"  + {e['en']:32} {e['type']:11} {e['pt']}")
         return 0
 
-    merged = sorted(existing + new, key=lambda e: e["en"].lower())
-    LIB.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(f"wrote {LIB} — {len(merged)} entries")
+    added = append_entries(ADDITIONS)
+    total = len(existing) + len(added)
+    print(f"wrote {LIB} — {total} entries")
     return 0
 
 
