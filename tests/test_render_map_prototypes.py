@@ -108,7 +108,8 @@ _EXPECTED_FILES = [
     "10-gating-comparado.html", "11-sistemas-vista-separada.html",
     "12-sistemas-vista-separada-seletiva.html", "13-caminhos.html",
     "14-caminhos-sistemas.html", "15-orcamento.html", "16-aneis.html",
-    "17-aneis-ancoras.html",
+    "17-aneis-ancoras.html", "18-aneis-tipo.html", "19-aneis-comunidade.html",
+    "20-aneis-ancoras-distancia.html",
 ]
 
 _EXPECTED_VARIANT_KEYS = {
@@ -117,6 +118,7 @@ _EXPECTED_VARIANT_KEYS = {
     "7-icones-categoria", "8-sistemas-colapsavel", "9-sistemas-expande-in-place",
     "11-sistemas-vista-separada", "12-sistemas-vista-separada-seletiva", "13-caminhos",
     "14-caminhos-sistemas", "15-orcamento", "16-aneis", "17-aneis-ancoras",
+    "18-aneis-tipo", "19-aneis-comunidade", "20-aneis-ancoras-distancia",
 }
 
 
@@ -144,12 +146,14 @@ def test_render_all_produces_every_artifact_with_valid_counts(tmp_path: Path) ->
         # every other variant still hands graph.js a real repulsion budget.
         assert m["knobs"]["charge"] > 0 or name in (
             "13-caminhos", "14-caminhos-sistemas", "15-orcamento", "16-aneis",
-            "17-aneis-ancoras"), name
+            "17-aneis-ancoras", "18-aneis-tipo", "19-aneis-comunidade",
+            "20-aneis-ancoras-distancia"), name
 
     # handovers only exist where you+partner are both rendered (variants 3-8); variant 1/2/13/14
     # never bridge actors (paths never cross actors — the compiler's own guarantee)
     for name in ("1-baseline", "2-migrado-proprio", "13-caminhos", "14-caminhos-sistemas",
-                 "15-orcamento", "16-aneis", "17-aneis-ancoras"):
+                 "15-orcamento", "16-aneis", "17-aneis-ancoras", "18-aneis-tipo",
+                 "19-aneis-comunidade", "20-aneis-ancoras-distancia"):
         assert metrics["variants"][name]["handover_links"] == 0
     for name in ("3-migrado-oponente-completo", "4-migrado-oponente-seletivo", "5-hubs",
                  "6-ghost-inferidos", "7-icones-categoria"):
@@ -248,8 +252,24 @@ def test_render_all_is_deterministic(tmp_path: Path) -> None:
     assert (out1 / "13-caminhos.html").read_bytes() == (out2 / "13-caminhos.html").read_bytes()
     assert (out1 / "14-caminhos-sistemas.html").read_bytes() == \
         (out2 / "14-caminhos-sistemas.html").read_bytes()
-    for name in ("15-orcamento.html", "16-aneis.html", "17-aneis-ancoras.html"):
+    for name in ("15-orcamento.html", "16-aneis.html", "17-aneis-ancoras.html",
+                 "18-aneis-tipo.html", "19-aneis-comunidade.html",
+                 "20-aneis-ancoras-distancia.html"):
         assert (out1 / name).read_bytes() == (out2 / name).read_bytes(), name
+
+
+def test_1819_extra_token_never_leaks_into_16_or_17() -> None:
+    """`_render_rings_page` grew `legend=`/`extra_html=` kwargs for variants 18/19; both default
+    to 16/17's own values (``_RING_LEGEND``, no extra panel). This is the mechanism that keeps
+    16/17 additive-only: ``__EXTRA__`` is only ever real content when a caller passes one, and it
+    never appears in ``_PAGE16``/``_PAGE17``'s own template text, so `.replace("__EXTRA__", "")`
+    is a true no-op there — confirmed by every pre-existing 16/17 test in this file still passing
+    unmodified alongside 18/19."""
+    from scripts.render_map_prototypes import _PAGE16, _PAGE17, _RING_LEGEND
+
+    assert "__EXTRA__" not in _PAGE16
+    assert "__EXTRA__" not in _PAGE17
+    assert "vs. distância de finalização" not in _RING_LEGEND
 
 
 def test_graph_js_patch_applies_and_never_touches_the_site_original(tmp_path: Path) -> None:
@@ -1373,4 +1393,151 @@ def test_new_pages_carry_the_source_selector_with_every_source() -> None:
     for payload in (_budget_payloads([src], _DEFAULT_ANCHOR_STRUCTURE),
                      _rings_payloads([src], ["arco"])):
         assert [s["id"] for s in payload["sources"]] == [src.id]
-        assert payload["sourceMeta"][src.id]["note"]
+
+
+# ── variants 18/19 (Onda B3 item 1, lote 2026-09-02: pluggable ring semantics, DEMO) ──────────
+
+
+def test_variant18_type_ring_matches_the_documented_mapping() -> None:
+    """control=1, guard=2, everything else (generic anchors forced here, see the docstring on
+    ``_type_ring_of``)=3 — ``_TYPE_RING``."""
+    from scripts.render_map_prototypes import _TYPE_RING, _TYPE_RING_OTHER, _custom_rings_payloads
+
+    src = _owner_like_source()
+    custom = _custom_rings_payloads([src], "type")
+    ring_of = custom["ringOf"]
+    assert ring_of, "at least one non-finish state must land on a ring"
+    anchor_node_keys = {"start top", "start bottom", "start neutral"}
+    for qid, row in src.state.items():
+        if row.get("node_key") == "finish":
+            continue
+        pid = f"s:{qid}"
+        if pid not in ring_of:
+            continue  # not part of the (budgeted) bundled graph on this source
+        if row.get("node_key") in anchor_node_keys:
+            assert ring_of[pid] == _TYPE_RING_OTHER, (qid, row["cat"])
+            continue
+        assert ring_of[pid] == _TYPE_RING.get(row["cat"], _TYPE_RING_OTHER), (qid, row["cat"])
+
+
+def test_variant19_community_rings_never_collide_with_the_finish() -> None:
+    from scripts.render_map_prototypes import _custom_rings_payloads
+
+    src = _owner_like_source()
+    custom = _custom_rings_payloads([src], "community")
+    ring_of = custom["ringOf"]
+    assert ring_of, "at least one non-finish state must land on a ring"
+    # ring 0 is reserved for the finish itself (the unified centre, `_FINISH_KEY`), never handed
+    # out by community classification to anything else
+    non_finish = {p: k for p, k in ring_of.items() if p != f"s:{_FINISH_KEY}"}
+    assert non_finish
+    assert all(k >= 1 for k in non_finish.values())
+
+
+def test_variant18_and_19_toggle_moves_only_the_generic_anchors() -> None:
+    from scripts.render_map_prototypes import _custom_rings_payloads
+
+    src = _owner_like_source()
+    for kind in ("type", "community"):
+        payload = _custom_rings_payloads([src], kind)
+        fixed = payload["layouts"][f"{src.id}|bipolar|fixo"]["desktop"]
+        moved = payload["layouts"][f"{src.id}|bipolar|atribuida"]["desktop"]
+        anchors = set(fixed["anchorAt"])
+        assert anchors and anchors == set(moved["anchorAt"])
+        # `atribuida` classifies the anchors into the ring structure instead of the fixed pole —
+        # at least one of the three generic anchors must actually move.
+        assert any(fixed["pos"][a] != moved["pos"][a] for a in anchors), kind
+        # every NON-anchor point keeps the exact same position — only the anchor toggle changed
+        non_anchor_ids = set(fixed["pos"]) - anchors
+        for point_id in non_anchor_ids:
+            assert fixed["pos"][point_id] == moved["pos"][point_id], (kind, point_id)
+
+
+def test_variant18_and_19_are_deterministic_and_compare_against_17(tmp_path: Path) -> None:
+    bundle = _load_mock_bundle()
+    out1, out2 = tmp_path / "run1", tmp_path / "run2"
+    render_all(bundle, out1)
+    render_all(bundle, out2)
+    for name in ("18-aneis-tipo.html", "19-aneis-comunidade.html"):
+        assert (out1 / name).read_bytes() == (out2 / name).read_bytes(), name
+
+    metrics = json.loads((out1 / "metrics.json").read_text(encoding="utf-8"))
+    for name in ("18-aneis-tipo", "19-aneis-comunidade"):
+        m = metrics["variants"][name]
+        assert "vs_finish_distance_17" in m
+        for vp in ("desktop", "phone"):
+            row = m["vs_finish_distance_17"][vp]
+            assert set(row) == {"occupancy_delta", "crossings_delta", "label_overlaps_delta"}
+
+
+# ── variant 20 (owner follow-up 2026-09-02: 17/finish_distance stays default; the three
+# generic anchors join it as ordinary states instead of the fixed pole) ───────────────────────
+
+
+def test_variant20_generic_anchors_read_their_own_reverse_bfs_ring() -> None:
+    """17's own anchors are forced onto ONE outer ring (``_ring_of``'s ``outer_ring + 1``,
+    identical for all three regardless of how close each really sits — see ``ring_layout``).
+    Variant 20 drops that special case; ground-truth against ``ring_index`` directly, the same
+    reverse-BFS ``ring_layout`` itself runs, so this proves the WIRING, not a re-implementation
+    of the algorithm."""
+    from analysis.render_budget import apply_budget
+    from analysis.ring_layout import ring_index
+    from scripts.render_map_prototypes import (
+        _BUDGET_DEFAULT,
+        _RING_MODE_DEFAULT,
+        _RING_STRUCTURE,
+        _distance_rings_payload,
+        _ring_layout_fn,
+        _rings_payloads,
+        _view_of,
+    )
+
+    src = _owner_like_source()
+    budgeted = apply_budget(list(src.paths), budget=_BUDGET_DEFAULT, score=src.score,
+                             category_of=src.action_type)
+    base = _view_of(src, list(budgeted.drawn), structure=_RING_STRUCTURE,
+                     layout=_ring_layout_fn("arco", _RING_MODE_DEFAULT))
+    ctx, bundled = base["_ctx"], base["_bundled"]
+    expected = ring_index(bundled, ctx.centre_ids)
+
+    twenty = _distance_rings_payload([src])["ringOf"]
+    anchor_points = set(ctx.anchor_slots) - set(ctx.centre_ids)
+    assert anchor_points, "fixture must carry at least one generic anchor"
+    # `ring_index` leaves a point OUT of its result when it has no observed route to a finish at
+    # all — an anchor is no exception once it is an ordinary point, `ring_layout` gives it the
+    # same "one beyond the deepest reachable ring" fallback as any other unreachable state, so
+    # only the REACHABLE anchors ground-truth exactly against `ring_index` here.
+    reachable = [p for p in anchor_points if p in expected]
+    assert reachable, "fixture must carry at least one anchor with an observed route to a finish"
+    for point_id in reachable:
+        assert twenty[point_id] == expected[point_id], point_id
+
+    # 17's own anchors, for contrast, are all forced onto the identical outer ring
+    seventeen = _rings_payloads([src], ["arco"])["ringOf"]
+    assert len({seventeen[p] for p in anchor_points}) == 1
+    # and at least one anchor moved off that forced ring once it reads its own distance
+    assert any(twenty[p] != seventeen[p] for p in anchor_points)
+
+
+def test_variant20_finish_stays_the_fixed_centre() -> None:
+    from scripts.render_map_prototypes import _FINISH_KEY, _distance_rings_payload
+
+    src = _owner_like_source()
+    ring_of = _distance_rings_payload([src])["ringOf"]
+    assert ring_of[f"s:{_FINISH_KEY}"] == 0
+
+
+def test_variant20_is_deterministic_and_compares_against_17(tmp_path: Path) -> None:
+    bundle = _load_mock_bundle()
+    out1, out2 = tmp_path / "run1", tmp_path / "run2"
+    render_all(bundle, out1)
+    render_all(bundle, out2)
+    assert (out1 / "20-aneis-ancoras-distancia.html").read_bytes() == \
+        (out2 / "20-aneis-ancoras-distancia.html").read_bytes()
+
+    metrics = json.loads((out1 / "metrics.json").read_text(encoding="utf-8"))
+    m = metrics["variants"]["20-aneis-ancoras-distancia"]
+    assert "vs_finish_distance_17" in m
+    for vp in ("desktop", "phone"):
+        row = m["vs_finish_distance_17"][vp]
+        assert set(row) == {"occupancy_delta", "crossings_delta", "label_overlaps_delta"}

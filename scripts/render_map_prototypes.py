@@ -21,7 +21,7 @@ outgoing actor's live state (``CompiledChain.state_after_event``) to the incomin
 state. Rendered as a neutral dashed link (``fighter:'x'``), the same convention the public site
 already uses for contested links.
 
-Renders 17 self-contained HTMLs (a single patched ``site/graph.js`` copy shared by all of
+Renders 20 self-contained HTMLs (a single patched ``site/graph.js`` copy shared by all of
 them — see ``_patch_graph_js``) + an ``index.html`` + ``metrics.json``. Deterministic:
 dict/list order follows bundle read order (no unordered ``set`` in the render path),
 community detection sorts every input/tie-break (cicatriz #10, same convention as
@@ -94,6 +94,30 @@ is render, never topology, §13). **16** is the concentric-ring frame (``analysi
 **17** is 16 with the anchor placement and the fixed/free toggle live, plus the measured
 comparison. Full write-up + the numbers: ``docs/taxonomy/03_ARESTA_COMO_CAMINHO.md`` §15.
 
+**18/19 — pluggable ring semantics, DEMO ONLY (kanban lote 2026-09-02, Onda B3 item 1, no
+contract).** Same rings frame as 16/17 (sector rule, bipolar anchor placement, viewport bend) but
+the ring number itself is swapped for something other than finish-distance: **18** buckets by the
+state's own taxonomic TYPE (``_type_ring_of``), **19** by Louvain COMMUNITY
+(``analysis.constellations.detect``, ring order = the community's own mean finish-distance
+ascending, ``_community_ring_of``). Both mappings are decisions made and documented ON the page,
+not a fact — the owner picks by looking. The override (``_custom_ring_layout``) is deliberately
+LOCAL to this script: it reuses ``ring_layout`` for its scaffold and only repositions a point's
+radius, never a new parameter on ``analysis/ring_layout.py`` — that is Onda B3 item 2, gated on
+the owner's pick. Each page carries a toggle for the three generic anchors entering the ring by
+the same rule instead of the fixed bipolar pole, and a measured comparison against 17.
+
+**Owner's decision on 18/19 (2026-09-02): 17/finish_distance stays the DEFAULT ring, neither
+demo wins.** Follow-up question, same session — **20** (``_render_variant20``): 17's own ring
+(finish-distance) unchanged, but the three generic anchors drop the fixed
+``ANCHOR_PLACEMENTS`` pole and join the ring/sector/angular-separation computation as ORDINARY
+states, exactly the "assentam no anel resultante, com separação angular normal" the owner asked
+for. No new geometry at all — ``ring_layout`` already runs its reverse BFS over every point in
+the bundled graph, anchors included; ``_distance_ring_layout`` is a thin caller that passes an
+EMPTY ``anchor_slots`` (which is what pulls a point OUT of the fixed-pole special case) and
+folds the anchor's own slot into ``sector_of`` instead (top/bottom/neutral already being a
+valid sector). Finalização stays the fixed centre either way. Comparison against 17, same
+mechanism as 18/19.
+
 **14 — "Caminhos por sistema" (owner request, 2026-09-01):** 13's own paths with systems
 collapsible in the 11/12 model, ``_render_variant14``/``_paths_systems_view``. Same
 ``_detect_systems`` 11/12/13 already share; every system's members fold into one
@@ -143,11 +167,22 @@ from analysis.network_metrics import edge_arrow
 from analysis.path_bundling import BundledGraph, RenderPath, Segment, bundle_paths
 from analysis.path_metrics import PathMetrics, path_metrics
 from analysis.render_budget import BudgetResult, apply_budget, compress_actions
+
+# `_angle_of`/`_bend`/`_polar`/`_ring_radii` are ring_layout's own private geometry helpers —
+# reused directly for the 18/19 ring-override, same precedent as ring_layout.py itself reusing
+# flow_layout's private `_bubbles`/`_relax`/`_spread`.
 from analysis.ring_layout import (
     ANCHOR_MODES,
     ANCHOR_PLACEMENTS,
+    DEFAULT_RING_PLACEMENT,
+    SECTOR_CENTRE,
     RingLayout,
+    _angle_of,
+    _bend,
+    _polar,
+    _ring_radii,
     layout_quality,
+    ring_index,
     ring_layout,
 )
 from analysis.taxonomy_kind import load_inference_table, orientation_of, resolve_library_entry
@@ -4522,6 +4557,483 @@ def _rings_payloads(sources: list[PathSource], placements: list[str]) -> dict[st
     }
 
 
+# ── variants 18/19 — ring semantics is PLUGGABLE (Onda B3 item 1, plan lote 2026-09-02) ──
+#
+# The owner's request, demo-first: instead of a ring meaning "hops to a finish" (16/17), try
+# TYPE (18) and COMMUNITY (19). This is a DEMO override, not a new parameter on
+# ``analysis.ring_layout.ring_layout`` — a real ``ring_of`` contract is Onda B3 item 2, gated on
+# the owner picking a variant here. So the override lives entirely in this script: it calls
+# ``ring_layout`` for its scaffold (sector, bipolar anchor placement, viewport bend — identical
+# rules to 16/17) and only repositions the RADIUS of every non-anchor, non-centre point onto a
+# caller-supplied ring, exactly the "aplicado sobre o resultado de ring_layout repositioning
+# raios" the spec asks for.
+
+# Ring 0 stays reserved for the finish (the centre never moves). Documented mapping (shown on
+# the 18 page too): CONTROL is historically the position closest to actually finishing a fight,
+# GUARD is the contested one, everything else (generic anchors, and any stray action-typed state
+# — rare under D1, almost every action now lives on an edge) shares the outer ring.
+_TYPE_RING = {"control": 1, "guard": 2}
+_TYPE_RING_OTHER = 3
+
+
+def _type_ring_of(ctx: _LayoutCtx, src: PathSource) -> dict[str, int]:
+    """Variant 18's ring: the state's own taxonomic TYPE (``src.state[...]["cat"]``, the same
+    field variant 7's icon colouring already reads), bucketed by ``_TYPE_RING``.
+
+    A generic anchor is forced to the outer bucket regardless of its ``cat`` — measured, its
+    compiled state carries no real position type (``"start top"``/``"start bottom"``/
+    ``"start neutral"``), so ``_cat_of``'s own fallback reads it as ``"control"`` exactly like a
+    real dominant position, which would put an anchor and e.g. "Side Control" on the same ring
+    for a reason that has nothing to do with the taxonomy. ``ctx.anchor_slots`` is the same
+    membership test ``_view_of`` uses to single anchors out."""
+    out: dict[str, int] = {}
+    for pt in ctx.bundled.points:
+        if pt.state_key is None or pt.id in ctx.centre_ids:
+            continue
+        if pt.id in ctx.anchor_slots:
+            out[pt.id] = _TYPE_RING_OTHER
+            continue
+        row = src.state.get(pt.state_key) or {}
+        out[pt.id] = _TYPE_RING.get(str(row.get("cat") or ""), _TYPE_RING_OTHER)
+    return out
+
+
+def _community_ring_of(ctx: _LayoutCtx, src: PathSource) -> dict[str, int]:
+    """Variant 19's ring: Louvain community (``analysis.constellations.detect`` — the exact App-
+    parity detector variants 8/9 already run for "sistemas"), one ring PER community, ordered by
+    that community's own MEAN finish-distance (``ring_index``) ascending — the community closest
+    to finishing lands closest to the centre, without mixing a member's own distance into it."""
+    dist = ring_index(ctx.bundled, ctx.centre_ids)
+    ids = {pt.id for pt in ctx.bundled.points
+           if pt.state_key is not None and pt.id not in ctx.centre_ids}
+    weights: dict[tuple[str, str], int] = {}
+    for m in src.meta.values():
+        u, v = f"s:{m['source']}", f"s:{m['target']}"
+        if u == v or u not in ids or v not in ids:
+            continue
+        weights[(u, v)] = weights.get((u, v), 0) + int(m["count"])
+    dg: nx.DiGraph = nx.DiGraph()
+    dg.add_nodes_from(sorted(ids))
+    for (u, v), w in sorted(weights.items()):
+        dg.add_edge(u, v, weight=w)
+    # Same zero-edge guard `_detect_systems` already uses — an all-isolated graph is one
+    # singleton community per node, not a Louvain run (`constellation_detect` projects its OWN
+    # undirected graph internally, so `dg`'s directed edge count is the right thing to check).
+    if dg.number_of_edges() == 0:
+        communities = [[n] for n in sorted(dg.nodes)]
+    else:
+        communities = [sorted(c.members) for c in constellation_detect(dg).constellations]
+    ranked = sorted(
+        communities,
+        key=lambda members: (sum(dist.get(p, 0) for p in members) / max(len(members), 1),
+                              members[0] if members else ""),
+    )
+    return {p: idx for idx, members in enumerate(ranked, start=1) for p in members}
+
+
+def _propagate_ring(bundled: BundledGraph, base: Mapping[str, int],
+                     order: Mapping[str, int]) -> dict[str, int]:
+    """Fill in a ring for points ``base`` does not cover — junctions (branch/merge scaffolding)
+    have no type/community of their own, so they inherit the ring of whichever neighbour is
+    already resolved. Same propagation ``ring_layout._sectors`` uses for orientation,
+    generalised to any per-point integer. ``order`` (the finish-distance ring) only decides
+    RESOLUTION ORDER, never the value that gets assigned."""
+    neigh: dict[str, list[str]] = {}
+    for seg in bundled.segments:
+        neigh.setdefault(seg.from_point, []).append(seg.to_point)
+        neigh.setdefault(seg.to_point, []).append(seg.from_point)
+    out = dict(base)
+    pending = [p.id for p in bundled.points if p.id not in out]
+    for point in sorted(pending, key=lambda p: (order.get(p, 10**6), p)):
+        candidates = sorted((n for n in neigh.get(point, ()) if n in out),
+                             key=lambda n: (order.get(n, 10**6), n))
+        out[point] = out[candidates[0]] if candidates else 1
+    return out
+
+
+def _custom_ring_layout(ctx: _LayoutCtx, bundled: BundledGraph, ring_of_state: Mapping[str, int],
+                         placement: str, *, assign_anchors: bool,
+                         aspect: float | None) -> RingLayout:
+    """The override itself. Reuses ``ring_layout`` for its scaffold (sector, bipolar/arco/tercos
+    anchor placement, bend) and repositions every non-anchor, non-centre point's RADIUS onto
+    ``ring_of_state`` while keeping the angle the scaffold already picked — sector + neighbour
+    barycentre are orthogonal to which ring numbering is used, so nothing about the angle rule
+    changes.
+
+    ``assign_anchors`` is the owner's requested toggle: ``False`` keeps the product's fixed
+    bipolar pole (``seed.pos`` untouched for the three generic anchors); ``True`` lets them enter
+    the ring/sector structure by the SAME classification as every other state, at the sector's
+    own centre line (their own barycentre angle does not exist — they were never in the sector
+    loop that computes one — a fixed sector-centre angle is the honest simplification).
+
+    ponytail: local override, mode is always ``fixo`` (no spread/relax) — the plan's demo scope
+    is the RING criterion, not a second pass over the free-anchor modes 16/17 already cover.
+    """
+    anchor_slots = {p: s for p, s in ctx.anchor_slots.items() if s != "finish"}
+    seed = ring_layout(bundled, centre_ids=ctx.centre_ids, anchor_slots=anchor_slots,
+                        sector_of=ctx.sector_of, support=ctx.support, label_len=ctx.label_len,
+                        placement=placement, mode="fixo", target_aspect=None)
+    centres = set(ctx.centre_ids)
+    ring = _propagate_ring(bundled, dict(ring_of_state), order=seed.ring)
+    for p in centres:
+        ring[p] = 0
+    outer = max((k for p, k in ring.items() if p not in centres), default=1)
+    fixed_ids: set[str] = set() if assign_anchors else set(anchor_slots)
+    members: dict[int, list[str]] = {}
+    for p, k in ring.items():
+        if k == 0 or p in centres or p in fixed_ids:
+            continue
+        members.setdefault(k, []).append(p)
+    radii = _ring_radii(members, seed.sector, ctx.label_len)
+    pos = dict(seed.pos)
+    for p in pos:
+        if p in centres or p in fixed_ids:
+            continue
+        angle = (SECTOR_CENTRE[seed.sector.get(p, "neutral")] if p in anchor_slots
+                  else _angle_of(seed.pos[p]))
+        pos[p] = _polar(radii.get(ring.get(p, outer), 0.0), angle)
+    bend = (1.0, 1.0)
+    centre = pos[sorted(centres)[0]] if centres else (0.0, 0.0)
+    if aspect is not None:
+        bend = _bend(pos, centre, aspect)
+    return RingLayout(pos=pos, ring=ring, radius=radii, sector=seed.sector,
+                       unreachable=seed.unreachable, anchor_seed=seed.anchor_seed,
+                       bend=bend, centre=centre)
+
+
+def _custom_ring_geometry(ctx: _LayoutCtx, bundled: BundledGraph, ring_of_state: Mapping[str, int],
+                           placement: str, assign_anchors: bool) -> dict[str, Any]:
+    """Same shape ``_ring_geometry`` returns (16/17), for the ring override."""
+    seed = _custom_ring_layout(ctx, bundled, ring_of_state, placement,
+                                assign_anchors=assign_anchors, aspect=None)
+    out: dict[str, Any] = {"ringCounts": {}, "unreachable": len(seed.unreachable)}
+    for point_id, k in sorted(seed.ring.items()):
+        if point_id not in seed.anchor_seed:
+            out["ringCounts"][str(k)] = out["ringCounts"].get(str(k), 0) + 1
+    for name, (vw, vh) in sorted(_RING_VIEWPORTS.items()):
+        laid = _custom_ring_layout(ctx, bundled, ring_of_state, placement,
+                                    assign_anchors=assign_anchors, aspect=vw / vh)
+        kx, ky = laid.bend
+        centre = laid.pos.get(ctx.centre_ids[0], (0.0, 0.0)) if ctx.centre_ids else (0.0, 0.0)
+        out[name] = {
+            "pos": {p: [round(x, 1), round(y, 1)] for p, (x, y) in sorted(laid.pos.items())},
+            "centre": [round(centre[0], 1), round(centre[1], 1)],
+            "rings": [{"rx": round(laid.radius[k] * kx, 1), "ry": round(laid.radius[k] * ky, 1),
+                        "ring": k}
+                       for k in sorted(laid.radius) if laid.radius[k] > 0],
+            "anchorAt": {p: [round(laid.pos[p][0], 1), round(laid.pos[p][1], 1)]
+                          for p in sorted(laid.anchor_seed)},
+            "anchorDrift": {p: round(math.dist(laid.anchor_seed[p], laid.pos[p]), 1)
+                             for p in sorted(laid.anchor_seed)},
+            "quality": layout_quality(laid.pos, bundled, ctx.label_len, (vw, vh)),
+        }
+    out["anchorDrift"] = out["desktop"]["anchorDrift"]
+    return out
+
+
+_CUSTOM_RING_MODES = [{"id": "fixo", "label": "Âncoras fixas (polos)"},
+                       {"id": "atribuida", "label": "Âncoras atribuídas (mesma regra)"}]
+
+# The PRODUCT frame (plan FASE 5e / spec for this lote: "âncoras bipolares fixas como o
+# produto"), NOT `_RING_PLACEMENT_DEFAULT` above — that constant is 16's own demo default
+# ("arco"), a different page's choice. 18/19 read `ring_layout.DEFAULT_RING_PLACEMENT` directly
+# so this can never silently drift from what `ring_layout.py` calls the product's own default.
+_RING18_19_PLACEMENT = DEFAULT_RING_PLACEMENT
+
+
+def _custom_rings_payloads(sources: list[PathSource], ring_kind: str) -> dict[str, Any]:
+    """Same shape ``_rings_payloads`` returns (16/17), ring from ``ring_kind`` ('type'|
+    'community') instead of finish-distance. Placement is always the product default
+    (bipolar) — the plan's demo scope is the ring criterion, not the placement comparison 17
+    already covers."""
+    pages: dict[str, Any] = {}
+    layouts: dict[str, Any] = {}
+    meta: dict[str, Any] = {}
+    ring_of: dict[str, int] = {}
+    placement = _RING18_19_PLACEMENT
+    for src in sources:
+        budgeted = apply_budget(list(src.paths), budget=_BUDGET_DEFAULT, score=src.score,
+                                 category_of=src.action_type)
+        fold_labels = {f"$fold:{f.path.path_id}": f.label for f in budgeted.folds}
+        base = _view_of(src, list(budgeted.drawn), structure=_RING_STRUCTURE,
+                         layout=_ring_layout_fn(placement, _RING_MODE_DEFAULT),
+                         extra_labels=fold_labels)
+        base["foldMeta"] = {
+            f.path.path_id: {"label": f.label, "kind": f.kind, "members": list(f.members),
+                              "count": f.path.count}
+            for f in budgeted.folds
+        }
+        base["stats"]["occurrences"] = len(src.paths)
+        base["stats"]["folded"] = len(budgeted.folded)
+        ctx: _LayoutCtx = base["_ctx"]
+        bundled = base["_bundled"]
+        for key in ("_bundled", "_ctx", "_pos"):
+            base.pop(key)
+        base["sector"] = {p: s for p, s in sorted(ctx.sector_of.items())}
+        pages[src.id] = base
+        meta[src.id] = {"paths": src.meta, "label": src.label, "note": src.note,
+                         "unresolved": src.unresolved}
+        ring_of_state = (_type_ring_of(ctx, src) if ring_kind == "type"
+                          else _community_ring_of(ctx, src))
+        for assign in (False, True):
+            mode = "atribuida" if assign else "fixo"
+            geom = _custom_ring_geometry(ctx, bundled, ring_of_state, placement, assign)
+            laid = _custom_ring_layout(ctx, bundled, ring_of_state, placement,
+                                        assign_anchors=assign, aspect=None)
+            ring_of.update(laid.ring)
+            layouts[f"{src.id}|{placement}|{mode}"] = geom
+    return {
+        "pages": pages, "layouts": layouts, "sourceMeta": meta, "ringOf": ring_of,
+        "sources": [{"id": s.id, "label": s.label} for s in sources],
+        "placements": [{"id": placement, "label": ANCHOR_PLACEMENTS[placement]["label"]}],
+        "modes": _CUSTOM_RING_MODES,
+        "default": f"{sources[0].id}|{placement}|fixo",
+    }
+
+
+def _ring_compare_html(out_q: Mapping[str, Mapping[str, Any]],
+                        base_q: Mapping[str, Mapping[str, Any]]) -> str:
+    """The owner's requested comparison against 17 (finish-distance), both viewports, reusing
+    the ``table.cmp`` styling 17's own comparison already defines in ``_SHELL_CSS``."""
+    rows = "".join(
+        f"<tr><td>{vp}</td><td>{out_q[vp]['occupancy']}%</td><td>{base_q[vp]['occupancy']}%</td>"
+        f"<td>{out_q[vp]['crossings']}</td><td>{base_q[vp]['crossings']}</td>"
+        f"<td>{out_q[vp]['labelOverlaps']}</td><td>{base_q[vp]['labelOverlaps']}</td></tr>"
+        for vp in ("desktop", "phone")
+    )
+    return (
+        '<div class="sechead">vs. distância de finalização (17)</div>'
+        '<table class="cmp"><tr><th>viewport</th><th>ocup. (aqui)</th><th>ocup. (17)</th>'
+        "<th>cruz. (aqui)</th><th>cruz. (17)</th><th>sobrep. (aqui)</th><th>sobrep. (17)</th></tr>"
+        f"{rows}</table>"
+    )
+
+
+def _ring_frame_delta(out_q: Mapping[str, Mapping[str, Any]],
+                       base_q: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
+    return {
+        vp: {"occupancy_delta": round(out_q[vp]["occupancy"] - base_q[vp]["occupancy"], 1),
+              "crossings_delta": out_q[vp]["crossings"] - base_q[vp]["crossings"],
+              "label_overlaps_delta": out_q[vp]["labelOverlaps"] - base_q[vp]["labelOverlaps"]}
+        for vp in ("desktop", "phone")
+    }
+
+
+_RING18_LEGEND = """<div class="legend"><b>O que um anel significa aqui (por TIPO).</b> Em vez
+da proximidade de finalização (16/17), o raio vem do TIPO taxonômico do próprio estado — o mesmo
+campo <span class="n">cat</span> que já colore o ícone da variante 7. Mapeamento (decisão desta
+demo, documentada aqui porque é uma escolha, não um fato): anel 1 = <b>control</b> (posição
+dominante, historicamente a mais perto de terminar uma luta), anel 2 = <b>guard</b> (posição
+disputada), anel 3 = tudo o resto — inclui as três âncoras genéricas (forçadas aqui: o estado
+compilado delas não carrega um tipo de posição real, então o fallback de <span class="n">cat</span>
+as leria como <span class="n">control</span> pelo motivo errado — nunca disputaram nem
+dominaram nada) e qualquer estado raro de tipo ação (sob D1 quase toda ação já virou aresta,
+então este anel costuma segurar só as âncoras). A Finalização continua no CENTRO. O ângulo (setor
+de orientação), a colocação bipolar das âncoras e a dobra por viewport são EXATAMENTE os mesmos
+de 16/17 — só o critério do raio muda.
+<br/><br/><b>Âncoras atribuídas</b> (toggle): em vez do polo fixo, as três âncoras entram no anel
+3 (a mesma classificação forçada acima) e se posicionam na linha de centro do próprio setor — não
+têm vizinho já posicionado para calcular um baricentro próprio, então usam o ângulo do setor
+diretamente.</div>"""
+
+_RING19_LEGEND = """<div class="legend"><b>O que um anel significa aqui (por COMUNIDADE).</b> As
+comunidades vêm do MESMO detector Louvain que as variantes 8/9 já usam para "sistemas"
+(<span class="n">analysis.constellations.detect</span>, resolução 1.0, semeado — paridade com o
+App), rodado sobre o grafo de estados desta fonte (peso = ocorrências). Cada comunidade vira UM
+anel; a ORDEM dos anéis é a distância média de finalização (<span class="n">ring_index</span>)
+dos membros da comunidade, crescente — a comunidade mais perto de terminar, em média, fica mais
+perto do centro, sem misturar a distância individual de cada membro (só a média decide o anel, a
+posição angular dentro do anel continua sendo o setor de orientação de cada estado). A
+Finalização continua no CENTRO, fora de qualquer comunidade. O ângulo, a régua de setor e a
+colocação bipolar das âncoras seguem exatamente 16/17.
+<br/><br/><b>Âncoras atribuídas</b> (toggle): as três âncoras entram na comunidade que a
+detecção já lhes deu (elas participam do grafo de estados normalmente) em vez do polo fixo, na
+linha de centro do próprio setor.</div>"""
+
+
+_PAGE_RING_CUSTOM = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/><title>__TITLE__</title>
+<style>__CSS__</style></head><body>
+<div id="canvas"><canvas id="cv"></canvas></div>
+<div id="side">
+<h1>__TITLE__</h1><div class="muted" id="sub"></div>
+
+<div class="sechead">Fonte</div><div class="pills" id="sources"></div>
+<div class="muted" id="srcNote"></div>
+<div class="sechead">Âncoras genéricas</div><div class="pills" id="modes"></div>
+<div class="sechead">Rótulos das ações</div><div class="pills" id="labels"></div>
+
+<div class="sechead">Medido neste desenho</div>
+<div class="card" id="ringStats"></div>
+
+__EXTRA__
+
+<div class="sechead">Seleção</div>
+<div id="sel"></div>
+
+<div class="sechead">Caminhos mais frequentes</div><div id="freq"></div>
+
+__LEGEND__
+</div>
+<script src="graph.js"></script>
+<script>__RINGS_JS__</script></body></html>"""
+
+
+def _render_custom_ring_variant(out: Path, filename: str, title: str, legend: str,
+                                 sources: list[PathSource], ring_kind: str,
+                                 baseline_quality: Mapping[str, Mapping[str, Any]]
+                                 ) -> dict[str, Any]:
+    payload = _custom_rings_payloads(sources, ring_kind)
+    key = f"{sources[0].id}|{_RING18_19_PLACEMENT}|fixo"
+    out_q = {vp: payload["layouts"][key][vp]["quality"] for vp in ("desktop", "phone")}
+    base_key = f"{sources[0].id}|{_RING18_19_PLACEMENT}|{_RING_MODE_DEFAULT}"
+    base_q = dict(baseline_quality.get(base_key, out_q))
+    result = _render_rings_page(out, filename, title, _PAGE_RING_CUSTOM, payload,
+                                 _RING18_19_PLACEMENT, legend=legend,
+                                 extra_html=_ring_compare_html(out_q, base_q))
+    result["vs_finish_distance_17"] = _ring_frame_delta(out_q, base_q)
+    return result
+
+
+def _render_variant18(out: Path, sources: list[PathSource],
+                       baseline_quality: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
+    return _render_custom_ring_variant(out, "18-aneis-tipo.html", "18 — Anéis por tipo",
+                                        _RING18_LEGEND, sources, "type", baseline_quality)
+
+
+def _render_variant19(out: Path, sources: list[PathSource],
+                       baseline_quality: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
+    return _render_custom_ring_variant(out, "19-aneis-comunidade.html",
+                                        "19 — Anéis por comunidade", _RING19_LEGEND, sources,
+                                        "community", baseline_quality)
+
+
+# ── variant 20 — generic anchors join finish_distance as ordinary states (owner follow-up,
+# 2026-09-02, after seeing 18/19: 17/finish_distance stays the DEFAULT, this is the next
+# question on TOP of it) ────────────────────────────────────────────────────────────────────
+#
+# 17 (and 18/19) special-case the three generic anchors OUT of the ring computation and place
+# them on a fixed pole (`ANCHOR_PLACEMENTS`). The ask here is the opposite of a new ring
+# CRITERION: keep finish_distance (17's own ring), but let the three anchors compete for a ring
+# and an angle by the exact SAME rule as every other state — `ring_layout`'s reverse BFS already
+# runs over the WHOLE bundled graph (anchors included, they are real points with real segments),
+# it is only the caller that throws that number away for them. So the entire change is which
+# arguments reach the untouched `ring_layout`: an EMPTY `anchor_slots` is what keeps a point OUT
+# of the fixed-pole special case, and an anchor's own slot (top/bottom/neutral) already IS a
+# valid `sector_of` value — the exact axis every other state's angle already reads. No new
+# geometry, no override of `ring_layout`'s own angle/radius/`_separate_on_ring` logic — that is
+# the "separação angular normal" the ask names, and it is what the untouched function already
+# does for a state that shares a ring with others in its sector.
+def _distance_ring_layout(ctx: _LayoutCtx, bundled: BundledGraph,
+                           aspect: float | None) -> RingLayout:
+    """Variant 20's layout: `ring_layout` itself, called with the three generic anchors folded
+    into `sector_of` instead of `anchor_slots` — they become ordinary inner points. Mode is
+    always `fixo` ("assentam no anel resultante": glued to a ring, no free/spread simulation —
+    the same convention 16/17's own fixed mode already uses; whether the SIMULATION may move a
+    point is a different, already-answered question). `placement` is passed but inert: with
+    `anchor_slots={}` the `ANCHOR_PLACEMENTS` loop in `ring_layout` has nothing to place."""
+    generic = {p: s for p, s in ctx.anchor_slots.items() if s != "finish"}
+    return ring_layout(bundled, centre_ids=ctx.centre_ids, anchor_slots={},
+                        sector_of={**ctx.sector_of, **generic}, support=ctx.support,
+                        label_len=ctx.label_len, placement=DEFAULT_RING_PLACEMENT, mode="fixo",
+                        target_aspect=aspect)
+
+
+def _distance_ring_geometry(ctx: _LayoutCtx, bundled: BundledGraph) -> dict[str, Any]:
+    """Same shape `_ring_geometry`/`_custom_ring_geometry` return. No `anchorAt` panel — there is
+    no separate "seed pole" any more to compare a settled position against; `anchorDrift` stays
+    present (empty) because `_RINGS_JS`'s stats card reads it unconditionally."""
+    seed = _distance_ring_layout(ctx, bundled, aspect=None)
+    out: dict[str, Any] = {"ringCounts": {}, "unreachable": len(seed.unreachable)}
+    for point_id, k in sorted(seed.ring.items()):
+        out["ringCounts"][str(k)] = out["ringCounts"].get(str(k), 0) + 1
+    for name, (vw, vh) in sorted(_RING_VIEWPORTS.items()):
+        laid = _distance_ring_layout(ctx, bundled, aspect=vw / vh)
+        kx, ky = laid.bend
+        centre = laid.pos.get(ctx.centre_ids[0], (0.0, 0.0)) if ctx.centre_ids else (0.0, 0.0)
+        out[name] = {
+            "pos": {p: [round(x, 1), round(y, 1)] for p, (x, y) in sorted(laid.pos.items())},
+            "centre": [round(centre[0], 1), round(centre[1], 1)],
+            "rings": [{"rx": round(laid.radius[k] * kx, 1), "ry": round(laid.radius[k] * ky, 1),
+                        "ring": k}
+                       for k in sorted(laid.radius) if laid.radius[k] > 0],
+            "anchorDrift": {},
+            "quality": layout_quality(laid.pos, bundled, ctx.label_len, (vw, vh)),
+        }
+    out["anchorDrift"] = out["desktop"]["anchorDrift"]
+    return out
+
+
+_RING20_LEGEND = """<div class="legend"><b>O que muda aqui.</b> O anel continua sendo a
+distância de finalização — o mesmo critério de 17 — mas as três âncoras genéricas (Por Cima,
+Neutro, Por Baixo) deixam de ter um polo fixo (arco/terços/bipolar) e entram no cálculo como um
+estado normal: a mesma busca reversa que dá o anel de qualquer posição já roda sobre elas (são
+pontos reais do grafo, com arestas reais), então cada âncora assenta no anel da sua PRÓPRIA
+distância até a Finalização, no setor da sua própria orientação (Por Cima = topo, Por Baixo =
+baixo, Neutro = meio), com a MESMA separação angular por baricentro dos vizinhos que qualquer
+outra posição do anel usa — nenhuma regra nova, nenhum polo. A Finalização continua a âncora
+central fixa; só as três genéricas se movem.</div>"""
+
+
+def _distance_rings_payload(sources: list[PathSource]) -> dict[str, Any]:
+    """Same shape `_custom_rings_payloads` returns, one deterministic frame per source (no
+    placement/mode axis — the ring rule leaves nothing left to choose)."""
+    pages: dict[str, Any] = {}
+    layouts: dict[str, Any] = {}
+    meta: dict[str, Any] = {}
+    ring_of: dict[str, int] = {}
+    placement = DEFAULT_RING_PLACEMENT
+    mode = "fixo"
+    for src in sources:
+        budgeted = apply_budget(list(src.paths), budget=_BUDGET_DEFAULT, score=src.score,
+                                 category_of=src.action_type)
+        fold_labels = {f"$fold:{f.path.path_id}": f.label for f in budgeted.folds}
+        base = _view_of(src, list(budgeted.drawn), structure=_RING_STRUCTURE,
+                         layout=_ring_layout_fn(placement, _RING_MODE_DEFAULT),
+                         extra_labels=fold_labels)
+        base["foldMeta"] = {
+            f.path.path_id: {"label": f.label, "kind": f.kind, "members": list(f.members),
+                              "count": f.path.count}
+            for f in budgeted.folds
+        }
+        base["stats"]["occurrences"] = len(src.paths)
+        base["stats"]["folded"] = len(budgeted.folded)
+        ctx: _LayoutCtx = base["_ctx"]
+        bundled = base["_bundled"]
+        for key in ("_bundled", "_ctx", "_pos"):
+            base.pop(key)
+        base["sector"] = {p: s for p, s in sorted(ctx.sector_of.items())}
+        pages[src.id] = base
+        meta[src.id] = {"paths": src.meta, "label": src.label, "note": src.note,
+                         "unresolved": src.unresolved}
+        geom = _distance_ring_geometry(ctx, bundled)
+        laid = _distance_ring_layout(ctx, bundled, aspect=None)
+        ring_of.update(laid.ring)
+        layouts[f"{src.id}|{placement}|{mode}"] = geom
+    return {
+        "pages": pages, "layouts": layouts, "sourceMeta": meta, "ringOf": ring_of,
+        "sources": [{"id": s.id, "label": s.label} for s in sources],
+        "placements": [{"id": placement, "label": ANCHOR_PLACEMENTS[placement]["label"]}],
+        "modes": [{"id": mode, "label": "Distância de finalização (igual às demais posições)"}],
+        "default": f"{sources[0].id}|{placement}|{mode}",
+    }
+
+
+def _render_variant20(out: Path, sources: list[PathSource],
+                       baseline_quality: Mapping[str, Mapping[str, Any]]) -> dict[str, Any]:
+    payload = _distance_rings_payload(sources)
+    key = payload["default"]
+    out_q = {vp: payload["layouts"][key][vp]["quality"] for vp in ("desktop", "phone")}
+    base_key = f"{sources[0].id}|{DEFAULT_RING_PLACEMENT}|{_RING_MODE_DEFAULT}"
+    base_q = dict(baseline_quality.get(base_key, out_q))
+    result = _render_rings_page(out, "20-aneis-ancoras-distancia.html",
+                                 "20 — Âncoras na distância de finalização", _PAGE_RING_CUSTOM,
+                                 payload, DEFAULT_RING_PLACEMENT, legend=_RING20_LEGEND,
+                                 extra_html=_ring_compare_html(out_q, base_q))
+    result["vs_finish_distance_17"] = _ring_frame_delta(out_q, base_q)
+    return result
+
+
 # Shared shell for the three 2026-09-01 pages. Cloned from `_PAGE13` rather than parametrised —
 # module convention (no `.format()`-shared JS body across variants); only the CSS is identical.
 _SHELL_CSS = """
@@ -5182,7 +5694,8 @@ renderCompare();
 
 
 def _render_rings_page(out: Path, filename: str, title: str, template: str,
-                        payload: dict[str, Any], placement: str) -> dict[str, Any]:
+                        payload: dict[str, Any], placement: str, *,
+                        legend: str = _RING_LEGEND, extra_html: str = "") -> dict[str, Any]:
     default_source, default_placement, default_mode = payload["default"].split("|")
     body = (
         _RINGS_JS
@@ -5199,7 +5712,11 @@ def _render_rings_page(out: Path, filename: str, title: str, template: str,
         .replace("__DEFAULT_PLACEMENT__", json.dumps(default_placement))
         .replace("__DEFAULT_MODE__", json.dumps(default_mode))
     )
-    html = (template.replace("__CSS__", _SHELL_CSS).replace("__LEGEND__", _RING_LEGEND)
+    # `__EXTRA__` is absent from 16/17's own templates (`_PAGE16`/`_PAGE17`), so this `.replace`
+    # is a true no-op there — the 18/19 override is the only caller that passes a non-default
+    # `legend`/`extra_html`, and 16/17's rendered bytes never move.
+    html = (template.replace("__CSS__", _SHELL_CSS).replace("__LEGEND__", legend)
+             .replace("__EXTRA__", extra_html)
              .replace("__RINGS_JS__", body).replace("__TITLE__", title))
     (out / filename).write_text(html, encoding="utf-8")
     src_id = payload["sources"][0]["id"]
@@ -5259,6 +5776,9 @@ _VARIANT_DESCRIPTIONS = [
     ("16-aneis.html", "concentric rings: Finish at the CENTRE, radius = hops to a finish, angle = the state's own orientation sector, the three generic anchors OUTSIDE on an arc; toggle for anchors fixed vs. anchors in the simulation"),
     ("17-aneis-ancoras.html", "16's rings with the anchor placement live — external arc vs. thirds vs. Neutral as a second centre — plus the measured comparison (occupancy / crossings / overlapping names / anchor drift) at both viewports"),
     ("14-caminhos-sistemas.html", "13's own paths, systems collapsible in place: every detected system folds into one node (bridges/anchors/opponent stay first-class), a crossing path keeps its path_id and draws through the system's own node; click a system (node or pill) to expand it with 13's flow layout restricted to its subgraph + 11/12's own boundary stubs"),
+    ("18-aneis-tipo.html", "DEMO (Onda B3 item 1, no contract): 16/17's ring frame with the ring PLUGGED to the state's own taxonomic type (control=1, guard=2, everything else incl. the generic anchors=3, documented on the page) instead of finish-distance; toggle for the anchors entering the ring by the same rule instead of the fixed pole; comparison panel against 17"),
+    ("19-aneis-comunidade.html", "DEMO (Onda B3 item 1, no contract): 16/17's ring frame with the ring PLUGGED to Louvain community (analysis.constellations.detect, App parity), ring order = community's own mean finish-distance ascending; same anchor toggle as 18; comparison panel against 17"),
+    ("20-aneis-ancoras-distancia.html", "DEMO (owner follow-up 2026-09-02, after 18/19: 17/finish_distance stays the DEFAULT ring): 17's own ring (finish-distance) unchanged, but the three generic anchors drop the fixed pole and enter the SAME ring/sector/angular-separation computation as every other state — no new geometry, `ring_layout` called with an empty `anchor_slots`; comparison panel against 17"),
 ]
 
 _INDEX_PAGE = """<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"/>
@@ -6049,6 +6569,17 @@ def render_all(bundle: dict[str, Any], out: Path,
     metrics["variants"]["15-orcamento"] = _render_variant15(out, sources)
     metrics["variants"]["16-aneis"] = _render_variant16(out, sources)
     metrics["variants"]["17-aneis-ancoras"] = _render_variant17(out, sources)
+
+    # 18/19 — Onda B3 item 1 (lote 2026-09-02): DEMO, no contract. Same rings frame, ring
+    # PLUGGED to type/community instead of finish-distance; compared against 17's own quality.
+    quality_17 = metrics["variants"]["17-aneis-ancoras"]["quality"]
+    metrics["variants"]["18-aneis-tipo"] = _render_variant18(out, sources, quality_17)
+    metrics["variants"]["19-aneis-comunidade"] = _render_variant19(out, sources, quality_17)
+
+    # 20 — owner follow-up 2026-09-02 (after seeing 18/19: 17/finish_distance stays the
+    # DEFAULT ring). 17's own ring unchanged; the three generic anchors join it as ordinary
+    # states instead of the fixed pole. Compared against 17's own quality, same as 18/19.
+    metrics["variants"]["20-aneis-ancoras-distancia"] = _render_variant20(out, sources, quality_17)
 
     metrics["corpus_inference_rate"] = {
         "states_total": agg.raw_states_total,

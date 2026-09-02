@@ -53,6 +53,27 @@ _SHOTS: list[tuple[str, str, tuple[int, int], list[tuple[str, str]]]] = [
      [("sources", "#1 Gordon Ryan"), ("placements", "Terços (topo / esquerda / baixo)")]),
     ("17-aneis-ancoras.html", "17-dono-tercos-phone", (390, 840),
      [("placements", "Terços (topo / esquerda / baixo)")]),
+    # 18/19 — Onda B3 item 1 (pluggable ring semantics, DEMO): dono/corpus/Gordon at both
+    # viewports, plus the "âncoras atribuídas" toggle, mirroring 16/17's own shot density.
+    ("18-aneis-tipo.html", "18-dono-fixo", (1280, 800), []),
+    ("18-aneis-tipo.html", "18-dono-fixo-phone", (390, 840), []),
+    ("18-aneis-tipo.html", "18-dono-atribuida", (1280, 800),
+     [("modes", "Âncoras atribuídas (mesma regra)")]),
+    ("18-aneis-tipo.html", "18-corpus-fixo", (1280, 800), [("sources", "Corpus")]),
+    ("18-aneis-tipo.html", "18-gordon-fixo", (1280, 800), [("sources", "#1 Gordon Ryan")]),
+    ("19-aneis-comunidade.html", "19-dono-fixo", (1280, 800), []),
+    ("19-aneis-comunidade.html", "19-dono-fixo-phone", (390, 840), []),
+    ("19-aneis-comunidade.html", "19-dono-atribuida", (1280, 800),
+     [("modes", "Âncoras atribuídas (mesma regra)")]),
+    ("19-aneis-comunidade.html", "19-corpus-fixo", (1280, 800), [("sources", "Corpus")]),
+    ("19-aneis-comunidade.html", "19-gordon-fixo", (1280, 800), [("sources", "#1 Gordon Ryan")]),
+    # 20 — owner follow-up 2026-09-02: 17's own ring, anchors join finish_distance as ordinary
+    # states. No toggle (the ring rule leaves nothing left to choose) — dono/corpus/Gordon at
+    # both viewports, same shot density as 18/19's fixed-mode shots.
+    ("20-aneis-ancoras-distancia.html", "20-dono", (1280, 800), []),
+    ("20-aneis-ancoras-distancia.html", "20-dono-phone", (390, 840), []),
+    ("20-aneis-ancoras-distancia.html", "20-corpus", (1280, 800), [("sources", "Corpus")]),
+    ("20-aneis-ancoras-distancia.html", "20-gordon", (1280, 800), [("sources", "#1 Gordon Ryan")]),
 ]
 
 
