@@ -319,7 +319,9 @@ class GroupMember(Base):
 
 class GroupInvite(Base):
     """Its own table, not a column on ``groups``, so a code can expire/rotate without
-    touching the group or its members."""
+    touching the group or its members. ``role`` (alembic 0052) is what ``join_group()``
+    grants the redeemer — 'student' by default, 'professor' for an academy-minted code;
+    minting stays owner-only (``group_invites_owner_all``)."""
 
     __tablename__ = "group_invites"
 
@@ -330,8 +332,13 @@ class GroupInvite(Base):
     created_by: Mapped[str] = mapped_column(
         UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
     )
+    role: Mapped[str] = mapped_column(Text, nullable=False, server_default="student")
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    __table_args__ = (
+        CheckConstraint("role in ('student','professor')", name="ck_group_invites_role"),
+    )
 
 
 class ClassSession(Base):

@@ -66,6 +66,47 @@ def test_create_group_makes_owner_the_first_member(session):
     assert member.role == "owner"
 
 
+def test_mint_invite_defaults_to_student_role(session):
+    from db.models import Group, Profile
+    from scripts.group_admin import mint_invite
+
+    session.add(Profile(id=PROF_ID, full_name="Professor"))
+    group = Group(id="33333333-3333-3333-3333-333333333333", owner_id=PROF_ID, name="GB")
+    session.add(group)
+    session.commit()
+
+    invite = mint_invite(session, group.id, PROF_ID)
+
+    assert invite.role == "student"
+
+
+def test_mint_invite_can_grant_professor(session):
+    from db.models import Group, Profile
+    from scripts.group_admin import mint_invite
+
+    session.add(Profile(id=PROF_ID, full_name="Professor"))
+    group = Group(id="33333333-3333-3333-3333-333333333333", owner_id=PROF_ID, name="GB")
+    session.add(group)
+    session.commit()
+
+    invite = mint_invite(session, group.id, PROF_ID, role="professor")
+
+    assert invite.role == "professor"
+
+
+def test_mint_invite_rejects_unknown_role(session):
+    from db.models import Group, Profile
+    from scripts.group_admin import mint_invite
+
+    session.add(Profile(id=PROF_ID, full_name="Professor"))
+    group = Group(id="33333333-3333-3333-3333-333333333333", owner_id=PROF_ID, name="GB")
+    session.add(group)
+    session.commit()
+
+    with pytest.raises(ValueError):
+        mint_invite(session, group.id, PROF_ID, role="owner")
+
+
 def test_roster_lists_every_member_and_role(session):
     from db.models import Group, GroupMember, Profile
     from scripts.group_admin import roster
