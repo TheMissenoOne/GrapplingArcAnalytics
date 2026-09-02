@@ -42,7 +42,12 @@ from analysis.athlete_systems import (
     from_career_graphview,
     profile_to_dict,
 )
-from analysis.corpus_paths import OCEAN_FOLD_GROUP_BUDGET, aggregate_bouts, path_payload
+from analysis.corpus_paths import (
+    OCEAN_FOLD_GROUP_BUDGET,
+    aggregate_bouts,
+    mini_path_graph,
+    path_payload,
+)
 from analysis.counter_moves import counter_moves
 from analysis.defense_rate import defense_profile
 from analysis.event_profile import build_event_profile, event_names
@@ -645,6 +650,9 @@ def build_breakdowns(
             "b": {"name": b.name, "code": _initials(b.name), "record": "",
                   "style": _archetype(b, session) or "—"},
             "graph": gv,
+            # Card-thumbnail cut of the SAME ring payload the breakdown page draws (§17) —
+            # computed post-cache-hit from `bd["path_graph"]`, so no BREAKDOWN_VERSION bump.
+            "pathGraph": mini_path_graph(bd["path_graph"]),
         })
         full.append((slug, bd))
         score = (a.rank_elo or 0.0) + (b.rank_elo or 0.0)
@@ -660,6 +668,9 @@ def build_breakdowns(
                 "b": {"name": b.name, "code": _initials(b.name),
                       "style": _archetype(b, session) or "—"},
                 "headline": _headline(bd), "stats": _featured_stats(bd),
+                # Home hero graph (index.html) — same mini cut just appended to `rows`, not a
+                # second reduction.
+                "pathGraph": rows[-1]["pathGraph"],
             }
     rows.sort(key=lambda r: r["date"], reverse=True)
     return rows, full, featured, omitted
@@ -909,6 +920,9 @@ def build_fighters(
                 "arch_en": arche, "arch_pt": archetype_label("pt", arche), "rec": sub,
                 "href": f"grapple-{slug}.html",
                 "nodes": card["nodes"], "links": card["links"],
+                # Card-thumbnail cut of the SAME ring payload the dossier page draws (§17) —
+                # computed post-cache-hit from `path_graph`, so no DOSSIER_VERSION bump.
+                "pathGraph": mini_path_graph(path_graph),
                 "_rank": rank or 9999,
             })
             ag = from_career_graphview(athlete.name, career)

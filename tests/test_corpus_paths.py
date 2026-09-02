@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import Any
 
 from analysis import corpus_paths
-from analysis.corpus_paths import aggregate_bouts, path_payload, render_paths
+from analysis.corpus_paths import aggregate_bouts, mini_path_graph, path_payload, render_paths
 from analysis.path_bundling import bundle_paths
 
 # One bout with a real shape: A opens on the ground and finishes; B passes and controls. Two
@@ -318,6 +318,46 @@ def test_join_labels_compressed_collapses_consecutive_repeats() -> None:
     assert j(["Sweep", "Triangle", "Sweep"]) == "Sweep → Triangle → Sweep", (
         "non-adjacent repeats are not the same run — must not compress"
     )
+
+
+def test_mini_path_graph_is_a_reduction_not_a_recompute() -> None:
+    """The card thumbnail cut of a full ring payload: same shape source, byte-light. Anchors
+    always survive; a tiny budget still keeps them even when it drops every state."""
+    payload = path_payload(aggregate_bouts(_FOLD_BOUTS), layout="ring")
+    mini = mini_path_graph(payload, max_nodes=3)
+    assert set(mini) == {"nodes", "links"}
+    anchor_ids = {n["id"] for n in payload["nodes"] if n.get("kind") == "anchor"}
+    mini_ids = {n["id"] for n in mini["nodes"]}
+    assert anchor_ids <= mini_ids, "anchors are the frame — must survive any budget"
+    assert len(mini["nodes"]) <= max(3, len(anchor_ids))
+    # no label/action/path text anywhere — the whole point of a byte-light card payload
+    dumped = json.dumps(mini)
+    assert '"label"' not in dumped and '"actions"' not in dumped and '"pathIds"' not in dumped
+    # every surviving link's endpoints are both kept nodes
+    for link in mini["links"]:
+        assert link["from"] in mini_ids and link["to"] in mini_ids
+
+
+def test_mini_path_graph_keeps_the_highest_support_states_first() -> None:
+    """§ "top-N estados/traços por support" — states rank by the payload's own clamped
+    ``size`` (junctions are always ``size=1`` so a real state always outranks scaffolding)."""
+    payload = path_payload(aggregate_bouts(_FOLD_BOUTS), layout="ring")
+    states = sorted(
+        (n for n in payload["nodes"] if n.get("kind") not in ("anchor",)),
+        key=lambda n: (-(n.get("size") or 0), n["id"]),
+    )
+    budget = 2
+    anchors = {n["id"] for n in payload["nodes"] if n.get("kind") == "anchor"}
+    mini = mini_path_graph(payload, max_nodes=len(anchors) + budget)
+    expected = anchors | {n["id"] for n in states[:budget]}
+    assert {n["id"] for n in mini["nodes"]} == expected
+
+
+def test_mini_path_graph_is_deterministic() -> None:
+    payload = path_payload(aggregate_bouts(_FOLD_BOUTS), layout="ring")
+    one = mini_path_graph(payload, max_nodes=6)
+    two = mini_path_graph(payload, max_nodes=6)
+    assert json.dumps(one, sort_keys=True) == json.dumps(two, sort_keys=True)
 
 
 def test_anchor_labels_are_english_not_the_app_locale() -> None:

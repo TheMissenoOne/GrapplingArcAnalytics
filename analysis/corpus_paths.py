@@ -65,6 +65,7 @@ __all__ = [
     "PATH_VARIANT_BUDGET",
     "PathAggregate",
     "aggregate_bouts",
+    "mini_path_graph",
     "path_payload",
     "render_paths",
 ]
@@ -964,3 +965,44 @@ def path_payload(
             "lengths": lengths,
         },
     }
+
+
+def mini_path_graph(payload: Mapping[str, Any], *, max_nodes: int = 30) -> dict[str, Any]:
+    """A byte-light thumbnail cut of a full ``path_payload()`` — for card-sized canvases
+    (breakdown/dossier grid thumbnails, ``GAGraph.mountPaths`` with no labels and no
+    interaction). Reduces the SAME payload ``export/*`` already computed with
+    ``path_payload(..., layout="ring")`` — this is NOT a recompute, so a detail page and its
+    own card thumbnail are always drawn from the same underlying positions.
+
+    Keeps every anchor (the frame) plus the top ``max_nodes - len(anchors)`` remaining nodes
+    ranked by ``size`` (the payload's own clamped support/occurrence proxy — junctions are
+    always ``size=1`` so they are the first to drop when over budget), then only the links
+    whose BOTH endpoints survive. Positions (``x``/``y``/``pin``), the visual fields a dot/
+    stroke needs to draw (``cat``/``fighter``/``shape``/``color``/``junction``,
+    ``weight``/``arrow``/``back``/``bow``/``inf``/``par``/``parCount``) all carry over
+    unrounded/untouched; every label, action, path, fold and stat field is dropped — a mini
+    card never draws a name (``site/graph.js`` skips a label with no text) and can't select a
+    path, so ``paths``/``folded``/``unresolved``/``stats``/``rings``/``ringCentre`` would be
+    pure dead weight in the committed bundle.
+    """
+    nodes = payload.get("nodes") or []
+    links = payload.get("links") or []
+    anchors = [n for n in nodes if n.get("kind") == "anchor"]
+    rest = sorted(
+        (n for n in nodes if n.get("kind") != "anchor"),
+        key=lambda n: (-(n.get("size") or 0), n["id"]),
+    )
+    budget = max(0, max_nodes - len(anchors))
+    keep_ids = {n["id"] for n in anchors} | {n["id"] for n in rest[:budget]}
+    node_fields = ("id", "x", "y", "pin", "size", "cat", "fighter", "kind",
+                   "shape", "color", "junction")
+    link_fields = ("from", "to", "weight", "arrow", "fighter",
+                   "back", "bow", "inf", "par", "parCount")
+    mini_nodes = [
+        {k: n[k] for k in node_fields if k in n} for n in nodes if n["id"] in keep_ids
+    ]
+    mini_links = [
+        {k: link[k] for k in link_fields if k in link}
+        for link in links if link.get("from") in keep_ids and link.get("to") in keep_ids
+    ]
+    return {"nodes": mini_nodes, "links": mini_links}
