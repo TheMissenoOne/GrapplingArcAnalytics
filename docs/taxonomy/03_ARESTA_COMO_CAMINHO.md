@@ -1558,3 +1558,37 @@ e 390×700) e `GrapplingArcApp/docs/screenshots/map/*.png` (App, 390×840 e 1280
 
 ⚠️ **Regenerar o site é obrigatório** — os dois bumps de versão invalidam todo breakdown e
 dossiê em cache, e as páginas em disco hoje são do quadro antigo.
+
+### 17.5 Correção (2026-09-02, decisão do dono) — âncoras genéricas saem do polo fixo
+
+§17 acima descreve Top/Neutro/Bottom com pólo FIXO (`ANCHOR_PLACEMENTS`). Produtizado da
+variante 20 do protótipo (`render_map_prototypes._render_variant20`): só a Finalização continua
+com centro fixo (`centre_ids`). Top/Neutro/Bottom agora assentam no ANEL que a própria
+finish-distance dá a eles, como qualquer outro estado — o ângulo (setor de `orientation_of`)
+continua a régua, o raio para de ser hardcoded. Mecanismo é **caller-only**: `corpus_paths.py`
+monta `sector_of` para os três genéricos e chama `ring_layout(..., anchor_slots={})` (vazio) —
+`ring_layout.py`/`ringLayout.ts` em si não mudaram, só quem os chama dobra a âncora genérica em
+`sector_of` antes de entrar no BFS reverso. Espelho App: `mapPathsView.ts` (`anchorSlots`/
+`sectorOf`, mesmo padrão). Golden `ring_layout_golden.json` intacto — a mudança é a montagem da
+entrada, não a função.
+
+## 18. Mini-grafos (2026-09-02) — cartões e sessão anelam por finish distance
+
+Dois cortes independentes do MESMO conceito de anel (`ring(p) = menor nº de traços até uma
+finalização`), cada um no seu lado:
+
+- **Site/Analytics** — `corpus_paths.mini_path_graph()` corta um `path_payload(layout="ring")`
+  JÁ CALCULADO (não recomputa) para um cartão de miniatura: mantém âncoras + top `max_nodes`
+  nós por `size`, só links com as duas pontas vivas, dropa rótulo/caminho/dobra/stat. Consumido
+  por `pathGraph` em `GA_BREAKDOWNS`/`GA_FIGHTERS`/`GA_FEATURED` (`export/site_data.py`); o site
+  desenha via `GAGraph.mountThumb` (`site/graph.js`), que escolhe `mountPaths({mini:true})`
+  quando o bundle carrega `pathGraph` e cai no `mount()` legado (force, hero) senão.
+- **App** — mini-grafo de SESSÃO (cartão de compartilhamento) é um segundo caminho, não uma
+  chamada a `ring_layout.py`/`ringLayout.ts`: `ringTopology.ringByFinishDistance` (BFS reversa
+  própria sobre as arestas da sessão) substitui o anel-por-categoria antigo
+  (`GraphRingsBackground.tsx`, `buildSessionGraph.ts`). Sem finalização na sessão ⇒ cai de volta
+  no anel-por-categoria (não há "distância até o fim" para medir).
+
+Nenhum dos dois lê `ring_layout.py`/`ts` — a Analytics reaproveita o payload já anelado, o App
+reimplementa o mesmo BFS num grafo de sessão sem os dados que `ring_layout` pede (support,
+label_len, orientação plena).
