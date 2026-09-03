@@ -44,6 +44,7 @@ to manage, which is why a single-bout breakdown almost never folds.
 
 from __future__ import annotations
 
+from collections import Counter
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Any
 
@@ -252,6 +253,14 @@ class PathAggregate:
         # ONLY for a relation that already carries >=1 concrete variant — a relation with none
         # gets its placeholder edge instead (`finalize()`).
         self.unresolved: dict[tuple[str, str, str], dict[str, Any]] = {}
+        # Provenance (§N4, 2026-09-03) — ``match_id`` -> the caller's own opaque per-bout meta
+        # dict (must carry at least ``match_id``/``family``; anything else — ``event``/``slug``/
+        # ``label``/``athletes`` — rides through untouched to ``path_payload``'s ``matches``
+        # index). One entry per bout `aggregate_bouts` actually compiled, filled there — NOT
+        # here — so a bout with meta but zero edges (a single-event bout) still counts toward
+        # `meta.scope`. Empty (the default) for every caller that never passes `bout_meta`,
+        # which is how the whole feature stays additive/opt-in.
+        self.matches: dict[str, Mapping[str, Any]] = {}
         self._finalized = False
 
     # ── ingestion ───────────────────────────────────────────────────────────────────
@@ -283,7 +292,11 @@ class PathAggregate:
             row["count"] += 1
 
     def add_edge(
-        self, edge: ChainEdge, side: str, ts_of: Callable[[int], int | None] | None = None
+        self,
+        edge: ChainEdge,
+        side: str,
+        ts_of: Callable[[int], int | None] | None = None,
+        meta: Mapping[str, Any] | None = None,
     ) -> None:
         if side not in _SIDES:
             return
@@ -314,13 +327,13 @@ class PathAggregate:
                 "family": (source, target, actor), "guess": action_seq[0] if action_seq else "",
                 "edge": edge, "actions": action_seq, "action_labels": action_labels,
                 "action_inferred": action_inferred, "action_ts": action_ts,
-                "action_types": action_types,
+                "action_types": action_types, "meta": meta,
             })
             return
         key = (source, target, observed_seq, actor)
         row = self.edges.get(key)
         if row is None:
-            self.edges[key] = {
+            self.edges[key] = row = {
                 "source": source,
                 "target": target,
                 "actor": actor,
@@ -330,10 +343,15 @@ class PathAggregate:
                 "action_inferred": action_inferred,
                 "action_ts": action_ts,
                 "action_types": action_types,
+                "bouts": set(),
+                "families": Counter(),
             }
             self.edge_sample[key] = edge
         else:
             row["count"] += 1
+        if meta is not None:
+            row["bouts"].add(meta["match_id"])
+            row["families"][meta["family"]] += 1
 
     def finalize(self) -> None:
         """§13.3, the order-independent half: decide, for every buffered wholly-inferred
@@ -365,12 +383,19 @@ class PathAggregate:
             rep = next(o for o in occurrences if o["guess"] == top_guess)
             source, target, actor = family
             placeholder_key = (source, target, (top_guess,), actor)
+            bouts: set[str] = set()
+            families: Counter[str] = Counter()
+            for occ in occurrences:
+                m = occ.get("meta")
+                if m is not None:
+                    bouts.add(m["match_id"])
+                    families[m["family"]] += 1
             self.edges[placeholder_key] = {
                 "source": source, "target": target, "actor": actor,
                 "count": len(occurrences), "actions": rep["actions"],
                 "action_labels": rep["action_labels"], "action_inferred": rep["action_inferred"],
                 "action_ts": rep["action_ts"], "unresolved_guesses": dict(sorted(guesses.items())),
-                "action_types": rep["action_types"],
+                "action_types": rep["action_types"], "bouts": bouts, "families": families,
             }
             self.edge_sample[placeholder_key] = rep["edge"]
         self._ghosts = []
@@ -394,6 +419,7 @@ def aggregate_bouts(
     bouts: Iterable[Sequence[Mapping[str, Any]]],
     *,
     collapse_actors: bool = False,
+    bout_meta: Sequence[Mapping[str, Any]] | None = None,
 ) -> PathAggregate:
     """Compile every bout and fold it into one aggregate.
 
@@ -401,12 +427,21 @@ def aggregate_bouts(
     (``'a'``/``'b'``); an event with any other side is dropped by the compiler into its own
     audit bucket, never silently. Feeding only one side's events (the dossier case) is valid —
     the compiler already compiles each side independently.
+
+    ``bout_meta`` (§N4, 2026-09-03, additive/opt-in) — one entry per ``bouts`` entry, SAME
+    index, at least ``{"match_id": str, "family": str}``. When given, every variant's row gains
+    ``bouts``/``families`` (read by ``path_payload`` into ``paths[].bouts``/``paths[].families``)
+    and every compiled bout's own meta lands in ``PathAggregate.matches`` (``meta.scope`` +
+    the ``matches`` index). Existing callers that never pass it keep the exact same aggregate —
+    the whole feature is inert until a caller opts in.
     """
     table = load_inference_table()
     agg = PathAggregate(collapse_actors=collapse_actors)
-    for events in bouts:
+    metas = bout_meta if bout_meta is not None else ()
+    for i, events in enumerate(bouts):
         if not events:
             continue
+        meta = metas[i] if i < len(metas) else None
         agg.register_labels(events)
         compiled = compile_two_sided(
             events,
@@ -417,12 +452,14 @@ def aggregate_bouts(
             actor_of=lambda e: (str(e.get("actor") or e.get("side") or "") or None),
             inference_table=table,
         )
+        if meta is not None:
+            agg.matches[meta["match_id"]] = meta
         ts_of = _ts_reader(events)
         for side in _SIDES:
             for state in compiled[side].states:
                 agg.add_state(state, side)
             for edge in compiled[side].edges:
-                agg.add_edge(edge, side, ts_of)
+                agg.add_edge(edge, side, ts_of, meta)
     agg.finalize()
     return agg
 
@@ -592,9 +629,20 @@ def path_payload(
     max_fold_groups: int | None = None,
     layout: str = "flow",
     target_aspect: float | None = None,
+    bout_ids: bool = True,
 ) -> dict[str, Any]:
     """Layers 3 + 4 — the bundled graph, laid out, as the site's ``{nodes, links, paths,
     folded}``.
+
+    ``bout_ids`` (§N4, 2026-09-03) only matters when ``agg`` was built with ``bout_meta`` —
+    otherwise there is no provenance to include and this is a no-op. ``True`` (default) puts the
+    real match ids on ``paths[].bouts`` and echoes every referenced match into the top-level
+    ``matches`` index (``{match_id: {event, family, slug, label, ...}}``, whatever the caller's
+    own ``bout_meta`` dicts carried beyond ``match_id``/``family``) for the client to link to a
+    ``breakdown-<slug>.html``. ``False`` swaps the id list for a bare ``paths[].nBouts`` count
+    and drops the ``matches`` index — the fallback the plan calls for once the raw payload
+    measures past ~3MB with ids in it; ``meta.scope`` (corpus-wide totals) is unaffected either
+    way, it was always cheap.
 
     §5d replaced the old static ``min_count`` drop with a ranked budget: every variant is
     ordered by ``(support, strength)`` (``_rank_key``) and the top ``max_variants`` (~60) draw
@@ -650,6 +698,18 @@ def path_payload(
     family_of = {f"p{i}": (key[0], key[1], key[3]) for i, key in enumerate(sorted(agg.edges))}
     types_of = {
         f"p{i}": agg.edges[key]["action_types"] for i, key in enumerate(sorted(agg.edges))
+    }
+    # §N4 provenance (2026-09-03) — only non-empty when the caller passed `bout_meta` into
+    # `aggregate_bouts`; every other caller (dossier/breakdown) sees empty sets/counters here,
+    # so `bouts_of`/`ruleset_families_of` below are empty dicts and the `paths[]` rows below
+    # never grow the new keys (additive/opt-in, §0.1 of the plan).
+    bouts_of = {
+        f"p{i}": sorted(agg.edges[key].get("bouts") or ())
+        for i, key in enumerate(sorted(agg.edges))
+    }
+    ruleset_families_of = {
+        f"p{i}": dict(sorted((agg.edges[key].get("families") or {}).items()))
+        for i, key in enumerate(sorted(agg.edges))
     }
 
     all_paths = render_paths(agg)
@@ -885,12 +945,13 @@ def path_payload(
 
     label_of_point = {n["id"]: n["label"] for n in nodes}
     point_of_state = {n["stateKey"]: n["id"] for n in nodes if n.get("stateKey")}
+    has_provenance = bool(agg.matches)
     path_rows: list[dict[str, Any]] = []
     for p in paths:
         m = metrics_by_path[p.path_id]
         src_point = point_of_state.get(p.source, f"s:{p.source}")
         tgt_point = point_of_state.get(p.target, f"s:{p.target}")
-        path_rows.append({
+        row = {
             "id": p.path_id, "actor": p.actor, "count": p.count,
             "source": src_point, "target": tgt_point,
             "sourceLabel": label_of_point.get(src_point, p.source),
@@ -900,7 +961,17 @@ def path_payload(
             "observedRatio": round(m.observed_ratio, 3),
             "support": m.support, "terminal": m.terminal, "roleDelta": m.role_delta,
             "strength": None if m.strength is None else round(m.strength, 1),
-        })
+        }
+        if has_provenance:
+            # §N4 — real match ids by default; ``bout_ids=False`` (the caller's call, measured
+            # against the ~3MB ceiling the plan sets) swaps the id list for a bare count and
+            # drops the ``matches`` index below, since nothing can look one up without an id.
+            if bout_ids:
+                row["bouts"] = bouts_of.get(p.path_id, [])
+            else:
+                row["nBouts"] = len(bouts_of.get(p.path_id, ()))
+            row["families"] = ruleset_families_of.get(p.path_id, {})
+        path_rows.append(row)
 
     lengths: dict[str, int] = {}
     for p in paths:
@@ -943,6 +1014,32 @@ def path_payload(
     # convention as `unresolved`: context, not a redraw).
     undrawn_groups = [fm for fm in fold_meta.values() if not fm["drawn"]]
 
+    # §N4 — corpus-wide scope + the match-id index the client links a stroke's `bouts[]` back
+    # to a `breakdown-<slug>.html` with. `agg.matches` (every bout `aggregate_bouts` actually
+    # compiled, keyed by match id) is the ONLY read here — never the drawn `paths`, so a bout
+    # whose events produced no surviving variant still counts toward `meta.scope`.
+    provenance: dict[str, Any] = {}
+    if agg.matches:
+        family_counts: Counter[str] = Counter(
+            str(m.get("family")) for m in agg.matches.values()
+        )
+        athletes_seen = {
+            aid for m in agg.matches.values() for aid in (m.get("athletes") or ())
+        }
+        events_seen = {m.get("event") for m in agg.matches.values() if m.get("event")}
+        provenance["meta"] = {"scope": {
+            "bouts": len(agg.matches),
+            "athletes": len(athletes_seen),
+            "events": len(events_seen),
+            "families": dict(sorted(family_counts.items())),
+        }}
+        if bout_ids:
+            referenced = {mid for row in path_rows for mid in row.get("bouts", ())}
+            provenance["matches"] = {
+                mid: {k: v for k, v in agg.matches[mid].items() if k != "match_id"}
+                for mid in sorted(referenced) if mid in agg.matches
+            }
+
     return {
         "nodes": nodes,
         "links": links,
@@ -954,6 +1051,7 @@ def path_payload(
         # ignores the fields draws the same graph it always drew.
         "layout": layout,
         **({"rings": rings, "ringCentre": ring_centre} if layout == "ring" else {}),
+        **provenance,
         "stats": {
             "paths": len(paths),
             "variants": len(all_paths),

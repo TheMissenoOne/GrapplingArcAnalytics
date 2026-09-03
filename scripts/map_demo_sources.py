@@ -88,7 +88,7 @@ def public_sources(*, top_athletes: int = 6, include_corpus: bool = True) -> lis
     out: list[PathSource] = []
     with get_session_factory()() as session:
         if include_corpus:
-            bouts = _corpus_bouts(session)
+            bouts, _bout_meta = _corpus_bouts(session)  # §N4: provenance meta unused here
             agg = aggregate_bouts(bouts, collapse_actors=True)
             out.append(path_source(
                 agg, corpus_render_paths(agg), id="corpus",

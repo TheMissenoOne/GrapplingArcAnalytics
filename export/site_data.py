@@ -89,6 +89,13 @@ logger = logging.getLogger(__name__)
 _DEFAULT_OUT = Path(__file__).resolve().parents[2] / "GrapplingArc" / "site"
 _CATS = {"guard", "pass", "sweep", "takedown", "control", "submission", "escape", "transition"}
 
+# §N4 provenance (2026-09-03, root plan "Decisões do dono": "se o bruto passar de ~3 MB, cair
+# para contagens") — raw (pre-gzip) byte ceiling on `ocean["pathGraph"]` WITH real match ids
+# before `export_site` falls back to `path_payload(..., bout_ids=False)`. Measured 2026-09-03
+# without provenance: 1.4 MB raw / 99 KB gz over the full corpus (analysis/corpus_paths.py
+# docstring) — the ceiling below is the owner's own number, not a guess.
+_BOUT_IDS_BUDGET = 3_000_000
+
 # Grapple-Like radar = the App analytics tab's axes (SpiderChart categoryOrder,
 # clockwise from the top), so the site and the app read the same fingerprint.
 _RADAR_AXES = ["pass", "control", "submission", "escape", "guard", "sweep", "takedown"]
@@ -462,9 +469,27 @@ def _career_graphview(athlete: Athlete, profile: dict[str, Any], session: Sessio
 
 
 # ── data files ───────────────────────────────────────────────────────────────
-def _corpus_bouts(session: Session) -> list[list[dict[str, Any]]]:
-    """Every final bout as two-sided compiler input. Public data only (``matches.sequence``)."""
+def _corpus_bouts(
+    session: Session,
+) -> tuple[list[list[dict[str, Any]]], list[dict[str, Any]]]:
+    """Every final bout as two-sided compiler input, plus one PARALLEL per-bout provenance meta
+    dict (§N4, 2026-09-03) — same index as the bout it describes, for Atlas's "N fights · N
+    events · M athletes" scope panel and its links back to a bout's own breakdown page. Public
+    data only (``matches.sequence``, the two ``owner_kind='athlete'`` participants — nothing
+    here reads a ``graphs`` row).
+
+    Reads ``_SLUG_BY_MATCH`` (populated by ``build_fighters``, which every caller runs first —
+    ``export_site`` always does) rather than recomputing ``match_slug`` itself, so a bout this
+    corpus-wide read floats through but that ``build_fighters`` withheld/omitted for its own
+    reasons (Wave 8: neither side confident enough) still gets ``slug: None`` here — Atlas
+    counts it in ``meta.scope`` but never links to a page that doesn't exist.
+    """
+    from analysis.ruleset_scoring import family_of, load_event_rulesets
+
+    names = dict(session.execute(select(Athlete.id, Athlete.name)).all())
+    ruleset_doc = load_event_rulesets()
     bouts: list[list[dict[str, Any]]] = []
+    bout_meta: list[dict[str, Any]] = []
     for m in _final_matches(session):
         rows: list[dict[str, Any]] = []
         for e in (m.sequence or []):
@@ -480,7 +505,17 @@ def _corpus_bouts(session: Session) -> list[list[dict[str, Any]]]:
             })
         if rows:
             bouts.append(rows)
-    return bouts
+            a_name = names.get(m.athlete_a_id, "?")
+            b_name = names.get(m.athlete_b_id, "?")
+            bout_meta.append({
+                "match_id": m.id,
+                "event": m.event,
+                "family": family_of(m.event, ruleset_doc),
+                "athletes": (m.athlete_a_id, m.athlete_b_id),
+                "slug": _SLUG_BY_MATCH.get(m.id),
+                "label": f"{a_name} vs. {b_name}",
+            })
+    return bouts, bout_meta
 
 
 def _athlete_path_graph(athlete_id: str, matches: list[Any]) -> dict[str, Any]:
@@ -1071,7 +1106,7 @@ def _nav(active: str) -> str:
     <a href="breakdowns.html"{cls('breakdowns')}>Breakdowns</a>
     <a href="events.html"{cls('events')}>Events</a>
     <a href="grapple-like.html"{cls('grapple')}>Grapple Like</a>
-    <a href="the-system.html"{cls('system')}>The System</a>
+    <a href="atlas.html"{cls('atlas')}>Atlas</a>
     <a href="the-data.html"{cls('data')}>The Data</a>
     <div class="nav-cta">
       <div class="lang"><button data-lang="en" class="on">EN</button><button data-lang="pt">PT</button></div>
@@ -1085,7 +1120,7 @@ _FOOTER = """<footer class="site-foot"><div class="wrap">
   <a class="brand" href="index.html" aria-label="GrapplingArc"><img class="brand-symbol" src="brand-symbol.svg" alt="" aria-hidden="true"/><span class="brand-wordmark">Grappling<span class="brand-wordmark-accent">Arc</span></span></a>
   <nav class="links">
     <a href="breakdowns.html">Breakdowns</a><a href="events.html">Events</a><a href="grapple-like.html">Grapple Like</a>
-    <a href="the-system.html">The System</a><a href="the-data.html">The Data</a>
+    <a href="atlas.html">Atlas</a><a href="the-data.html">The Data</a>
     <a href="../privacy.html">Privacy</a><a href="../account-deletion.html">Data &amp; Deletion</a>
   </nav>
   <p class="copy">© 2026 GrapplingArc · generated from match data · analysis &amp; education only</p>
@@ -1991,17 +2026,18 @@ def render_event_page(
     return _head(name, description=ev_desc, path=f"event-{slug}.html") + body
 
 
-# ── The Ocean (full technique force graph) ───────────────────────────────────
-_OCEAN_STYLE = """<style>
+# ── Atlas (the public corpus's 3D "solar system", + the retired 2D Ocean fallback below) ─────
+# Renamed from `_OCEAN_STYLE` (2026-09-03, the-system.html -> atlas.html) — still shared with
+# the dead `render_ocean_page()` fallback check below, so its own `.ocean-legend`/`.ocean-chip`
+# rows lost their style along with this rename (that function is unreachable from `export_site`
+# and has no test; not deleted here — out of this change's scope).
+_ATLAS_STYLE = """<style>
 .ocean-stage{position:relative;height:calc(100vh - 58px);overflow:hidden;border-top:1px solid var(--line)}
 .ocean-canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
 .ocean-hud{position:absolute;top:18px;left:18px;z-index:2;max-width:340px;display:flex;flex-direction:column;gap:12px;pointer-events:none}
 .ocean-hud>*{pointer-events:auto}
 .ocean-h h1{font-size:30px;margin:0;letter-spacing:-.6px}
 .ocean-search{width:100%;padding:9px 12px;background:rgba(12,12,17,.85);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:13px;font-family:var(--mono)}
-.ocean-legend{display:flex;flex-wrap:wrap;gap:6px}
-.ocean-chip{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--ink-2);background:rgba(12,12,17,.8);border:1px solid var(--line);border-radius:20px;padding:3px 9px}
-.ocean-chip i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .ocean-panel{position:absolute;top:0;right:0;height:100%;width:340px;background:var(--panel);border-left:1px solid var(--line);z-index:3;padding:24px 22px;overflow:auto;box-shadow:-22px 0 44px rgba(0,0,0,.32)}
 .ocean-panel[hidden]{display:none}
 .ocean-close{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--ink-3);font-size:23px;cursor:pointer;line-height:1}
@@ -2245,56 +2281,68 @@ os.addEventListener('keydown', function(e){ if(e.key==='Enter') locate(); });
 def render_ocean_page() -> str:
     """The Ocean — full-screen technique force graph, region legend, search, node dialog.
 
-    ⚠️ Dead weight since "The System" (2026-09-03) — nothing links here (`_nav`/`_FOOTER` point
-    at the-system.html now) and `export_site` no longer calls this; kept only because
-    `_OCEAN_STYLE`/`_OCEAN_BODY`/`_OCEAN_JS` are still read by `render_system_page` below (the
-    2D force-graph reading of `pathGraph`'s SIBLING data, `O.nodes`/`O.links`, is unrelated to
-    the 3D one and this function is the only place it's exercised — a manual fallback check, not
-    a live page). `the-ocean.html` itself is generated as a REDIRECT by `_render_ocean_redirect`.
+    ⚠️ Dead weight since "The System"/"Atlas" (2026-09-03) — nothing links here (`_nav`/
+    `_FOOTER` point at atlas.html now) and `export_site` no longer calls this; kept only because
+    `_ATLAS_STYLE`/`_OCEAN_BODY`/`_OCEAN_JS` are the last place the 2D force-graph reading of
+    `pathGraph`'s SIBLING data (`O.nodes`/`O.links`, unrelated to the 3D one) is exercised — a
+    manual fallback check, not a live page. Both `the-ocean.html` AND `the-system.html`
+    (Atlas's own short-lived former name) are generated as REDIRECTS by
+    `_render_retired_page`.
     """
     return (
         _head("The Ocean", description="The global grappling position map — every technique as a "
               "node, transitions as edges, clustered into regions with centrality, bridging and "
               "effectiveness metrics.", path="the-ocean.html")
-        + _OCEAN_STYLE + _nav("ocean") + _OCEAN_BODY + _FOOTER +
+        + _ATLAS_STYLE + _nav("ocean") + _OCEAN_BODY + _FOOTER +
         '<script src="graph.js"></script><script src="i18n.js"></script>'
         '<script src="ocean-data.js"></script><script>' + _OCEAN_JS + "</script></body></html>"
     )
 
 
-def _render_ocean_redirect() -> str:
-    """``the-ocean.html`` (2026-09-03) — "The Ocean" is replaced by "The System"; this is a
-    thin redirect kept only so old links/bookmarks land somewhere real. `<html lang>`/canonical/
-    og come from `_head`; `validate_site.py` (site repo) checks the meta-refresh + canonical."""
+def _render_retired_page(title: str) -> str:
+    """A thin redirect to ``atlas.html``, kept only so an old link/bookmark lands somewhere
+    real. Shared by both retired names: ``the-ocean.html`` (replaced 2026-09-03 by "The
+    System") and ``the-system.html`` (renamed the same day, before ever going live under that
+    name, to "Atlas" — the owner's decision, root-plan "Decisões do dono (2026-09-03)").
+    `<html lang>`/canonical/og come from `_head`; `validate_site.py` (site repo) checks the
+    meta-refresh + canonical."""
     return (
-        _head("The Ocean", description="Moved — see The System.", path="the-system.html",
-              image="brand-og.png")
-        + '<meta http-equiv="refresh" content="0; url=the-system.html"/>'
-        + _nav("system") +
-        '<main style="padding:48px 24px"><h1>The Ocean has moved</h1>'
-        '<p>This page is now <a href="the-system.html">The System</a>.</p></main>'
+        _head(title, description="Moved — see Atlas.", path="atlas.html", image="brand-og.png")
+        + '<meta http-equiv="refresh" content="0; url=atlas.html"/>'
+        + _nav("atlas") +
+        f'<main style="padding:48px 24px"><h1>{html.escape(title)} has moved</h1>'
+        '<p>This page is now <a href="atlas.html">Atlas</a>.</p></main>'
         + _FOOTER + "</body></html>"
     )
 
 
-def render_system_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
-    """The System — 3D "solar system" read of ``GA_OCEAN.pathGraph`` (2026-09-03, replaces
-    the-ocean.html as the front door; `docs/superpowers/specs/2026-09-03-the-system-design.md`).
+def render_atlas_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
+    """Atlas — 3D "solar system" read of ``GA_OCEAN.pathGraph`` (2026-09-03; shipped one day
+    as "The System" before the owner's rename — `docs/superpowers/specs/
+    2026-09-03-the-system-design.md`; ADR-level naming decision in the root plan's "Decisões do
+    dono (2026-09-03)": Atlas = this corpus-wide 3D page, "Athlete system" = the dossier,
+    "Your systems" = the App).
 
     This is CHROME only — header/nav/footer/canonical/og (from `_head`, unchanged), the same
-    panel HTML/CSS the Ocean used (`_OCEAN_STYLE`, ``#oceanPanel``/``opName``/… ids — literal
+    panel HTML/CSS the Ocean used (`_ATLAS_STYLE`, ``#oceanPanel``/``opName``/… ids — literal
     reuse, not a rename, so the interactive script wires the exact same selectors), a vendored
-    three.js importmap, and the module bootstrap that hands off to ``site/system.js``
-    (``mountSystem`` — the actual 3D render/camera/raycaster logic; that file lives in the site
-    repo, out of this module's scope). ``pathgraph_nodes`` is the SAME ``GA_OCEAN.pathGraph.nodes``
-    list `export_site` already computed — used only to server-render the fallback shown
-    inside ``#system-root`` (a state/anchor label list + a link to Grapple Like), because a
-    page with no JS (or no WebGL) has nothing else to build that list from at load time.
-    The fallback lives as plain HTML *inside* ``#system-root`` rather than in a
-    ``<noscript>`` sibling: ``mountSystem`` only appends a ``<canvas>`` there on success and
-    never clears the root first (see site/system.js), so a ``<noscript>`` block would miss
-    the "JS on, WebGL missing" case entirely — `_OCEAN_STYLE`'s ``#system-root:has(canvas)``
-    rule hides the fallback once (and only once) that canvas lands, no JS coordination needed.
+    three.js importmap, and the module bootstrap that hands off to ``site/atlas.js``
+    (``mountSystem`` — the actual 3D render/camera/raycaster logic; export name unchanged by
+    the site repo's own rename, only the file became ``atlas.js``; out of this module's scope).
+    ``pathgraph_nodes`` is the SAME ``GA_OCEAN.pathGraph.nodes`` list `export_site` already
+    computed — used only to server-render the fallback shown inside ``#system-root`` (a
+    state/anchor label list + a link to Grapple Like), because a page with no JS (or no WebGL)
+    has nothing else to build that list from at load time. The fallback lives as plain HTML
+    *inside* ``#system-root`` rather than in a ``<noscript>`` sibling: ``mountSystem`` only
+    appends a ``<canvas>`` there on success and never clears the root first (see
+    site/atlas.js), so a ``<noscript>`` block would miss the "JS on, WebGL missing" case
+    entirely — `_ATLAS_STYLE`'s ``#system-root:has(canvas)`` rule hides the fallback once (and
+    only once) that canvas lands, no JS coordination needed.
+
+    The search ``<input id="atlasSearch" list="atlasStates">`` + its ``<datalist>`` are markup
+    only — a native combobox needs no JS to be an accessible text field, and ``atlas.js``
+    populates ``#atlasStates`` and wires selection (out of this module's scope, same as the
+    canvas itself).
     """
     fallback_items = "".join(
         f"<li>{html.escape(str(n.get('label') or ''))}</li>"
@@ -2314,7 +2362,14 @@ def render_system_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str
     {fallback}
   </div>
   <div class="ocean-hud">
-    <div class="ocean-h"><h1>{_bi("The System", "O Sistema")}</h1><p class="muted" id="systemMeta"></p></div>
+    <div class="ocean-h"><h1>Atlas</h1><p class="muted" id="systemMeta"></p></div>
+    <input id="atlasSearch" class="ocean-search" list="atlasStates" type="search"
+      placeholder="Find a position / Buscar posição" aria-label="Find a position / Buscar posição"/>
+    <datalist id="atlasStates"></datalist>
+    <p class="muted" id="atlasLegend">{_bi(
+        "Finish = submission finish; decision/points bouts end on their last position.",
+        "Finalização = finalização por submissão; lutas por decisão/pontos terminam na "
+        "última posição.")}</p>
   </div>
   <aside id="oceanPanel" class="ocean-panel" hidden>
     <button id="oceanClose" class="ocean-close" aria-label="close">&times;</button>
@@ -2332,14 +2387,14 @@ def render_system_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str
         "reset:document.getElementById('systemReset'),metaLabel:document.getElementById('systemMeta')}"
     )
     return (
-        _head("The System", description="Every technique connection in the public corpus, drawn "
-              "as a 3D solar system — Finish at the centre, every position in orbit by how many "
-              "strokes it takes to get there.", path="the-system.html")
-        + _OCEAN_STYLE + _nav("system") + body + _FOOTER +
+        _head("Atlas", description="Every technique connection in the public corpus, drawn as "
+              "a 3D solar system — Finish at the centre, every position placed by ring order "
+              "(how many strokes out from a finish), not by real distance.", path="atlas.html")
+        + _ATLAS_STYLE + _nav("atlas") + body + _FOOTER +
         '<script src="i18n.js"></script><script src="ocean-data.js"></script>'
         '<script type="importmap">{"imports":{"three":"./three/three.module.min.js",'
         '"three/addons/":"./three/addons/"}}</script>'
-        '<script type="module">import {mountSystem} from "./system.js";'
+        '<script type="module">import {mountSystem} from "./atlas.js";'
         "mountSystem(document.getElementById('system-root'),(window.GA_OCEAN||{}).pathGraph,"
         "{panel:" + panel_js + "});</script></body></html>"
     )
@@ -2417,8 +2472,8 @@ def export_site(session: Session, out: Path, full: bool = False,
     renderer against that loop is not workable. The globals it writes are PARTIAL by
     construction, so ``main()`` refuses to point it at the real site directory — a preview must
     never be mistaken for the bundle. ``only=frozenset()`` builds no detail page at all, which
-    is the cheapest way to regenerate just ``the-system.html``/``the-ocean.html`` (redirect) +
-    ``ocean-data.js``.
+    is the cheapest way to regenerate just ``atlas.html`` + ``the-system.html``/
+    ``the-ocean.html`` (both redirects) + ``ocean-data.js``.
     """
     from time import perf_counter as _pc
 
@@ -2518,14 +2573,27 @@ def export_site(session: Session, out: Path, full: bool = False,
     # `layout="ring"` (already the dossier/breakdown default) is what gives every point a
     # `sector` — the 3D client's latitude band. Measured over the full corpus, 2026-09-03: 219
     # points / 2 297 strokes / 2 221 paths / 5 rings, 1.4 MB raw, ~1s.
-    ocean["pathGraph"] = path_payload(
-        aggregate_bouts(_corpus_bouts(session), collapse_actors=True),
-        layout="ring", max_variants=None, max_fold_groups=None,
+    #
+    # §N4 provenance (2026-09-03, root plan "Decisões do dono": "Medir e incluir") — `bout_meta`
+    # feeds `paths[].bouts`/`paths[].families` + `meta.scope` + the `matches` index Atlas's
+    # panel links back to a `breakdown-<slug>.html`. `_BOUT_IDS_BUDGET` is the measured decision
+    # (see its own docstring): real match ids while the raw payload stays under it, a bare count
+    # (`paths[].nBouts`, no `matches` index) past it.
+    corpus_bouts, corpus_bout_meta = _corpus_bouts(session)
+    prov_payload = path_payload(
+        aggregate_bouts(corpus_bouts, collapse_actors=True, bout_meta=corpus_bout_meta),
+        layout="ring", max_variants=None, max_fold_groups=None, bout_ids=True,
+    )
+    raw_size = len(json.dumps(prov_payload, ensure_ascii=False))
+    ocean["pathGraph"] = prov_payload if raw_size <= _BOUT_IDS_BUDGET else path_payload(
+        aggregate_bouts(corpus_bouts, collapse_actors=True, bout_meta=corpus_bout_meta),
+        layout="ring", max_variants=None, max_fold_groups=None, bout_ids=False,
     )
     (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
-    (out / "the-system.html").write_text(
-        render_system_page(ocean["pathGraph"].get("nodes") or ()), encoding="utf-8")
-    (out / "the-ocean.html").write_text(_render_ocean_redirect(), encoding="utf-8")
+    (out / "atlas.html").write_text(
+        render_atlas_page(ocean["pathGraph"].get("nodes") or ()), encoding="utf-8")
+    (out / "the-system.html").write_text(_render_retired_page("The System"), encoding="utf-8")
+    (out / "the-ocean.html").write_text(_render_retired_page("The Ocean"), encoding="utf-8")
     _t = _phase("build_ocean + data.js", _t)
     clear_match_cache()  # renders below use precomputed data; don't leak the cache past the builds
 
@@ -2571,9 +2639,10 @@ def export_site(session: Session, out: Path, full: bool = False,
     _t = _phase("render events", _t)
 
     # robots.txt + sitemap.xml (acquisition baseline — the site was invisible to crawlers).
-    # the-ocean.html is a redirect (2026-09-03) — the-system.html is the page worth indexing.
+    # the-ocean.html AND the-system.html are both redirects (2026-09-03) — atlas.html is the
+    # page worth indexing.
     static_pages = ["index.html", "breakdowns.html", "events.html", "grapple-like.html",
-                    "the-data.html", "the-system.html"]
+                    "the-data.html", "atlas.html"]
     urls = static_pages + [f"breakdown-{s}.html" for s, _ in full_bds] \
         + [f"grapple-{s}.html" for s in details] + [f"event-{s}.html" for s, _ in event_details]
     locs = "\n".join(f"  <url><loc>{SITE_BASE}/{u}</loc></url>" for u in urls)

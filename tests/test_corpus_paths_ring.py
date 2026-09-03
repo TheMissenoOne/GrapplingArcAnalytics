@@ -52,10 +52,27 @@ BOUT_C: list[dict[str, Any]] = [
 ]
 BOUTS = [BOUT_A, BOUT_B, BOUT_C]
 
+# §N4 (2026-09-03) — one meta dict per BOUTS entry, same index, feeding provenance.
+BOUT_META: list[dict[str, Any]] = [
+    {"match_id": "m-a", "event": "ADCC 2022", "family": "adcc",
+     "athletes": ("ath-1", "ath-2"), "slug": "a-vs-b-2022", "label": "A vs B"},
+    {"match_id": "m-b", "event": "IBJJF Worlds", "family": "ibjjf",
+     "athletes": ("ath-1", "ath-3"), "slug": "a-vs-c-2022", "label": "A vs C"},
+    {"match_id": "m-c", "event": "IBJJF Worlds", "family": "ibjjf",
+     "athletes": ("ath-1", "ath-4"), "slug": "a-vs-d-2022", "label": "A vs D"},
+]
+
 
 @pytest.fixture(scope="module")
 def ring() -> dict[str, Any]:
     return path_payload(aggregate_bouts(BOUTS), layout="ring")
+
+
+@pytest.fixture(scope="module")
+def ring_provenance() -> dict[str, Any]:
+    return path_payload(
+        aggregate_bouts(BOUTS, bout_meta=BOUT_META), layout="ring",
+    )
 
 
 @pytest.fixture(scope="module")
@@ -138,3 +155,59 @@ def test_no_two_state_names_overlap(ring: dict[str, Any]) -> None:
     ]
     assert hits == []
     assert len(boxes) >= 6
+
+
+def test_provenance_is_additive_and_opt_in(
+    ring: dict[str, Any], ring_provenance: dict[str, Any]
+) -> None:
+    """§N4 — no `bout_meta`, no new fields anywhere (existing dossier/breakdown callers)."""
+    assert "meta" not in ring and "matches" not in ring
+    assert all("bouts" not in p and "families" not in p for p in ring["paths"])
+    assert "meta" in ring_provenance and "matches" in ring_provenance
+
+
+def test_paths_carry_their_own_bouts_and_families(ring_provenance: dict[str, Any]) -> None:
+    all_bouts: set[str] = set()
+    for p in ring_provenance["paths"]:
+        assert isinstance(p["bouts"], list) and p["bouts"] == sorted(p["bouts"])
+        assert set(p["bouts"]) <= {"m-a", "m-b", "m-c"}
+        assert p["count"] >= len(p["bouts"])  # count is occurrences, bouts is DISTINCT matches
+        assert isinstance(p["families"], dict)
+        assert sum(p["families"].values()) == p["count"]
+        all_bouts |= set(p["bouts"])
+    assert all_bouts == {"m-a", "m-b", "m-c"}, "every fed bout shows up on at least one path"
+
+
+def test_meta_scope_counts_the_whole_corpus_fed_in(ring_provenance: dict[str, Any]) -> None:
+    scope = ring_provenance["meta"]["scope"]
+    assert scope["bouts"] == 3
+    assert scope["athletes"] == 4  # ath-1..4, shared ath-1 counted once
+    assert scope["events"] == 2  # ADCC 2022, IBJJF Worlds
+    assert scope["families"] == {"adcc": 1, "ibjjf": 2}
+
+
+def test_matches_index_resolves_every_referenced_bout_to_slug_and_label(
+    ring_provenance: dict[str, Any],
+) -> None:
+    referenced = {mid for p in ring_provenance["paths"] for mid in p["bouts"]}
+    matches = ring_provenance["matches"]
+    assert referenced  # the fixture bouts do produce drawn variants
+    assert referenced <= matches.keys()
+    for mid in referenced:
+        row = matches[mid]
+        assert "match_id" not in row  # redundant with the dict key
+        assert row["slug"] and row["label"] and row["event"]
+
+
+def test_bout_ids_false_falls_back_to_counts_and_drops_the_matches_index(
+    ring_provenance: dict[str, Any],
+) -> None:
+    payload = path_payload(
+        aggregate_bouts(BOUTS, bout_meta=BOUT_META), layout="ring", bout_ids=False,
+    )
+    assert "matches" not in payload
+    assert "meta" in payload and payload["meta"] == ring_provenance["meta"]  # scope unaffected
+    by_id = {p["id"]: p for p in ring_provenance["paths"]}
+    for p in payload["paths"]:
+        assert "bouts" not in p
+        assert p["nBouts"] == len(by_id[p["id"]]["bouts"])
