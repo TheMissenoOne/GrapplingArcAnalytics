@@ -14,7 +14,7 @@
   "leg drag to straddle": {"action": "Leg Drag", "to": "Straddle"},
   "guard pass to mount": {"action": "Guard Pass", "to": "Mount"},
   "guard pass to side control": {"action": "Guard Pass", "to": "Side Control"},
-  "guard pass to north south": {"action": "Guard Pass", "to": "North South Position"},
+  "guard pass to north south": {"action": "Guard Pass", "to": "North-South Position"},
   "sweep top position": {"action": "Sweep", "to": "top"},
   "arm drag to back take": {"action": "Arm Drag", "to": "Back Take"},
   "crab ride to back take": {"action": "Crab Ride", "to": "Back Take"},
@@ -25,7 +25,7 @@
   "body lock pass to mount": {"action": "Body Lock Pass", "to": "Mount"},
   "scramble to standing": {"action": "Scramble", "to": "neutral"},
   "sprawl to top position": {"action": "Sprawl", "to": "top"},
-  "wrestle up to top": {"action": "Wrestle Up", "to": "top"},
+  "wrestle up to top": {"action": "Wrestle-Up", "to": "top"},
 
   "leg entanglement aoki lock entry": {"state": "Leg Entanglement", "action": "Aoki Lock Entry"},
   "leg entanglement false reap": {"state": "Leg Entanglement", "action": "False Reap"},

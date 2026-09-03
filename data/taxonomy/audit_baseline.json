@@ -1,13 +1,13 @@
 {
  "generated_by": "scripts/audit_ontology.py --write-baseline",
  "contract": "docs/taxonomy/04_ONTOLOGIA_CANONICA.md",
- "events": 10016,
+ "events": 10128,
  "counts": {
   "dual_identity": 10,
   "alias_candidates": 1,
   "composites": 11,
   "states_without_orientation": 0,
-  "athlete_nodes_typed_technique": 286
+  "athlete_nodes_typed_technique": 254
  },
  "reclassified": {
   "control|Back Take": {
