@@ -81,4 +81,30 @@ def test_funcoes_nao_expostas_a_anon() -> None:
     assert '"public.group_member_graph_edges(uuid, uuid)"' in arquivo
     assert 'revoke all on function {fn} from public' in arquivo
     assert 'revoke all on function {fn} from anon' in arquivo
-    assert 'grant execute on function {fn} to authenticated' in arquivo
+
+
+def test_group_member_graph_edges_projeta_o_node_canonico() -> None:
+    """0057: o professor lê um aluno com rótulos em PT — sem ``canonical_node_key`` a view do
+    professor nunca casa esse nó com o corpus (mesmo gap que ``corpusInsights.ts`` já resolve no
+    lado do próprio atleta). ``sn``/``tn`` já estão joinados; a projeção só precisa das colunas
+    que já estão na mesa, sem join novo."""
+    corpo = _corpo("group_member_graph_edges")
+    assinatura = corpo.split("as $$")[0]
+
+    assert "source_canonical text" in assinatura
+    assert "target_canonical text" in assinatura
+    assert "sn.canonical_node_key" in corpo
+    assert "tn.canonical_node_key" in corpo
+
+
+def test_0057_recoloca_os_grants_do_graph_edges_apos_o_drop() -> None:
+    """Mesma razão que o teste equivalente de ``group_member_names``: mudar as colunas de
+    ``returns table`` exige DROP FUNCTION, que apaga os grants da 0054 — a 0057 tem que
+    reconceder, não só recriar o corpo."""
+    arquivo = (VERSOES / "0057_group_member_belt_and_canonical.py").read_text(encoding="utf-8")
+
+    assert "drop function if exists public.group_member_graph_edges(uuid, uuid);" in arquivo
+    assert (
+        "grant execute on function public.group_member_graph_edges(uuid, uuid) to authenticated;"
+        in arquivo
+    )
