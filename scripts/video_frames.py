@@ -61,6 +61,8 @@ import numpy as np
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
+from reportlab.lib.utils import ImageReader  # noqa: E402
+
 from scripts.frame_pdf import (  # noqa: E402
     DEFAULT_GRID_LANDSCAPE,
     DEFAULT_STEP_SECONDS,
@@ -318,12 +320,22 @@ def load_library() -> dict[str, Any] | None:
 
 
 def build_sheet(frames: list[tuple[float, Path]], video_path: Path, decision: dict[str, Any],
-                out_path: Path, library: dict[str, Any] | None = None) -> None:
+                out_path: Path, library: dict[str, Any] | None = None,
+                context: dict[str, Any] | None = None) -> None:
     """Landscape 2x2 sheet via frame_pdf.py's own grid renderer -- context page written here
     (this caller has no Entry/DB/manifest to draw frame_pdf's own context page from), frame
     grid drawn by the imported, unmodified function so every sheet in the repo looks alike.
     ``library`` (when given) is drawn via ``frame_pdf.draw_library_pages`` -- same vocabulary
-    pages, same closed-vocabulary rule, as any other sheet in the repo."""
+    pages, same closed-vocabulary rule, as any other sheet in the repo.
+
+    ``context`` (when given, video-pro Fase 3) adds a few extra rows -- ``round_kind``, ``kit``,
+    ``notes`` -- plus, when ``context["selfie_path"]`` points at an existing image, a thumbnail
+    in the corner and the sentence that fixes the actor vocabulary for the reader: the athlete
+    in the photo is "you", the other body in every frame is "partner". This is PRIVATE, one
+    user's own reference photo/notes for their own round -- see this repo's CLAUDE.md Public vs
+    Private Data section; a caller passing ``context`` owns that classification, this function
+    only lays it out.
+    """
     from reportlab.pdfgen.canvas import Canvas
 
     set_page_size("landscape")
@@ -331,12 +343,18 @@ def build_sheet(frames: list[tuple[float, Path]], video_path: Path, decision: di
     out_path.parent.mkdir(parents=True, exist_ok=True)
     c = Canvas(str(out_path), pagesize=page_size("landscape"))
     c.setTitle(video_path.name)
-    y = page_size("landscape")[1] - PAD
+    page_w, page_h = page_size("landscape")
+    y = page_h - PAD
     c.setFont(FONT_B, 15)
     c.drawString(PAD, y, video_path.name)
+    selfie_path = context.get("selfie_path") if context else None
+    if selfie_path and Path(selfie_path).exists():
+        img_side = 90.0
+        c.drawImage(ImageReader(str(selfie_path)), page_w - PAD - img_side, page_h - PAD - img_side,
+                   width=img_side, height=img_side, preserveAspectRatio=True, mask="auto")
     y -= 24
     c.setLineWidth(1)
-    c.line(PAD, y, page_size("landscape")[0] - PAD, y)
+    c.line(PAD, y, page_w - PAD, y)
     y -= 20
     rows = [
         ("Frames", f"{len(frames)}, {hhmmss(frames[0][0]) if frames else '-'} to "
@@ -346,10 +364,18 @@ def build_sheet(frames: list[tuple[float, Path]], video_path: Path, decision: di
         ("Median cam motion (px-equiv)", f"{decision['median_cam_motion']:.3f}"),
         ("Fraction high-motion windows", f"{decision['frac_high_cam_motion']:.2f}"),
     ]
+    if context:
+        rows += [
+            ("Round kind", str(context.get("round_kind") or "round")),
+            ("Kit", str(context.get("kit") or "-")),
+            ("Notes", str(context.get("notes") or "-")),
+            ("Identity", "the athlete in the reference photo (top-right, if attached) is "
+                        "\"you\"; the other person in every frame is \"partner\"."),
+        ]
     for k, v in rows:
         c.setFont(FONT_B, 9)
         c.drawString(PAD, y, k)
-        y = _text_block(c, v, PAD + 200, y, page_size("landscape")[0] - PAD - 200 - PAD, 9, 12) - 4
+        y = _text_block(c, v, PAD + 200, y, page_w - PAD - 200 - PAD, 9, 12) - 4
     c.showPage()
     if library:
         draw_library_pages(c, library)
@@ -390,7 +416,7 @@ def plot_motion(records: list[MotionRecord], chosen: list[float], otsu_t: float 
 # ── CLI ───────────────────────────────────────────────────────────────────────────────────────
 def process(video_path: Path, out_dir: Path, *, analysis_fps: float = ANALYSIS_FPS,
            step: float = DEFAULT_STEP_SECONDS, dry_run: bool = False,
-           no_library: bool = False) -> dict[str, Any]:
+           no_library: bool = False, context: dict[str, Any] | None = None) -> dict[str, Any]:
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise RuntimeError(f"cannot open video: {video_path}")
@@ -429,7 +455,7 @@ def process(video_path: Path, out_dir: Path, *, analysis_fps: float = ANALYSIS_F
         if frames:
             library = None if no_library else load_library()
             build_sheet(frames, video_path, decision, out_dir / "sheets" / f"{out_dir.name}.pdf",
-                       library)
+                       library, context)
         decision["n_frames_extracted"] = len(frames)
 
     return decision

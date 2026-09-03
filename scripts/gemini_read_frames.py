@@ -85,15 +85,19 @@ PAGE_NOTICE = (
 )
 
 
-def load_prompt() -> str:
+def load_prompt(path: Path = PROMPT_PATH) -> str:
     """The prompt body only -- the doc's own ``---``-delimited middle section, not its title,
     intro or the "Measured performance" appendix below it. Keeps this script and the doc
-    provably in sync: change the prompt here by changing the doc, nowhere else."""
-    text = PROMPT_PATH.read_text(encoding="utf-8")
+    provably in sync: change the prompt here by changing the doc, nowhere else.
+
+    ``path`` defaults to the frame-reading prompt (``docs/PROMPT_gemini_frame_reading.md``);
+    the video-pro worker (``scripts/video_jobs.py``, Fase 3) passes
+    ``docs/PROMPT_gemini_round_reading.md`` instead -- same file shape, same ``---`` contract,
+    different vocabulary (``you``/``partner`` actors, no scoreboard)."""
+    text = path.read_text(encoding="utf-8")
     parts = re.split(r"\n---\n", text)
     if len(parts) < 3:
-        logger.warning("%s has no --- delimited prompt section; sending the whole file",
-                       PROMPT_PATH)
+        logger.warning("%s has no --- delimited prompt section; sending the whole file", path)
         return text.strip()
     return parts[1].strip()
 
@@ -309,6 +313,8 @@ def main() -> int:
     ap.add_argument("--sheets", type=Path, required=True,
                     help="directory of .pdf/.png/.jpg frame sheets to send")
     ap.add_argument("--out", type=Path, required=True, help="events.json path to write")
+    ap.add_argument("--prompt", type=Path, default=PROMPT_PATH,
+                    help="prompt doc to load (default: frame-reading prompt)")
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--thinking", choices=_THINKING_LEVELS, default="high")
     ap.add_argument("--dry-run", action="store_true")
@@ -318,7 +324,7 @@ def main() -> int:
     a = ap.parse_args()
 
     sheets = find_sheets(a.sheets)
-    prompt = load_prompt()
+    prompt = load_prompt(a.prompt)
 
     if a.guidance and [p.suffix.lower() for p in sheets] != [".pdf"]:
         raise ValueError("--guidance needs exactly one .pdf under --sheets "
