@@ -367,7 +367,7 @@ def match_narrative(bd: dict[str, Any], lang: str = "en") -> list[Section]:
     if ds_section is not None:
         sections.append(ds_section)
 
-    # Grappling-ELO context — relative % move, never the raw rating.
+    # Grappling Rating (Glicko-2) context — relative % move, never the raw rating.
     da, db = a.get("elo_delta_pct"), b.get("elo_delta_pct")
     if da is not None or db is not None:
         bits = []
@@ -376,10 +376,10 @@ def match_narrative(bd: dict[str, Any], lang: str = "en") -> list[Section]:
         if db is not None:
             bits.append(f"{_name(b)} {db:+.1f}%")
         joined = "; ".join(bits)
-        sections.append(("Grappling ELO", [_t(
+        sections.append(("Grappling Rating (Glicko-2)", [_t(
             lang,
-            f"This bout moved each fighter's Grappling ELO: {joined}.",
-            f"A luta mexeu no Grappling ELO de cada um: {joined}.")]))
+            f"This bout moved each fighter's Grappling Rating (Glicko-2): {joined}.",
+            f"A luta mexeu no Grappling Rating (Glicko-2) de cada um: {joined}.")]))
 
     return sections
 
@@ -418,8 +418,8 @@ def profile_narrative(p: dict[str, Any], lang: str = "en") -> list[Section]:
         division_en = pick(gender, m="his division", f="her division", neutral="the division")
         subject_pt = pick(gender, m="Ele", f="Ela", neutral=name)
         opener += _t(lang,
-                     f" {sits_en} #{rank} by Grappling ELO in {division_en}",
-                     f" {subject_pt} é o #{rank} em Grappling ELO na divisão")
+                     f" {sits_en} #{rank} by Grappling Rating (Glicko-2) in {division_en}",
+                     f" {subject_pt} é o #{rank} em Grappling Rating (Glicko-2) na divisão")
         opener += (_t(lang, f" (top {pctile}% overall).", f" (top {pctile}% no geral).")
                    if pctile else ".")
     sections.append((_t(lang, "The system", "O sistema"), [opener]))
@@ -592,8 +592,8 @@ def event_narrative(ep: dict[str, Any], lang: str = "en") -> list[Section]:
         joined = ", ".join(hl)
         sections.append((_t(lang, "Who showed up", "Quem estava lá"), [_t(
             lang,
-            f"Top names on the card by Grappling ELO: {joined}.",
-            f"Principais nomes do card por Grappling ELO: {joined}.")]))
+            f"Top names on the card by Grappling Rating (Glicko-2): {joined}.",
+            f"Principais nomes do card por Grappling Rating (Glicko-2): {joined}.")]))
 
     return sections
 

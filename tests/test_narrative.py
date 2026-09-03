@@ -93,7 +93,7 @@ class TestMatchNarrative:
 
     def test_grappling_elo_relative(self) -> None:
         body = _flat(match_narrative(_breakdown()))
-        assert "Grappling ELO" in body
+        assert "Grappling Rating (Glicko-2)" in body
         assert "+2.5%" in body and "-1.7%" in body
         assert "1884" not in body  # raw rating never shown
 
@@ -118,7 +118,7 @@ class TestProfileNarrative:
     def test_archetype_and_rank(self) -> None:
         body = _flat(profile_narrative(_profile()))
         assert "submission hunter" in body
-        assert "#1 by Grappling ELO" in body
+        assert "#1 by Grappling Rating (Glicko-2)" in body
 
     def test_response_patterns_removed(self) -> None:
         """Response-pattern prose (owner-distrusted, small-sample) is gone entirely —
@@ -326,5 +326,6 @@ def test_every_section_differs_between_languages() -> None:
 
     assert len(en) == len(pt)
     for (h_en, p_en), (h_pt, p_pt) in zip(en, pt):
-        assert h_en != h_pt or h_en == "Grappling ELO", f"heading not translated: {h_en}"
+        assert h_en != h_pt or h_en == "Grappling Rating (Glicko-2)", (
+            f"heading not translated: {h_en}")
         assert p_en != p_pt, f"body not translated under {h_en}"
