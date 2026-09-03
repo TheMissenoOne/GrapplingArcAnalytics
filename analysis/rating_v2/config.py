@@ -97,7 +97,9 @@ class EngineConfig:
 # CBJJE Paulista / CBJJ Brasileiro No-Gi 2026, 3 new athletes; 914 matches, 719 eligible,
 # 672 athletes with state). Re-pinned together with the "edge = path" map ship so the
 # published Grappling ELO and athletes.elo read the same corpus again.
-SITE_RATING_RUN_ID: str | None = "8ff9fb45-ab30-4385-87c1-402c9918ee53"
+# 2026-09-04 — N1 aliases + N2 composite reprocess + Turtle=control + D7 (one replay for all;
+# corpus: 912 matches after the N2 expansion, 248 composite events split).
+SITE_RATING_RUN_ID: str | None = "b679c3f0-60a7-44ac-b993-9a173074ad09"
 
 # Publish-confidence cut. An editorial decision calibrated against measured impact
 # (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87
