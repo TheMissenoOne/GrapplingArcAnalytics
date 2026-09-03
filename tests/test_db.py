@@ -555,6 +555,33 @@ def test_group_membership_round_trips(session):
     assert roles == {prof.id: "professor", student.id: "student"}
 
 
+def test_group_member_trains_here_round_trips_and_defaults_false(session):
+    """Alembic 0055 — separate from ``role``: an owner/professor opts in explicitly, a plain
+    row otherwise defaults to not training there (join_group() sets it per-invite server-side,
+    outside this ORM-level default)."""
+
+    from db.models import Group, GroupMember, Profile
+
+    owner = Profile(id=str(uuid.uuid4()), full_name="Dono")
+    student = Profile(id=str(uuid.uuid4()), full_name="Aluno")
+    group = Group(id=str(uuid.uuid4()), owner_id=owner.id, name="SP Grappling")
+    session.add_all([owner, student, group])
+    session.add_all([
+        GroupMember(group_id=group.id, profile_id=owner.id, role="owner"),
+        GroupMember(group_id=group.id, profile_id=student.id, role="student", trains_here=True),
+    ])
+    session.commit()
+
+    owner_row = session.get(GroupMember, (group.id, owner.id))
+    student_row = session.get(GroupMember, (group.id, student.id))
+    assert owner_row.trains_here is False
+    assert student_row.trains_here is True
+
+    owner_row.trains_here = True
+    session.commit()
+    assert session.get(GroupMember, (group.id, owner.id)).trains_here is True
+
+
 def test_group_member_consent_at_round_trips(session):
     """``join_group()`` (alembic 0054) stamps this the moment the Web confirmation screen lets
     the join through — NULL means "joined before 0054" or "never confirmed", never "declined"."""

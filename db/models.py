@@ -316,6 +316,12 @@ class GroupMember(Base):
     # via `create_group()` (the owner's own membership, nothing to disclose to themselves) or
     # for any row that predates 0054; NULL is never read as consent given.
     consent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # "Does this person train here" — independent of ``role`` ("what can this person DO here").
+    # Alembic 0055. Server default false; `join_group()` sets it true for a `'student'` invite,
+    # `set_trains_here()` (self-only RPC) is how an owner/professor opts themselves in.
+    trains_here: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
 
     __table_args__ = (
         CheckConstraint("role in ('owner','professor','student')", name="ck_group_members_role"),
