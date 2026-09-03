@@ -179,6 +179,43 @@ sheet without inventing events, where the answer JSON goes, and the automation b
 frames they describe (written by `scripts/frame_answer_import.py`, reviewed in place via
 `scripts/frame_registrar.py`; the file's `source` field carries model-vs-human provenance).
 
+## Round Video Worker (private, Pro — cross-module contract)
+
+`scripts/video_jobs.py` — batch worker over `session_video_jobs`/`session_video_analysis`
+(alembic `0058_session_video_analysis.py`), the App's Pro "record a round" feature. Run by hand
+by the dono, no cron, no server:
+
+```bash
+uv run python -m scripts.video_jobs list
+uv run python -m scripts.video_jobs process --limit 10 [--job <uuid>] [--dry-run] [--keep-frames]
+uv run python -m scripts.video_jobs retry [--job <uuid> | --all-failed]
+```
+
+Flow per job: claim (`for update skip locked`) → download video from `session-videos` (+ the
+owner's selfie from `user-media`, only if `profiles.face_consent_at is not null`) → segment +
+sheet via `scripts.video_frames.process` (library-embedded by default) → read via
+`scripts.gemini_read_frames.read_frames` with `docs/PROMPT_gemini_round_reading.md` (actors are
+`you`/`partner`, never a name) → `analysis/round_analysis.py` (pure: `build_sequences`,
+`derive_difficulty`/`difficulty_components`, `build_highlights`) → clip + PDF upload to
+`user-media/{owner_id}/analysis/{job_id}/...` → one `session_video_analysis` row, job → `done`.
+Full flow + the difficulty formula: `docs/video_jobs.md`.
+
+**No bucket added** — video stays in `session-videos` (0024, unchanged path), everything the
+worker produces goes to `user-media` (0042); both already in `PRIVATE_BUCKETS`. RLS is
+owner-only SELECT on both tables, no `is_pro` predicate (an entitlement lapse must not revoke
+an analysis already generated); the only client write path is the RPC `enqueue_video_job` —
+neither table has a client INSERT/UPDATE policy.
+
+**Difficulty calibration is PENDING.** The four coefficients in `derive_difficulty` (5.0 / 3.0 /
+1.5 / 0.5) are a first transparent guess, not measured against real rounds —
+`session_video_analysis.difficulty_inputs` stores every intermediate term precisely so a re-fit
+against user-confirmed manual ratings never needs to re-read a video.
+
+Privacy class: **PRIVATE** (see "Public vs Private Data" above and the root `CLAUDE.md`) — the
+whole pipeline exists to hand ONE owner back their OWN round; frames/video/selfie live only
+inside a `TemporaryDirectory` for the run and are deleted after, nothing here ever reaches
+`data/finetune`, a CV dataset, the athlete corpus, an archetype centroid, ELO, or `site/`.
+
 ## ELO Engine
 
 ⚠️ **The per-node number an athlete graph publishes is Glicko-2, not this V1 engine**

@@ -94,13 +94,14 @@ thinking level changes what the model infers, not which frames it sees. Cost: pr
 tokens (1293 text + 2128 image), 1422 thoughts tokens, 318 output tokens, 5161 total — a
 rounding error per bout at Gemini Flash pricing.
 
-**Known gap, not fixed here:** the prompt (`PROMPT_gemini_frame_reading.md`) describes a sheet
-that includes an "Allowed labels" vocabulary section — the real trials/broadcast sheets
-`frame_pdf.py` renders always carry one. `video_frames.py`'s sheet does not embed the node
-library (out of scope for this test), so Gemini reads this sheet against its own judgement of
-technique names rather than the closed vocabulary. Fine for testing the extraction+reading
-loop; a production run over this footage would want the library pages added to
-`build_sheet()` the same way `frame_pdf.py`'s `draw_library_pages` does.
+**Gap closed (2026-09-05):** `video_frames.py:process` now embeds the vocabulary by default —
+`build_sheet()` draws `frame_pdf.draw_library_pages` on the sheet unless called with
+`no_library=True`, the same pages the broadcast/trials path already carries. The single-sheet
+read described above predates this change and read without the vocabulary; the baseline runs
+below (`gemini_baseline.py`, trials_2023_24 corpus) already use library-embedded sheets and are
+the current numbers to trust for label-discrimination accuracy. The round-video production
+path (`scripts/video_jobs.py`, `docs/video_jobs.md`) also gets the library for free through the
+same default.
 
 ## Cost (rough)
 
