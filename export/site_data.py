@@ -30,6 +30,7 @@ import logging
 import re
 import unicodedata
 from collections import Counter
+from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -43,7 +44,6 @@ from analysis.athlete_systems import (
     profile_to_dict,
 )
 from analysis.corpus_paths import (
-    OCEAN_FOLD_GROUP_BUDGET,
     aggregate_bouts,
     mini_path_graph,
     path_payload,
@@ -1071,7 +1071,7 @@ def _nav(active: str) -> str:
     <a href="breakdowns.html"{cls('breakdowns')}>Breakdowns</a>
     <a href="events.html"{cls('events')}>Events</a>
     <a href="grapple-like.html"{cls('grapple')}>Grapple Like</a>
-    <a href="the-ocean.html"{cls('ocean')}>The Ocean</a>
+    <a href="the-system.html"{cls('system')}>The System</a>
     <a href="the-data.html"{cls('data')}>The Data</a>
     <div class="nav-cta">
       <div class="lang"><button data-lang="en" class="on">EN</button><button data-lang="pt">PT</button></div>
@@ -1085,7 +1085,7 @@ _FOOTER = """<footer class="site-foot"><div class="wrap">
   <a class="brand" href="index.html" aria-label="GrapplingArc"><img class="brand-symbol" src="brand-symbol.svg" alt="" aria-hidden="true"/><span class="brand-wordmark">Grappling<span class="brand-wordmark-accent">Arc</span></span></a>
   <nav class="links">
     <a href="breakdowns.html">Breakdowns</a><a href="events.html">Events</a><a href="grapple-like.html">Grapple Like</a>
-    <a href="the-ocean.html">The Ocean</a><a href="the-data.html">The Data</a>
+    <a href="the-system.html">The System</a><a href="the-data.html">The Data</a>
     <a href="../privacy.html">Privacy</a><a href="../account-deletion.html">Data &amp; Deletion</a>
   </nav>
   <p class="copy">© 2026 GrapplingArc · generated from match data · analysis &amp; education only</p>
@@ -2241,7 +2241,15 @@ os.addEventListener('keydown', function(e){ if(e.key==='Enter') locate(); });
 
 
 def render_ocean_page() -> str:
-    """The Ocean — full-screen technique force graph, region legend, search, node dialog."""
+    """The Ocean — full-screen technique force graph, region legend, search, node dialog.
+
+    ⚠️ Dead weight since "The System" (2026-09-03) — nothing links here (`_nav`/`_FOOTER` point
+    at the-system.html now) and `export_site` no longer calls this; kept only because
+    `_OCEAN_STYLE`/`_OCEAN_BODY`/`_OCEAN_JS` are still read by `render_system_page` below (the
+    2D force-graph reading of `pathGraph`'s SIBLING data, `O.nodes`/`O.links`, is unrelated to
+    the 3D one and this function is the only place it's exercised — a manual fallback check, not
+    a live page). `the-ocean.html` itself is generated as a REDIRECT by `_render_ocean_redirect`.
+    """
     return (
         _head("The Ocean", description="The global grappling position map — every technique as a "
               "node, transitions as edges, clustered into regions with centrality, bridging and "
@@ -2249,6 +2257,81 @@ def render_ocean_page() -> str:
         + _OCEAN_STYLE + _nav("ocean") + _OCEAN_BODY + _FOOTER +
         '<script src="graph.js"></script><script src="i18n.js"></script>'
         '<script src="ocean-data.js"></script><script>' + _OCEAN_JS + "</script></body></html>"
+    )
+
+
+def _render_ocean_redirect() -> str:
+    """``the-ocean.html`` (2026-09-03) — "The Ocean" is replaced by "The System"; this is a
+    thin redirect kept only so old links/bookmarks land somewhere real. `<html lang>`/canonical/
+    og come from `_head`; `validate_site.py` (site repo) checks the meta-refresh + canonical."""
+    return (
+        _head("The Ocean", description="Moved — see The System.", path="the-ocean.html",
+              image="brand-og.png")
+        + '<meta http-equiv="refresh" content="0; url=the-system.html"/>'
+        + _nav("system") +
+        '<main style="padding:48px 24px"><h1>The Ocean has moved</h1>'
+        '<p>This page is now <a href="the-system.html">The System</a>.</p></main>'
+        + _FOOTER + "</body></html>"
+    )
+
+
+def render_system_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
+    """The System — 3D "solar system" read of ``GA_OCEAN.pathGraph`` (2026-09-03, replaces
+    the-ocean.html as the front door; `docs/superpowers/specs/2026-09-03-the-system-design.md`).
+
+    This is CHROME only — header/nav/footer/canonical/og (from `_head`, unchanged), the same
+    panel HTML/CSS the Ocean used (`_OCEAN_STYLE`, ``#oceanPanel``/``opName``/… ids — literal
+    reuse, not a rename, so the interactive script wires the exact same selectors), a vendored
+    three.js importmap, and the module bootstrap that hands off to ``site/system.js``
+    (``mountSystem`` — the actual 3D render/camera/raycaster logic; that file lives in the site
+    repo, out of this module's scope). ``pathgraph_nodes`` is the SAME ``GA_OCEAN.pathGraph.nodes``
+    list `export_site` already computed — used only to server-render the ``<noscript>`` fallback
+    (a state/anchor label list + a link to Grapple Like), because a page with no JS has nothing
+    else to build that list from at load time.
+    """
+    fallback = "".join(
+        f"<li>{html.escape(str(n.get('label') or ''))}</li>"
+        for n in sorted(
+            (n for n in pathgraph_nodes if n.get("kind") in ("state", "anchor") and n.get("label")),
+            key=lambda n: str(n.get("label") or ""),
+        )
+    )
+    body = f"""<section class="ocean-stage">
+  <div id="system-root" class="ocean-canvas"></div>
+  <div class="ocean-hud">
+    <div class="ocean-h"><h1>The System</h1><p class="muted" id="systemMeta"></p></div>
+  </div>
+  <aside id="oceanPanel" class="ocean-panel" hidden>
+    <button id="oceanClose" class="ocean-close" aria-label="close">&times;</button>
+    <h2 id="opName"></h2><div id="opMeta"></div>
+    <div id="opMetrics" class="op-metrics"></div>
+    <div id="opNeighbours"></div><div id="opEdges"></div><div id="opUndrawn"></div>
+  </aside>
+  <button id="systemReset" type="button" class="ocean-close" style="position:absolute;bottom:18px;right:18px;width:auto;height:auto;padding:8px 14px;border:1px solid var(--line);border-radius:8px;font-size:12px;pointer-events:auto">Reset view</button>
+  <noscript><div style="padding:24px 22px">
+    <p>The 3D map needs JavaScript. Every position in the corpus:</p>
+    <ul>{fallback}</ul>
+    <p><a href="grapple-like.html">Browse fighters instead →</a></p>
+  </div></noscript>
+</section>"""
+    panel_js = (
+        "{root:document.getElementById('oceanPanel'),name:document.getElementById('opName'),"
+        "meta:document.getElementById('opMeta'),metrics:document.getElementById('opMetrics'),"
+        "neighbours:document.getElementById('opNeighbours'),edges:document.getElementById('opEdges'),"
+        "undrawn:document.getElementById('opUndrawn'),close:document.getElementById('oceanClose'),"
+        "reset:document.getElementById('systemReset'),metaLabel:document.getElementById('systemMeta')}"
+    )
+    return (
+        _head("The System", description="Every technique connection in the public corpus, drawn "
+              "as a 3D solar system — Finish at the centre, every position in orbit by how many "
+              "strokes it takes to get there.", path="the-system.html")
+        + _OCEAN_STYLE + _nav("system") + body + _FOOTER +
+        '<script src="i18n.js"></script><script src="ocean-data.js"></script>'
+        '<script type="importmap">{"imports":{"three":"three/three.module.min.js",'
+        '"three/addons/":"three/addons/"}}</script>'
+        '<script type="module">import {mountSystem} from "./system.js";'
+        "mountSystem(document.getElementById('system-root'),(window.GA_OCEAN||{}).pathGraph,"
+        "{panel:" + panel_js + "});</script></body></html>"
     )
 
 
@@ -2324,7 +2407,8 @@ def export_site(session: Session, out: Path, full: bool = False,
     renderer against that loop is not workable. The globals it writes are PARTIAL by
     construction, so ``main()`` refuses to point it at the real site directory — a preview must
     never be mistaken for the bundle. ``only=frozenset()`` builds no detail page at all, which
-    is the cheapest way to regenerate just ``the-ocean.html`` + ``ocean-data.js``.
+    is the cheapest way to regenerate just ``the-system.html``/``the-ocean.html`` (redirect) +
+    ``ocean-data.js``.
     """
     from time import perf_counter as _pc
 
@@ -2416,21 +2500,22 @@ def export_site(session: Session, out: Path, full: bool = False,
     # §5d superseded the old static `min_count=2` drop (docs/taxonomy/03_ARESTA_COMO_CAMINHO.md
     # §FASE 5d) — hiding a path hides the object of study (§10.7), and `min_count=2` did exactly
     # that: 391/2370 paths kept, most of the long chains that carry the branching gone with them.
-    # `path_payload`'s own default budget (~60 variants, ranked by support/strength) now decides
-    # what draws individually; the corpus still bundles in under a second regardless, so this was
-    # never a perf gate. Everything past the budget FOLDS into a category stroke instead of
-    # dropping — see `path_payload`'s docstring and `analysis.corpus_paths._fold_overflow`.
-    # `max_fold_groups` is the Ocean's SECOND ceiling (only this caller sets it — a dossier/
-    # breakdown never folds enough to need one): 877 fold groups measured over the full corpus
-    # would still put 937 strokes on one canvas, more than the old static gate it replaced.
-    # Nothing is dropped — every group past the budget rides in `pathGraph.folded` flagged
-    # `drawn=False`, and `pathGraph.stats.undrawn` is the aggregate the meta line reads.
+    # "The System" (2026-09-03, docs/superpowers/specs/2026-09-03-the-system-design.md) drops the
+    # budget/fold ceilings entirely for this caller — `max_variants=None`/`max_fold_groups=None`
+    # draws every variant individually, nothing folds. Those ceilings existed because a FLAT
+    # canvas ran out of legible ink; the 3D client dims by selection instead, and a dossier/
+    # breakdown (still budgeted, `path_payload`'s own default) never had the density problem.
+    # `layout="ring"` (already the dossier/breakdown default) is what gives every point a
+    # `sector` — the 3D client's latitude band. Measured over the full corpus, 2026-09-03: 219
+    # points / 2 297 strokes / 2 221 paths / 5 rings, 1.4 MB raw, ~1s.
     ocean["pathGraph"] = path_payload(
         aggregate_bouts(_corpus_bouts(session), collapse_actors=True),
-        max_fold_groups=OCEAN_FOLD_GROUP_BUDGET,
+        layout="ring", max_variants=None, max_fold_groups=None,
     )
     (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
-    (out / "the-ocean.html").write_text(render_ocean_page(), encoding="utf-8")
+    (out / "the-system.html").write_text(
+        render_system_page(ocean["pathGraph"].get("nodes") or ()), encoding="utf-8")
+    (out / "the-ocean.html").write_text(_render_ocean_redirect(), encoding="utf-8")
     _t = _phase("build_ocean + data.js", _t)
     clear_match_cache()  # renders below use precomputed data; don't leak the cache past the builds
 
@@ -2476,8 +2561,9 @@ def export_site(session: Session, out: Path, full: bool = False,
     _t = _phase("render events", _t)
 
     # robots.txt + sitemap.xml (acquisition baseline — the site was invisible to crawlers).
+    # the-ocean.html is a redirect (2026-09-03) — the-system.html is the page worth indexing.
     static_pages = ["index.html", "breakdowns.html", "events.html", "grapple-like.html",
-                    "the-data.html", "the-ocean.html"]
+                    "the-data.html", "the-system.html"]
     urls = static_pages + [f"breakdown-{s}.html" for s, _ in full_bds] \
         + [f"grapple-{s}.html" for s in details] + [f"event-{s}.html" for s, _ in event_details]
     locs = "\n".join(f"  <url><loc>{SITE_BASE}/{u}</loc></url>" for u in urls)

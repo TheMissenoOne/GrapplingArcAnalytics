@@ -1,11 +1,18 @@
-"""Tests for the public-site graph-link direction/dash helpers (pure, no DB)."""
+"""Tests for the public-site graph-link direction/dash helpers (pure, no DB), plus the-system.html
+nav/page/redirect contract ("The System", 2026-09-03 — replaces the-ocean.html)."""
 
 from __future__ import annotations
 
 from typing import Any
 
 from analysis.network_metrics import network_from_sequences
-from export.site_data import _direct_career_links, _to_graphview
+from export.site_data import (
+    _direct_career_links,
+    _nav,
+    _render_ocean_redirect,
+    _to_graphview,
+    render_system_page,
+)
 
 
 def _e(label: str, typ: str, actor: str, ok: bool = False) -> dict[str, Any]:
@@ -54,3 +61,35 @@ def test_direct_career_links_dashes_low_landing() -> None:
     net_ok = network_from_sequences([miss, land, land])  # 3x → below weight-5 floor
     out_ok = _direct_career_links(links, node_type, net_ok)
     assert out_ok[0]["dashed"] is False  # weight 3 < 5 floor
+
+
+def test_nav_and_footer_point_at_the_system_not_the_ocean() -> None:
+    nav = _nav("system")
+    assert 'href="the-system.html"' in nav and 'class="on"' in nav
+    assert "The System" in nav
+    assert "the-ocean.html" not in nav  # old link fully replaced, not just added-to
+
+
+def test_render_system_page_wires_globals_importmap_and_one_h1() -> None:
+    page = render_system_page([
+        {"kind": "state", "label": "Closed Guard"},
+        {"kind": "anchor", "label": "Finish"},
+        {"kind": "state", "label": ""},  # no label -> excluded from the noscript fallback
+    ])
+    assert page.count("<h1>") == 1 and "<h1>The System</h1>" in page
+    assert '<html lang="en">' in page
+    assert '<link rel="canonical" href="https://' in page
+    assert '<meta property="og:image" content="https://' in page
+    assert 'id="system-root"' in page
+    assert '"imports":{"three":"three/three.module.min.js"' in page
+    assert "mountSystem(document.getElementById('system-root')" in page
+    assert "window.GA_OCEAN" in page
+    assert "<li>Closed Guard</li>" in page and "<li>Finish</li>" in page
+
+
+def test_ocean_redirect_points_at_the_system_with_canonical() -> None:
+    page = _render_ocean_redirect()
+    assert '<meta http-equiv="refresh" content="0; url=the-system.html"/>' in page
+    assert '<link rel="canonical" href="https://' in page and "the-ocean.html" in page
+    assert 'href="the-system.html"' in page
+    assert page.count("<h1>") == 1

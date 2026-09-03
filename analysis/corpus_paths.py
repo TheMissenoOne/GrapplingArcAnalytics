@@ -61,7 +61,6 @@ from analysis.taxonomy_kind import load_inference_table, orientation_of
 
 __all__ = [
     "LAYOUTS",
-    "OCEAN_FOLD_GROUP_BUDGET",
     "PATH_VARIANT_BUDGET",
     "PathAggregate",
     "aggregate_bouts",
@@ -85,19 +84,18 @@ _SIDES = ("a", "b")
 # below it the mechanism never fires, which is the whole point for a one-bout breakdown.
 PATH_VARIANT_BUDGET = 60
 
-# Ocean's SECOND ceiling (docs §12, 2026-09-01): 60 kept variants + one stroke per fold GROUP
-# is still a novelo — the full corpus folds into 877 groups, more strokes (937) than the OLD
-# static gate it replaced (396). Measured over the real corpus: 340 caps `stats.segments` at
-# ~407, close to the owner's ~400 target (`export/site_data.py` measurement, 2026-09-01). Only
-# the ocean passes this; a dossier/breakdown never crosses it (`max_fold_groups=None` default).
-OCEAN_FOLD_GROUP_BUDGET = 340
-
 # §17 (Fase 5e, owner 2026-09-01 night, on the variant-17 demo): the dossier and the breakdown
 # draw CONCENTRIC RINGS — Finish at the centre, radius = strokes to a finish, the three generic
-# anchors fixed outside in the bipolar placement. The OCEAN stays on the flow: measured, its ring
-# 2 alone holds 141 of 85 states' occurrences and the disc becomes one band (the same reason it
-# already carries a stroke ceiling the other two do not need). One parameter, two readings — the
-# rest of the payload is byte-for-byte the same shape either way.
+# anchors fixed outside in the bipolar placement. As of "The System" (2026-09-03) the OCEAN also
+# reads ring mode — its 2D flat disc still bands (ring 2 alone held 141 of 85 states'
+# occurrences), but the payload is no longer drawn flat: `export/site_data.py:build_ocean` feeds
+# it to a 3D client (`the-system.html`) that spreads each ring's own `sector` band across
+# latitude AND longitude, which is what the flat disc could not do. Same call also drops the old
+# ~400-stroke ceiling (`max_variants=None`, `max_fold_groups=None` — measured over the full
+# corpus: 219 points / 2 297 strokes / 2 221 paths / 5 rings, 1.4 MB, ~1s) — a novelo on a flat
+# canvas is not one once every stroke gets its own orbit and can be dimmed by selection instead
+# of by budget. One parameter, two readings — the rest of the payload is byte-for-byte the same
+# shape either way.
 LAYOUTS = ("flow", "ring")
 
 # A folded stroke's synthetic single action key — unique per fold group by construction (each
@@ -590,7 +588,7 @@ def path_payload(
     *,
     structure: str = DEFAULT_ANCHOR_STRUCTURE,
     rating_of: Callable[[str], float | None] | None = None,
-    max_variants: int = PATH_VARIANT_BUDGET,
+    max_variants: int | None = PATH_VARIANT_BUDGET,
     max_fold_groups: int | None = None,
     layout: str = "flow",
     target_aspect: float | None = None,
@@ -607,7 +605,9 @@ def path_payload(
     category stroke instead (``_fold_overflow``) — additive ``folded`` field below. A payload
     with fewer variants than the budget folds nothing, which is why a single-bout breakdown
     almost never does. Deterministic: the ranking key is total over the corpus, ties break on
-    ``path_id``.
+    ``path_id``. ``max_variants=None`` (2026-09-03, "The System") turns the budget off entirely —
+    every variant draws, nothing folds; the caller that wants this is the Ocean's 3D client,
+    which dims by selection instead of by a stroke ceiling.
 
     ``layout`` (§17, Fase 5e) picks the FRAME. ``"flow"`` is the left-to-right reading every
     caller had; ``"ring"`` is the owner's 2026-09-01 decision for the dossier and the breakdown:
@@ -618,10 +618,12 @@ def path_payload(
     state, landing on the ring their OWN finish-distance gives them, in the sector of their own
     orientation — Finish stays the one fixed centre. Ring mode adds two
     ADDITIVE fields — ``rings`` (the guide ellipses, in the same world units as the positions)
-    and ``ringCentre`` — plus a ``ring`` index on every state node; a client that does not know
-    about them draws exactly what it drew before. It also changes what ``back`` means on a
-    stroke: on a disc "behind in the flow" is not an x comparison, it is a stroke moving AWAY
-    from the finish, which is the return-edge reading the bow was invented for.
+    and ``ringCentre`` — plus a ``ring`` index AND a ``sector`` (``'top'``/``'neutral'``/
+    ``'bottom'``, ``RingLayout.sector`` — a junction inherits it the same way the layout already
+    does) on every point (state, anchor, junction alike); a client that does not know about them
+    draws exactly what it drew before. It also changes what ``back`` means on a stroke: on a
+    disc "behind in the flow" is not an x comparison, it is a stroke moving AWAY from the finish,
+    which is the return-edge reading the bow was invented for.
 
     ``target_aspect`` is the surface's TRUE ratio (``width / height``) and only the ring reads
     it — see ``analysis.ring_layout`` for why it is not the long-axis ratio ``flow_layout``
@@ -667,7 +669,7 @@ def path_payload(
         ]
 
     fold_meta: dict[str, dict[str, Any]] = {}
-    if len(all_paths) <= max_variants:
+    if max_variants is None or len(all_paths) <= max_variants:
         paths, bundle_input = all_paths, all_paths
     else:
         ranked = sorted(all_paths, key=lambda p: _rank_key(p, metrics_by_path[p.path_id]))
@@ -736,6 +738,7 @@ def path_payload(
     if layout not in LAYOUTS:
         raise ValueError(f"layout desconhecido: {layout!r}")
     ring_of: dict[str, int] = {}
+    sector_by_point: dict[str, str] = {}
     rings: list[dict[str, Any]] = []
     ring_centre: list[float] = [0.0, 0.0]
     if layout == "ring":
@@ -761,6 +764,7 @@ def path_payload(
                             target_aspect=target_aspect)
         pos = laid.pos
         ring_of = laid.ring
+        sector_by_point = laid.sector
         rings = ring_guides(laid)
         ring_centre = [round(laid.centre[0], 1), round(laid.centre[1], 1)]
     else:
@@ -779,6 +783,7 @@ def path_payload(
                 # "every positioned node has a ring" true of the whole payload, which is what
                 # lets a reader (or a test) evaluate a stroke's direction without a second BFS
                 **({"ring": ring_of[point.id]} if point.id in ring_of else {}),
+                **({"sector": sector_by_point[point.id]} if point.id in sector_by_point else {}),
             })
             continue
         found = state_rows.get(point.state_key)
@@ -807,6 +812,11 @@ def path_payload(
             # is what lets a panel say "two strokes from a finish" without re-deriving a BFS in
             # the client.
             node["ring"] = ring_of[point.id]
+        if point.id in sector_by_point:
+            # ADDITIVE (§17 follow-up): the same latitude band `RingLayout.sector` already
+            # computed (top/neutral/bottom orientation) — a 3D client (the-system.html) reads
+            # it directly instead of re-deriving orientation from `stateKey`.
+            node["sector"] = sector_by_point[point.id]
         if anchor:
             node["orient"] = orientation_of(node_key) if node_key != _FINISH_KEY else "finish"
             node["shape"] = "diamond"

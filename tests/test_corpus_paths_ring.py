@@ -74,10 +74,18 @@ def test_ring_mode_is_additive_over_the_flow_payload(ring: dict[str, Any],
     assert [lk["id"] for lk in ring["links"]] == [lk["id"] for lk in flow["links"]]
     assert ring["stats"] == flow["stats"]
     assert json.dumps(ring["paths"], sort_keys=True) == json.dumps(flow["paths"], sort_keys=True)
-    # o único campo novo por nó
+    # os únicos campos novos por nó
     for a, b in zip(ring["nodes"], flow["nodes"], strict=True):
-        assert set(a) - set(b) <= {"ring"}
+        assert set(a) - set(b) <= {"ring", "sector"}
         assert set(b) - set(a) == set()
+
+
+def test_every_point_carries_its_sector(ring: dict[str, Any]) -> None:
+    """L5 — o campo aditivo `sector` (já existia em `RingLayout.sector`, agora serializado):
+    todo ponto do payload de anel (estado, âncora, junção) carrega uma das três latitudes."""
+    assert all(n.get("sector") in {"top", "neutral", "bottom"} for n in ring["nodes"])
+    junctions = [n for n in ring["nodes"] if n.get("junction")]
+    assert junctions and all("sector" in n for n in junctions)
 
 
 def test_every_drawn_state_sits_on_its_ring_and_the_guides_describe_them(
