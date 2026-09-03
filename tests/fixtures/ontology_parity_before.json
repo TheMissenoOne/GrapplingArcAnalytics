@@ -1,10 +1,11 @@
 {
  "_": "Multiconjuntos medidos com o codigo ANTERIOR a N0 (docs/taxonomy/04_ONTOLOGIA_CANONICA.md), sobre os eventos de entrada de data/rating/chain_compiler_golden.json. Snapshot historico, escrito uma vez a mao a partir de um checkout limpo de main (9d9f079) — NAO e um golden gerado, e nao deve ser regenerado: seu valor inteiro e ser o 'antes'.",
+ "_addendum_2026-09-03": "de561d4 (D7) added 3 NEW cases to chain_compiler_golden.json (closing_drops_on_explicit_failure, closing_by_exit_orientation_explicit_success, failure_mid_chain_does_not_suppress_the_LAST_actions_anchor) — inputs this snapshot never saw, unrelated to the N0 authority swap. 'observations' below now includes their raw-event counts (rating reads every event regardless of D7's closing rule: +3 closed guard, +2 hip bump sweep, +1 armbar, +1 kimura). 'actions' below is the PRE-D7 compiler's count on those same 3 cases (D7 did not exist yet, so the pending chain still closed and counted the last action even when successful=false — same +1 armbar/+1 kimura as the observations, but +2 hip bump sweep because closing_drops_on_explicit_failure's Hip Bump Sweep would ALSO have closed and counted pre-D7). 'dropped_by_rule' declares exactly what D7 removes on top of that pre-D7 baseline: 1 hip bump sweep action, from closing_drops_on_explicit_failure, reason unresolved_failure — the only actions-multiset diff this addendum does not already fold in.",
  "actions": [
   [
    "armbar",
    "you",
-   2
+   3
   ],
   [
    "escape to standing",
@@ -29,12 +30,12 @@
   [
    "hip bump sweep",
    "you",
-   3
+   5
   ],
   [
    "kimura",
    "you",
-   5
+   6
   ],
   [
    "triangle choke",
@@ -42,11 +43,19 @@
    1
   ]
  ],
+ "dropped_by_rule": [
+  {
+   "node_key": "hip bump sweep",
+   "actor": "you",
+   "count": 1,
+   "reason": "unresolved_failure"
+  }
+ ],
  "observations": [
   [
    "armbar",
    0.25,
-   2
+   3
   ],
   [
    "back control",
@@ -61,7 +70,7 @@
   [
    "closed guard",
    0.25,
-   11
+   14
   ],
   [
    "escape to standing",
@@ -86,12 +95,12 @@
   [
    "hip bump sweep",
    0.25,
-   3
+   5
   ],
   [
    "kimura",
    0.25,
-   5
+   6
   ],
   [
    "mount",

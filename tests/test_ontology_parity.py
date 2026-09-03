@@ -53,6 +53,14 @@ def _reclassified() -> dict[str, Any]:
     return rows
 
 
+def _dropped_by_rule() -> list[dict[str, Any]]:
+    """D7 (`de561d4`) legitimately removes a final `successful=False` closing action from the
+    compiler's multiset instead of inferring an anchor for it — declared here (not a loose
+    tolerance) so the parity test still catches anything ELSE that moved."""
+    rows: list[dict[str, Any]] = _before().get("dropped_by_rule", [])
+    return rows
+
+
 def test_observations_for_side_is_untouched_by_the_authority_swap() -> None:
     """Sem exceção nenhuma: o rating lê evento cru, não classe."""
     observed: Counter[tuple[Any, ...]] = Counter()
@@ -76,6 +84,16 @@ def test_compiler_action_multiset_moves_only_where_reclassified_says() -> None:
                     after[(action.key, action.actor)] += 1
 
     before = _as_counter(_before()["actions"])
+
+    # D7 dropped exactly these (node_key, actor) counts off the pre-D7 baseline above — assert
+    # the exact size of that hole, then remove it from `before` so what's left to explain is
+    # only the N0 authority swap.
+    dropped = _dropped_by_rule()
+    for row in dropped:
+        key = (row["node_key"], row["actor"])
+        before[key] -= row["count"]
+        assert before[key] >= 0, key
+
     allowed = {entry["node_key"] for entry in _reclassified().values()}
     moved = {key for key in set(before) | set(after) if before.get(key) != after.get(key)}
     assert {key[0] for key in moved} <= allowed, sorted(moved)
