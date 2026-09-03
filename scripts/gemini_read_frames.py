@@ -35,7 +35,7 @@ sys.path.insert(0, str(REPO))
 logger = logging.getLogger("gemini_read_frames")
 
 PROMPT_PATH = REPO / "docs" / "PROMPT_gemini_frame_reading.md"
-DEFAULT_MODEL = "gemini-2.5-flash"
+DEFAULT_MODEL = "gemini-3.6-flash-high"
 _MIME = {".pdf": "application/pdf", ".png": "image/png", ".jpg": "image/jpeg",
         ".jpeg": "image/jpeg"}
 

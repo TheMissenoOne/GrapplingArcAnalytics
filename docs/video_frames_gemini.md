@@ -90,7 +90,7 @@ loop; a production run over this footage would want the library pages added to
 
 Gemini's image tokenization scales with resolution, not bytes — a page raster around 1024px on
 its long side is ~256-1300 tokens depending on tiling. A 3-page, 9-frame sheet PDF is a handful
-of embedded JPEGs plus the context page's text, well under 5k input tokens; `gemini-2.5-flash`
+of embedded JPEGs plus the context page's text, well under 5k input tokens; `gemini-3.6-flash-high` (owner's pick; override with --model)
 pricing is per-million-token and this is a rounding error per bout. The real cost driver at
 scale is bout COUNT, not sheet size — 100 bouts is still under a few hundred thousand tokens.
 
