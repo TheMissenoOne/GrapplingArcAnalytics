@@ -2005,6 +2005,8 @@ _OCEAN_STYLE = """<style>
 .ocean-panel{position:absolute;top:0;right:0;height:100%;width:340px;background:var(--panel);border-left:1px solid var(--line);z-index:3;padding:24px 22px;overflow:auto;box-shadow:-22px 0 44px rgba(0,0,0,.32)}
 .ocean-panel[hidden]{display:none}
 .ocean-close{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--ink-3);font-size:23px;cursor:pointer;line-height:1}
+.system-fallback{padding:24px 22px;max-width:60ch;color:var(--ink-2);overflow:auto;max-height:100%}
+#system-root:has(canvas) .system-fallback{display:none}
 .ocean-panel h2{font-size:21px;margin:0 30px 8px 0;letter-spacing:-.3px}
 .op-metrics{margin-top:18px;display:flex;flex-direction:column;gap:12px}
 .op-metric .op-mh{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px}
@@ -2265,7 +2267,7 @@ def _render_ocean_redirect() -> str:
     thin redirect kept only so old links/bookmarks land somewhere real. `<html lang>`/canonical/
     og come from `_head`; `validate_site.py` (site repo) checks the meta-refresh + canonical."""
     return (
-        _head("The Ocean", description="Moved — see The System.", path="the-ocean.html",
+        _head("The Ocean", description="Moved — see The System.", path="the-system.html",
               image="brand-og.png")
         + '<meta http-equiv="refresh" content="0; url=the-system.html"/>'
         + _nav("system") +
@@ -2285,21 +2287,34 @@ def render_system_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str
     three.js importmap, and the module bootstrap that hands off to ``site/system.js``
     (``mountSystem`` — the actual 3D render/camera/raycaster logic; that file lives in the site
     repo, out of this module's scope). ``pathgraph_nodes`` is the SAME ``GA_OCEAN.pathGraph.nodes``
-    list `export_site` already computed — used only to server-render the ``<noscript>`` fallback
-    (a state/anchor label list + a link to Grapple Like), because a page with no JS has nothing
-    else to build that list from at load time.
+    list `export_site` already computed — used only to server-render the fallback shown
+    inside ``#system-root`` (a state/anchor label list + a link to Grapple Like), because a
+    page with no JS (or no WebGL) has nothing else to build that list from at load time.
+    The fallback lives as plain HTML *inside* ``#system-root`` rather than in a
+    ``<noscript>`` sibling: ``mountSystem`` only appends a ``<canvas>`` there on success and
+    never clears the root first (see site/system.js), so a ``<noscript>`` block would miss
+    the "JS on, WebGL missing" case entirely — `_OCEAN_STYLE`'s ``#system-root:has(canvas)``
+    rule hides the fallback once (and only once) that canvas lands, no JS coordination needed.
     """
-    fallback = "".join(
+    fallback_items = "".join(
         f"<li>{html.escape(str(n.get('label') or ''))}</li>"
         for n in sorted(
             (n for n in pathgraph_nodes if n.get("kind") in ("state", "anchor") and n.get("label")),
             key=lambda n: str(n.get("label") or ""),
         )
     )
+    fallback = f"""<div class="system-fallback">
+    <p>{_bi("This 3D map needs a browser with JavaScript and WebGL. Every position in the corpus:",
+            "Este mapa 3D exige um navegador com JavaScript e WebGL. Toda posição do corpus:")}</p>
+    <ul>{fallback_items}</ul>
+    <p><a href="grapple-like.html">{_bi("Browse fighters instead →", "Ver atletas em vez disso →")}</a></p>
+  </div>"""
     body = f"""<section class="ocean-stage">
-  <div id="system-root" class="ocean-canvas"></div>
+  <div id="system-root" class="ocean-canvas">
+    {fallback}
+  </div>
   <div class="ocean-hud">
-    <div class="ocean-h"><h1>The System</h1><p class="muted" id="systemMeta"></p></div>
+    <div class="ocean-h"><h1>{_bi("The System", "O Sistema")}</h1><p class="muted" id="systemMeta"></p></div>
   </div>
   <aside id="oceanPanel" class="ocean-panel" hidden>
     <button id="oceanClose" class="ocean-close" aria-label="close">&times;</button>
@@ -2307,12 +2322,7 @@ def render_system_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str
     <div id="opMetrics" class="op-metrics"></div>
     <div id="opNeighbours"></div><div id="opEdges"></div><div id="opUndrawn"></div>
   </aside>
-  <button id="systemReset" type="button" class="ocean-close" style="position:absolute;bottom:18px;right:18px;width:auto;height:auto;padding:8px 14px;border:1px solid var(--line);border-radius:8px;font-size:12px;pointer-events:auto">Reset view</button>
-  <noscript><div style="padding:24px 22px">
-    <p>The 3D map needs JavaScript. Every position in the corpus:</p>
-    <ul>{fallback}</ul>
-    <p><a href="grapple-like.html">Browse fighters instead →</a></p>
-  </div></noscript>
+  <button id="systemReset" type="button" class="ocean-close" style="position:absolute;top:auto;bottom:18px;right:18px;width:auto;height:auto;padding:8px 14px;border:1px solid var(--line);border-radius:8px;font-size:12px;pointer-events:auto">{_bi("Reset view", "Redefinir")}</button>
 </section>"""
     panel_js = (
         "{root:document.getElementById('oceanPanel'),name:document.getElementById('opName'),"

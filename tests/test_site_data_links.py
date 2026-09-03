@@ -74,9 +74,10 @@ def test_render_system_page_wires_globals_importmap_and_one_h1() -> None:
     page = render_system_page([
         {"kind": "state", "label": "Closed Guard"},
         {"kind": "anchor", "label": "Finish"},
-        {"kind": "state", "label": ""},  # no label -> excluded from the noscript fallback
+        {"kind": "state", "label": ""},  # no label -> excluded from the fallback list
     ])
-    assert page.count("<h1>") == 1 and "<h1>The System</h1>" in page
+    assert page.count("<h1>") == 1
+    assert "data-lang-en>The System<" in page and "data-lang-pt>O Sistema<" in page
     assert '<html lang="en">' in page
     assert '<link rel="canonical" href="https://' in page
     assert '<meta property="og:image" content="https://' in page
@@ -87,9 +88,43 @@ def test_render_system_page_wires_globals_importmap_and_one_h1() -> None:
     assert "<li>Closed Guard</li>" in page and "<li>Finish</li>" in page
 
 
+def test_render_system_page_reset_button_is_not_stretched() -> None:
+    page = render_system_page()
+    btn_start = page.index('id="systemReset"')
+    btn_end = page.index(">", btn_start)
+    style = page[btn_start:btn_end]
+    # top+bottom both set (with height:auto) stretches the element per the CSS spec —
+    # top:auto neutralises the shared .ocean-close class's top:2px.
+    assert "bottom:18px" in style
+    assert "top:2px" not in style
+
+
+def test_render_system_page_fallback_lives_inside_system_root() -> None:
+    page = render_system_page([{"kind": "state", "label": "Closed Guard"}])
+    root_start = page.index('id="system-root"')
+    root_open_tag_end = page.index(">", root_start)
+    # the fallback markup (grapple-like link + position list) must be a DESCENDANT of
+    # #system-root so CSS can hide it once JS mounts a <canvas> there; a sibling/noscript
+    # block stays visible even when WebGL succeeds silently with JS still enabled.
+    fallback_pos = page.index("grapple-like.html", root_open_tag_end)
+    assert root_open_tag_end < fallback_pos
+    # a <li> for the seeded node must appear before #system-root's matching </div>
+    li_pos = page.index("<li>Closed Guard</li>")
+    assert root_open_tag_end < li_pos
+    assert "<noscript>" not in page  # folded into plain HTML, no longer noscript-gated
+    assert "data-lang-en" in page[fallback_pos - 400:fallback_pos + 400] or \
+        "data-lang-pt" in page[fallback_pos - 400:fallback_pos + 400]
+
+
+def test_render_system_page_has_bilingual_reset_button() -> None:
+    page = render_system_page()
+    assert "data-lang-en>Reset view<" in page and "data-lang-pt>Redefinir<" in page
+
+
 def test_ocean_redirect_points_at_the_system_with_canonical() -> None:
     page = _render_ocean_redirect()
     assert '<meta http-equiv="refresh" content="0; url=the-system.html"/>' in page
-    assert '<link rel="canonical" href="https://' in page and "the-ocean.html" in page
+    assert ('<link rel="canonical" href="https://themissenoone.github.io/GrapplingArc/site/'
+            'the-system.html"/>' in page)
     assert 'href="the-system.html"' in page
     assert page.count("<h1>") == 1
