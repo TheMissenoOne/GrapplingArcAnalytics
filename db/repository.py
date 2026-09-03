@@ -8,7 +8,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import delete, or_, select, update
+from sqlalchemy import delete, exists, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
@@ -189,6 +189,24 @@ def upsert_graph_from_athlete_graph(
     if keep_keys:
         stale_stmt = stale_stmt.where(GraphEdge.edge_key.notin_(keep_keys))
     session.execute(stale_stmt)
+
+    # The edge prune above can leave a graph_nodes row with zero incident edges (its only
+    # edge got pruned, and the fresh techs dict didn't re-register it because the current
+    # derivation doesn't use that key any more) — an orphan. Scoped to THIS graph_id only,
+    # so a user's own custom nodes (legitimately edge-less) are never touched: this delete
+    # only ever runs on the athlete path.
+    orphan_edge_exists = exists(
+        select(GraphEdge.graph_id).where(
+            GraphEdge.graph_id == GraphNode.graph_id,
+            or_(
+                GraphEdge.source_key == GraphNode.node_key,
+                GraphEdge.target_key == GraphNode.node_key,
+            ),
+        )
+    )
+    session.execute(
+        delete(GraphNode).where(GraphNode.graph_id == graph_id, ~orphan_edge_exists)
+    )
 
     # Bout provenance (alembic 0046) — one row per (edge, bout), written AFTER the prune so it
     # never references an edge the prune just removed.

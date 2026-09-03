@@ -180,6 +180,58 @@ def test_athlete_graph_upsert_prunes_stale_edges(session):
     assert keys_after < keys_before  # the armbar edge is gone, not just unchanged
     assert all("armbar" not in k for k in keys_after)
 
+    # The armbar node's only edge is gone — it must not be left behind as an orphan.
+    from db.models import GraphNode
+
+    node_keys_after = {
+        n.node_key
+        for n in session.execute(
+            select(GraphNode).where(GraphNode.graph_id == graph_id)
+        ).scalars()
+    }
+    assert "armbar" not in node_keys_after
+    assert node_keys_after == {"back take", "rear naked choke"}
+
+
+def test_athlete_graph_upsert_prune_does_not_touch_other_graphs(session):
+    """The orphan-node prune is scoped to THIS graph_id — a user's own edge-less node in a
+    different graph must survive an unrelated athlete's upsert untouched."""
+    from analysis.athlete_graph import build_athlete_graph
+    from db.models import Graph, GraphNode
+    from db.repository import upsert_graph_from_athlete_graph
+
+    user_graph_id = str(uuid.uuid4())
+    session.add(Graph(id=user_graph_id, owner_kind="user", owner_id=str(uuid.uuid4())))
+    session.add(
+        GraphNode(graph_id=user_graph_id, node_key="my custom drill", label="My Custom Drill")
+    )
+    session.commit()
+
+    athlete_id = str(uuid.uuid4())
+    graph = build_athlete_graph(
+        "Gordon Ryan",
+        [
+            {
+                "topics": [],
+                "rounds": [
+                    {
+                        "entries": [
+                            {"label": "Back Take", "type": "position", "actor": "you"},
+                            {"label": "Rear Naked Choke", "type": "submission", "actor": "you"},
+                        ]
+                    }
+                ],
+            }
+        ],
+    )
+    upsert_graph_from_athlete_graph(graph, athlete_id, session)
+    session.commit()
+
+    user_nodes = list(
+        session.execute(select(GraphNode).where(GraphNode.graph_id == user_graph_id)).scalars()
+    )
+    assert {n.node_key for n in user_nodes} == {"my custom drill"}
+
 
 def test_register_matches_bulk_inserts_and_registers_techniques(session):
     """The dump importer's batched insert path: one bulk statement for all bouts'
