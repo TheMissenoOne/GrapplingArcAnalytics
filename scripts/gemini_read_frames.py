@@ -35,7 +35,8 @@ sys.path.insert(0, str(REPO))
 logger = logging.getLogger("gemini_read_frames")
 
 PROMPT_PATH = REPO / "docs" / "PROMPT_gemini_frame_reading.md"
-DEFAULT_MODEL = "gemini-3.6-flash-high"
+DEFAULT_MODEL = "gemini-3.6-flash"
+_THINKING_LEVELS = ("low", "medium", "high")
 _MIME = {".pdf": "application/pdf", ".png": "image/png", ".jpg": "image/jpeg",
         ".jpeg": "image/jpeg"}
 
@@ -64,21 +65,48 @@ def empty_answer(reason: str) -> dict[str, Any]:
     return {"bout": {}, "events": [], "source": f"gemini_read_frames (dry-run: {reason})"}
 
 
-def read_frames(sheets: list[Path], prompt: str, model: str) -> tuple[dict[str, Any], Any]:
-    """Sends the sheets + prompt to Gemini, returns (parsed_answer_with_source, raw_response)."""
-    from google import genai
+def build_generate_config(thinking: str | None) -> Any:
+    """Shared by both attempts in ``read_frames`` -- with or without ``thinking_config``.
+    ``automatic_function_calling`` disabled: we never pass tools, so the AFC branch (and its
+    "Direct use of AFC..." log warning) has nothing to do here."""
     from google.genai import types
+
+    kwargs: dict[str, Any] = {
+        "response_mime_type": "application/json",
+        "automatic_function_calling": types.AutomaticFunctionCallingConfig(disable=True),
+    }
+    if thinking:
+        kwargs["thinking_config"] = types.ThinkingConfig(thinking_level=thinking.upper())
+    return types.GenerateContentConfig(**kwargs)
+
+
+def read_frames(sheets: list[Path], prompt: str, model: str,
+                thinking: str | None) -> tuple[dict[str, Any], Any]:
+    """Sends the sheets + prompt to Gemini, returns (parsed_answer_with_source, raw_response).
+    A model that rejects ``thinking_level`` (400) is retried once without it, with a warning --
+    not every model on this account is guaranteed to support it."""
+    from google import genai
+    from google.genai import errors, types
 
     client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
     parts = [types.Part.from_bytes(data=p.read_bytes(), mime_type=_MIME[p.suffix.lower()])
             for p in sheets]
     parts.append(types.Part.from_text(text=prompt))
-    resp = client.models.generate_content(
-        model=model, contents=parts,
-        config=types.GenerateContentConfig(response_mime_type="application/json"),
-    )
+
+    try:
+        resp = client.models.generate_content(
+            model=model, contents=parts, config=build_generate_config(thinking))
+    except errors.ClientError:
+        if not thinking:
+            raise
+        logger.warning("model %s rejected thinking_level=%s, retrying without thinking",
+                       model, thinking)
+        thinking = None
+        resp = client.models.generate_content(
+            model=model, contents=parts, config=build_generate_config(None))
+
     answer = json.loads(resp.text)
-    answer["source"] = (f"gemini_read_frames ({model}, "
+    answer["source"] = (f"gemini_read_frames ({model}, thinking={thinking or 'none'}, "
                         f"{datetime.now(UTC).date().isoformat()}) — not yet human-reviewed")
     return answer, resp
 
@@ -97,6 +125,7 @@ def main() -> int:
                     help="directory of .pdf/.png/.jpg frame sheets to send")
     ap.add_argument("--out", type=Path, required=True, help="events.json path to write")
     ap.add_argument("--model", default=DEFAULT_MODEL)
+    ap.add_argument("--thinking", choices=_THINKING_LEVELS, default="high")
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
 
@@ -117,11 +146,15 @@ def main() -> int:
         logger.info("wrote empty-shaped %s", a.out)
         return 0
 
-    answer, resp = read_frames(sheets, prompt, a.model)
+    answer, resp = read_frames(sheets, prompt, a.model, a.thinking)
     a.out.parent.mkdir(parents=True, exist_ok=True)
     a.out.write_text(json.dumps(answer, indent=2), encoding="utf-8")
+    usage = resp.usage_metadata
     (a.out.parent / "gemini_raw.json").write_text(
-        json.dumps({"model": a.model, "text": resp.text}, indent=2), encoding="utf-8")
+        json.dumps({"model": a.model, "thinking": a.thinking, "text": resp.text,
+                    "usage_metadata": usage.model_dump(mode="json") if usage else None},
+                   indent=2),
+        encoding="utf-8")
     logger.info("wrote %s (%d events)", a.out, len(answer.get("events", [])))
     return 0
 

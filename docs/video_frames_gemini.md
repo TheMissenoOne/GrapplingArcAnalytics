@@ -68,15 +68,31 @@ throughout. Fell back to the 5s-interval criterion → **9 frames**, one landsca
 plus the prompt in `docs/PROMPT_gemini_frame_reading.md` (its own `---`-delimited body only —
 loaded fresh each run, so the two files cannot drift), asks for `response_mime_type:
 application/json`, and stamps the result with `source: "gemini_read_frames (<model>,
-<date>) — not yet human-reviewed"` — the same provenance convention
+thinking=<level>, <date>) — not yet human-reviewed"` — the same provenance convention
 `frame_answer_import.py` uses, so a reviewed/unreviewed answer is distinguishable the same way
-regardless of which script produced it. The raw response text is also saved next to the answer
-(`gemini_raw.json`).
+regardless of which script produced it. `automatic_function_calling` is explicitly disabled
+(we never pass tools) so the SDK's "Direct use of AFC..." log line never fires. The raw
+response text is also saved next to the answer (`gemini_raw.json`), alongside
+`usage_metadata` (prompt/candidates/thoughts token counts) for cost tracking.
+
+Default model is `gemini-3.6-flash` (`--model` to override). `--thinking {low,medium,high}`
+(default `high`) sets `GenerateContentConfig.thinking_config.thinking_level`; a model that
+rejects the field (400) is retried once without it, with a log warning, rather than failing
+the whole run.
 
 No `GEMINI_API_KEY` in the environment (checked via `os.environ`, `.env` loaded first) forces
 `--dry-run` automatically: prints the resolved prompt and the file list it would have sent, and
 still writes a correctly-shaped, empty `events.json` (`source` says why) so a caller does not
 need two code paths depending on whether a key was present.
+
+**First real read** (2026-09-03, `owner_20260725` sheet, `--thinking low`): 3 events —
+Takedown 15s (Athlete B), Guard Play 20s (Athlete A), Side Control 35s (Athlete B), all
+`confidence: "low"`. A `--thinking high` rerun on the same sheet read the same window
+differently (Guard Pull 15s / Closed Guard 20s, both Athlete B; Side Control 35s, Athlete A) —
+expected on a 9-frame, 40s handheld clip with no vocabulary page (see "Known gap" below);
+thinking level changes what the model infers, not which frames it sees. Cost: prompt 3421
+tokens (1293 text + 2128 image), 1422 thoughts tokens, 318 output tokens, 5161 total — a
+rounding error per bout at Gemini Flash pricing.
 
 **Known gap, not fixed here:** the prompt (`PROMPT_gemini_frame_reading.md`) describes a sheet
 that includes an "Allowed labels" vocabulary section — the real trials/broadcast sheets
@@ -90,9 +106,11 @@ loop; a production run over this footage would want the library pages added to
 
 Gemini's image tokenization scales with resolution, not bytes — a page raster around 1024px on
 its long side is ~256-1300 tokens depending on tiling. A 3-page, 9-frame sheet PDF is a handful
-of embedded JPEGs plus the context page's text, well under 5k input tokens; `gemini-3.6-flash-high` (owner's pick; override with --model)
-pricing is per-million-token and this is a rounding error per bout. The real cost driver at
-scale is bout COUNT, not sheet size — 100 bouts is still under a few hundred thousand tokens.
+of embedded JPEGs plus the context page's text, well under 5k input tokens; `gemini-3.6-flash`
+(default; override with `--model`) pricing is per-million-token and this is a rounding error
+per bout — measured total 5161 tokens for this sheet at `--thinking high` (see above). The real
+cost driver at scale is bout COUNT, not sheet size — 100 bouts is still under a few hundred
+thousand tokens.
 
 ## Next step (not this pass)
 
