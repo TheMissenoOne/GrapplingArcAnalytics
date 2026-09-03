@@ -1,0 +1,17 @@
+{
+  "bouts": 742,
+  "bouts_rel_readable": 610,
+  "actions": 5585,
+  "actions_without_state": 1578,
+  "points": 4007,
+  "train": 3173,
+  "val": 834,
+  "train_bouts": 429,
+  "val_bouts": 107,
+  "vocab": 198,
+  "val_oov": 6,
+  "uncurated_labels": 59,
+  "distinct_queries": 3600,
+  "split_seed": 20260902,
+  "win_margin": 0.05
+}

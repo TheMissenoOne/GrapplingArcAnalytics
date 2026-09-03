@@ -108,3 +108,8 @@ data/frame_pdf/gemini_baseline/
 
 # owner training footage — private, never committed
 data/video/
+
+# Next-move experiment caches — regenerable (corpus re-pulled from the DB, vectors re-embedded).
+# The report itself (eval.csv / eval_meta.json) IS committed.
+data/next_moves/corpus.json
+data/next_moves/emb_cache.json
