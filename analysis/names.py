@@ -69,6 +69,41 @@ SYNONYMS: dict[str, str] = {
     # between two DIFFERENT submissions (arm triangle vs d'arce); folding it into either
     # would assert what the transcript declined to. Stays its own node until footage
     # settles the single bout that carries it.
+
+    # N1 alias pass (2026-09-04, docs/taxonomy/04_ONTOLOGIA_CANONICA.md §5 row "N1 —
+    # aliases + biblioteca"), all measured live against prod
+    # (`uv run python -m scripts.audit_ontology`) — direction is always the higher
+    # corpus count, and matches the curated `technique_library.json` grafia where one
+    # exists. First five are `alias_candidates`-family hits (edit distance <= 2 / plural
+    # / spacing); the rest are domain merges the distance heuristic can't see.
+    "close guard": "closed guard",          # 1 event vs 145
+    "take down": "takedown",                # 3 vs 131
+    "snap down": "snapdown",                # 40 vs 47, and library canonical is "Snapdown"
+    "shin on shin guard": "shin to shin guard",  # 1 vs 12, library canonical
+    "nearfall": "near fall",                # 2 vs 5
+    # north-south: "North-South Position" itself normalizes to "northsouth position"
+    # (hyphen drops, no space fills the gap) -- the corpus's dominant spelling (104
+    # events) and already the pre-existing target. "North South" (3, bare) and "North
+    # South Control" (13, its own now-redundant library entry -- kept for display/type,
+    # not for node identity) are the same position under a different narrator's words.
+    "north south": "northsouth position",
+    "north south control": "northsouth position",
+    # forward-compat: only "North-South Pass" (-> "northsouth pass") exists in the
+    # corpus today; this catches the spaced spelling if a future transcript uses it.
+    "north south pass": "northsouth pass",
+    # library already lists "leg lock entanglement" as a known variant string of "Leg
+    # Entanglement" (35 events) -- this was never carried into SYNONYMS.
+    "leg lock entanglement": "leg entanglement",
+    # REVIEWED, NOT MERGED (N1, 2026-09-04): "kimura grip" (4 events, all `control`) vs
+    # "kimura trap" (3 events, mostly `submission`) -- the alias_candidates family flags
+    # this pair (edit distance 2, same length) but they're different techniques: a grip
+    # vs a named finishing setup. The type split confirms it. Left alone on purpose.
+    #
+    # REVIEWED, NOT MERGED (N1, 2026-09-04): "Leg Entry (50/50)" (1 event) already
+    # resolves to "5050 guard" via the "leg entry 5050" entry above (a pre-existing,
+    # documented decision) rather than to "leg entry" or "backside 50/50 entry" -- both
+    # plausible per the docs/taxonomy plan. Ambiguous at n=1; left as-is rather than
+    # re-litigated without new evidence.
 }
 
 

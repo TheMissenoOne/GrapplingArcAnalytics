@@ -27,8 +27,12 @@ from scripts.audit_ontology import (
 #                                       lados como state — é a prova de que o detector não grita
 #                                       só porque o rótulo aparece sob dois tipos)
 #   Guard Recovery guard vs escape   -> dupla identidade real
-#   Close Guard / Closed Guard       -> alias por particípio
-#   Take Down / Takedown             -> alias por espaço
+#   Reap Sweep / Reaps Sweep         -> alias por particípio (synthetic — the corpus's real
+#                                       participle pair, "close guard"/"closed guard", is now
+#                                       merged by names.SYNONYMS (N1), so it no longer reaches
+#                                       this detector; a fresh unresolved pair proves the fold)
+#   Knee Cut / Kneecut               -> alias por espaço (synthetic, same reason as above —
+#                                       "take down"/"takedown" is now SYNONYMS-merged too)
 #   Shin to Shin Guard, 50/50 Guard  -> compostos FALSOS (contêm " to " / "/"), ignorados
 #   Escape to Standing               -> composto real
 #   Front Headlock                   -> state sem orientação
@@ -37,10 +41,10 @@ SYNTHETIC: list[dict[str, Any]] = [{"sequence": [
     {"type": "guard", "label": "Turtle Position"},
     {"type": "guard", "label": "Guard Recovery"},
     {"type": "escape", "label": "Guard Recovery"},
-    {"type": "guard", "label": "Close Guard"},
-    {"type": "guard", "label": "Closed Guard"},
-    {"type": "takedown", "label": "Take Down"},
-    {"type": "takedown", "label": "Takedown"},
+    {"type": "sweep", "label": "Reap Sweep"},
+    {"type": "sweep", "label": "Reaps Sweep"},
+    {"type": "pass", "label": "Knee Cut"},
+    {"type": "pass", "label": "Kneecut"},
     {"type": "guard", "label": "Shin to Shin Guard"},
     {"type": "guard", "label": "50/50 Guard"},
     {"type": "escape", "label": "Escape to Standing"},
@@ -60,8 +64,8 @@ def test_dual_identity_needs_two_kinds_not_two_types() -> None:
 
 def test_alias_candidates_catch_participle_and_space() -> None:
     found = {(row["a"], row["b"]) for row in find_alias_candidates(_pairs())}
-    assert ("close guard", "closed guard") in found
-    assert ("take down", "takedown") in found
+    assert ("reap sweep", "reaps sweep") in found
+    assert ("knee cut", "kneecut") in found
 
 
 def test_composites_skip_the_declared_false_positives() -> None:

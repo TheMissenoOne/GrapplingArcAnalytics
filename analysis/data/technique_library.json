@@ -113,12 +113,10 @@
     "variants": [
       "back mount",
       "back control",
-      "saddle",
       "costas",
       "pegada nas costas",
       "back",
-      "controle das costas",
-      "back take"
+      "controle das costas"
     ]
   },
   {
@@ -128,6 +126,15 @@
     "variants": [
       "back escape",
       "fuga das costas"
+    ]
+  },
+  {
+    "en": "Back Take",
+    "pt": "Pegada de Costas",
+    "type": "transition",
+    "variants": [
+      "take the back",
+      "back-take"
     ]
   },
   {

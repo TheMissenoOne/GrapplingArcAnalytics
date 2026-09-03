@@ -490,11 +490,16 @@ def test_orientation_of_is_untouched_by_fase_2() -> None:
 
 
 def test_orientation_for_inference_covers_every_curated_label() -> None:
-    """The payoff, measured over `attribution`'s own curated lists: 52 of the 74 labels that
-    ought to carry an orientation read `neutral` through `state_orientation.json` alone (70%,
-    and all 13 grips), which left the inversion rule blind. The three-level reading takes that
-    to zero. `_GUARD_NEUTRAL` is excluded from the count on purpose — 50/50 is symmetric by
-    construction, so `neutral` is the correct answer there and stays."""
+    """The payoff, measured over `attribution`'s own curated lists: originally 52 of the 74
+    labels that ought to carry an orientation read `neutral` through `state_orientation.json`
+    alone (70%, and all 13 grips), which left the inversion rule blind. The three-level reading
+    takes that to zero. `_GUARD_NEUTRAL` is excluded from the count on purpose — 50/50 is
+    symmetric by construction, so `neutral` is the correct answer there and stays.
+
+    50, not 52, since N1 (2026-09-04): "close guard" and "north south control" now
+    `canonicalize` to a declared node ("closed guard" / "northsouth position" — the same
+    corpus-count merge as `names.SYNONYMS`), so they're no longer blind before the
+    three-level reading even runs."""
     from analysis import attribution as attr
     from analysis.taxonomy_kind import orientation_for_inference
 
@@ -507,7 +512,7 @@ def test_orientation_for_inference_covers_every_curated_label() -> None:
         label for label, _t in curated
         if orientation_of(canonicalize(_normalize_name(label))) == "neutral"
     ]
-    assert len(blind_before) == 52
+    assert len(blind_before) == 50
     blind_after = [label for label, t in curated
                    if orientation_for_inference(t, label).value == "neutral"]
     assert blind_after == []

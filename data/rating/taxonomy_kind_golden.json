@@ -1007,7 +1007,7 @@
       "value": "top"
     },
     "control|north south control": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|northsouth position": {
@@ -1239,7 +1239,7 @@
       "value": "bottom"
     },
     "guard|close guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|closed guard": {

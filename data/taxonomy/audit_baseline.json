@@ -4,9 +4,9 @@
  "events": 10016,
  "counts": {
   "dual_identity": 11,
-  "alias_candidates": 6,
+  "alias_candidates": 1,
   "composites": 38,
-  "states_without_orientation": 59,
+  "states_without_orientation": 53,
   "athlete_nodes_typed_technique": 286
  },
  "reclassified": {

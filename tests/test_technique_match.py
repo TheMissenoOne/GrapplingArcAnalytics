@@ -13,7 +13,10 @@ class TestCleanLabel:
 
     def test_variant_maps_to_canonical(self) -> None:
         assert clean_label("full guard") == "Closed Guard"
-        assert clean_label("Back Take") == "Back Control"
+        # N1 (2026-09-04): "back take" is its OWN library entry now, not a Back Control
+        # variant (docs/taxonomy/04_ONTOLOGIA_CANONICA.md §3.1) -- resolves to itself.
+        assert clean_label("Back Take") == "Back Take"
+        assert clean_label("take the back") == "Back Take"
 
     def test_alias_abbreviation(self) -> None:
         assert clean_label("RNC") == "Rear Naked Choke"
@@ -25,15 +28,17 @@ class TestCleanLabel:
         assert clean_label("Some Made Up Move") == "Some Made Up Move"
 
     def test_type_hint_blocks_cross_type_match(self) -> None:
-        # "Back Take" is a control; with a mismatched type hint the rename is rejected.
-        assert clean_label("Back Take", "control") == "Back Control"
+        # "Back Take" is a transition (N1); a mismatched type hint still doesn't rename it
+        # to anything else, and the matching hint round-trips.
+        assert clean_label("Back Take", "control") == "Back Take"
         assert clean_label("Back Take", "submission") == "Back Take"
+        assert clean_label("Back Take", "transition") == "Back Take"
 
     def test_attempt_strips_to_base_technique(self) -> None:
         # "<X> Attempt" is not a distinct technique — it canonicalises to <X>.
         assert clean_label("Heel Hook Attempt") == "Heel Hook"
         assert clean_label("Triangle Choke Attempt") == "Triangle Choke"
-        assert clean_label("Back Take Attempt") == "Back Control"  # strip, then variant-resolve
+        assert clean_label("Back Take Attempt") == "Back Take"  # strip, then variant-resolve
         assert clean_label("Rear Naked Choke Attempted") == "Rear Naked Choke"
         # A base that isn't in the library still loses the "attempt" word (no fragment node).
         assert "attempt" not in clean_label("Some Made Up Move Attempt").lower()
