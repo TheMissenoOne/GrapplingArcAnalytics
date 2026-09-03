@@ -1,0 +1,218 @@
+{
+ "excluded": {
+  "bruno-fernandes-rocha-vs-joao-cleber-araujo-borges--cbjj-bra-16045240": "no sheet PDF under (none)",
+  "bruno-rocha-vs-bryan-silva--cbjje-bjj-paulista-2026-15546999": "no sheet PDF under (none)",
+  "izaak-michell-vs-roberto-dib": "no sheet PDF under /home/vetor/GrapplingArc/GrapplingArcAnalytics/data/frame_pdf/trials_2023_24",
+  "keven-julio-vs-bruno-rocha--cbjje-bjj-paulista-2026-15547218": "no sheet PDF under (none)",
+  "luke-griffith-vs-mraz-avdoyan": "no sheet PDF under /home/vetor/GrapplingArc/GrapplingArcAnalytics/data/frame_pdf/trials_2023_24",
+  "mansur-makhmakhanov-vs-dalton-terei": "no sheet PDF under /home/vetor/GrapplingArc/GrapplingArcAnalytics/data/frame_pdf/trials_2023_24",
+  "rafael-silverio-da-fonseca-vs-bruno-rocha--fpjj-circuito-pau-16132708": "no sheet PDF under (none)",
+  "sula-loewenthal-vs-nadia-frankland": "no sheet PDF under /home/vetor/GrapplingArc/GrapplingArcAnalytics/data/frame_pdf/trials_2023_24"
+ },
+ "group_key": "athlete_connected_component",
+ "groups": {
+  "ath:adam bradley": [
+   "michael-pixley-vs-adam-bradley"
+  ],
+  "ath:adele fornarino": [
+   "adele-fornarino-vs-kanae-yamada"
+  ],
+  "ath:alex enriquez": [
+   "jasmine-rocha-vs-alex-enriquez"
+  ],
+  "ath:alex grandy": [
+   "paul-ardila-vs-alex-grandy"
+  ],
+  "ath:alexandre jesus": [
+   "alexandre-jesus-vs-jonnatas-gracie"
+  ],
+  "ath:alibi orazbek": [
+   "daniel-schuardt-vs-alibi-orazbek"
+  ],
+  "ath:amanda leve": [
+   "elizabeth-mitrovic-vs-amanda-leve"
+  ],
+  "ath:amanda nicole": [
+   "anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY",
+   "anabel-lopez-vs-brianna-ste-marie--world-no-gi-2024-9ThUSXSEf8w",
+   "anabel-lopez-vs-erin-harpe--pan-no-gi-2025-YIJvzBtP3q4",
+   "anabel-lopez-vs-kendall-reusing--polaris-36-2026-2nfCwbxdvTY",
+   "anabel-lopez-vs-maria-vicentini--world-no-gi-2024-HWNPuVZYB1Q",
+   "anabel-lopez-vs-paige-ivette--world-no-gi-2024-GHFT3RO4v_k",
+   "anabel-lopez-vs-salla-simola--world-no-gi-2024-U7ovaUg3y4U",
+   "ane-svendsen-vs-aurelie-le-vern--european-no-gi-2024-oIMgwDldvmA",
+   "aurelie-le-vern-vs-nadia-frankland",
+   "helena-crevar-vs-amanda-nicole--polaris-37-2026-NO62LWlUUNQ",
+   "helena-crevar-vs-gabriela-miranda--world-no-gi-2025-IGaL1pyNtuU",
+   "helena-crevar-vs-leilani-bernales--wno-25-2024-Vo7ymhLxDxo",
+   "helena-crevar-vs-morgan-black",
+   "injana-goodman-vs-elisabeth-clay--world-no-gi-2025-C4ZeMLqnTDs",
+   "injana-goodman-vs-julia-maele--european-no-gi-2025-vnYJGBVM78E",
+   "morgan-black-vs-brianna-ste-marie--world-no-gi-2024-BzwFZSrxJkM",
+   "nadia-frankland-vs-elisabeth-clay--world-no-gi-2024-V0TNJTVVuwA",
+   "nadia-frankland-vs-gabriele-schuck--pan-no-gi-2024-wFqamBHsK3g",
+   "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2024-7H1PhSukqZg",
+   "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2025-LQUors-3gZM",
+   "nadia-frankland-vs-paige-ivette--world-no-gi-2024-ImqWcrhUF8w",
+   "nia-blackman-vs-salla-simola"
+  ],
+  "ath:andrew tackett": [
+   "andrew-tackett-vs-oliver-taza",
+   "jozef-chen-vs-oliver-taza"
+  ],
+  "ath:anna rodrigues": [
+   "anna-rodrigues-vs-franciele-santos"
+  ],
+  "ath:anton minenko": [
+   "declan-moody-vs-anton-minenko"
+  ],
+  "ath:antonio assef": [
+   "inacio-santos-vs-antonio-assef"
+  ],
+  "ath:ben bennett": [
+   "taylor-pearman-vs-ben-bennett"
+  ],
+  "ath:cammy donnelly": [
+   "owen-jones-vs-cammy-donnelly"
+  ],
+  "ath:charles negromonte": [
+   "charles-negromonte-vs-gabriel-almeida"
+  ],
+  "ath:damon ramos": [
+   "daniel-manasoiu-vs-damon-ramos",
+   "heikki-jussila-vs-daniel-manasoiu"
+  ],
+  "ath:davis asare": [
+   "tommy-langaker-vs-davis-asare"
+  ],
+  "ath:deandre corbe": [
+   "deandre-corbe-vs-keith-krikorian"
+  ],
+  "ath:dominic mejia": [
+   "dorian-olivarez-vs-dominic-mejia"
+  ],
+  "ath:elder cruz": [
+   "jacob-couch-vs-elder-cruz"
+  ],
+  "ath:elijah dorsey": [
+   "elijah-dorsey-vs-nicky-ryan"
+  ],
+  "ath:elionai braz": [
+   "felipe-costa-vs-elionai-braz",
+   "henrique-cardoso-vs-elionai-braz"
+  ],
+  "ath:ethan thomas": [
+   "ethan-thomas-vs-minoru-takeuchi"
+  ],
+  "ath:fabricio andrey": [
+   "fabricio-andrey-vs-kaua-gabriel",
+   "kennedy-maciel-vs-kaua-gabriel"
+  ],
+  "ath:freddy vosgroene": [
+   "mark-macqueen-vs-freddy-vosgroene"
+  ],
+  "ath:gairbeg ibragimov": [
+   "gairbeg-ibragimov-vs-yigit-hanay"
+  ],
+  "ath:gase sanita": [
+   "nikki-lloyd-griffiths-vs-gase-sanita"
+  ],
+  "ath:jacob rodriguez": [
+   "william-tackett-vs-jacob-rodriguez"
+  ],
+  "ath:jefferson pontes": [
+   "luiz-paulo-vs-jefferson-pontes"
+  ],
+  "ath:jeremy skinner": [
+   "levi-jones-leary-vs-jeremy-skinner"
+  ],
+  "ath:josh saunders": [
+   "josh-saunders-vs-ricky-luzny"
+  ],
+  "ath:kauane silva": [
+   "maria-ruffatto-vs-kauane-silva"
+  ],
+  "ath:kenta iwamoto": [
+   "kenta-iwamoto-vs-rhys-allan"
+  ],
+  "ath:libby genge": [
+   "sarah-galvao-vs-libby-genge--polaris-36-2026-bhtda0EZYpU",
+   "sarah-galvao-vs-zara-tofano--polaris-38-2026-IPgbC27xBQQ"
+  ],
+  "ath:lucas kanard": [
+   "lucas-kanard-vs-william-dias"
+  ],
+  "ath:matheus lino": [
+   "victor-honorio-vs-matheus-lino"
+  ]
+ },
+ "seed": 0,
+ "train": [
+  "adele-fornarino-vs-kanae-yamada",
+  "anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY",
+  "anabel-lopez-vs-brianna-ste-marie--world-no-gi-2024-9ThUSXSEf8w",
+  "anabel-lopez-vs-erin-harpe--pan-no-gi-2025-YIJvzBtP3q4",
+  "anabel-lopez-vs-kendall-reusing--polaris-36-2026-2nfCwbxdvTY",
+  "anabel-lopez-vs-maria-vicentini--world-no-gi-2024-HWNPuVZYB1Q",
+  "anabel-lopez-vs-paige-ivette--world-no-gi-2024-GHFT3RO4v_k",
+  "anabel-lopez-vs-salla-simola--world-no-gi-2024-U7ovaUg3y4U",
+  "andrew-tackett-vs-oliver-taza",
+  "ane-svendsen-vs-aurelie-le-vern--european-no-gi-2024-oIMgwDldvmA",
+  "aurelie-le-vern-vs-nadia-frankland",
+  "charles-negromonte-vs-gabriel-almeida",
+  "daniel-manasoiu-vs-damon-ramos",
+  "deandre-corbe-vs-keith-krikorian",
+  "declan-moody-vs-anton-minenko",
+  "dorian-olivarez-vs-dominic-mejia",
+  "elizabeth-mitrovic-vs-amanda-leve",
+  "fabricio-andrey-vs-kaua-gabriel",
+  "felipe-costa-vs-elionai-braz",
+  "heikki-jussila-vs-daniel-manasoiu",
+  "helena-crevar-vs-amanda-nicole--polaris-37-2026-NO62LWlUUNQ",
+  "helena-crevar-vs-gabriela-miranda--world-no-gi-2025-IGaL1pyNtuU",
+  "helena-crevar-vs-leilani-bernales--wno-25-2024-Vo7ymhLxDxo",
+  "helena-crevar-vs-morgan-black",
+  "henrique-cardoso-vs-elionai-braz",
+  "inacio-santos-vs-antonio-assef",
+  "injana-goodman-vs-elisabeth-clay--world-no-gi-2025-C4ZeMLqnTDs",
+  "injana-goodman-vs-julia-maele--european-no-gi-2025-vnYJGBVM78E",
+  "jacob-couch-vs-elder-cruz",
+  "jozef-chen-vs-oliver-taza",
+  "kennedy-maciel-vs-kaua-gabriel",
+  "kenta-iwamoto-vs-rhys-allan",
+  "levi-jones-leary-vs-jeremy-skinner",
+  "lucas-kanard-vs-william-dias",
+  "luiz-paulo-vs-jefferson-pontes",
+  "morgan-black-vs-brianna-ste-marie--world-no-gi-2024-BzwFZSrxJkM",
+  "nadia-frankland-vs-elisabeth-clay--world-no-gi-2024-V0TNJTVVuwA",
+  "nadia-frankland-vs-gabriele-schuck--pan-no-gi-2024-wFqamBHsK3g",
+  "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2024-7H1PhSukqZg",
+  "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2025-LQUors-3gZM",
+  "nadia-frankland-vs-paige-ivette--world-no-gi-2024-ImqWcrhUF8w",
+  "nia-blackman-vs-salla-simola",
+  "nikki-lloyd-griffiths-vs-gase-sanita",
+  "owen-jones-vs-cammy-donnelly",
+  "paul-ardila-vs-alex-grandy",
+  "sarah-galvao-vs-libby-genge--polaris-36-2026-bhtda0EZYpU",
+  "sarah-galvao-vs-zara-tofano--polaris-38-2026-IPgbC27xBQQ",
+  "taylor-pearman-vs-ben-bennett",
+  "tommy-langaker-vs-davis-asare",
+  "william-tackett-vs-jacob-rodriguez"
+ ],
+ "val": [
+  "alexandre-jesus-vs-jonnatas-gracie",
+  "anna-rodrigues-vs-franciele-santos",
+  "daniel-schuardt-vs-alibi-orazbek",
+  "elijah-dorsey-vs-nicky-ryan",
+  "ethan-thomas-vs-minoru-takeuchi",
+  "gairbeg-ibragimov-vs-yigit-hanay",
+  "jasmine-rocha-vs-alex-enriquez",
+  "josh-saunders-vs-ricky-luzny",
+  "maria-ruffatto-vs-kauane-silva",
+  "mark-macqueen-vs-freddy-vosgroene",
+  "michael-pixley-vs-adam-bradley",
+  "victor-honorio-vs-matheus-lino"
+ ],
+ "val_fraction": 0.2,
+ "version": "v1"
+}

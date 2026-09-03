@@ -1,0 +1,1572 @@
+{
+ "bouts": [
+  {
+   "athletes": [
+    "adele fornarino",
+    "kanae yamada"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 100,
+   "labels": 18,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 6698657,
+   "sheet_sha256": "f7ca00fa0c5b383c",
+   "slug": "adele-fornarino-vs-kanae-yamada",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "alexandre jesus",
+    "jonnatas gracie"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 170,
+   "labels": 28,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 14051028,
+   "sheet_sha256": "238eafa1b2516192",
+   "slug": "alexandre-jesus-vs-jonnatas-gracie",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "anabel lopez",
+    "aurelie le vern"
+   ],
+   "batch": "women_65",
+   "frames": 32,
+   "labels": 8,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 2982107,
+   "sheet_sha256": "0488e4256b66d35c",
+   "slug": "anabel-lopez-vs-aurelie-le-vern--european-no-gi-2024-8xvq3lM6kQY",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "anabel lopez",
+    "brianna stemarie"
+   ],
+   "batch": "women_65",
+   "frames": 137,
+   "labels": 5,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 14838526,
+   "sheet_sha256": "018dffecc733e1c3",
+   "slug": "anabel-lopez-vs-brianna-ste-marie--world-no-gi-2024-9ThUSXSEf8w",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "anabel lopez",
+    "erin harpe"
+   ],
+   "batch": "women_65",
+   "frames": 139,
+   "labels": 7,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 12336896,
+   "sheet_sha256": "93c77da7294a78cb",
+   "slug": "anabel-lopez-vs-erin-harpe--pan-no-gi-2025-YIJvzBtP3q4",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "anabel lopez",
+    "kendall reusing"
+   ],
+   "batch": "women_65",
+   "frames": 114,
+   "labels": 5,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 9798436,
+   "sheet_sha256": "37407f68ac902c31",
+   "slug": "anabel-lopez-vs-kendall-reusing--polaris-36-2026-2nfCwbxdvTY",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "anabel lopez",
+    "maria vicentini"
+   ],
+   "batch": "women_65",
+   "frames": 30,
+   "labels": 6,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 3053190,
+   "sheet_sha256": "a0bd29a5af199436",
+   "slug": "anabel-lopez-vs-maria-vicentini--world-no-gi-2024-HWNPuVZYB1Q",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "anabel lopez",
+    "paige ivette"
+   ],
+   "batch": "women_65",
+   "frames": 140,
+   "labels": 4,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 14216855,
+   "sheet_sha256": "35e1f3a3bd3d333a",
+   "slug": "anabel-lopez-vs-paige-ivette--world-no-gi-2024-GHFT3RO4v_k",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "anabel lopez",
+    "salla simola"
+   ],
+   "batch": "women_65",
+   "frames": 137,
+   "labels": 4,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 14346880,
+   "sheet_sha256": "e5dd2b23448b8ea4",
+   "slug": "anabel-lopez-vs-salla-simola--world-no-gi-2024-U7ovaUg3y4U",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "andrew tackett",
+    "oliver taza"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 108,
+   "labels": 26,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 5736794,
+   "sheet_sha256": "f3b105d0866285c3",
+   "slug": "andrew-tackett-vs-oliver-taza",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "ane svendsen",
+    "aurelie le vern"
+   ],
+   "batch": "women_65",
+   "frames": 134,
+   "labels": 6,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 12300777,
+   "sheet_sha256": "7f9ef62ee2c7c3ba",
+   "slug": "ane-svendsen-vs-aurelie-le-vern--european-no-gi-2024-oIMgwDldvmA",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "anna rodrigues",
+    "franciele santos"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 183,
+   "labels": 16,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 17017151,
+   "sheet_sha256": "c0efe069f2a9ee00",
+   "slug": "anna-rodrigues-vs-franciele-santos",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "aurelie le vern",
+    "nadia frankland"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 14,
+   "labels": 4,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 723555,
+   "sheet_sha256": "efed04d6bb8e54d3",
+   "slug": "aurelie-le-vern-vs-nadia-frankland",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "charles negromonte",
+    "gabriel almeida"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 160,
+   "labels": 26,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 11934721,
+   "sheet_sha256": "2a68f1674126fcde",
+   "slug": "charles-negromonte-vs-gabriel-almeida",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "damon ramos",
+    "daniel manasoiu"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 88,
+   "labels": 30,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 6863312,
+   "sheet_sha256": "b3c19e609a50130e",
+   "slug": "daniel-manasoiu-vs-damon-ramos",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "alibi orazbek",
+    "daniel schuardt"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 106,
+   "labels": 14,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 8183829,
+   "sheet_sha256": "15402c2e9d2c8ed4",
+   "slug": "daniel-schuardt-vs-alibi-orazbek",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "deandre corbe",
+    "keith krikorian"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 100,
+   "labels": 17,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 4260817,
+   "sheet_sha256": "928a6cbf075d201f",
+   "slug": "deandre-corbe-vs-keith-krikorian",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "anton minenko",
+    "declan moody"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 108,
+   "labels": 8,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 10195048,
+   "sheet_sha256": "f9abbf23e935569b",
+   "slug": "declan-moody-vs-anton-minenko",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "dominic mejia",
+    "dorian olivarez"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 144,
+   "labels": 30,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 10157918,
+   "sheet_sha256": "46fd6812009bd444",
+   "slug": "dorian-olivarez-vs-dominic-mejia",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "elijah dorsey",
+    "nicky ryan"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 180,
+   "labels": 38,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 12760277,
+   "sheet_sha256": "f19c93109d63cc46",
+   "slug": "elijah-dorsey-vs-nicky-ryan",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "amanda leve",
+    "elizabeth mitrovic"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 168,
+   "labels": 24,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 8713032,
+   "sheet_sha256": "cee331324e30156c",
+   "slug": "elizabeth-mitrovic-vs-amanda-leve",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "ethan thomas",
+    "minoru takeuchi"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 92,
+   "labels": 15,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 8480473,
+   "sheet_sha256": "2ef5ba551748e006",
+   "slug": "ethan-thomas-vs-minoru-takeuchi",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "fabricio andrey",
+    "kaua gabriel"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 176,
+   "labels": 31,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 13370465,
+   "sheet_sha256": "e1cb5f523bcc12f3",
+   "slug": "fabricio-andrey-vs-kaua-gabriel",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "elionai braz",
+    "felipe costa"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 104,
+   "labels": 12,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 7701098,
+   "sheet_sha256": "239441ac742076c0",
+   "slug": "felipe-costa-vs-elionai-braz",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "gairbeg ibragimov",
+    "yigit hanay"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 166,
+   "labels": 12,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 11100133,
+   "sheet_sha256": "d35a6f71cf550958",
+   "slug": "gairbeg-ibragimov-vs-yigit-hanay",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "daniel manasoiu",
+    "heikki jussila"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 166,
+   "labels": 10,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 17552339,
+   "sheet_sha256": "e8091cbf13f2cbea",
+   "slug": "heikki-jussila-vs-daniel-manasoiu",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "amanda nicole",
+    "helena crevar"
+   ],
+   "batch": "women_65",
+   "frames": 157,
+   "labels": 5,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 12695728,
+   "sheet_sha256": "4662a7e7e4e708c2",
+   "slug": "helena-crevar-vs-amanda-nicole--polaris-37-2026-NO62LWlUUNQ",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "gabriela miranda",
+    "helena crevar"
+   ],
+   "batch": "women_65",
+   "frames": 90,
+   "labels": 4,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 11510151,
+   "sheet_sha256": "643d38d312f20e0c",
+   "slug": "helena-crevar-vs-gabriela-miranda--world-no-gi-2025-IGaL1pyNtuU",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "helena crevar",
+    "leilani bernales"
+   ],
+   "batch": "women_65",
+   "frames": 208,
+   "labels": 8,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 20211482,
+   "sheet_sha256": "966c01315be02f4d",
+   "slug": "helena-crevar-vs-leilani-bernales--wno-25-2024-Vo7ymhLxDxo",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "helena crevar",
+    "morgan black"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 144,
+   "labels": 29,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 7166894,
+   "sheet_sha256": "ce388d0f9528a523",
+   "slug": "helena-crevar-vs-morgan-black",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "elionai braz",
+    "henrique cardoso"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 116,
+   "labels": 20,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 9514653,
+   "sheet_sha256": "99c182858efe4167",
+   "slug": "henrique-cardoso-vs-elionai-braz",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "antonio assef",
+    "inacio santos"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 108,
+   "labels": 14,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 8553509,
+   "sheet_sha256": "43f70c80d1a95510",
+   "slug": "inacio-santos-vs-antonio-assef",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "elisabeth clay",
+    "injana goodman"
+   ],
+   "batch": "women_65",
+   "frames": 34,
+   "labels": 14,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 4272587,
+   "sheet_sha256": "b76c722fdf563121",
+   "slug": "injana-goodman-vs-elisabeth-clay--world-no-gi-2025-C4ZeMLqnTDs",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "injana goodman",
+    "julia maele"
+   ],
+   "batch": "women_65",
+   "frames": 127,
+   "labels": 6,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 14164898,
+   "sheet_sha256": "d5832e46815e13f4",
+   "slug": "injana-goodman-vs-julia-maele--european-no-gi-2025-vnYJGBVM78E",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "elder cruz",
+    "jacob couch"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 82,
+   "labels": 16,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 4725893,
+   "sheet_sha256": "160399f809565bc4",
+   "slug": "jacob-couch-vs-elder-cruz",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "alex enriquez",
+    "jasmine rocha"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 149,
+   "labels": 24,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 7744107,
+   "sheet_sha256": "48633694e4d7360d",
+   "slug": "jasmine-rocha-vs-alex-enriquez",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "josh saunders",
+    "ricky luzny"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 62,
+   "labels": 16,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 5679118,
+   "sheet_sha256": "182d49bd0be3458e",
+   "slug": "josh-saunders-vs-ricky-luzny",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "jozef chen",
+    "oliver taza"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 176,
+   "labels": 22,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 17482833,
+   "sheet_sha256": "066edf2eba3eaea2",
+   "slug": "jozef-chen-vs-oliver-taza",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "kaua gabriel",
+    "kennedy maciel"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 100,
+   "labels": 24,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 6442082,
+   "sheet_sha256": "6d2a347b4558c5cd",
+   "slug": "kennedy-maciel-vs-kaua-gabriel",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "kenta iwamoto",
+    "rhys allan"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 112,
+   "labels": 18,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 9414096,
+   "sheet_sha256": "91184b7bbaf00d7d",
+   "slug": "kenta-iwamoto-vs-rhys-allan",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "jeremy skinner",
+    "levi jonesleary"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 100,
+   "labels": 20,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 6116789,
+   "sheet_sha256": "b24a42fe4fc85e73",
+   "slug": "levi-jones-leary-vs-jeremy-skinner",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "lucas kanard",
+    "william dias"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 46,
+   "labels": 8,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 3854699,
+   "sheet_sha256": "bcbb81222dd32a30",
+   "slug": "lucas-kanard-vs-william-dias",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "jefferson pontes",
+    "luiz paulo"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 76,
+   "labels": 18,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 5719992,
+   "sheet_sha256": "5dbc4213e9add38d",
+   "slug": "luiz-paulo-vs-jefferson-pontes",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "kauane silva",
+    "maria ruffatto"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 46,
+   "labels": 18,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 3565542,
+   "sheet_sha256": "3abe9d14b04f932f",
+   "slug": "maria-ruffatto-vs-kauane-silva",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "freddy vosgroene",
+    "mark macqueen"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 106,
+   "labels": 12,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 7656931,
+   "sheet_sha256": "0d55e0c8c787d5a4",
+   "slug": "mark-macqueen-vs-freddy-vosgroene",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "adam bradley",
+    "michael pixley"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 180,
+   "labels": 30,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 9981771,
+   "sheet_sha256": "48995747d16fcd6a",
+   "slug": "michael-pixley-vs-adam-bradley",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "brianna stemarie",
+    "morgan black"
+   ],
+   "batch": "women_65",
+   "frames": 31,
+   "labels": 2,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 3070979,
+   "sheet_sha256": "fd6cf424f25fa811",
+   "slug": "morgan-black-vs-brianna-ste-marie--world-no-gi-2024-BzwFZSrxJkM",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "elisabeth clay",
+    "nadia frankland"
+   ],
+   "batch": "women_65",
+   "frames": 136,
+   "labels": 4,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 12001729,
+   "sheet_sha256": "58ba5b77e26eeec4",
+   "slug": "nadia-frankland-vs-elisabeth-clay--world-no-gi-2024-V0TNJTVVuwA",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "gabriele schuck",
+    "nadia frankland"
+   ],
+   "batch": "women_65",
+   "frames": 105,
+   "labels": 13,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 10319302,
+   "sheet_sha256": "8e33a6e7205b3237",
+   "slug": "nadia-frankland-vs-gabriele-schuck--pan-no-gi-2024-wFqamBHsK3g",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "gabrieli pessanha",
+    "nadia frankland"
+   ],
+   "batch": "women_65",
+   "frames": 123,
+   "labels": 6,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 13930857,
+   "sheet_sha256": "c5b4493c979abb78",
+   "slug": "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2024-7H1PhSukqZg",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "gabrieli pessanha",
+    "nadia frankland"
+   ],
+   "batch": "women_65",
+   "frames": 138,
+   "labels": 3,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 14893994,
+   "sheet_sha256": "e6302ac045b9df52",
+   "slug": "nadia-frankland-vs-gabrieli-pessanha--world-no-gi-2025-LQUors-3gZM",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "nadia frankland",
+    "paige ivette"
+   ],
+   "batch": "women_65",
+   "frames": 137,
+   "labels": 6,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 12442635,
+   "sheet_sha256": "dcfc84a5ec13d0ad",
+   "slug": "nadia-frankland-vs-paige-ivette--world-no-gi-2024-ImqWcrhUF8w",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "nia blackman",
+    "salla simola"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 166,
+   "labels": 18,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 11940811,
+   "sheet_sha256": "da1c25196027f868",
+   "slug": "nia-blackman-vs-salla-simola",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "gase sanita",
+    "nikki lloydgriffiths"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 64,
+   "labels": 16,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 4824331,
+   "sheet_sha256": "36880d770ae13221",
+   "slug": "nikki-lloyd-griffiths-vs-gase-sanita",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "cammy donnelly",
+    "owen jones"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 112,
+   "labels": 26,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 10214143,
+   "sheet_sha256": "0b391e126b17802b",
+   "slug": "owen-jones-vs-cammy-donnelly",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "alex grandy",
+    "paul ardila"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 64,
+   "labels": 16,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 3247909,
+   "sheet_sha256": "35681d1e8d43c0be",
+   "slug": "paul-ardila-vs-alex-grandy",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "libby genge",
+    "sarah galvao"
+   ],
+   "batch": "women_65",
+   "frames": 160,
+   "labels": 7,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 11641716,
+   "sheet_sha256": "f9c1eacedf0f2f80",
+   "slug": "sarah-galvao-vs-libby-genge--polaris-36-2026-bhtda0EZYpU",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "sarah galvao",
+    "zara di tofano"
+   ],
+   "batch": "women_65",
+   "frames": 140,
+   "labels": 12,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 12316122,
+   "sheet_sha256": "f485e524d9c2e44f",
+   "slug": "sarah-galvao-vs-zara-tofano--polaris-38-2026-IPgbC27xBQQ",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "ben bennett",
+    "taylor pearman"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 58,
+   "labels": 12,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 3988906,
+   "sheet_sha256": "50e3971964d35a54",
+   "slug": "taylor-pearman-vs-ben-bennett",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "davis asare",
+    "tommy langaker"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 90,
+   "labels": 22,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 6358342,
+   "sheet_sha256": "cf1680140fb7dc96",
+   "slug": "tommy-langaker-vs-davis-asare",
+   "split": "train"
+  },
+  {
+   "athletes": [
+    "matheus lino",
+    "victor honorio"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 112,
+   "labels": 22,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 7805005,
+   "sheet_sha256": "68c2c2c21f5e2bee",
+   "slug": "victor-honorio-vs-matheus-lino",
+   "split": "val"
+  },
+  {
+   "athletes": [
+    "jacob rodriguez",
+    "william tackett"
+   ],
+   "batch": "trials_2023_24",
+   "frames": 66,
+   "labels": 18,
+   "origins": [
+    "gemini",
+    "human"
+   ],
+   "sheet_bytes": 3620380,
+   "sheet_sha256": "4049fbb9599e403d",
+   "slug": "william-tackett-vs-jacob-rodriguez",
+   "split": "train"
+  }
+ ],
+ "classes_by_split": {
+  "train": {
+   "5050 guard": 6,
+   "ankle pick": 4,
+   "aoki lock": 2,
+   "arm drag": 8,
+   "arm triangle choke": 4,
+   "armbar": 14,
+   "armtriangle headarm strangle": 1,
+   "back control": 20,
+   "back take": 28,
+   "back triangle": 2,
+   "body lock": 4,
+   "body lock pass": 6,
+   "body triangle": 7,
+   "body triangle bottom": 2,
+   "butterfly guard": 2,
+   "butterfly half guard": 2,
+   "clinch": 10,
+   "closed guard": 14,
+   "collar tie": 47,
+   "dogbar": 2,
+   "double leg takedown": 8,
+   "double under pass": 2,
+   "double underhooks": 6,
+   "duck under": 2,
+   "escape to standing": 8,
+   "false reap": 2,
+   "firemans carry": 2,
+   "foot lock": 2,
+   "front headlock": 4,
+   "front headlock control": 4,
+   "guard break": 2,
+   "guard pass": 20,
+   "guard pass to mount": 2,
+   "guard pull": 66,
+   "guard recovery": 6,
+   "guard retention": 2,
+   "guillotine choke": 14,
+   "half guard": 26,
+   "headarm control top": 2,
+   "heel hook": 8,
+   "inversion": 6,
+   "jump guard": 2,
+   "kguard": 4,
+   "kimura": 2,
+   "kimura trap": 2,
+   "knee shield half guard": 2,
+   "knee tap": 2,
+   "leg entanglement": 17,
+   "leg entanglement entry": 2,
+   "leg entry": 4,
+   "low single leg": 2,
+   "match": 2,
+   "mount": 8,
+   "north south choke": 2,
+   "northsouth position": 4,
+   "open guard": 16,
+   "rear naked choke": 10,
+   "reset stalemate": 4,
+   "russian tie": 2,
+   "seated guard": 12,
+   "shin to shin guard": 4,
+   "side control": 10,
+   "single leg takedown": 20,
+   "single leg x": 2,
+   "smother": 2,
+   "snap down": 8,
+   "stand up": 2,
+   "straight ankle lock": 4,
+   "straight armbar": 2,
+   "suplex": 4,
+   "sweep": 25,
+   "takedown": 20,
+   "takedown back exposure": 2,
+   "tap": 40,
+   "toe hold": 4,
+   "top control": 22,
+   "top control half guard": 8,
+   "top half guard": 4,
+   "triangle choke": 4,
+   "turtle control": 4,
+   "turtle position": 6,
+   "twoonone control": 4,
+   "uchi mata": 4,
+   "underhook": 1,
+   "wrestleup": 2,
+   "xguard": 2
+  },
+  "val": {
+   "5050 guard": 2,
+   "arm drag": 2,
+   "armbar": 2,
+   "back control": 4,
+   "back take": 4,
+   "body triangle": 2,
+   "butterfly guard": 2,
+   "closed guard": 6,
+   "collar tie": 26,
+   "darce choke": 2,
+   "deep half guard": 2,
+   "double leg takedown": 6,
+   "escape to standing": 8,
+   "escape to turtle": 2,
+   "foot sweep": 8,
+   "front headlock": 2,
+   "front headlock control": 2,
+   "guard pass": 10,
+   "guard pull": 2,
+   "guillotine choke": 8,
+   "guillotine escape": 4,
+   "half guard": 12,
+   "heel hook": 2,
+   "hip switch pass": 2,
+   "inversion": 2,
+   "kguard": 2,
+   "kimura grip": 2,
+   "knee bar": 2,
+   "knee cut pass": 2,
+   "knee on belly": 2,
+   "leg entanglement": 7,
+   "mount": 2,
+   "north south choke": 2,
+   "northsouth position": 2,
+   "open guard": 2,
+   "outside ashi garami": 2,
+   "rear naked choke": 4,
+   "seatbelt control": 2,
+   "seated guard": 2,
+   "shoot": 4,
+   "side control": 6,
+   "single leg takedown": 16,
+   "single leg x": 2,
+   "snap down": 8,
+   "standing guillotine": 2,
+   "straight ankle lock": 2,
+   "takedown": 8,
+   "tap": 8,
+   "top control": 8,
+   "top control half guard": 6,
+   "top half guard": 2,
+   "turtle control": 6,
+   "turtle position": 2,
+   "underhook": 2,
+   "wrist lock": 2,
+   "xguard": 2
+  }
+ },
+ "counts": {
+  "bouts": 62,
+  "bouts_excluded": 8,
+  "bouts_train": 50,
+  "bouts_val": 12,
+  "frame_bytes": 460003810,
+  "frames": 7117,
+  "frames_labelled": 481,
+  "frames_unlabelled": 6636,
+  "labels": 933
+ },
+ "dropped_events": {
+  "off_library_label": 1
+ },
+ "generated": "2026-09-03T01:20:56+00:00",
+ "labels_by_origin": {
+  "gemini": 475,
+  "human": 458
+ },
+ "labels_by_type": {
+  "train": {
+   "control": 164,
+   "escape": 20,
+   "guard": 153,
+   "pass": 30,
+   "submission": 119,
+   "sweep": 25,
+   "takedown": 82,
+   "transition": 95
+  },
+  "val": {
+   "control": 76,
+   "escape": 16,
+   "guard": 43,
+   "pass": 14,
+   "submission": 36,
+   "takedown": 46,
+   "transition": 14
+  }
+ },
+ "split_file": "splits/v1.json",
+ "taxonomy_version": "node_library@8b2dcd1cfa75",
+ "train_labels_by_type_and_class": {
+  "control": {
+   "back control": 10,
+   "body lock": 2,
+   "body triangle": 3,
+   "body triangle bottom": 1,
+   "collar tie": 23,
+   "double underhooks": 3,
+   "front headlock": 2,
+   "front headlock control": 2,
+   "headarm control top": 1,
+   "kimura trap": 1,
+   "mount": 4,
+   "northsouth position": 2,
+   "russian tie": 1,
+   "side control": 5,
+   "top control": 11,
+   "top control half guard": 4,
+   "top half guard": 2,
+   "turtle control": 2,
+   "twoonone control": 2
+  },
+  "escape": {
+   "escape to standing": 4,
+   "guard recovery": 3,
+   "turtle position": 3
+  },
+  "guard": {
+   "5050 guard": 3,
+   "butterfly guard": 1,
+   "butterfly half guard": 1,
+   "closed guard": 7,
+   "guard pull": 16,
+   "guard retention": 1,
+   "half guard": 13,
+   "inversion": 3,
+   "kguard": 2,
+   "knee shield half guard": 1,
+   "leg entanglement": 8,
+   "open guard": 8,
+   "seated guard": 6,
+   "shin to shin guard": 2,
+   "single leg x": 1,
+   "xguard": 1
+  },
+  "pass": {
+   "body lock pass": 3,
+   "double under pass": 1,
+   "guard pass": 11,
+   "guard pass to mount": 1
+  },
+  "submission": {
+   "aoki lock": 1,
+   "arm triangle choke": 2,
+   "armbar": 7,
+   "armtriangle headarm strangle": 1,
+   "back triangle": 1,
+   "dogbar": 1,
+   "foot lock": 1,
+   "guillotine choke": 7,
+   "heel hook": 4,
+   "kimura": 1,
+   "north south choke": 1,
+   "rear naked choke": 4,
+   "smother": 1,
+   "straight ankle lock": 2,
+   "straight armbar": 1,
+   "tap": 20,
+   "toe hold": 2,
+   "triangle choke": 2
+  },
+  "sweep": {
+   "sweep": 10
+  },
+  "takedown": {
+   "ankle pick": 2,
+   "arm drag": 2,
+   "double leg takedown": 4,
+   "duck under": 1,
+   "firemans carry": 1,
+   "knee tap": 1,
+   "low single leg": 1,
+   "single leg takedown": 10,
+   "snap down": 4,
+   "suplex": 2,
+   "takedown": 9,
+   "takedown back exposure": 1,
+   "uchi mata": 2
+  },
+  "transition": {
+   "arm drag": 2,
+   "back take": 13,
+   "clinch": 5,
+   "false reap": 1,
+   "guard break": 1,
+   "guard pull": 15,
+   "jump guard": 1,
+   "leg entanglement entry": 1,
+   "leg entry": 2,
+   "match": 1,
+   "reset stalemate": 2,
+   "stand up": 1,
+   "wrestleup": 1
+  }
+ },
+ "train_near_miss_clusters": {
+  "control": [
+   {
+    "labels": {
+     "front headlock": 2,
+     "front headlock control": 2
+    },
+    "shared_word": "front",
+    "total": 4
+   },
+   {
+    "labels": {
+     "front headlock": 2,
+     "front headlock control": 2
+    },
+    "shared_word": "headlock",
+    "total": 4
+   },
+   {
+    "labels": {
+     "body triangle": 3,
+     "body triangle bottom": 1
+    },
+    "shared_word": "triangle",
+    "total": 4
+   },
+   {
+    "labels": {
+     "body lock": 2,
+     "body triangle": 3,
+     "body triangle bottom": 1
+    },
+    "shared_word": "body",
+    "total": 6
+   },
+   {
+    "labels": {
+     "top control half guard": 4,
+     "top half guard": 2
+    },
+    "shared_word": "half",
+    "total": 6
+   },
+   {
+    "labels": {
+     "headarm control top": 1,
+     "top control": 11,
+     "top control half guard": 4,
+     "top half guard": 2
+    },
+    "shared_word": "top",
+    "total": 18
+   },
+   {
+    "labels": {
+     "collar tie": 23,
+     "russian tie": 1
+    },
+    "shared_word": "tie",
+    "total": 24
+   }
+  ],
+  "guard": [
+   {
+    "labels": {
+     "butterfly guard": 1,
+     "butterfly half guard": 1
+    },
+    "shared_word": "butterfly",
+    "total": 2
+   },
+   {
+    "labels": {
+     "leg entanglement": 8,
+     "single leg x": 1
+    },
+    "shared_word": "leg",
+    "total": 9
+   },
+   {
+    "labels": {
+     "butterfly half guard": 1,
+     "half guard": 13,
+     "knee shield half guard": 1
+    },
+    "shared_word": "half",
+    "total": 15
+   }
+  ],
+  "submission": [
+   {
+    "labels": {
+     "straight ankle lock": 2,
+     "straight armbar": 1
+    },
+    "shared_word": "straight",
+    "total": 3
+   },
+   {
+    "labels": {
+     "aoki lock": 1,
+     "foot lock": 1,
+     "straight ankle lock": 2
+    },
+    "shared_word": "lock",
+    "total": 4
+   },
+   {
+    "labels": {
+     "arm triangle choke": 2,
+     "back triangle": 1,
+     "triangle choke": 2
+    },
+    "shared_word": "triangle",
+    "total": 5
+   },
+   {
+    "labels": {
+     "armbar": 7,
+     "straight armbar": 1
+    },
+    "shared_word": "armbar",
+    "total": 8
+   }
+  ],
+  "takedown": [
+   {
+    "labels": {
+     "low single leg": 1,
+     "single leg takedown": 10
+    },
+    "shared_word": "single",
+    "total": 11
+   },
+   {
+    "labels": {
+     "double leg takedown": 4,
+     "low single leg": 1,
+     "single leg takedown": 10
+    },
+    "shared_word": "leg",
+    "total": 15
+   }
+  ],
+  "transition": [
+   {
+    "labels": {
+     "leg entanglement entry": 1,
+     "leg entry": 2
+    },
+    "shared_word": "entry",
+    "total": 3
+   },
+   {
+    "labels": {
+     "leg entanglement entry": 1,
+     "leg entry": 2
+    },
+    "shared_word": "leg",
+    "total": 3
+   }
+  ]
+ },
+ "train_rare_classes": [
+  "control/body lock",
+  "control/body triangle bottom",
+  "control/front headlock",
+  "control/front headlock control",
+  "control/headarm control top",
+  "control/kimura trap",
+  "control/northsouth position",
+  "control/russian tie",
+  "control/top half guard",
+  "control/turtle control",
+  "control/twoonone control",
+  "guard/butterfly guard",
+  "guard/butterfly half guard",
+  "guard/guard retention",
+  "guard/kguard",
+  "guard/knee shield half guard",
+  "guard/shin to shin guard",
+  "guard/single leg x",
+  "guard/xguard",
+  "pass/double under pass",
+  "pass/guard pass to mount",
+  "submission/aoki lock",
+  "submission/arm triangle choke",
+  "submission/armtriangle headarm strangle",
+  "submission/back triangle",
+  "submission/dogbar",
+  "submission/foot lock",
+  "submission/kimura",
+  "submission/north south choke",
+  "submission/smother",
+  "submission/straight ankle lock",
+  "submission/straight armbar",
+  "submission/toe hold",
+  "submission/triangle choke",
+  "takedown/ankle pick",
+  "takedown/arm drag",
+  "takedown/duck under",
+  "takedown/firemans carry",
+  "takedown/knee tap",
+  "takedown/low single leg",
+  "takedown/suplex",
+  "takedown/takedown back exposure",
+  "takedown/uchi mata",
+  "transition/arm drag",
+  "transition/false reap",
+  "transition/guard break",
+  "transition/jump guard",
+  "transition/leg entanglement entry",
+  "transition/leg entry",
+  "transition/match",
+  "transition/reset stalemate",
+  "transition/stand up",
+  "transition/wrestleup"
+ ],
+ "version": "v1"
+}
