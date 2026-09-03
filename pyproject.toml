@@ -109,6 +109,9 @@ postgres = [
     "alembic>=1.13",
     "psycopg[binary]>=3.2",
 ]
+gemini = [
+    "google-genai>=2.22.0",
+]
 
 [project.urls]
 Repository = "https://github.com/vetor/GrapplingArcAnalytics"
