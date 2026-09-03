@@ -65,10 +65,12 @@ from scripts.frame_pdf import (  # noqa: E402
     DEFAULT_GRID_LANDSCAPE,
     DEFAULT_STEP_SECONDS,
     FONT_B,
+    LIBRARY_PATH,
     PAD,
     _register_fonts,
     _text_block,
     draw_grid_pages,
+    draw_library_pages,
     hhmmss,
     page_size,
     set_page_size,
@@ -301,11 +303,27 @@ def extract_frames(video_path: Path, timestamps: list[float], out_dir: Path) -> 
     return frames
 
 
+def load_library() -> dict[str, Any] | None:
+    """The cached vocabulary snapshot (``--dump-library``'s own output), read as-is -- no DB
+    call from this module. ``frame_pdf.py`` re-queries prod on every render because it always
+    runs against a live manifest; this path is a one-off local video, so a same-day cache on
+    disk is a fine trade against pulling a DB dependency into a script whose whole point is
+    working offline on a local file. ``None`` (with a log warning) when no snapshot exists yet
+    -- ``frame_pdf.py --dump-library`` writes one."""
+    if not LIBRARY_PATH.exists():
+        logger.warning("%s missing -- run `frame_pdf.py --dump-library` first; "
+                       "sheet will carry no vocabulary page", LIBRARY_PATH)
+        return None
+    return json.loads(LIBRARY_PATH.read_text(encoding="utf-8"))
+
+
 def build_sheet(frames: list[tuple[float, Path]], video_path: Path, decision: dict[str, Any],
-                out_path: Path) -> None:
+                out_path: Path, library: dict[str, Any] | None = None) -> None:
     """Landscape 2x2 sheet via frame_pdf.py's own grid renderer -- context page written here
     (this caller has no Entry/DB/manifest to draw frame_pdf's own context page from), frame
-    grid drawn by the imported, unmodified function so every sheet in the repo looks alike."""
+    grid drawn by the imported, unmodified function so every sheet in the repo looks alike.
+    ``library`` (when given) is drawn via ``frame_pdf.draw_library_pages`` -- same vocabulary
+    pages, same closed-vocabulary rule, as any other sheet in the repo."""
     from reportlab.pdfgen.canvas import Canvas
 
     set_page_size("landscape")
@@ -333,6 +351,8 @@ def build_sheet(frames: list[tuple[float, Path]], video_path: Path, decision: di
         c.drawString(PAD, y, k)
         y = _text_block(c, v, PAD + 200, y, page_size("landscape")[0] - PAD - 200 - PAD, 9, 12) - 4
     c.showPage()
+    if library:
+        draw_library_pages(c, library)
     draw_grid_pages(c, frames, DEFAULT_GRID_LANDSCAPE)
     c.save()
 
@@ -369,7 +389,8 @@ def plot_motion(records: list[MotionRecord], chosen: list[float], otsu_t: float 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────────────────────
 def process(video_path: Path, out_dir: Path, *, analysis_fps: float = ANALYSIS_FPS,
-           step: float = DEFAULT_STEP_SECONDS, dry_run: bool = False) -> dict[str, Any]:
+           step: float = DEFAULT_STEP_SECONDS, dry_run: bool = False,
+           no_library: bool = False) -> dict[str, Any]:
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise RuntimeError(f"cannot open video: {video_path}")
@@ -406,7 +427,9 @@ def process(video_path: Path, out_dir: Path, *, analysis_fps: float = ANALYSIS_F
     if not dry_run:
         frames = extract_frames(video_path, timestamps, out_dir / "frames")
         if frames:
-            build_sheet(frames, video_path, decision, out_dir / "sheets" / f"{out_dir.name}.pdf")
+            library = None if no_library else load_library()
+            build_sheet(frames, video_path, decision, out_dir / "sheets" / f"{out_dir.name}.pdf",
+                       library)
         decision["n_frames_extracted"] = len(frames)
 
     return decision
@@ -421,6 +444,8 @@ def main() -> int:
     ap.add_argument("--step", type=float, default=DEFAULT_STEP_SECONDS,
                     help="fallback interval (seconds) when the camera is moving")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--no-library", action="store_true",
+                    help="do not print the label vocabulary into the sheet")
     a = ap.parse_args()
 
     if not a.video.exists():
@@ -428,7 +453,7 @@ def main() -> int:
         return 1
 
     decision = process(a.video, a.out, analysis_fps=a.analysis_fps, step=a.step,
-                       dry_run=a.dry_run)
+                       dry_run=a.dry_run, no_library=a.no_library)
     logger.info("camera_moving=%s method=%s n_frames=%d (median_cam=%.3f frac_high=%.2f)",
                decision["camera_moving"], decision["method"], decision["n_frames"],
                decision["median_cam_motion"], decision["frac_high_cam_motion"])

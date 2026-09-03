@@ -112,6 +112,95 @@ per bout — measured total 5161 tokens for this sheet at `--thinking high` (see
 cost driver at scale is bout COUNT, not sheet size — 100 bouts is still under a few hundred
 thousand tokens.
 
+## Baseline zero-shot (2026-09-03)
+
+`scripts/gemini_baseline.py` measures a fresh zero-shot `gemini-3.6-flash`, `thinking=high`
+read against ground truth, so the fine-tuning gain (next step, below) has a number to beat.
+Ground truth: `data/frame_pdf/trials_2023_24/answers/<slug>.events.json`, concordance-audited
+(`docs/gemini_concordance_audit.md`) — every kept event was independently re-read off the
+frames by a human auditor, which is the "human provenance" this baseline needs.
+
+**Deliberate scope adaptation.** The ticket named `data/frame_pdf/out/<slug>/events.json` +
+its sheet as the source of human-reviewed pairs; measured 2026-09-03, that pipeline currently
+has ZERO bouts carrying both a rendered sheet and a human/reviewed `source` (all 21
+`out/processed/*.events.json` sidecars are still `frame_answer_import (…not yet
+human-reviewed)`). The trials_2023_24 corpus does have 41 bouts with both a PDF sheet (library
+pages embedded, same as any `frame_pdf.py` sheet) and a concordance-audited answer — that is
+where this baseline actually runs. `select_candidates` picks bouts from the curated index in
+file order, capped at `--n` (hard cap 10, cost guard).
+
+Each candidate's sheet is read FRESH (no reuse of the reading that produced the ground truth —
+that reading was already audited/corrected). Match rule: same `type`, same canonicalised label
+(`scripts.enrich_from_audit.node_key`, i.e. `clean_label → _normalize_name → canonicalize`,
+the repo's one node-key chain), `|ts diff| ≤ 10s` — greedy nearest-ts, one-to-one.
+
+### Run: 10 bouts, `gemini-3.6-flash`, thinking=high
+
+| type | support | predicted | TP | precision | recall | F1 |
+|---|---|---|---|---|---|---|
+| control | 32 | 12 | 4 | 0.33 | 0.13 | 0.18 |
+| transition | 13 | 22 | 5 | 0.23 | 0.38 | 0.29 |
+| guard | 22 | 4 | 2 | 0.50 | 0.09 | 0.15 |
+| pass | 6 | 8 | 3 | 0.38 | 0.50 | 0.43 |
+| escape | 4 | 3 | 0 | 0.00 | 0.00 | — |
+| sweep | 1 | 0 | 0 | — | 0.00 | — |
+| submission | 15 | 10 | 7 | 0.70 | 0.47 | 0.56 |
+| takedown | 13 | 20 | 10 | 0.50 | 0.77 | 0.61 |
+| **overall** | **106** | **79** | **31** | **0.39** | **0.29** | **0.34** |
+
+Other numbers: mean `|ts|` error among matches **1.13s** (tight — when the model gets an event
+right, it gets the timestamp very right), actor accuracy among matches **90%**,
+`confidence: "high"` rate **100%** (every one of the 79 model events across all 10 bouts —
+Gemini's own confidence field carries zero signal here; it never says "low", so it cannot
+correlate with correctness). Cost: 140,610 prompt + 39,326 thoughts + 7,650 output = **187,586
+tokens for 10 bouts** (~18.8k tokens/bout at `thinking=high`) — a rounding error at Gemini
+Flash pricing, confirming the earlier single-sheet measurement's cost note.
+
+Full per-bout CSV: `data/processed/gemini_baseline.csv` (gitignored, regenerate with
+`uv run python -m scripts.gemini_baseline --n 10`). Raw per-bout readings:
+`data/frame_pdf/gemini_baseline/<slug>/gemini_baseline.json` (gitignored).
+
+### Three most common failure modes
+
+**1. Wrong technique at the right moment, not just a spelling miss.** The model reads SOME
+action at roughly the right time but names the wrong node — not a fold-fixable spelling
+variant, a different technique. `josh-saunders-vs-ricky-luzny`, human `ts=6125 takedown
+"Single Leg Takedown"` → model `ts=6120 takedown "Snap Down"`; human `ts=6310 submission "Rear
+Naked Choke"` → model `ts=6330 submission "Choke"` (a real-but-different library label, not a
+synonym of RNC). This is the largest driver of low recall on `control`/`guard` — the model
+sees an action but not which position it resolved into.
+
+**2. Actor swap, partial or whole-bout.** `owen-jones-vs-cammy-donnelly`: human has every
+early-guard event owned by Owen Jones (`Guard Pull`, `Open Guard`, …); the model's
+`ts=2375 transition "Guard Pull" — Cammy Donnelly` and `ts=2700 "Guard Pull" — Cammy Donnelly`
+put the SAME actions on the other athlete. Same defect class the concordance-audit doc already
+named for the classic pipeline (`docs/gemini_concordance_audit.md` §Batch 2) — this baseline
+shows it survives a fresh zero-shot read on a sheet that already embeds the vocabulary AND an
+identity-discrimination instruction.
+
+**3. Over-generation of same-type events that don't correspond to distinct human events, plus
+timestamp drift wide enough to slip past a 10s window.** `declan-moody-vs-anton-minenko`: human
+records 3 takedown-family events across the bout; the model reports 5 `takedown` events
+(`"Snap Down"` three times, `"Take Down"` once, plus the one real
+`"Takedown (Back Exposure)"`) — and even that one correct label lands at `ts=6835` against the
+human's `ts=6855`, a 20s gap that misses the ±10s tolerance entirely. Zero of this bout's 4
+human events matched. The model appears to narrate every frame showing sustained wrestling
+as its own event rather than segmenting the actual technique changes.
+
+### Recommendation
+
+Zero-shot precision (0.39) and recall (0.29) are too low to trust unsupervised, and the
+`confidence: "high"` field is useless as a filter (constant). But the two things that DO work
+well when a match happens — mean ts error 1.1s, actor accuracy 90% — say the failure is
+concentrated in WHICH label the model assigns, not WHEN or WHO. That points fine-tuning (or
+few-shot examples) at label discrimination specifically: pairs like `Snap Down` vs `Single Leg
+Takedown`, `Choke` vs `Rear Naked Choke`, and the guard/control sub-position vocabulary
+(recall 0.09–0.13, the two weakest types) rather than at timestamp extraction or actor
+identification, which the model is already doing acceptably. The dataset this needs is not
+more raw readings — `docs/gemini_concordance_audit.md`'s corpus already has 400+ audited
+events — it's audited (label, near-miss) pairs specifically on the confusions in failure mode
+1, since that is measurably where the errors concentrate.
+
 ## Next step (not this pass)
 
 Fine-tuning (or few-shot prompt tuning) on frames the model already reads with high confidence

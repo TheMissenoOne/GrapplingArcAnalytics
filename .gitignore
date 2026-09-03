@@ -23,6 +23,14 @@ data/study/reports/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 
+# Vision dataset (scripts/vision_dataset.py) — frames + labels are large and fully
+# regenerable from the sheet PDFs. The manifest, the split and the card are small,
+# are what make a measurement citable, and ARE committed.
+data/finetune/*
+!data/finetune/manifests/
+!data/finetune/splits/
+!data/finetune/DATASET_CARD.md
+
 # Jupyter
 .ipynb_checkpoints/
 */.ipynb_checkpoints/*
@@ -96,6 +104,7 @@ docs/raw/
 data/frame_pdf/out/
 data/frame_pdf/trials_2023_24/*.pdf
 data/frame_pdf/trials_2023_24/pendentes_gemini/
+data/frame_pdf/gemini_baseline/
 
 # owner training footage — private, never committed
 data/video/
