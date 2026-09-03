@@ -555,6 +555,65 @@ def test_group_membership_round_trips(session):
     assert roles == {prof.id: "professor", student.id: "student"}
 
 
+def test_group_member_consent_at_round_trips(session):
+    """``join_group()`` (alembic 0054) stamps this the moment the Web confirmation screen lets
+    the join through — NULL means "joined before 0054" or "never confirmed", never "declined"."""
+
+    from datetime import UTC, datetime
+
+    from db.models import Group, GroupMember, Profile
+
+    prof = Profile(id=str(uuid.uuid4()), full_name="Professor")
+    student = Profile(id=str(uuid.uuid4()), full_name="Aluno")
+    group = Group(id=str(uuid.uuid4()), owner_id=prof.id, name="Gracie Barra")
+    session.add_all([prof, student, group])
+    session.flush()
+
+    t = datetime(2026, 9, 3, tzinfo=UTC)
+    session.add(GroupMember(group_id=group.id, profile_id=student.id, role="student", consent_at=t))
+    session.commit()
+
+    row = session.get(GroupMember, (group.id, student.id))
+    assert row.consent_at is not None
+    assert row.consent_at.replace(tzinfo=UTC) == t
+
+
+# ── professor_evaluations (alembic 0054) ─────────────────────────────────────────
+
+
+def test_professor_evaluation_round_trips(session):
+    from db.models import Group, GroupMember, ProfessorEvaluation, Profile
+
+    prof = Profile(id=str(uuid.uuid4()), full_name="Professor")
+    student = Profile(id=str(uuid.uuid4()), full_name="Aluno")
+    group = Group(id=str(uuid.uuid4()), owner_id=prof.id, name="Gracie Barra")
+    session.add_all([prof, student, group])
+    session.add_all([
+        GroupMember(group_id=group.id, profile_id=prof.id, role="professor"),
+        GroupMember(group_id=group.id, profile_id=student.id, role="student"),
+    ])
+    session.flush()
+
+    evaluation = ProfessorEvaluation(
+        group_id=group.id,
+        student_id=student.id,
+        professor_id=prof.id,
+        rating_note="Guard retention improving, work on far-side underhook.",
+        score=4,
+    )
+    session.add(evaluation)
+    session.commit()
+
+    fetched = session.query(ProfessorEvaluation).filter_by(student_id=student.id).one()
+    assert fetched.group_id == group.id
+    assert fetched.professor_id == prof.id
+    assert fetched.score == 4
+
+    # Never a write path to the Elo tables — a coach note is not a rating.
+    assert not hasattr(fetched, "elo")
+    assert not hasattr(fetched, "user_elo")
+
+
 # ── class_sessions (alembic 0026) ────────────────────────────────────────────────
 
 

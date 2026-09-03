@@ -17,6 +17,7 @@ from sqlalchemy import (
     Index,
     Integer,
     PrimaryKeyConstraint,
+    SmallInteger,
     String,
     Text,
     UniqueConstraint,
@@ -310,6 +311,11 @@ class GroupMember(Base):
     # 'professor', not 'teacher' — the word the product uses, in the data too.
     role: Mapped[str] = mapped_column(String(16), nullable=False)
     joined_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    # When this member's ``join_group()`` call confirmed the disclosure screen (Web, alembic
+    # 0054) — "your training data is visible to this gym's professors". NULL for rows created
+    # via `create_group()` (the owner's own membership, nothing to disclose to themselves) or
+    # for any row that predates 0054; NULL is never read as consent given.
+    consent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     __table_args__ = (
         CheckConstraint("role in ('owner','professor','student')", name="ck_group_members_role"),
@@ -433,6 +439,44 @@ class Instructional(Base):
     )
 
     __table_args__ = (Index("idx_instructionals_group", "group_id"),)
+
+
+class ProfessorEvaluation(Base):
+    """A professor's own coaching note on a student (alembic 0054) — the OTHER kind of rating.
+
+    Deliberately separate from every Elo/Glicko table (``graphs``, ``graph_edges``, ``athletes``,
+    ``rating_engine_runs``): this is the professor's opinion, not a number derived from the
+    student's replayed sequences, and nothing in this module ever writes it back into the rating
+    pipeline. ``score`` has no fixed scale yet — that is a professor-UI decision, not a schema
+    one; add the CHECK constraint when a scale is picked.
+
+    RLS: read by the group's owner/professor (any of their students) or by the student about
+    themselves; write by the authoring professor/owner only, and only in their own name
+    (``professor_id = auth.uid()``) — same ``is_group_owner_or_professor`` split as
+    ``class_plan_templates``/``instructionals`` (0050). No update/delete policy yet — a wrong
+    note today is a data-loss risk this table's zero rows don't justify solving until it has
+    users; add the policy the day someone needs to correct one."""
+
+    __tablename__ = "professor_evaluations"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    group_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("groups.id", ondelete="CASCADE"), nullable=False
+    )
+    student_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    professor_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    rating_note: Mapped[str | None] = mapped_column(Text)
+    score: Mapped[int | None] = mapped_column(SmallInteger)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (
+        Index("idx_professor_evaluations_group", "group_id"),
+        Index("idx_professor_evaluations_student", "student_id"),
+    )
 
 
 class FrameAnnotation(Base):
