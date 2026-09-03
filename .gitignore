@@ -96,3 +96,6 @@ docs/raw/
 data/frame_pdf/out/
 data/frame_pdf/trials_2023_24/*.pdf
 data/frame_pdf/trials_2023_24/pendentes_gemini/
+
+# owner training footage — private, never committed
+data/video/
