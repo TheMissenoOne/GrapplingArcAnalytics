@@ -1795,8 +1795,8 @@
       "value": "neutral"
     },
     "transition|Back Take": {
-      "source": "declared",
-      "value": "top"
+      "source": "derived",
+      "value": "neutral"
     },
     "transition|Berimbolo": {
       "source": "derived",
