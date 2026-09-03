@@ -150,12 +150,17 @@ def test_kind_of_entry_submission_logged_with_a_stale_type() -> None:
 
 
 def test_kind_of_entry_turtle_is_state_not_action() -> None:
-    """Real bug this carve-out (1.3) exists for: 'Turtle'/'Quatro Apoios' variants used to
-    resolve to the library's `Turtle Position` node with `type: 'escape'` — a FORCED_ACTION
-    type — so `kind_of_entry` misread the App's own turtle position as an ACTION. Now `type`
-    is `'defensive'` (not forced), so the position reads as a state."""
+    """Real bug this used to need a carve-out for: 'Turtle'/'Quatro Apoios' variants resolved
+    to the library's `Turtle Position` node with `type: 'escape'` — a FORCED_ACTION type — so
+    `kind_of_entry` misread the App's own turtle position as an ACTION. Fixed at the DATA layer
+    (owner, 2026-09-04, decision 1: turtle is a generic bottom STATE, same family as `Turtle
+    Control`): the library's own type is now `'control'`, which is not in `_FORCED_ACTION_TYPES`,
+    so turtle reads as a state BY TYPE ALONE — no curated row and no special-cased code involved."""
     assert kind_of_entry("Turtle", "control") == "state"
     assert kind_of_entry("Quatro Apoios", "control") == "state"
+    # A bare, uncurated `escape` label still forces 'action' — the fix is scoped to turtle's
+    # own library type, not a weakening of `_FORCED_ACTION_TYPES` itself.
+    assert kind_of("Some Unmapped Escape Label", "escape") == "action"
 
 
 def test_kind_of_entry_falls_back_to_kind_of_outside_the_library() -> None:

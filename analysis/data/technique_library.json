@@ -2223,7 +2223,7 @@
   {
     "en": "Turtle Position",
     "pt": "Quatro Apoios",
-    "type": "escape",
+    "type": "control",
     "variants": [
       "turtle",
       "de quatro",

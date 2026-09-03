@@ -735,7 +735,7 @@
     "turtle position": {
       "kind": "state",
       "orientation": "bottom",
-      "type": "defensive"
+      "type": "control"
     },
     "twister": {
       "kind": "action",
@@ -893,6 +893,10 @@
     "control|Truck": {
       "source": "declared",
       "value": "top"
+    },
+    "control|Turtle Position": {
+      "source": "declared",
+      "value": "bottom"
     },
     "control|arm drag": {
       "source": "derived",
@@ -1117,10 +1121,6 @@
     "control|underhook": {
       "source": "derived",
       "value": "controlling"
-    },
-    "defensive|Turtle Position": {
-      "source": "declared",
-      "value": "bottom"
     },
     "escape|Bridge (Upa Escape)": {
       "source": "derived",
