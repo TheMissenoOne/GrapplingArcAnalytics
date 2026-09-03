@@ -823,3 +823,104 @@ def test_profile_athlete_link_column_and_partial_unique(engine, session):
     p4 = Profile(id=str(uuid.uuid4()))
     session.add_all([p3, p4])
     session.commit()  # no error
+
+
+# ── session_video_jobs / session_video_analysis (alembic 0058) ────────────────────
+
+
+def test_profile_face_consent_defaults_null(session):
+    """`face_ref_path`/`face_consent_at` start NULL — worker never reads a selfie until
+    the owner explicitly sets `face_consent_at`."""
+    from db.models import Profile
+
+    prof = Profile(id=str(uuid.uuid4()), full_name="Aluno")
+    session.add(prof)
+    session.commit()
+
+    row = session.get(Profile, prof.id)
+    assert row.face_ref_path is None
+    assert row.face_consent_at is None
+
+
+def test_session_video_job_and_analysis_round_trip(session):
+    from datetime import UTC, datetime
+
+    from db.models import Profile, SessionVideoAnalysis, SessionVideoJob
+
+    prof = Profile(id=str(uuid.uuid4()), full_name="Aluno")
+    session.add(prof)
+    session.flush()
+
+    job = SessionVideoJob(
+        id=str(uuid.uuid4()),
+        owner_id=prof.id,
+        session_id="s-1234-abcd",
+        round_id="r-1",
+        media_id="m-1",
+        storage_path=f"{prof.id}/s-1234-abcd/m-1.mp4",
+        round_kind="round",
+        status="queued",
+        context={"kit": "black rashguard"},
+    )
+    session.add(job)
+    session.commit()
+
+    fetched = session.get(SessionVideoJob, job.id)
+    assert fetched.owner_id == prof.id
+    assert fetched.status == "queued"
+    assert fetched.attempts == 0
+    assert fetched.context == {"kit": "black rashguard"}
+
+    analysis = SessionVideoAnalysis(
+        job_id=job.id,
+        owner_id=prof.id,
+        session_id="s-1234-abcd",
+        round_id="r-1",
+        events=[{"ts": 1.0, "label": "closed_guard", "actor": "you"}],
+        sequences=[{"sequenceId": "seq-1", "startTs": 0.0, "endTs": 30.0, "eventIdx": [0]}],
+        difficulty_derived=6.5,
+        difficulty_inputs={"control_share_you": 0.3},
+        highlights=[{"start": 0.0, "end": 4.0, "label": "closed_guard", "score": 0.9}],
+        generated_at=datetime.now(UTC),
+    )
+    session.add(analysis)
+    session.commit()
+
+    row = session.get(SessionVideoAnalysis, job.id)
+    assert row.owner_id == prof.id
+    assert row.difficulty_derived == pytest.approx(6.5)
+    assert row.events[0]["actor"] == "you"
+    assert row.sequences[0]["sequenceId"] == "seq-1"
+    assert row.highlights[0]["label"] == "closed_guard"
+
+
+def test_session_video_job_unique_owner_media(session):
+    from sqlalchemy.exc import IntegrityError
+
+    from db.models import Profile, SessionVideoJob
+
+    prof = Profile(id=str(uuid.uuid4()), full_name="Aluno")
+    session.add(prof)
+    session.flush()
+
+    session.add(
+        SessionVideoJob(
+            owner_id=prof.id,
+            session_id="s-1",
+            media_id="m-1",
+            storage_path=f"{prof.id}/s-1/m-1.mp4",
+        )
+    )
+    session.commit()
+
+    session.add(
+        SessionVideoJob(
+            owner_id=prof.id,
+            session_id="s-1",
+            media_id="m-1",
+            storage_path=f"{prof.id}/s-1/m-1.mp4",
+        )
+    )
+    with pytest.raises(IntegrityError):
+        session.flush()
+    session.rollback()

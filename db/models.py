@@ -16,6 +16,7 @@ from sqlalchemy import (
     ForeignKeyConstraint,
     Index,
     Integer,
+    Numeric,
     PrimaryKeyConstraint,
     SmallInteger,
     String,
@@ -76,6 +77,13 @@ class Profile(Base):
     athlete_id: Mapped[str | None] = mapped_column(
         UUID(as_uuid=False), ForeignKey("athletes.id", ondelete="SET NULL")
     )
+    # Video analysis pipeline (alembic 0058) — a reference selfie for actor identification in
+    # the worker's frame reading, purely opt-in. NULL face_consent_at = worker never reads the
+    # selfie, whatever face_ref_path holds. `authenticated` gets a column grant for both (0058
+    # extends 0023's per-column list) so the owner can set/revoke consent themselves; no RLS
+    # policy change needed since `profiles_update_own` (0023) already gates the row.
+    face_ref_path: Mapped[str | None] = mapped_column(Text)
+    face_consent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -1108,3 +1116,80 @@ class AthleteConstellationMemberV2(Base):
     pagerank: Mapped[float] = mapped_column(Float, nullable=False)
     weighted_pagerank: Mapped[float] = mapped_column(Float, nullable=False)
     degree: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class SessionVideoJob(Base):
+    """One user-recorded round/session video, queued for the video-analysis worker
+    (alembic 0058). Written only via the `enqueue_video_job` RPC (ownership proven by the
+    storage path prefix, same rule as the `session-videos` bucket policy from 0024) or by the
+    service-role worker claiming/updating status. No FK to `user_sessions.session_id` on
+    purpose — the session push is offline-first and may not have landed yet when a video
+    enqueues; `owner_id`'s cascade already covers account deletion.
+    `(status, created_at) where status = 'queued'` is the worker's claim index — partial, so
+    it's raw SQL in the migration only (see 0051's own note on partial indexes), not modeled
+    here."""
+
+    __tablename__ = "session_video_jobs"
+    __table_args__ = (
+        UniqueConstraint("owner_id", "media_id", name="uq_session_video_jobs_owner_media"),
+        CheckConstraint(
+            "round_kind IN ('round', 'full_session')", name="ck_session_video_jobs_round_kind"
+        ),
+        CheckConstraint(
+            "status IN ('queued', 'processing', 'done', 'failed')",
+            name="ck_session_video_jobs_status",
+        ),
+    )
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    session_id: Mapped[str] = mapped_column(Text, nullable=False)
+    round_id: Mapped[str | None] = mapped_column(Text)
+    media_id: Mapped[str] = mapped_column(Text, nullable=False)
+    storage_path: Mapped[str] = mapped_column(Text, nullable=False)
+    round_kind: Mapped[str] = mapped_column(Text, nullable=False, server_default="round")
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="queued")
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    error: Mapped[str | None] = mapped_column(Text)
+    context: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, server_default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+
+class SessionVideoAnalysis(Base):
+    """The worker's output for one `SessionVideoJob` — 1:1, keyed by `job_id` (no separate
+    id, same shape as `AthleteDossier.athlete_id`). Written only by the service-role worker;
+    read owner-only via RLS, deliberately without an `is_pro` check (alembic 0058, ADR D9 in
+    the video-pro plan) — an expired entitlement must not revoke access to an analysis the
+    user already owns."""
+
+    __tablename__ = "session_video_analysis"
+    __table_args__ = (Index("ix_session_video_analysis_owner_session", "owner_id", "session_id"),)
+
+    job_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("session_video_jobs.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    owner_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    session_id: Mapped[str] = mapped_column(Text, nullable=False)
+    round_id: Mapped[str | None] = mapped_column(Text)
+    schema_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    motion: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, server_default="{}")
+    events: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, server_default="[]")
+    sequences: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, server_default="[]")
+    difficulty_derived: Mapped[float | None] = mapped_column(Numeric(4, 1))
+    difficulty_inputs: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, server_default="{}"
+    )
+    confidence: Mapped[str | None] = mapped_column(Text)
+    highlights: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, server_default="[]")
+    pdf_path: Mapped[str | None] = mapped_column(Text)
+    clip_paths: Mapped[list[Any]] = mapped_column(JSONB, nullable=False, server_default="[]")
+    generated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
