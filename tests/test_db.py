@@ -657,6 +657,33 @@ def test_group_member_consent_at_round_trips(session):
     assert row.consent_at.replace(tzinfo=UTC) == t
 
 
+def test_group_branding_round_trips_and_defaults_null(session):
+    """Alembic 0056 — logo/description/accent_color, all nullable. The ``#rrggbb`` CHECK is
+    Postgres-only (regex ``~`` isn't portable to SQLite), so it isn't exercised here; see
+    ``tests/test_group_branding.py`` for the source-scan on the migration's regex."""
+
+    from db.models import Group, Profile
+
+    prof = Profile(id=str(uuid.uuid4()), full_name="Professor")
+    group = Group(id=str(uuid.uuid4()), owner_id=prof.id, name="Gracie Barra")
+    session.add_all([prof, group])
+    session.commit()
+
+    row = session.get(Group, group.id)
+    assert row.logo_url is None
+    assert row.description is None
+    assert row.accent_color is None
+
+    row.logo_url = "https://x.supabase.co/storage/v1/object/public/gym-logos/g/logo.png"
+    row.description = "Downtown academy, no-gi focus."
+    row.accent_color = "#1a2b3c"
+    session.commit()
+
+    reread = session.get(Group, group.id)
+    assert reread.accent_color == "#1a2b3c"
+    assert reread.description == "Downtown academy, no-gi focus."
+
+
 # ── professor_evaluations (alembic 0054) ─────────────────────────────────────────
 
 

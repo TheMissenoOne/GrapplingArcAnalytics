@@ -26,25 +26,29 @@ import { createClient, type SupabaseClient } from 'https://esm.sh/@supabase/supa
 import { deleteAccount, type DeletionEffects, type OwnedFile } from './deletion.ts';
 
 /**
- * Every private bucket, not just the one this function was written for.
+ * Every bucket a migration creates, not just the one this function was written for — public
+ * buckets included. `gym-logos` (alembic 0056) is PUBLIC (read is the point), but a bucket
+ * being public says nothing about whether its objects should survive an account deletion: an
+ * owner's academy logo is still THEIR write, under THEIR group's prefix, and this sweep is
+ * about not leaving files behind, not about who can read them.
  *
  * `user-media` (alembic 0042) exists because `session-videos` carries a professor read policy
- * that must not reach a study attachment. `instructional-media` (alembic 0050) is a third:
- * professor-authored teaching material for a whole group. Three buckets means the sweep below
- * has to visit all three: a bucket the deletion path does not know about is files left on the
- * server under a response that says the account is gone.
+ * that must not reach a study attachment. `instructional-media` (alembic 0050) is professor-
+ * authored teaching material for a whole group. Four buckets means the sweep below has to visit
+ * all four: a bucket the deletion path does not know about is files left on the server under a
+ * response that says the account is gone.
  *
  * Add a bucket to the schema, add it here in the same change.
  */
-const PRIVATE_BUCKETS = ['session-videos', 'user-media', 'instructional-media'];
+const PRIVATE_BUCKETS = ['session-videos', 'user-media', 'instructional-media', 'gym-logos'];
 
 /**
- * `instructional-media` objects live under `{groupId}/...`, not `{ownerId}/...` — the whole
- * group reads them (`is_group_member`), so the path can't be keyed by one person. A professor
- * who deletes their account still needs those objects swept, so for this bucket the "owner
- * prefix" to walk is each group THEY OWN, not their own uid.
+ * `instructional-media` and `gym-logos` objects both live under `{groupId}/...`, not
+ * `{ownerId}/...` — the whole group reads them, so the path can't be keyed by one person. An
+ * owner who deletes their account still needs those objects swept, so for these buckets the
+ * "owner prefix" to walk is each group THEY OWN, not their own uid.
  */
-const GROUP_KEYED_BUCKETS = new Set(['instructional-media']);
+const GROUP_KEYED_BUCKETS = new Set(['instructional-media', 'gym-logos']);
 const PAGE = 100;
 
 const ALLOWED_ORIGINS = [

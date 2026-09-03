@@ -287,7 +287,11 @@ class UserSyncMeta(Base):
 
 class Group(Base):
     """A gym's students under one professor (alembic 0024). Flat — one owner, many
-    members. RLS + join_group()/group_member_sessions view live in alembic 0024."""
+    members. RLS + join_group()/group_member_sessions view live in alembic 0024.
+
+    ``logo_url``/``description``/``accent_color`` (alembic 0056) — branding, owner-only writable
+    via ``groups_update_owner`` (same shape as every other write on this table); ``accent_color``
+    is CHECK-constrained to ``#rrggbb`` at the DB, not re-validated here."""
 
     __tablename__ = "groups"
 
@@ -296,6 +300,9 @@ class Group(Base):
         UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
     )
     name: Mapped[str] = mapped_column(Text, nullable=False)
+    logo_url: Mapped[str | None] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
+    accent_color: Mapped[str | None] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
