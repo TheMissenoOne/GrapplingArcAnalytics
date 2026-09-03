@@ -8,6 +8,8 @@ from typing import Any
 
 from analysis.network_metrics import network_from_sequences
 from export.site_data import (
+    _DEFAULT_DESC,
+    _OCEAN_JS,
     _direct_career_links,
     _nav,
     _render_retired_page,
@@ -62,6 +64,16 @@ def test_direct_career_links_dashes_low_landing() -> None:
     net_ok = network_from_sequences([miss, land, land])  # 3x → below weight-5 floor
     out_ok = _direct_career_links(links, node_type, net_ok)
     assert out_ok[0]["dashed"] is False  # weight 3 < 5 floor
+
+
+def test_grappling_rating_label_replaces_grappling_elo() -> None:
+    # N5-site (2026-09-04): "Grappling ELO" -> "Grappling Rating (Glicko-2)" on user-facing
+    # site copy; "ELO" is kept only where a string refers to the App's own on-device engine
+    # (not touched here — none of these strings do).
+    assert "Grappling Rating (Glicko-2)" in _DEFAULT_DESC
+    assert "Grappling ELO" not in _DEFAULT_DESC
+    assert "Grappling Rating (Glicko-2)" in _OCEAN_JS
+    assert "Grappling ELO" not in _OCEAN_JS
 
 
 def test_nav_and_footer_point_at_atlas_not_the_system_or_the_ocean() -> None:

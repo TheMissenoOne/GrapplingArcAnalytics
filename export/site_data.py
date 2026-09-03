@@ -1130,7 +1130,7 @@ _FOOTER = """<footer class="site-foot"><div class="wrap">
 SITE_BASE = "https://themissenoone.github.io/GrapplingArc/site"
 _DEFAULT_DESC = (
     "Interactive grappling & MMA match breakdowns — transition maps, momentum, "
-    "positional conversion and Grappling ELO."
+    "positional conversion and Grappling Rating (Glicko-2)."
 )
 
 
@@ -1387,7 +1387,7 @@ def render_breakdown_page(
             cls = "up" if d >= 0 else "down"
             arrow = "▲" if d >= 0 else "▼"
             delta = f'<div class="delta {cls}">{arrow} {d:+.1f} pp this bout</div>'
-        return (f'<div class="sig-card"><div class="k">{html.escape(name)} · Grappling ELO</div>'
+        return (f'<div class="sig-card"><div class="k">{html.escape(name)} · Grappling Rating (Glicko-2)</div>'
                 f'<div class="v">{value}</div>{delta}</div>')
 
     ref = _video_ref(meta.get("video_url"))
@@ -1713,7 +1713,7 @@ document.addEventListener('DOMContentLoaded', function(){{
         f'<div class="fincard"><div class="k">Finish rate</div><div class="v sub">{round(fin["finish_rate"] * 100)}%</div><div class="cap">of wins by submission</div></div>',
         f'<div class="fincard"><div class="k">Submission family</div><div class="v">{html.escape(fam.get("dominant") or "—")}</div><div class="cap">{html.escape(", ".join(sub_lines))}</div></div>',
         f'<div class="fincard"><div class="k">Decision rate</div><div class="v">{round(fin["decision_rate"] * 100)}%</div><div class="cap">of decided bouts</div></div>',
-        f'<div class="fincard"><div class="k">vs Top-10 Grappling ELO</div><div class="v" style="color:var(--good)">{fin["record_vs_elite"]["wins"]}–{fin["record_vs_elite"]["losses"]}</div><div class="cap">elite opposition</div></div>',
+        f'<div class="fincard"><div class="k">vs Top-10 Grappling Rating (Glicko-2)</div><div class="v" style="color:var(--good)">{fin["record_vs_elite"]["wins"]}–{fin["record_vs_elite"]["losses"]}</div><div class="cap">elite opposition</div></div>',
     ])
     # Systems section — community decomposition stashed by build_fighters as
     # _systems (profile_to_dict) + _analogues (compare_profiles rows). Rendered
@@ -1771,7 +1771,7 @@ document.addEventListener('DOMContentLoaded', function(){{
     sub_meta = f"<span><b>{rec['wins']}–{rec['losses']}</b> record</span>"
     sub_meta += f"<span><b>{round(f['finish_rate'] * 100)}%</b> finish rate</span>"
     if rank:
-        sub_meta += f"<span><b>#{rank}</b> Grappling ELO</span>"
+        sub_meta += f"<span><b>#{rank}</b> Grappling Rating (Glicko-2)</span>"
     pctile = f.get("elo_percentile")
     if pctile:
         sub_meta += f"<span><b>Top {pctile}%</b> overall</span>"
@@ -1808,7 +1808,7 @@ document.addEventListener('DOMContentLoaded', function(){{
     <h2 class="h-lg mt16">{html.escape(_defense_heading(gender))}</h2></div>
   <div class="fingrid">{ov_card}{dcards}</div>
   <p class="graph-hint">Share of opponents' attempts stuffed, each weighted by that
-  opponent's Grappling ELO — defending an elite is worth more than defending a novice.</p>
+  opponent's Grappling Rating (Glicko-2) — defending an elite is worth more than defending a novice.</p>
 </div></section>"""
 
     # Counter Moves — highest-value response per position (PtV of where it lands).
@@ -2037,6 +2037,8 @@ _ATLAS_STYLE = """<style>
 .ocean-hud{position:absolute;top:18px;left:18px;z-index:2;max-width:340px;display:flex;flex-direction:column;gap:12px;pointer-events:none}
 .ocean-hud>*{pointer-events:auto}
 .ocean-h h1{font-size:30px;margin:0;letter-spacing:-.6px}
+.hud-more{display:flex;flex-direction:column;gap:12px}
+.hud-more-btn{display:none}
 .ocean-search{width:100%;padding:9px 12px;background:rgba(12,12,17,.85);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-size:13px;font-family:var(--mono)}
 .ocean-panel{position:absolute;top:0;right:0;height:100%;width:340px;background:var(--panel);border-left:1px solid var(--line);z-index:3;padding:24px 22px;overflow:auto;box-shadow:-22px 0 44px rgba(0,0,0,.32)}
 .ocean-panel[hidden]{display:none}
@@ -2064,6 +2066,19 @@ _ATLAS_STYLE = """<style>
   .ocean-panel{top:auto;bottom:0;height:auto;max-height:52vh;width:100%;border-left:none;border-top:1px solid var(--line);box-shadow:0 -22px 44px rgba(0,0,0,.4)}
   .ocean-hud{max-width:none;right:18px}
   .ocean-signals{display:none}
+  /* Atlas mobile HUD (2026-09-04): collapse title+meta+search+note down to one row (title +
+     a search toggle) so the 3D canvas keeps its height instead of losing its top third to
+     chrome. #systemMeta is corpus-wide summary text, not needed to read the map — dropped on
+     mobile rather than relocated; ponytail: reachable again if the owner wants it in
+     #oceanPanel's empty state, out of scope for this pass. */
+  .ocean-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .ocean-h h1{font-size:22px}
+  #systemMeta{display:none}
+  .hud-more-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
+    flex:none;border:1px solid var(--line);border-radius:9px;background:rgba(12,12,17,.85);
+    font-size:17px;line-height:1;cursor:pointer}
+  .hud-more{display:none}
+  .hud-more-check:checked ~ .hud-more{display:flex;margin-top:10px}
 }
 </style>"""
 
@@ -2147,7 +2162,7 @@ var g = PGO
   host.innerHTML =
     (mv ? '<div class="sig-block"><h3>Markov backbone</h3>'+mv+
       '<div class="sig-note">'+(M.n_bouts||0)+' bouts · action-level, corpus-wide (Lamas et al. 2024 states)</div></div>' : '') +
-    (ev ? '<div class="sig-block"><h3>Grappling ELO · relative spread</h3>'+ev+
+    (ev ? '<div class="sig-block"><h3>Grappling Rating (Glicko-2) · relative spread</h3>'+ev+
       '<div class="sig-note">ratio vs. corpus mean, athlete graphs only — never a raw rating</div></div>' : '');
 })();
 function bar(title, m){
@@ -2362,14 +2377,20 @@ def render_atlas_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
     {fallback}
   </div>
   <div class="ocean-hud">
-    <div class="ocean-h"><h1>Atlas</h1><p class="muted" id="systemMeta"></p></div>
-    <input id="atlasSearch" class="ocean-search" list="atlasStates" type="search"
-      placeholder="Find a position / Buscar posição" aria-label="Find a position / Buscar posição"/>
-    <datalist id="atlasStates"></datalist>
-    <p class="muted" id="atlasLegend">{_bi(
-        "Finish = submission finish; decision/points bouts end on their last position.",
-        "Finalização = finalização por submissão; lutas por decisão/pontos terminam na "
-        "última posição.")}</p>
+    <div class="ocean-h">
+      <h1>Atlas</h1><p class="muted" id="systemMeta"></p>
+      <label for="hudMoreToggle" class="hud-more-btn" aria-label="{_bi('Find a position', 'Buscar posição')}">&#128269;</label>
+    </div>
+    <input type="checkbox" id="hudMoreToggle" class="hud-more-check" hidden/>
+    <div class="hud-more">
+      <input id="atlasSearch" class="ocean-search" list="atlasStates" type="search"
+        placeholder="Find a position / Buscar posição" aria-label="Find a position / Buscar posição"/>
+      <datalist id="atlasStates"></datalist>
+      <p class="muted" id="atlasLegend">{_bi(
+          "Finish = submission finish; decision/points bouts end on their last position.",
+          "Finalização = finalização por submissão; lutas por decisão/pontos terminam na "
+          "última posição.")}</p>
+    </div>
   </div>
   <aside id="oceanPanel" class="ocean-panel" hidden>
     <button id="oceanClose" class="ocean-close" aria-label="close">&times;</button>
