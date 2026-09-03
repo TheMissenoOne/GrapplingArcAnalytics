@@ -268,6 +268,7 @@ def process_job(
                 f"job {job.id}: no sheet produced ({decision.get('n_frames', 0)} frames)"
             )
         motion_doc = json.loads((out_dir / "motion.json").read_text(encoding="utf-8"))
+        motion_doc.pop("video", None)  # worker temp path — never persist it
 
         prompt = gemini_read_frames.load_prompt(prompt_path)
         answer, _raw = gemini_read_frames.read_frames([sheet_path], prompt, model, thinking)
