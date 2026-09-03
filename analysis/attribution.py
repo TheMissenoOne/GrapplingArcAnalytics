@@ -46,13 +46,18 @@ from __future__ import annotations
 
 from collections import Counter
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Any
 
 from analysis.names import _normalize_name
 
 # Bump when a table below changes in a way that moves a published number.
-RULES_VERSION = 1
+# 2 (2026-09-03, N0 of the ontology programme, docs/taxonomy/04_ONTOLOGIA_CANONICA.md):
+# `category` became THE authority for state-vs-action (`taxonomy_kind.kind_of` reads it first),
+# so the rows this file got wrong are now published as node kinds. Three corrections went in
+# with that: `body triangle bottom` roles, `escape/turtle position` category, and the
+# guard-pull family's category.
+RULES_VERSION = 2
 
 # The eight types the model defines (docs/match_event_model.md). Everything else in the column
 # is bookkeeping that one import batch left behind -- eight rows labelled "Match" -- and it is
@@ -196,7 +201,11 @@ _LABEL: dict[tuple[str, str], Attribution] = {
     # Filed under `control` 46 times and under `escape` 3 times for the same movement. The
     # actor escaped TO turtle; that is an escape, and it leaves her defensive, not controlling.
     ("control", "escape to turtle"): _a(ACTION, ESCAPES, EXECUTOR, DEFENDER),
-    ("control", "body triangle bottom"): _a(STATE, HOLDS, CONTROLLING, CONTROLLED),
+    # The athlete UNDER a body triangle, not the one holding it — `lamas_chain.LABEL_OVERRIDES`
+    # (`lamas_chain.py:211-213`) already reads this exact label as "the opposite of a back
+    # take" and refuses it as a back-take action. This row used to say `controlling`, which is
+    # the other side of the same position; the two layers now agree.
+    ("control", "body triangle bottom"): _a(STATE, DEFENDS, CONTROLLED, CONTROLLING),
     ("control", "near fall"): _a(STATE, HOLDS, TOP, BOTTOM),
     ("control", "nearfall"): _a(STATE, HOLDS, TOP, BOTTOM),
     ("control", "arm drag"): _a(ACTION, EXECUTES, EXECUTOR, DEFENDER),
@@ -209,7 +218,13 @@ _LABEL: dict[tuple[str, str], Attribution] = {
     # A sweep ENDS with the sweeper on top; that is what makes it a sweep and not a scramble.
     ("sweep", "sweep top position"): _a(ACTION, EXECUTES, EXECUTOR, DEFENDER),
     # Filed under `escape` and under `guard`. Turtling is the actor's own defensive shape.
-    ("escape", "turtle position"): _a(ACTION, ESCAPES, EXECUTOR, DEFENDER),
+    # `category` says what the NODE IS (see the vocabulary block above), and turtle is a place,
+    # not a movement — the `escape` TYPE describes how she got there, the LABEL names where she
+    # is. Filed as ACTION here until 2026-09-03, which gave the one label two classes depending
+    # on the type it was logged under; the ontology contract
+    # (docs/taxonomy/04_ONTOLOGIA_CANONICA.md) forbids that. Only the category moved: the
+    # relation stays ESCAPES and both roles are untouched.
+    ("escape", "turtle position"): _a(STATE, ESCAPES, EXECUTOR, DEFENDER),
     ("guard", "turtle position"): _a(STATE, DEFENDS, BOTTOM, UNKNOWN, status="unknown"),
     # Generic endings. Measured against `matches.winner_id`: "Tap" 55/64 (86%) and "Finish"
     # 95/112 (85%) belong to the winner against a 62.5% baseline, so the actor is the FINISHER
@@ -224,6 +239,24 @@ _LABEL: dict[tuple[str, str], Attribution] = {
     ("match", "match"): _a(TRANSITION, INITIATES, UNKNOWN, UNKNOWN, status="unknown"),
 }
 
+# ── category correction: the positional lists are keyed on ORIENTATION, not on class ────
+# `_GUARD_BOTTOM` and `_CONTROL_BACK` answer "which side of the position is the actor on", and
+# their STATE category is inherited from the type branch rather than decided per label. That is
+# right for a posture and wrong for a movement: pulling guard LEAVES you underneath (which is
+# why the row belongs in `_GUARD_BOTTOM`) but it is a thing you do, not a place you are, and
+# `arm drag to back take` is an entry, not a position. Category and role are separate axes in
+# this module already -- `pass` is an ACTION carrying TOP/BOTTOM -- so only the category is
+# corrected here and every role stays exactly where the lists put it.
+#
+# Load-bearing since 2026-09-03: `taxonomy_kind.kind_of` reads `category` as its first
+# authority, so a movement filed as STATE here becomes a NODE on the map
+# (docs/taxonomy/04_ONTOLOGIA_CANONICA.md).
+_ACTIONS_FILED_AS_POSITIONS = frozenset({
+    "guard pull", "pull guard", "pull half guard", "pull closed guard", "jump guard",
+    "pull guard inversion", "pull guard inside triangle", "double guard pull",
+    "arm drag to back take", "crab ride to back take",
+})
+
 
 def classify(ev_type: str | None, label: str | None) -> Attribution:
     """Category, relation and both roles for one event, from its type and label alone.
@@ -231,6 +264,13 @@ def classify(ev_type: str | None, label: str | None) -> Attribution:
     Pure. No bout, no athletes, no timestamps -- whether the bout's actor assignments can be
     trusted at all is a separate question, answered by `bout_flags`.
     """
+    at = _classify(ev_type, label)
+    if at.category == STATE and _normalize_name(label or "") in _ACTIONS_FILED_AS_POSITIONS:
+        return replace(at, category=ACTION)
+    return at
+
+
+def _classify(ev_type: str | None, label: str | None) -> Attribution:
     t = (ev_type or "").strip().lower()
     key = _normalize_name(label or "")
     hit = _LABEL.get((t, key))
@@ -257,7 +297,11 @@ def classify(ev_type: str | None, label: str | None) -> Attribution:
         # A pass is an action AND it places the passer on top of a guard. Both are true and
         # the report uses both: the action list counts it, the topology names the sides.
         return _a(ACTION, EXECUTES, TOP, BOTTOM, source="type_default")
-    return _TYPE_DEFAULT.get(t) or _a(TRANSITION, INITIATES, UNKNOWN, UNKNOWN, status="unknown")
+    # A type this module does not model at all (the technique library's own `defensive`,
+    # `concept`, ... reach here through `taxonomy_kind.kind_of_entry`). `type_default`, not
+    # `table`: nothing was curated, and `kind_of` keys its authority on that distinction.
+    return _TYPE_DEFAULT.get(t) or _a(TRANSITION, INITIATES, UNKNOWN, UNKNOWN,
+                                      status="unknown", source="type_default")
 
 
 # ── bout-level: can this bout carry a role at all ───────────────────────────────

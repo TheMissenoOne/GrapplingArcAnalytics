@@ -334,31 +334,31 @@
               {
                 "actor": "you",
                 "actor_is_opponent": false,
-                "inferred": true,
-                "key": "control transition",
-                "label": "Troca de Controle",
-                "provenance": "inferred",
-                "source_event_index": null,
-                "type": "transition"
+                "inferred": false,
+                "key": "back take",
+                "label": "Back Take",
+                "provenance": "user",
+                "source_event_index": 0,
+                "type": "control"
               }
             ],
-            "source_key": "back take",
+            "source_key": "start neutral",
             "target_key": "mount",
             "terminal": false
           }
         ],
         "state_after_event": {
-          "0": "back take",
+          "0": "start neutral",
           "1": "mount"
         },
         "states": [
           {
             "actor": "you",
-            "inferred": false,
-            "label": "Back Take",
-            "nascent": true,
-            "node_key": "back take",
-            "role": null,
+            "inferred": true,
+            "label": "Neutro",
+            "nascent": false,
+            "node_key": "start neutral",
+            "role": "anchor",
             "type": "control"
           },
           {

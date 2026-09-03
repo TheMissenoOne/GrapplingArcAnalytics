@@ -348,12 +348,20 @@ def test_no_empty_endpoint_edges_and_no_generic_out_degrees_the_real_graph() -> 
 
     assert empty_endpoint_edges == 0
     # OBSERVED is the invariant: one action per logged action event, unchanged by Fase 0/1/1b/2.
-    assert observed_actions == 1390
+    # Moved ONCE, by N0's authority swap (docs/taxonomy/04_ONTOLOGIA_CANONICA.md): 1390 -> 1548,
+    # the net of five reclassified labels on this dump — `control/Back Take` (128) and
+    # `control/Escape to Turtle` (47) and `guard/Jump Guard` (2) became actions, `control/Body
+    # Lock` (3) and `control/Clinch Knees` (1) became states. The exact set is pinned in
+    # `data/taxonomy/audit_baseline.json` under `reclassified`; any OTHER movement is the
+    # regression this number exists to catch.
+    assert observed_actions == 1548
     # INFERRED is the rule's own output and moves with it. 399 before Fase 2; 433 after, and the
     # +34 are all inversions the endpoints prove and no observed action explains (28 appended,
-    # 4 at the head, 2 spliced BETWEEN observed actions). Change the rule and change this number
-    # deliberately — never to make a red test green.
-    assert inferred_actions == 433
+    # 4 at the head, 2 spliced BETWEEN observed actions). N0 takes it to 321: 128 `control/Back
+    # Take` and 47 `control/Escape to Turtle` events stopped being STATES, so the generic bridges
+    # the compiler had to invent around them are no longer needed. Change the rule and change this
+    # number deliberately — never to make a red test green.
+    assert inferred_actions == 321
     max_real_degree = max(
         (d for key, d in degree.items() if key not in generic_keys and key != ""), default=0
     )

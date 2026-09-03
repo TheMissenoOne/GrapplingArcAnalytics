@@ -41,18 +41,29 @@ def test_guard_pull_then_armlock_opens_start_neutral_and_stacks_into_one_finish_
 
 
 def test_chain_opening_on_clinch_label_gets_start_neutral() -> None:
-    """Lamas CDP (clinch/grip-fighting) is label-, not type-, keyed — 'Collar Tie' is type
-    'control', same type as an ordinary position, so only `lamas_state` (not the table) can tell
-    this opening is a standing exchange."""
+    """Lamas CDP (clinch/grip-fighting) is label-, not type-, keyed, so a `control`-typed label
+    could open the chain as an ACTION. Since N0 (docs/taxonomy/04_ONTOLOGIA_CANONICA.md) the
+    curated `attribution` row wins over the Lamas token for the grips — a collar tie is a place,
+    not a move — so 'Collar Tie' is now the chain's FIRST STATE and no anchor is invented. The
+    label-keyed opening still exists for the labels `attribution` really does call actions
+    ('Arm Drag' under `control`), which is what the second half pins."""
     chain = compile_chain([
         _ev("Collar Tie", "control"),
         _ev("Mount", "control"),
     ], inference_table=TABLE)
 
-    assert chain.states[0].node_key == "start neutral"
-    assert chain.states[0].role == "anchor"
-    assert chain.edges[0].source_key == "start neutral"
-    assert chain.edges[0].action_key == "collar tie"
+    assert [s.node_key for s in chain.states] == ["collar tie", "mount"]
+    assert chain.states[0].role is None
+    assert not chain.states[0].inferred
+
+    arm_drag = compile_chain([
+        _ev("Arm Drag", "control"),
+        _ev("Mount", "control"),
+    ], inference_table=TABLE)
+    assert arm_drag.states[0].node_key == "start neutral"
+    assert arm_drag.states[0].role == "anchor"
+    assert arm_drag.edges[0].source_key == "start neutral"
+    assert arm_drag.edges[0].action_key == "arm drag"
 
 
 def test_armbar_then_triangle_stack_into_one_path_to_finish() -> None:

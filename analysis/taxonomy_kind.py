@@ -61,6 +61,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Literal, cast
 
+from analysis import attribution
 from analysis.attribution import classify
 from analysis.decision_flow import ACTION_TYPES
 from analysis.lamas_chain import lamas_state
@@ -92,14 +93,53 @@ assert STABLE_STATE_TYPES.isdisjoint(_FORCED_ACTION_TYPES), (
 )
 
 
+# N0 of the ontology programme (docs/taxonomy/04_ONTOLOGIA_CANONICA.md, 2026-09-03).
+# `attribution.classify(...).category` is a CURATED per-(type,label) answer to exactly the
+# question `kind_of` asks, and until now `kind_of` never read it: the two disagreed on 526
+# events / 23 label pairs of the 10 016-event corpus, and the site published `Front Headlock`
+# and `Collar Tie` as actions while the curated table called them positions. One authority,
+# one precedence order, and the old type/token heuristic demoted to the fallback it always was.
+#
+# `source == "table"` is the discriminator, not the category itself: `classify` ALWAYS returns
+# something, and `"type_default"` means "nobody curated this pair, here is what the type
+# implies" — which is the same guess the fallback below makes, better. Only a curated row wins.
+_CATEGORY_TO_KIND: dict[str, Kind] = {
+    attribution.STATE: "state",
+    attribution.ACTION: "action",
+    attribution.TRANSITION: "action",
+}
+
+
+def curated_kind(label: str, event_type: str) -> Kind | None:
+    """The curated answer for this ``(type, label)``, or ``None`` when no curated row covers
+    it. Split out so the audit script can count coverage without re-deriving the precedence."""
+    typ = (event_type or "").strip().lower()
+    if typ not in attribution.EVENT_TYPES:
+        # `attribution` only models the eight real event types. The library's own `defensive`/
+        # `position` types and the `match` bookkeeping rows reach it too, and its answer there is
+        # a shrug typed as TRANSITION (`("match","match")` is `status="unknown"`) — reading that
+        # as "action" would promote import bookkeeping to a technique.
+        return None
+    at = classify(typ, label)
+    return _CATEGORY_TO_KIND[at.category] if at.source == "table" else None
+
+
 def kind_of(label: str, event_type: str) -> Kind:
     """D1's classifier: one technique-library entry (or event) → 'action' | 'state' |
     'transparent'. ``label`` should be the entry's ONE canonical label (English preferred,
     same convention as ``export.app_node_scores.canonical_label``) — ``lamas_state`` reads
-    English tokens, so a Portuguese-only label can under-classify (see module docstring)."""
+    English tokens, so a Portuguese-only label can under-classify (see module docstring).
+
+    Precedence (04_ONTOLOGIA_CANONICA.md §3): ``concept`` → transparent, then the curated
+    ``attribution`` row, then the ``_FORCED_ACTION_TYPES``/``lamas_state`` heuristic."""
     typ = (event_type or "").strip().lower()
     if typ == "concept":
+        # Still first: 'transparent' exists so a concept is never silently bucketed as one of
+        # the other two, and a curated positional row must not undo that (D1's own rule).
         return "transparent"
+    curated = curated_kind(label, typ)
+    if curated is not None:
+        return curated
     if typ not in _FORCED_ACTION_TYPES:
         key = _normalize_name(_deaccent(str(label or "")))
         if key in _BACK_CONTROL_STATE_LABELS:
@@ -158,12 +198,27 @@ def resolve_library_entry(label: str) -> tuple[str, str] | None:
     return _library_lookup().get(key)
 
 
+# Bridge to N1, not a permanent home. The App's technique library files "back take" as a
+# VARIATION of "Back Control" (`grappling-arch.nodes.json`), so `resolve_library_entry` answers
+# with a position for what the owner's ontology calls an action (Decision Log 2026-09-03: back
+# take = action). N1 gives "back take" its own library entry and this set goes away; until then
+# the raw label is checked BEFORE resolution, because after resolution the evidence is gone.
+# Keys are `_normalize_name` output. 19 events in the corpus (`transition/Back Take`).
+_LIBRARY_VARIANTS_THAT_ARE_ACTIONS = frozenset({"back take"})
+
+
 def kind_of_entry(label: str, event_type: str | None) -> Kind:
     """D1's classifier, entry point for real logged data: resolves ``label`` through the App's
     technique library first (``resolve_library_entry``) and classifies on the library's own
     canonical label + type — ``event_type`` is used only as a fallback, for labels the library
     doesn't recognise. See the module note above `_build_library_lookup` for why the caller's
-    ``event_type`` cannot be trusted on its own."""
+    ``event_type`` cannot be trusted on its own.
+
+    One carve-out runs on the RAW label first (`_LIBRARY_VARIANTS_THAT_ARE_ACTIONS`): library
+    resolution is what turns "Back Take" into "Back Control", and no amount of authority
+    ordering downstream can undo a label that has already been replaced by another one."""
+    if _normalize_name(str(label or "")) in _LIBRARY_VARIANTS_THAT_ARE_ACTIONS:
+        return "action"
     resolved = resolve_library_entry(label)
     if resolved is not None:
         canon_label, lib_type = resolved

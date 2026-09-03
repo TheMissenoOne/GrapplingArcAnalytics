@@ -1,0 +1,119 @@
+{
+ "generated_by": "scripts/audit_ontology.py --write-baseline",
+ "contract": "docs/taxonomy/04_ONTOLOGIA_CANONICA.md",
+ "events": 10016,
+ "counts": {
+  "dual_identity": 11,
+  "alias_candidates": 6,
+  "composites": 38,
+  "states_without_orientation": 59,
+  "athlete_nodes_typed_technique": 286
+ },
+ "reclassified": {
+  "control|Back Take": {
+   "node_key": "back take",
+   "from": "state",
+   "to": "action",
+   "corpus_events": 0,
+   "dump_events": 128
+  },
+  "control|Body Lock": {
+   "node_key": "body lock",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 68,
+   "dump_events": 3
+  },
+  "control|Clinch Knees": {
+   "node_key": "clinch knees",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 1,
+   "dump_events": 1
+  },
+  "control|Collar Tie": {
+   "node_key": "collar tie",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 42,
+   "dump_events": 0
+  },
+  "control|Double Underhooks": {
+   "node_key": "double underhooks",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 5,
+   "dump_events": 0
+  },
+  "control|Escape to Turtle": {
+   "node_key": "escape to turtle",
+   "from": "state",
+   "to": "action",
+   "corpus_events": 46,
+   "dump_events": 47
+  },
+  "control|Front Headlock": {
+   "node_key": "front headlock",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 137,
+   "dump_events": 0
+  },
+  "control|Hooks In": {
+   "node_key": "hooks in",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 3,
+   "dump_events": 0
+  },
+  "control|Rear Body Lock": {
+   "node_key": "rear body lock",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 3,
+   "dump_events": 0
+  },
+  "control|Russian Tie": {
+   "node_key": "russian tie",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 2,
+   "dump_events": 0
+  },
+  "control|Smother": {
+   "node_key": "smother",
+   "from": "state",
+   "to": "action",
+   "corpus_events": 1,
+   "dump_events": 0
+  },
+  "control|Two-on-One Control": {
+   "node_key": "twoonone control",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 3,
+   "dump_events": 0
+  },
+  "control|Two-on-One Wrist Control": {
+   "node_key": "twoonone wrist control",
+   "from": "action",
+   "to": "state",
+   "corpus_events": 2,
+   "dump_events": 0
+  },
+  "guard|Jump Guard": {
+   "node_key": "jump guard",
+   "from": "state",
+   "to": "action",
+   "corpus_events": 2,
+   "dump_events": 2
+  },
+  "transition|Back Take": {
+   "node_key": "back take",
+   "from": "state",
+   "to": "action",
+   "corpus_events": 19,
+   "dump_events": 0
+  }
+ }
+}

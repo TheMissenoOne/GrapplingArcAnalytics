@@ -61,7 +61,21 @@ def test_guard_pull_is_action_via_lamas_pgd() -> None:
 
 def test_back_take_is_action_via_lamas_btk() -> None:
     assert kind_of("Back Take", "control") == "action"
-    assert kind_of("Hooks In", "control") == "action"
+
+
+def test_curated_grips_are_states_even_though_lamas_calls_them_cdp() -> None:
+    """N0's authority swap (docs/taxonomy/04_ONTOLOGIA_CANONICA.md): `lamas_state` reads
+    "Hooks In"/"Collar Tie"/"Front Headlock" as its CDP *action* code, but `attribution`'s
+    curated `_CONTROL_GRIP` list calls them positions, and that is the class the map needs —
+    a grip you hold is somewhere you are. `lamas_state` itself is untouched, so the Markov
+    CDP weight does not move."""
+    from analysis.lamas_chain import lamas_state
+
+    for label in ("Hooks In", "Collar Tie", "Front Headlock", "Russian Tie", "Clinch Knees"):
+        assert kind_of(label, "control") == "state", label
+        # ...and every one of them is still a Lamas ACTION code, which is what used to decide
+        # this ("Hooks In" is a back-take token, the rest are clinch tokens).
+        assert lamas_state({"type": "control", "label": label}) in ("CDP", "BTKA"), label
 
 
 def test_explicit_state_labels_stay_state() -> None:
@@ -105,9 +119,15 @@ def test_body_triangle_and_body_lock_from_back_are_state_despite_back_take_token
 
 
 def test_bare_body_lock_is_not_carved_out() -> None:
-    """"Body Lock" (no "from Back") is deliberately left alone — not a `BACK_TAKE_TOKENS`
-    collision, and folding it in would move a Markov `CDP` weight (full ELO replay)."""
-    assert kind_of("Body Lock", "control") == "action"
+    """"Body Lock" (no "from Back") is still outside `_BACK_CONTROL_STATE_LABELS`: it is not a
+    `BACK_TAKE_TOKENS` collision, and touching `lamas_state` would move a Markov `CDP` weight
+    (full ELO replay). It nonetheless reads as a STATE since N0, through the curated
+    `attribution._CONTROL_BACK` row rather than through the carve-out — a standing body lock is
+    a clinch position. `lamas_state` is unchanged, so no weight moved."""
+    from analysis.lamas_chain import lamas_state
+
+    assert lamas_state({"type": "control", "label": "Body Lock"}) == "CDP"
+    assert kind_of("Body Lock", "control") == "state"
 
 
 # ── kind_of_entry: library-resolved, distrusts a stale logged `type` ────────────
@@ -364,8 +384,19 @@ def test_role_of_unknown_or_real_technique_node_is_none() -> None:
 
 # ── orientation_of: top | bottom | neutral per state (curated) ──────────────────
 def test_orientation_of_bottom_guards() -> None:
-    for label in ("Closed Guard", "Half Guard", "Spider Guard", "X-Guard", "50/50 Guard"):
+    for label in ("Closed Guard", "Half Guard", "Spider Guard", "X-Guard"):
         assert orientation_of(label) == "bottom"
+
+
+def test_symmetric_positions_are_neutral() -> None:
+    """Owner call 2026-09-03 (docs/taxonomy/04_ONTOLOGIA_CANONICA.md §5): symmetric positions
+    default to `neutral`; top/bottom only where the data supports it. These read `bottom` until
+    then, contradicting `attribution._GUARD_NEUTRAL`, which always called them symmetric."""
+    from analysis.attribution import classify
+
+    for label in ("50/50 Guard", "Single Leg X", "Shin to Shin Guard"):
+        assert orientation_of(label) == "neutral", label
+        assert classify("guard", label).actor_role == "neutral", label
 
 
 def test_orientation_of_top_controls() -> None:
@@ -484,8 +515,10 @@ def test_orientation_for_inference_covers_every_curated_label() -> None:
     # orientation table and `attribution` already contradict each other — a pre-existing item on
     # the owner's explicit "não tocar agora" backlog, inherited here rather than silently
     # resolved: the declared table stays the truth, and this pins exactly which labels it wins.
-    contradicted = {"5050 guard", "single leg x", "single leg x guard entry",
-                    "shin to shin guard"}
+    # Owner call 2026-09-03: the four labels that used to read `bottom` here through the
+    # declared table WERE that contradiction. Resolved in `state_orientation.json`, so the set
+    # is empty now and any regrowth is a regression.
+    contradicted: set[str] = set()
     assert {label for label in attr._GUARD_NEUTRAL
             if orientation_for_inference("guard", label).value != "neutral"} == contradicted
 

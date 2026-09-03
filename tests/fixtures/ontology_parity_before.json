@@ -1,0 +1,117 @@
+{
+ "_": "Multiconjuntos medidos com o codigo ANTERIOR a N0 (docs/taxonomy/04_ONTOLOGIA_CANONICA.md), sobre os eventos de entrada de data/rating/chain_compiler_golden.json. Snapshot historico, escrito uma vez a mao a partir de um checkout limpo de main (9d9f079) — NAO e um golden gerado, e nao deve ser regenerado: seu valor inteiro e ser o 'antes'.",
+ "actions": [
+  [
+   "armbar",
+   "you",
+   2
+  ],
+  [
+   "escape to standing",
+   "you",
+   1
+  ],
+  [
+   "guard pass",
+   "partner",
+   1
+  ],
+  [
+   "guard pass",
+   "you",
+   1
+  ],
+  [
+   "guard pull",
+   "you",
+   1
+  ],
+  [
+   "hip bump sweep",
+   "you",
+   3
+  ],
+  [
+   "kimura",
+   "you",
+   5
+  ],
+  [
+   "triangle choke",
+   "you",
+   1
+  ]
+ ],
+ "observations": [
+  [
+   "armbar",
+   0.25,
+   2
+  ],
+  [
+   "back control",
+   0.25,
+   1
+  ],
+  [
+   "back take",
+   0.25,
+   1
+  ],
+  [
+   "closed guard",
+   0.25,
+   11
+  ],
+  [
+   "escape to standing",
+   0.25,
+   1
+  ],
+  [
+   "guard pass",
+   0.25,
+   1
+  ],
+  [
+   "guard pull",
+   0.25,
+   1
+  ],
+  [
+   "half guard",
+   0.25,
+   1
+  ],
+  [
+   "hip bump sweep",
+   0.25,
+   3
+  ],
+  [
+   "kimura",
+   0.25,
+   5
+  ],
+  [
+   "mount",
+   0.25,
+   9
+  ],
+  [
+   "pressure",
+   0.25,
+   1
+  ],
+  [
+   "side control",
+   0.25,
+   5
+  ],
+  [
+   "triangle choke",
+   0.25,
+   1
+  ]
+ ]
+}

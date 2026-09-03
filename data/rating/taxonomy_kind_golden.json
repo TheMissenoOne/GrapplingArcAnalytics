@@ -1,6 +1,7 @@
 {
   "actor_role": {
     "control|arm drag": "executor",
+    "control|body triangle bottom": "controlled",
     "control|chesttochest half guard": "top",
     "control|crucifix": "top",
     "control|escape to turtle": "executor",
@@ -177,7 +178,7 @@
   "kinds": {
     "5050 guard": {
       "kind": "state",
-      "orientation": "bottom",
+      "orientation": "neutral",
       "type": "guard"
     },
     "americana keylock": {
@@ -226,7 +227,8 @@
       "type": "submission"
     },
     "body lock": {
-      "kind": "action",
+      "kind": "state",
+      "orientation": "neutral",
       "type": "control"
     },
     "body lock from back": {
@@ -626,7 +628,7 @@
     },
     "shin to shin guard": {
       "kind": "state",
-      "orientation": "bottom",
+      "orientation": "neutral",
       "type": "guard"
     },
     "shoulder crunch": {
@@ -653,7 +655,7 @@
     },
     "single leg x": {
       "kind": "state",
-      "orientation": "bottom",
+      "orientation": "neutral",
       "type": "guard"
     },
     "single under pass": {
@@ -910,7 +912,7 @@
     },
     "control|body triangle bottom": {
       "source": "derived",
-      "value": "controlling"
+      "value": "controlled"
     },
     "control|chesttochest half guard": {
       "source": "derived",
@@ -1145,12 +1147,12 @@
       "value": "bottom"
     },
     "guard|50/50 Guard": {
-      "source": "declared",
-      "value": "bottom"
+      "source": "derived",
+      "value": "neutral"
     },
     "guard|5050 guard": {
-      "source": "declared",
-      "value": "bottom"
+      "source": "derived",
+      "value": "neutral"
     },
     "guard|Butterfly Guard": {
       "source": "declared",
@@ -1197,12 +1199,12 @@
       "value": "bottom"
     },
     "guard|Shin to Shin Guard": {
-      "source": "declared",
-      "value": "bottom"
+      "source": "derived",
+      "value": "neutral"
     },
     "guard|Single Leg X": {
-      "source": "declared",
-      "value": "bottom"
+      "source": "derived",
+      "value": "neutral"
     },
     "guard|Spider Guard": {
       "source": "declared",
@@ -1381,16 +1383,16 @@
       "value": "neutral"
     },
     "guard|shin to shin guard": {
-      "source": "declared",
-      "value": "bottom"
+      "source": "derived",
+      "value": "neutral"
     },
     "guard|single leg x": {
-      "source": "declared",
-      "value": "bottom"
+      "source": "derived",
+      "value": "neutral"
     },
     "guard|single leg x guard entry": {
-      "source": "declared",
-      "value": "bottom"
+      "source": "derived",
+      "value": "neutral"
     },
     "guard|spider guard": {
       "source": "declared",
@@ -1802,7 +1804,7 @@
     }
   },
   "state_orientation": {
-    "5050 guard": "bottom",
+    "5050 guard": "neutral",
     "back control": "top",
     "body lock from back": "top",
     "body triangle": "top",
@@ -1828,10 +1830,10 @@
     "rubber guard": "bottom",
     "saddle inside sankaku": "neutral",
     "scarf hold": "top",
-    "shin to shin guard": "bottom",
+    "shin to shin guard": "neutral",
     "shoulder crunch": "top",
     "side control": "top",
-    "single leg x": "bottom",
+    "single leg x": "neutral",
     "spider guard": "bottom",
     "start bottom": "bottom",
     "start neutral": "neutral",
