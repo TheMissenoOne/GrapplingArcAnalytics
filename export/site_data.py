@@ -2327,8 +2327,8 @@ def render_system_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str
               "strokes it takes to get there.", path="the-system.html")
         + _OCEAN_STYLE + _nav("system") + body + _FOOTER +
         '<script src="i18n.js"></script><script src="ocean-data.js"></script>'
-        '<script type="importmap">{"imports":{"three":"three/three.module.min.js",'
-        '"three/addons/":"three/addons/"}}</script>'
+        '<script type="importmap">{"imports":{"three":"./three/three.module.min.js",'
+        '"three/addons/":"./three/addons/"}}</script>'
         '<script type="module">import {mountSystem} from "./system.js";'
         "mountSystem(document.getElementById('system-root'),(window.GA_OCEAN||{}).pathGraph,"
         "{panel:" + panel_js + "});</script></body></html>"

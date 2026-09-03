@@ -81,7 +81,7 @@ def test_render_system_page_wires_globals_importmap_and_one_h1() -> None:
     assert '<link rel="canonical" href="https://' in page
     assert '<meta property="og:image" content="https://' in page
     assert 'id="system-root"' in page
-    assert '"imports":{"three":"three/three.module.min.js"' in page
+    assert '"imports":{"three":"./three/three.module.min.js"' in page
     assert "mountSystem(document.getElementById('system-root')" in page
     assert "window.GA_OCEAN" in page
     assert "<li>Closed Guard</li>" in page and "<li>Finish</li>" in page
