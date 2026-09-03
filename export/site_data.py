@@ -2043,6 +2043,7 @@ _ATLAS_STYLE = """<style>
 .ocean-panel{position:absolute;top:0;right:0;height:100%;width:340px;background:var(--panel);border-left:1px solid var(--line);z-index:3;padding:24px 22px;overflow:auto;box-shadow:-22px 0 44px rgba(0,0,0,.32)}
 .ocean-panel[hidden]{display:none}
 .ocean-close{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--ink-3);font-size:23px;cursor:pointer;line-height:1}
+#opDetails{display:none}
 .system-fallback{padding:24px 22px;max-width:60ch;color:var(--ink-2);overflow:auto;max-height:100%}
 #system-root:has(canvas) .system-fallback{display:none}
 .ocean-panel h2{font-size:21px;margin:0 30px 8px 0;letter-spacing:-.3px}
@@ -2063,17 +2064,46 @@ _ATLAS_STYLE = """<style>
 .sig-row .up{color:var(--good)}.sig-row .down{color:var(--bad)}
 .sig-note{font-size:10px;color:var(--ink-3);margin-top:6px;line-height:1.4}
 @media(max-width:600px){
-  .ocean-panel{top:auto;bottom:0;height:auto;max-height:52vh;width:100%;border-left:none;border-top:1px solid var(--line);box-shadow:0 -22px 44px rgba(0,0,0,.4)}
+  /* Atlas mobile (2026-09-04, extended 2026-09-05): the stage owns the full viewport below the
+     header — dvh (not vh) so a mobile browser's collapsing toolbar never leaves the layout
+     taller than what's actually visible — and the site footer is dropped on THIS page at this
+     width rather than left reachable by an accidental scroll past a mis-measured 100vh: there is
+     nothing to see there (an atlas-in-a-99dvh-box), so a deliberate absence beats a scroll to
+     empty space. `.ocean-panel` becomes a viewport-fixed overlay (not stage-relative) so it can
+     never add document height regardless of the stage's own box model. */
+  .ocean-stage{height:calc(100dvh - 58px)}
+  .site-foot{display:none}
+  .ocean-panel{position:fixed;left:0;right:0;top:auto;bottom:0;height:auto;max-height:none;width:100%;border-left:none;border-top:1px solid var(--line);box-shadow:0 -22px 44px rgba(0,0,0,.4);z-index:5}
+  /* peek (default on a selection): name + first tag + ONE metric line + a "Details" button —
+     same DOM `updatePanel()` already fills in full, just less of it shown. Tapping #opDetails
+     (site/atlas.js) adds `.full`; #oceanClose / Escape remove it before deselecting. */
+  .ocean-panel.full{max-height:78vh;overflow:auto}
+  .ocean-panel:not(.full) h2{font-size:17px;margin:0 44px 4px 0}
+  .ocean-panel:not(.full) #opMeta .tag:nth-of-type(n+2),
+  .ocean-panel:not(.full) #opMeta .muted,
+  .ocean-panel:not(.full) .op-metrics .op-metric:nth-child(n+2),
+  .ocean-panel:not(.full) .op-metrics .op-bar,
+  .ocean-panel:not(.full) #opNeighbours,
+  .ocean-panel:not(.full) #opEdges,
+  .ocean-panel:not(.full) #opUndrawn{display:none}
+  .ocean-panel:not(.full) .op-metrics{margin-top:6px}
+  .ocean-panel:not(.full) #opDetails{display:inline-flex;margin-top:10px}
+  /* mobile type scale: bigger touch targets, fewer words on screen at once (own scale, not a
+     shrink of the desktop one) */
+  .ocean-panel h2{font-size:19px}
+  .ocean-panel .tag{font-size:12.5px;padding:9px 12px}
+  .op-metric .op-mh{font-size:13px}
+  .op-sec{font-size:11.5px}
   .ocean-hud{max-width:none;right:18px}
   .ocean-signals{display:none}
-  /* Atlas mobile HUD (2026-09-04): collapse title+meta+search+note down to one row (title +
-     a search toggle) so the 3D canvas keeps its height instead of losing its top third to
-     chrome. #systemMeta is corpus-wide summary text, not needed to read the map — dropped on
-     mobile rather than relocated; ponytail: reachable again if the owner wants it in
-     #oceanPanel's empty state, out of scope for this pass. */
+  /* collapse title+meta+search+note down to one row (title + a search toggle) so the 3D canvas
+     keeps its height instead of losing its top third to chrome. #systemMeta (corpus stats) and
+     #atlasLegend (the Finish note) are relocated into site/atlas.js's own collapsible legend
+     (mobile-only rows, see mountSystem) rather than simply dropped — reachable behind the dock's
+     "Legend" chip instead of sitting mid-canvas. */
   .ocean-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .ocean-h h1{font-size:22px}
-  #systemMeta{display:none}
+  #systemMeta,#atlasLegend{display:none}
   .hud-more-btn{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;
     flex:none;border:1px solid var(--line);border-radius:9px;background:rgba(12,12,17,.85);
     font-size:17px;line-height:1;cursor:pointer}
@@ -2397,6 +2427,7 @@ def render_atlas_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
     <h2 id="opName"></h2><div id="opMeta"></div>
     <div id="opMetrics" class="op-metrics"></div>
     <div id="opNeighbours"></div><div id="opEdges"></div><div id="opUndrawn"></div>
+    <button id="opDetails" type="button" class="tag">{_bi("Details", "Detalhes")}</button>
   </aside>
   <button id="systemReset" type="button" class="ocean-close" style="position:absolute;top:auto;bottom:18px;right:18px;width:auto;height:auto;padding:8px 14px;border:1px solid var(--line);border-radius:8px;font-size:12px;pointer-events:auto">{_bi("Reset view", "Redefinir")}</button>
 </section>"""
@@ -2405,7 +2436,8 @@ def render_atlas_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
         "meta:document.getElementById('opMeta'),metrics:document.getElementById('opMetrics'),"
         "neighbours:document.getElementById('opNeighbours'),edges:document.getElementById('opEdges'),"
         "undrawn:document.getElementById('opUndrawn'),close:document.getElementById('oceanClose'),"
-        "reset:document.getElementById('systemReset'),metaLabel:document.getElementById('systemMeta')}"
+        "reset:document.getElementById('systemReset'),metaLabel:document.getElementById('systemMeta'),"
+        "details:document.getElementById('opDetails')}"
     )
     return (
         _head("Atlas", description="Every technique connection in the public corpus, drawn as "
