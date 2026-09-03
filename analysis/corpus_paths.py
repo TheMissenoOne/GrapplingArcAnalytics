@@ -44,6 +44,7 @@ to manage, which is why a single-bout breakdown almost never folds.
 
 from __future__ import annotations
 
+import bisect
 from collections import Counter
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Any
@@ -121,6 +122,110 @@ _CAT_PLURAL = {
 # Anchors are the map's FRAME, so their size is fixed (owner 2026-08-27) — deriving it from
 # usage made the landmark grow and shrink between renders.
 _ANCHOR_SIZE = 3
+
+# Brightness = "how good is the move" (owner, 2026-09-05, superseding the same-day belt/quintile
+# design) — `nodes[].quality` is a CONTINUOUS 0..1 percentile of the caller's `node_quality` mean
+# (ADR-16 rated-athlete `computed_elo`) taken WITHIN this payload's own state nodes, never the
+# whole corpus and never bucketed into bands. The client (site/atlas.js `starGlowFor`) maps it
+# straight to luminance.
+def _stamp_quality(
+    nodes: list[dict[str, Any]], node_quality: Mapping[str, float] | None
+) -> None:
+    """ADDITIVE: ``nodes[].quality`` from the caller's per-node_key mean (raw ``computed_elo``,
+    e.g. the ADR-16 rated-athlete population) — only for STATE nodes (never an anchor or a
+    junction, owner's rule: the frame's brightness is geometry, not a game).
+
+    Percentile is over the fraction of THIS payload's own matched state means strictly below
+    a node's own mean (``bisect`` on the sorted value list) — deterministic by VALUE alone, so
+    two runs that see ``node_quality`` in a different dict order still agree byte for byte
+    (root instruction: the site bundle is committed, a rerun must not spuriously diff).
+    ``None``/empty leaves every node exactly as it was (opt-in, no field added at all)."""
+    if not node_quality:
+        return
+    matched = [
+        (n, node_quality[n["stateKey"]])
+        for n in nodes
+        if n.get("kind") == "state" and n.get("stateKey") in node_quality
+    ]
+    if not matched:
+        return
+    sorted_vals = sorted(v for _n, v in matched)
+    total = len(sorted_vals)
+    for node, val in matched:
+        node["quality"] = round(bisect.bisect_left(sorted_vals, val) / total, 3)
+
+
+# Colour = dominant ARCHETYPE (owner, 2026-09-05) — the athletes who most use a state, weighted by
+# the occurrence count of every path (variant) touching that state as source or target, spread
+# across the archetypes of the two athletes in each path's own bouts (`agg.matches`, the §N4
+# provenance index this module already carries — see `aggregate_bouts(..., bout_meta=...)`).
+# "Dominant" requires clearing the uniform share (1/n_archetypes) by this margin; below it a state
+# is too mixed to name one archetype and reads `archetype: None` (neutral, the client's fallback).
+_ARCHETYPE_DOMINANCE_MARGIN = 1.5
+
+
+def _stamp_archetype(
+    nodes: list[dict[str, Any]],
+    agg: PathAggregate,
+    *,
+    collapse: bool,
+    archetype_of: Mapping[str, int] | None,
+) -> None:
+    """ADDITIVE: ``nodes[].archetype`` (int id, or ``None`` when no archetype clears the
+    dominance margin) + ``nodes[].archetypeShare`` (0..1, that archetype's share of this state's
+    own attributed usage) — STATE nodes only, same anchor/junction exclusion as ``_stamp_quality``.
+
+    ``archetype_of`` is ``{athlete_id: archetype_id}`` (public roster only — the caller filters
+    ``owner_kind='athlete'`` before building it, this module can never open the DB itself).
+    ``None``/empty leaves every node exactly as it was (opt-in)."""
+    if not archetype_of:
+        return
+    n_archetypes = len(set(archetype_of.values()))
+    if n_archetypes == 0:
+        return
+    threshold = (1.0 / n_archetypes) * _ARCHETYPE_DOMINANCE_MARGIN
+
+    # qid -> {archetype_id: weight}. Iterating `sorted(agg.edges)`/`sorted(bouts)` keeps the float
+    # summation order fixed regardless of dict insertion order (determinism, same reasoning as
+    # `_stamp_quality`'s bisect-by-value).
+    weight_of: dict[str, dict[int, float]] = {}
+    for key in sorted(agg.edges):
+        source, target, _observed, actor = key
+        row = agg.edges[key]
+        bouts = row.get("bouts") or ()
+        if not bouts:
+            continue
+        credits: dict[int, float] = {}
+        for mid in sorted(bouts):
+            match = agg.matches.get(mid)
+            for aid in (match or {}).get("athletes") or ():
+                arch = archetype_of.get(aid)
+                if arch is not None:
+                    credits[arch] = credits.get(arch, 0.0) + 1.0
+        total_credits = sum(credits.values())
+        if total_credits <= 0:
+            continue
+        per_credit = row["count"] / total_credits
+        src_qid = _qid(actor, source, collapse=collapse)
+        tgt_qid = _qid(actor, target, collapse=collapse)
+        for arch in sorted(credits):
+            w = credits[arch] * per_credit
+            for qid in (src_qid, tgt_qid):
+                d = weight_of.setdefault(qid, {})
+                d[arch] = d.get(arch, 0.0) + w
+
+    for node in nodes:
+        if node.get("kind") != "state":
+            continue
+        weights = weight_of.get(node["id"].removeprefix("s:"))
+        if not weights:
+            continue
+        total = sum(weights.values())
+        best_arch, best_w = min(weights.items(), key=lambda kv: (-kv[1], kv[0]))
+        share = best_w / total
+        node["archetypeShare"] = round(share, 3)
+        node["archetype"] = best_arch if share >= threshold else None
+
 
 # The anchors' labels come from ``data/taxonomy/inference_table.json`` in pt-BR (the App's own
 # locale). Site copy is English (GrapplingArc AGENTS.md rule 4), and the label must follow the
@@ -712,9 +817,31 @@ def path_payload(
     layout: str = "flow",
     target_aspect: float | None = None,
     bout_ids: bool = True,
+    node_quality: Mapping[str, float] | None = None,
+    archetype_of: Mapping[str, int] | None = None,
+    archetypes: Sequence[Mapping[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Layers 3 + 4 — the bundled graph, laid out, as the site's ``{nodes, links, paths,
     folded}``.
+
+    ``node_quality`` (owner, 2026-09-05, additive/opt-in) — ``{node_key: mean computed_elo}``
+    over whatever population the caller already computed (e.g. the ADR-16 rated-athlete
+    baseline, ``repository.rated_athlete_graph_ids`` — this module can never open the DB
+    itself, so the caller supplies the number the same way it already supplies ``rating_of``).
+    Stamps ``nodes[].quality`` — 0..1, CONTINUOUS percentile within THIS payload's own state
+    nodes, never bucketed — see ``_stamp_quality``. The client (site's Atlas) reads it as
+    brightness. Anchors and junctions never get the field. ``None`` (default) adds nothing,
+    byte-identical to before this parameter existed.
+
+    ``archetype_of`` (owner, 2026-09-05, additive/opt-in) — ``{athlete_id: archetype_id}`` over
+    the same public roster the caller already loads for dossier prose (``Graph.archetype_id``,
+    ``owner_kind='athlete'``). Stamps ``nodes[].archetype`` (int id, or ``None`` when no
+    archetype clears the dominance margin — see ``_stamp_archetype``) + ``nodes[].
+    archetypeShare`` (0..1). Requires ``agg`` to have been built with ``bout_meta`` — a variant
+    with no bout provenance contributes nothing. ``archetypes`` (optional) is the caller's own
+    roster — ``[{id, name, athletes}, ...]`` — echoed VERBATIM onto the top-level ``archetypes``
+    field so the client can name/colour every id ``nodes[].archetype`` can carry, without a
+    second query. Both ``None`` (default): no fields added, byte-identical to before.
 
     ``bout_ids`` (§N4, 2026-09-03) only matters when ``agg`` was built with ``bout_meta`` —
     otherwise there is no provenance to include and this is a no-op. ``True`` (default) puts the
@@ -979,6 +1106,9 @@ def path_payload(
                 node["label"] = "Finish (opponent)"
         nodes.append(node)
 
+    _stamp_quality(nodes, node_quality)
+    _stamp_archetype(nodes, agg, collapse=collapse, archetype_of=archetype_of)
+
     links: list[dict[str, Any]] = []
     for seg in bundled.segments:
         weight = _segment_weight(seg, count_of)
@@ -1145,6 +1275,9 @@ def path_payload(
         "paths": path_rows,
         "unresolved": unresolved_rows,
         "folded": folded_rows,
+        # ADDITIVE (owner, 2026-09-05): the caller's own archetype roster, echoed verbatim — the
+        # client names/colours every id `nodes[].archetype` can carry with no second query.
+        **({"archetypes": list(archetypes)} if archetypes else {}),
         # ADDITIVE (§17): the frame this payload was laid out in, and — in ring mode — the guide
         # ellipses and their origin. `site/graph.js` draws them under everything; a client that
         # ignores the fields draws the same graph it always drew.

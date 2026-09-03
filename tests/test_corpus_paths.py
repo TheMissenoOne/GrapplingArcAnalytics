@@ -61,6 +61,135 @@ def test_payload_is_deterministic_across_runs_and_input_order() -> None:
     assert json.dumps(one, sort_keys=True) == json.dumps(flipped, sort_keys=True)
 
 
+GUARD_GAME: list[dict[str, Any]] = [
+    {"label": "Closed Guard", "type": "guard", "side": "a", "ts": 10},
+    {"label": "Hip Bump Sweep", "type": "sweep", "side": "a", "successful": True, "ts": 20},
+    {"label": "De La Riva Guard", "type": "guard", "side": "a", "ts": 30},
+    {"label": "Berimbolo", "type": "sweep", "side": "a", "successful": True, "ts": 40},
+    {"label": "Closed Guard", "type": "guard", "side": "a", "ts": 50},
+    {"label": "Armbar", "type": "submission", "side": "a", "successful": True, "ts": 60},
+]
+PASS_GAME: list[dict[str, Any]] = [
+    {"label": "Half Guard", "type": "guard", "side": "b", "ts": 10},
+    {"label": "Knee Cut", "type": "pass", "side": "b", "successful": True, "ts": 20},
+    {"label": "Side Control", "type": "control", "side": "b", "ts": 30},
+    {"label": "Mount Transition", "type": "transition", "side": "b", "successful": True, "ts": 40},
+    {"label": "Mount", "type": "control", "side": "b", "ts": 50},
+    {"label": "Americana", "type": "submission", "side": "b", "successful": True, "ts": 60},
+]
+
+
+def test_node_quality_is_a_continuous_percentile_within_the_payloads_own_nodes() -> None:
+    """``node_quality`` (raw mean corpus ``computed_elo`` per node_key — the caller's, e.g.
+    the ADR-16 rated-athlete population) becomes ``nodes[].quality`` — 0..1, CONTINUOUS
+    percentile WITHIN this payload's own state nodes, never the whole corpus and never
+    bucketed into bands (owner, 2026-09-05: brightness is the axis, not a belt). Anchors stay
+    neutral (never a ``quality`` field — the owner's rule: anchor brightness is geometry, not
+    a game)."""
+    agg = aggregate_bouts([GUARD_GAME, PASS_GAME, GUARD_GAME, PASS_GAME])
+    means = {
+        "half guard": 1000.0, "side control": 1200.0, "mount": 1400.0,
+        "closed guard": 1600.0, "de la riva guard": 1800.0,
+    }
+    payload = path_payload(agg, layout="ring", node_quality=means)
+    by_key = {n["stateKey"]: n for n in payload["nodes"] if n.get("kind") == "state"}
+    assert set(means) <= set(by_key)
+    assert [round(by_key[k]["quality"], 3) for k in
+            ("half guard", "side control", "mount", "closed guard", "de la riva guard")] == [
+        0.0, 0.2, 0.4, 0.6, 0.8,
+    ]
+    finish = next(n for n in payload["nodes"] if n["id"] == "s:finish")
+    assert "quality" not in finish
+
+    # determinism: dict insertion order of ``node_quality`` must not change a single byte —
+    # ranking is by VALUE, never by node_key or by iteration order.
+    reordered = dict(reversed(list(means.items())))
+    payload2 = path_payload(agg, layout="ring", node_quality=reordered)
+    assert json.dumps(payload, sort_keys=True) == json.dumps(payload2, sort_keys=True)
+
+
+def test_node_quality_absent_means_no_quality_field() -> None:
+    """Additive/opt-in (root instructions): a payload built without ``node_quality`` carries
+    no ``quality`` key at all, so an old client (or a caller with no rated-corpus baseline)
+    draws exactly what it always drew."""
+    payload = path_payload(aggregate_bouts([BOUT_A, BOUT_B]))
+    for n in payload["nodes"]:
+        assert "quality" not in n
+
+
+_ARCHETYPE_BOUT_META = [
+    {"match_id": "m1", "family": "f", "athletes": ("a1", "a2")},
+    {"match_id": "m2", "family": "f", "athletes": ("a3", "a4")},
+    {"match_id": "m3", "family": "f", "athletes": ("a1", "a2")},
+    {"match_id": "m4", "family": "f", "athletes": ("a3", "a1")},
+]
+
+
+def test_node_archetype_is_the_dominant_athlete_archetype_weighted_by_path_count() -> None:
+    """``archetype_of`` (``{athlete_id: archetype_id}``, a public roster) becomes ``nodes[].
+    archetype`` — the archetype whose athletes most use this state, weighted by each touching
+    path's own ``count`` split across its bouts' two athletes — and ``nodes[].archetypeShare``
+    (0..1). "Closed Guard"/"De La Riva Guard" are only ever reached in bouts m1/m3, both
+    archetype 10 -> share 1.0, dominant. "Half Guard"/"Mount"/"Side Control" split evenly
+    between archetype 10 and 20 across m2/m4 -> share 0.5, at the UNIFORM (1/2) and below the
+    1.5x margin -> not dominant, ``archetype: None`` (still carries its own share)."""
+    agg = aggregate_bouts(
+        [GUARD_GAME, PASS_GAME, GUARD_GAME, PASS_GAME], bout_meta=_ARCHETYPE_BOUT_META,
+    )
+    archetype_of = {"a1": 10, "a2": 10, "a3": 20, "a4": 10}
+    payload = path_payload(agg, layout="ring", archetype_of=archetype_of)
+    by_key = {n["stateKey"]: n for n in payload["nodes"] if n.get("kind") == "state"}
+    assert by_key["closed guard"]["archetype"] == 10
+    assert by_key["closed guard"]["archetypeShare"] == 1.0
+    assert by_key["de la riva guard"]["archetype"] == 10
+    for key in ("half guard", "mount", "side control"):
+        assert by_key[key]["archetype"] is None
+        assert by_key[key]["archetypeShare"] == 0.5
+    finish = next(n for n in payload["nodes"] if n["id"] == "s:finish")
+    assert "archetype" not in finish and "archetypeShare" not in finish
+
+    # determinism: dict insertion order of `archetype_of` must not change a single byte.
+    reordered = dict(reversed(list(archetype_of.items())))
+    payload2 = path_payload(agg, layout="ring", archetype_of=reordered)
+    assert json.dumps(payload, sort_keys=True) == json.dumps(payload2, sort_keys=True)
+
+
+def test_node_archetype_at_exactly_the_dominance_margin_is_dominant() -> None:
+    """The boundary is inclusive: a share exactly AT ``1.5 × uniform`` counts as dominant, not
+    just strictly above it."""
+    agg = aggregate_bouts(
+        [GUARD_GAME, PASS_GAME, GUARD_GAME, PASS_GAME], bout_meta=_ARCHETYPE_BOUT_META,
+    )
+    archetype_of = {"a1": 10, "a2": 10, "a3": 20, "a4": 20}  # 0.75 share, threshold 0.75
+    payload = path_payload(agg, layout="ring", archetype_of=archetype_of)
+    by_key = {n["stateKey"]: n for n in payload["nodes"] if n.get("kind") == "state"}
+    assert by_key["half guard"]["archetype"] == 20
+    assert by_key["half guard"]["archetypeShare"] == 0.75
+
+
+def test_archetypes_roster_is_echoed_verbatim_when_given() -> None:
+    """``archetypes`` (the caller's own roster) rides through untouched onto the top-level
+    field — additive, absent when the caller never supplies one."""
+    agg = aggregate_bouts([GUARD_GAME, PASS_GAME], bout_meta=_ARCHETYPE_BOUT_META[:2])
+    roster = [{"id": 10, "name": "Guard players", "athletes": 2}]
+    payload = path_payload(
+        agg, layout="ring", archetype_of={"a1": 10, "a2": 10}, archetypes=roster,
+    )
+    assert payload["archetypes"] == roster
+    payload_no_roster = path_payload(agg, layout="ring", archetype_of={"a1": 10, "a2": 10})
+    assert "archetypes" not in payload_no_roster
+
+
+def test_node_archetype_absent_means_no_archetype_field() -> None:
+    """Additive/opt-in: no ``archetype_of`` -> no ``archetype``/``archetypeShare`` field at
+    all, even on a payload built WITH bout provenance."""
+    agg = aggregate_bouts([GUARD_GAME, PASS_GAME], bout_meta=_ARCHETYPE_BOUT_META[:2])
+    payload = path_payload(agg, layout="ring")
+    for n in payload["nodes"]:
+        assert "archetype" not in n
+        assert "archetypeShare" not in n
+
+
 def test_corpus_paths_cannot_reach_the_database_at_all() -> None:
     """PRIVACY, structurally (root CLAUDE.md). A public artefact must filter ``owner_kind``;
     this module goes further and cannot query anything — it takes plain event dicts. Asserted

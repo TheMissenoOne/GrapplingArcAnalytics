@@ -518,6 +518,47 @@ def _corpus_bouts(
     return bouts, bout_meta
 
 
+def _node_quality_means(session: Session) -> dict[str, float]:
+    """``{node_key: mean computed_elo}`` over the ADR-16 rated-athlete population — the Atlas's
+    brightness ("how good is the move"). Reuses ``export.app_node_scores.elo_baseline`` (same
+    ``owner_kind='athlete'`` + ``repository.rated_athlete_graph_ids`` filter it already proved
+    out for ``eloPercentile``, root CLAUDE.md's ELO Engine section) rather than a second query —
+    one call, cached by the caller for the whole regen. Only the MEAN is kept; the percentile
+    ``analysis.corpus_paths._stamp_quality`` needs is computed there, over each payload's own
+    node set, not the whole corpus."""
+    from export.app_node_scores import elo_baseline
+
+    by_key, _sorted_means = elo_baseline(session)
+    return {k: v[0] for k, v in by_key.items()}
+
+
+def _archetype_roster(session: Session) -> tuple[dict[str, int], list[dict[str, Any]]]:
+    """``({athlete_id: archetype_id}, archetypes[])`` — the Atlas's colour axis. Same source
+    ``_prime_arch_cache``/``_archetype`` already reuse (``Graph.archetype_id``,
+    ``owner_kind='athlete'`` — NOT ``Athlete.archetype_id``, which nothing ever writes, see
+    ``_archetype``'s own docstring) so a dossier's prose and the Atlas's star colour agree.
+    ``archetypes[]`` — ``{id, name, athletes}`` (``athletes`` = how many public athletes anchor
+    that archetype) — is the roster the client names/colours ``nodes[].archetype`` from,
+    ordered by id for a deterministic payload."""
+    from db.models import Graph
+
+    rows = session.execute(
+        select(Graph.owner_id, Graph.archetype_id, Archetype.name)
+        .join(Archetype, Graph.archetype_id == Archetype.id)
+        .where(Graph.owner_kind == "athlete", Graph.archetype_id.isnot(None))
+    ).all()
+    archetype_of = {str(oid): int(aid) for oid, aid, _name in rows}
+    counts: dict[int, int] = {}
+    names: dict[int, str] = {}
+    for _oid, aid, name in rows:
+        counts[aid] = counts.get(aid, 0) + 1
+        names[aid] = name
+    archetypes = [
+        {"id": aid, "name": names[aid], "athletes": counts[aid]} for aid in sorted(counts)
+    ]
+    return archetype_of, archetypes
+
+
 def _athlete_path_graph(athlete_id: str, matches: list[Any]) -> dict[str, Any]:
     """The dossier's "edge = path" map: this athlete's OWN chains across their bouts.
 
@@ -2658,14 +2699,21 @@ def export_site(session: Session, out: Path, full: bool = False,
     # (see its own docstring): real match ids while the raw payload stays under it, a bare count
     # (`paths[].nBouts`, no `matches` index) past it.
     corpus_bouts, corpus_bout_meta = _corpus_bouts(session)
+    # Atlas colour = dominant archetype, brightness = quality (owner, 2026-09-05) — two
+    # queries for the whole regen, turned into per-payload percentile/dominance inside
+    # `path_payload` itself (`_stamp_quality`/`_stamp_archetype`).
+    node_quality = _node_quality_means(session)
+    archetype_of, archetype_roster = _archetype_roster(session)
     prov_payload = path_payload(
         aggregate_bouts(corpus_bouts, collapse_actors=True, bout_meta=corpus_bout_meta),
         layout="ring", max_variants=None, max_fold_groups=None, bout_ids=True,
+        node_quality=node_quality, archetype_of=archetype_of, archetypes=archetype_roster,
     )
     raw_size = len(json.dumps(prov_payload, ensure_ascii=False))
     ocean["pathGraph"] = prov_payload if raw_size <= _BOUT_IDS_BUDGET else path_payload(
         aggregate_bouts(corpus_bouts, collapse_actors=True, bout_meta=corpus_bout_meta),
         layout="ring", max_variants=None, max_fold_groups=None, bout_ids=False,
+        node_quality=node_quality, archetype_of=archetype_of, archetypes=archetype_roster,
     )
     (out / "ocean-data.js").write_text(_js_file("GA_OCEAN", ocean), encoding="utf-8")
     (out / "atlas.html").write_text(
