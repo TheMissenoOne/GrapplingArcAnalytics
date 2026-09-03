@@ -219,10 +219,12 @@ de banco não é medir zero.
 
 ## 8. Fora de escopo de N0, por decisão
 
-- **`guard recovery`** lê `state` sob `guard` (28 eventos) e `action` sob `escape` (7), e o
-  mesmo `guard recovery` é chave de `inference_table.generic_actions`. É dupla identidade E
-  colisão com o vocabulário genérico. Mexer nele reclassifica 35 eventos e colide com um
-  genérico — N1/N2, com a biblioteca junto.
+- **`guard recovery`** lia `state` sob `guard` (28 eventos) e `action` sob `escape` (7), e o
+  mesmo `guard recovery` é chave de `inference_table.generic_actions`. Dupla identidade E
+  colisão com o vocabulário genérico. **Fechado por N2** (§9.4 abaixo) — o rótulo OBSERVADO
+  agora é sempre ação; o genérico de `inference_table.json` (D2, usado só pelo compilador para
+  ligar dois estados adjacentes sem ação observada entre eles) continua intocado, questão
+  diferente, sem colisão.
 - **`orientation_of`** continua prometendo "rótulo não resolvido lê `neutral`, nunca chuta"
   (`03` §8.2). A leitura mais larga da inferência continua em `orientation_for_inference`, com
   `source: declared | derived` dizendo qual nível respondeu.
@@ -232,3 +234,100 @@ de banco não é medir zero.
   do lado App ficam DIVERGENTES até a fase N3 portar `taxonomyInference.ts`/`chainCompiler.ts` e
   regenerar com os mesmos bytes; `tests/test_cross_repo_fixtures.py` fica vermelho nesses dois
   até lá, de propósito.
+
+---
+
+## 9. N2 — rótulos compostos e perspectiva (2026-09-04)
+
+Fecha os dois itens que N0 deixou pendurados: rótulos "A to B"/"X / Y" que empacotam um estado E
+uma ação num nó só, e a cobertura de `state_orientation.json` (39 → 93 linhas). Nada de
+`node_key` se move para os rótulos JÁ atômicos; os compostos decompostos SIM ganham `node_key`
+novos (os das partes) — por isso esta fase, como N1, exige um replay (§9.5).
+
+### 9.1 A tabela curada
+
+`data/taxonomy/composite_labels.json`, chaveada por `analysis.names._normalize_name`. Três
+formas — nunca regex em produção, nunca heurística no compilador:
+
+```
+{"action": "<rótulo>", "to": "<rótulo>" | "top"|"bottom"|"neutral"}
+    -> evento de ação, depois um segundo evento para "to" — OMITIDO quando "to" é uma palavra de
+    orientação nua ("Escape to Standing" -> neutral): o alvo era vago na fonte, e a âncora de
+    saída que o compilador já infere (`taxonomy_kind.resolve_closing_anchor`) responde a mesma
+    pergunta para uma ação sem estado declarado a seguir — emitir um nó literal reinventaria
+    esse mecanismo.
+{"state": "<rótulo>", "action": "<rótulo>"}
+    -> evento de estado, depois evento de ação (a posição já existia; dela, um movimento).
+{"state": "<rótulo>", "perspective": {"actor": "top"|"bottom"}}
+    -> UM evento só. O RÓTULO NÃO MUDA — perspectiva é metadado, nunca um segundo nome de
+    estado (a invariante do §1). "Top Half Guard" continua "Top Half Guard"; ganha só o campo
+    `perspective`.
+```
+
+Curados: 21 pares `{action,to}`, 4 pares `{state,action}` (a família Leg Entanglement), 4
+perspectivas (`Top Half Guard`, `Top Control (Half Guard)`, `Body Triangle (Bottom)`,
+`Head-Arm Control (Top)`). Deixados de fora, em `_skipped` com o motivo escrito: pares
+"Nome / Nome" onde os dois lados são nomes ALTERNATIVOS da mesma finalização (`Armbar / Choi
+Bar`, `Katagatame / Darce`, …) — decompô-los duplicaria a ocorrência, não a descreveria melhor
+— e um caso (`Pull Guard / Sit Guard`) cujo alvo pode ser o `seated guard` já curado sob outra
+grafia, decisão de fusão de N1, não de N2.
+
+### 9.2 Onde a expansão roda
+
+`analysis/composite_labels.py:expand_composite`/`expand_sequence`, chamada de
+`db.repository.expand_sequence` em **todos** os pontos que escrevem `matches.sequence`:
+`register_match`, `register_matches_bulk` (o caminho de volume — `dump_import.py`) e
+`update_match` (edição no admin). Não existe UM ponto único de fato — são três funções de
+escrita, cada uma o entry point real do seu caminho (dump, admin paste/edit, scraped import) —
+então a garantia de "uma implementação só" vem do helper compartilhado, não de um único call
+site. `chain_compiler` nunca vê um rótulo composto: a lição das 160 ações fantasma
+(`03_ARESTA_COMO_CAMINHO.md` §3.2) é que inferência de estado pertence à ingestão, nunca ao
+compilador.
+
+Cada evento gerado mantém todo campo do original exceto `label`/`type` (`ts`, `actor`/
+`actor_id`, `successful`, `points`, …, duplicados nas duas metades quando o composto separa) e
+ganha `source_label` = o rótulo bruto original, para auditoria. `type` da metade é um genérico
+fixo (`"transition"` para ação, `"control"` para estado) — a classificação real roda depois via
+`analysis.taxonomy_kind.kind_of_entry`, que resolve pela biblioteca primeiro e só cai no `type`
+bruto como último recurso, então o genérico raramente importa.
+
+### 9.3 `state_orientation.json`: 39 → 93 linhas
+
+Cobre as 53 entradas que `scripts/audit_ontology` media em `states_without_orientation` mais
+`straddle` (o alvo novo de `Leg Drag to Straddle`, §9.1). `Body Triangle (Bottom)` = `bottom`
+(a leitura de `lamas_chain`, "quem está debaixo" — a mesma resposta que N0 já deu ao PAPEL em
+`attribution.py:199`; agora a ORIENTAÇÃO da posição concorda). Incertezas marcadas para revisão
+humana: `smash half guard` → `top` (nome de estilo de passagem, não posição parada — lido como
+"quem pressiona está em cima", mas o rótulo pode nomear o LADO de baixo em vez da técnica de
+quem passa); `kimura trap`/`leg lace`/`half nelson`/`ride out`/`straight jacket` → `top` por
+convenção de wrestling (controle aplicado de cima), sem confirmação por transcrição.
+
+Efeito: `scripts/audit_ontology` `states_without_orientation` 53 → 0; `composites` 38 → 11 (cai
+exatamente para o conjunto `_skipped`); `dual_identity` 11 → 10 (`guard recovery` fechado, §9.4).
+`alias_candidates` (1) e `athlete_nodes_typed_technique` (286) são N1/N3, intocados.
+
+### 9.4 `guard recovery`
+
+Dupla identidade real: `state` sob `guard` (28 eventos), `action` sob `escape` (7). Menor
+correção coerente com o contrato — o mesmo padrão já usado para a família guard-pull
+(`analysis.attribution._ACTIONS_FILED_AS_POSITIONS`, §4 acima): o rótulo observado é sempre
+AÇÃO (é um movimento — recompor uma guarda perdida — não uma postura), só a `category` muda,
+nenhum papel (`actor_role`/`target_role`) se move. `RULES_VERSION` de `attribution.py`: 2 → 3.
+O genérico `inference_table.json → generic_actions["guard recovery"]` (D2, vocabulário do
+compilador para ligar dois ESTADOS adjacentes sem ação observada entre eles) é uma tabela
+diferente, uma pergunta diferente, e fica exatamente como estava.
+
+### 9.5 Prompt do refinador
+
+`docs/PROMPT_events_sidecar.md` ganhou duas regras: "um evento = um estado OU uma ação, nunca
+'A to B'/'X / Y' num rótulo só" (com o exemplo de decomposição) e "perspectiva de cima/baixo é
+metadado do evento, nunca um segundo nome de estado — não inventar 'Top …'/'… (Bottom)'" (fecha
+a torneira para os 4 casos de §9.1), mais "registre o estado inicial de cada troca, não só a
+ação que a fecha" (o under-registration medido: Back Control sozinho é 44% de todo evento de
+estado do corpus, porque a transcrição narra a finalização e nunca a posição que a permitiu).
+
+### 9.6 Reprocesso
+
+Escrita em prod — dono. Runbook: `docs/repairs/2026-09-04_n2_composite_reprocess.md`. Roda
+sobre `matches.sequence` do BANCO (nunca sobre os dumps — cicatriz `dumps-diverged-from-db`) e
+ANTES do replay já pendente de N1, no MESMO replay (um replay cobre N1+N2, como `03` já previa).

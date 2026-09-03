@@ -1,0 +1,54 @@
+{
+  "_comment": "N2 (docs/taxonomy/04_ONTOLOGIA_CANONICA.md). Curated by hand from `uv run python -m scripts.audit_ontology` family 'composites', plus 4 perspective-only labels the separator heuristic cannot see (parenthetical/prefix form). Keys are `analysis.names._normalize_name` output. Consumed by `analysis.composite_labels.expand_composite`, applied once at `db.repository.register_match` (the single point every entry path funnels `sequence` through). Three shapes: {action,to} -> action event then a second event for `to` (dropped when `to` is a bare 'top'|'bottom'|'neutral' -- the existing exit-orientation anchor inference already supplies that, splicing a literal node for it would just reinvent `start top`/`start bottom`/`start neutral`); {state,action} -> state event then action event; {state,perspective} -> ONE event, label UNCHANGED, `perspective` added as metadata (04 S2: perspective is metadata, never a second state name).",
+
+  "escape to standing": {"action": "Escape", "to": "neutral"},
+  "escape to turtle": {"action": "Escape", "to": "Turtle Position"},
+  "escaped to neutral": {"action": "Escape", "to": "neutral"},
+  "escape to guard": {"action": "Escape", "to": "Guard"},
+  "escape to half guard": {"action": "Escape", "to": "Half Guard"},
+  "escape to top": {"action": "Escape", "to": "top"},
+
+  "pull guard inversion": {"action": "Pull Guard", "to": "Inversion"},
+  "pull guard inside triangle": {"action": "Pull Guard", "to": "Inside Triangle"},
+
+  "leg drag to straddle": {"action": "Leg Drag", "to": "Straddle"},
+  "guard pass to mount": {"action": "Guard Pass", "to": "Mount"},
+  "guard pass to side control": {"action": "Guard Pass", "to": "Side Control"},
+  "guard pass to north south": {"action": "Guard Pass", "to": "North South Position"},
+  "sweep top position": {"action": "Sweep", "to": "top"},
+  "arm drag to back take": {"action": "Arm Drag", "to": "Back Take"},
+  "crab ride to back take": {"action": "Crab Ride", "to": "Back Take"},
+  "takedown to back take": {"action": "Takedown", "to": "Back Take"},
+  "sweep back take": {"action": "Sweep", "to": "Back Take"},
+  "back step to leg entanglement": {"action": "Back Step", "to": "Leg Entanglement"},
+  "imanari roll to leg entanglement": {"action": "Imanari Roll", "to": "Leg Entanglement"},
+  "body lock pass to mount": {"action": "Body Lock Pass", "to": "Mount"},
+  "scramble to standing": {"action": "Scramble", "to": "neutral"},
+  "sprawl to top position": {"action": "Sprawl", "to": "top"},
+  "wrestle up to top": {"action": "Wrestle Up", "to": "top"},
+
+  "leg entanglement aoki lock entry": {"state": "Leg Entanglement", "action": "Aoki Lock Entry"},
+  "leg entanglement false reap": {"state": "Leg Entanglement", "action": "False Reap"},
+  "leg entanglement heel hook entry": {"state": "Leg Entanglement", "action": "Heel Hook Entry"},
+  "leg entanglement inside heel hook": {"state": "Leg Entanglement", "action": "Inside Heel Hook"},
+
+  "top half guard": {"state": "Half Guard", "perspective": {"actor": "top"}},
+  "top control half guard": {"state": "Half Guard", "perspective": {"actor": "top"}},
+  "body triangle bottom": {"state": "Body Triangle", "perspective": {"actor": "bottom"}},
+  "headarm control top": {"state": "Head-Arm Control", "perspective": {"actor": "top"}},
+
+  "_skipped": {
+    "pull guard inside triangle note": "not skipped -- see pull_guard_inside_triangle above; kept here only as a reminder it was reviewed",
+    "leg entanglement 5050": "ambos os lados são ESTADOS (leg entanglement + 50/50), não action+state/state+action -- não cabe no contrato dos 3 formatos",
+    "reset stalemate": "bookkeeping/referee, não é técnica -- splitar duplicaria um evento que não é grappling",
+    "armbar choi bar": "mesmo submission com dois nomes (choi bar É um armbar) -- alias, não sequência; ver names.py (N1), splitar duplicaria a finalização",
+    "arm-triangle head-arm strangle": "mesmo submission com dois nomes -- alias, não sequência",
+    "katagatame darce": "nomenclaturas alternativas do mesmo estrangulamento -- alias, não sequência",
+    "katagatame gift wrap": "ambíguo: nomeação alternativa OU combo real, n=1, sem evidência de transcrição para decidir",
+    "knee crush calf slicer": "termos quase-sinônimos para o mesmo ataque de perna em regras diferentes -- alias, não sequência",
+    "armbar triangle": "ambíguo: pode ser combo real (triângulo->armlock é comum) OU nomeação simultânea, n=1, sem evidência de transcrição",
+    "neck crank rear naked choke": "ambíguo: n=1, sem evidência de transcrição para decidir sequência vs nomeação dupla",
+    "omoplata triangle": "ambíguo: combo real comum (omoplata/triângulo) OU ameaça simultânea nomeada junto, n=1, sem evidência de transcrição",
+    "pull guard sit guard": "alvo 'sit guard' não tem node_key curado -- pode ser alias de 'seated guard' já existente (13 eventos); decisão de fusão é N1, não N2"
+  }
+}

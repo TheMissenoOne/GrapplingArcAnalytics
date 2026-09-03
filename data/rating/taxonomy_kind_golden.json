@@ -232,7 +232,7 @@
     },
     "body lock": {
       "kind": "state",
-      "orientation": "neutral",
+      "orientation": "top",
       "type": "control"
     },
     "body lock from back": {
@@ -831,8 +831,8 @@
       "value": "top"
     },
     "control|Body Lock": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|Body Lock from Back": {
       "source": "declared",
@@ -907,20 +907,20 @@
       "value": "top"
     },
     "control|body lock": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|body triangle": {
       "source": "declared",
       "value": "top"
     },
     "control|body triangle bottom": {
-      "source": "derived",
-      "value": "controlled"
+      "source": "declared",
+      "value": "bottom"
     },
     "control|chesttochest half guard": {
-      "source": "derived",
-      "value": "top"
+      "source": "declared",
+      "value": "bottom"
     },
     "control|clinch knees": {
       "source": "derived",
@@ -943,8 +943,8 @@
       "value": "top"
     },
     "control|double underhooks": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|escape to turtle": {
       "source": "derived",
@@ -955,28 +955,28 @@
       "value": "controlling"
     },
     "control|front headlock": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|ground and pound": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|half guard control": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|half nelson": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|headarm control top": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|hooks in": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|inside ashi": {
       "source": "derived",
@@ -991,7 +991,7 @@
       "value": "top"
     },
     "control|leg lace": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|mount": {
@@ -999,15 +999,15 @@
       "value": "top"
     },
     "control|mounted crucifix": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|near fall": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|nearfall": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|north south control": {
@@ -1019,11 +1019,11 @@
       "value": "top"
     },
     "control|rear body lock": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|ride out": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|russian tie": {
@@ -1039,15 +1039,15 @@
       "value": "top"
     },
     "control|seatbelt control": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|side control": {
       "source": "declared",
       "value": "top"
     },
     "control|smash half guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|smother": {
@@ -1055,8 +1055,8 @@
       "value": "neutral"
     },
     "control|standing back control": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|start bottom": {
       "source": "declared",
@@ -1071,27 +1071,27 @@
       "value": "top"
     },
     "control|straight jacket": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|threequarter mount": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|top control": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|top control body lock": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|top control half guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|top half guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "top"
     },
     "control|truck": {
@@ -1099,8 +1099,8 @@
       "value": "top"
     },
     "control|turtle control": {
-      "source": "derived",
-      "value": "controlling"
+      "source": "declared",
+      "value": "top"
     },
     "control|turtle position": {
       "source": "declared",
@@ -1231,15 +1231,15 @@
       "value": "neutral"
     },
     "guard|bear trap": {
-      "source": "derived",
-      "value": "bottom"
+      "source": "declared",
+      "value": "top"
     },
     "guard|butterfly guard": {
       "source": "declared",
       "value": "bottom"
     },
     "guard|butterfly half guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|close guard": {
@@ -1263,7 +1263,7 @@
       "value": "neutral"
     },
     "guard|guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|guard pull": {
@@ -1271,11 +1271,11 @@
       "value": "bottom"
     },
     "guard|guard recovery": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|guard retention": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|half guard": {
@@ -1283,7 +1283,7 @@
       "value": "bottom"
     },
     "guard|half guard flat": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|imanari roll to leg entanglement": {
@@ -1295,7 +1295,7 @@
       "value": "neutral"
     },
     "guard|inverted de la riva guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|jump guard": {
@@ -1307,7 +1307,7 @@
       "value": "bottom"
     },
     "guard|knee shield half guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|lasso guard": {
@@ -1379,7 +1379,7 @@
       "value": "bottom"
     },
     "guard|seated guard": {
-      "source": "derived",
+      "source": "declared",
       "value": "bottom"
     },
     "guard|shin on shin guard": {
@@ -1814,40 +1814,94 @@
   "state_orientation": {
     "5050 guard": "neutral",
     "back control": "top",
+    "back step to leg entanglement": "neutral",
+    "bear trap": "top",
+    "body lock": "top",
     "body lock from back": "top",
     "body triangle": "top",
+    "body triangle bottom": "bottom",
     "butterfly guard": "bottom",
+    "butterfly half guard": "bottom",
+    "chesttochest half guard": "bottom",
+    "clinch knees": "neutral",
     "closed guard": "bottom",
     "collar sleeve guard": "bottom",
+    "collar tie": "neutral",
+    "cross ashi": "neutral",
     "crucifix": "top",
     "de la riva guard": "bottom",
     "deep half guard": "bottom",
+    "double underhooks": "top",
     "electric chair": "neutral",
     "finish": "neutral",
+    "front headlock": "top",
     "gift wrap": "top",
+    "ground and pound": "top",
+    "guard": "bottom",
+    "guard recovery": "bottom",
+    "guard retention": "bottom",
     "half guard": "bottom",
+    "half guard flat": "bottom",
+    "half nelson": "top",
+    "headarm control top": "top",
+    "hooks in": "top",
+    "imanari roll to leg entanglement": "neutral",
+    "inside ashi": "neutral",
+    "inversion": "neutral",
+    "inverted de la riva guard": "bottom",
     "kguard": "bottom",
+    "kimura grip": "neutral",
+    "kimura trap": "top",
     "knee on belly": "top",
+    "knee shield half guard": "bottom",
     "lasso guard": "bottom",
+    "leg entanglement": "neutral",
+    "leg entanglement 5050": "neutral",
+    "leg entanglement aoki lock entry": "neutral",
+    "leg entanglement entry": "neutral",
+    "leg entanglement false reap": "neutral",
+    "leg entanglement heel hook entry": "neutral",
+    "leg entry": "neutral",
     "leg hug": "neutral",
+    "leg lace": "top",
+    "leg lock exchange": "neutral",
     "mount": "top",
+    "mounted crucifix": "top",
+    "near fall": "top",
     "northsouth position": "top",
     "open guard": "bottom",
     "outside ashi garami": "neutral",
+    "rear body lock": "top",
     "reverse de la riva": "bottom",
+    "ride out": "top",
     "rubber guard": "bottom",
+    "russian tie": "neutral",
     "saddle inside sankaku": "neutral",
     "scarf hold": "top",
+    "seatbelt control": "top",
+    "seated guard": "bottom",
     "shin to shin guard": "neutral",
     "shoulder crunch": "top",
     "side control": "top",
     "single leg x": "neutral",
+    "smash half guard": "top",
     "spider guard": "bottom",
+    "standing back control": "top",
     "start bottom": "bottom",
     "start neutral": "neutral",
     "start top": "top",
+    "straddle": "top",
+    "straight jacket": "top",
+    "threequarter mount": "top",
+    "top control": "top",
+    "top control body lock": "top",
+    "top control half guard": "top",
+    "top half guard": "top",
     "truck": "top",
+    "turtle control": "top",
     "turtle position": "bottom",
+    "twoonone control": "neutral",
+    "twoonone wrist control": "neutral",
     "worm guard": "bottom",
     "xguard": "bottom",
     "zguard": "bottom"

@@ -160,11 +160,35 @@ Prefer reusable labels. Do not over-specify beyond the evidence. Normalize clear
 (RNC → Rear Naked Choke, back mount → Back Control, single-leg → Single Leg Takedown). Never emit
 a placeholder such as `Match`.
 
+**One event = one state OR one action. Never both in a single label.** Do not emit a label
+shaped like "A to B" or "X / Y" — those pack a state and an action (or two actions) into one
+node, and the ontology has no way to split them back apart later (`docs/taxonomy/
+04_ONTOLOGIA_CANONICA.md`). "Guard Pass to Mount" is two events: `pass`/`Guard Pass`, then the
+`control`/`Mount` state it lands in. "Escape to Turtle" is `escape`/`Escape`, then (only if the
+resulting position is actually visible, not implied) `control`/`Turtle Position`. If the
+commentary only supports the action and not a clear landing position, emit the action alone —
+do not guess the landing state.
+
+Whether an athlete is on **top or bottom** of a position is metadata about THAT event, never a
+second name for it. Write "Half Guard" (the state), not "Top Half Guard" — the actor field
+already says whose game the node belongs to, and the ownership table above (guard → bottom,
+control → top-ish, …) already carries the orientation for the common cases. Do not invent
+parenthetical/prefixed perspective variants ("… (Top)", "… (Bottom)", "Top …") of a state that
+already has a plain entry in the vocabulary.
+
 ## One event per occurrence
 
 A position held across several lines is one event at the first clear establishment. Re-emit only
 after it was clearly lost and regained. A replay may refine an event already caught live but keeps
 the LIVE timestamp. If the live moment cannot be placed confidently, omit it.
+
+**Log the state an exchange STARTS from, not only the action that ends it.** Measured
+under-registration: Back Control alone is 44% of every position event in the corpus, because a
+transcript narrates "she takes the back and locks in the choke" and only the action (the choke)
+gets logged — the position that made the choke possible never does. When the commentary
+establishes a position before describing what happens from it (a control, a guard, a pin), emit
+that position as its own event FIRST, at the moment it is established, even if the athlete then
+immediately attacks from it. Do not fold "arrived at a position" into "did something from it".
 
 ## scouting_observations
 

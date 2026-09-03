@@ -348,20 +348,24 @@ def test_no_empty_endpoint_edges_and_no_generic_out_degrees_the_real_graph() -> 
 
     assert empty_endpoint_edges == 0
     # OBSERVED is the invariant: one action per logged action event, unchanged by Fase 0/1/1b/2.
-    # Moved ONCE, by N0's authority swap (docs/taxonomy/04_ONTOLOGIA_CANONICA.md): 1390 -> 1548,
+    # Moved by N0's authority swap (docs/taxonomy/04_ONTOLOGIA_CANONICA.md): 1390 -> 1548,
     # the net of five reclassified labels on this dump — `control/Back Take` (128) and
     # `control/Escape to Turtle` (47) and `guard/Jump Guard` (2) became actions, `control/Body
     # Lock` (3) and `control/Clinch Knees` (1) became states. The exact set is pinned in
-    # `data/taxonomy/audit_baseline.json` under `reclassified`; any OTHER movement is the
-    # regression this number exists to catch.
-    assert observed_actions == 1548
+    # `data/taxonomy/audit_baseline.json` under `reclassified`. Moved again by N2's `guard
+    # recovery` fix (04 S8 -> S "guard recovery", `_ACTIONS_FILED_AS_POSITIONS`): 1548 -> 1551,
+    # the 4 `guard/Guard Recovery` events on this dump that were STATE (dual identity with
+    # `escape/Guard Recovery`, already action) and are now ACTION always. Any OTHER movement is
+    # the regression this number exists to catch.
+    assert observed_actions == 1551
     # INFERRED is the rule's own output and moves with it. 399 before Fase 2; 433 after, and the
     # +34 are all inversions the endpoints prove and no observed action explains (28 appended,
     # 4 at the head, 2 spliced BETWEEN observed actions). N0 takes it to 321: 128 `control/Back
     # Take` and 47 `control/Escape to Turtle` events stopped being STATES, so the generic bridges
-    # the compiler had to invent around them are no longer needed. Change the rule and change this
-    # number deliberately — never to make a red test green.
-    assert inferred_actions == 321
+    # the compiler had to invent around them are no longer needed. N2's `guard recovery` fix
+    # takes it to 320: one fewer state-pair gap to bridge around those 4 events. Change the rule
+    # and change this number deliberately — never to make a red test green.
+    assert inferred_actions == 320
     max_real_degree = max(
         (d for key, d in degree.items() if key not in generic_keys and key != ""), default=0
     )

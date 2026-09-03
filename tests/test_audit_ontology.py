@@ -26,7 +26,10 @@ from scripts.audit_ontology import (
 #   Turtle Position sob dois `type`  -> NÃO é dupla identidade (a tabela curada resolve os dois
 #                                       lados como state — é a prova de que o detector não grita
 #                                       só porque o rótulo aparece sob dois tipos)
-#   Guard Recovery guard vs escape   -> dupla identidade real
+#   Hooks In control vs transition   -> dupla identidade real (N2, docs/taxonomy/
+#                                       04_ONTOLOGIA_CANONICA.md S6: "guard recovery" era este
+#                                       exemplo até N2 fechá-la via `_ACTIONS_FILED_AS_POSITIONS`
+#                                       — "hooks in" segue aberta, N1)
 #   Reap Sweep / Reaps Sweep         -> alias por particípio (synthetic — the corpus's real
 #                                       participle pair, "close guard"/"closed guard", is now
 #                                       merged by names.SYNONYMS (N1), so it no longer reaches
@@ -34,21 +37,25 @@ from scripts.audit_ontology import (
 #   Knee Cut / Kneecut               -> alias por espaço (synthetic, same reason as above —
 #                                       "take down"/"takedown" is now SYNONYMS-merged too)
 #   Shin to Shin Guard, 50/50 Guard  -> compostos FALSOS (contêm " to " / "/"), ignorados
-#   Escape to Standing               -> composto real
-#   Front Headlock                   -> state sem orientação
+#   Test Move to Test State          -> composto real, sem linha curada (synthetic — a real
+#                                       composite this size, "Escape to Standing", is now IN
+#                                       `data/taxonomy/composite_labels.json` (N2) and would no
+#                                       longer prove this detector fires)
+#   Uncurated Test State             -> state sem orientação (synthetic — real states this size
+#                                       ("Front Headlock", ...) got curated rows by N2)
 SYNTHETIC: list[dict[str, Any]] = [{"sequence": [
     {"type": "control", "label": "Turtle Position"},
     {"type": "guard", "label": "Turtle Position"},
-    {"type": "guard", "label": "Guard Recovery"},
-    {"type": "escape", "label": "Guard Recovery"},
+    {"type": "control", "label": "Hooks In"},
+    {"type": "transition", "label": "Hooks In"},
     {"type": "sweep", "label": "Reap Sweep"},
     {"type": "sweep", "label": "Reaps Sweep"},
     {"type": "pass", "label": "Knee Cut"},
     {"type": "pass", "label": "Kneecut"},
     {"type": "guard", "label": "Shin to Shin Guard"},
     {"type": "guard", "label": "50/50 Guard"},
-    {"type": "escape", "label": "Escape to Standing"},
-    {"type": "control", "label": "Front Headlock"},
+    {"type": "escape", "label": "Test Move to Test State"},
+    {"type": "control", "label": "Uncurated Test State"},
 ]}]
 
 
@@ -58,7 +65,7 @@ def _pairs() -> list[dict[str, Any]]:
 
 def test_dual_identity_needs_two_kinds_not_two_types() -> None:
     keys = {row["node_key"] for row in find_dual_identity(_pairs())}
-    assert "guard recovery" in keys
+    assert "hooks in" in keys
     assert "turtle position" not in keys
 
 
@@ -70,13 +77,13 @@ def test_alias_candidates_catch_participle_and_space() -> None:
 
 def test_composites_skip_the_declared_false_positives() -> None:
     labels = {row["label"] for row in find_composites(_pairs())}
-    assert labels == {"Escape to Standing"}
+    assert labels == {"Test Move to Test State"}
 
 
 def test_states_without_orientation_and_full_counts() -> None:
     report = audit(_pairs(), athlete_typed=None)
     missing = {row["node_key"] for row in report["states_without_orientation"]}
-    assert "front headlock" in missing
+    assert "uncurated test state" in missing
     assert "closed guard" not in missing        # tem linha curada
     counts = counts_of(report)
     assert counts["athlete_nodes_typed_technique"] is None   # sem banco, sem afirmação

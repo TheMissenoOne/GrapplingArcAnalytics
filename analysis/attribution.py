@@ -57,7 +57,9 @@ from analysis.names import _normalize_name
 # so the rows this file got wrong are now published as node kinds. Three corrections went in
 # with that: `body triangle bottom` roles, `escape/turtle position` category, and the
 # guard-pull family's category.
-RULES_VERSION = 2
+# 3 (2026-09-04, N2): `guard recovery` joins `_ACTIONS_FILED_AS_POSITIONS` — closes the last
+# dual-identity label N0 explicitly deferred (04 S8).
+RULES_VERSION = 3
 
 # The eight types the model defines (docs/match_event_model.md). Everything else in the column
 # is bookkeeping that one import batch left behind -- eight rows labelled "Match" -- and it is
@@ -255,6 +257,16 @@ _ACTIONS_FILED_AS_POSITIONS = frozenset({
     "guard pull", "pull guard", "pull half guard", "pull closed guard", "jump guard",
     "pull guard inversion", "pull guard inside triangle", "double guard pull",
     "arm drag to back take", "crab ride to back take",
+    # N2 (docs/taxonomy/04_ONTOLOGIA_CANONICA.md S "guard recovery"). Same defect as the
+    # guard-pull family above: "Guard Recovery" is filed under `guard` 28 times (lands in
+    # `_GUARD_BOTTOM`, inherits STATE) and under `escape` 7 times (`_TYPE_DEFAULT["escape"]`
+    # forces ACTION) — a dual identity `scripts/audit_ontology.py` measures directly. It is a
+    # movement (regaining a guard you lost), not a posture, same reasoning as "guard pull" —
+    # the observed label is ALWAYS an action; the SEPARATE synthetic `generic_actions["guard
+    # recovery"]` in `data/taxonomy/inference_table.json` (D2's own vocabulary, used only by
+    # `chain_compiler` to bridge two adjacent STATES with no observed action between them) is
+    # untouched — different table, different question, no collision.
+    "guard recovery",
 })
 
 

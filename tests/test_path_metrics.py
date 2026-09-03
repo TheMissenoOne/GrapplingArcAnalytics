@@ -147,7 +147,8 @@ DEFAULT_EXPORT = Path("/home/vetor/GrapplingArc/_analytics_export.json")
 def test_observed_total_matches_the_fase2_invariant_on_the_real_corpus() -> None:
     """Same invariant ``tests/test_actions_parity.py`` locks at the compiler level (1548
     observed action occurrences over the owner's 281-bout dump, 1390 before N0's authority swap
-    — docs/taxonomy/04_ONTOLOGIA_CANONICA.md), reproduced through
+    — docs/taxonomy/04_ONTOLOGIA_CANONICA.md; N2's `guard recovery` fix moves it again, 1548 ->
+    1551, `tests/test_actions_parity.py` carries the exact accounting), reproduced through
     ``PathMetrics.observed`` — proves this module doesn't lose or invent an observation while
     reshaping ``ChainEdge`` into path statistics. Skips when the private corpus dump isn't
     present (never committed — LGPD, same convention as ``test_actions_parity.py``)."""
@@ -169,4 +170,4 @@ def test_observed_total_matches_the_fase2_invariant_on_the_real_corpus() -> None
             )
             total_observed += sum(m.observed for _, m in pairs)
 
-    assert total_observed == 1548
+    assert total_observed == 1551

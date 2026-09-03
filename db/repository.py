@@ -12,6 +12,7 @@ from sqlalchemy import delete, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.orm import Session
 
+from analysis.composite_labels import expand_sequence
 from analysis.names import _normalize_name
 from db.models import (
     Archetype,
@@ -256,7 +257,12 @@ def register_match(
 ) -> str:
     """Store one GLOBAL match between two athletes. ``sequence`` events carry
     ``actor_id`` (one of the two athlete ids). ``winner_id`` is None for a draw.
-    ``timeline`` = the full event list (actor 'a'/'b'/None) for the breakdown UI; optional."""
+    ``timeline`` = the full event list (actor 'a'/'b'/None) for the breakdown UI; optional.
+
+    N2's composite-label expansion (`analysis.composite_labels.expand_sequence`,
+    docs/taxonomy/04_ONTOLOGIA_CANONICA.md) runs here — never in `chain_compiler`, which must
+    keep seeing only atomic events."""
+    sequence = expand_sequence(sequence)
     match = Match(
         athlete_a_id=athlete_a_id,
         athlete_b_id=athlete_b_id,
@@ -295,6 +301,7 @@ def register_matches_bulk(rows: list[dict[str, Any]], session: Session) -> None:
         return
     from sqlalchemy import insert
 
+    rows = [{**r, "sequence": expand_sequence(r.get("sequence") or [])} for r in rows]
     session.execute(insert(Match), [{**r, "status": "final"} for r in rows])
     techs: dict[str, dict[str, str]] = {}
     for r in rows:
@@ -328,6 +335,7 @@ def update_match(
     match = session.get(Match, match_id)
     if match is None:
         raise ValueError(f"Match {match_id} not found")
+    sequence = expand_sequence(sequence)
     match.athlete_a_id = athlete_a_id
     match.athlete_b_id = athlete_b_id
     match.winner_id = winner_id

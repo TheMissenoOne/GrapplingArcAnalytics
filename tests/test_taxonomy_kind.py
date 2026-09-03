@@ -454,13 +454,13 @@ def test_orientation_for_inference_prefers_the_declared_table() -> None:
 
 
 def test_orientation_for_inference_resolves_through_the_library_before_deriving() -> None:
-    """"Back Take" is the corpus's third-largest state node (degree 211) and has NO row in
-    `state_orientation.json` — the curated row is under its library-canonical name, "Back
-    Control". Reading the label as written misses it; resolving through the library does not,
-    and the answer is still `declared`, not a guess."""
+    """A library VARIANT ("Back") has no row of its own in `state_orientation.json` — the
+    curated row is under its canonical name, "Back Control". Reading the label as written misses
+    it; resolving through the library does not, and the answer is still `declared`, not a guess.
+    (N1 gave "Back Take" its own action entry, so it no longer serves as this example.)"""
     from analysis.taxonomy_kind import orientation_for_inference
-    assert orientation_of("Back Take") == "neutral"          # `orientation_of` is untouched
-    assert orientation_for_inference("control", "Back Take") == StanceReading("top", "declared")
+    assert orientation_of("Back") == "neutral"          # `orientation_of` is untouched
+    assert orientation_for_inference("control", "Back") == StanceReading("top", "declared")
 
 
 def test_orientation_for_inference_falls_back_to_attribution_and_says_so() -> None:
@@ -499,7 +499,19 @@ def test_orientation_for_inference_covers_every_curated_label() -> None:
     50, not 52, since N1 (2026-09-04): "close guard" and "north south control" now
     `canonicalize` to a declared node ("closed guard" / "northsouth position" — the same
     corpus-count merge as `names.SYNONYMS`), so they're no longer blind before the
-    three-level reading even runs."""
+    three-level reading even runs.
+
+    19, not 50, since N2 (2026-09-04, `state_orientation.json` 39 -> 93 lines): every
+    `_CONTROL_TOP`/`_CONTROL_BACK`/`_CONTROL_GRIP` label got a declared row (including all 9
+    grip-fighting labels that read the SAME `neutral` value the default would have given them
+    — genuinely curated now, not absent). The 19 still blind by this "== neutral" proxy are the
+    7-label guard-pull/back-take-entry family (`_ACTIONS_FILED_AS_POSITIONS` — these are
+    ACTIONS, not states, so `state_orientation.json` was never their table) plus 12 labels
+    curated here to `neutral` on purpose (the 9 grips above, "underhook", "saddle inside
+    sankaku" — this metric cannot tell a declared `neutral` from an absent row, and that is a
+    limitation of the proxy, not of the coverage: `blind_after` below still proves the deeper
+    invariant — that the fallback level answers a non-neutral stance for every label that
+    should carry one)."""
     from analysis import attribution as attr
     from analysis.taxonomy_kind import orientation_for_inference
 
@@ -512,7 +524,7 @@ def test_orientation_for_inference_covers_every_curated_label() -> None:
         label for label, _t in curated
         if orientation_of(canonicalize(_normalize_name(label))) == "neutral"
     ]
-    assert len(blind_before) == 50
+    assert len(blind_before) == 19
     blind_after = [label for label, t in curated
                    if orientation_for_inference(t, label).value == "neutral"]
     assert blind_after == []
@@ -667,3 +679,44 @@ def test_generator_check_flag_is_green() -> None:
         cwd=ROOT, capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_generator_one_pass_from_stale_lookup_matches_a_second_pass(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Read-before-write regression (found 2026-09-04): `build_fixture()` calls
+    `orientation_for_inference` -> `resolve_library_entry`, which lazily caches
+    `library_lookup.json` from DISK on first use. The generator used to build+render the
+    fixture BEFORE rewriting that file, so a STALE on-disk lookup (e.g. this script's own
+    previous output, now outdated) leaked into the golden until a second run overwrote it and
+    the third run finally read the fresh file. `main()` now primes the in-memory cache with the
+    freshly BUILT lookup before building the fixture — a single run from a stale file must
+    already match what a second run would produce."""
+    app_nodes_path = ROOT.parent / "GrapplingArcApp" / "src" / "data" / "grappling-arch.nodes.json"
+    if not app_nodes_path.is_file():
+        pytest.skip("GrapplingArcApp não está ao lado deste repo")
+
+    import analysis.taxonomy_kind as tk
+    import scripts.export_taxonomy_kind_fixtures as gen
+
+    out_names = (
+        "ANALYTICS_OUT", "APP_FIXTURE_OUT", "APP_INFERENCE_TABLE_OUT", "LIBRARY_LOOKUP_OUT",
+    )
+    for name in out_names:
+        monkeypatch.setattr(gen, name, tmp_path / name)
+    monkeypatch.setattr(tk, "_LIBRARY_LOOKUP_PATH", tmp_path / "LIBRARY_LOOKUP_OUT")
+    monkeypatch.setattr(sys, "argv", ["export_taxonomy_kind_fixtures"])
+
+    # Seed a wrong/stale lookup on disk, as a leftover from before a library change would leave.
+    (tmp_path / "LIBRARY_LOOKUP_OUT").write_text(
+        json.dumps({"back take": ["Back Control", "control"]}), encoding="utf-8")
+    monkeypatch.setattr(tk, "_LIBRARY_LOOKUP", None)  # force a lazy re-read on first call
+
+    assert gen.main() == 0
+    first_pass = (tmp_path / "ANALYTICS_OUT").read_text(encoding="utf-8")
+
+    monkeypatch.setattr(tk, "_LIBRARY_LOOKUP", None)  # simulate a fresh process for pass two
+    assert gen.main() == 0
+    second_pass = (tmp_path / "ANALYTICS_OUT").read_text(encoding="utf-8")
+
+    assert first_pass == second_pass

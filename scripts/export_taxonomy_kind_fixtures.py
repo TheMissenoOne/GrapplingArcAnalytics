@@ -45,7 +45,10 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from analysis import attribution  # noqa: E402
+from analysis import (
+    attribution,  # noqa: E402
+    taxonomy_kind,  # noqa: E402
+)
 from analysis.names import _normalize_name  # noqa: E402
 from analysis.taxonomy_kind import (  # noqa: E402
     kind_of,
@@ -224,9 +227,19 @@ def main() -> int:
                      help="não escreve; falha se o que está em disco divergir do gerado")
     args = ap.parse_args()
 
+    # Build + prime the library lookup BEFORE the fixture: `build_orientation_probes` (inside
+    # `build_fixture`) calls `orientation_for_inference` -> `resolve_library_entry`, which
+    # lazily caches `library_lookup.json` from DISK on first call. Read-before-write bug (found
+    # 2026-09-04): computing `fixture_text` first let that cache load the STALE file this same
+    # script was about to overwrite, freezing e.g. `back take -> Back Control` in the golden
+    # until a second run. Priming the cache with the freshly BUILT lookup (never touching disk)
+    # makes one run produce what used to take two.
+    lookup = build_library_lookup()
+    lookup_text = render(lookup)
+    taxonomy_kind._LIBRARY_LOOKUP = {k: (v[0], v[1]) for k, v in lookup.items()}
+
     fixture_text = render(build_fixture())
     table_text = render(load_inference_table())
-    lookup_text = render(build_library_lookup())
     targets = [
         (ANALYTICS_OUT, fixture_text),
         (APP_FIXTURE_OUT, fixture_text),
