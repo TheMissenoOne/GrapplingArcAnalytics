@@ -201,6 +201,77 @@ more raw readings — `docs/gemini_concordance_audit.md`'s corpus already has 40
 events — it's audited (label, near-miss) pairs specifically on the confusions in failure mode
 1, since that is measurably where the errors concentrate.
 
+## Guidance A/B (2026-09-02)
+
+Pre-registered question: does a Markov next-move hint improve the zero-shot read? Same 10
+bouts, same split/seed, same matcher as the baseline above — **A** = whole-sheet one-call read
+(`gemini_read_frames.read_frames`, the baseline table above), **B** = page-by-page read with a
+per-page Markov guidance block (`gemini_read_frames.read_frames_guided`, `--guidance` on
+`scripts/gemini_baseline.py`). Pre-registered verdict: guidance helps if F1 rises **≥ 0.05
+without losing recall**.
+
+### Run: 10 bouts, `gemini-3.6-flash`, thinking=high, `--guidance`
+
+| type | support | A pred/TP | A P/R/F1 | B pred/TP | B P/R/F1 |
+|---|---|---|---|---|---|
+| control | 32 | 12 / 4 | .33 / .13 / .18 | 66 / 8 | .12 / .25 / .16 |
+| transition | 13 | 22 / 5 | .23 / .38 / .29 | 6 / 2 | .33 / .15 / .21 |
+| guard | 22 | 4 / 2 | .50 / .09 / .15 | 97 / 6 | .06 / .27 / .10 |
+| pass | 6 | 8 / 3 | .38 / .50 / .43 | 51 / 1 | .02 / .17 / .04 |
+| escape | 4 | 3 / 0 | .00 / .00 / — | 12 / 0 | .00 / .00 / — |
+| sweep | 1 | 0 / 0 | — / .00 / — | 3 / 0 | .00 / .00 / — |
+| submission | 15 | 10 / 7 | .70 / .47 / .56 | 26 / 8 | .31 / .53 / .39 |
+| takedown | 13 | 20 / 10 | .50 / .77 / .61 | 30 / 9 | .30 / .69 / .42 |
+| **overall** | **106** | **79 / 31** | **.39 / .29 / .34** | **291 / 34** | **.12 / .32 / .17** |
+
+Other numbers, A vs B: mean `|ts|` error **1.13s → 0.74s** (tighter — guidance's per-page prompt
+narrows the reading to that page's own timestamps), actor accuracy **90% → 97%**, `confidence:
+"high"` rate **100% → 98%** (still no signal). Cost: A **187,586** tokens / 10 bouts (~18.8k/bout);
+B **1,101,760** tokens / 10 bouts (~110k/bout, 615,214 prompt + 435,896 thoughts + 50,650
+output) — **~5.9x** A, because guidance trades one call/bout for one call/frame-grid-page
+(14–33 pages/bout here), each re-sending the context + vocabulary pages and a fresh thinking
+pass. Full per-bout CSV: `data/processed/gemini_baseline_guided.csv` (gitignored, regenerate
+with `uv run python -m scripts.gemini_baseline --n 10 --guidance --out-dir
+data/frame_pdf/gemini_baseline_guided --csv data/processed/gemini_baseline_guided.csv`). Raw
+per-bout readings: `data/frame_pdf/gemini_baseline_guided/<slug>/` (gitignored).
+
+### Three examples where guidance changed the read
+
+**1. Over-generation, driven by the guidance block itself.** `jozef-chen-vs-oliver-taza`: A
+reads 8 events across the whole bout; B reads **60** on the same 11 human events, dominated by
+an alternating `Guard Pull` / `Guard Pass` / `Open Guard` cycle every 5–10s
+(`ts=1525..1795`, actor flipping almost every step) that has no counterpart in the human
+sequence at all. The Markov prior over-weights the guard↔pass transition (a real, common
+transition in the corpus) and — with no bout-level context across page calls — the model
+narrates it as a NEW event on nearly every page rather than recognising one held position.
+
+**2. A real recall gain.** `elijah-dorsey-vs-nicky-ryan`: B matches two human events A missed
+entirely — `ts=4645 guard "Butterfly Guard" (Nicky Ryan)` and `ts=4865 guard "X-Guard" (Nicky
+Ryan)` — both guard-family positions, the type the corpus-statistics hint is built from
+(`analysis/next_moves.py` fits state transitions specifically on guard/control states). This is
+the one place the mechanism does what it was meant to.
+
+**3. The same actor-swap defect the whole-sheet baseline already had, undiminished.**
+`owen-jones-vs-cammy-donnelly`: human has every early-guard event owned by Owen Jones
+(`ts=2385 "Open Guard"`, `ts=2460 "Half Guard"`, …); B's `ts=2390 "Open Guard" — Cammy
+Donnelly` and `ts=2405 "Open Guard" — Cammy Donnelly` put the same action on the other athlete
+— identical failure class to the baseline's failure mode 2, page-by-page reading and a
+guidance hint did nothing to fix it (bout actor accuracy dropped to 50%, the worst of the 10).
+
+### Verdict: guidance REJECTED
+
+F1 fell **0.34 → 0.17** (a 0.17 drop, nowhere near the +0.05 bar) and recall's small gain
+(.29 → .32) came entirely from a 3.7x flood of predicted events (79 → 291, support unchanged
+at 106) that crushed precision (.39 → .12). Per-bout precision degraded on every type except
+`transition`. The page-by-page split removes the whole-bout context that keeps the model from
+re-narrating a held position as a fresh event every page, and the guidance block's "likely next
+move" framing appears to invite exactly that — proposing a transition the model then reports as
+having happened. Combined with ~5.9x the token cost, this is a net loss on every axis except
+timestamp tightness and actor accuracy (both already acceptable in A). Do not adopt
+page-by-page + Markov guidance as implemented; the next lever for the label-discrimination
+problem A already identified is still few-shot/fine-tuning examples on confusable label pairs,
+not a next-move prior fed one grid page at a time.
+
 ## Next step (not this pass)
 
 Fine-tuning (or few-shot prompt tuning) on frames the model already reads with high confidence

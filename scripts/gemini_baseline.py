@@ -33,6 +33,12 @@ gitignored, ``data/processed/*`` is, and this is a re-derivable report).
 No ``GEMINI_API_KEY`` (or ``--dry-run``) -> every bout gets ``gemini_read_frames``'s own
 empty-shaped dry-run answer, so matching/reporting runs unchanged with 0 model events.
 
+``--guidance`` swaps the one-call whole-sheet read (``gemini_read_frames.read_frames``) for
+the page-by-page guided read (``gemini_read_frames.read_frames_guided``) -- same 10 bouts, same
+split/seed, same matcher, so the A (default) vs B (``--guidance``) run is the ONLY variable
+between two calls of this script. The Markov guidance model (``fit_markov_model``, fitted on
+the full ``matches`` corpus) is fit ONCE per run and reused across bouts, not once per bout.
+
 Privacy class: public competition footage (trials_2023_24), same as the sheets themselves.
 """
 from __future__ import annotations
@@ -51,14 +57,18 @@ from typing import Any
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
+from analysis.next_moves import MarkovNextMoves  # noqa: E402
 from scripts.enrich_from_audit import node_key  # noqa: E402
 from scripts.frame_pdf import Entry  # noqa: E402
 from scripts.gemini_normalize import slugify  # noqa: E402
 from scripts.gemini_read_frames import (  # noqa: E402
     DEFAULT_MODEL,
     empty_answer,
+    fit_markov_model,
     load_prompt,
     read_frames,
+    read_frames_guided,
+    usage_totals,
 )
 
 logger = logging.getLogger("gemini_baseline")
@@ -225,23 +235,44 @@ def precision_recall_f1(tp: int, support: int, predicted: int) -> tuple[float | 
     return precision, recall, f1
 
 
+def _sum_page_usage(pages: list[dict[str, Any]]) -> dict[str, int]:
+    """Guided read's per-page usage dicts (``gemini_read_frames.usage_totals`` shape) -> one
+    bout-level total, same 4 fields the whole-sheet path reports."""
+    out = {"prompt": 0, "candidates": 0, "thoughts": 0, "total": 0}
+    for p in pages:
+        for k in out:
+            out[k] += p["usage"][k]
+    return out
+
+
 def process_bout(cand: Candidate, *, model: str, thinking: str, dry_run: bool,
-                 out_dir: Path) -> dict[str, Any]:
+                 out_dir: Path, guidance: bool = False,
+                 markov_model: MarkovNextMoves | None = None) -> dict[str, Any]:
     """One zero-shot Gemini read of ``cand.sheet_path``, saved under its own directory. Never
-    opens ``cand.human_path`` for writing."""
+    opens ``cand.human_path`` for writing. ``guidance=True`` reads page-by-page
+    (``gemini_read_frames.read_frames_guided``) instead of the whole sheet in one call."""
     bout_dir = out_dir / cand.slug
     bout_dir.mkdir(parents=True, exist_ok=True)
     api_key = os.environ.get("GEMINI_API_KEY", "")
-    usage = None
+    usage: dict[str, int] | None = None
     if dry_run or not api_key:
         answer = empty_answer("no GEMINI_API_KEY" if not api_key else "--dry-run")
+    elif guidance:
+        prompt = load_prompt()
+        answer, pages = read_frames_guided(cand.sheet_path, prompt, model, thinking,
+                                           markov_model=markov_model)
+        usage = _sum_page_usage(pages)
+        (bout_dir / "gemini_raw.json").write_text(json.dumps({
+            "model": model, "thinking": thinking, "guidance": True, "pages": pages,
+        }, indent=2), encoding="utf-8")
     else:
         prompt = load_prompt()
         answer, resp = read_frames([cand.sheet_path], prompt, model, thinking)
-        usage = resp.usage_metadata
+        usage = usage_totals(resp.usage_metadata)
         (bout_dir / "gemini_raw.json").write_text(json.dumps({
             "model": model, "thinking": thinking, "text": resp.text,
-            "usage_metadata": usage.model_dump(mode="json") if usage else None,
+            "usage_metadata": (resp.usage_metadata.model_dump(mode="json")
+                              if resp.usage_metadata else None),
         }, indent=2), encoding="utf-8")
     (bout_dir / "gemini_baseline.json").write_text(json.dumps(answer, indent=2), encoding="utf-8")
     return {"answer": answer, "usage": usage}
@@ -265,8 +296,9 @@ def write_csv(csv_path: Path, rows: list[dict[str, Any]], aggregate: dict[str, A
 
 
 def run(n: int, *, model: str = DEFAULT_MODEL, thinking: str = "high", ts_tolerance: int = 10,
-       dry_run: bool = False, out_dir: Path = OUT_DIR, csv_path: Path = CSV_PATH,
-       trials_dir: Path = TRIALS_DIR, bouts_path: Path = BOUTS_PATH) -> dict[str, Any]:
+       dry_run: bool = False, guidance: bool = False, out_dir: Path = OUT_DIR,
+       csv_path: Path = CSV_PATH, trials_dir: Path = TRIALS_DIR,
+       bouts_path: Path = BOUTS_PATH) -> dict[str, Any]:
     capped = min(n, MAX_N)
     if n > MAX_N:
         logger.warning("--n %d capped to %d (cost guard)", n, MAX_N)
@@ -274,18 +306,20 @@ def run(n: int, *, model: str = DEFAULT_MODEL, thinking: str = "high", ts_tolera
     if not candidates:
         logger.warning("no eligible bouts (sheet + concordance-audited answer) under %s",
                        trials_dir)
+    # Fit ONCE, reused for every bout -- refitting per bout would be the same corpus 10x over.
+    markov_model = fit_markov_model() if guidance and not dry_run else None
 
     rows: list[dict[str, Any]] = []
     agg_by_type: dict[str, dict[str, int]] = {}
     agg_ts_errors: list[float] = []
     agg_actor_flags: list[bool] = []
     agg_conf_flags: list[bool] = []
-    usage_totals = {"prompt": 0, "candidates": 0, "thoughts": 0, "total": 0}
+    usage_sum = {"prompt": 0, "candidates": 0, "thoughts": 0, "total": 0}
 
     for cand in candidates:
         human = json.loads(cand.human_path.read_text(encoding="utf-8")).get("events") or []
         result = process_bout(cand, model=model, thinking=thinking, dry_run=dry_run,
-                              out_dir=out_dir)
+                              out_dir=out_dir, guidance=guidance, markov_model=markov_model)
         model_events = result["answer"].get("events") or []
         matches = match_bout(human, model_events, ts_tolerance=ts_tolerance)
         metrics = bout_metrics(human, model_events, matches)
@@ -301,10 +335,8 @@ def run(n: int, *, model: str = DEFAULT_MODEL, thinking: str = "high", ts_tolera
 
         usage = result["usage"]
         if usage:
-            usage_totals["prompt"] += usage.prompt_token_count or 0
-            usage_totals["candidates"] += usage.candidates_token_count or 0
-            usage_totals["thoughts"] += usage.thoughts_token_count or 0
-            usage_totals["total"] += usage.total_token_count or 0
+            for k in usage_sum:
+                usage_sum[k] += usage[k]
 
     by_type_report = {}
     for t, c in agg_by_type.items():
@@ -313,11 +345,12 @@ def run(n: int, *, model: str = DEFAULT_MODEL, thinking: str = "high", ts_tolera
 
     aggregate = {
         "n_bouts": len(candidates),
+        "guidance": guidance,
         "by_type": by_type_report,
         "mean_ts_error": _mean(agg_ts_errors),
         "actor_accuracy": _mean(agg_actor_flags),
         "confidence_high_rate": _mean(agg_conf_flags),
-        "total_usage": usage_totals,
+        "total_usage": usage_sum,
     }
     write_csv(csv_path, rows, aggregate)
     return {"rows": rows, "aggregate": aggregate}
@@ -338,12 +371,17 @@ def main() -> int:
     ap.add_argument("--thinking", choices=("low", "medium", "high"), default="high")
     ap.add_argument("--ts-tolerance", type=int, default=10, help="seconds, per event match")
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--guidance", action="store_true",
+                    help="page-by-page read with a Markov next-move prompt hint "
+                         "(gemini_read_frames.read_frames_guided) instead of one whole-sheet "
+                         "call -- pass distinct --out-dir/--csv from the A run so B doesn't "
+                         "overwrite it")
     ap.add_argument("--out-dir", type=Path, default=OUT_DIR)
     ap.add_argument("--csv", type=Path, default=CSV_PATH)
     a = ap.parse_args()
 
     result = run(a.n, model=a.model, thinking=a.thinking, ts_tolerance=a.ts_tolerance,
-                dry_run=a.dry_run, out_dir=a.out_dir, csv_path=a.csv)
+                dry_run=a.dry_run, guidance=a.guidance, out_dir=a.out_dir, csv_path=a.csv)
     print(json.dumps(result["aggregate"], indent=2))
     logger.info("wrote %s (%d bout rows)", a.csv, len(result["rows"]))
     return 0

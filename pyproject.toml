@@ -111,6 +111,10 @@ postgres = [
 ]
 gemini = [
     "google-genai>=2.22.0",
+    # Splits a rendered frame-sheet PDF into per-page PDFs for --guidance page-by-page
+    # reading (scripts/gemini_read_frames.split_sheet_pages). Pure-python, page objects only
+    # (no re-render), so a split page costs nothing beyond what reportlab already wrote.
+    "pypdf>=5.0",
 ]
 
 [project.urls]
