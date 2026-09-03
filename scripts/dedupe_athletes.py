@@ -17,11 +17,89 @@ from __future__ import annotations
 import argparse
 import logging
 from collections import defaultdict
-from typing import Any
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
 from analysis.names import athlete_key, clean_athlete_name, raw_athlete_key
 
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Session
+
+    from db.models import Athlete
+
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class MergeStats:
+    """What ``merge_into`` did (or, in dry-run, would do) to fold one athlete into another."""
+
+    matches_repointed: int
+    seq_entries_fixed: int
+    self_matches_deleted: int
+
+
+def merge_into(session: Session, src: Athlete, dst: Athlete, *, dry_run: bool = False) -> MergeStats:
+    """Fold ``src`` into ``dst``: repoint every ``matches`` FK, rewrite the stale
+    ``actor_id`` inside each affected match's ``sequence`` JSONB (same transaction — see
+    ``repair_actor_ids.py``'s docstring for why that split bit production once), drop any
+    self-match the repoint creates, then remove ``src`` via ``remove_athlete(...,
+    INVALID_DATA)`` — a merged row was never a separate person.
+
+    Does NOT replay ``dst`` — batch callers (this module's ``run``) replay once per canonical
+    row after all its dups are folded in; a single-pair caller (``scripts/merge_athlete.py``)
+    replays right after calling this.
+    """
+    from sqlalchemy import delete, select, update
+    from sqlalchemy.orm.attributes import flag_modified
+
+    from db.models import Match
+    from db.repository import AthleteRemovalReason, remove_athlete
+
+    matches_touching = list(session.execute(
+        select(Match).where(
+            (Match.athlete_a_id == src.id)
+            | (Match.athlete_b_id == src.id)
+            | (Match.winner_id == src.id)
+        )
+    ).scalars())
+    matches_repointed = len(matches_touching)
+
+    if dry_run:
+        seq_entries_fixed = sum(
+            1 for m in matches_touching for e in (m.sequence or [])
+            if isinstance(e, dict) and e.get("actor_id") == src.id
+        )
+        self_matches_deleted = sum(
+            1 for m in matches_touching
+            if {m.athlete_a_id, m.athlete_b_id} == {src.id, dst.id}
+        )
+        return MergeStats(matches_repointed, seq_entries_fixed, self_matches_deleted)
+
+    for col in (Match.athlete_a_id, Match.athlete_b_id, Match.winner_id):
+        session.execute(update(Match).where(col == src.id).values({col.key: dst.id}))
+    session.flush()
+
+    seq_entries_fixed = 0
+    for m in matches_touching:
+        seq = m.sequence or []
+        changed = False
+        for e in seq:
+            if isinstance(e, dict) and e.get("actor_id") == src.id:
+                e["actor_id"] = dst.id
+                seq_entries_fixed += 1
+                changed = True
+        if changed:
+            flag_modified(m, "sequence")
+    session.flush()
+
+    self_res = session.execute(delete(Match).where(Match.athlete_a_id == Match.athlete_b_id))
+    self_matches_deleted = getattr(self_res, "rowcount", 0) or 0
+    session.flush()
+
+    remove_athlete(src, session, reason=AthleteRemovalReason.INVALID_DATA)
+
+    return MergeStats(matches_repointed, seq_entries_fixed, self_matches_deleted)
 
 
 def _score(name: str, n_matches: int) -> tuple[int, int, int, int]:
@@ -33,11 +111,11 @@ def _score(name: str, n_matches: int) -> tuple[int, int, int, int]:
 
 
 def run(dry_run: bool) -> int:
-    from sqlalchemy import delete, func, select, update
+    from sqlalchemy import func, select
 
     from db.base import db_session
     from db.models import Athlete, Match
-    from db.repository import AthleteRemovalReason, remove_athlete, replay_and_persist_athlete
+    from db.repository import replay_and_persist_athlete
 
     with db_session() as session:
         athletes = list(session.execute(select(Athlete)).scalars())
@@ -55,8 +133,9 @@ def run(dry_run: bool) -> int:
 
         repoint = 0
         merged_rows = 0
+        seq_entries_fixed = 0
+        self_deleted = 0
         touched: set[str] = set()
-        id_map: dict[str, str] = {}  # dup athlete id → canonical id (for sequence actor_id rewrite)
         for key, rows in clusters.items():
             if len(rows) < 2:
                 continue
@@ -73,21 +152,15 @@ def run(dry_run: bool) -> int:
             touched.add(canon.id)
             for d in dups:
                 merged_rows += 1
-                id_map[d.id] = canon.id
-                if dry_run:
-                    repoint += n_matches(d.id)
-                    continue
-                for col in (Match.athlete_a_id, Match.athlete_b_id, Match.winner_id):
-                    res = session.execute(
-                        update(Match).where(col == d.id).values({col.key: canon.id})
-                    )
-                    repoint += getattr(res, "rowcount", 0) or 0
                 # A duplicate is the textbook invalid-data case: this row was never a separate
                 # person, so the graph derived from "their" bouts is not a separate game either.
-                # Routed through `remove_athlete` rather than deleting both by hand so there is
-                # ONE place that decides what a removal does to a graph — the hand-written
-                # version of this is what left seven orphans in production.
-                remove_athlete(d, session, reason=AthleteRemovalReason.INVALID_DATA)
+                # Routed through `merge_into` (FK repoint + sequence actor_id rewrite + removal
+                # via `remove_athlete`) so there is ONE place that decides what a merge does to
+                # a graph — the hand-written version of this is what left seven orphans in prod.
+                stats = merge_into(session, d, canon, dry_run=dry_run)
+                repoint += stats.matches_repointed
+                seq_entries_fixed += stats.seq_entries_fixed
+                self_deleted += stats.self_matches_deleted
             if not dry_run:
                 canon.name = canon_clean
                 # Preserve the ADCC leaderboard target: if the canonical row lost its rank_elo
@@ -102,34 +175,11 @@ def run(dry_run: bool) -> int:
                     if seeded:
                         canon.rank_elo = max(seeded)
 
-        # CRITICAL: repoint actor_ids INSIDE each match's sequence JSONB too — the FK update
-        # above doesn't touch them, and stale ids break _perspective_view (empty graph, floored
-        # ELO). Resolve dup → canonical via id_map.
-        seq_entries_fixed = 0
-        if not dry_run and id_map:
-            from sqlalchemy.orm.attributes import flag_modified
-            session.flush()
-            for m in list(session.execute(select(Match)).scalars()):
-                seq = m.sequence or []
-                changed = False
-                for e in seq:
-                    if isinstance(e, dict) and e.get("actor_id") in id_map:
-                        e["actor_id"] = id_map[e["actor_id"]]
-                        seq_entries_fixed += 1
-                        changed = True
-                if changed:
-                    flag_modified(m, "sequence")
-            session.flush()
-
-        # Drop self-matches + duplicate pairings (frozenset(participants)+year) created by merge.
-        self_deleted = 0
+        # Drop duplicate pairings (frozenset(participants)+year) created by merge — self-matches
+        # are already gone, `merge_into` drops those as part of each pair's own merge.
         dup_deleted = 0
         if not dry_run:
             session.flush()
-            self_res = session.execute(
-                delete(Match).where(Match.athlete_a_id == Match.athlete_b_id)
-            )
-            self_deleted = getattr(self_res, "rowcount", 0) or 0
             # Which duplicate SURVIVES is a data decision, not an iteration accident. This used
             # to keep whatever an unordered `select(Match)` returned first and delete the rest —
             # the same first-writer-wins defect class as the PtV node type — and it cost the
