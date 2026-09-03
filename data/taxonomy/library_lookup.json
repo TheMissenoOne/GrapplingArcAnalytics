@@ -176,8 +176,12 @@
     "pass"
   ],
   "back take": [
-    "Back Control",
-    "control"
+    "Back Take",
+    "transition"
+  ],
+  "backtake": [
+    "Back Take",
+    "transition"
   ],
   "baiana": [
     "Double Leg Takedown",
@@ -1851,6 +1855,10 @@
     "Grip Fighting",
     "concept"
   ],
+  "pegada de costas": [
+    "Back Take",
+    "transition"
+  ],
   "pegada de tornozelo": [
     "Ankle Pick",
     "takedown"
@@ -2148,7 +2156,7 @@
     "guard"
   ],
   "saddle": [
-    "Back Control",
+    "Saddle (Inside Sankaku)",
     "control"
   ],
   "saddle inside sankaku": [
@@ -2418,6 +2426,10 @@
   "taco de beisebol": [
     "Baseball Bat Choke",
     "submission"
+  ],
+  "take the back": [
+    "Back Take",
+    "transition"
   ],
   "tani otoshi": [
     "Tani Otoshi",

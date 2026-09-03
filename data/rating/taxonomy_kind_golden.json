@@ -210,6 +210,10 @@
       "orientation": "top",
       "type": "control"
     },
+    "back take": {
+      "kind": "action",
+      "type": "transition"
+    },
     "base": {
       "kind": "transparent",
       "type": "concept"
@@ -1789,6 +1793,10 @@
     "takedown|takedown defense": {
       "source": "derived",
       "value": "neutral"
+    },
+    "transition|Back Take": {
+      "source": "declared",
+      "value": "top"
     },
     "transition|Berimbolo": {
       "source": "derived",
