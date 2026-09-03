@@ -42,6 +42,7 @@
                 "label": "Armbar",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "submission"
               },
               {
@@ -52,6 +53,7 @@
                 "label": "Triangle Choke",
                 "provenance": "user",
                 "source_event_index": 2,
+                "successful": null,
                 "type": "submission"
               },
               {
@@ -62,6 +64,7 @@
                 "label": "Kimura",
                 "provenance": "user",
                 "source_event_index": 3,
+                "successful": null,
                 "type": "submission"
               },
               {
@@ -72,6 +75,7 @@
                 "label": "Raspagem",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "sweep"
               }
             ],
@@ -142,6 +146,7 @@
                 "label": "Hip Bump Sweep",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "sweep"
               }
             ],
@@ -205,6 +210,7 @@
                 "label": "Guard Pass",
                 "provenance": "user",
                 "source_event_index": 0,
+                "successful": null,
                 "type": "pass"
               },
               {
@@ -215,6 +221,7 @@
                 "label": "Armbar",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "submission"
               }
             ],
@@ -277,6 +284,7 @@
                 "label": "Guard Pull",
                 "provenance": "user",
                 "source_event_index": 0,
+                "successful": null,
                 "type": "transition"
               }
             ],
@@ -339,6 +347,7 @@
                 "label": "Back Take",
                 "provenance": "user",
                 "source_event_index": 0,
+                "successful": null,
                 "type": "control"
               }
             ],
@@ -401,6 +410,7 @@
                 "label": "Hip Bump Sweep",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "sweep"
               }
             ],
@@ -463,6 +473,7 @@
                 "label": "Escape to Standing",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "escape"
               }
             ],
@@ -507,6 +518,195 @@
           "type": "guard"
         },
         {
+          "actor": "you",
+          "label": "Hip Bump Sweep",
+          "successful": false,
+          "type": "sweep"
+        }
+      ],
+      "expected": {
+        "dropped": [
+          {
+            "event_type": "sweep",
+            "index": 1,
+            "label": "Hip Bump Sweep",
+            "reason": "unresolved_failure"
+          }
+        ],
+        "edges": [],
+        "state_after_event": {
+          "0": "closed guard",
+          "1": "closed guard"
+        },
+        "states": [
+          {
+            "actor": "you",
+            "inferred": false,
+            "label": "Closed Guard",
+            "nascent": true,
+            "node_key": "closed guard",
+            "role": null,
+            "type": "guard"
+          }
+        ]
+      },
+      "name": "closing_drops_on_explicit_failure"
+    },
+    {
+      "actor_readable": null,
+      "events": [
+        {
+          "actor": "you",
+          "label": "Closed Guard",
+          "type": "guard"
+        },
+        {
+          "actor": "you",
+          "label": "Hip Bump Sweep",
+          "successful": true,
+          "type": "sweep"
+        }
+      ],
+      "expected": {
+        "dropped": [],
+        "edges": [
+          {
+            "actions": [
+              {
+                "actor": "you",
+                "actor_is_opponent": false,
+                "inferred": false,
+                "key": "hip bump sweep",
+                "label": "Hip Bump Sweep",
+                "provenance": "user",
+                "source_event_index": 1,
+                "successful": true,
+                "type": "sweep"
+              }
+            ],
+            "source_key": "closed guard",
+            "target_key": "start top",
+            "terminal": true
+          }
+        ],
+        "state_after_event": {
+          "0": "closed guard",
+          "1": "start top"
+        },
+        "states": [
+          {
+            "actor": "you",
+            "inferred": false,
+            "label": "Closed Guard",
+            "nascent": true,
+            "node_key": "closed guard",
+            "role": null,
+            "type": "guard"
+          },
+          {
+            "actor": "you",
+            "inferred": true,
+            "label": "Por Cima",
+            "nascent": false,
+            "node_key": "start top",
+            "role": "anchor",
+            "type": "control"
+          }
+        ]
+      },
+      "name": "closing_by_exit_orientation_explicit_success"
+    },
+    {
+      "actor_readable": null,
+      "events": [
+        {
+          "actor": "you",
+          "label": "Closed Guard",
+          "type": "guard"
+        },
+        {
+          "actor": "you",
+          "label": "Armbar",
+          "successful": false,
+          "type": "submission"
+        },
+        {
+          "actor": "you",
+          "label": "Kimura",
+          "successful": true,
+          "type": "submission"
+        }
+      ],
+      "expected": {
+        "dropped": [],
+        "edges": [
+          {
+            "actions": [
+              {
+                "actor": "you",
+                "actor_is_opponent": false,
+                "inferred": false,
+                "key": "armbar",
+                "label": "Armbar",
+                "provenance": "user",
+                "source_event_index": 1,
+                "successful": false,
+                "type": "submission"
+              },
+              {
+                "actor": "you",
+                "actor_is_opponent": false,
+                "inferred": false,
+                "key": "kimura",
+                "label": "Kimura",
+                "provenance": "user",
+                "source_event_index": 2,
+                "successful": true,
+                "type": "submission"
+              }
+            ],
+            "source_key": "closed guard",
+            "target_key": "finish",
+            "terminal": true
+          }
+        ],
+        "state_after_event": {
+          "0": "closed guard",
+          "1": "closed guard",
+          "2": "finish"
+        },
+        "states": [
+          {
+            "actor": "you",
+            "inferred": false,
+            "label": "Closed Guard",
+            "nascent": true,
+            "node_key": "closed guard",
+            "role": null,
+            "type": "guard"
+          },
+          {
+            "actor": "you",
+            "inferred": true,
+            "label": "Finalização",
+            "nascent": false,
+            "node_key": "finish",
+            "role": "finish",
+            "type": "control"
+          }
+        ]
+      },
+      "name": "failure_mid_chain_does_not_suppress_the_LAST_actions_anchor"
+    },
+    {
+      "actor_readable": null,
+      "events": [
+        {
+          "actor": "you",
+          "label": "Closed Guard",
+          "type": "guard"
+        },
+        {
           "actor": "partner",
           "label": "Closed Guard",
           "type": "guard"
@@ -525,6 +725,7 @@
                 "label": "Raspagem",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "sweep"
               }
             ],
@@ -587,6 +788,7 @@
                 "label": "Passagem de Guarda",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "pass"
               }
             ],
@@ -649,6 +851,7 @@
                 "label": "Inversão",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "sweep"
               }
             ],
@@ -711,6 +914,7 @@
                 "label": "Recomposição de Guarda",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "transition"
               }
             ],
@@ -773,6 +977,7 @@
                 "label": "Transição de Guarda",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "transition"
               }
             ],
@@ -835,6 +1040,7 @@
                 "label": "Troca de Controle",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "transition"
               }
             ],
@@ -907,6 +1113,7 @@
                 "label": "Kimura",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "submission"
               },
               {
@@ -917,6 +1124,7 @@
                 "label": "Inversão",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "sweep"
               },
               {
@@ -927,6 +1135,7 @@
                 "label": "Guard Pass",
                 "provenance": "user",
                 "source_event_index": 2,
+                "successful": null,
                 "type": "pass"
               }
             ],
@@ -996,6 +1205,7 @@
                 "label": "Hip Bump Sweep",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "sweep"
               }
             ],
@@ -1064,6 +1274,7 @@
                 "label": "Kimura",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "submission"
               }
             ],
@@ -1127,6 +1338,7 @@
                 "label": "Transição de Guarda",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "transition"
               }
             ],
@@ -1189,6 +1401,7 @@
                 "label": "Troca de Controle",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "transition"
               }
             ],
@@ -1251,6 +1464,7 @@
                 "label": "Kimura",
                 "provenance": "user",
                 "source_event_index": 1,
+                "successful": null,
                 "type": "submission"
               }
             ],
@@ -1330,6 +1544,7 @@
                 "label": "Kimura",
                 "provenance": "user",
                 "source_event_index": 2,
+                "successful": null,
                 "type": "submission"
               },
               {
@@ -1340,6 +1555,7 @@
                 "label": "Raspagem",
                 "provenance": "inferred",
                 "source_event_index": null,
+                "successful": null,
                 "type": "sweep"
               }
             ],
@@ -1434,6 +1650,7 @@
                   "label": "Kimura",
                   "provenance": "user",
                   "source_event_index": 2,
+                  "successful": null,
                   "type": "submission"
                 },
                 {
@@ -1444,6 +1661,7 @@
                   "label": "Raspagem",
                   "provenance": "inferred",
                   "source_event_index": null,
+                  "successful": null,
                   "type": "sweep"
                 }
               ],
@@ -1491,6 +1709,7 @@
                   "label": "Guard Pass",
                   "provenance": "user",
                   "source_event_index": 1,
+                  "successful": null,
                   "type": "pass"
                 }
               ],
@@ -1580,6 +1799,7 @@
                   "label": "Kimura",
                   "provenance": "user",
                   "source_event_index": 1,
+                  "successful": null,
                   "type": "submission"
                 },
                 {
@@ -1590,6 +1810,7 @@
                   "label": "Raspagem",
                   "provenance": "inferred",
                   "source_event_index": null,
+                  "successful": null,
                   "type": "sweep"
                 }
               ],
@@ -1607,6 +1828,7 @@
                   "label": "Armbar",
                   "provenance": "user",
                   "source_event_index": 3,
+                  "successful": null,
                   "type": "submission"
                 }
               ],
@@ -1624,6 +1846,7 @@
                   "label": "Troca de Controle",
                   "provenance": "inferred",
                   "source_event_index": null,
+                  "successful": null,
                   "type": "transition"
                 }
               ],
@@ -1725,6 +1948,7 @@
                   "label": "Raspagem",
                   "provenance": "inferred",
                   "source_event_index": null,
+                  "successful": null,
                   "type": "sweep"
                 }
               ],

@@ -622,3 +622,52 @@ def test_only_actions_connect_to_a_start_anchor() -> None:
     opens_on_state = compile_chain([_ev("Mount", "control")], inference_table=TABLE)
     assert not any(s.role == "anchor" for s in opens_on_state.states)
     assert opens_on_state.edges == []
+
+
+def test_explicit_failure_on_the_last_action_drops_instead_of_closing() -> None:
+    """Owner call 2026-09-03: a chain-CLOSING action logged `successful=False` gets no closing
+    anchor and no edge — claiming a landing spot for a missed sweep is a claim the log does not
+    support. The accumulated actions land in `dropped` with `unresolved_failure` instead."""
+    chain = compile_chain([
+        _ev("Closed Guard", "guard"),
+        _ev("Hip Bump Sweep", "sweep", successful=False),
+    ], inference_table=TABLE)
+
+    assert [s.node_key for s in chain.states] == ["closed guard"]  # no 'start top' inferred
+    assert chain.edges == []
+    assert len(chain.dropped) == 1
+    dropped = chain.dropped[0]
+    assert dropped.index == 1 and dropped.label == "Hip Bump Sweep"
+    assert dropped.reason == "unresolved_failure"
+
+
+def test_explicit_success_on_the_last_action_still_closes_by_exit_orientation() -> None:
+    """`successful=True` (same as the pre-existing `None`/unknown default) keeps the existing
+    anchor rule — the gate only fires on an explicit `False`."""
+    chain = compile_chain([
+        _ev("Closed Guard", "guard"),
+        _ev("Hip Bump Sweep", "sweep", successful=True),
+    ], inference_table=TABLE)
+
+    assert [s.node_key for s in chain.states] == ["closed guard", "start top"]
+    (edge,) = chain.edges
+    assert edge.source_key == "closed guard" and edge.target_key == "start top"
+    assert edge.terminal is True
+    assert not chain.dropped
+
+
+def test_only_the_last_actions_outcome_gates_the_close_not_a_mid_chain_failure() -> None:
+    """A failed action in the MIDDLE of an accumulated buffer never suppresses the close — only
+    the final action's own `successful` decides. Armbar fails, Kimura (last) succeeds: the chain
+    still closes on 'finish', carrying both actions on the same edge."""
+    chain = compile_chain([
+        _ev("Closed Guard", "guard"),
+        _ev("Armbar", "submission", successful=False),
+        _ev("Kimura", "submission", successful=True),
+    ], inference_table=TABLE)
+
+    assert [s.node_key for s in chain.states] == ["closed guard", "finish"]
+    assert not chain.dropped
+    (edge,) = chain.edges
+    assert edge.target_key == "finish" and edge.terminal is True
+    assert [a.key for a in edge.actions] == ["armbar", "kimura"]

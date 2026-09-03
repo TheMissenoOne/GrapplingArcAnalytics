@@ -214,6 +214,12 @@ class ChainAction:
     # (user >= video_high > video_low > inferred) matters only when the SAME session is reread
     # (edit, not new evidence) — not exercised by this phase.
     provenance: str = "user"
+    # The ORIGINAL event's ``successful`` (None/True = landed), carried through for the
+    # chain-CLOSING gate only (``compile_chain``'s closing block below) — never read anywhere
+    # else in this module, same D7 boundary the module docstring names: an attempt's outcome
+    # may decide whether a chain-end anchor gets inferred, never invent a mid-chain state.
+    # ``None`` on an inferred action — it was never logged, so it has no outcome to carry.
+    successful: bool | None = None
 
 
 @dataclass(frozen=True)
@@ -354,7 +360,9 @@ def compile_chain(
 
     ``events`` items are tolerant dicts: ``label``/``event_label``, ``type``/``event_type``,
     optional ``actor`` (read via ``actor_of`` when given, else ``event.get("actor")``).
-    ``successful``/``ts``/``timestamp`` are NOT read here — see the module docstring on D7.
+    ``successful`` is read only to gate the chain-CLOSING anchor (below, owner call 2026-09-03:
+    a last action logged ``successful=False`` drops instead of inferring a landing state) — never
+    for anything mid-chain. ``ts``/``timestamp`` are NOT read here — see the module docstring on D7.
 
     ``actor_readable`` is ``attribution.bout_flags``' verdict, passed IN rather than re-derived:
     ``False`` means this bout's ``actor`` field carries no information (43.9% of the prod corpus,
@@ -430,7 +438,8 @@ def compile_chain(
 
         # kind == "action"
         action = ChainAction(key=key, label=label, type=etype, actor=actor,
-                              inferred=False, source_event_index=idx)
+                              inferred=False, source_event_index=idx,
+                              successful=ev.get("successful"))
         if pending is not None:
             # Stacks onto the SAME transition — no intermediate state invented (Phase 1: the
             # old "rule 3" is gone).
@@ -459,19 +468,29 @@ def compile_chain(
         # match ``infer_state_for_action_pair`` can find here); Fase 1b (owner call,
         # 2026-08-31): every OTHER closing type now falls back to ``resolve_anchor_by_role``
         # — the last action's own curated actor-role orientation — instead of closing
-        # unanchored. A chain never closes on an empty ``target_key`` any more.
+        # unanchored. A chain never closes on an empty ``target_key`` — UNLESS the last action
+        # is a logged FAILURE (owner, 2026-09-03): claiming a landing spot for a missed sweep is
+        # a claim the log does not support, the same D7 line this module's docstring names for
+        # the mid-chain exit-orientation gate. No closing state, no edge; the accumulated
+        # actions are recorded as dropped so a consumer can still see they were attempted.
         last_action = pending.actions[-1]
-        closing = infer_state_for_action_pair(table, last_action.type, _CHAIN_END)
-        if closing is None:
-            closing = resolve_closing_anchor(table, last_action.type, last_action.label)
-        states.append(ChainState(node_key=closing["node_key"], label=closing["label"],
-                                  type=closing["type"], actor=last_action.actor, inferred=True,
-                                  role=closing.get("role")))
-        target_key = closing["node_key"]
-        edges.append(_edge_from_pending(pending, target_key=target_key, terminal=True))
-        last_idx = last_action.source_event_index
-        if last_idx is not None:
-            state_after_event[last_idx] = target_key or None
+        if last_action.successful is False:
+            for a in pending.actions:
+                if a.source_event_index is not None:
+                    dropped.append(DroppedEvent(index=a.source_event_index, label=a.label,
+                                                 event_type=a.type, reason="unresolved_failure"))
+        else:
+            closing = infer_state_for_action_pair(table, last_action.type, _CHAIN_END)
+            if closing is None:
+                closing = resolve_closing_anchor(table, last_action.type, last_action.label)
+            states.append(ChainState(node_key=closing["node_key"], label=closing["label"],
+                                      type=closing["type"], actor=last_action.actor, inferred=True,
+                                      role=closing.get("role")))
+            target_key = closing["node_key"]
+            edges.append(_edge_from_pending(pending, target_key=target_key, terminal=True))
+            last_idx = last_action.source_event_index
+            if last_idx is not None:
+                state_after_event[last_idx] = target_key or None
 
     return CompiledChain(states=states, edges=edges, dropped=dropped,
                           state_after_event=state_after_event)

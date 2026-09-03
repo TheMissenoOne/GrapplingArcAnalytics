@@ -15,6 +15,9 @@ de erro que um porte pode cometer:
   par observado — a prova viva da invariante 3 (ninguém depende do índice de uma ação);
 - REDUNDÂNCIA: uma ação observada cuja orientação de SAÍDA já explica a inversão suprime o
   genérico (e nunca cria um — a linha D7 que a Fase 2 mediu e não cruza);
+- `successful=False` explícito na ÚLTIMA ação de uma cadeia derruba a âncora de fechamento (vai
+  para `dropped`, `unresolved_failure`); `True`/ausente mantém a inferência existente, e uma
+  falha NO MEIO do buffer não suprime nada — só a última ação decide (owner, 2026-09-03);
 - ABSTENÇÃO de ator (`actor_readable=False`): uma DIFERENÇA de ator deixa de ser evidência;
 - `nascent` (a cadeia começa num estado real, sem âncora e sem aresta inventada);
 - evento transparente (`concept`) — descartado com trilha de auditoria, nunca silenciosamente.
@@ -52,10 +55,12 @@ Case = tuple[str, list[dict[str, Any]], bool | None]
 _A, _B = "you", "partner"
 
 
-def _ev(label: str, etype: str, actor: str | None = None) -> dict[str, Any]:
+def _ev(label: str, etype: str, actor: str | None = None, *, successful: bool | None = None) -> dict[str, Any]:
     row: dict[str, Any] = {"label": label, "type": etype}
     if actor is not None:
         row["actor"] = actor
+    if successful is not None:
+        row["successful"] = successful
     return row
 
 
@@ -119,6 +124,33 @@ CASES: list[Case] = [
         # MEASURED and contradicting the plan's own illustration: 75 of the corpus's 83 escape
         # events are literally "Escape to Standing"/"Stand-up Escape" — escapes to the FEET.
         [_ev("Mount", "control", _A), _ev("Escape to Standing", "escape", _A)],
+        None,
+    ),
+    # ── 2026-09-03: explicit `successful` gates the CLOSING anchor only ───────────────────
+    (
+        "closing_drops_on_explicit_failure",
+        # The last action logged `successful=False` — no closing anchor is inferred, no edge
+        # is emitted, and the accumulated actions land in `dropped` (`unresolved_failure`).
+        [_ev("Closed Guard", "guard", _A), _ev("Hip Bump Sweep", "sweep", _A, successful=False)],
+        None,
+    ),
+    (
+        "closing_by_exit_orientation_explicit_success",
+        # Same shape as `closing_by_exit_orientation_sweep_ends_on_top`, but with `successful`
+        # carried explicitly `True` on the closing action — the existing anchor rule still runs,
+        # and `ChainAction.successful` round-trips onto the golden action.
+        [_ev("Closed Guard", "guard", _A), _ev("Hip Bump Sweep", "sweep", _A, successful=True)],
+        None,
+    ),
+    (
+        "failure_mid_chain_does_not_suppress_the_LAST_actions_anchor",
+        # Only the LAST action's outcome gates the close — a failed action mid-buffer does not
+        # suppress the anchor when the final action in the same edge succeeds (or is unknown).
+        [
+            _ev("Closed Guard", "guard", _A),
+            _ev("Armbar", "submission", _A, successful=False),
+            _ev("Kimura", "submission", _A, successful=True),
+        ],
         None,
     ),
     # ── Fase 2: the owner's seven examples of the inference rule ──────────────────────────

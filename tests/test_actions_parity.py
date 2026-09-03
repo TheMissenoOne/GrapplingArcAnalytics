@@ -353,11 +353,11 @@ def test_no_empty_endpoint_edges_and_no_generic_out_degrees_the_real_graph() -> 
     # `control/Escape to Turtle` (47) and `guard/Jump Guard` (2) became actions, `control/Body
     # Lock` (3) and `control/Clinch Knees` (1) became states. The exact set is pinned in
     # `data/taxonomy/audit_baseline.json` under `reclassified`. Moved again by N2's `guard
-    # recovery` fix (04 S8 -> S "guard recovery", `_ACTIONS_FILED_AS_POSITIONS`): 1548 -> 1551,
+    # recovery` fix (04 S8 -> S "guard recovery", `_ACTIONS_FILED_AS_POSITIONS`): 1548 -> 1551; D7 (successful=False closes without anchor, 2026-09-04): 1551 -> 1387,
     # the 4 `guard/Guard Recovery` events on this dump that were STATE (dual identity with
     # `escape/Guard Recovery`, already action) and are now ACTION always. Any OTHER movement is
     # the regression this number exists to catch.
-    assert observed_actions == 1551
+    assert observed_actions == 1387
     # INFERRED is the rule's own output and moves with it. 399 before Fase 2; 433 after, and the
     # +34 are all inversions the endpoints prove and no observed action explains (28 appended,
     # 4 at the head, 2 spliced BETWEEN observed actions). N0 takes it to 321: 128 `control/Back
