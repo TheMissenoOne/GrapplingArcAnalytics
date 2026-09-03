@@ -12,6 +12,7 @@ CLI (dry-run by default — pass ``--apply`` to actually write):
     uv run python -m scripts.group_admin invite --group-id <uuid> --role professor
     uv run python -m scripts.group_admin roster --group-id <uuid> [--role professor]
     uv run python -m scripts.group_admin groups [--owner-email a@b.com]
+    uv run python -m scripts.group_admin transfer --group <uuid> --to-email a@b.com [--apply]
 """
 
 from __future__ import annotations
@@ -64,6 +65,35 @@ def mint_invite(
     return invite
 
 
+def transfer_ownership(session, group_id: str, new_owner_id: str) -> Group:
+    """Same semantics as the client-facing RPC `transfer_group_ownership` (alembic 0053),
+    minus the `not_owner` check — this path writes directly, bypassing RLS, so there is no
+    `auth.uid()` to compare against; the caller IS the admin. `same_owner`/`not_a_member`
+    still apply, same stable error text as the RPC."""
+    group = session.get(Group, group_id)
+    if group is None:
+        raise ValueError(f"no group {group_id}")
+    if new_owner_id == group.owner_id:
+        raise ValueError("same_owner")
+    new_owner_member = (
+        session.query(GroupMember).filter_by(group_id=group_id, profile_id=new_owner_id).first()
+    )
+    if new_owner_member is None:
+        raise ValueError("not_a_member")
+
+    old_owner_id = group.owner_id
+    group.owner_id = new_owner_id
+    new_owner_member.role = "owner"
+    old_owner_member = (
+        session.query(GroupMember).filter_by(group_id=group_id, profile_id=old_owner_id).first()
+    )
+    if old_owner_member is not None:
+        old_owner_member.role = "professor"
+
+    session.commit()
+    return group
+
+
 def roster(session, group_id: str) -> list[tuple[str, str]]:
     rows = session.query(GroupMember).filter_by(group_id=group_id).all()
     return [(m.profile_id, m.role) for m in rows]
@@ -110,6 +140,11 @@ def _main() -> None:
 
     p_groups = sub.add_parser("groups", help="list groups, optionally by owner")
     p_groups.add_argument("--owner-email")
+
+    p_transfer = sub.add_parser("transfer", help="hand off group ownership to an existing member")
+    p_transfer.add_argument("--group", required=True, help="group id")
+    p_transfer.add_argument("--to-email", required=True, help="new owner's auth.users email")
+    p_transfer.add_argument("--apply", action="store_true", help="write. default: report only")
 
     args = ap.parse_args()
 
@@ -169,6 +204,24 @@ def _main() -> None:
                 query = query.filter_by(owner_id=owner_id)
             for group in query.all():
                 logger.info("  %s  %s  owner=%s", group.id, group.name, group.owner_id)
+
+        elif args.cmd == "transfer":
+            new_owner_id = resolve_owner_email(session, args.to_email)
+            if new_owner_id is None:
+                logger.info("no profile for %s — they must sign in at least once first.", args.to_email)
+                return
+            if not args.apply:
+                logger.info(
+                    "dry run — would transfer group %s to %s (%s). Pass --apply to write.",
+                    args.group, args.to_email, new_owner_id,
+                )
+                return
+            try:
+                transfer_ownership(session, args.group, new_owner_id)
+            except ValueError as exc:
+                logger.info("transfer failed: %s", exc)
+                return
+            logger.info("group %s now owned by %s (%s)", args.group, args.to_email, new_owner_id)
 
 
 if __name__ == "__main__":

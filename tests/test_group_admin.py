@@ -107,6 +107,65 @@ def test_mint_invite_rejects_unknown_role(session):
         mint_invite(session, group.id, PROF_ID, role="owner")
 
 
+def test_transfer_ownership_moves_owner_and_demotes_old_owner(session):
+    from db.models import Group, GroupMember, Profile
+    from scripts.group_admin import transfer_ownership
+
+    student_id = "22222222-2222-2222-2222-222222222222"
+    session.add_all([
+        Profile(id=PROF_ID, full_name="Professor"),
+        Profile(id=student_id, full_name="Aluno"),
+    ])
+    group = Group(id="33333333-3333-3333-3333-333333333333", owner_id=PROF_ID, name="GB")
+    session.add(group)
+    session.add_all([
+        GroupMember(group_id=group.id, profile_id=PROF_ID, role="owner"),
+        GroupMember(group_id=group.id, profile_id=student_id, role="student"),
+    ])
+    session.commit()
+
+    transfer_ownership(session, group.id, student_id)
+
+    session.refresh(group)
+    assert group.owner_id == student_id
+    new_owner = (
+        session.query(GroupMember).filter_by(group_id=group.id, profile_id=student_id).one()
+    )
+    old_owner = session.query(GroupMember).filter_by(group_id=group.id, profile_id=PROF_ID).one()
+    assert new_owner.role == "owner"
+    assert old_owner.role == "professor"
+
+
+def test_transfer_ownership_rejects_same_owner(session):
+    from db.models import Group, Profile
+    from scripts.group_admin import transfer_ownership
+
+    session.add(Profile(id=PROF_ID, full_name="Professor"))
+    group = Group(id="33333333-3333-3333-3333-333333333333", owner_id=PROF_ID, name="GB")
+    session.add(group)
+    session.commit()
+
+    with pytest.raises(ValueError, match="same_owner"):
+        transfer_ownership(session, group.id, PROF_ID)
+
+
+def test_transfer_ownership_rejects_non_member(session):
+    from db.models import Group, Profile
+    from scripts.group_admin import transfer_ownership
+
+    outsider_id = "44444444-4444-4444-4444-444444444444"
+    session.add_all([
+        Profile(id=PROF_ID, full_name="Professor"),
+        Profile(id=outsider_id, full_name="Fora"),
+    ])
+    group = Group(id="33333333-3333-3333-3333-333333333333", owner_id=PROF_ID, name="GB")
+    session.add(group)
+    session.commit()
+
+    with pytest.raises(ValueError, match="not_a_member"):
+        transfer_ownership(session, group.id, outsider_id)
+
+
 def test_roster_lists_every_member_and_role(session):
     from db.models import Group, GroupMember, Profile
     from scripts.group_admin import roster
