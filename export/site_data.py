@@ -1187,6 +1187,28 @@ def _bi(en: str, pt: str) -> str:
             f'<span data-lang-pt>{html.escape(pt)}</span>')
 
 
+# Inline SVG icons — owner's rule: never an emoji glyph as a UI icon. Paths copied verbatim
+# from lucide-static@1.40.0 (ISC license), same source + version as site/icons.js; duplicated
+# here (not imported — this is Python HTML, that's a JS ES module) rather than shared, ~10
+# paths is a fine amount of duplication for a static bundle. Only the icons the Atlas template
+# actually emits are kept; add more by copying from the same package/version as icons.js.
+_ICON_PATHS = {
+    "search": ['<path d="m21 21-4.34-4.34"/>', '<circle cx="11" cy="11" r="8"/>'],
+    "x": ['<path d="M18 6 6 18"/>', '<path d="m6 6 12 12"/>'],
+    "arrow-right": ['<path d="M5 12h14"/>', '<path d="m12 5 7 7-7 7"/>'],
+}
+
+
+def _icon(name: str) -> str:
+    paths = _ICON_PATHS.get(name)
+    if not paths:
+        return ""
+    return (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" '
+        f'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{"".join(paths)}</svg>'
+    )
+
+
 # Dossier section headings (English-only chrome, unlike the bilingual prose body) that
 # pronoun-agree with athletes.gender. See analysis/gendered_text.pick's docstring for the
 # convention — None (unknown) never reads masculine.
@@ -2043,8 +2065,11 @@ _ATLAS_STYLE = """<style>
 .ocean-panel{position:absolute;top:0;right:0;height:100%;width:340px;background:var(--panel);border-left:1px solid var(--line);z-index:3;padding:24px 22px;overflow:auto;box-shadow:-22px 0 44px rgba(0,0,0,.32)}
 .ocean-panel[hidden]{display:none}
 .ocean-close{position:absolute;top:2px;right:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:none;border:none;color:var(--ink-3);font-size:23px;cursor:pointer;line-height:1}
+.ocean-close svg{width:20px;height:20px}
+.hud-more-btn svg{width:18px;height:18px}
 #opDetails{display:none}
 .system-fallback{padding:24px 22px;max-width:60ch;color:var(--ink-2);overflow:auto;max-height:100%}
+.system-fallback svg{width:14px;height:14px;vertical-align:-2px}
 #system-root:has(canvas) .system-fallback{display:none}
 .ocean-panel h2{font-size:21px;margin:0 30px 8px 0;letter-spacing:-.3px}
 .op-metrics{margin-top:18px;display:flex;flex-direction:column;gap:12px}
@@ -2400,7 +2425,7 @@ def render_atlas_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
     <p>{_bi("This 3D map needs a browser with JavaScript and WebGL. Every position in the corpus:",
             "Este mapa 3D exige um navegador com JavaScript e WebGL. Toda posição do corpus:")}</p>
     <ul>{fallback_items}</ul>
-    <p><a href="grapple-like.html">{_bi("Browse fighters instead →", "Ver atletas em vez disso →")}</a></p>
+    <p><a href="grapple-like.html">{_bi("Browse fighters instead", "Ver atletas em vez disso")} {_icon("arrow-right")}</a></p>
   </div>"""
     body = f"""<section class="ocean-stage">
   <div id="system-root" class="ocean-canvas">
@@ -2409,7 +2434,7 @@ def render_atlas_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
   <div class="ocean-hud">
     <div class="ocean-h">
       <h1>Atlas</h1><p class="muted" id="systemMeta"></p>
-      <label for="hudMoreToggle" class="hud-more-btn" aria-label="{_bi('Find a position', 'Buscar posição')}">&#128269;</label>
+      <label for="hudMoreToggle" class="hud-more-btn" aria-label="{_bi('Find a position', 'Buscar posição')}">{_icon("search")}</label>
     </div>
     <input type="checkbox" id="hudMoreToggle" class="hud-more-check" hidden/>
     <div class="hud-more">
@@ -2423,7 +2448,7 @@ def render_atlas_page(pathgraph_nodes: Sequence[Mapping[str, Any]] = ()) -> str:
     </div>
   </div>
   <aside id="oceanPanel" class="ocean-panel" hidden>
-    <button id="oceanClose" class="ocean-close" aria-label="close">&times;</button>
+    <button id="oceanClose" class="ocean-close" aria-label="close">{_icon("x")}</button>
     <h2 id="opName"></h2><div id="opMeta"></div>
     <div id="opMetrics" class="op-metrics"></div>
     <div id="opNeighbours"></div><div id="opEdges"></div><div id="opUndrawn"></div>

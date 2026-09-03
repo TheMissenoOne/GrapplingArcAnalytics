@@ -11,6 +11,7 @@ from export.site_data import (
     _DEFAULT_DESC,
     _OCEAN_JS,
     _direct_career_links,
+    _icon,
     _nav,
     _render_retired_page,
     _to_graphview,
@@ -154,6 +155,23 @@ def test_render_atlas_page_fallback_lives_inside_system_root() -> None:
 def test_render_atlas_page_has_bilingual_reset_button() -> None:
     page = render_atlas_page()
     assert "data-lang-en>Reset view<" in page and "data-lang-pt>Redefinir<" in page
+
+
+def test_icon_returns_inline_svg_not_emoji() -> None:
+    svg = _icon("search")
+    assert svg.startswith('<svg viewBox="0 0 24 24"')
+    assert 'aria-hidden="true"' in svg
+    assert "<path" in svg
+    assert _icon("no-such-icon") == ""  # unknown name -> empty, never a raw glyph fallback
+
+
+def test_render_atlas_page_never_emits_an_emoji_glyph_as_an_icon() -> None:
+    # Owner's rule (2026-09-04): never emoji in the UI, library icon instead. This page used
+    # to carry &#128269; (search) and &times; (close) as literal glyphs.
+    page = render_atlas_page()
+    assert "&#128269;" not in page
+    assert "&times;" not in page
+    assert page.count('<svg viewBox="0 0 24 24"') >= 3  # search + close + fallback arrow-right
 
 
 def test_retired_pages_point_at_atlas_with_canonical() -> None:
