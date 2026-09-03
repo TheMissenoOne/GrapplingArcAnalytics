@@ -108,7 +108,11 @@ def test_payload_carries_what_the_renderer_contracts_on() -> None:
     # additive too — always present, empty here because two tiny bouts never cross the budget.
     # §17: `layout` names the frame the positions were computed in ("flow" here; the ring adds
     # `rings`/`ringCentre` on top — see tests/test_corpus_paths_ring.py).
-    assert set(payload) == {"nodes", "links", "paths", "stats", "unresolved", "folded", "layout"}
+    # 2026-09-04: `systems` is new and additive — the constellation legend (see
+    # tests/test_corpus_paths_systems.py); always present, possibly empty.
+    assert set(payload) == {
+        "nodes", "links", "paths", "stats", "unresolved", "folded", "layout", "systems",
+    }
     assert payload["folded"] == []
 
     ids = {n["id"] for n in payload["nodes"]}

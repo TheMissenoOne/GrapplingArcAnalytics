@@ -48,6 +48,8 @@ from collections import Counter
 from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import Any
 
+import networkx as nx
+
 from analysis.chain_compiler import ChainEdge, ChainState, compile_two_sided
 from analysis.flow_layout import (
     ANCHOR_STRUCTURES,
@@ -55,6 +57,7 @@ from analysis.flow_layout import (
     flow_layout,
 )
 from analysis.markov_weights import block_for_family, load_markov_weights
+from analysis.network_metrics import detect_communities, weighted_pagerank
 from analysis.path_bundling import RenderPath, Segment, bundle_paths
 from analysis.path_metrics import PathMetrics, path_metrics
 from analysis.ring_layout import DEFAULT_RING_PLACEMENT, ring_guides, ring_layout
@@ -98,6 +101,8 @@ PATH_VARIANT_BUDGET = 60
 # of by budget. One parameter, two readings — the rest of the payload is byte-for-byte the same
 # shape either way.
 LAYOUTS = ("flow", "ring")
+# a lone state is not a system (same rule as `analysis/systems.py:propose_from_network`)
+_MIN_SYSTEM_SIZE = 2
 
 # A folded stroke's synthetic single action key — unique per fold group by construction (each
 # carries its own bucket index), so it can never merge with a real action's segment and never
@@ -620,6 +625,83 @@ def _fold_overflow(
     return synth, meta
 
 
+def state_systems(
+    nodes: Sequence[Mapping[str, Any]], paths: Sequence[Mapping[str, Any]]
+) -> tuple[dict[str, int], list[dict[str, Any]]]:
+    """CONSTELLATIONS — the corpus' own systems, from the payload's own state graph.
+
+    Returns ``(system_of_point_id, systems)``. Additive by design: a point that lands in no
+    system simply carries no ``system`` key and the client keeps its category colour.
+
+    Why this exists: the site coloured states by CATEGORY, but only ``guard`` and ``control`` are
+    STATES in the event model, so the measured corpus is 190 ``control`` / 40 ``guard`` /
+    1 ``escape`` — 82% of the map is one grey. Category is the wrong axis for a colour; the
+    SYSTEM (which states actually flow into each other) is the one that carries information.
+
+    The graph is the payload's own ``paths``: in the "edge = path" model a path IS one
+    ``state -> actions[] -> state`` relation, so path endpoints already are the state-transition
+    graph — no second pass over the aggregate, no DB. Anchors (Top/Bottom/Neutral/Finish),
+    junctions and self-loops are excluded: anchors are orientation, not a game, and the owner
+    keeps them neutral.
+
+    Communities come from ``network_metrics.detect_communities`` (greedy modularity, already the
+    workspace's definition of a "system" — ``analysis/systems.py``, ``analysis/ocean.py``) and the
+    hub is the community's highest ``weighted_pagerank`` member, matching
+    ``systems.propose_from_network``'s ``ranked[0]``.
+
+    DETERMINISM (failure-archaeology scar #10 — greedy modularity returns frozensets, whose
+    iteration order is hash-seeded): ``detect_communities`` already sorts members and
+    communities; on top of that the hub breaks a PageRank tie on ``stateKey`` and the systems are
+    ordered by ``(-size, hub stateKey)``, so ids are stable across export processes.
+    """
+    by_id = {n["id"]: n for n in nodes}
+
+    def is_state(pid: Any) -> bool:
+        n = by_id.get(pid)
+        return n is not None and n.get("kind") == "state" and not n.get("junction")
+
+    g = nx.DiGraph()
+    for row in paths:
+        src, dst = row.get("source"), row.get("target")
+        if src == dst or not is_state(src) or not is_state(dst):
+            continue
+        w = int(row.get("count") or 1)
+        if g.has_edge(src, dst):
+            g[src][dst]["weight"] += w
+        else:
+            g.add_edge(src, dst, weight=w)
+    if g.number_of_edges() == 0:
+        return {}, []
+    for pid in g:
+        g.nodes[pid]["occ"] = sum(d["weight"] for _, _, d in g.edges(pid, data=True))
+
+    def key_of(pid: str) -> str:
+        return str(by_id[pid].get("stateKey") or pid)
+
+    pagerank = weighted_pagerank(g)
+    ranked = [
+        (members, min(members, key=lambda pid: (-pagerank.get(pid, 0.0), key_of(pid))))
+        for members in detect_communities(g, min_occ=0)
+        if len(members) >= _MIN_SYSTEM_SIZE
+    ]
+    ranked.sort(key=lambda r: (-len(r[0]), key_of(r[1])))
+
+    system_of: dict[str, int] = {}
+    systems: list[dict[str, Any]] = []
+    for idx, (members, hub) in enumerate(ranked):
+        for pid in members:
+            system_of[pid] = idx
+        systems.append({
+            "id": idx,
+            "hub": key_of(hub),
+            # the system's NAME is its hub — "Back Control system" reads as a game, an opaque
+            # cluster id does not (same convention as `analysis/ocean.py:_regions`).
+            "label": str(by_id[hub].get("label") or key_of(hub)),
+            "size": len(members),
+        })
+    return system_of, systems
+
+
 def path_payload(
     agg: PathAggregate,
     *,
@@ -864,6 +946,14 @@ def path_payload(
             "label": row["label"],
             "cat": _cat_of(str(row["type"])),
             "size": _ANCHOR_SIZE if anchor else _clamp3(int(row["count"])),
+            # ADDITIVE (2026-09-04): PROMINENCE. `size` is a 1..3 class — too coarse to scale a
+            # 3D star by, and it saturates (measured on the corpus: 165 nodes at 1, 57 at 3).
+            # `weight` is the raw weighted degree the ring layout already computes for its
+            # barycentre sweeps: the sum of every path count entering AND leaving this state.
+            # ponytail: degree only. A rating-weighted prominence (node Glicko/RRB) would need a
+            # DB read inside what is a pure payload function -- if it is ever wanted, pass it in
+            # the way `rating_of` already is, do not reach for a session here.
+            "weight": int(node_weight.get(point.id, 0.0)),
             "fighter": side,
             "x": round(x, 1), "y": round(y, 1), "pin": True,
         }
@@ -1040,9 +1130,18 @@ def path_payload(
                 for mid in sorted(referenced) if mid in agg.matches
             }
 
+    # ADDITIVE: constellations. Stamped onto the nodes AND published as `systems` so a client can
+    # build a legend without re-deriving the grouping. See `state_systems` for why category was
+    # the wrong axis for colour.
+    system_of, systems = state_systems(nodes, path_rows)
+    for node_row in nodes:
+        if node_row["id"] in system_of:
+            node_row["system"] = system_of[node_row["id"]]
+
     return {
         "nodes": nodes,
         "links": links,
+        "systems": systems,
         "paths": path_rows,
         "unresolved": unresolved_rows,
         "folded": folded_rows,
