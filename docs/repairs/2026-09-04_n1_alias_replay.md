@@ -118,7 +118,8 @@ uv run python -m scripts.backfill_edge_bouts --dry-run
 uv run python -m scripts.backfill_edge_bouts               # ~1340 athletes, SAVEPOINT each
 
 # 2. Baselines that depend on computed_elo, in order.
-uv run python -m analysis.archetype
+uv run python -c "from db.base import db_session; from analysis.archetype import run_archetype_pipeline
+with db_session() as s: run_archetype_pipeline(s, k=6)"  # analysis/archetype.py has no CLI; this is what POST /admin/archetypes/recompute calls
 uv run python -m scripts.assign_user_archetypes
 uv run python -m export.ontology
 

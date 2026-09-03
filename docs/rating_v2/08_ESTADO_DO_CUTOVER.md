@@ -162,7 +162,8 @@ uv run python -m scripts.backfill_edge_bouts --dry-run   # confere contagem, nã
 uv run python -m scripts.backfill_edge_bouts             # ~1300 atletas, SAVEPOINT por atleta
 
 # 3. Baselines derivadas do computed_elo, na ordem em que dependem umas das outras.
-uv run python -m analysis.archetype                      # ou o entrypoint do pipeline
+uv run python -c "from db.base import db_session; from analysis.archetype import run_archetype_pipeline
+with db_session() as s: run_archetype_pipeline(s, k=6)"  # analysis/archetype.py has no CLI; this is what POST /admin/archetypes/recompute calls                      # ou o entrypoint do pipeline
 uv run python -m scripts.assign_user_archetypes
 uv run python -m export.ontology
 
