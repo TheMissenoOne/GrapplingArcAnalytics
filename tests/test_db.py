@@ -634,6 +634,37 @@ def test_group_member_trains_here_round_trips_and_defaults_false(session):
     assert session.get(GroupMember, (group.id, owner.id)).trains_here is True
 
 
+def test_group_member_video_and_athlete_share_round_trip_and_default_false(session):
+    """Alembic 0059 — self-only opt-ins, same default shape as ``trains_here`` (0055): a plain
+    row starts opted out of both; the student flips them one at a time via
+    ``set_share_video_analysis``/``set_share_athlete_link``, outside this ORM-level default."""
+
+    from db.models import Group, GroupMember, Profile
+
+    prof = Profile(id=str(uuid.uuid4()), full_name="Professor")
+    student = Profile(id=str(uuid.uuid4()), full_name="Aluno")
+    group = Group(id=str(uuid.uuid4()), owner_id=prof.id, name="SP Grappling")
+    session.add_all([prof, student, group])
+    session.add_all([
+        GroupMember(group_id=group.id, profile_id=prof.id, role="professor"),
+        GroupMember(group_id=group.id, profile_id=student.id, role="student"),
+    ])
+    session.commit()
+
+    row = session.get(GroupMember, (group.id, student.id))
+    assert row.share_video_analysis is False
+    assert row.share_athlete_link is False
+
+    row.share_video_analysis = True
+    session.commit()
+    assert session.get(GroupMember, (group.id, student.id)).share_video_analysis is True
+    assert session.get(GroupMember, (group.id, student.id)).share_athlete_link is False
+
+    row.share_athlete_link = True
+    session.commit()
+    assert session.get(GroupMember, (group.id, student.id)).share_athlete_link is True
+
+
 def test_group_member_consent_at_round_trips(session):
     """``join_group()`` (alembic 0054) stamps this the moment the Web confirmation screen lets
     the join through — NULL means "joined before 0054" or "never confirmed", never "declined"."""

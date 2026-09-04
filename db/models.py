@@ -337,6 +337,15 @@ class GroupMember(Base):
     trains_here: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=False, server_default="false"
     )
+    # Self-only opt-ins (alembic 0059), same shape as `trains_here` — written only by the
+    # owning member's `set_share_video_analysis`/`set_share_athlete_link` RPC, read (once
+    # true) by the group's staff through `group_member_video_analysis`/`group_member_athlete`.
+    share_video_analysis: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
+    share_athlete_link: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default="false"
+    )
 
     __table_args__ = (
         CheckConstraint("role in ('owner','professor','student')", name="ck_group_members_role"),
