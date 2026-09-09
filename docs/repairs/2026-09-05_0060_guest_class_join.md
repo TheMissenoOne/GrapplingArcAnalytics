@@ -1,6 +1,8 @@
 # 0060 — drop-in de não-membro numa aula (guest class join)
 
-**Estado:** migração escrita, **NÃO aplicada**. Aplicar é ação do dono/orquestrador (skill
+**Estado:** **Aplicada em produção em 2026-09-09** — drift check verde (head `0060`, live == tracked).
+
+**Estado (histórico, na escrita deste doc):** migração escrita, ainda não aplicada. Aplicar era ação do dono/orquestrador (skill
 `supabase-schema-migration` §6).
 
 **Decisão vinculante (dono, 2026-09-03, item 5):** *"Não-membro em aula via QR ⇒ confirmação
