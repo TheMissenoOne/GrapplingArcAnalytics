@@ -1237,6 +1237,9 @@ _ICON_PATHS = {
     "search": ['<path d="m21 21-4.34-4.34"/>', '<circle cx="11" cy="11" r="8"/>'],
     "x": ['<path d="M18 6 6 18"/>', '<path d="m6 6 12 12"/>'],
     "arrow-right": ['<path d="M5 12h14"/>', '<path d="m12 5 7 7-7 7"/>'],
+    "arrow-left": ['<path d="m12 19-7-7 7-7"/>', '<path d="M19 12H5"/>'],
+    "trending-up": ['<path d="M16 7h6v6"/>', '<path d="m22 7-8.5 8.5-5-5L2 17"/>'],
+    "trending-down": ['<path d="M16 17h6v-6"/>', '<path d="m22 17-8.5-8.5-5 5L2 7"/>'],
 }
 
 
@@ -1395,8 +1398,8 @@ def _train_this_style(
         href = _dossier_href(fslug, dossier_slugs)
         if href:
             btns.append(f'<a class="btn" href="{href}">'
-                        f'Grapple like {html.escape(f.get("name", "unknown"))} →</a>')
-    btns.append('<a class="btn app" href="index.html#app">Start a Project in the app →</a>')
+                        f'Grapple like {html.escape(f.get("name", "unknown"))} {_icon("arrow-right")}</a>')
+    btns.append(f'<a class="btn app" href="index.html#app">Start a Project in the app {_icon("arrow-right")}</a>')
     return (
         '<section class="block"><div class="wrap prose">'
         '<h2 class="sec-label">Train this style</h2>'
@@ -1448,7 +1451,7 @@ def render_breakdown_page(
         delta = ""
         if d is not None:
             cls = "up" if d >= 0 else "down"
-            arrow = "▲" if d >= 0 else "▼"
+            arrow = _icon("trending-up") if d >= 0 else _icon("trending-down")
             delta = f'<div class="delta {cls}">{arrow} {d:+.1f} pp this bout</div>'
         return (f'<div class="sig-card"><div class="k">{html.escape(name)} · Grappling Rating (Glicko-2)</div>'
                 f'<div class="v">{value}</div>{delta}</div>')
@@ -1500,7 +1503,7 @@ def render_breakdown_page(
     )
     body = f"""{_nav('breakdowns')}
 <section class="art-hero" role="img" aria-label="{html.escape(a['name'])} vs {html.escape(b['name'])}"><div class="wrap">
-  <div class="center"><a href="breakdowns.html" class="tag" style="text-decoration:none">← Breakdowns</a></div>
+  <div class="center"><a href="breakdowns.html" class="tag" style="text-decoration:none">{_icon('arrow-left')} Breakdowns</a></div>
   <div class="bout">
     <div class="corner a"><span class="av">{_initials(a['name'])}</span>
       <span class="nm">{html.escape(_name_break(a['name'])).replace('&lt;br/&gt;', '<br/>')}</span>
@@ -1880,7 +1883,7 @@ document.addEventListener('DOMContentLoaded', function(){{
     if counters:
         rows = "".join(
             f'<div class="fork"><span class="fk">{html.escape(cm["technique"])}</span>'
-            f'<span class="or">→</span>'
+            f'<span class="or">{_icon("arrow-right")}</span>'
             + '<span class="or">·</span>'.join(
                 f'<span class="fbr">{html.escape(c["move"])}'
                 + (f' <span class="or">leads to</span> {html.escape(c["leads_to"])}'
@@ -1916,7 +1919,7 @@ document.addEventListener('DOMContentLoaded', function(){{
   <div class="hero-bg" style="{hero_bg}"></div>
   <div class="wrap">
   <div class="flex ac g12" style="margin-bottom:22px">
-    <a href="grapple-like.html" class="tag" style="text-decoration:none">← Grapple Like</a>
+    <a href="grapple-like.html" class="tag" style="text-decoration:none">{_icon('arrow-left')} Grapple Like</a>
     <span class="kicker">Athlete dossier</span>
   </div>
   <div class="dhead">
@@ -1956,7 +1959,7 @@ document.addEventListener('DOMContentLoaded', function(){{
   <div class="sec-head flex jb ac wrap-fx" style="gap:14px"><div>
     <span class="eyebrow">From abstract to concrete</span>
     <h2 class="h-lg mt16">See the system in action</h2></div>
-    <a class="btn" href="breakdowns.html">All breakdowns →</a></div>
+    <a class="btn" href="breakdowns.html">All breakdowns {_icon('arrow-right')}</a></div>
   <div class="mgrid" id="linked"></div>
   <p class="graph-hint" style="margin-top:30px">Lead photo via <a href="https://commons.wikimedia.org/" style="color:var(--ink-3);text-decoration:underline">Wikimedia Commons</a> (CC BY) — see <a href="assets/fighters/LICENSES.md" style="color:var(--ink-3);text-decoration:underline">credits</a>.</p>
 </div></section>
@@ -1965,7 +1968,7 @@ document.addEventListener('DOMContentLoaded', function(){{
     <h2 class="h-lg">Grapple like {html.escape(f['name'])}</h2>
     <p class="muted mt8" style="max-width:48ch">Turn this game into a Project in the GrapplingArc app — it maps {html.escape(f['name'].split()[0])}'s signature entries against your own graph and shows exactly which positions to add.</p>
   </div>
-  <a class="btn app lg" href="index.html#app">Start this Project →</a>
+  <a class="btn app lg" href="index.html#app">Start this Project {_icon('arrow-right')}</a>
 </div></div></section>
 {_FOOTER}
 {df_head_includes}
@@ -2069,7 +2072,7 @@ def render_event_page(
         omitted_note = f'<p class="graph-hint">{_bi(en, pt)}</p>'
     body = f"""{_nav('events')}
 <section class="art-hero"><div class="wrap">
-  <div class="center"><a href="events.html" class="tag" style="text-decoration:none">← Events</a></div>
+  <div class="center"><a href="events.html" class="tag" style="text-decoration:none">{_icon('arrow-left')} Events</a></div>
   <h1 class="art-title">{html.escape(name)}</h1>
   <div class="result-bar">{tagrow}</div>
   <div class="prose"><p class="lead art-sum">{_bi(sections[0][1][0], sections_pt[0][1][0])}</p></div>
@@ -2127,6 +2130,7 @@ _ATLAS_STYLE = """<style>
 .sig-row{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11.5px;padding:3px 0}
 .sig-row .arrow{color:var(--ink-3)}
 .sig-row .delta{font-family:var(--mono)}
+.sig-row .delta svg{width:12px;height:12px;vertical-align:-2px}
 .sig-row .up{color:var(--good)}.sig-row .down{color:var(--bad)}
 .sig-note{font-size:10px;color:var(--ink-3);margin-top:6px;line-height:1.4}
 @media(max-width:600px){
@@ -2254,7 +2258,7 @@ var g = PGO
   var ev = (E.buckets||[]).map(function(b){
     var pct = Math.round((b.ratio - 1) * 100), cls = pct >= 0 ? 'up' : 'down';
     return '<div class="sig-row"><span>'+b.type+'</span><span class="delta '+cls+'">'+
-      (pct >= 0 ? '▲ +' : '▼ ')+pct+'%</span></div>'; }).join('');
+      (pct >= 0 ? '__ICON_TREND_UP__ +' : '__ICON_TREND_DOWN__ ')+pct+'%</span></div>'; }).join('');
   host.innerHTML =
     (mv ? '<div class="sig-block"><h3>Markov backbone</h3>'+mv+
       '<div class="sig-note">'+(M.n_bouts||0)+' bouts · action-level, corpus-wide (Lamas et al. 2024 states)</div></div>' : '') +
@@ -2387,6 +2391,11 @@ var os=document.getElementById('oceanSearch');
 os.addEventListener('change', locate);
 os.addEventListener('keydown', function(e){ if(e.key==='Enter') locate(); });
 """
+# Sentinel swap, not an f-string: this template is full of literal JS `{`/`}` braces that
+# .format() would demand escaping everywhere for. The two icons are static per page (only
+# the ternary branch varies at runtime), so splice their markup in once here.
+_OCEAN_JS = (_OCEAN_JS.replace("__ICON_TREND_UP__", _icon("trending-up"))
+             .replace("__ICON_TREND_DOWN__", _icon("trending-down")))
 
 
 def render_ocean_page() -> str:

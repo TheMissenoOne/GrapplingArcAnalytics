@@ -4,9 +4,11 @@ short-lived former name the-system.html, both now redirects)."""
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 
 from analysis.network_metrics import network_from_sequences
+from export.match_breakdown import build_match_breakdown
 from export.site_data import (
     _DEFAULT_DESC,
     _OCEAN_JS,
@@ -15,7 +17,9 @@ from export.site_data import (
     _nav,
     _render_retired_page,
     _to_graphview,
+    _train_this_style,
     render_atlas_page,
+    render_breakdown_page,
 )
 
 
@@ -184,3 +188,53 @@ def test_retired_pages_point_at_atlas_with_canonical() -> None:
         assert f"<h1>{old_title} has moved</h1>" in page
         assert page.count("<h1>") == 1
         assert old_path not in page  # the OWN retired filename never appears as a link target
+
+
+def _breakdown_athlete(aid: str, name: str, elo: float = 800.0,
+                        series: list[float] | None = None) -> Any:
+    return SimpleNamespace(
+        id=aid, name=name, nickname=None, team=None, weight_class="185",
+        elo=elo, elo_series=series or [],
+    )
+
+
+def _breakdown_match(seq: list[dict[str, Any]], winner_id: str | None) -> Any:
+    return SimpleNamespace(
+        sequence=seq, winner_id=winner_id, year=2025, event="UFC 319",
+        weight_class="185", win_type="DECISION", submission=None, video_url=None,
+    )
+
+
+def test_train_this_style_cta_uses_icon_not_glyph() -> None:
+    # Owner's rule (2026-09-04): never a text-glyph icon.
+    a = {"name": "Dricus du Plessis"}
+    b = {"name": "Khamzat Chimaev"}
+    html = _train_this_style(a, b, frozenset({"dricus-du-plessis", "khamzat-chimaev"}))
+    assert "→" not in html
+    assert html.count('<svg viewBox="0 0 24 24"') == 3  # a's link, b's link, app CTA
+
+
+def test_render_breakdown_page_has_no_text_glyph_arrows_and_uses_icons() -> None:
+    seq = [
+        {"label": "Double Leg Takedown", "type": "takedown", "actor_id": "B", "successful": True},
+        {"label": "Mount", "type": "control", "actor_id": "B"},
+        {"label": "Sweep / Reversal", "type": "sweep", "actor_id": "A", "successful": True},
+    ]
+    a = _breakdown_athlete("A", "Dricus du Plessis", elo=794.6, series=[800.0, 794.6])
+    b = _breakdown_athlete("B", "Khamzat Chimaev", elo=811.0, series=[800.0, 811.0, 811.0])
+    bd = build_match_breakdown(_breakdown_match(seq, "B"), a, b)
+    bd["transition_graph_gv"] = _to_graphview(bd["transition_graph"])
+    page = render_breakdown_page("dricus-du-plessis-vs-khamzat-chimaev-2025", bd)
+    # UI chrome (breadcrumb tag, sig-card delta, CTA buttons) must use the icon sprite, never
+    # a text-glyph arrow — prose (match narrative) may still say "X → Y" and is out of scope.
+    breadcrumb = page[page.index('class="tag"'):page.index("</a>", page.index('class="tag"'))]
+    assert "←" not in breadcrumb
+    assert '<svg viewBox="0 0 24 24"' in breadcrumb
+    cards_start = page.index('class="sig-cards"')
+    sig_cards = page[cards_start:page.index("</section>", cards_start)]
+    assert "▲" not in sig_cards and "▼" not in sig_cards
+    assert '<svg viewBox="0 0 24 24"' in sig_cards  # trend icon on the elo delta
+    cta_start = page.index("Train this style")
+    train_cta = page[cta_start:page.index("</section>", cta_start)]
+    assert "→" not in train_cta
+    assert '<svg viewBox="0 0 24 24"' in train_cta
