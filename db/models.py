@@ -408,6 +408,38 @@ class ClassSession(Base):
     __table_args__ = (Index("idx_class_sessions_group", "group_id"),)
 
 
+class ClassGuest(Base):
+    """A NON-member who dropped in to one class by QR, and the consent that let them (0060).
+
+    The owner's 2026-09-03 decision item 5: a non-member scanning a class QR confirms explicitly
+    before entering, and the professor then sees only that class/session — nothing of their
+    history. This row IS that consent: written only by ``attach_to_class_guest()`` (SECURITY
+    DEFINER) in the same statement that records it, so ``consent_at`` is NOT NULL — unlike
+    ``group_members.consent_at`` (0054) there is no legacy row that predates the column.
+
+    The row is also the entire read scope. ``can_read_member_row()`` (0060) lets the class's own
+    owner/professor see ``user_sessions`` rows whose ``class_session_id`` is exactly this class,
+    for exactly this profile; every other professor projection (``group_member_names``/
+    ``_rating``/``_graph_edges``/``_video_analysis``/``_athlete``) starts from ``group_members``
+    and therefore returns nothing for a guest, with no change needed.
+
+    RLS: SELECT by the guest themselves or the class's staff; no INSERT/UPDATE/DELETE policy and
+    no such grant — the RPC is the only write path (same shape as ``session_video_jobs``, 0058)."""
+
+    __tablename__ = "class_guests"
+
+    class_session_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("class_sessions.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    profile_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), primary_key=True
+    )
+    consent_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class ClassPlanTemplate(Base):
     """A reusable class theme/focus, scoped to one academy (alembic 0050).
 
