@@ -5363,7 +5363,6 @@ def _render_variant15(out: Path, sources: list[PathSource]) -> dict[str, Any]:
     )
     (out / "15-orcamento.html").write_text(html, encoding="utf-8")
     default = payload["pages"][payload["default"]]
-    st = default["stats"]
     return {
         "nodes": len(default["gv"]["nodes"]), "edges": len(default["gv"]["links"]),
         "edges_per_node": round(len(default["gv"]["links"]) / len(default["gv"]["nodes"]), 2)

@@ -113,8 +113,8 @@ def backfill_graph_embeddings(session: Session) -> int:
     The one-way rule is enforced downstream — nothing built from user graphs may flow back
     into a competitive or public artefact.
     """
-    from db.models import Graph, GraphEdge
-    from db.repository import incident_edge_elos
+    from db.models import Graph
+    from db.repository import edges_by_graph, incident_edge_elos
 
     node_emb = {
         k: np.asarray(v, dtype=np.float64)
@@ -125,8 +125,12 @@ def backfill_graph_embeddings(session: Session) -> int:
         ).all()
     }
     n_set = 0
-    for g in session.execute(select(Graph)).scalars():
-        edges = list(session.execute(select(GraphEdge).where(GraphEdge.graph_id == g.id)).scalars())
+    # Deliberately every graph, user rows included — see this function's docstring. One query
+    # for the edges of all of them; it used to be one round trip per graph.
+    graphs = list(session.execute(select(Graph)).scalars())
+    by_graph = edges_by_graph(session, [g.id for g in graphs])
+    for g in graphs:
+        edges = by_graph.get(g.id, [])
         vecs: list[np.ndarray] = []
         weights: list[float] = []
         for key, elos in incident_edge_elos(edges).items():

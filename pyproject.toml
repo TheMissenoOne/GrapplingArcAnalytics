@@ -133,13 +133,21 @@ extend-exclude = ["notebooks", "transcripts"]  # exploratory notebooks + raw mat
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "W", "UP"]
 
-# ponytail: measured 2026-07-27 — `scripts/` (one-off dump/import/verify scripts) carries 49
-# pre-existing findings (37 E501, 5 E402, 3 F841, 2 N806, 1 E722, 1 E741) that are debt, not new
-# breakage. Ignored HERE (not globally, not `# noqa`) so `ruff check .` gates the rest of the repo
-# clean. Upgrade path: pick these off script-by-script, then drop this block once `scripts/` is
-# clean under `ruff check .` unscoped.
+# ponytail: `scripts/` (one-off dump/import/verify scripts) carries pre-existing findings that
+# are debt, not new breakage. Ignored HERE (not globally, not `# noqa`) so `ruff check .` gates
+# the rest of the repo clean.
+#
+# A blanket ignore with no ceiling is a ratchet that only turns one way: measured 49 on
+# 2026-07-27, remeasured 2026-09-09 and it had reached **130**. So the three codes that can hide
+# a BUG rather than a long line were fixed and DROPPED from this list on 2026-09-09 —
+# F841 (4: two of them a directional heuristic in `refine_pbp` that was built and never read),
+# E722 (1: a bare `except` in `build_url_mapping` that turned any parse failure into an empty
+# video-URL mapping, silently), E741 (2). What is left is 123, all cosmetic: 113 E501, 6 E402,
+# 4 N806. Verify with:
+#   uv run ruff check scripts/ --config 'lint.per-file-ignores = {}' --select E,F,I,N,W,UP
+# Upgrade path: pick the rest off script-by-script, then delete this block.
 [tool.ruff.lint.per-file-ignores]
-"scripts/**/*.py" = ["E501", "E402", "F841", "N806", "E722", "E741"]
+"scripts/**/*.py" = ["E501", "E402", "N806"]
 # ponytail: rls_auto_enable()'s plpgsql body is adopted byte-for-byte from
 # pg_get_functiondef (see the migration's docstring) — its raise-log format strings run
 # past 100 cols in the source, and reformatting a security-relevant function body just to

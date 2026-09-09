@@ -196,9 +196,11 @@ def resolve_actor(text: str, a_name: str, opponent: str) -> str | None:
     has_opp_name = any(p in text_lower for p in opp_parts if len(p) > 2) or (opp_first and opp_first in text_lower)
     has_a_name = any(p in text_lower for p in a_parts if len(p) > 2) or (a_first and a_first in text_lower)
 
-    # Directional hints
-    hints_opponent = {"the red corner", "his opponent", "opponent"}
-    hints_athlete = {"the blue corner", name_lower.split()[-1] if len(name_lower.split()) > 1 else ""}
+    # NB: a pair of `hints_opponent`/`hints_athlete` keyword sets used to be built here and
+    # never read — a directional heuristic that was started and abandoned. Removed 2026-09-09.
+    # What actually decides attribution is the name/`by <actor>`/`from <actor>` matching below,
+    # and every unresolved line still falls through to `return a_name`. Changing THAT default is
+    # an event-model decision (docs/match_event_model.md), not a lint cleanup.
 
     # "by <actor>" pattern
     by_match = re.search(r'\bby\s+(\w+)', text_lower)
@@ -264,7 +266,7 @@ def refine_dump(dump_name: str, dump_pbp: bool = False) -> None | dict:
                 print(f"\n=== {a_name} vs {opponent} ({year}) ===")
                 for p in pbp:
                     matches = match_text(p["text"])
-                    match_str = ", ".join(f"{l}[{tp}]" for l, tp, _ in matches) if matches else ""
+                    match_str = ", ".join(f"{lbl}[{tp}]" for lbl, tp, _ in matches) if matches else ""
                     print(f"  ts={p['ts']:>5} | {p['text'][:100]}")
                     if match_str:
                         print(f"         → {match_str}")
@@ -272,7 +274,6 @@ def refine_dump(dump_name: str, dump_pbp: bool = False) -> None | dict:
 
             # Process pbp → events
             events: list[dict] = []
-            seen_actions: dict[str, int] = {}  # label_lower → total matching lines
 
             for p in pbp:
                 text = p["text"]

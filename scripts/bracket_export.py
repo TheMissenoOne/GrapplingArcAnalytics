@@ -1644,7 +1644,7 @@ def video_layer(conn: Any, roster: Mapping[str, str],
                                          | set(footage_keys((na, nb), aliases)))
             hit.setdefault("links", []).append(
                 {"host": "YouTube · corpus", "url": url}) if url and not any(
-                    l.get("url") == url for l in hit.get("links", [])) else None
+                    link.get("url") == url for link in hit.get("links", [])) else None
             continue
         out.append({"slug": None, "title": title,
                     "source": "published link", "url": url, "start": start,

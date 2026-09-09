@@ -3,8 +3,9 @@
 
 Runs every event dump through the shared importer (``scripts.dump_import.run_dump``) — each
 call de-dupes by ``frozenset(participants)+year``, idempotently replaces bouts, and double-pass
-replays both athletes — then exports all final bouts once via ``export.match_breakdown``. The
-enriched breakdowns carry the additive ``decision_space`` block (RF14 / DS-12).
+replays both athletes — then regenerates the whole public bundle once via ``export.site_data.run``
+(NOT ``export.match_breakdown``, which is a library and no longer has a runner). The enriched
+breakdowns carry the additive ``decision_space`` block (RF14 / DS-12).
 
 Per-event tags group bouts into card pages (``export.site_data``); the four ADCC 2022 division
 files share one ``ADCC 2022`` tag. Khabib stays ``event=None`` (MMA, no card page).

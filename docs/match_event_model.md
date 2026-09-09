@@ -3,7 +3,7 @@
 A bout's `sequence` is a list of **events**; each event is one grappling action. Events become the
 transition graph (`export/match_breakdown.py:_transition_graph`) — node = normalized technique label,
 edge = each consecutive pair, `fighter` side taken from the event's actor. This model is the same
-whether events come from the **DeepSeek refiner** (`docs/deepseek/E-refine-events.md`), `convert_dump.py`,
+whether events come from the **refiner** (`docs/PROMPT_events_sidecar.md`), `convert_dump.py`,
 the `insert_*.py` scripts, or the admin paste box. Get it wrong on any path and the graph is wrong.
 
 ## Event shape
@@ -50,7 +50,9 @@ recovery re-opens it. An attack **from** a position keeps its attacker (triangle
 the guard player owns both the `guard` and the `submission`). Neutral 50/50 / double-guard-pull →
 the fighter who initiates or breaks the symmetry.
 
-> Full refiner-facing version with grep recipes: `docs/deepseek/E-refine-events.md`.
+> Full refiner-facing version with grep recipes: `docs/PROMPT_events_sidecar.md`.
+> (It replaced `docs/deepseek/E-refine-events.md`, which is SUPERSEDED — that file's own
+> banner says its bout-relative `ts` rule is actively wrong. Read it for worked examples only.)
 
 ## Does the corpus actually follow this? Measured, 2026-08-20
 

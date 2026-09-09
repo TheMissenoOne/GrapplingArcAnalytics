@@ -105,9 +105,14 @@ uv run python -m scripts.reprocess_all --only <Label> --no-export             # 
 > Writing to the shared prod Supabase DB is an orchestrator/human action. A subagent runs the
 > dry-run, reports, and hands off.
 
-**Always pass `--no-export`.** A bare run auto-calls `export.match_breakdown.run()`, which
-regenerates `GrapplingArc/assets/matches/*.json` — the legacy Jekyll-era tree, removed from the
-live site in 2026-06. It costs 10+ minutes and serves nothing. The real export is step 8.
+**Always pass `--no-export`.** A bare run ends by calling `export.site_data.run`, which
+regenerates the ENTIRE `GrapplingArc/site/` bundle — 10+ minutes, and you do not want it firing
+in the middle of an import you may still have to correct. Export deliberately, at step 8, once
+the data is right.
+
+> Corrected 2026-09-09: this used to say the bare run called `export.match_breakdown.run()` and
+> rebuilt the dead `GrapplingArc/assets/` tree. `reprocess_all` has called `export.site_data.run`
+> for a while, and `match_breakdown`'s writer/CLI has since been deleted — it is a library now.
 
 Read the dry-run log for `dropping event with unknown actor <name>`: an `actor` that matched
 neither athlete, silently discarded. Fix the sidecar and re-splice — do not just re-import.
@@ -141,8 +146,10 @@ carried a `start`, without a full reimport, and reports how many `url_mapping.js
 now redundant (covered by a dump) vs. still the only source — that count must be zero before the
 file can be deleted; see the script's docstring for the exact rule.
 
-**Never hand-edit `GrapplingArc/assets/matches/*.json`.** It is generated output; the edit is a
-no-op overwritten on the next export.
+**Never hand-edit the generated `GrapplingArc/site/` bundle** (`*-data.js`, `breakdown-*.html`,
+`grapple-*.html`, `event-*.html`, `atlas.html`). It is generated output; the edit is a no-op
+overwritten on the next export. (The old `GrapplingArc/assets/matches/*.json` tree this line used
+to name is dead — nothing writes it since 2026-09-09 and nothing serves it.)
 
 ## 8. Embeddings → pgvector · **maintainer**
 

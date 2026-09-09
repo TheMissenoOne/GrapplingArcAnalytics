@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -117,6 +117,37 @@ def incident_edge_elos(edges: Iterable[GraphEdge]) -> dict[str, list[float]]:
         incident.setdefault(e.source_key, []).append(e.elo)
         incident.setdefault(e.target_key, []).append(e.elo)
     return incident
+
+
+def edges_by_graph(
+    session: Session, graph_ids: Sequence[str]
+) -> dict[str, list[GraphEdge]]:
+    """Every listed graph's edges in ONE query, bucketed by ``graph_id``.
+
+    Replaces the ``for gid in ids: select(GraphEdge).where(graph_id == gid)`` loop that both
+    ``graphs_for_clustering`` and ``analysis.embeddings.backfill_graph_embeddings`` carried:
+    one round trip per graph against a REMOTE Postgres — ~200 for the athlete corpus alone,
+    every graph in the DB for the embedding backfill.
+
+    No ``order_by`` is added on purpose. ``incident_edge_elos`` builds its dict in edge
+    arrival order, so the node order every caller has been getting is the server's own; an
+    ``order_by`` here would quietly change it. Bucketing preserves arrival order per graph.
+
+    A graph with no edges is simply absent from the mapping — callers use ``.get(gid, [])``,
+    which is what the per-graph query returned for it.
+
+    ``graph_ids`` empty → ``{}`` with no query at all.
+
+    ponytail: one IN list. Chunk it if the corpus ever outgrows a single statement.
+    """
+    if not graph_ids:
+        return {}
+    out: dict[str, list[GraphEdge]] = {}
+    for edge in session.execute(
+        select(GraphEdge).where(GraphEdge.graph_id.in_(graph_ids))
+    ).scalars():
+        out.setdefault(edge.graph_id, []).append(edge)
+    return out
 
 
 def upsert_graph_from_athlete_graph(
@@ -700,15 +731,21 @@ def rated_athlete_graph_ids(session: Session, run_id: str | None) -> set[str]:
 
 
 def graphs_for_clustering(
-    session: Session, owner_kind: str | None = None
+    session: Session, owner_kind: str
 ) -> list[tuple[str, list[DerivedNode]]]:
-    """Return [(graph_id, [DerivedNode, ...])] for graphs (optionally one ``owner_kind``).
+    """Return [(graph_id, [DerivedNode, ...])] for one ``owner_kind``.
 
     Nodes are reconstructed from each graph's edges joined to the shared
     ``technique_nodes`` library (graph_nodes is dropped): the node set is the
     edge endpoints, ``node_type`` comes from the library, and ``computed_elo``
-    is derived as the strongest incident edge ELO. Pass ``owner_kind='athlete'`` to
-    restrict to pro-athlete graphs (the archetype population).
+    is derived as the strongest incident edge ELO. Pass ``owner_kind='athlete'`` for
+    pro-athlete graphs (the archetype population), ``'user'`` for app-fed ones.
+
+    ``owner_kind`` is REQUIRED, not defaulted. Root ``CLAUDE.md``: "every query that builds
+    a public or competitive artefact must filter ``owner_kind`` explicitly — an unfiltered
+    ``select(Graph)`` is a defect, not a shortcut". A default of ``None`` here meant "every
+    graph, user rows included", one forgotten argument away from putting a private graph in
+    an archetype centroid. Every call site already passed it.
 
     Baselines computed over the athlete population must additionally be narrowed by
     ``rated_athlete_graph_ids`` — see that function for why."""
@@ -718,14 +755,13 @@ def graphs_for_clustering(
             select(TechniqueNode.node_key, TechniqueNode.node_type)
         ).all()
     }
-    graph_q = select(Graph.id)
-    if owner_kind is not None:
-        graph_q = graph_q.where(Graph.owner_kind == owner_kind)
-    graph_ids = list(session.execute(graph_q).scalars())
+    graph_ids = list(
+        session.execute(select(Graph.id).where(Graph.owner_kind == owner_kind)).scalars()
+    )
+    by_graph = edges_by_graph(session, graph_ids)
     result = []
     for graph_id in graph_ids:
-        edges = session.execute(select(GraphEdge).where(GraphEdge.graph_id == graph_id)).scalars()
-        incident = incident_edge_elos(edges)
+        incident = incident_edge_elos(by_graph.get(graph_id, []))
         nodes = [
             DerivedNode(
                 node_key=key,

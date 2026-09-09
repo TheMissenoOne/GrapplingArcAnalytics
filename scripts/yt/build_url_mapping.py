@@ -1,6 +1,7 @@
 """Build url_mapping.json: event→URL + per-match {athlete, timestamp}."""
 import ast
 import json
+import sys
 from pathlib import Path
 
 ROOT = Path("/home/vetor/GrapplingArc")
@@ -149,7 +150,11 @@ for stem, event_title in sorted(FILE_EVENTS.items()):
         content = py_path.read_text(encoding="utf-8")
         try:
             data = ast.literal_eval(content)
-        except:
+        except (ValueError, SyntaxError, MemoryError, RecursionError) as exc:
+            # Was a bare `except:` — it swallowed KeyboardInterrupt and turned any parse
+            # failure into an EMPTY url mapping, silently. This file is the site's video-link
+            # source of truth; a miss has to be loud.
+            print(f"warning: could not parse {py_path}: {exc}", file=sys.stderr)
             data = []
         if isinstance(data, list):
             for block in data:

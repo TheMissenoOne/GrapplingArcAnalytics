@@ -1,31 +1,23 @@
-"""Export one global match into a self-contained breakdown JSON for the public site.
+"""Build one global match's self-contained breakdown payload for the public site.
 
-The public landing (``../GrapplingArc``) is static, so it can't talk to the DB. This
-exporter turns each ``matches`` row into a single JSON bundle that a dependency-free
-client renders directly (timeline + transition graph + stat cards + ELO sparklines):
+A LIBRARY, not a CLI. ``export/site_data.py`` is the only site exporter; it imports
+``build_match_breakdown``/``export_fighter_graph``/``_final_matches``/``match_slug``/
+``slugify``/``_headline`` from here and writes the whole ``GrapplingArc/site/`` bundle.
 
-    assets/matches/<slug>.json     one bout, fully self-contained
-    assets/fighters/<slug>.json    each participant's career graph (app-shaped)
-    assets/matches/index.json      slug/fighters/headline per bout (articles index)
+This module used to ALSO own ``export_site_assets``/``run``/``main``, which wrote
+``GrapplingArc/assets/{matches,fighters}/*.json`` — the legacy Jekyll-era tree removed from
+the live site in 2026-06. Nothing consumed those files and a bare run spent 10+ minutes
+writing 689 of them, so the writer and its ``__main__`` entry point were deleted (2026-09-09).
+The payload builders below are untouched.
 
-It is the public-site half of the Analytics→JSON contract (mirrors export/tech_library
-for the app). The client graph renderer consumes the same app-shaped ``{nodes, edges}``
-that ``admin/static/graphview.js`` already reads, and node keys use the shared
+The client graph renderer consumes the app-shaped ``{nodes, edges}`` that
+``admin/static/graphview.js`` already reads, and node keys use the shared
 ``analysis.names._normalize_name`` so they stay char-for-char with the app's
 ``graphSync.ts:normalizeLabel``.
-
-Usage:
-    uv run python -m export.match_breakdown --all
-    uv run python -m export.match_breakdown --match dricus-du-plessis-vs-khamzat-chimaev-2025
-    uv run python -m export.match_breakdown --all --out /tmp/site-assets
 """
 
 from __future__ import annotations
 
-import argparse
-import json
-import logging
-from pathlib import Path
 from typing import Any
 
 from sqlalchemy import select
@@ -37,11 +29,6 @@ from analysis.decision_space import sequence_decision_space
 from analysis.names import _normalize_name, canonical_label, canonicalize
 from db.models import Athlete, Graph, Match
 from export.athlete_graph_export import athlete_graph_to_app_json
-
-logger = logging.getLogger(__name__)
-
-# Default output dir = the public repo's assets folder (sibling checkout).
-_DEFAULT_OUT = Path(__file__).resolve().parents[2] / "GrapplingArc" / "assets"
 
 
 def slugify(name: str) -> str:
@@ -398,103 +385,3 @@ def _load_curated_ds(session: Session) -> dict[str, dict[str, Any]]:
     ).all()
     return {node_key: ds for node_key, ds in rows if ds}
 
-
-def export_site_assets(
-    session: Session, out: Path, only_slug: str | None = None
-) -> list[str]:
-    """Write match + fighter JSON (and index.json) under ``out``. Returns slugs written."""
-    matches_dir = out / "matches"
-    fighters_dir = out / "fighters"
-    matches_dir.mkdir(parents=True, exist_ok=True)
-    fighters_dir.mkdir(parents=True, exist_ok=True)
-
-    curated_ds = _load_curated_ds(session)  # F4: authored per-position DS overrides defaults
-    index: list[dict[str, Any]] = []
-    written: list[str] = []
-    seen_fighters: set[str] = set()
-    for match in _final_matches(session):
-        a = session.get(Athlete, match.athlete_a_id)
-        b = session.get(Athlete, match.athlete_b_id)
-        if a is None or b is None:
-            continue
-        slug = match_slug(a, b, match.year)
-        if only_slug and slug != only_slug:
-            continue
-        bd = build_match_breakdown(match, a, b, curated_ds=curated_ds)
-        (matches_dir / f"{slug}.json").write_text(
-            json.dumps(bd, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-        for athlete in (a, b):
-            fslug = slugify(athlete.name)
-            if fslug in seen_fighters:
-                continue
-            seen_fighters.add(fslug)
-            graph = export_fighter_graph(athlete, session)
-            if graph is not None:
-                (fighters_dir / f"{fslug}.json").write_text(
-                    json.dumps({"fighter": _fighter_block(athlete), "graph": graph},
-                               ensure_ascii=False, indent=2),
-                    encoding="utf-8",
-                )
-        index.append({
-            "slug": slug, "title": bd["meta"]["title"],
-            "a": bd["meta"]["a"]["name"], "b": bd["meta"]["b"]["name"],
-            "year": match.year, "event": match.event,
-            "headline": _headline(bd), "events": len(bd["sequence"]),
-        })
-        written.append(slug)
-
-    index.sort(key=lambda r: (r["year"] or 0), reverse=True)
-    (matches_dir / "index.json").write_text(
-        json.dumps(index, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    # Prune orphan files from prior exports (e.g. stale slugs after an athlete rename/dedupe) so
-    # the site never shows a deleted/duplicate bout. Only on a full export — a single-slug export
-    # must not wipe the rest.
-    if only_slug is None:
-        keep_matches = {f"{s}.json" for s in written} | {"index.json"}
-        for f in matches_dir.glob("*.json"):
-            if f.name not in keep_matches:
-                f.unlink()
-        keep_fighters = {f"{s}.json" for s in seen_fighters} | {"index.json"}
-        for f in fighters_dir.glob("*.json"):
-            if f.name not in keep_fighters:
-                f.unlink()
-    return written
-
-
-def run(out: Path, only_slug: str | None) -> int:
-    from db.base import db_session
-
-    with db_session() as session:
-        written = export_site_assets(session, out, only_slug)
-    logger.info("Exported %d bout(s) → %s", len(written), out)
-    for slug in written:
-        logger.info("  %s", slug)
-    if only_slug and not written:
-        logger.warning("No bout matched slug %r", only_slug)
-        return 1
-    return 0
-
-
-def main() -> int:
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    try:
-        from dotenv import load_dotenv
-
-        load_dotenv()
-    except ImportError:
-        pass
-
-    ap = argparse.ArgumentParser(description="Export match breakdown JSON for the public site")
-    ap.add_argument("--out", type=Path, default=_DEFAULT_OUT, help="assets output dir")
-    g = ap.add_mutually_exclusive_group()
-    g.add_argument("--match", dest="slug", help="export only this bout slug")
-    g.add_argument("--all", action="store_true", help="export every final bout (default)")
-    args = ap.parse_args()
-    return run(args.out, args.slug)
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())
