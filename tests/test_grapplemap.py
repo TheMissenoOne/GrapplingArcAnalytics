@@ -182,9 +182,9 @@ def test_render_position_icon(gmap):
     assert pixels.std() > 0
 
 
-# ─── exporter: app vocab subset + require-index code-gen ─────────────────────
+# ─── exporter: app vocab subset ───────────────────────────────────────────────
 
-def test_export_icons_writes_subset_and_index(gmap, tmp_path):
+def test_export_icons_writes_subset(gmap, tmp_path):
     # Matching needs the app node library, which lives in the sibling repo. That
     # repo is absent in CI and in any worktree checkout, and load_app_nodes()
     # degrades to [] rather than raising — so without this guard the test fails
@@ -199,12 +199,10 @@ def test_export_icons_writes_subset_and_index(gmap, tmp_path):
 
     full_dir   = tmp_path / "full"
     app_assets = tmp_path / "app" / "grapplemap_icons"
-    index_ts   = tmp_path / "app" / "grapplemapIconIndex.ts"
 
     matched = export_icons(
         full_icons_dir=full_dir,
         app_assets_dir=app_assets,
-        app_index_ts=index_ts,
         size=64,
         verbose=False,
     )
@@ -223,12 +221,3 @@ def test_export_icons_writes_subset_and_index(gmap, tmp_path):
     assert "guarda_fechada" in matched   # Closed Guard
     assert "montada" in matched          # Mount
     assert (app_assets / "guarda_fechada.png").exists()
-
-    # Index TS is valid: every matched file has a static require, and node aliases
-    # (e.g. English "closed guard") resolve to the same canonical icon.
-    text = index_ts.read_text()
-    assert "GRAPPLEMAP_ICONS" in text
-    for key in matched:
-        assert f'"{key}": require("./grapplemap_icons/{key}.png")' in text
-    # English alias maps onto the canonical Portuguese icon.
-    assert '"closed_guard": require("./grapplemap_icons/guarda_fechada.png")' in text
