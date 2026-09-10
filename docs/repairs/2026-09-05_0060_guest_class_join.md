@@ -5,6 +5,8 @@
 **Estado (histórico, na escrita deste doc):** migração escrita, ainda não aplicada. Aplicar era ação do dono/orquestrador (skill
 `supabase-schema-migration` §6).
 
+**Próxima da fila:** `0061_user_sessions_composite_identity.py` (revisa esta, escrita 2026-09-09) — troca a PK de `user_sessions` de `id` para `(owner_id, id)`; **ainda não aplicada em prod**, guardada em CI por `ci/verify_user_sessions_identity.py`. Contrato completo em `.wikis/GrapplingArcAnalytics/Contratos.md`.
+
 **Decisão vinculante (dono, 2026-09-03, item 5):** *"Não-membro em aula via QR ⇒ confirmação
 explícita antes de entrar; professor vê só aquela aula/sessão + análise dela, nada do histórico."*
 
