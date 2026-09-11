@@ -83,6 +83,13 @@ def test_escape_to_turtle_filed_as_control_is_still_an_escape() -> None:
     assert a.category == at.ACTION and a.relation == at.ESCAPES
 
 
+def test_mount_attempt_is_an_action_not_the_position() -> None:
+    """backlog `corpus-labels-fora-da-biblioteca`: filed under `control`, which the type
+    default reads as "she holds mount" -- "Attempt" says she does not, yet."""
+    a = at.classify("control", "Mount Attempt")
+    assert a.category == at.ACTION and a.relation == at.EXECUTES
+
+
 def test_takedown_defense_is_a_defence_not_an_attack() -> None:
     a = at.classify("takedown", "Takedown Defense")
     assert a.relation == at.DEFENDS

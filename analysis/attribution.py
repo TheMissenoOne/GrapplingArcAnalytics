@@ -59,7 +59,9 @@ from analysis.names import _normalize_name
 # guard-pull family's category.
 # 3 (2026-09-04, N2): `guard recovery` joins `_ACTIONS_FILED_AS_POSITIONS` — closes the last
 # dual-identity label N0 explicitly deferred (04 S8).
-RULES_VERSION = 3
+# 4 (2026-09-11): `("control", "mount attempt")` curated to ACTION — it was falling through to
+# `_TYPE_DEFAULT["control"]` (STATE), backlog `corpus-labels-fora-da-biblioteca`.
+RULES_VERSION = 4
 
 # The eight types the model defines (docs/match_event_model.md). Everything else in the column
 # is bookkeeping that one import batch left behind -- eight rows labelled "Match" -- and it is
@@ -212,6 +214,11 @@ _LABEL: dict[tuple[str, str], Attribution] = {
     ("control", "nearfall"): _a(STATE, HOLDS, TOP, BOTTOM),
     ("control", "arm drag"): _a(ACTION, EXECUTES, EXECUTOR, DEFENDER),
     ("control", "smother"): _a(ACTION, EXECUTES, EXECUTOR, DEFENDER),
+    # An ATTEMPT at mount, not the position itself -- the type table would read `control` as
+    # "she holds it", but "Attempt" says the mount was not yet secured. Same family as `sweep
+    # top position`/`arm drag`: the label names an effort, not an occupancy (decision 2, 04
+    # S1). backlog `corpus-labels-fora-da-biblioteca`.
+    ("control", "mount attempt"): _a(ACTION, EXECUTES, EXECUTOR, DEFENDER),
     # A defence, not an attack. The actor is the one who was shot on and stayed up, so the
     # relation inverts even though the perspective does not: it is still HER event.
     ("takedown", "takedown defense"): _a(ACTION, DEFENDS, DEFENDER, EXECUTOR),

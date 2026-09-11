@@ -63,6 +63,16 @@ def test_back_take_is_action_via_lamas_btk() -> None:
     assert kind_of("Back Take", "control") == "action"
 
 
+def test_mount_attempt_is_action_via_curated_attribution_row() -> None:
+    """backlog `corpus-labels-fora-da-biblioteca`: not in the App library (`resolve_library_entry`
+    is `None`), so `kind_of_entry` falls straight to `kind_of` on the raw `(control, label)` --
+    which used to read `_TYPE_DEFAULT["control"]` (STATE) before the curated row landed."""
+    from analysis.taxonomy_kind import kind_of_entry, resolve_library_entry
+    assert resolve_library_entry("Mount Attempt") is None
+    assert kind_of("Mount Attempt", "control") == "action"
+    assert kind_of_entry("Mount Attempt", "control") == "action"
+
+
 def test_curated_grips_are_states_even_though_lamas_calls_them_cdp() -> None:
     """N0's authority swap (docs/taxonomy/04_ONTOLOGIA_CANONICA.md): `lamas_state` reads
     "Hooks In"/"Collar Tie"/"Front Headlock" as its CDP *action* code, but `attribution`'s

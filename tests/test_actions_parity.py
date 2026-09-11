@@ -356,16 +356,26 @@ def test_no_empty_endpoint_edges_and_no_generic_out_degrees_the_real_graph() -> 
     # recovery` fix (04 S8 -> S "guard recovery", `_ACTIONS_FILED_AS_POSITIONS`): 1548 -> 1551;
     # D7 (successful=False closes without anchor, 2026-09-04): 1551 -> 1387,
     # the 4 `guard/Guard Recovery` events on this dump that were STATE (dual identity with
-    # `escape/Guard Recovery`, already action) and are now ACTION always. Any OTHER movement is
-    # the regression this number exists to catch.
-    assert observed_actions == 1387
+    # `escape/Guard Recovery`, already action) and are now ACTION always.
+    # `corpus-labels-fora-da-biblioteca` (2026-09-11): `("control", "mount attempt")` curated to
+    # ACTION takes it to 1386, and the -1 (not +1) is D7, not a second reclassified event —
+    # there is exactly ONE `Mount Attempt` in this dump, sitting between `Guard Pass Attempt`
+    # (successful=False) and a run that ends on `Guillotine Attempt` (successful=False). Before,
+    # Mount Attempt was a real STATE, so `Guard Pass Attempt` closed safely on it (1 observed
+    # action) before the LATER pending buffer (Takedown/Double Leg Takedown/Guillotine Attempt)
+    # got dropped whole by D7. After, all five actions stack into ONE pending buffer whose last
+    # action is the same failed Guillotine Attempt, so D7 drops the whole run — including the
+    # `Guard Pass Attempt` that used to bank safely on the now-gone state anchor. Any OTHER
+    # movement is the regression this number exists to catch.
+    assert observed_actions == 1386
     # INFERRED is the rule's own output and moves with it. 399 before Fase 2; 433 after, and the
     # +34 are all inversions the endpoints prove and no observed action explains (28 appended,
     # 4 at the head, 2 spliced BETWEEN observed actions). N0 takes it to 321: 128 `control/Back
     # Take` and 47 `control/Escape to Turtle` events stopped being STATES, so the generic bridges
     # the compiler had to invent around them are no longer needed. N2's `guard recovery` fix
-    # takes it to 320: one fewer state-pair gap to bridge around those 4 events. Change the rule
-    # and change this number deliberately — never to make a red test green.
+    # takes it to 320: one fewer state-pair gap to bridge around those 4 events. Unmoved by the
+    # `mount attempt` fix above — that state simply stopped existing, not a gap that needed a
+    # bridge. Change the rule and change this number deliberately — never to make a red test green.
     assert inferred_actions == 320
     max_real_degree = max(
         (d for key, d in degree.items() if key not in generic_keys and key != ""), default=0

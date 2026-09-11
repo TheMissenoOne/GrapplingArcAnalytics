@@ -12,6 +12,7 @@
     "control|knee on belly": "top",
     "control|leg lace": "top",
     "control|mount": "top",
+    "control|mount attempt": "executor",
     "control|mounted crucifix": "top",
     "control|near fall": "top",
     "control|nearfall": "top",
@@ -1001,6 +1002,10 @@
     "control|mount": {
       "source": "declared",
       "value": "top"
+    },
+    "control|mount attempt": {
+      "source": "derived",
+      "value": "neutral"
     },
     "control|mounted crucifix": {
       "source": "declared",
