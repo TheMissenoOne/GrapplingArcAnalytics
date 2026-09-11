@@ -128,6 +128,12 @@ class DecisionPoint(NamedTuple):
     # Position of the target event in the bout's sequence (provenance). NOT ``index`` — that
     # name would shadow ``tuple.index`` on a NamedTuple.
     event_index: int
+    # H2 (docs/research/next_moves_literature.md): the clock. ``staleness`` = events since the
+    # state event fired (>= 1, always known). ``elapsed_ts`` = seconds since that same event's
+    # ``ts``, or ``None`` when either event lacks a numeric ``ts`` — NEVER defaulted to 0, same
+    # convention E9 already used for its 47 missing-``ts`` bouts.
+    staleness: int
+    elapsed_ts: float | None
 
 
 # ── corpus → decision points ────────────────────────────────────────────────────
@@ -137,6 +143,14 @@ def _rel(actor: Any, state_actor: Any, readable: bool) -> str:
     if not readable or actor is None or state_actor is None:
         return UNK
     return OWN if actor == state_actor else OPP
+
+
+def _numeric_ts(v: Any) -> float | None:
+    """``ts`` is seconds into the bout (``analysis.attribution.CONTRADICTION_WINDOW`` is 10 of
+    the same unit). ``bool`` is an ``int`` subclass in Python and is not a timestamp."""
+    if isinstance(v, int | float) and not isinstance(v, bool):
+        return float(v)
+    return None
 
 
 def decision_points(
@@ -160,6 +174,8 @@ def decision_points(
     state: str | None = None
     state_type = ""
     state_actor: Any = None
+    state_index = -1
+    state_ts: float | None = None
     hist: list[tuple[str, Any]] = []  # (label, actor) — rel is computed at emit time
 
     for i, ev in enumerate(sequence or []):
@@ -171,10 +187,13 @@ def decision_points(
         actor = ev.get("actor_id")
         if kind == "state":
             state, state_type, state_actor = label, etype, actor
+            state_index = i
+            state_ts = _numeric_ts(ev.get("ts"))
             continue
         if kind != "action":
             continue
         if state is not None:
+            ev_ts = _numeric_ts(ev.get("ts"))
             points.append(
                 DecisionPoint(
                     bout_id=bout_id,
@@ -187,6 +206,10 @@ def decision_points(
                     target_rel=_rel(actor, state_actor, rel_readable),
                     rel_readable=rel_readable,
                     event_index=i,
+                    staleness=i - state_index,
+                    elapsed_ts=(
+                        (ev_ts - state_ts) if ev_ts is not None and state_ts is not None else None
+                    ),
                 )
             )
         hist.append((label, actor))
@@ -410,6 +433,8 @@ def evaluate(
     ks: Sequence[int] = (1, 3, 5),
     *,
     ci: bool = False,
+    dist_fn: Any = None,
+    ece_bins: int = 10,
 ) -> dict[str, Any]:
     """Top-k accuracy + MRR over decision points.
 
@@ -426,6 +451,15 @@ def evaluate(
     decision points from the same bout are not two independent observations — a naive interval
     on 834 points would read about ±3.0 pp and understate the real uncertainty, which is
     exactly the quantity the pre-registered 5-point win margin has to be compared against.
+
+    ``dist_fn(point) -> {label: p}`` (H3, docs/research/next_moves_literature.md §H3/§17), when
+    given, adds ``log_loss`` (mean ``-log P(target)``), ``brier`` (multiclass, ``sum_c p_c^2 -
+    2*p_target + 1``) and ``ece`` — expected calibration error over the TOP-1 confidence, in
+    ``ece_bins`` EQUAL-MASS bins (quantiles of confidence, not equal-width: this corpus's
+    confidence distribution is heavy-tailed and equal-width bins leave the high-confidence ones
+    near-empty). A point whose target is outside ``dist_fn``'s vocabulary cannot be scored as a
+    probability (``log(0)``) and is excluded, counted in ``calib_n_oov`` rather than silently
+    dropped from the denominator.
     """
     kmax = max(ks) if ks else 5
     hits = {k: 0 for k in ks}
@@ -464,7 +498,115 @@ def evaluate(
 
         _, lo, hi = bootstrap_ci(hit3, lambda v: sum(v) / len(v), n_boot=2000, groups=bouts)
         out["top3_lo"], out["top3_hi"] = lo, hi
+    if dist_fn is not None:
+        out.update(calibration_metrics(dist_fn, points, n_bins=ece_bins))
     return out
+
+
+def calibration_metrics(
+    dist_fn: Any, points: Sequence[DecisionPoint], *, n_bins: int = 10
+) -> dict[str, Any]:
+    """Log-loss, multiclass Brier and top-1 ECE for a full-distribution ranker (H3).
+
+    ``dist_fn(point) -> {label: p}`` must be a normalised distribution (``MarkovNextMoves.dist``
+    is: Lidstone-smoothed, strictly positive, sums to 1). Prefixed ``calib_`` because this is
+    called from :func:`evaluate`, where ``n`` already names the rank-accuracy denominator and a
+    dist-scored point can be a different count (OOV targets excluded, see below).
+    """
+    ll_sum = 0.0
+    brier_sum = 0.0
+    n = n_oov = 0
+    confs: list[float] = []
+    corrects: list[float] = []
+    for p in points:
+        d = dist_fn(p)
+        if p.target not in d:
+            n_oov += 1
+            continue
+        n += 1
+        pt = d[p.target]
+        ll_sum += -math.log(pt)
+        brier_sum += sum(v * v for v in d.values()) - 2.0 * pt + 1.0
+        top_label, top_p = max(d.items(), key=lambda kv: (kv[1], kv[0]))
+        confs.append(top_p)
+        corrects.append(1.0 if top_label == p.target else 0.0)
+    return {
+        "calib_n": n,
+        "calib_n_oov": n_oov,
+        "log_loss": ll_sum / n if n else float("nan"),
+        "brier": brier_sum / n if n else float("nan"),
+        "ece": _ece(confs, corrects, n_bins) if n else float("nan"),
+    }
+
+
+def _ece(confs: Sequence[float], corrects: Sequence[float], n_bins: int) -> float:
+    """Expected calibration error, EQUAL-MASS bins (quantiles of confidence).
+
+    Kull, Perelló-Nieto et al. 2019 / Ferrer 2024 (source 17,
+    ``docs/research/next_moves_literature.md``): a better score does not imply calibration, and
+    calibration needs measuring on its own terms. Equal-mass rather than equal-width so a
+    heavy-tailed confidence distribution (this corpus's) does not leave the top bins empty.
+    """
+    n = len(confs)
+    if n == 0:
+        return float("nan")
+    order = sorted(range(n), key=lambda i: confs[i])
+    bounds = [round(i * n / n_bins) for i in range(n_bins + 1)]
+    ece = 0.0
+    for lo, hi in zip(bounds, bounds[1:]):
+        if hi <= lo:
+            continue
+        idx = order[lo:hi]
+        bin_conf = sum(confs[i] for i in idx) / len(idx)
+        bin_acc = sum(corrects[i] for i in idx) / len(idx)
+        ece += (len(idx) / n) * abs(bin_conf - bin_acc)
+    return ece
+
+
+def temperature_scaled_dist(
+    model: MarkovNextMoves, state: str, history: Sequence[Any], temperature: float
+) -> dict[str, float]:
+    """``model``'s distribution rescaled by ONE scalar temperature on ``log_prior`` (H3).
+
+    ``P_T(y) = softmax(log P(y) / T)`` — the standard multiclass temperature scaling (Guo et al.
+    2017; Kull et al. 2019, source 17), applied to the count model's own log-probabilities
+    rather than to NN logits, which is the same operation: it sharpens (``T<1``) or flattens
+    (``T>1``) the distribution without changing its ranking.
+    """
+    lp = log_prior(model, state, history)
+    m = max(lp.values())
+    exps = {lb: math.exp((v - m) / temperature) for lb, v in lp.items()}
+    z = sum(exps.values())
+    return {lb: v / z for lb, v in exps.items()}
+
+
+def fit_temperature(
+    model: MarkovNextMoves,
+    points: Sequence[DecisionPoint],
+    *,
+    bounds: tuple[float, float] = (0.05, 20.0),
+) -> float:
+    """ONE scalar temperature minimising log-loss on ``points`` — TRAIN only, never validation.
+
+    ``scipy.optimize.minimize_scalar``, bounded. More than one calibration parameter is out of
+    scope at this corpus's size (H3 pre-registration) — that bound is itself the finding if a
+    single scalar cannot fix the calibration.
+    """
+    from scipy.optimize import minimize_scalar
+
+    def loss(t: float) -> float:
+        total = 0.0
+        n = 0
+        for p in points:
+            d = temperature_scaled_dist(model, p.state, p.history, t)
+            if p.target not in d:
+                continue
+            total += -math.log(d[p.target])
+            n += 1
+        return total / n if n else float("inf")
+
+    res = minimize_scalar(loss, bounds=bounds, method="bounded")
+    return float(res.x)
 
 
 def markov_rank_fn(model: MarkovNextMoves) -> Any:
@@ -535,6 +677,185 @@ def rolling_origin_folds(
             row["markov_top3_lo"] = m_eval.get("top3_lo")
             row["markov_top3_hi"] = m_eval.get("top3_hi")
         rows.append(row)
+    return rows
+
+
+# ── H2: the clock (staleness / elapsed-time ablation) ──────────────────────────
+
+
+def staleness_bucket(staleness: int) -> int:
+    """Arm (a)'s bucket: ``min(events since state, 3)`` — pre-registered in
+    ``docs/research/next_moves_literature.md`` §H2."""
+    return min(max(staleness, 0), 3)
+
+
+def elapsed_bucket(elapsed_ts: float | None, *, bucket_s: float = 15.0) -> int:
+    """Arm (b)'s bucket: 15-second-wide buckets, capped at 3 (same shape as
+    :func:`staleness_bucket` so the two arms are directly comparable). ``None`` (no numeric
+    ``ts`` on one of the two events) has no bucket here — callers must exclude those points
+    rather than default them into bucket 0, same convention E9 used for its 47 missing-``ts``
+    bouts (docs/research/next_moves_literature.md §H2)."""
+    if elapsed_ts is None:
+        raise ValueError("elapsed_ts is None — exclude the point, do not bucket it")
+    return min(int(max(elapsed_ts, 0.0) // bucket_s), 3)
+
+
+class StalenessMarkovNextMoves(MarkovNextMoves):
+    """H2 ablation: the level-2 context is ``(state, prev_action, bucket)`` instead of
+    ``(state, prev_action)``. Same Witten-Bell cascade, same backoff to ``(state)`` then the
+    unigram (``MarkovNextMoves._wb``/``_p0``) — this is a different KEY on the existing count
+    model, not a new model class (docs/research/next_moves_literature.md §H2: "no new model
+    class").
+
+    ``feature``: ``"staleness"`` (arm a), ``"elapsed"`` (arm b, drops points with no
+    ``elapsed_ts`` from BOTH fit and scoring) or ``"both"`` (arm c).
+    """
+
+    def __init__(
+        self, vocab: Sequence[str], *, feature: str = "staleness", max_order: int = 2
+    ) -> None:
+        if feature not in ("staleness", "elapsed", "both"):
+            raise ValueError(f"feature must be staleness/elapsed/both, got {feature!r}")
+        super().__init__(vocab, max_order=max_order)
+        self.feature = feature
+        self._c2b: dict[tuple[Any, ...], Counter[str]] = defaultdict(Counter)
+
+    def _usable(self, p: DecisionPoint) -> bool:
+        return self.feature == "staleness" or p.elapsed_ts is not None
+
+    def _bucket(self, p: DecisionPoint) -> tuple[int, ...]:
+        if self.feature == "staleness":
+            return (staleness_bucket(p.staleness),)
+        if self.feature == "elapsed":
+            return (elapsed_bucket(p.elapsed_ts),)
+        return (staleness_bucket(p.staleness), elapsed_bucket(p.elapsed_ts))
+
+    def fit(self, points: Iterable[DecisionPoint]) -> StalenessMarkovNextMoves:
+        for p in points:
+            if p.target not in self._index:
+                self.n_oov += 1
+                continue
+            if not self._usable(p):
+                continue  # feature="elapsed"/"both" and this point has no ts — excluded, not OOV
+            self.n_fitted += 1
+            self._c0[p.target] += 1
+            self._c1[p.state][p.target] += 1
+            prev = p.history[-1][0] if p.history else ""
+            key = (p.state, prev, *self._bucket(p))
+            self._c2b[key][p.target] += 1
+            if p.rel_readable and p.target_rel != UNK:
+                self._rel[(p.state, p.target)][p.target_rel] += 1
+        return self
+
+    def dist_for_point(self, p: DecisionPoint) -> dict[str, float]:
+        """Full distribution conditioned on this exact point's state/history/bucket."""
+        prev = p.history[-1][0] if p.history else ""
+        key = (p.state, prev, *self._bucket(p))
+        c1 = self._c1.get(p.state, Counter())
+        c2 = self._c2b.get(key, Counter())
+        out = {}
+        for lb in self.vocab:
+            v = self._p0(lb)
+            if self.max_order >= 1:
+                v = self._wb(c1, lb, v)
+            if self.max_order >= 2:
+                v = self._wb(c2, lb, v)
+            out[lb] = v
+        return out
+
+    def rank_for_point(self, p: DecisionPoint, k: int) -> list[tuple[str, float, str]]:
+        d = self.dist_for_point(p)
+        ordered = sorted(d.items(), key=lambda kv: (-kv[1], kv[0]))[: max(0, k)]
+        return [(lb, pr, self.rel_of(p.state, lb)[0]) for lb, pr in ordered]
+
+
+def staleness_ablation(
+    bouts: Sequence[Mapping[str, Any]],
+    cutoffs: Sequence[int] = (2023, 2024, 2025),
+    *,
+    library: Sequence[Mapping[str, Any]] | None = None,
+    features: Sequence[str] = ("staleness",),
+    history_n: int = HISTORY_N,
+) -> list[dict[str, Any]]:
+    """H2 — one row per (fold, feature): does the clock beat plain ``(state, prev_action)``?
+
+    Kill rule (pre-registered, docs/research/next_moves_literature.md §H2): if ``"staleness"``
+    is null, do not evaluate ``"elapsed"``/``"both"`` — pass ``features=("staleness",)`` until
+    that row is read, exactly like :func:`rolling_origin_folds` reuses :func:`evaluate` so every
+    row in this table is computed the same way as every other table in this module.
+    """
+    from analysis.stats_rigor import bootstrap_ci
+
+    lib = library if library is not None else library_actions()
+    rows: list[dict[str, Any]] = []
+    for cutoff in cutoffs:
+        train_bouts, _ = split_by_year(bouts, cutoff)
+        test_bouts = [b for b in bouts if int(b.get("year") or 0) == cutoff + 1]
+        if not train_bouts or not test_bouts:
+            for feature in features:
+                rows.append(
+                    {
+                        "cutoff": cutoff,
+                        "test_year": cutoff + 1,
+                        "feature": feature,
+                        "skipped": "no bouts in train or in the test year",
+                    }
+                )
+            continue
+        ptr, _ = corpus_points(train_bouts, history_n=history_n)
+        pte, _ = corpus_points(test_bouts, history_n=history_n)
+        vocab = build_vocab(ptr, lib)
+        base = MarkovNextMoves(vocab, max_order=2).fit(ptr)
+
+        def base_dist(p: DecisionPoint, base: MarkovNextMoves = base) -> dict[str, float]:
+            return base.dist(p.state, p.history)
+
+        for feature in features:
+            eval_pts = (
+                pte if feature == "staleness" else [p for p in pte if p.elapsed_ts is not None]
+            )
+            arm = StalenessMarkovNextMoves(vocab, feature=feature).fit(ptr)
+
+            def arm_dist(
+                p: DecisionPoint, arm: StalenessMarkovNextMoves = arm
+            ) -> dict[str, float]:
+                return arm.dist_for_point(p)
+
+            def arm_rank(
+                p: DecisionPoint, k: int, arm: StalenessMarkovNextMoves = arm
+            ) -> list[tuple[str, float, str]]:
+                return arm.rank_for_point(p, k)
+
+            diffs: list[float] = []
+            groups: list[str] = []
+            for p in eval_pts:
+                bd, ad = base_dist(p), arm_dist(p)
+                if p.target not in bd or p.target not in ad:
+                    continue
+                diffs.append(-math.log(bd[p.target]) - (-math.log(ad[p.target])))
+                groups.append(p.bout_id)
+            gain, lo, hi = (
+                bootstrap_ci(diffs, lambda v: sum(v) / len(v), groups=groups)
+                if diffs
+                else (float("nan"), float("nan"), float("nan"))
+            )
+            m_eval = evaluate(markov_rank_fn(base), eval_pts, ks=(1, 3, 5))
+            a_eval = evaluate(arm_rank, eval_pts, ks=(1, 3, 5))
+            rows.append(
+                {
+                    "cutoff": cutoff,
+                    "test_year": cutoff + 1,
+                    "feature": feature,
+                    "n": len(diffs),
+                    "n_excluded_no_ts": len(pte) - len(eval_pts),
+                    "logloss_gain": gain,
+                    "logloss_gain_lo": lo,
+                    "logloss_gain_hi": hi,
+                    "base_top3": m_eval["top3"],
+                    "arm_top3": a_eval["top3"],
+                    "top3_gain_pp": (a_eval["top3"] - m_eval["top3"]) * 100,
+                }
+            )
     return rows
 
 

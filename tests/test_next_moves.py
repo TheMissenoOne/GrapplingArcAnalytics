@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
@@ -9,16 +11,24 @@ from analysis.next_moves import (
     OPP,
     OWN,
     UNK,
+    DecisionPoint,
     MarkovNextMoves,
+    StalenessMarkovNextMoves,
     build_vocab,
+    calibration_metrics,
     corpus_points,
     decision_points,
+    elapsed_bucket,
     evaluate,
+    fit_temperature,
     log_prior,
     markov_rank_fn,
     rolling_origin_folds,
     split_by_bout,
     split_by_year,
+    staleness_ablation,
+    staleness_bucket,
+    temperature_scaled_dist,
 )
 from analysis.next_moves_embed import (
     EmbedRanker,
@@ -70,6 +80,23 @@ def test_unreadable_actor_field_makes_every_rel_unknown():
     assert all(not p.rel_readable for p in pts)
     # the label target is unaffected — that is the whole point of separating the two
     assert [p.target for p in pts] == [p.target for p in decision_points(SEQ, "b1")]
+
+
+def test_decision_points_track_staleness_and_elapsed_ts():
+    pts = decision_points(SEQ, "b1")  # no `ts` field anywhere in SEQ
+    assert [p.staleness for p in pts] == [1, 2, 1]
+    assert [p.elapsed_ts for p in pts] == [None, None, None]
+
+    seq_ts = [
+        {"label": "Closed Guard", "type": "guard", "actor_id": "A", "ts": 0},
+        {"label": "Armbar", "type": "submission", "actor_id": "A", "ts": 5},
+        {"label": "Guard Pass", "type": "pass", "actor_id": "B", "ts": 12},
+        {"label": "Mount", "type": "control", "actor_id": "B", "ts": 20},
+        {"label": "Armbar", "type": "submission", "actor_id": "B", "ts": 22},
+    ]
+    pts2 = decision_points(seq_ts, "b1")
+    assert [p.staleness for p in pts2] == [1, 2, 1]
+    assert [p.elapsed_ts for p in pts2] == [5.0, 12.0, 2.0]
 
 
 def test_history_carries_previous_actions_relative_to_the_current_state():
@@ -354,3 +381,166 @@ def test_guidance_block_prints_the_markov_probability_even_when_the_order_is_hyb
 
 def test_guidance_block_is_empty_without_a_model():
     assert guidance_block("Closed Guard", (), OWN, model=None) == ""
+
+
+# ── H3: calibration (log-loss / Brier / ECE / temperature) ─────────────────────
+
+
+class _Pt:
+    """Everything :func:`calibration_metrics` touches is ``.target`` — no need for a real
+    ``DecisionPoint`` to pin down the arithmetic."""
+
+    def __init__(self, target: str) -> None:
+        self.target = target
+
+
+def test_calibration_metrics_known_answer():
+    # p1: correctly top-ranked (conf 0.6, correct); p2: wrongly top-ranked (conf 0.7, wrong).
+    dists = {
+        "p1": {"a": 0.6, "b": 0.4},
+        "p2": {"a": 0.3, "b": 0.7},
+    }
+    pts = [_Pt("a"), _Pt("a")]
+    keys = ["p1", "p2"]
+
+    def dist_fn(p, _it=iter(keys)):
+        return dists[next(_it)]
+
+    res = calibration_metrics(dist_fn, pts, n_bins=1)
+    assert res["calib_n"] == 2
+    assert res["calib_n_oov"] == 0
+    assert res["log_loss"] == pytest.approx((-math.log(0.6) - math.log(0.3)) / 2, abs=1e-9)
+    assert res["brier"] == pytest.approx((0.32 + 0.98) / 2, abs=1e-9)
+    # one bin: mean confidence 0.65, mean accuracy 0.5 (p1 top1 hit, p2 top1 miss)
+    assert res["ece"] == pytest.approx(0.15, abs=1e-9)
+
+
+def test_calibration_metrics_excludes_out_of_vocabulary_targets():
+    res = calibration_metrics(lambda p: {"a": 1.0}, [_Pt("z")])
+    assert res["calib_n"] == 0
+    assert res["calib_n_oov"] == 1
+    assert math.isnan(res["log_loss"])
+
+
+def test_evaluate_reports_calibration_when_given_a_dist_fn(fitted):
+    pts = decision_points(SEQ, "b1")
+    res = evaluate(markov_rank_fn(fitted), pts, dist_fn=lambda p: fitted.dist(p.state, p.history))
+    assert res["calib_n"] == 3
+    assert res["log_loss"] > 0.0
+    assert 0.0 <= res["ece"] <= 1.0
+
+
+def test_temperature_one_reproduces_the_prior(fitted):
+    lp = log_prior(fitted, "Closed Guard", ())
+    scaled = temperature_scaled_dist(fitted, "Closed Guard", (), 1.0)
+    d = fitted.dist("Closed Guard", ())
+    for lb in fitted.vocab:
+        assert scaled[lb] == pytest.approx(d[lb], abs=1e-9)
+    assert set(lp) == set(scaled)
+
+
+def test_temperature_below_one_sharpens_above_one_flattens(fitted):
+    d = fitted.dist("Closed Guard", ())
+    sharp = temperature_scaled_dist(fitted, "Closed Guard", (), 0.3)
+    flat = temperature_scaled_dist(fitted, "Closed Guard", (), 3.0)
+    assert max(sharp.values()) > max(d.values()) > max(flat.values())
+
+
+def test_fit_temperature_does_not_make_train_logloss_worse(fitted):
+    pts = decision_points(SEQ, "b1")
+
+    def train_ll(t: float) -> float:
+        total = 0.0
+        for p in pts:
+            d = temperature_scaled_dist(fitted, p.state, p.history, t)
+            total += -math.log(d[p.target])
+        return total / len(pts)
+
+    t = fit_temperature(fitted, pts, bounds=(0.05, 20.0))
+    assert 0.05 <= t <= 20.0
+    assert train_ll(t) <= train_ll(1.0) + 1e-9
+
+
+# ── H2: staleness / elapsed-time ablation ───────────────────────────────────────
+
+
+def test_staleness_bucket_clips_at_zero_and_three():
+    assert [staleness_bucket(x) for x in (-1, 0, 1, 3, 5, 26)] == [0, 0, 1, 3, 3, 3]
+
+
+def test_elapsed_bucket_is_15s_wide_and_capped():
+    assert elapsed_bucket(0.0) == 0
+    assert elapsed_bucket(14.9) == 0
+    assert elapsed_bucket(15.0) == 1
+    assert elapsed_bucket(44.9) == 2
+    assert elapsed_bucket(1000.0) == 3
+
+
+def test_elapsed_bucket_refuses_to_default_a_missing_ts():
+    with pytest.raises(ValueError, match="exclude"):
+        elapsed_bucket(None)
+
+
+def _dp(
+    state: str, target: str, staleness: int, *, elapsed=None, bout: str = "b1"
+) -> DecisionPoint:
+    return DecisionPoint(
+        bout_id=bout,
+        state=state,
+        state_type="",
+        history=(),
+        target=target,
+        target_rel=OWN,
+        rel_readable=True,
+        event_index=0,
+        staleness=staleness,
+        elapsed_ts=elapsed,
+    )
+
+
+def test_staleness_context_separates_what_state_plus_prev_action_cannot():
+    # Same (state, prev_action="") for every point; only the staleness bucket differs.
+    low = [_dp("Mount", "Armbar", 1, bout=f"lo{i}") for i in range(5)]
+    high = [_dp("Mount", "Heel Hook", 10, bout=f"hi{i}") for i in range(5)]
+    pts = low + high
+    vocab = ["Armbar", "Heel Hook"]
+
+    base = MarkovNextMoves(vocab).fit(pts)
+    # 5/5 tie at (Mount, "") for the plain model — ties break alphabetically, always "Armbar".
+    assert base.rank_next_moves("Mount", (), 1)[0][0] == "Armbar"
+
+    arm = StalenessMarkovNextMoves(vocab, feature="staleness").fit(pts)
+    assert arm.rank_for_point(_dp("Mount", "", 1), 1)[0][0] == "Armbar"
+    assert arm.rank_for_point(_dp("Mount", "", 10), 1)[0][0] == "Heel Hook"
+
+
+def test_elapsed_feature_excludes_points_with_no_ts_from_fit():
+    pts = [_dp("Mount", "Armbar", 1, elapsed=None)]
+    arm = StalenessMarkovNextMoves(["Armbar"], feature="elapsed").fit(pts)
+    assert arm.n_fitted == 0
+
+
+def test_both_feature_keys_on_staleness_and_elapsed_together():
+    pts = [_dp("Mount", "Armbar", 1, elapsed=5.0), _dp("Mount", "Heel Hook", 1, elapsed=200.0)]
+    arm = StalenessMarkovNextMoves(["Armbar", "Heel Hook"], feature="both").fit(pts)
+    assert arm.rank_for_point(_dp("Mount", "", 1, elapsed=5.0), 1)[0][0] == "Armbar"
+    assert arm.rank_for_point(_dp("Mount", "", 1, elapsed=200.0), 1)[0][0] == "Heel Hook"
+
+
+def test_staleness_ablation_returns_one_row_per_fold_and_feature():
+    bouts = _year_bouts([2021, 2022, 2023, 2024, 2025])
+    rows = staleness_ablation(
+        bouts, cutoffs=(2022, 2023, 2024), library=[], features=("staleness",)
+    )
+    assert [r["cutoff"] for r in rows] == [2022, 2023, 2024]
+    for r in rows:
+        assert "skipped" not in r
+        assert r["feature"] == "staleness"
+        assert "logloss_gain" in r
+        assert "top3_gain_pp" in r
+
+
+def test_staleness_ablation_skips_a_cutoff_with_no_next_year():
+    bouts = _year_bouts([2022, 2023])
+    rows = staleness_ablation(bouts, cutoffs=(2023,), library=[], features=("staleness",))
+    assert rows[0]["skipped"]

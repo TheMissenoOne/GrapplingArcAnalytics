@@ -136,6 +136,47 @@ stronger. Conditioning on the state is worth roughly twice as much against a dri
 the historical table), because random-by-bout blurs the marginal's own year-over-year drift
 into the training set.
 
+### 3b. H2 — the clock: staleness and elapsed-time as an ablation
+
+**Backlog:** `docs/research/next_moves_literature.md` §H2, pre-registered 2026-09-11.
+**Claim:** the next action depends on how long the corpus has been sitting in the current state
+— (a) staleness, `min(events since the state event, 3)`, and (b) an elapsed-time bucket from
+`ts` (kept only if (a) is not null). **Metric:** held-out log-loss (primary) and top-3
+(secondary), chronological split, same three rolling-origin folds as §3a. **Threshold:** the
+duration-conditioned model wins if log-loss improves by ≥ 0.05 nats with a 95% cluster-bootstrap
+interval (over bouts) excluding 0, **or** top-3 improves by ≥ 5 pp. **Kill rule:** if (a) alone
+is null, (b) is not built.
+
+**Implementation** (`analysis.next_moves.StalenessMarkovNextMoves`, `analysis.next_moves.
+staleness_ablation`): the level-2 Witten-Bell context becomes `(state, prev_action, bucket)`
+instead of `(state, prev_action)` — a different key on the SAME count model and backoff cascade,
+not a new model class, per the pre-registration.
+
+**Run 2026-09-11**, offline, cached corpus, arm (a) only:
+
+| fold | n | log-loss gain (nats) | 95% CI (cluster, by bout) | top-3 gain (pp) |
+|---|---|---|---|---|
+| ≤2023 → 2024 | 918 | +0.035 | [−0.005, +0.074] | +0.2 |
+| ≤2024 → 2025 | 1 304 | +0.009 | [−0.020, +0.040] | −1.0 |
+| ≤2025 → 2026 | 658 | −0.032 | [−0.096, +0.025] | 0.0 |
+
+**Verdict: NULL.** Every fold's CI crosses 0, no fold clears +0.05 nats or +5 pp, and the point
+estimate is not even consistently signed (positive in two folds, negative in the third — noise,
+not a trend). **Kill rule invoked: arm (b), the elapsed-time bucket, is not built or reported.**
+This is a clean negative, not a bug — `n_excluded_no_ts` was 0 in every fold (this corpus's `ts`
+coverage is complete on the bouts that reach a decision point), so the null is not an artefact of
+missing timestamps; the staleness signal simply is not separable from `(state, prev_action)` at
+this sample size. Consistent with §6: staleness is a symptom of the corpus's logging gap (median
+2, max 26 events between a state event and the next action), not an independent predictor once
+the state and previous action are already in the context — the two are correlated by
+construction (a stale state is usually reached after more intervening actions, which is exactly
+what `prev_action` already partially encodes). Reproduce with:
+
+```python
+from analysis.next_moves import staleness_ablation
+rows = staleness_ablation(bouts, cutoffs=(2023, 2024, 2025), features=("staleness",))
+```
+
 ---
 
 ## 4. Models
@@ -273,6 +314,74 @@ edges the baseline is gemini α=0.25 on top-5 and MRR — a hint, not a result, 
 points), 880 918 characters ≈ **220 k tokens**, **38 API calls** — one pass, then cached at
 `data/next_moves/emb_cache.json` (61 MB, keyed `model\ntext`) so every re-run is free. Well
 inside the round's ~200-call ceiling. mpnet cost nothing.
+
+### 5c. H3 — calibration of the probability we already print
+
+**Backlog:** `docs/research/next_moves_literature.md` §H3, pre-registered 2026-09-11.
+**Claim:** the guidance block and the planned App export print a Markov probability
+("Triangle Choke 29%") that has never been checked as a probability. **Metric:** held-out
+log-loss, multiclass Brier, and ECE (10 equal-mass bins on top-1 confidence), chronological
+split, same three rolling-origin folds as §3a/§5a. **Threshold:** "fit to publish a percentage"
+needs **ECE ≤ 0.05 AND log-loss beats the marginal baseline by ≥ 0.05 nats**. If FAIL, fit ONE
+temperature on `log_prior` on TRAIN only (`analysis.next_moves.fit_temperature`,
+`scipy.optimize.minimize_scalar`) and re-measure on the same test fold.
+
+**Run 2026-09-11**, offline, cached corpus (`analysis.next_moves.evaluate(..., dist_fn=...)`):
+
+| fold | n (calib) | **Markov log-loss** | marginal log-loss | gain (nats) | Markov Brier | **ECE** |
+|---|---|---|---|---|---|---|
+| ≤2023 → 2024 | 918 | 4.321 | 4.044 | **−0.277** | 1.011 | **0.184** |
+| ≤2024 → 2025 | 1 304 | 4.063 | 3.965 | **−0.097** | 0.974 | **0.113** |
+| ≤2025 → 2026 | 658 | 4.214 | 4.156 | **−0.058** | 0.993 | **0.140** |
+
+The Markov model **loses** to the flatter marginal on log-loss in all three folds — the opposite
+sign from the threshold — and ECE (11-18%) is 2-4× the 0.05 bar. This is not a contradiction of
+§5a: top-3 accuracy is a ranking metric and log-loss is a strictly proper scoring rule (source
+16, Gneiting & Raftery 2007) — they answer different questions, and a model that ranks the right
+label higher can still spread too much or too little mass across the wrong ones to be a good
+probability. **Verdict before temperature: FAIL on both legs, every fold.**
+
+Temperature, fit on TRAIN only, re-evaluated on TEST:
+
+| fold | T (train-fit) | log-loss before → after | ECE before → after |
+|---|---|---|---|
+| ≤2023 → 2024 | 0.609 | 4.321 → **5.680** | 0.184 → **0.397** |
+| ≤2024 → 2025 | 0.616 | 4.063 → **5.069** | 0.113 → **0.296** |
+| ≤2025 → 2026 | 0.648 | 4.214 → **5.104** | 0.140 → **0.265** |
+
+`T < 1` sharpens the distribution — that is what minimises TRAIN log-loss, because the fitted
+model is memorising training contexts (§9: 64.6% train top-3 vs 27.2% val, already flagged as a
+large train/val gap). Sharpening a distribution that is confidently right on train and mediocre
+on held-out data makes held-out log-loss and ECE **worse**, not better, in every fold. One scalar
+cannot fix this calibration — the failure is in what the count model is confident ABOUT, not in
+how sharp or flat its curve is overall. **Verdict after temperature: still FAIL, every fold, and
+by a wide margin — temperature scaling is actively harmful here, not neutral.**
+
+**Consequence (per the pre-registration): the App/guidance export must show rank and count, not
+a percentage.** The Markov probability printed today (`next_moves_embed.guidance_block`'s
+`{share:.1%}`, and the planned `{state: [[label, p], …]}` App export in `docs/next_moves.md` §7)
+is not a calibrated confidence and this measurement is the first time anyone checked. This is a
+**product decision for the orchestrator**, not made here — the concrete change, if adopted,
+is: `guidance_block` prints `label — rank N of K (seen M times from this position)` instead of
+`label — 29%`, and the App export ships `{state: [[label, rank, count], …]}` instead of a
+probability column. Neither `guidance_block` nor the export shape was touched by this round.
+
+Reproduce:
+
+```python
+from analysis.next_moves import (
+    split_by_year, corpus_points, build_vocab, library_actions,
+    MarkovNextMoves, evaluate, markov_rank_fn, fit_temperature, temperature_scaled_dist,
+)
+train, _ = split_by_year(bouts, 2025)
+test = [b for b in bouts if b.get("year") == 2026]
+ptr, _ = corpus_points(train); pte, _ = corpus_points(test)
+vocab = build_vocab(ptr, library_actions())
+m = MarkovNextMoves(vocab, max_order=2).fit(ptr)
+evaluate(markov_rank_fn(m), pte, dist_fn=lambda p: m.dist(p.state, p.history))
+T = fit_temperature(m, ptr)
+evaluate(markov_rank_fn(m), pte, dist_fn=lambda p: temperature_scaled_dist(m, p.state, p.history, T))
+```
 
 ---
 
