@@ -208,3 +208,85 @@ def test_unique_names_are_left_alone() -> None:
     v = np.zeros(2 * len(_TYPES)).tolist()
     names = ["Passing Specialist", "Control-Based"]
     assert _dedupe_names(names, [v, v]) == names
+
+
+# ── interpretability baseline report (scripts/research/archetype_interpretability.py) ────
+
+def _synthetic_population():
+    """9 eligible graphs in 3 well-separated groups + 1 excluded — no DB."""
+    from scripts.research.archetype_interpretability import ClusterPopulation
+
+    groups = {
+        1: ["guard"] * 6 + ["control"] * 2,
+        2: ["submission"] * 6 + ["takedown"] * 2,
+        3: ["pass"] * 6 + ["escape"] * 2,
+    }
+    rows, persisted, athlete_names, archetypes = [], {}, {}, {}
+    for aid, types in groups.items():
+        archetypes[aid] = {
+            "name": f"Cluster {aid}",
+            "key": f"cluster-{aid}",
+            "signature_types": [],
+            "centroid_vec": graph_feature_vector(_nodes(types), *_EMPTY),
+        }
+        for i in range(3):
+            gid = f"g{aid}-{i}"
+            rows.append((gid, _nodes(types)))
+            persisted[gid] = aid
+            athlete_names[gid] = (f"athlete-{aid}-{i}", f"Athlete {aid}-{i}")
+    excluded = [("gx-empty", "0 grappling node(s)")]
+    return ClusterPopulation(
+        rows=rows, excluded=excluded, persisted=persisted, archetypes=archetypes,
+        athlete_names=athlete_names, by_key={}, by_type={},
+    )
+
+
+def test_build_report_shape():
+    from scripts.research.archetype_interpretability import build_report_from_population
+
+    report = build_report_from_population(_synthetic_population(), k=3, n_bootstrap=5, seed=42)
+    assert set(report) == {
+        "feature_version_prefix", "k", "n_bootstrap", "n_graphs_total", "n_graphs_eligible",
+        "clusters", "stability", "exemplars", "refusal", "feature_dims",
+    }
+    assert report["n_graphs_eligible"] == 9
+    assert report["n_graphs_total"] == 10
+    assert len(report["clusters"]) == 3
+    assert all(c["size"] == 3 for c in report["clusters"])
+    assert len(report["feature_dims"]) == FEATURE_LEN
+    for aid in ("1", "2", "3"):
+        assert len(report["exemplars"][aid]) == 3
+    assert report["refusal"]["insufficient_evidence"]["count"] == 1
+    assert report["refusal"]["insufficient_evidence"]["graph_ids"] == ["gx-empty"]
+    assert report["refusal"]["no_assignment"]["count"] == 0
+    stab = report["stability"]
+    assert stab["n_graphs"] == 9
+    assert 0.0 <= stab["mean_ari"] <= 1.0
+    assert set(stab["churn_by_graph"]) <= {gid for gid, _ in _synthetic_population().rows}
+
+
+def test_build_report_deterministic():
+    from scripts.research.archetype_interpretability import build_report_from_population
+
+    r1 = build_report_from_population(_synthetic_population(), k=3, n_bootstrap=5, seed=42)
+    r2 = build_report_from_population(_synthetic_population(), k=3, n_bootstrap=5, seed=42)
+    assert r1 == r2
+
+
+def test_resample_ari_identity_is_one():
+    from sklearn.cluster import KMeans
+
+    from scripts.research.archetype_interpretability import _resample_ari
+
+    rng = np.random.default_rng(0)
+    vectors = np.vstack([
+        rng.normal(loc=[0, 0, 0], scale=0.05, size=(5, 3)),
+        rng.normal(loc=[5, 0, 0], scale=0.05, size=(5, 3)),
+        rng.normal(loc=[0, 5, 0], scale=0.05, size=(5, 3)),
+    ])
+    seed = 7
+    persisted = KMeans(n_clusters=3, random_state=seed, n_init="auto").fit_predict(vectors)
+    idx = np.arange(len(vectors))
+
+    ari, _boot_labels = _resample_ari(vectors, persisted, idx, k=3, seed=seed)
+    assert ari == 1.0
