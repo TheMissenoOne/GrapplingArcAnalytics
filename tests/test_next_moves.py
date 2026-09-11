@@ -16,7 +16,9 @@ from analysis.next_moves import (
     evaluate,
     log_prior,
     markov_rank_fn,
+    rolling_origin_folds,
     split_by_bout,
+    split_by_year,
 )
 from analysis.next_moves_embed import (
     EmbedRanker,
@@ -103,6 +105,30 @@ def test_split_is_deterministic():
     pts = [p for i in range(30) for p in decision_points(SEQ, f"b{i:02d}")]
     assert split_by_bout(pts) == split_by_bout(pts)
     assert split_by_bout(pts)[1] != split_by_bout(pts, seed=1)[1]
+
+
+def test_split_by_year_respects_the_cutoff_and_never_leaks():
+    bouts = [
+        {"id": "b2022", "year": 2022, "a": "A", "b": "B", "sequence": SEQ},
+        {"id": "b2024", "year": 2024, "a": "A", "b": "B", "sequence": SEQ},
+        {"id": "b2025", "year": 2025, "a": "A", "b": "B", "sequence": SEQ},
+        {"id": "b2026", "year": 2026, "a": "A", "b": "B", "sequence": SEQ},
+    ]
+    train, test = split_by_year(bouts, 2025)
+    assert {b["id"] for b in train} == {"b2022", "b2024", "b2025"}
+    assert {b["id"] for b in test} == {"b2026"}
+    assert not ({b["id"] for b in train} & {b["id"] for b in test})
+    # deterministic — same call, same order
+    assert split_by_year(bouts, 2025) == (train, test)
+
+
+def test_split_by_year_is_deterministic_and_sorted():
+    bouts = [
+        {"id": "b02", "year": 2024, "a": "A", "b": "B", "sequence": SEQ},
+        {"id": "b01", "year": 2024, "a": "A", "b": "B", "sequence": SEQ},
+    ]
+    train, _ = split_by_year(bouts, 2025)
+    assert [b["id"] for b in train] == ["b01", "b02"]
 
 
 def test_vocab_is_built_from_train_only():
@@ -221,6 +247,34 @@ def test_cluster_ci_brackets_the_point_estimate():
     pts = [p for i in range(20) for p in decision_points(SEQ, f"b{i:02d}")]
     res = evaluate(lambda _p, k: [("Armbar", 1.0, OWN)][:k], pts, ci=True)
     assert res["top3_lo"] <= res["top3"] <= res["top3_hi"]
+
+
+# ── H1: rolling-origin chronological evaluation ─────────────────────────────────
+
+
+def _year_bouts(years, per_year=3):
+    return [
+        {"id": f"b{y}-{i}", "year": y, "a": "A", "b": "B", "sequence": SEQ}
+        for y in years
+        for i in range(per_year)
+    ]
+
+
+def test_rolling_origin_folds_returns_one_row_per_fold():
+    bouts = _year_bouts([2021, 2022, 2023, 2024, 2025])
+    rows = rolling_origin_folds(bouts, cutoffs=(2022, 2023, 2024), library=[])
+    assert [r["cutoff"] for r in rows] == [2022, 2023, 2024]
+    assert [r["test_year"] for r in rows] == [2023, 2024, 2025]
+    for r in rows:
+        assert "skipped" not in r
+        assert 0.0 <= r["markov_top3"] <= 1.0
+        assert 0.0 <= r["marginal_top3"] <= 1.0
+
+
+def test_rolling_origin_folds_skips_a_cutoff_with_no_next_year():
+    bouts = _year_bouts([2022, 2023])
+    rows = rolling_origin_folds(bouts, cutoffs=(2023,), library=[])
+    assert rows[0]["skipped"]
 
 
 # ── embedding layer ─────────────────────────────────────────────────────────────

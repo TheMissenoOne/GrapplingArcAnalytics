@@ -74,6 +74,11 @@ would need its own held-out fold and this baseline has to be reproducible withou
 ``split_by_bout`` splits **by bout id**, never by decision point. Two decision points from the
 same bout share a state vocabulary, an athlete pair and a referee — putting one in train and
 one in validation leaks. Deterministic: sorted ids, seeded shuffle.
+
+``split_by_year`` + ``rolling_origin_folds`` are the chronological protocol
+``docs/research/next_moves_literature.md`` §H1 confirmed random-by-bout is optimistic on this
+corpus (calendar drift, not just within-bout leakage). Random split is kept only to reproduce
+the historical table in ``docs/next_moves.md``; every new headline number must be chronological.
 """
 
 from __future__ import annotations
@@ -230,6 +235,26 @@ def split_by_bout(
     train = [p for p in points if p.bout_id not in val_ids]
     val = [p for p in points if p.bout_id in val_ids]
     return train, val
+
+
+def split_by_year(
+    bouts: Iterable[Mapping[str, Any]], cutoff: int
+) -> tuple[list[Mapping[str, Any]], list[Mapping[str, Any]]]:
+    """Chronological split, **by bout**: train ``year <= cutoff``, test ``year > cutoff``.
+
+    Deterministic — a filter, no shuffle — and returned sorted by bout id so re-running is
+    byte-identical. ``docs/research/next_moves_literature.md`` §2b/§H1: random-by-bout
+    (``split_by_bout``) lets the model train on 2026 bouts and predict 2025 ones; this is the
+    honest protocol every future headline number must use. A bout with no/zero year sorts into
+    train (``<= cutoff`` is true for ``year=0``) rather than silently vanishing.
+    """
+    train = sorted(
+        (b for b in bouts if int(b.get("year") or 0) <= cutoff), key=lambda b: str(b["id"])
+    )
+    test = sorted(
+        (b for b in bouts if int(b.get("year") or 0) > cutoff), key=lambda b: str(b["id"])
+    )
+    return train, test
 
 
 # ── vocabulary ──────────────────────────────────────────────────────────────────
@@ -452,6 +477,65 @@ def markov_rank_fn(model: MarkovNextMoves) -> Any:
         ]
 
     return fn
+
+
+def rolling_origin_folds(
+    bouts: Sequence[Mapping[str, Any]],
+    cutoffs: Sequence[int] = (2023, 2024, 2025),
+    *,
+    library: Sequence[Mapping[str, Any]] | None = None,
+    ks: Sequence[int] = (1, 3, 5),
+    ci: bool = True,
+    history_n: int = HISTORY_N,
+) -> list[dict[str, Any]]:
+    """H1's rolling-origin evaluation — one row per cutoff year, never pooled.
+
+    Fold for ``cutoff`` trains on every bout with ``year <= cutoff`` (:func:`split_by_year`) and
+    tests on the single FOLLOWING year only (``cutoff + 1``), matching the three folds
+    pre-registered in ``docs/research/next_moves_literature.md`` §H1 (≤2023→2024, ≤2024→2025,
+    ≤2025→2026) — a rolling origin, not one growing test tail. Reuses :func:`evaluate` for both
+    the Markov ranker (``max_order=2``) and the marginal-frequency floor (``max_order=0``) so
+    the gain-over-marginal each row reports is computed the same way as every other table in
+    this module. A cutoff with no train or no test bouts is reported ``skipped`` rather than
+    raising — a thin corpus year is a fact about the data, not a bug.
+    """
+    lib = library if library is not None else library_actions()
+    rows: list[dict[str, Any]] = []
+    for cutoff in cutoffs:
+        train_bouts, _ = split_by_year(bouts, cutoff)
+        test_bouts = [b for b in bouts if int(b.get("year") or 0) == cutoff + 1]
+        if not train_bouts or not test_bouts:
+            rows.append(
+                {
+                    "cutoff": cutoff,
+                    "test_year": cutoff + 1,
+                    "skipped": "no bouts in train or in the test year",
+                }
+            )
+            continue
+        ptr, _ = corpus_points(train_bouts, history_n=history_n)
+        pte, _ = corpus_points(test_bouts, history_n=history_n)
+        vocab = build_vocab(ptr, lib)
+        markov = MarkovNextMoves(vocab, max_order=2).fit(ptr)
+        marginal = MarkovNextMoves(vocab, max_order=0).fit(ptr)
+        m_eval = evaluate(markov_rank_fn(markov), pte, ks=ks, ci=ci)
+        b_eval = evaluate(markov_rank_fn(marginal), pte, ks=ks, ci=False)
+        row = {
+            "cutoff": cutoff,
+            "test_year": cutoff + 1,
+            "train_bouts": len(train_bouts),
+            "train_points": len(ptr),
+            "test_bouts": len(test_bouts),
+            "test_points": len(pte),
+            "marginal_top3": b_eval["top3"],
+            "markov_top3": m_eval["top3"],
+            "gain_top3": m_eval["top3"] - b_eval["top3"],
+        }
+        if ci:
+            row["markov_top3_lo"] = m_eval.get("top3_lo")
+            row["markov_top3_hi"] = m_eval.get("top3_hi")
+        rows.append(row)
+    return rows
 
 
 def log_prior(model: MarkovNextMoves, state: str, history: Sequence[Any]) -> dict[str, float]:
