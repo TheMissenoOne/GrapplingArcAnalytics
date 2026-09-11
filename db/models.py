@@ -542,6 +542,167 @@ class ProfessorEvaluation(Base):
     )
 
 
+class ProfessorProject(Base):
+    """A multi-class teaching project — the professor's own plan, never a student artefact
+    (alembic 0062).
+
+    Deliberately NOT ``user_projects`` (0030): that is the athlete's own training project,
+    device-synced, owner-private. This one is authored by the gym's staff, scoped to a group,
+    and read by nobody else — the two answer different questions and sharing a table would
+    put a professor's plan under a student's owner-scoped RLS.
+
+    Lifecycle is ``status`` ∈ active/paused/completed: active takes new classes and shows on
+    the overview, paused is history that can resume, completed is an immutable summary
+    (``professor_project_attach_class`` refuses both ends of a move once completed) that only
+    an explicit ``professor_project_set_status`` reopen unfreezes.
+
+    RLS: SELECT for the group's owner/professor; **no INSERT/UPDATE/DELETE policy and no such
+    grant** — ``professor_project_upsert``/``_set_status`` (SECURITY DEFINER) are the only
+    writers, same shape as ``class_guests`` (0060)."""
+
+    __tablename__ = "professor_projects"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    group_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("groups.id", ondelete="CASCADE"), nullable=False
+    )
+    created_by: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(Text, nullable=False, server_default="active")
+    starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "status in ('active','paused','completed')", name="ck_professor_projects_status"
+        ),
+        Index("idx_professor_projects_group", "group_id"),
+    )
+
+
+class ProfessorProjectClass(Base):
+    """Which project a class belongs to (alembic 0062).
+
+    The PK is ``class_session_id`` ALONE, and that is the constraint: a class belongs to 0 or 1
+    project, enforced by the database rather than by whoever writes next. "0 or 1 *active*
+    project" cannot be a partial index — ``status`` lives on the other table — so the RPC
+    refuses to move a class into or out of a completed project instead.
+
+    Same-group-ness (project and class under one ``groups`` row) is validated inside
+    ``professor_project_attach_class``; no FK can express it without denormalising
+    ``group_id`` onto this row."""
+
+    __tablename__ = "professor_project_classes"
+
+    class_session_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("class_sessions.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    project_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("professor_projects.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    position: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+    __table_args__ = (Index("idx_professor_project_classes_project", "project_id"),)
+
+
+class ClassFocusSpec(Base):
+    """What a class taught, typed (alembic 0062) — the source of truth behind
+    ``class_sessions.focus_node_keys``.
+
+    ``kind`` ∈ move_set / target_state / sequence. ``node_keys`` is canonical
+    (``normalize_node_key``) and is what EVERY evidence read consumes, whatever the kind — a
+    future kind stays additive precisely by populating it with the items whose attempts count.
+    ``sequence_steps`` is a JSONB array of ``{"node_key": ...}`` objects (extra keys ignored
+    today), ordered, and only meaningful for ``kind = 'sequence'``.
+
+    ``class_sessions.focus_node_keys`` (0050) is kept as a COMPATIBILITY PROJECTION: the
+    students' own ``class_sessions_select_member`` policy and the Web's existing
+    ``classFocus``/``curriculum`` surfaces read it. ``class_focus_spec_upsert`` writes both in
+    one call; when a spec row exists it wins, and the focus must be edited through that RPC
+    rather than through 0050's plain column UPDATE."""
+
+    __tablename__ = "class_focus_specs"
+
+    class_session_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False),
+        ForeignKey("class_sessions.id", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    node_keys: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False, server_default="{}")
+    sequence_steps: Mapped[Any] = mapped_column(JSONB, nullable=False, server_default="[]")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "kind in ('move_set','target_state','sequence')", name="ck_class_focus_specs_kind"
+        ),
+    )
+
+
+class ClassObjective(Base):
+    """What the class's focus is supposed to PRODUCE in the students' own training (0062).
+
+    ``kind`` ∈ explore_move / reach_state / explore_sequence / increase_exploration. The first
+    three carry ``target_count`` (default 3 at the RPC — a UI default, not a calibrated
+    threshold); ``increase_exploration`` carries ``target_percent`` against the baseline window.
+    The CHECK enforces that pairing so a half-filled objective cannot exist.
+
+    ``baseline_days``/``followup_days`` default to 14 each: baseline is the window BEFORE the
+    class, follow-up the window after, both anchored on the class's own calendar day.
+    ``node_keys`` empty means "this class's focus", resolved at read time by
+    ``professor_project_evidence`` so an objective can never drift from what was taught.
+
+    Evidence is counts only — attempts (successful true/false/omitted alike), successful
+    attempts, distinct sessions, first/last dates. No reflection, no round notes, ever."""
+
+    __tablename__ = "class_objectives"
+
+    id: Mapped[str] = mapped_column(UUID(as_uuid=False), primary_key=True, default=_uuid)
+    class_session_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=False), ForeignKey("class_sessions.id", ondelete="CASCADE"), nullable=False
+    )
+    kind: Mapped[str] = mapped_column(Text, nullable=False)
+    node_keys: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False, server_default="{}")
+    sequence_steps: Mapped[Any] = mapped_column(JSONB, nullable=False, server_default="[]")
+    target_count: Mapped[int | None] = mapped_column(Integer)
+    target_percent: Mapped[float | None] = mapped_column(Float)
+    baseline_days: Mapped[int] = mapped_column(Integer, nullable=False, server_default="14")
+    followup_days: Mapped[int] = mapped_column(Integer, nullable=False, server_default="14")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "kind in ('explore_move','reach_state','explore_sequence','increase_exploration')",
+            name="ck_class_objectives_kind",
+        ),
+        CheckConstraint(
+            "(kind = 'increase_exploration' and target_percent is not null)"
+            " or (kind <> 'increase_exploration' and target_count is not null)",
+            name="ck_class_objectives_target",
+        ),
+        Index("idx_class_objectives_class", "class_session_id"),
+    )
+
+
 class FrameAnnotation(Base):
     """One reviewable frame: an event that carries both a video URL and a timestamp.
 
