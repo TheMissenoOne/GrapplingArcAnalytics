@@ -8,16 +8,17 @@ must NEVER become a corpus/dataset/site artefact: no DB write, no upload, output
 a gitignored ``out/`` dir. Run it, look at it on your own machine, throw it away.
 
 Reuses, deliberately not rewritten:
-- ``scripts.render_map_prototypes.partition_by_sequence``/``_resolve_group`` — the same
-  session -> sequence-group -> library-resolved-label adapter variant 13 ("Bundle do dono")
-  already runs over this exact bundle shape.
-- ``export.site_data._athlete_path_graph``'s own convention for a ONE-SIDED ring payload (an
-  athlete's dossier draws only THEIR OWN chain, side ``'a'``, opponent events dropped
-  entirely) — the closest existing analogue to "one person's own training data" is applied
-  here verbatim: only ``actor == 'you'`` entries become bout rows, training-partner actions
-  are dropped the same way an opponent's are on a dossier page.
+- ``scripts.render_map_prototypes.partition_by_sequence``/``_resolve_group``/``_ACTOR_SIDE`` —
+  the same session -> sequence-group -> library-resolved-label -> side adapter variant 13
+  ("Bundle do dono") already runs over this exact bundle shape.
 - ``analysis.corpus_paths.aggregate_bouts``/``path_payload(layout="ring")`` — the exact
-  pipeline that already produces the public site's Atlas payload, unmodified.
+  pipeline that already produces the public site's Atlas payload, unmodified — fed TWO-sided
+  bout rows (owner ``side='a'``, training partner ``side='b'``, ``collapse_actors`` left at
+  its default ``False``), the same Ocean/dossier two-sided convention. Owner rule (binding):
+  a user-level map always carries actor colour coding. ``site/atlas.js`` already has the
+  colour-by-fighter path built in (``hasSideDuality`` — see its own comment on
+  ``traceColorOf``, added for exactly this "own vs opponent" reading) — feeding both sides is
+  the whole change; no client code needed for the colouring itself.
 
 Usage::
 
@@ -37,7 +38,7 @@ from analysis.corpus_paths import aggregate_bouts, path_payload
 from analysis.taxonomy_kind import resolve_library_entry
 from export.site_data import _ATLAS_STYLE, _icon
 from schemas.app_types import UserBundle
-from scripts.render_map_prototypes import _resolve_group, partition_by_sequence
+from scripts.render_map_prototypes import _ACTOR_SIDE, _resolve_group, partition_by_sequence
 
 # The site's own Atlas client bundle — vendored three.js + the module that draws it. Renamed
 # the-system.html/system.js -> atlas.html/atlas.js on 2026-09-03; a caller written against the
@@ -48,16 +49,54 @@ from scripts.render_map_prototypes import _resolve_group, partition_by_sequence
 _SITE_DIR = Path(__file__).resolve().parents[2] / "GrapplingArc" / "site"
 _ASSETS = ("atlas.js", "three", "site.css", "icons.js")
 
+# `site/atlas.js` FIG palette (own/opponent blue/orange) — copied, not imported (Python HTML
+# vs. a JS ES module, same call `export/site_data.py` already makes for its own icon paths).
+# Keep in sync by hand if the vendored palette ever moves.
+_FIG_A, _FIG_B = "#4d86ff", "#fc4c02"  # você (you), parceiro (partner)
+
+# `atlas.js`'s corpus-wide meta line (`metaTxt`) ends in a "% of the ink is shared" clause that
+# only makes sense pooled across many athletes — replaced, in the COPY under `out/` only (never
+# the vendored source in `GrapplingArc/site/`), with a "você · parceiro" stroke count computed
+# from this payload's own two-sided links. ponytail: one `str.replace` on a known vendored
+# line rather than templating atlas.js — if the vendored line's text ever changes this raises
+# instead of silently doing nothing (see `_patch_meta_line`).
+_METALINE_OLD = (
+    "(metaStats.sharedActionPct != null ? ` · ${metaStats.sharedActionPct}"
+    "% of the ink is shared` : '');"
+)
+
+
+def _metaline_new(you_strokes: int, partner_strokes: int) -> str:
+    return (
+        f"(metaStats.youStrokes != null ? ` · você {you_strokes} · parceiro "
+        f"{partner_strokes}` : '');"
+    )
+
+
+def _patch_meta_line(atlas_js_path: Path, you_strokes: int, partner_strokes: int) -> None:
+    text = atlas_js_path.read_text(encoding="utf-8")
+    if _METALINE_OLD not in text:
+        raise RuntimeError(
+            "site/atlas.js's meta-line text changed — _METALINE_OLD/_patch_meta_line in "
+            "render_atlas_user.py need updating to match the new vendored line."
+        )
+    atlas_js_path.write_text(
+        text.replace(_METALINE_OLD, _metaline_new(you_strokes, partner_strokes)),
+        encoding="utf-8",
+    )
+
 
 def _owner_bouts(bundle: dict[str, Any]) -> tuple[list[list[dict[str, Any]]], set[str]]:
-    """Bundle sessions -> ``aggregate_bouts`` bouts, the owner's own actions only.
+    """Bundle sessions -> ``aggregate_bouts`` bouts, TWO-sided.
 
-    Reuses the session/round/sequence-group partition + library-label resolution
+    Owner rule (binding): a user-level map always carries actor colour coding — you vs.
+    partner. Reuses the session/round/sequence-group partition + library-label resolution
     ``render_map_prototypes.build_aggregate`` runs (do not rewrite it), then reshapes each
-    resolved group into the flat ``{label, type, side}`` row ``export.site_data``'s own
-    one-sided dossier bouts use — ``side`` is always ``'a'`` (this IS the subject), a
-    training partner's own entries are dropped, same convention as an opponent's on a
-    dossier page. Also returns every raw label the App technique library could not resolve
+    resolved group into the flat ``{label, type, side}`` row ``aggregate_bouts`` takes —
+    ``'you'`` -> ``side='a'``, ``'partner'`` -> ``side='b'`` (``_ACTOR_SIDE``, same mapping
+    ``build_aggregate`` uses), exactly the Ocean/dossier two-sided convention
+    (``collapse_actors`` stays at its default ``False`` at the call site, so ``'a'``/``'b'``
+    never merge). Also returns every raw label the App technique library could not resolve
     (report-only; classification already falls back to the raw label/type for these,
     ``_resolve_group``'s own contract).
     """
@@ -72,17 +111,17 @@ def _owner_bouts(bundle: dict[str, Any]) -> tuple[list[list[dict[str, Any]]], se
                     if raw_label and resolve_library_entry(raw_label) is None:
                         unresolved.add(raw_label)
                 resolved_group, _display = _resolve_group(group)
-                own = [
+                bout = [
                     {
                         "label": str(e.get("label", "")), "type": str(e.get("type", "")),
-                        "side": "a",
+                        "side": side,
                         **({"successful": e["successful"]} if e.get("successful") is not None else {}),
                     }
                     for e in resolved_group
-                    if e.get("actor") == "you"
+                    if (side := _ACTOR_SIDE.get(e.get("actor"))) is not None
                 ]
-                if own:
-                    bouts.append(own)
+                if bout:
+                    bouts.append(bout)
     return bouts, unresolved
 
 
@@ -134,6 +173,10 @@ def _atlas_html(payload: dict[str, Any], first_name: str) -> str:
       <datalist id="atlasStates"></datalist>
       <p class="muted" id="atlasLegend">Prévia privada — seus treinos, nunca sai desta máquina.
         Finalização = finalização por submissão.</p>
+      <p class="muted" id="atlasFighterKey">
+        <span style="color:{_FIG_A}">●</span> Você
+        <span style="color:{_FIG_B}">●</span> Parceiro
+      </p>
     </div>
   </div>
   <aside id="oceanPanel" class="ocean-panel" hidden>
@@ -194,7 +237,12 @@ def render(bundle: dict[str, Any], out: Path) -> dict[str, Any]:
         else:
             shutil.copy2(src, dst)
 
+    you_strokes = sum(1 for link in payload["links"] if link.get("fighter") == "a")
+    partner_strokes = sum(1 for link in payload["links"] if link.get("fighter") == "b")
+    _patch_meta_line(out / "atlas.js", you_strokes, partner_strokes)
+
     payload["_unresolved_labels"] = sorted(unresolved)  # report-only, not part of the site contract
+    payload["_you_strokes"], payload["_partner_strokes"] = you_strokes, partner_strokes
     return payload
 
 
@@ -208,9 +256,15 @@ def main() -> int:
     payload = render(bundle, args.out)
 
     unresolved = payload.pop("_unresolved_labels")
+    you_strokes, partner_strokes = payload.pop("_you_strokes"), payload.pop("_partner_strokes")
     rings = sorted({n["ring"] for n in payload["nodes"] if "ring" in n})
-    print(f"nodes: {len(payload['nodes'])}")
-    print(f"paths: {len(payload['paths'])}")
+    nodes_you = sum(1 for n in payload["nodes"] if n.get("fighter") == "a")
+    nodes_partner = sum(1 for n in payload["nodes"] if n.get("fighter") == "b")
+    paths_you = sum(1 for p in payload["paths"] if p.get("actor") == "a")
+    paths_partner = sum(1 for p in payload["paths"] if p.get("actor") == "b")
+    print(f"nodes: {len(payload['nodes'])} (você {nodes_you} · parceiro {nodes_partner})")
+    print(f"paths: {len(payload['paths'])} (você {paths_you} · parceiro {paths_partner})")
+    print(f"strokes: você {you_strokes} · parceiro {partner_strokes}")
     print(f"rings: {len(rings)} {rings}")
     print(
         f"unresolved labels: {len(unresolved)}" + (f" {unresolved}" if unresolved else "")
