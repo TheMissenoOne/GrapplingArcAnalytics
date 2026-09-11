@@ -110,6 +110,11 @@ data/frame_pdf/gemini_baseline_guided/
 # owner training footage — private, never committed
 data/video/
 
+# scripts/render_atlas_user.py output — a PRIVATE local preview over one owner's own bundle,
+# never a corpus/site artefact (root CLAUDE.md). Also the default scratch dir for any other
+# throwaway local render.
+/out/
+
 # Next-move experiment caches — regenerable (corpus re-pulled from the DB, vectors re-embedded).
 # The report itself (eval.csv / eval_meta.json) IS committed.
 data/next_moves/corpus.json
