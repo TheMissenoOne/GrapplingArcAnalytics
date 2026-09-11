@@ -398,13 +398,49 @@ class TestCompareProfiles:
         for i in range(3):
             assert matrix["similarity_matrix"][i][i] == pytest.approx(1.0, abs=1e-3)
 
-    def test_results_sorted_by_similarity(self) -> None:
+    def test_results_sorted_by_label_overlap(self) -> None:
+        # E16 D1: order is whole-graph technique-label Jaccard, not aggregate_similarity.
         pa = build_system_profile("Guard Player", _graph_a())
         pb = build_system_profile("Passing Player", _graph_b())
         pc = build_system_profile("Leg Lock Player", _graph_c())
         results = compare_profiles(pa, [pa, pb, pc], k=5)
         for i in range(len(results) - 1):
-            assert results[i]["aggregate_similarity"] >= results[i + 1]["aggregate_similarity"]
+            assert results[i]["label_overlap"] >= results[i + 1]["label_overlap"]
+        # graph_a and graph_b share 8 labels (guard pass, knee cut pass, mount, back
+        # control, armbar, rear naked choke, closed guard, half guard) of 22 distinct;
+        # graph_a and graph_c share zero.
+        by_name = {r["athlete"]: r for r in results}
+        assert by_name["Passing Player"]["label_overlap"] == pytest.approx(8 / 22, abs=1e-4)
+        assert by_name["Leg Lock Player"]["label_overlap"] == 0.0
+        assert results[0]["athlete"] == "Passing Player"
+
+    def test_tiebreak_by_athlete_name(self) -> None:
+        # Two targets with the IDENTICAL label set (same Jaccard vs the query) must break
+        # the tie by athlete name — Jaccard ties constantly (failure-archaeology #10), and
+        # today's sort had no tiebreak at all.
+        query = build_system_profile("Query", _graph_c())
+        zzz = _graph_a()
+        zzz.athlete = "Zzz Player"
+        aaa = _graph_a()
+        aaa.athlete = "Aaa Player"
+        pz = build_system_profile("Zzz Player", zzz)
+        pa = build_system_profile("Aaa Player", aaa)
+        assert pz.labels == pa.labels  # same node set → guaranteed tie
+        results = compare_profiles(query, [pz, pa], k=5)
+        assert [r["athlete"] for r in results] == ["Aaa Player", "Zzz Player"]
+
+    def test_compare_profiles_deterministic_across_calls(self) -> None:
+        pa = build_system_profile("Guard Player", _graph_a())
+        pb = build_system_profile("Passing Player", _graph_b())
+        pc = build_system_profile("Leg Lock Player", _graph_c())
+        first = compare_profiles(pa, [pa, pb, pc], k=5)
+        second = compare_profiles(pa, [pa, pb, pc], k=5)
+        assert [r["athlete"] for r in first] == [r["athlete"] for r in second]
+
+    def test_labels_non_empty_for_fixture_profile(self) -> None:
+        p = build_system_profile("Guard Player", _graph_a())
+        assert p.labels
+        assert p.labels == frozenset(_graph_a().nodes.keys())
 
 
 # ── Export ───────────────────────────────────────────────────────────────

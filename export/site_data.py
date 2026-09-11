@@ -447,7 +447,12 @@ def _career_graphview(athlete: Athlete, profile: dict[str, Any], session: Sessio
     from ``_fighter_forks`` — see ``build_fighters``)."""
     g = export_fighter_graph(athlete, session)
     if g and g.get("nodes"):
-        gv = _truncate_graph(_to_graphview(g, "a"), limit)
+        full = _to_graphview(g, "a")
+        gv = _truncate_graph(full, limit)
+        # E16 D1 §9b: the analogue ranking needs the WHOLE label set, not the 12-node cut
+        # this view truncates to for legibility — capture it here, before the cut, at zero
+        # extra query cost (export_fighter_graph already ran in full above).
+        gv["_all_node_ids"] = sorted(n["id"] for n in full["nodes"])
     else:
         nodes: dict[str, dict[str, Any]] = {}
         links = []
@@ -463,6 +468,7 @@ def _career_graphview(athlete: Athlete, profile: dict[str, Any], session: Sessio
             links.append({"from": frm, "to": to,
                           "fighter": "a", "weight": _clamp3(int(t["count"]))})
         gv = {"nodes": list(nodes.values()), "links": links}
+        gv["_all_node_ids"] = sorted(nodes.keys())  # already untruncated in this fallback
     node_type = {n["id"]: n.get("cat", "") for n in gv["nodes"]}
     gv["links"] = _direct_career_links(gv["links"], node_type, net)
     return gv
@@ -895,7 +901,10 @@ def _progression_example(
 # 5 -> 6 (§17, Fase 5e): same ring-layout change as BREAKDOWN_VERSION 6 -> 7 — every cached
 # position is from the old frame, so the cache has to miss, not merely gain a key.
 # 6 -> 7: same anchor-into-ring change as BREAKDOWN_VERSION 7 -> 8.
-DOSSIER_VERSION = 7
+# 7 -> 8 (E16 D1, docs/research/e16_technique_jaccard_prereg.md §9b): `:c` now carries
+# `_all_node_ids` and analogue order changed from aggregate_similarity to label Jaccard —
+# a stale `:c`/`:p` hit would silently keep the old order on some dossiers and not others.
+DOSSIER_VERSION = 8
 
 
 def build_fighters(

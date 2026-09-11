@@ -52,17 +52,23 @@ def _systems() -> dict[str, Any]:
     }
 
 
-def test_systems_section_rendered() -> None:
-    p = _profile()
-    p["_systems"] = _systems()
-    p["_analogues"] = [
-        {"athlete": "Craig Jones", "aggregate_similarity": 0.87,
+def _analogues() -> list[dict[str, Any]]:
+    # E16 D1: analogue rows now also carry label_overlap (the Jaccard that orders them) —
+    # §9f says the ranking may set the ORDER and nothing else, so it must never render.
+    return [
+        {"athlete": "Craig Jones", "aggregate_similarity": 0.87, "label_overlap": 0.6301,
          "dominant_type": "submission", "system_count": 2, "best_match": None,
          "shared_systems": [{"hub": "back control", "shared": ["armbar", "rnc"]}]},
-        {"athlete": "Nicholas Meregali", "aggregate_similarity": 0.61,
+        {"athlete": "Nicholas Meregali", "aggregate_similarity": 0.61, "label_overlap": 0.4123,
          "dominant_type": "control", "system_count": 3, "best_match": None,
          "shared_systems": []},
     ]
+
+
+def test_systems_section_rendered() -> None:
+    p = _profile()
+    p["_systems"] = _systems()
+    p["_analogues"] = _analogues()
     page = render_profile_page(p)
     assert "Submission (back control)" in page
     assert "back control" in page          # hub named
@@ -74,6 +80,17 @@ def test_systems_section_rendered() -> None:
     assert "87%" not in page and "61%" not in page   # never a bare percent
     assert "1520" not in page              # raw system elo never shown
     assert "100%" in page and "75%" in page  # strength relative to strongest system
+
+
+def test_analogue_ranking_number_never_rendered() -> None:
+    # §9f: label_overlap sets the order, never a printed number — no percent, no ratio.
+    p = _profile()
+    p["_systems"] = _systems()
+    p["_analogues"] = _analogues()
+    page = render_profile_page(p)
+    assert "label_overlap" not in page
+    assert "0.6301" not in page and "0.4123" not in page
+    assert "63%" not in page and "41%" not in page
 
 
 def test_systems_section_absent_without_data() -> None:

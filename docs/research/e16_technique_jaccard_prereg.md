@@ -566,3 +566,6 @@ Two cross-checks worth printing because they cost nothing: `c1`'s primary MRR he
 Nothing in this cell touches production: no DB write, no replay, no site export, no edit to `export/site_data.py` or `analysis/athlete_systems.py`.
 
 <!-- /E16:RESULTS -->
+
+## §9d.3 — transfer check (2026-09-11, orquestrador)
+Mediana do Jaccard entre o conjunto de rótulos de `export_fighter_graph` e o de `matches.sequence` (carreira inteira) na coorte primária (36 atletas): **0,924** (média 0,900; faixa 0,714–1,000). Passa o critério "> 0,9". Fiado em `analysis/athlete_systems.py` (ordem `(-label_overlap, athlete)`), `DOSSIER_VERSION` 7→8.

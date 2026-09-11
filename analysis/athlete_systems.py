@@ -29,6 +29,7 @@ import networkx as nx
 import numpy as np
 
 from analysis.athlete_graph import AthleteEdge, AthleteGraph, AthleteNode
+from analysis.constellations.compare import jaccard
 from analysis.network_metrics import detect_communities
 
 TYPES = ["guard", "pass", "sweep", "submission", "takedown", "control", "escape", "transition"]
@@ -75,6 +76,10 @@ class AthleteSystemProfile:
     diversity: float
     dominant_type: str
     total_techniques: int
+    # E16 D1 (docs/research/e16_technique_jaccard_prereg.md §9c): the athlete's whole
+    # technique-label set (untruncated — see AthleteGraph._all_node_ids), used ONLY to
+    # order analogues by Jaccard. Not part of profile_to_dict's shape.
+    labels: frozenset[str] = frozenset()
 
 
 # ── Graph conversion ─────────────────────────────────────────────────────
@@ -258,6 +263,8 @@ def build_system_profile(
     diversity = _type_entropy(overall)
     dominant = TYPES[np.argmax(overall)] if overall else ""
 
+    labels = getattr(graph, "_all_node_ids", None) or graph.nodes.keys()
+
     return AthleteSystemProfile(
         athlete_name=athlete_name,
         systems=systems,
@@ -266,6 +273,7 @@ def build_system_profile(
         diversity=round(diversity, 3),
         dominant_type=dominant,
         total_techniques=sum(s.size for s in systems),
+        labels=frozenset(labels),
     )
 
 
@@ -365,9 +373,12 @@ def compare_profiles(
 ) -> list[dict[str, Any]]:
     """Rank target athletes by system similarity to the query athlete.
 
-    Returns top-``k`` targets sorted descending by aggregate similarity,
-    each with their best-matching system detail plus ``shared_systems``
-    (see ``_shared_systems``) — the dossier's checkable evidence.
+    Returns top-``k`` targets sorted descending by whole-graph technique-label Jaccard
+    (E16 D1, ACCEPT — docs/research/e16_technique_jaccard_prereg.md §9c), ties broken by
+    athlete name (mandatory: Jaccard over ~10-node sets ties constantly, see
+    failure-archaeology #10). Each result still carries its best-matching system detail
+    plus ``shared_systems`` (see ``_shared_systems``) — the dossier's checkable evidence
+    — and ``aggregate_similarity``, which no longer orders but still weights that evidence.
     """
     results: list[dict[str, Any]] = []
     for target in targets:
@@ -381,11 +392,12 @@ def compare_profiles(
             "dominant_type": target.dominant_type,
             "diversity": target.diversity,
             "aggregate_similarity": comp["aggregate_similarity"],
+            "label_overlap": round(jaccard(set(query.labels), set(target.labels)), 4),
             "best_match": comp["matches"][0] if comp["matches"] else None,
             "shared_systems": _shared_systems(comp["matches"]),
         })
 
-    results.sort(key=lambda x: -x["aggregate_similarity"])
+    results.sort(key=lambda x: (-x["label_overlap"], x["athlete"]))
     return results[:k]
 
 
@@ -523,6 +535,13 @@ def from_career_graphview(athlete_name: str, graphview: dict[str, Any]) -> Athle
         c = int(lk.get("weight", 1))
         if src and tgt and src != tgt:
             g.edges[(src, tgt)] = AthleteEdge(source=src, target=tgt, count=c)
+
+    # E16 D1 §9b: the FULL (untruncated) label set, captured by _career_graphview before
+    # its 12-node cap. Plain attribute (AthleteGraph carries no slots) — falls back to the
+    # (possibly truncated) node keys when the caller didn't provide it, so every other
+    # caller of from_career_graphview keeps working unchanged.
+    all_ids = graphview.get("_all_node_ids")
+    g._all_node_ids = frozenset(all_ids) if all_ids is not None else frozenset(g.nodes.keys())  # type: ignore[attr-defined]
     return g
 
 
