@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import pandas as pd
 
 from analysis.names import _normalize_name, _resolve_aliases
@@ -10,6 +12,7 @@ from export.tech_library import (
     _generate_variations,
     build_effectiveness,
     build_technique_library,
+    load_curated_library,
 )
 
 
@@ -105,3 +108,76 @@ def test_generate_variations_short_forms() -> None:
     assert len(_generate_variations("Headlock", "Gravata")) >= 2
     # dedup: en==pt yields one base entry
     assert _generate_variations("Twister", "Twister")[0] == "twister"
+
+
+# ── Curated library as primary source (backlog: tech-library-curated-source) ──
+
+_CURATED = [
+    {
+        "en": "Saddle (Inside Sankaku)",
+        "pt": "Sela",
+        "type": "control",
+        "variants": ["saddle", "inside sankaku", "411"],
+    },
+    {"en": "Armbar", "pt": "Chave de Braço Curada", "type": "submission", "variants": ["armbar"]},
+]
+
+
+def _empty_tech_df() -> pd.DataFrame:
+    return pd.DataFrame(columns=["technique_name", "Origin", "Type"])
+
+
+def test_curated_entry_reaches_output() -> None:
+    lib = build_technique_library(
+        _empty_tech_df(), effectiveness={}, existing_nodes=[], curated=_CURATED
+    )
+    saddle = next(e for e in lib if e["translations"]["en"] == "Saddle (Inside Sankaku)")
+    assert saddle["source"] == "library"
+    assert saddle["type"] == "control"
+    assert "saddle" in saddle["variations"]
+    assert "merged_from" not in saddle  # no collision, single source
+
+
+def test_kaggle_collision_merges_into_curated_row() -> None:
+    tech_df = pd.DataFrame(
+        {
+            "technique_name": ["Armbar"],
+            "Origin": ["BJJ"],
+            "Type": ["Submissions"],
+        }
+    )
+    lib = build_technique_library(
+        tech_df, effectiveness={}, existing_nodes=[], curated=_CURATED
+    )
+    armbars = [e for e in lib if e["translations"]["en"] == "Armbar"]
+    assert len(armbars) == 1  # merged once, not duplicated
+    entry = armbars[0]
+    assert entry["source"] == "library"  # curated wins name/type
+    assert entry["name"] == "Chave de Braço Curada"
+    assert entry["merged_from"] == ["library", "grappling_techniques_dataset"]
+
+
+def test_build_technique_library_deterministic_across_runs() -> None:
+    tech_df = pd.DataFrame(
+        {
+            "technique_name": ["Armbar", "Scissor Sweep"],
+            "Origin": ["BJJ", "BJJ"],
+            "Type": ["Submissions", "Sweeps"],
+        }
+    )
+    eff = build_effectiveness(_synthetic_adcc())
+    args = (tech_df, eff)
+    kwargs = {"existing_nodes": [], "curated": _CURATED}
+    run1 = build_technique_library(*args, **kwargs)
+    run2 = build_technique_library(*args, **kwargs)
+    assert json.dumps(run1, sort_keys=True) == json.dumps(run2, sort_keys=True)
+
+
+def test_load_curated_library_missing_file_returns_empty(tmp_path) -> None:
+    assert load_curated_library(tmp_path / "nope.json") == []
+
+
+def test_load_curated_library_real_file_has_entries() -> None:
+    curated = load_curated_library()
+    assert len(curated) > 0
+    assert all({"en", "pt", "type"} <= set(item) for item in curated)

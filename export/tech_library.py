@@ -157,6 +157,26 @@ def _make_oid(index: int) -> dict[str, str]:
 
 # ── Core ─────────────────────────────────────────────────────
 
+def load_curated_library(path: Path | None = None) -> list[dict[str, Any]]:
+    """Load the curated technique library — the PRIMARY source for the export.
+
+    ``analysis/data/technique_library.json``: human-reviewed list of
+    ``{en, pt, type, variants}``. Kaggle/ADCC rows that collide by
+    ``_normalize_name`` MERGE into the curated row (curated wins name/type,
+    see ``build_technique_library``). Distinct from this module's OUTPUT file
+    of (almost) the same name, ``data/processed/technique_library.json`` —
+    see docs/repairs/2026-09-04_n1_alias_replay.md "Two libraries"."""
+    curated_path = path or (
+        Path(__file__).resolve().parent.parent / "analysis" / "data" / "technique_library.json"
+    )
+    try:
+        data = json.loads(curated_path.read_text(encoding="utf-8"))
+        return list(data) if isinstance(data, list) else []
+    except FileNotFoundError:
+        logger.warning("Curated library not found at %s", curated_path)
+        return []
+
+
 def load_all_data() -> tuple[pd.DataFrame, pd.DataFrame, list[dict[str, Any]]]:
     """Load grappling_techniques, ADCC historical, and existing app nodes."""
     tech_df = GrapplingTechniquesPipeline().run()
@@ -275,18 +295,73 @@ def build_technique_library(
     existing_nodes: list[dict[str, Any]],
     match_techs: list[dict[str, str]] | None = None,
     elo_deviance: dict[str, int] | None = None,
+    curated: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
     """Build enriched NodeLibraryItem[] from all sources.
 
+    curated: the PRIMARY source (``load_curated_library()``) — human-reviewed
+    ``{en, pt, type, variants}`` rows, processed FIRST. A Kaggle/ADCC/match row
+    that collides with a curated row by ``_normalize_name`` merges into it
+    (curated wins name/type; the merge is recorded in ``entry["merged_from"]``)
+    instead of producing a second entry.
     elo_deviance: optional dict of node_key → signed ELO offset (from path-to-victory analysis).
     """
     elo_deviance = elo_deviance or {}
+    curated = curated or []
 
     library: list[dict[str, Any]] = []
     seen_normalized: set[str] = set()
+    # node_key -> list of source tags that contributed to that entry, in the
+    # order they were merged. Lists only (never a set) so the merge itself
+    # can never depend on Python's per-process string-hash randomization —
+    # see failure-archaeology #10 (dict/set iteration order flipping output).
+    provenance: dict[str, list[str]] = {}
     index = 0
 
-    # ── 1. Map from grappling_techniques dataset ──
+    # ── 1. Curated library (primary source — human-reviewed node identity) ──
+    # Sort by node_key before iterating: the curated JSON list order is
+    # already stable, but sorting makes the merge order explicit/deterministic
+    # rather than relying on that being true forever.
+    curated_rows = sorted(
+        (
+            (_normalize_name(str(item.get("en", "")).strip()), item)
+            for item in curated
+            if str(item.get("en", "")).strip()
+        ),
+        key=lambda t: t[0],
+    )
+    for norm, item in curated_rows:
+        if not norm or norm in seen_normalized:
+            continue
+        seen_normalized.add(norm)
+        provenance[norm] = ["library"]
+
+        name_en = str(item.get("en", "")).strip()
+        pt_name = str(item.get("pt") or name_en).strip()
+        app_type = str(item.get("type") or "concept")
+        variations = list(dict.fromkeys(item.get("variants") or []))
+
+        existing = _name_in_nodes(norm, existing_nodes)
+
+        entry = {
+            "_id": _make_oid(index),
+            "name": pt_name,
+            "type": app_type,
+            "translations": {"en": name_en, "pt": pt_name},
+            "variations": variations,
+            "source": "library",
+            "already_in_app": existing,
+        }
+        adcc_eff = effectiveness.get(norm)
+        if adcc_eff:
+            entry["effectiveness"] = adcc_eff
+        if norm in elo_deviance:
+            entry["eloDeviance"] = elo_deviance[norm]
+
+        library.append(entry)
+        index += 1
+
+    # ── 2. Map from grappling_techniques dataset ──
     for _, row in tech_df.iterrows():
         name_en = str(row.get("technique_name", row.get("Name", ""))).strip()
         if not name_en:
@@ -302,8 +377,11 @@ def build_technique_library(
 
         norm = _normalize_name(name_en)
         if norm in seen_normalized:
+            if norm in provenance and "grappling_techniques_dataset" not in provenance[norm]:
+                provenance[norm].append("grappling_techniques_dataset")
             continue
         seen_normalized.add(norm)
+        provenance[norm] = ["grappling_techniques_dataset"]
 
         tech_type_raw = str(row.get("Type", "")).lower().strip()
         app_type = TECHNIQUE_TYPE_MAP.get(tech_type_raw, "concept")
@@ -336,9 +414,11 @@ def build_technique_library(
         library.append(entry)
         index += 1
 
-    # ── 2. Add ADCC-only submissions not in technique dataset ──
+    # ── 3. Add ADCC-only submissions not in technique dataset ──
     for sub_name, eff in effectiveness.items():
         if sub_name in seen_normalized:
+            if sub_name in provenance and "adcc_submission_data" not in provenance[sub_name]:
+                provenance[sub_name].append("adcc_submission_data")
             continue
         # Skip generic entries
         if sub_name in ("submission", "verbal tap", "short choke", "choke"):
@@ -350,8 +430,11 @@ def build_technique_library(
         pt_name = DEFAULT_PT_TRANSLATIONS.get(sub_name, name_en)
         norm = _normalize_name(name_en)
         if norm in seen_normalized:
+            if norm in provenance and "adcc_submission_data" not in provenance[norm]:
+                provenance[norm].append("adcc_submission_data")
             continue
         seen_normalized.add(norm)
+        provenance[norm] = ["adcc_submission_data"]
 
         existing = _name_in_nodes(norm, existing_nodes)
 
@@ -370,7 +453,7 @@ def build_technique_library(
         library.append(entry)
         index += 1
 
-    # ── 2c. Add techniques seen in entered athlete matches (novel only) ──
+    # ── 4. Add techniques seen in entered athlete matches (novel only) ──
     # Every technique in a registered match must enter the app's offline catalog
     # too (not just the shared technique_nodes table). app_type comes from the
     # sequence's node_type bucket; novel-by-normalized-key and not already in app.
@@ -379,9 +462,16 @@ def build_technique_library(
         if not name_en:
             continue
         norm = _normalize_name(name_en)
-        if not norm or norm in seen_normalized or _name_in_nodes(norm, existing_nodes):
+        if not norm:
+            continue
+        if norm in seen_normalized:
+            if norm in provenance and "athlete_match" not in provenance[norm]:
+                provenance[norm].append("athlete_match")
+            continue
+        if _name_in_nodes(norm, existing_nodes):
             continue
         seen_normalized.add(norm)
+        provenance[norm] = ["athlete_match"]
         node_type = str(mt.get("node_type", "")).lower().strip()
         app_type = node_type if node_type in TYPE_DISPLAY else "concept"
         pt_name = DEFAULT_PT_TRANSLATIONS.get(norm, name_en)
@@ -399,11 +489,21 @@ def build_technique_library(
         library.append(entry)
         index += 1
 
-    # ── 3. Sort by effectiveness descending (submissions first), then alpha ──
-    # Scored entries first (descending score), unscored last, alpha tiebreak
+    # ── 5. Record cross-source merges (curated wins name/type, keeps provenance) ──
+    for entry in library:
+        norm = _normalize_name(entry["translations"]["en"])
+        srcs = provenance.get(norm, [])
+        if len(srcs) > 1:
+            entry["merged_from"] = srcs
+
+    # ── 6. Sort by effectiveness descending (submissions first), then alpha ──
+    # Scored entries first (descending score), unscored last; alpha tiebreak,
+    # then node_key — makes the final order independent of any dict/set
+    # iteration order upstream (failure-archaeology #10).
     library.sort(key=lambda x: (
         -x["effectiveness"]["effectiveness_score"] if "effectiveness" in x else 1,
         x["name"],
+        _normalize_name(x["translations"]["en"]),
     ))
 
     return library
@@ -480,14 +580,18 @@ def write_summary_report(library: list[dict[str, Any]], effectiveness: dict[str,
     """Write a human-readable analysis report."""
     lines = ["# Technique Library Analysis Report", ""]
     lines.append(f"**Total techniques:** {len(library)}")
+    from_library = sum(1 for e in library if e.get("source") == "library")
     from_dataset = sum(1 for e in library
                        if e.get("source") == "grappling_techniques_dataset")
     from_adcc = sum(1 for e in library
                     if e.get("source") == "adcc_submission_data")
+    merged = sum(1 for e in library if e.get("merged_from"))
     already = sum(1 for e in library if e.get("already_in_app"))
     new_additions = sum(1 for e in library if not e.get("already_in_app"))
+    lines.append(f"**From curated library:** {from_library}")
     lines.append(f"**From grappling_techniques dataset:** {from_dataset}")
     lines.append(f"**From ADCC submission data:** {from_adcc}")
+    lines.append(f"**Merged across sources:** {merged}")
     lines.append(f"**Already in app library:** {already}")
     lines.append(f"**New additions for app:** {new_additions}")
     lines.append("")
@@ -572,8 +676,9 @@ def export_tech_library() -> dict[str, Any]:
     logger.info("=" * 60)
 
     tech_df, adcc_df, existing_nodes = load_all_data()
-    logger.info("Data loaded: %d techniques, %d ADCC matches, %d existing nodes",
-                len(tech_df), len(adcc_df), len(existing_nodes))
+    curated = load_curated_library()
+    logger.info("Data loaded: %d techniques, %d ADCC matches, %d existing nodes, %d curated",
+                len(tech_df), len(adcc_df), len(existing_nodes), len(curated))
 
     effectiveness = build_effectiveness(adcc_df)
     logger.info("Built effectiveness scores for %d submission techniques", len(effectiveness))
@@ -596,7 +701,7 @@ def export_tech_library() -> dict[str, Any]:
     if match_techs:
         logger.info("Merging %d match-derived techniques from technique_nodes", len(match_techs))
     library = build_technique_library(
-        tech_df, effectiveness, existing_nodes, match_techs, elo_deviance
+        tech_df, effectiveness, existing_nodes, match_techs, elo_deviance, curated
     )
 
     lib_path, eff_path = export_library(library)
@@ -607,16 +712,20 @@ def export_tech_library() -> dict[str, Any]:
         f.write(report)
     logger.info("Report written to %s", report_path)
 
+    from_library = sum(1 for e in library if e.get("source") == "library")
     from_dataset = sum(1 for e in library
                        if e.get("source") == "grappling_techniques_dataset")
     from_adcc = sum(1 for e in library
                     if e.get("source") == "adcc_submission_data")
+    merged = sum(1 for e in library if e.get("merged_from"))
     already = sum(1 for e in library if e.get("already_in_app"))
     new_count = sum(1 for e in library if not e.get("already_in_app"))
     return {
         "total": len(library),
+        "from_library": from_library,
         "from_dataset": from_dataset,
         "from_adcc": from_adcc,
+        "merged": merged,
         "already_in_app": already,
         "new": new_count,
         "with_effectiveness": len(effectiveness),
