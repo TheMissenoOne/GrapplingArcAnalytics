@@ -46,16 +46,93 @@ def test_null_successful_produces_no_observation() -> None:
     """ADR-06 one level down: a missing outcome is lost coverage, never a fabricated one.
 
     Measured on the 2026-08-26 corpus, 67.7% of own-actor labelled events carry no flag —
-    so this is the rule that decides two thirds of the input, not an edge case.
+    so this is the rule that decides two thirds of the input, not an edge case. ADR-09 §2.3
+    carves ``submission`` OUT of this rule and nothing else; every type below is a non-finish
+    type precisely so this test keeps guarding the rule it was written for.
     """
     seq = [
-        _event("Armbar", "submission", A, None),
-        _event("Heel Hook", "submission", A, True),
+        _event("Knee Cut", "pass", A, None),
+        _event("Berimbolo", "sweep", A, True),
         _event("Back Take", "control", A, False),
     ]
     obs = observations_for_side(seq, A, None)
-    assert [o.node_key for o in obs] == [node_key_of("Heel Hook"), node_key_of("Back Take")]
+    assert [o.node_key for o in obs] == [node_key_of("Berimbolo"), node_key_of("Back Take")]
     assert [o.score for o in obs] == [1.0, 0.0]
+
+
+# ── ADR-09 §2.3 — a finish is scored by the BOUT's ending, never by its flag ─────────────
+
+
+def test_a_finish_attempt_the_bout_outlived_is_a_zero_not_a_silence() -> None:
+    """The owner's 2026-09-11 answer to the ADR's open question, in one bout.
+
+    A carries an armbar the opponent escapes, then finishes with a heel hook that ends the
+    bout. Under the flag both read 1.0 — ``successful: true`` on a finish means the lock was
+    SUNK, which is exactly what the corpus records on bouts that go on to be LOST (the Amy
+    Campo knee bar, ``docs/research/lamas_chain_divisions.md:148``). Under ADR-09 §2.3 the
+    armbar is a FAILURE observation and only the finish that ended the bout scores.
+    """
+    seq = [
+        _event("Armbar", "submission", A, True),
+        _event("Guard Recovery", "transition", B, True),
+        _event("Heel Hook", "submission", A, True),
+    ]
+    obs = observations_for_side(seq, A, None, winner_id=A, win_type="SUBMISSION")
+    assert [(o.node_key, o.score) for o in obs] == [
+        (node_key_of("Armbar"), 0.0),
+        (node_key_of("Heel Hook"), 1.0),
+    ]
+
+
+def test_an_unflagged_finish_attempt_is_still_scored() -> None:
+    """The one place NULL stops meaning "no observation" — and only for a finish.
+
+    The score never reads ``successful`` for this type in either direction, so an unannotated
+    attempt is as much a failed finish as a flagged one. The ``sweep`` beside it is the
+    control: NULL there still produces nothing at all.
+    """
+    seq = [
+        _event("Armbar", "submission", A, None),
+        _event("Berimbolo", "sweep", A, None),
+    ]
+    obs = observations_for_side(seq, A, None, winner_id=B, win_type="DECISION")
+    assert [(o.node_key, o.score) for o in obs] == [(node_key_of("Armbar"), 0.0)]
+
+
+def test_the_loser_of_a_submission_bout_has_no_terminal_finish() -> None:
+    """Being the actor is not enough — the side comes from ``winner_id`` (ADR-09 §2.3)."""
+    seq = [_event("Armbar", "submission", B, True)]
+    obs = observations_for_side(seq, B, None, winner_id=A, win_type="SUBMISSION")
+    assert [o.score for o in obs] == [0.0]
+
+
+def test_a_points_win_has_no_terminal_finish_for_either_side() -> None:
+    seq = [_event("Armbar", "submission", A, True), _event("Armbar", "submission", B, True)]
+    assert [o.score for o in observations_for_side(
+        seq, A, None, winner_id=A, win_type="POINTS")] == [0.0]
+    assert [o.score for o in observations_for_side(
+        seq, B, None, winner_id=A, win_type="POINTS")] == [0.0]
+
+
+def test_an_unknown_outcome_credits_nobody_rather_than_guessing_the_finisher() -> None:
+    """No ``winner_id``/``win_type`` (the default, and ADR-06's excluded bout) means no
+    terminal finish exists — the conservative direction. Measured on the 281-bout offline
+    corpus: 18 of the 98 SUBMISSION bouts file the finish under nobody on the winner's side,
+    and those credit nobody rather than promoting a loser's attempt."""
+    seq = [_event("Armbar", "submission", A, True)]
+    assert [o.score for o in observations_for_side(seq, A, None)] == [0.0]
+
+
+def test_only_the_last_finish_attempt_of_the_winner_is_the_terminal_one() -> None:
+    seq = [
+        _event("Kimura", "submission", A, True),
+        _event("Armbar", "submission", A, True),
+    ]
+    obs = observations_for_side(seq, A, None, winner_id=A, win_type="SUBMISSION")
+    assert [(o.node_key, o.score) for o in obs] == [
+        (node_key_of("Kimura"), 0.0),
+        (node_key_of("Armbar"), 1.0),
+    ]
 
 
 def test_only_the_named_actor_is_read() -> None:
@@ -121,7 +198,11 @@ def test_new_node_is_seeded_at_its_athletes_pre_period_global() -> None:
         NodeEvidenceBout(
             bout=bouts[0],
             observations_a=observations_for_side(
-                [_event("Armbar", "submission", A, True)], A, None
+                [_event("Armbar", "submission", A, True)],
+                A,
+                None,
+                winner_id=A,
+                win_type="SUBMISSION",
             ),
         )
     ]

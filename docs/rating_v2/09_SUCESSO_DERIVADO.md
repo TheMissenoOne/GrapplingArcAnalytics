@@ -31,8 +31,33 @@ citado ao lado, para o leitor calibrar o quanto a amostra representa o corpus in
 | Flag no corpus | **Derivar sempre, nos dois lados.** Medido: flag e derivação concordam em **51,2%** — são medidas diferentes, e misturá-las é a mesma falha de duas unidades numa distribuição que este repo já mediu três vezes (§5.4) |
 | Faseamento | **Fase 3c**, landing próprio, DEPOIS de 3a/3b. O gate "evidência intocada" da 3a não sobrevive ao D7 e não deve ser reescrito para acomodá-lo (§7) |
 
-Duas decisões precisam do dono e estão marcadas 🔶 no texto: **§2.3** (finalização não-terminal
-pontua 0) e **§5.3** (aceitar o degrau de −15% no global do App).
+## Status: **ACEITO** (dono, 2026-09-11)
+
+As duas decisões marcadas 🔶 foram respondidas, nesta ordem:
+
+| 🔶 | pergunta | resposta do dono |
+|---|---|---|
+| §2.3 | finalização NÃO-terminal: `0` ou nenhuma observação? | **`0`** — é uma observação de FRACASSO. A alternativa conservadora ("nenhuma observação") foi recusada |
+| §5.3 | aceitar o degrau de −15% no global do App? | **Aceitar, sem mitigação** — correção honesta de uma vez só, sem transição gradual |
+
+**O que foi implementado em 2026-09-11 é a §2.3 SOZINHA**, nos dois repos, no único ponto em que
+o score de um evento `submission` é derivado/consumido — `observations_for_side`
+(`analysis/rating_v2/node_rating.py`) e `extractSessionEvidence`
+(`services/rating/ratingV2Evidence.ts`). O resto do
+D7 — a cadeia `terminal → target_state → next_action → none` para as OUTRAS famílias — continua
+NÃO implementado, e continua sendo a Fase 3c do §7.1.
+
+⚠️ **Três números deste doc não descrevem o que a §2.3 sozinha faz.** Medidos em 2026-09-11 sobre
+os mesmos artefatos offline, com o código que foi escrito:
+
+| número do doc | o que a §2.3 sozinha faz | por quê |
+|---|---|---|
+| taxa da família `submission` 0,459 → **0,218** (§2.3, §7.3) | 0,588 → **0,097** na amostra offline (600 eventos `type='submission'` em 281 lutas; 351 pontuavam 1, agora 58) | os 0,218 do doc são o score derivado pela CADEIA INTEIRA: uma finalização não-terminal ainda podia marcar 1 no nível `next_action`. Sem esse nível, só a finalização que ACABA a luta marca |
+| degrau de **−15,3%** no global do App (§5.3) | **0,0%** — global 1277,8654497201878 antes e depois, à última casa do double | os −15,3% vêm de derivar TODAS as famílias (77,3% → 36,3% de acerto). As 6 finalizações próprias do `mock_user_bundle` já são a ÚLTIMA entrada da sua cadeia, então nenhuma muda de score |
+| população de evidência ×1,49 (§5.1) | **+3 observações** em 2421 eventos na amostra offline | a amostra tem 597 dos 600 eventos `submission` já anotados (351 True / 246 False / 3 NULL); o ganho de cobertura do D7 está nas outras famílias, não nesta |
+
+O §7.1 recomenda um landing ÚNICO para o D7 justamente para não pagar dois bumps de versão e
+dois replays. Fatiar a §2.3 para fora paga o primeiro agora; a Fase 3c pagará o segundo.
 
 ---
 
@@ -129,7 +154,9 @@ pode ser o marcador terminal e o resultado da luta pode.
 **No App:** o toggle sobrevive **só** neste caso — uma finalização no fim da cadeia. É a única
 informação que a sequência não consegue derivar, porque no treino não existe `win_type`.
 
-🔶 **Decisão que precisa do dono: uma finalização NÃO terminal pontua `0`.**
+✅ **DECIDIDO pelo dono em 2026-09-11: uma finalização NÃO terminal pontua `0`.** (Era 🔶.)
+Implementado nos dois repos no mesmo dia — ver o bloco de status no topo, incluindo a taxa
+REAL medida da regra sozinha (0,097, não os 0,218 abaixo, que pressupõem o nível `next_action`).
 Segue literalmente a regra do dono ("tentou X e não conseguiu X ⇒ X ruim") aplicada por simetria à
 finalização. A consequência é grande e está medida: a taxa de sucesso da família `submission` cai
 para **0,218** contra 0,459 de flag no corpus. Na prática o nó de finalização passa a responder
@@ -383,7 +410,10 @@ nós daquele eixo. Replay simulado (40 sessões × 6 entradas, 28 nós, 7 eixos,
 
 **Degrau de −201,8 pontos (−15,3%) no global. O σ sobrevive** (60,3 → 63,7, +5,6%).
 
-🔶 **Decisão que precisa do dono: aceitar o degrau. Recomendação: aceitar, sem mitigação.**
+✅ **DECIDIDO pelo dono em 2026-09-11: aceitar o degrau, sem mitigação.** (Era 🔶.)
+Medido depois da decisão: a §2.3 sozinha NÃO produz degrau nenhum no corpus de referência do App
+(0,0 ponto). O degrau de −15,3% continua sendo o preço da Fase 3c inteira, e a aceitação vale
+para quando ela chegar.
 
 Por quê:
 

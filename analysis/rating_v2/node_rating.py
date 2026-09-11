@@ -17,13 +17,21 @@ module's observation model would silently invalidate the sweep the ADR quotes.
 
 An observation is one *event* in the athlete's own side of a bout's ``sequence``:
 
-- **score** comes from the event's ``successful`` flag — 1.0 landed, 0.0 missed;
-- **an event with ``successful`` NULL produces NO observation.** Measured on the 2026-08-26
-  corpus: 6818 of 10075 own-actor labelled events (67.7%) carry no flag. Reading NULL as
-  landed would score 82.5% of the corpus as a success; reading it as missed (Python's
-  historical default) would score 85% as a failure. Both fabricate evidence. This is ADR-06
-  one level down — a missing outcome is lost coverage, never a manufactured result — and it
-  is the same reason that ADR refuses to turn 271 winner-less decisions into draws;
+- **score** comes from the event's ``successful`` flag — 1.0 landed, 0.0 missed — for every
+  event type EXCEPT ``submission``. A finish is scored by whether it ENDED the bout
+  (ADR-09 §2.3, owner decision 2026-09-11): ``1.0`` for the finish that won the bout,
+  ``0.0`` for every other finish attempt, and the flag is not consulted either way. The flag
+  answers a different question — ``successful: true`` on a submission means the lock was
+  sunk, which the corpus carries on bouts that go on to be LOST by decision — so a node that
+  reads it answers "how often do I get the grip" while this track answers "how often does my
+  finish end the fight". A non-terminal attempt is a real FAILURE observation, not lost
+  coverage; that was the ADR's open question and the owner chose ``0`` over "no observation";
+- **an event of any other type with ``successful`` NULL produces NO observation.** Measured on
+  the 2026-08-26 corpus: 6818 of 10075 own-actor labelled events (67.7%) carry no flag. Reading
+  NULL as landed would score 82.5% of the corpus as a success; reading it as missed (Python's
+  historical default) would score 85% as a failure. Both fabricate evidence. This is ADR-06 one
+  level down — a missing outcome is lost coverage, never a manufactured result — and it is the
+  same reason that ADR refuses to turn 271 winner-less decisions into draws;
 - **the observation's "opponent" is the athlete's OWN pre-period global state**, from the same
   corpus-wide replay that produces the published athlete rating
   (``periods.run_periods_with_snapshots``). A node is seeded AT that rating, so its first
@@ -185,32 +193,83 @@ class NodeRating:
     offset: float = 0.0
 
 
+#: Event ``type`` whose score is DERIVED from the bout's ending instead of read from the
+#: annotator's flag (ADR-09 §2.3, owner decision 2026-09-11). ``successful: true`` on a
+#: finish means the lock was SUNK, not that anybody tapped — the Amy Campo bout carries
+#: ``submission/Knee Bar successful=true`` and then runs for another seventeen events on the
+#: way to losing a DECISION. So the flag cannot answer "did this finish the fight", and the
+#: bout's own outcome can.
+TERMINAL_SCORED_TYPE = "submission"
+
+
+def _terminal_index(
+    events: Sequence[Any], actor_id: str, winner_id: str | None, win_type: str | None
+) -> int | None:
+    """Index of the bout-ending finish on ``actor_id``'s side, or ``None`` if there is none.
+
+    Three conditions together (ADR-09 §2.3): the bout ended by submission, the side being
+    scored is the WINNER's, and the event is the last finish attempt filed under them. The
+    side comes from the bout's ``winner_id``, never from the event's own actor —
+    ``lamas_chain._absorbing_side`` measured 7 of 24 ADCC chains truncated on a marked SUB
+    filing that finish under whoever LOST, so an event's own actor can never make it
+    terminal by itself. A bout whose finish is misfiled therefore credits nobody: lost
+    coverage, never a fabricated finish, the same direction ADR-06 picks every time.
+    """
+    if win_type != "SUBMISSION" or winner_id is None or actor_id != winner_id:
+        return None
+    last: int | None = None
+    for index, event in enumerate(events):
+        if not isinstance(event, dict) or event.get("actor_id") != actor_id:
+            continue
+        if str(event.get("type") or "").strip().lower() == TERMINAL_SCORED_TYPE:
+            last = index
+    return last
+
+
 def observations_for_side(
     sequence: Iterable[Any] | None,
     actor_id: str,
     block: Mapping[str, float] | None,
+    *,
+    winner_id: str | None = None,
+    win_type: str | None = None,
 ) -> tuple[NodeObservation, ...]:
     """One bout side's scored events → weighted node observations.
 
-    Events without a label, without ``actor_id == actor_id``, or with ``successful`` NULL
-    produce nothing at all (see the module docstring). The Markov codes are read from the RAW
-    corpus event, so ``lamas_state`` sees the ``type``/``label``/``successful`` it was
-    derived under — including its own rule that only ``successful is True`` earns a success
-    code, which is why the code lookup and the score read the same field differently and
-    correctly.
+    Events without a label or without ``actor_id == actor_id`` produce nothing at all.
+    Neither does an event whose ``successful`` is NULL — **except** one of
+    :data:`TERMINAL_SCORED_TYPE`, whose score never reads that field in either direction
+    (ADR-09 §2.3): it is ``1.0`` when it is the finish that ENDED the bout and ``0.0``
+    otherwise, so every finish attempt is an observation and the node answers "how often
+    does my finish end the fight" rather than "how often do I get the grip". NULL-means-no-
+    observation is unchanged for every other type (ADR-06 one level down, module docstring).
+
+    The Markov codes are read from the RAW corpus event, so ``lamas_state`` sees the
+    ``type``/``label``/``successful`` it was derived under — including its own rule that only
+    ``successful is True`` earns a success code. ADR-09 §6.3 leaves that reading alone on
+    purpose: score is what happened, weight is what that class of move is worth as evidence,
+    and the two are measured under their own conventions.
     """
+    events = list(sequence or [])
+    terminal = _terminal_index(events, actor_id, winner_id, win_type)
     scored: list[tuple[str, float, Any]] = []
-    for event in sequence or []:
+    for index, event in enumerate(events):
         if not isinstance(event, dict) or event.get("actor_id") != actor_id:
             continue
         label = event.get("label")
-        successful = event.get("successful")
-        if not label or successful is None:
+        if not label:
             continue
+        if str(event.get("type") or "").strip().lower() == TERMINAL_SCORED_TYPE:
+            score = 1.0 if index == terminal else 0.0
+        else:
+            successful = event.get("successful")
+            if successful is None:
+                continue
+            score = 1.0 if successful else 0.0
         key = node_key_of(label)
         if not key:
             continue
-        scored.append((key, 1.0 if successful else 0.0, event))
+        scored.append((key, score, event))
 
     if not scored:
         return ()
@@ -475,8 +534,12 @@ def build_corpus_node_ratings(
             continue
         coverage["eligible"] += 1
         block = block_for_family(family_of(m.event), weights_doc)
-        obs_a = observations_for_side(m.sequence, m.athlete_a_id, block)
-        obs_b = observations_for_side(m.sequence, m.athlete_b_id, block)
+        obs_a = observations_for_side(
+            m.sequence, m.athlete_a_id, block, winner_id=m.winner_id, win_type=m.win_type
+        )
+        obs_b = observations_for_side(
+            m.sequence, m.athlete_b_id, block, winner_id=m.winner_id, win_type=m.win_type
+        )
         if obs_a or obs_b:
             coverage["with_evidence"] += 1
         evidence.append(

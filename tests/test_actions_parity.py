@@ -81,16 +81,23 @@ def test_p2_observations_for_side_is_byte_identical_pinned() -> None:
     unaffected by this migration (see the module's own docstring and root CLAUDE.md's
     'Cross-Module Contracts' row on Rating V2). This golden pin must stay true through EVERY
     phase of the actions/states migration — if it ever needs updating, something reached into
-    this function's input path, which the migration plan says must never happen."""
+    this function's input path, which the migration plan says must never happen.
+
+    Re-pinned once, 2026-09-11, and NOT by the migration: ADR-09 §2.3 (owner decision) changed
+    the SCORE of a ``submission`` event from its flag to whether it ended the bout. The input
+    path is still the raw event list — the two extra arguments are the bout's own outcome
+    columns, not a compiled chain — so the claim this test makes is intact. Both finish
+    attempts below now read 0.0 because this bout was not won by submission; the whole point
+    of the change is that ``successful: true`` on a finish no longer means the fight ended."""
     seq = [
         {"actor_id": "ath1", "label": "Closed Guard", "type": "guard", "successful": None},
         {"actor_id": "ath1", "label": "Armbar", "type": "submission", "successful": True},
         {"actor_id": "ath1", "label": "Triangle Choke", "type": "submission", "successful": False},
         {"actor_id": "ath2", "label": "Guard Pass", "type": "pass", "successful": True},
     ]
-    obs = observations_for_side(seq, "ath1", None)
+    obs = observations_for_side(seq, "ath1", None, winner_id="ath1", win_type="POINTS")
     assert obs == (
-        _node_obs("armbar", 1.0, 0.25),
+        _node_obs("armbar", 0.0, 0.25),
         _node_obs("triangle choke", 0.0, 0.25),
     )
 
