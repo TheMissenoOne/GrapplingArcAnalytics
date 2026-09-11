@@ -314,8 +314,13 @@ def match_systems(
             matches.append({
                 "a_system": sa.name,
                 "a_hub": sa.hub,
+                "a_size": sa.size,
                 "b_system": sb.name,
                 "b_hub": sb.hub,
+                # Members the two systems actually share — the checkable evidence for a
+                # dossier's analogue line (E15 §7): a bare similarity score isn't, an
+                # intersecting technique list is.
+                "shared_members": sorted(set(sa.members) & set(sb.members)),
                 **best_detail,
             })
 
@@ -331,6 +336,28 @@ def match_systems(
     }
 
 
+# Owner decision 2026-09-09 + E15 §7: the dossier's analogue line names shared SYSTEMS
+# (by the query athlete's own hub) instead of a bare percent. Cap + tiebreak below.
+SHARED_SYSTEMS_CAP = 3
+SHARED_MEMBERS_CAP = 4
+
+
+def _shared_systems(matches: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Matched system pairs that actually share a technique, as the dossier evidence.
+
+    Ranked by ``size(a_system) * score`` descending (the aggregate's own weight), ties
+    broken by hub label — a total order, not dict/set iteration order
+    (failure-archaeology #10). Capped to ``SHARED_SYSTEMS_CAP``; each system's shown
+    members capped to ``SHARED_MEMBERS_CAP``, alphabetical (also a total order).
+    """
+    qualifying = [m for m in matches if m["shared_members"]]
+    ranked = sorted(qualifying, key=lambda m: (-(m["a_size"] * m["score"]), m["a_hub"]))
+    return [
+        {"hub": m["a_hub"], "shared": m["shared_members"][:SHARED_MEMBERS_CAP]}
+        for m in ranked[:SHARED_SYSTEMS_CAP]
+    ]
+
+
 def compare_profiles(
     query: AthleteSystemProfile,
     targets: list[AthleteSystemProfile],
@@ -339,7 +366,8 @@ def compare_profiles(
     """Rank target athletes by system similarity to the query athlete.
 
     Returns top-``k`` targets sorted descending by aggregate similarity,
-    each with their best-matching system detail.
+    each with their best-matching system detail plus ``shared_systems``
+    (see ``_shared_systems``) — the dossier's checkable evidence.
     """
     results: list[dict[str, Any]] = []
     for target in targets:
@@ -354,6 +382,7 @@ def compare_profiles(
             "diversity": target.diversity,
             "aggregate_similarity": comp["aggregate_similarity"],
             "best_match": comp["matches"][0] if comp["matches"] else None,
+            "shared_systems": _shared_systems(comp["matches"]),
         })
 
     results.sort(key=lambda x: -x["aggregate_similarity"])

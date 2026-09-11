@@ -57,16 +57,21 @@ def test_systems_section_rendered() -> None:
     p["_systems"] = _systems()
     p["_analogues"] = [
         {"athlete": "Craig Jones", "aggregate_similarity": 0.87,
-         "dominant_type": "submission", "system_count": 2, "best_match": None},
+         "dominant_type": "submission", "system_count": 2, "best_match": None,
+         "shared_systems": [{"hub": "back control", "shared": ["armbar", "rnc"]}]},
         {"athlete": "Nicholas Meregali", "aggregate_similarity": 0.61,
-         "dominant_type": "control", "system_count": 3, "best_match": None},
+         "dominant_type": "control", "system_count": 3, "best_match": None,
+         "shared_systems": []},
     ]
     page = render_profile_page(p)
     assert "Submission (back control)" in page
     assert "back control" in page          # hub named
     assert "5" in page and "7" in page     # size + transition count
     assert "grapple-craig-jones.html" in page
-    assert "87%" in page                   # similarity as %
+    assert "shares 1 system: back control" in page  # evidence-carrying line, not a percent
+    assert "armbar" in page and "rnc" in page        # the checkable overlap
+    assert "no shared system" in page                # honest degrade for the other analogue
+    assert "87%" not in page and "61%" not in page   # never a bare percent
     assert "1520" not in page              # raw system elo never shown
     assert "100%" in page and "75%" in page  # strength relative to strongest system
 

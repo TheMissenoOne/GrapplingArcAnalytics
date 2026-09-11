@@ -326,6 +326,28 @@ class TestMatchSystems:
             assert "score" in m
             assert "type_cosine" in m
 
+    def test_shared_members_is_actual_intersection(self) -> None:
+        # graph_a and graph_b both carry "mount" — a real overlap the dossier
+        # evidence has to be able to name.
+        pa = build_system_profile("Guard Player", _graph_a())
+        pb = build_system_profile("Passing Player", _graph_b())
+        result = match_systems(pa, pb)
+        all_shared = {m for match in result["matches"] for m in match["shared_members"]}
+        assert "mount" in all_shared
+        for match in result["matches"]:
+            assert match["shared_members"] == sorted(match["shared_members"])  # total order
+            a_sys = next(s for s in pa.systems if s.hub == match["a_hub"])
+            b_sys = next(s for s in pb.systems if s.hub == match["b_hub"])
+            assert set(match["shared_members"]) == set(a_sys.members) & set(b_sys.members)
+
+    def test_shared_members_empty_for_disjoint_systems(self) -> None:
+        # graph_a and graph_c (leg lock player) share zero technique labels.
+        pa = build_system_profile("Guard Player", _graph_a())
+        pc = build_system_profile("Leg Lock Player", _graph_c())
+        result = match_systems(pa, pc)
+        for m in result["matches"]:
+            assert m["shared_members"] == []
+
 
 class TestCompareProfiles:
     def test_query_not_in_results(self) -> None:
@@ -342,6 +364,28 @@ class TestCompareProfiles:
         pc = build_system_profile("Leg Lock Player", _graph_c())
         results = compare_profiles(pa, [pa, pb, pc], k=1)
         assert len(results) == 1
+
+    def test_shared_systems_present_and_capped(self) -> None:
+        pa = build_system_profile("Guard Player", _graph_a())
+        pb = build_system_profile("Passing Player", _graph_b())
+        results = compare_profiles(pa, [pa, pb], k=5)
+        row = next(r for r in results if r["athlete"] == "Passing Player")
+        shared = row["shared_systems"]
+        assert 0 < len(shared) <= 3
+        for s in shared:
+            assert 0 < len(s["shared"]) <= 4
+            assert s["shared"] == sorted(s["shared"])  # alphabetical, total order
+        # ranked by size(a)*score desc, ties by hub — deterministic across repeats
+        again = compare_profiles(pa, [pa, pb], k=5)
+        row_again = next(r for r in again if r["athlete"] == "Passing Player")
+        assert row_again["shared_systems"] == shared
+
+    def test_shared_systems_empty_says_no_shared_system(self) -> None:
+        pa = build_system_profile("Guard Player", _graph_a())
+        pc = build_system_profile("Leg Lock Player", _graph_c())
+        results = compare_profiles(pa, [pa, pc], k=5)
+        row = next(r for r in results if r["athlete"] == "Leg Lock Player")
+        assert row["shared_systems"] == []
 
     def test_comparison_matrix(self) -> None:
         pa = build_system_profile("Guard Player", _graph_a())

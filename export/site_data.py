@@ -1814,13 +1814,35 @@ document.addEventListener('DOMContentLoaded', function(){{
         )
         forks_html = (f'<div class="forks"><span class="kicker">Dilemma forks</span>'
                       f'<div class="fork-rows">{forks}</div></div>') if forks else ""
-        chips = "".join(
-            f'<a class="chip" href="grapple-{slugify(a["athlete"])}.html">{html.escape(a["athlete"])}'
-            f'<span class="sim">{round(a["aggregate_similarity"] * 100)}%</span></a>'
-            for a in (profile.get("_analogues") or [])[:5]
-        )
+        # Owner decision 2026-09-09 + E15 §7: PoC-E15 measured the shipped percentage as
+        # not distinguishable from chance on the pre-registered split (docs/research/
+        # e15_systems_similarity_prereg.md) and no candidate metric cleared its bar — so
+        # this stays a presentation change, not a metric one. Ranking is untouched
+        # (aggregate_similarity, computed above); the bare percent is dropped and replaced
+        # by the shared systems (`compare_profiles`' `shared_systems`, ponytail: simplest
+        # honest option E15 offered — add a self-recognition-gated percent back only if a
+        # future cell earns one). A row with no shared system says so rather than falling
+        # back to a number.
+        def _ana_row(a: dict[str, Any]) -> str:
+            name = html.escape(a["athlete"])
+            href = f'grapple-{slugify(a["athlete"])}.html'
+            shared = a.get("shared_systems") or []
+            if not shared:
+                return (f'<div class="ana-row"><a class="ana-name" href="{href}">{name}</a>'
+                        f'<span class="ana-count">— no shared system</span></div>')
+            hubs = " · ".join(html.escape(s["hub"]) for s in shared)
+            evid = "".join(
+                f'<div class="ana-sys"><span class="hub">{html.escape(s["hub"])}</span>'
+                f'<span class="evid">{" · ".join(html.escape(m) for m in s["shared"])}</span></div>'
+                for s in shared
+            )
+            n = len(shared)
+            return (f'<div class="ana-row"><a class="ana-name" href="{href}">{name}</a>'
+                    f'<span class="ana-count">— shares {n} system{"s" if n != 1 else ""}: {hubs}</span>'
+                    f'<div class="ana-evid">{evid}</div></div>')
+        ana_rows = "".join(_ana_row(a) for a in (profile.get("_analogues") or [])[:5])
         ana_html = (f'<div class="ana"><span class="kicker">Grapples most like</span>'
-                    f'<div class="chips">{chips}</div></div>') if chips else ""
+                    f'<div class="ana-list">{ana_rows}</div></div>') if ana_rows else ""
         sys_prose = next((sec for sec in sections if sec[0] == "The systems"), None)
         prose = (f'<div class="editorial sys-lead"><p>{html.escape(sys_prose[1][0])}</p></div>'
                  if sys_prose else "")
