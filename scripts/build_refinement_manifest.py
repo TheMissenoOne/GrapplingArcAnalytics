@@ -41,6 +41,7 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from analysis.names import athlete_key  # noqa: E402
+from analysis.ruleset_scoring import family_of as _authoritative_family_of  # noqa: E402
 
 OUT = REPO / "data" / "frame_pdf" / "refinamento_manifest.json"
 TRANSCRIPTS_DIR = REPO / "transcripts"
@@ -70,16 +71,17 @@ ALREADY_FRAMED_SINGLES: frozenset[tuple[frozenset[str], int | None]] = frozenset
 
 
 def family_of(event: str | None) -> str | None:
-    """ponytail: inline placeholder classifier -- another agent is building the real
-    event->family map in analysis/ruleset_scoring.py concurrently; that module did not exist
-    on disk when this was written. Reconcile once it lands; this stays literal per the ticket:
-    ADCC = 'adcc' or 'cji' substring, IBJJF = worlds/pan/euro/no-gi/ibjjf substring."""
-    ev = (event or "").lower()
-    if "adcc" in ev or "cji" in ev:
-        return "adcc"
-    if any(k in ev for k in ("worlds", "pan", "euro", "no-gi", "nogi", "ibjjf")):
-        return "ibjjf"
-    return None
+    """ADCC/IBJJF only -- the two families this manifest's points-reprocessing targets.
+    Delegates to ``analysis.ruleset_scoring.family_of`` (backed by
+    ``data/scouting/event_rulesets.json``), the same map rating reads -- reconciled 2026-09-11,
+    replacing this file's own inline placeholder classifier which disagreed on CJI (grouped it
+    under 'adcc' by keyword, including 'Combat Jiu-Jitsu Worlds' misread as 'ibjjf' via its
+    'Worlds' substring). CJI is excluded here on purpose, not folded into either arm: CJI 1 ran
+    submission-only and CJI 2 scores whole rounds on judges' cards, never actions -- neither has
+    a per-action points table (event_rulesets.json ``points['cji'] = null``), so neither is a
+    candidate for "enrich with points/advantages" reprocessing."""
+    fam = _authoritative_family_of(event)
+    return fam if fam in ("adcc", "ibjjf") else None
 
 
 def has_score_info(sequence: list[dict[str, Any]] | None) -> bool:

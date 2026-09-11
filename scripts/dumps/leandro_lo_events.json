@@ -244,53 +244,5 @@
       "successful": false,
       "ts": 16028
     }
-  ],
-  "Leandro Lo|Gordon Ryan|2025": [
-    {
-      "label": "Takedown",
-      "type": "takedown",
-      "actor": "Leandro Lo",
-      "ts": 21204
-    },
-    {
-      "label": "Back Take",
-      "type": "control",
-      "actor": "Leandro Lo",
-      "ts": 21292
-    },
-    {
-      "label": "Double Leg Takedown",
-      "type": "takedown",
-      "actor": "Leandro Lo",
-      "ts": 21322
-    },
-    {
-      "label": "Sweep",
-      "type": "sweep",
-      "actor": "Gordon Ryan",
-      "successful": false,
-      "ts": 21331
-    },
-    {
-      "label": "Kimura",
-      "type": "submission",
-      "actor": "Gordon Ryan",
-      "successful": false,
-      "ts": 21368
-    },
-    {
-      "label": "Guard Pass",
-      "type": "pass",
-      "actor": "Gordon Ryan",
-      "successful": false,
-      "ts": 21679
-    },
-    {
-      "label": "Sweep",
-      "type": "sweep",
-      "actor": "Gordon Ryan",
-      "successful": false,
-      "ts": 21686
-    }
   ]
 }

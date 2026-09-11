@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from collections import Counter
 
+from analysis.ruleset_scoring import family_of as authoritative_family_of
+from analysis.ruleset_scoring import load_event_rulesets
 from scripts.build_refinement_manifest import (
     already_framed,
     build_entry,
@@ -20,12 +22,31 @@ from scripts.build_refinement_manifest import (
 
 def test_family_of() -> None:
     assert family_of("ADCC 2022") == "adcc"
-    assert family_of("CJI 2 - Day 1") == "adcc"
     assert family_of("IBJJF Worlds 2023") == "ibjjf"
     assert family_of("Pan No-Gi 2025") == "ibjjf"
     assert family_of("WNO 24") is None          # Who's Number One, not IBJJF
     assert family_of("Polaris 36") is None
     assert family_of(None) is None
+    # cji has no per-action points table (submission-only / judges'-cards) -- excluded, not
+    # folded into 'adcc' by keyword. Real bug: 'Combat Jiu-Jitsu Worlds' used to misread as
+    # 'ibjjf' off its own 'Worlds' substring.
+    assert family_of("CJI") is None
+    assert family_of("CJI 2 - Day 1") is None
+    assert family_of("Combat Jiu-Jitsu Worlds") is None
+
+
+def test_family_of_matches_authoritative_map_for_every_known_event() -> None:
+    """This manifest's family_of must never diverge from analysis.ruleset_scoring.family_of
+    (event_rulesets.json) -- the map rating reads. Every event the corpus has a family opinion
+    on: this manifest's answer is either the same family or a deliberate exclusion (None),
+    never a DIFFERENT family."""
+    doc = load_event_rulesets()
+    for event in doc["events"]:
+        auth = authoritative_family_of(event, doc)
+        mine = family_of(event)
+        assert mine in (None, auth), (
+            f"{event!r}: manifest family_of={mine!r} disagrees with authoritative={auth!r}"
+        )
 
 
 def test_has_score_info() -> None:
