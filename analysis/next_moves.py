@@ -395,19 +395,40 @@ class MarkovNextMoves:
         ordered = sorted(d.items(), key=lambda kv: (-kv[1], kv[0]))
         return ordered[: max(0, k)]
 
-    def rel_of(self, state: str, label: str) -> tuple[str, float]:
-        """Most likely relative actor for this move from this state, and its share.
+    def raw_count(self, state: str, label: str) -> int:
+        """Raw, unsmoothed count of LABEL immediately following STATE in the training corpus.
 
-        Fitted only on bouts ``attribution.bout_flags`` calls ``perspective_reliable``. An
-        unseen pair answers ``("unk", 0.0)`` rather than guessing — 43.9% of the corpus cannot
-        support this field at all and inventing a side there would be the exact defect
-        ``analysis/attribution.py`` exists to refuse.
+        The "seen M times from this position" figure `guidance_block` prints (H3,
+        `docs/next_moves.md` §5c) — deliberately NOT `prob()`'s Witten-Bell estimate, which is
+        smoothed and conditions on the previous action too. This is the plain tally a reader can
+        check against the corpus themselves.
+        """
+        return self._c1.get(state, Counter())[label]
+
+    def rel_counts(self, state: str, label: str) -> tuple[str, int, int]:
+        """Most likely relative actor for this move from this state, as raw counts.
+
+        ``(side, n_for_side, n_total)`` — `rel_of` is this divided into a share. Fitted only on
+        bouts ``attribution.bout_flags`` calls ``perspective_reliable``. An unseen pair answers
+        ``(UNK, 0, 0)`` rather than guessing — 43.9% of the corpus cannot support this field at
+        all and inventing a side there would be the exact defect ``analysis/attribution.py``
+        exists to refuse.
         """
         c = self._rel.get((state, label))
         if not c:
-            return UNK, 0.0
+            return UNK, 0, 0
         side, n = max(c.items(), key=lambda kv: (kv[1], kv[0]))
-        return side, n / sum(c.values())
+        return side, n, sum(c.values())
+
+    def rel_of(self, state: str, label: str) -> tuple[str, float]:
+        """Most likely relative actor for this move from this state, and its share.
+
+        See `rel_counts` for the raw counts this is derived from.
+        """
+        side, n, total = self.rel_counts(state, label)
+        if total == 0:
+            return UNK, 0.0
+        return side, n / total
 
 
 def _prev_label(history: Sequence[Any]) -> str:

@@ -364,19 +364,23 @@ def test_guidance_block_works_with_no_embedding_at_all(fitted):
     assert "not a constraint" in txt.lower()
     assert "Closed Guard" in txt
     assert txt.count("\n- ") == 3
-    assert "%" in txt
+    assert "%" not in txt
+    assert "rank 1 of 3" in txt
+    assert "seen" in txt and "times from this position" in txt
 
 
-def test_guidance_block_prints_the_markov_probability_even_when_the_order_is_hybrid(fitted):
+def test_guidance_block_prints_the_markov_count_even_when_the_order_is_hybrid(fitted):
     eye = np.eye(len(fitted.vocab))
     r = EmbedRanker(fitted.vocab, eye)
     hybrid = guidance_block("Closed Guard", (), OWN, k=2, model=fitted, ranker=r,
                             qvec=eye[-1], alpha=1.0)
-    # α=1 puts the last vocab entry first, but its printed number is still its corpus share
+    # α=1 puts the last vocab entry first, but its printed number is still its corpus count
     first = hybrid.split("\n- ")[1]
     assert fitted.vocab[-1] in first
-    share = fitted.dist("Closed Guard")[fitted.vocab[-1]]
-    assert f"{share:.1%}" in first
+    seen = fitted.raw_count("Closed Guard", fitted.vocab[-1])
+    assert f"seen {seen} times from this position" in first
+    assert "rank 1 of 2" in first
+    assert "%" not in hybrid
 
 
 def test_guidance_block_is_empty_without_a_model():

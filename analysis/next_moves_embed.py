@@ -289,16 +289,20 @@ def guidance_block(
     alpha: float = 0.25,
     state_type: str = "",
 ) -> str:
-    """Prompt-ready text: the top-``k`` likely next moves from ``state``, with probabilities.
+    """Prompt-ready text: the top-``k`` likely next moves from ``state``, ranked — never a
+    percentage (H3, `docs/next_moves.md` §5c).
 
     Pure and network-free. With ``ranker``/``qvec`` it ranks by the hybrid score; without them
     (or without a fitted ``model``) it falls back to the Markov prior alone, which is why this
     is testable offline and why a caller with no embedding cache still gets a usable block.
 
-    **The printed number is always the Markov probability**, even when the ORDER comes from the
-    hybrid. A blended score is not a probability and printing one as if it were would be the
-    kind of number a reader trusts and should not — the corpus frequency is the only figure
-    here with a meaning outside this module.
+    **The printed statistic is always rank-in-this-list + a raw observed count**, even when the
+    ORDER comes from the hybrid. §5c measured the Markov distribution's calibration (log-loss,
+    Brier, ECE) on three chronological folds and it FAILED every fold, before AND after fitting
+    a temperature — so nothing here is printed as if it were a probability, blended score or
+    not. ``rank N of K`` is the position in THIS list; ``seen M times`` is
+    `MarkovNextMoves.raw_count` — the plain, unsmoothed tally of that label following this
+    state in the training corpus, checkable against the corpus by anyone reading it.
 
     Intended consumer: the frame-reading vision prompt (``docs/PROMPT_gemini_frame_reading.md``,
     driven by ``scripts/gemini_read_frames.py``), appended per page with the previous page's
@@ -312,7 +316,6 @@ def guidance_block(
     else:
         order = [lb for lb, _ in model.rank_next_moves(state, history, k)]
 
-    probs = model.dist(state, history)
     who = {OWN: "the athlete in this position", OPP: "her opponent"}.get(actor, "either athlete")
     lines = [
         f"## Likely next moves from “{state}” ({who})",
@@ -325,13 +328,17 @@ def guidance_block(
         told = [h if isinstance(h, str) else str(h[0]) for h in recent]
         lines.append(f"Recent actions: {' → '.join(told)}")
         lines.append("")
-    for lb in order:
+    k_total = len(order)
+    for rank, lb in enumerate(order, start=1):
         pt = _pt_of(lb)
-        side, share = model.rel_of(state, lb)
+        side, n_side, n_total = model.rel_counts(state, lb)
         who_s = {OWN: "hers", OPP: "opponent's"}.get(side)
-        tail = f", usually {who_s} ({share:.0%} of attributable cases)" if who_s else ""
+        tail = f", usually {who_s} ({n_side} of {n_total} attributable cases)" if who_s else ""
         name = f"{lb} · {pt}" if pt and pt != lb else lb
-        lines.append(f"- {name} — {probs[lb]:.1%}{tail}")
+        seen = model.raw_count(state, lb)
+        lines.append(
+            f"- {name} — rank {rank} of {k_total} (seen {seen} times from this position){tail}"
+        )
     return "\n".join(lines)
 
 
@@ -365,7 +372,8 @@ def _demo() -> None:
     assert r.rank(eye[2], lp, alpha=1.0, k=1)[0][0] == "Heel Hook"
 
     g = guidance_block("Closed Guard", [("Armbar", OWN)], OWN, k=2, model=m)
-    assert "corpus statistics" in g.lower() and "%" in g
+    assert "corpus statistics" in g.lower() and "%" not in g
+    assert "rank 1 of 2" in g and "seen" in g and "times from this position" in g
     assert "Armbar" in g
     print("next_moves_embed demo ok")
     print(g)

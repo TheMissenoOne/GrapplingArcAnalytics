@@ -460,12 +460,15 @@ relative.
   a `--guidance` flag, page by page with the previous page's last state feeding the next, is a
   separate task and a separate agent — **that script was not touched here.** See §8.
 * **App / Web suggestion.** Export the fitted counts the way `export/tech_library.py` exports
-  the library: a small JSON of `{state: [[label, p], …]}` truncated to the top ~10 per state
-  (78 states × 10 ≈ 780 rows, single-digit kB), bundled or served. The device does a dict
-  lookup — zero inference, works in airplane mode, no embedding, no key. If the hybrid ever
-  wins a future round, the candidate vectors are precomputed server-side and the device needs
-  ONE query embed — which is exactly the cost the App does not currently pay and should not
-  start paying for a 0-point gain.
+  the library: a small JSON of `{state: [[label, rank, count], …]}` truncated to the top ~10
+  per state (78 states × 10 ≈ 780 rows, single-digit kB), bundled or served — **rank and raw
+  count, never a probability column** (§5c, H3: the Markov distribution failed calibration on
+  every fold, before and after temperature scaling). The device does a dict lookup — zero
+  inference, works in airplane mode, no embedding, no key. If the hybrid ever wins a future
+  round, the candidate vectors are precomputed server-side and the device needs ONE query
+  embed — which is exactly the cost the App does not currently pay and should not start paying
+  for a 0-point gain. **Not implemented yet** — no `export/next_moves.py` exists; this is still
+  the planned shape, now pinned to match §5c's consequence.
 
 ### Not recommended, and why
 
