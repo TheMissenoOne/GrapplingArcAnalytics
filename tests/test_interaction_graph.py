@@ -91,6 +91,20 @@ def test_label_canonicalisation_is_the_system_chain() -> None:
     assert g.nodes["you:escape to turtle"]["label"] == "escape to turtle"
 
 
+def test_ambiguous_node_type_resolves_by_majority_not_read_order() -> None:
+    """Same first-writer-wins bug as build_graph.py's node_type (dcaff71): a label
+    seen with two different `type` values must settle on the majority regardless of
+    which sequence is read first, not whichever sequence happened to come first."""
+    majority = [_ev("Takedown", "you", "takedown") for _ in range(2)]
+    minority = [_ev("Takedown", "you", "transition")]
+    seqs_majority_first = [[e] for e in majority] + [[e] for e in minority]
+    seqs_minority_first = [[e] for e in minority] + [[e] for e in majority]
+    g1 = interaction_graph(seqs_majority_first)
+    g2 = interaction_graph(seqs_minority_first)
+    assert g1.nodes["you:takedown"]["type"] == "takedown"
+    assert g2.nodes["you:takedown"]["type"] == "takedown"  # must not flip to "transition"
+
+
 def test_role_map_is_fixed_per_sequence() -> None:
     app = [_ev("Mount", "you"), _ev("Back Control", "partner")]
     assert role_map(app, None) == {"you": "you", "partner": "opp"}

@@ -27,7 +27,7 @@ Node ids are strings (``"you:half guard"``) so the graph drops straight into the
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -146,7 +146,10 @@ def interaction_graph(
     denom: defaultdict[str, float] = defaultdict(float)
     reward: defaultdict[str, float] = defaultdict(float)
     risk: defaultdict[str, float] = defaultdict(float)
-    node_type: dict[str, str] = {}
+    # A node id can carry >1 `type` across sequences (same first-writer-wins bug fixed
+    # in build_graph.py by dcaff71) — resolve by MAJORITY occurrence, tie-broken by
+    # type name, so the result does not depend on sequence read order.
+    node_type_counts: dict[str, Counter[str]] = defaultdict(Counter)
     meta: dict[str, tuple[str, str]] = {}
 
     for i, seq in enumerate(sequences):
@@ -156,7 +159,7 @@ def interaction_graph(
                 occ[e["id"]] += 1
                 if e["ok"]:
                     ok_count[e["id"]] += 1
-                node_type.setdefault(e["id"], e["type"])
+                node_type_counts[e["id"]][e["type"]] += 1
                 meta.setdefault(e["id"], (e["role"], e["key"]))
             for a, b in zip(events, events[1:], strict=False):
                 denom[a["id"]] += 1
@@ -174,8 +177,12 @@ def interaction_graph(
     for n, c in occ.items():
         g.add_node(n)
         role, key = meta[n]
+        counts = node_type_counts[n]
+        best = max(counts.values()) if counts else 0
+        winners = sorted(t for t, ct in counts.items() if ct == best)
+        node_type = winners[0] if winners else ""
         g.nodes[n].update({
-            "role": role, "label": key, "type": node_type.get(n, ""),
+            "role": role, "label": key, "type": node_type,
             "occ": c, "ok_count": ok_count[n], "denom": denom[n],
             "reward": reward[n], "risk": risk[n],
             "reward_risk": round((reward[n] - risk[n]) / denom[n], 3) if denom[n] else 0.0,
