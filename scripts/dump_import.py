@@ -79,14 +79,23 @@ def _dump_bout_start_s(m: dict[str, Any]) -> int | None:
 
 
 def _load_url_mapping() -> dict[str, Any]:
-    """Load url_mapping.json if available, else return empty dict."""
+    """Load url_mapping.json, merged with any per-source overlay files under
+    ``data/video_fixes/*.json`` (same event-keyed shape — e.g. Flo page URLs that don't belong
+    in the main YouTube-sourced file). Missing/unreadable files are skipped, not fatal."""
+    root = Path(__file__).resolve().parents[1]
+    mapping: dict[str, Any] = {}
     try:
-        path = Path(__file__).resolve().parents[1] / "url_mapping.json"
+        path = root / "url_mapping.json"
         if path.exists():
-            return json.loads(path.read_text(encoding="utf-8"))
+            mapping.update(json.loads(path.read_text(encoding="utf-8")))
     except Exception as e:
         logger.warning("Could not load url_mapping.json: %s", e)
-    return {}
+    for overlay in sorted((root / "data" / "video_fixes").glob("*.json")):
+        try:
+            mapping.update(json.loads(overlay.read_text(encoding="utf-8")))
+        except Exception as e:
+            logger.warning("Could not load %s: %s", overlay, e)
+    return mapping
 
 
 # Trailing round tags in url_mapping "athlete" strings ("Craig Jones vs Kyle Boehm QF").
@@ -99,6 +108,8 @@ def video_index() -> dict[tuple[frozenset[str], int | None], str]:
     """(participants key, year) → video URL (+``&t=<start>s`` when the bout start is known)."""
     index: dict[tuple[frozenset[str], int | None], str] = {}
     for mapping in _load_url_mapping().values():
+        if not isinstance(mapping, dict):
+            continue  # e.g. a top-level "_comment" key in an overlay file
         base = mapping.get("video_url")
         if not base:
             continue
@@ -114,7 +125,7 @@ def video_index() -> dict[tuple[frozenset[str], int | None], str]:
             if not a or not b or athlete_key(a) == athlete_key(b):
                 continue
             secs = m.get("seconds")
-            url = f"{base}&t={int(secs)}s" if isinstance(secs, int | float) else base
+            url = _with_t_param(base, int(secs)) if isinstance(secs, int | float) else base
             index.setdefault((frozenset((athlete_key(a), athlete_key(b))), m.get("year")), url)
     return index
 

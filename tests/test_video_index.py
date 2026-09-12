@@ -39,10 +39,43 @@ def _key(a: str, b: str, year: int):
     return (frozenset((athlete_key(a), athlete_key(b))), year)
 
 
+class TestWithTParam:
+    """bruno-video-url-null: separator must match whether base already has a query string."""
+
+    def test_youtube_url_uses_ampersand(self) -> None:
+        url = dump_import._with_t_param("https://www.youtube.com/watch?v=AAAAAAAAAAA", 4571)
+        assert url == "https://www.youtube.com/watch?v=AAAAAAAAAAA&t=4571s"
+
+    def test_flo_url_with_no_query_uses_question_mark(self) -> None:
+        url = dump_import._with_t_param("https://www.flograppling.com/video/123-bout", 90)
+        assert url == "https://www.flograppling.com/video/123-bout?t=90s"
+
+    def test_url_with_query_but_no_t_uses_ampersand(self) -> None:
+        url = dump_import._with_t_param("https://example.com/watch?foo=bar", 12)
+        assert url == "https://example.com/watch?foo=bar&t=12s"
+
+
 class TestVideoIndex:
     def test_pair_with_start_gets_t_param(self, monkeypatch) -> None:
         idx = _index(monkeypatch)
         assert idx[_key("Felipe Pena", "Gordon Ryan", 2022)].endswith("&t=4571s")
+
+    def test_flo_style_base_url_uses_question_mark(self, monkeypatch) -> None:
+        # Flo page URLs carry no query string (unlike YouTube's "?v="): the join must not
+        # glue "&t=" onto a URL with no "?" yet.
+        mapping = {
+            "FLO": {
+                "video_url": "https://www.flograppling.com/video/999-bruno-rocha-vs-foe",
+                "matches": [
+                    {"athlete": "Bruno Rocha", "opponent": "Some Foe", "year": 2023,
+                     "winner": "Bruno Rocha", "seconds": 42},
+                ],
+            },
+        }
+        monkeypatch.setattr(dump_import, "_load_url_mapping", lambda: mapping)
+        idx = dump_import.video_index()
+        assert idx[_key("Bruno Rocha", "Some Foe", 2023)] == \
+            "https://www.flograppling.com/video/999-bruno-rocha-vs-foe?t=42s"
 
     def test_vs_key_and_stage_suffix(self, monkeypatch) -> None:
         idx = _index(monkeypatch)

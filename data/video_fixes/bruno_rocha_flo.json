@@ -1,0 +1,31 @@
+{
+  "_comment": [
+    "bruno-video-url-null: Flo full-match page URLs for Bruno Fernandes Rocha bouts, sourced",
+    "from data/frame_pdf/bruno_rocha.json. Each Flo page IS the single bout (kind=full_match),",
+    "so no 'seconds' offset — unlike a YouTube broadcast video shared across many bouts. The",
+    "Rafael Silverio da Fonseca entry is skipped: homonym white/master-2 belt, not this athlete",
+    "(purple belt), per that file's 'skip' note. Overlay file, merged by",
+    "dump_import._load_url_mapping on top of url_mapping.json (data/video_fixes/*.json)."
+  ],
+  "BRUNO_ROCHA_FLO_KEVEN_JULIO": {
+    "event_title": "CBJJE BJJ Paulista 2026",
+    "video_url": "https://www.flograppling.com/video/15547218-keven-julio-vs-bruno-rocha-2026-cbjje-bjj-paulista",
+    "matches": [
+      {"athlete": "Bruno Fernandes Rocha", "opponent": "Keven Julio", "year": 2026}
+    ]
+  },
+  "BRUNO_ROCHA_FLO_BRYAN_SILVA": {
+    "event_title": "CBJJE BJJ Paulista 2026",
+    "video_url": "https://www.flograppling.com/video/15546999-bruno-rocha-vs-bryan-silva-2026-cbjje-bjj-paulista",
+    "matches": [
+      {"athlete": "Bruno Fernandes Rocha", "opponent": "Bryan Silva", "year": 2026}
+    ]
+  },
+  "BRUNO_ROCHA_FLO_JOAO_CLEBER": {
+    "event_title": "CBJJ Brasileiro No-Gi 2026",
+    "video_url": "https://www.flograppling.com/video/16045240-bruno-fernandes-rocha-vs-joao-cleber-araujo-borges-2026-cbjj-brazilian-jiu-jitsu-championship-no-gi",
+    "matches": [
+      {"athlete": "Bruno Fernandes Rocha", "opponent": "Joao Cleber Araujo Borges", "year": 2026}
+    ]
+  }
+}
