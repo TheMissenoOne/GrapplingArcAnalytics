@@ -35,14 +35,16 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from analysis.markov_weights import block_for_family, load_markov_weights  # noqa: E402
-from scripts.research.rrb_round_rating import (  # noqa: E402
+from analysis.rating_v2.rrb_dominance import (  # noqa: E402
     CALIBRATION_METHODS,
     CALIBRATION_TIE_NATS,
-    _corpus_t2_dominance,
     action_values,
     calibration_fit,
-    load_corpus_bouts,
     marginal_submission_share,
+)
+from scripts.research.rrb_round_rating import (  # noqa: E402
+    _corpus_t2_dominance,
+    load_corpus_bouts,
 )
 
 OUT = REPO / "data" / "rating" / "rrb_dominance_calibration.json"

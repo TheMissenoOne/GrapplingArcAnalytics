@@ -634,3 +634,64 @@ filtrar por `repository.rated_athlete_graph_ids` — sem isso, `node_population_
 escala V2 e V1 dentro do mesmo `node_key` e o z-score começa a medir de qual corpus o atleta é.
 Os 86 são majoritariamente MMA (Chimaev, Khabib, St-Pierre, Prochazka), que o ADR-05 já mandava
 manter fora. Os grafos continuam sendo POSICIONADOS contra a baseline; só não a definem.
+
+## ADR-17 — Oponente virtual a partir da dominância RRB calibrada (2026-09-12)
+
+**Contexto.** O App tem dois sliders manuais por round (`difficulty`/`intensity`) que hoje não
+alimentam nenhum rating — `intensity` não é lido por caminho nenhum, `difficulty` só define o
+deslocamento do oponente virtual do Glicko-2 via `ELO_PER_DIFFICULTY_POINT × (difficulty − 5)`.
+O estudo pré-registrado `docs/research/rrb_round_rating_prereg.md` (relatório
+`docs/research/rrb_round_rating_study.md`, §E) testou se um sinal de dominância derivado da
+própria sequência (RRB — Round Rating Bayesiano/Bayesian-ish, o `Z` actor-signed log-odds sobre
+o mapeamento Lamas) explica melhor essa posição do que os sliders manuais.
+
+**O que muda.** O slider `difficulty` é **substituído** — nunca removido sem substituto (H2n:
+remover e não pôr nada é pior que os dois, decisivamente) — por um oponente virtual cuja força
+vem da dominância calibrada da própria sequência do round: `actions_states` (γ=1, `terminal`
+marginal para as duas ações de finalização), calibrada por temperatura no corpus público, virada
+em pontos de Elo por `-400·log10(P/(1-P))` e clamped a `±clamp_elo` (400, precedente do `hier4`
+do estudo). `intensity` é **removida** — nenhum caminho de rating lê esse campo (certeza de
+código, não de estatística).
+
+**O que NÃO muda e por quê — os dois resultados negativos que travam o E2/E3.**
+
+1. **§E2 — "dominância-Glicko" (usar `P` calibrado tanto como `E` quanto como `S` do mesmo
+   round) FALHOU.** Discriminação pior que a produção (`ΔAUC` vs A0 **−0,149** [−0,292, −0,004];
+   vs A4 **−0,205** [−0,356, −0,051]) e sem ganho de calibração que compense
+   (`ΔLogLoss` NULL). A identidade do §4 do estudo explica o motivo: quando a MESMA dominância
+   do round vira `E` e `S`, `s − E ≡ 0` (resíduo máximo medido 9,2e-09) — o round não carrega
+   informação nenhuma para o Glicko-2. **Por isso `round_dominance` só retorna o deslocamento do
+   OPONENTE (`elo_offset`), nunca um `score`** — a flag `successful` do próprio evento continua
+   sendo o `S` da observação, sem exceção.
+2. **§E3 — crédito Glicko-2 por técnica (dividir a evidência de um round entre as ações que o
+   compõem) foi REJEITADO, regra de morte 17.** Nenhum dos três braços (`equal_split`,
+   `last_action_only`, `contribution`) bateu o prior estático `v(code)` da técnica com um
+   intervalo limpo. `contribution_shares` (o `c_k` do §E3) continua existindo só como
+   **diagnóstico** — os campos `contributions` do artefato e do golden são para leitura humana
+   ("o que pesou nesse round"), nunca uma atualização de rating por técnica.
+
+**Artefato e geradores.** `data/rating/rrb_dominance_calibration.json`
+(`scripts/build_rrb_dominance_calibration.py`, lê `matches` prod read-only, corpus público
+apenas — classe de privacidade A) e o golden cross-repo
+`data/fixtures/rrbDominanceGolden.json` (`scripts/export_rrb_dominance_fixtures.py`, sem rede,
+lê o artefato committado). A partir deste ADR, a matemática de produção — tabela de valores,
+`actions_states`, calibração por temperatura/Platt/isotônica, `elo_offset`, `clamp_elo`,
+`contribution_shares` — vive em `analysis/rating_v2/rrb_dominance.py` (`round_dominance` +
+`load_calibration`), e o script de pesquisa (`scripts/research/rrb_round_rating.py`) e os dois
+geradores IMPORTAM de lá — nenhuma cópia da matemática. `tests/test_rrb_dominance.py` cobre o
+round-trip contra o golden, determinismo, cobertura zero (`coverage=0.0`, nunca `NaN`) e a
+identidade de auto-cancelamento que mantém a dominância fora do score de observação.
+
+**Porta para o App (ainda não escrita aqui).** `services/rating/rrbDominance.ts` — mesma tabela
+de valores (snapshot do `definition.value_table` do artefato), mesmo `actions_states`/γ=1, mesma
+calibração (parâmetros do artefato, sem re-fit on-device), mesmo `clamp_elo`. Ligado no slot que
+hoje lê `difficulty` em `ratingV2Evidence.ts`/`ratingV2Projection.ts`. Contrato cross-repo:
+`data/fixtures/rrbDominanceGolden.json` ↔
+`GrapplingArcApp/src/services/__fixtures__/rrbDominanceGolden.json`, byte-idêntico
+(`tests/test_cross_repo_fixtures.py`).
+
+**Não generaliza além do estudo.** A personalização por atleta FALHOU no corpus público (§C3,
+AUC 0,772 → 0,708) — este ADR não introduz nenhuma camada pessoal on-device; a calibração é
+ajustada UMA VEZ no corpus inteiro (`fitted_on`), nunca por usuário. E H4 (previsão do vencedor
+do próximo ano) é NULL em todas as dobras para todo braço, inclusive este — a dominância RRB
+descreve um round bem; não valida uma regra de atualização de rating no corpus público.

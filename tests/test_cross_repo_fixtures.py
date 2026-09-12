@@ -71,6 +71,11 @@ GENERATORS: list[tuple[str, Path, Path]] = [
         ROOT / "data" / "rating" / "actions_parity_golden.json",
         APP_FIXTURES / "actionsParityGolden.json",
     ),
+    (
+        "scripts.export_rrb_dominance_fixtures",
+        ROOT / "data" / "fixtures" / "rrbDominanceGolden.json",
+        APP_FIXTURES / "rrbDominanceGolden.json",
+    ),
 ]
 
 _IDS = [module.rsplit(".", 1)[-1] for module, _, _ in GENERATORS]

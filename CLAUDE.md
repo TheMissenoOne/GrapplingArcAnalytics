@@ -239,6 +239,23 @@ counts, `graph_edge_bouts` provenance) and still rates athletes the V2 run does 
 **Changing the node engine requires a full replay** — runbook in
 `docs/rating_v2/08_ESTADO_DO_CUTOVER.md`, and never `scripts.reprocess_all`.
 
+⚠️ **The App's `difficulty` slider is being replaced by a calibrated RRB-dominance virtual
+opponent** (ADR-17, 2026-09-12 — `docs/rating_v2/01_DECISOES.md`). Production math —
+`actions_states` dominance, temperature/Platt/isotonic calibration, `elo_offset`, `clamp_elo`,
+diagnostic `contribution_shares` — lives in `analysis/rating_v2/rrb_dominance.py`
+(`round_dominance`/`load_calibration`); `scripts/research/rrb_round_rating.py` and both
+generators (`scripts/build_rrb_dominance_calibration.py` → `data/rating/
+rrb_dominance_calibration.json`, public-corpus-only; `scripts/export_rrb_dominance_fixtures.py`
+→ `data/fixtures/rrbDominanceGolden.json`) import it, never duplicate it. Dominance is the
+Glicko-2 OPPONENT offset only — the study's self-cancellation identity (§4) means using the same
+round's dominance as both `E` and `S` erases all information, so `round_dominance` returns no
+`score` field; the event's own `successful` flag stays `S`. Per-technique credit-splitting was
+tried and rejected (§E3, death rule 17) — `contribution_shares` is diagnostic only, never a
+rating update. App port (not yet written): `services/rating/rrbDominance.ts`, wired at the
+`ratingV2Evidence.ts`/`ratingV2Projection.ts` slot that reads `difficulty` today; cross-repo
+golden `data/fixtures/rrbDominanceGolden.json` ↔ `GrapplingArcApp/src/services/__fixtures__/
+rrbDominanceGolden.json`, checked byte-identical by `tests/test_cross_repo_fixtures.py`.
+
 The V1 math below is still what `score_from_match`/`k_factor` use.
 From `felixgnwn/adcc_elo_engine/elo_engine.py`:
 - K = 40 × win_type_mult × stage_mult

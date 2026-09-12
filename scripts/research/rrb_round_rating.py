@@ -61,98 +61,27 @@ VOLATILITY_SEED = 0.06
 #: every arm's virtual opponent is expressed as an offset from this same value.
 GLOBAL_SEED = 1500.0
 
-SUB_FAMILY = ("SUBA", "SUB")
-
-
-# ── pure: the value table ────────────────────────────────────────────────────────
-
-
-def marginal_submission_share(doc: Mapping[str, Any], family: str = "global") -> float:
-    """The n-weighted mix of ``SUBA``/``SUB`` in one block of the weights artefact.
-
-    The pilot's "terminal marginalised at 0.5582". Recomputed from the artefact's OWN
-    ``provenance.actions`` counts rather than quoted, so it moves when the artefact does.
-    """
-    rows = ((doc.get("provenance") or {}).get("actions") or {}).get(family) or {}
-    num = den = 0.0
-    for code in SUB_FAMILY:
-        row = rows.get(code) or {}
-        n = float(row.get("n") or 0.0)
-        w = float(row.get("weight") or 0.0)
-        num += n * w
-        den += n
-    return num / den if den else 0.5
-
-
-def action_values(
-    block: Mapping[str, float], *, terminal: str, marginal: float
-) -> dict[str, float]:
-    """Per-code dominance value, under one of the three pre-registered terminal settings.
-
-    ``landed`` — the block as published (``SUB`` keeps its partly-circular 0.8065).
-    ``marginal`` — both submission codes take the family's n-weighted mix.
-    ``drop`` — the submission family is removed entirely (the leakage control).
-    """
-    vals = {str(k): float(v) for k, v in block.items()}
-    if terminal == "landed":
-        return vals
-    if terminal == "marginal":
-        return {k: (marginal if k in SUB_FAMILY else v) for k, v in vals.items()}
-    if terminal == "drop":
-        return {k: v for k, v in vals.items() if k not in SUB_FAMILY}
-    raise ValueError(f"terminal desconhecido: {terminal!r}")
-
-
-# ── pure: the dominance score ────────────────────────────────────────────────────
-
-
-def _logit(p: float) -> float:
-    p = min(max(p, 1e-9), 1 - 1e-9)
-    return math.log(p / (1.0 - p))
-
-
-def sigmoid(z: float) -> float:
-    return 1.0 / (1.0 + math.exp(-z)) if z > -700 else 0.0
-
-
-def signed_log_odds(
-    steps: Sequence[tuple[str | None, bool]],
-    values: Mapping[str, float],
-    *,
-    gamma: float = 1.0,
-    temperature: float = 1.0,
-) -> tuple[float, int]:
-    """``(Z, n_mapped)`` — the prereg §3 statistic.
-
-    ``steps`` is ``(lamas code or None, is_own)`` in sequence order. Unmapped codes and codes
-    absent from ``values`` are DROPPED, not given the block mean: the mean is the no-information
-    value for a WEIGHT, and averaging it into a VALUE invents a reading of who was winning.
-
-    ``gamma`` is the length exponent: ``Z = Σ z_i / (n^γ · T)``. γ=1 is the pilot's mean, γ=0 its
-    "full compounding" (a plain sum, which is the length artefact), γ=0.5 the √n middle.
-    """
-    zs = [
-        (_logit(values[code]) if own else -_logit(values[code]))
-        for code, own in steps
-        if code is not None and code in values
-    ]
-    n = len(zs)
-    if n == 0:
-        return float("nan"), 0
-    denom = (n**gamma) * temperature
-    return sum(zs) / denom if denom else float("nan"), n
-
-
-def p_own(z: float) -> float:
-    """Dominance as a probability. ``P_partner = 1 − p_own(z)`` (the pilot's orientation)."""
-    return sigmoid(z)
-
-
-def elo_offset(p: float) -> float:
-    """Elo points the virtual partner sits ABOVE the athlete. ``p`` is the athlete's dominance,
-    so a dominant round puts the partner BELOW (negative offset)."""
-    p = min(max(p, 1e-6), 1 - 1e-6)
-    return -400.0 * math.log10(p / (1.0 - p))
+# The production signal — value table, dominance statistic, canonical mapping, calibration,
+# contribution shares — lives in ``analysis.rating_v2.rrb_dominance`` (ADR-17). This research
+# script and both artefact generators import it from there; nothing below duplicates that math.
+from analysis.rating_v2.rrb_dominance import (  # noqa: E402
+    CALIBRATION_METHODS,
+    CALIBRATION_TIE_NATS,
+    SUB_FAMILY,
+    _isotonic_interp,  # noqa: F401 -- re-exported, tests/test_rrb_round_rating.py imports it here
+    _logit,
+    action_values,
+    calibration_apply,
+    calibration_fit,
+    canonical_code,
+    contribution_shares,
+    elo_offset,
+    granular_score,
+    marginal_submission_share,
+    p_own,
+    sigmoid,
+    signed_log_odds,
+)
 
 
 def competitiveness(p: float) -> float:
@@ -1143,90 +1072,8 @@ def main(argv: Sequence[str] | None = None) -> int:
 
 GRANULARITIES = ("actions", "states", "states_occ", "edges", "actions_states", "edges_states")
 
-
-def canonical_code(entry: Mapping[str, Any], *, library: bool = True) -> str | None:
-    """Lamas code for an APP entry, optionally through the canonical library first.
-
-    The owner logs in pt-BR (``control/Costas``, ``transition/Puxada para Guarda``) and
-    ``lamas_chain``'s label rules match English tokens, so reading the raw label loses the single
-    largest action in the log. ``technique_match.clean_label`` is the existing pt/variant →
-    canonical-English resolver; routing through it takes the owner's coverage from 28.75 % to
-    50.00 % (prereg §A1). ``library=False`` reproduces the pre-addendum numbers.
-    """
-    from analysis.technique_match import clean_label
-
-    label = str(entry.get("label") or "")
-    if library:
-        label = clean_label(label, str(entry.get("type") or ""))
-    return lamas_state({"type": entry.get("type"), "label": label, "successful": entry.get("successful")})
-
-
-def _zs(steps: Sequence[tuple[str | None, bool]], values: Mapping[str, float]) -> list[float]:
-    return [
-        (_logit(values[c]) if own else -_logit(values[c]))
-        for c, own in steps
-        if c is not None and c in values
-    ]
-
-
-def _keyed_zs(
-    steps: Sequence[tuple[str | None, bool]], values: Mapping[str, float]
-) -> list[tuple[tuple[str, bool], float]]:
-    return [
-        ((c, own), _logit(values[c]) if own else -_logit(values[c]))
-        for c, own in steps
-        if c is not None and c in values
-    ]
-
-
-def granular_score(
-    steps: Sequence[tuple[str | None, bool]],
-    values: Mapping[str, float],
-    *,
-    granularity: str = "actions",
-    gamma: float = 1.0,
-    temperature: float = 1.0,
-) -> tuple[float, int]:
-    """``(Z, n_used)`` under one evidence granularity (prereg §A3).
-
-    ``actions``    Σ z_i / n^γ — repetition-weighted (the pilot's statistic).
-    ``states``     z of the LAST mapped step — a position, length-free by construction.
-    ``states_occ`` mean z over DISTINCT ``(code, actor)`` pairs — occupancy, not repetition.
-    ``edges``      Σ (z_{i+1} − z_i) / (n−1)^γ — the PROGRESSION (VAEP/xT form). At γ=0 it
-                   telescopes to ``z_n − z_1``, so it is length-free in the strongest sense.
-    ``*_states``   the mean of the two component Zs; coherent because both are log-odds.
-    """
-    zs = _zs(steps, values)
-    n = len(zs)
-    if granularity == "actions":
-        if n == 0:
-            return float("nan"), 0
-        return sum(zs) / ((n**gamma) * temperature), n
-    if granularity == "states":
-        if n == 0:
-            return float("nan"), 0
-        return zs[-1] / temperature, n
-    if granularity == "states_occ":
-        kz = _keyed_zs(steps, values)
-        if not kz:
-            return float("nan"), 0
-        uniq: dict[tuple[str, bool], float] = {}
-        for k, z in kz:
-            uniq.setdefault(k, z)
-        return sum(uniq.values()) / (len(uniq) * temperature), len(uniq)
-    if granularity == "edges":
-        if n < 2:
-            return float("nan"), 0
-        deltas = [zs[i + 1] - zs[i] for i in range(n - 1)]
-        return sum(deltas) / (((n - 1) ** gamma) * temperature), n
-    if granularity in ("actions_states", "edges_states"):
-        first = "actions" if granularity == "actions_states" else "edges"
-        za, na = granular_score(steps, values, granularity=first, gamma=gamma, temperature=temperature)
-        zb, nb = granular_score(steps, values, granularity="states", gamma=gamma, temperature=temperature)
-        if na == 0 or nb == 0:
-            return float("nan"), 0
-        return (za + zb) / 2.0, max(na, nb)
-    raise ValueError(f"granularity desconhecida: {granularity!r}")
+# canonical_code / _zs / _keyed_zs / granular_score moved to analysis.rating_v2.rrb_dominance
+# (ADR-17) — imported above.
 
 
 # ── targets ──────────────────────────────────────────────────────────────────────
@@ -3075,74 +2922,8 @@ def run_section_d(doc: Mapping[str, Any], weights_doc: Mapping[str, Any]) -> dic
 # `actions_states` (§A) under a GLOBAL calibration fit once on the public corpus, never
 # per-user. See prereg §E for every fixed choice below.
 
-CALIBRATION_METHODS = ("temperature", "platt", "isotonic")
-#: Tie-break tolerance for E1's method selection (prereg §E1), fixed before any number was seen.
-CALIBRATION_TIE_NATS = 0.005
-
-
-def calibration_fit(zs: Sequence[float], ys: Sequence[float], method: str) -> dict[str, Any]:
-    """One calibration candidate, fit on ``(Z, label)`` pairs — prereg §E1."""
-    if method == "temperature":
-        from scipy.optimize import minimize_scalar
-
-        ys_int = [int(y) for y in ys]
-
-        def nll(t: float) -> float:
-            t = max(t, 1e-3)
-            return log_loss([sigmoid(z / t) for z in zs], ys_int)
-
-        r = minimize_scalar(nll, bounds=(0.05, 20.0), method="bounded")
-        return {"method": "temperature", "T": float(r.x)}
-    if method == "platt":
-        from sklearn.linear_model import LogisticRegression
-
-        lr = LogisticRegression(C=1e6, solver="lbfgs")
-        lr.fit([[z] for z in zs], ys)
-        return {"method": "platt", "a": float(lr.coef_[0][0]), "b": float(lr.intercept_[0])}
-    if method == "isotonic":
-        from sklearn.isotonic import IsotonicRegression
-
-        ps = [sigmoid(z) for z in zs]
-        iso = IsotonicRegression(out_of_bounds="clip", y_min=1e-6, y_max=1 - 1e-6)
-        iso.fit(ps, ys)
-        return {
-            "method": "isotonic",
-            "x_thresholds": [round(float(x), 6) for x in iso.X_thresholds_],
-            "y_thresholds": [round(float(y), 6) for y in iso.y_thresholds_],
-        }
-    raise ValueError(f"método de calibração desconhecido: {method!r}")
-
-
-def _isotonic_interp(p: float, xt: Sequence[float], yt: Sequence[float]) -> float:
-    """Piecewise-linear read of a serialised isotonic fit — no sklearn object in the artefact."""
-    if not xt:
-        return p
-    if p <= xt[0]:
-        return yt[0]
-    if p >= xt[-1]:
-        return yt[-1]
-    for i in range(1, len(xt)):
-        if p <= xt[i]:
-            x0, x1, y0, y1 = xt[i - 1], xt[i], yt[i - 1], yt[i]
-            if x1 == x0:
-                return y1
-            return y0 + (p - x0) / (x1 - x0) * (y1 - y0)
-    return yt[-1]
-
-
-def calibration_apply(zs: Sequence[float], params: Mapping[str, Any]) -> list[float]:
-    """Calibrated ``P`` for a list of raw ``Z`` (logit-scale `actions_states`), one method."""
-    method = params["method"]
-    if method == "temperature":
-        t = params["T"]
-        return [sigmoid(z / t) for z in zs]
-    if method == "platt":
-        a, b = params["a"], params["b"]
-        return [sigmoid(a * z + b) for z in zs]
-    if method == "isotonic":
-        xt, yt = params["x_thresholds"], params["y_thresholds"]
-        return [_isotonic_interp(sigmoid(z), xt, yt) for z in zs]
-    raise ValueError(f"método de calibração desconhecido: {method!r}")
+# CALIBRATION_METHODS / CALIBRATION_TIE_NATS / calibration_fit / _isotonic_interp /
+# calibration_apply moved to analysis.rating_v2.rrb_dominance (ADR-17) — imported above.
 
 
 def _corpus_t2_dominance(
@@ -3457,17 +3238,7 @@ def _e3_forecast(
     return (sum(zs) / n, n) if n else (float("nan"), 0)
 
 
-def contribution_shares(
-    steps: Sequence[tuple[str | None, bool]], vals: Mapping[str, float]
-) -> list[tuple[str, bool, float]]:
-    """``(code, own, c_k)`` — prereg §E3's per-action contribution: the actor-signed SHARE of the
-    round's `actions` log-odds mass, ``c_k = z_k / Σ|z_j|`` so ``Σ|c_k| = 1``. Mapped steps only.
-    """
-    kz = _keyed_zs(steps, vals)
-    total = sum(abs(z) for _, z in kz)
-    if total <= 0:
-        return []
-    return [(code, own, z / total) for (code, own), z in kz]
+# contribution_shares moved to analysis.rating_v2.rrb_dominance (ADR-17) — imported above.
 
 
 def _e3_credit(

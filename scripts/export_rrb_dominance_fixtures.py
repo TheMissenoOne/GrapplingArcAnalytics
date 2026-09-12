@@ -23,7 +23,7 @@ from typing import Any
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from scripts.research.rrb_round_rating import (  # noqa: E402
+from analysis.rating_v2.rrb_dominance import (  # noqa: E402
     calibration_apply,
     canonical_code,
     contribution_shares,
