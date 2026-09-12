@@ -67,6 +67,15 @@ perder quando a Fase 1+ precisar dele.
    que hoje chaveia por `node_key` de ação (rating, Markov, dossiê) continua vendo a mesma chave,
    porque `ChainAction.key` é derivado exatamente como `ChainEdge.action_key` sempre foi.
 
+   **Obrigação do chamador: canonicalizar antes de compilar.** `compile_chain`/`compile_two_sided`
+   chaveiam EXATAMENTE o rótulo que recebem — `canonicalize(_normalize_name(label))`, sem consulta
+   à biblioteca, por design, espelhado char-a-char pelo App. Qualquer chamador alimentando rótulos
+   de user-bundle/localizados DEVE resolver cada entrada pela biblioteca primeiro
+   (`taxonomy_kind.resolve_library_entry` → rótulo canônico), como `scripts/render_map_prototypes.
+   _resolve_group` e o `services/map/mapAggregate.ts` do App já fazem — senão logs em pt-BR
+   fragmentam o espaço de chaves (`costas` vs `back control`). Medido em 2026-09-12 no estudo RRB
+   (108 entradas de `costas` invisíveis ao mapeador Lamas).
+
 2. **Relação canônica ≠ ocorrência.** `(source_key, target_key)` é a relação; cada ocorrência
    (cada `ChainEdge` individual na lista `CompiledChain.edges`) guarda seu próprio `actions`. Duas
    passagens diferentes de Guarda Fechada para Montada são uma relação e duas ocorrências — o
