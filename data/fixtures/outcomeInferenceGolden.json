@@ -1,0 +1,263 @@
+{
+  "cases": [
+    {
+      "action": {
+        "label": "Sweep",
+        "type": "sweep"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Mount",
+        "type": "control"
+      },
+      "outcome": true,
+      "prev": {
+        "actor": "you",
+        "label": "Half Guard",
+        "type": "guard"
+      },
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "RNC",
+        "type": "submission"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Back Control",
+        "type": "control"
+      },
+      "outcome": false,
+      "prev": {
+        "actor": "you",
+        "label": "Back Control",
+        "type": "control"
+      },
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Raspagem",
+        "type": "sweep"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Montada",
+        "type": "control"
+      },
+      "outcome": true,
+      "prev": {
+        "actor": "you",
+        "label": "Meia Guarda",
+        "type": "guard"
+      },
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Mata Leao",
+        "type": "submission"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Costas",
+        "type": "control"
+      },
+      "outcome": false,
+      "prev": {
+        "actor": "you",
+        "label": "Costas",
+        "type": "control"
+      },
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Armlock",
+        "type": "submission"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": null,
+      "outcome": null,
+      "prev": null,
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Armlock",
+        "type": "submission"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": null,
+      "outcome": true,
+      "prev": null,
+      "terminal": true
+    },
+    {
+      "action": {
+        "label": "Stand-up Escape",
+        "type": "escape"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Closed Guard",
+        "type": "guard"
+      },
+      "outcome": true,
+      "prev": null,
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Guard Pass",
+        "type": "pass"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Mount",
+        "type": "control"
+      },
+      "outcome": true,
+      "prev": {
+        "actor": "you",
+        "label": "Half Guard",
+        "type": "guard"
+      },
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Sweep",
+        "type": "sweep"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Closed Guard",
+        "type": "guard"
+      },
+      "outcome": false,
+      "prev": {
+        "actor": "you",
+        "label": "Half Guard",
+        "type": "guard"
+      },
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Guard Pull",
+        "type": "guard"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Closed Guard",
+        "type": "guard"
+      },
+      "outcome": true,
+      "prev": null,
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Back Take",
+        "type": "transition"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Back Control",
+        "type": "control"
+      },
+      "outcome": true,
+      "prev": null,
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Back Take",
+        "type": "transition"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Mount",
+        "type": "control"
+      },
+      "outcome": false,
+      "prev": null,
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Stand-up Escape",
+        "type": "escape"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Standing",
+        "type": "transition"
+      },
+      "outcome": true,
+      "prev": null,
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Armlock",
+        "type": "submission"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": null,
+      "outcome": null,
+      "prev": null,
+      "terminal": false
+    },
+    {
+      "action": {
+        "label": "Something Unmapped",
+        "type": "transition"
+      },
+      "actor": "you",
+      "actor_readable": true,
+      "next": {
+        "actor": "you",
+        "label": "Standing",
+        "type": "transition"
+      },
+      "outcome": null,
+      "prev": null,
+      "terminal": false
+    }
+  ],
+  "contract": "infer_outcome(prev, action, next, actor, terminal=False, actor_readable=True) -> True|False|None under DEFAULT_RULES (R0 exit-orientation table, R1 orientation flip for sweep/reversal, R2 type -> expected next-state family), first non-None rule wins. `terminal` mirrors chain_compiler.ChainEdge.terminal. R3 (actor consistency) is defined in the source but excluded from DEFAULT_RULES — measured below today's precision floor, docs/taxonomy/05_INFERENCIA_DE_RESULTADO.md.",
+  "default_rules": [
+    "r0_exit_table",
+    "r1_orientation_flip",
+    "r2_type_expectation"
+  ],
+  "generated_from": "GrapplingArcAnalytics/scripts/export_outcome_inference_fixtures.py"
+}
