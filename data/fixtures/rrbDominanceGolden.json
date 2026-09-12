@@ -131,6 +131,150 @@
       "z": 0.2338600301
     },
     {
+      "calibrated_p": 0.9717959793,
+      "contributions": [
+        {
+          "c_k": 1.0,
+          "code": "SUB",
+          "own": true
+        }
+      ],
+      "elo_offset": -614.905629,
+      "entries": [
+        {
+          "actor": "you",
+          "label": "Armbar attempt",
+          "successful": true,
+          "type": "submission"
+        }
+      ],
+      "expected_codes": [
+        "SUB"
+      ],
+      "n_mapped": 1,
+      "name": "attempt_suffix_stripped_terminal_submission",
+      "raw_p": 0.5582,
+      "z": 0.2338600301
+    },
+    {
+      "calibrated_p": 0.0282040207,
+      "contributions": [
+        {
+          "c_k": -1.0,
+          "code": "SUBA",
+          "own": false
+        }
+      ],
+      "elo_offset": 614.905629,
+      "entries": [
+        {
+          "actor": "partner",
+          "label": "Armlock attempted",
+          "successful": false,
+          "type": "submission"
+        }
+      ],
+      "expected_codes": [
+        "SUBA"
+      ],
+      "n_mapped": 1,
+      "name": "attempted_suffix_stripped_partner_not_landed",
+      "raw_p": 0.4418,
+      "z": -0.2338600301
+    },
+    {
+      "calibrated_p": 0.9717959793,
+      "contributions": [
+        {
+          "c_k": 1.0,
+          "code": "SUBA",
+          "own": true
+        }
+      ],
+      "elo_offset": -614.905629,
+      "entries": [
+        {
+          "actor": "you",
+          "label": "Tentativa de armlock",
+          "successful": false,
+          "type": "submission"
+        }
+      ],
+      "expected_codes": [
+        "SUBA"
+      ],
+      "n_mapped": 1,
+      "name": "ptbr_tentativa_prefix_not_stripped_by_clean_label",
+      "raw_p": 0.5582,
+      "z": 0.2338600301
+    },
+    {
+      "calibrated_p": null,
+      "contributions": [],
+      "elo_offset": null,
+      "entries": [
+        {
+          "actor": "partner",
+          "label": "Chave de Braço",
+          "successful": null,
+          "type": "guard"
+        }
+      ],
+      "expected_codes": [
+        null
+      ],
+      "n_mapped": 0,
+      "name": "type_hint_rejects_cross_type_match",
+      "raw_p": null,
+      "z": null
+    },
+    {
+      "calibrated_p": null,
+      "contributions": [],
+      "elo_offset": null,
+      "entries": [
+        {
+          "actor": "you",
+          "label": "GuArDa FeChAda",
+          "successful": null,
+          "type": "guard"
+        }
+      ],
+      "expected_codes": [
+        null
+      ],
+      "n_mapped": 0,
+      "name": "mixed_case_closed_guard_still_unmapped",
+      "raw_p": null,
+      "z": null
+    },
+    {
+      "calibrated_p": 0.0170182064,
+      "contributions": [
+        {
+          "c_k": -1.0,
+          "code": "SWP",
+          "own": false
+        }
+      ],
+      "elo_offset": 704.652675,
+      "entries": [
+        {
+          "actor": "partner",
+          "label": "RASPAGEM de GANCHO",
+          "successful": true,
+          "type": "sweep"
+        }
+      ],
+      "expected_codes": [
+        "SWP"
+      ],
+      "n_mapped": 1,
+      "name": "mixed_case_butterfly_sweep_mapped",
+      "raw_p": 0.4334,
+      "z": -0.2679924983
+    },
+    {
       "calibrated_p": null,
       "contributions": [],
       "elo_offset": null,

@@ -61,6 +61,60 @@ CASES: list[tuple[str, list[dict[str, Any]]]] = [
             {"type": "submission", "label": "Armbar", "actor": "you", "successful": False},
         ],
     ),
+    # ── clean_label rule coverage (App port `rrbDominance.ts` is missing all six below) ──
+    (
+        # "<X> Attempt" stripped before the library lookup (`_ATTEMPT_RE`) -> canonicalises to
+        # "Armbar" -> `successful=True` makes this the ONE terminal (landed) submission case.
+        "attempt_suffix_stripped_terminal_submission",
+        [
+            {"type": "submission", "label": "Armbar attempt", "actor": "you", "successful": True},
+        ],
+    ),
+    (
+        # "<X> Attempted" — same strip rule, plural/tense variant, partner side, not landed.
+        "attempted_suffix_stripped_partner_not_landed",
+        [
+            {"type": "submission", "label": "Armlock attempted", "actor": "partner", "successful": False},
+        ],
+    ),
+    (
+        # pt-BR "Tentativa de X" is NOT covered by `_ATTEMPT_RE` (English word only) — the label
+        # reaches the library lookup unstripped, fails to match, and comes back untouched. Kept
+        # mapped here only because `type=submission` decides the Lamas code from the EVENT TYPE
+        # regardless of the label (`lamas_state`'s rule 1) — the gap is invisible on this event
+        # type and would only bite a control/transition/guard-typed pt-BR "tentativa" label,
+        # where the label content is what `lamas_state` reads.
+        "ptbr_tentativa_prefix_not_stripped_by_clean_label",
+        [
+            {"type": "submission", "label": "Tentativa de armlock", "actor": "you", "successful": False},
+        ],
+    ),
+    (
+        # Label normalises to a library entry ("Armbar", type submission) but the event's own
+        # `type` hint ("guard") disagrees -> `clean_label` REJECTS the match and returns the raw
+        # label unchanged -> that raw pt-BR label has no Lamas token of its own -> unmapped.
+        "type_hint_rejects_cross_type_match",
+        [
+            {"type": "guard", "label": "Chave de Braço", "actor": "partner", "successful": None},
+        ],
+    ),
+    (
+        # Scrambled case still resolves through `_normalize_name` to "Closed Guard" — correctly
+        # STILL unmapped afterwards (guard postures are deliberately outside the Lamas token
+        # list, `lamas_chain` rule 2), so this is a canonicalisation check, not a mapping one.
+        "mixed_case_closed_guard_still_unmapped",
+        [
+            {"type": "guard", "label": "GuArDa FeChAda", "actor": "you", "successful": None},
+        ],
+    ),
+    (
+        # Mixed-case pt-BR canonicalises to "Butterfly Sweep"; `type=sweep` then maps regardless
+        # of label (rule 1), landed -> SWP.
+        "mixed_case_butterfly_sweep_mapped",
+        [
+            {"type": "sweep", "label": "RASPAGEM de GANCHO", "actor": "partner", "successful": True},
+        ],
+    ),
     (
         "no_mapped_entries",
         [
@@ -70,6 +124,37 @@ CASES: list[tuple[str, list[dict[str, Any]]]] = [
     ),
     ("empty_round", []),
 ]
+
+#: Snapshot of the five ORIGINAL cases (pre-2026-09-12), rounded to the fixture's own precision.
+#: This is the "existing cases keep their exact values" guard the task calls for: the six new
+#: cases above must never perturb these through some shared-state accident (e.g. `lru_cache` on
+#: the library index). Compared field-by-field in `build_fixture()`, `--check` covers the file
+#: as a whole but this fails fast, and by name, if any of these five ever move.
+_ORIGINAL_GOLDEN: dict[str, dict[str, Any]] = {
+    "own_dominant_takedown_and_control": {
+        "expected_codes": ["TKD", "BTK", "SUB"], "n_mapped": 3,
+        "z": 0.239371179, "raw_p": 0.5595586804, "calibrated_p": 0.9739944979,
+        "elo_offset": -629.396504,
+    },
+    "partner_dominant_sweep_and_pass": {
+        "expected_codes": ["SWP", "GPS"], "n_mapped": 2,
+        "z": -0.1911810637, "raw_p": 0.4523497811, "calibrated_p": 0.0524660289,
+        "elo_offset": 502.686638,
+    },
+    "mixed_sides_one_mapped_one_not": {
+        "expected_codes": [None, None, "SUBA"], "n_mapped": 1,
+        "z": 0.2338600301, "raw_p": 0.5582, "calibrated_p": 0.9717959793,
+        "elo_offset": -614.905629,
+    },
+    "no_mapped_entries": {
+        "expected_codes": [None, None], "n_mapped": 0,
+        "z": None, "raw_p": None, "calibrated_p": None, "elo_offset": None,
+    },
+    "empty_round": {
+        "expected_codes": [], "n_mapped": 0,
+        "z": None, "raw_p": None, "calibrated_p": None, "elo_offset": None,
+    },
+}
 
 
 def build_fixture() -> dict[str, Any]:
@@ -105,6 +190,16 @@ def build_fixture() -> dict[str, Any]:
             row["elo_offset"] = None
             row["contributions"] = []
         cases.append(row)
+
+    for row in cases:
+        want = _ORIGINAL_GOLDEN.get(row["name"])
+        if want is None:
+            continue
+        for key, expected in want.items():
+            got = row[key]
+            assert got == expected, (
+                f"original case {row['name']!r} field {key!r} moved: {got!r} != {expected!r}"
+            )
 
     return {
         "generated_from": "GrapplingArcAnalytics/scripts/export_rrb_dominance_fixtures.py",
