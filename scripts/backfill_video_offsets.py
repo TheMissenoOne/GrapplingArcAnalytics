@@ -91,6 +91,8 @@ def _retirement_report(declared: dict[PairKey, Declared]) -> None:
     covered = 0
     still_needed: list[str] = []
     for event_key, mapping in _load_url_mapping().items():
+        if not isinstance(mapping, dict):
+            continue  # e.g. a top-level "_comment" key in an overlay file
         for m in mapping.get("matches", []):
             a = _STAGE_RE.sub("", str(m.get("athlete") or "").strip())
             b = str(m.get("opponent") or "").strip()
