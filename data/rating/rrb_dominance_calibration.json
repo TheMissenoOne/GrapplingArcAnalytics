@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "generated": "2026-09-12T21:27:44Z",
+  "signal": "actions_states",
+  "definition": {
+    "clean_label": "analysis.technique_match.clean_label — pt-BR/variant label resolver, applied BEFORE the Lamas mapper (prereg addendum §A1)",
+    "node_key_to_lamas_code": "analysis.lamas_chain.lamas_state",
+    "gamma": 1.0,
+    "terminal": "marginal",
+    "formula": "Z = mean(actions_Z, states_Z); actions_Z = sum(z_i)/n; states_Z = z of the LAST mapped step; z_i = +/-logit(value_table[code_i]) (own +, partner -)",
+    "value_table": {
+      "BTK": 0.5977,
+      "BTKA": 0.5116,
+      "CDP": 0.4976,
+      "GPS": 0.5413,
+      "GPSA": 0.4956,
+      "PGD": 0.4752,
+      "SUB": 0.5582,
+      "SUBA": 0.5582,
+      "SWP": 0.5666,
+      "SWPA": 0.4879,
+      "TKD": 0.5262,
+      "TKDA": 0.5001
+    }
+  },
+  "calibration": {
+    "method": "temperature",
+    "parameters": {
+      "method": "temperature",
+      "T": 0.06606810267291639
+    },
+    "tie_break_nats": 0.005,
+    "candidates_considered": [
+      "temperature",
+      "platt",
+      "isotonic"
+    ]
+  },
+  "clamp_elo": {
+    "value": 400.0,
+    "source": "hier4 precedent (docs/research/rrb_round_rating_study.md); LOO clamp sweep not run in this pass (prereg §E2, stated as a gap, not assumed)"
+  },
+  "fitted_on": {
+    "years": {
+      "min": 2015,
+      "max": 2026
+    },
+    "n_units": 143,
+    "source": "prod `matches` where status='final' (public competition footage), T2 = finish-side from the prefix of SUBMISSION-decided bouts",
+    "privacy_class": "A — public competition data"
+  },
+  "provenance": {
+    "corpus_digest": "54b5d4b2c60e49f3be7d23504e15a44e42c6bb642a36e212a5eff695b5c909e0",
+    "generator": "scripts/build_rrb_dominance_calibration.py",
+    "study": "docs/research/rrb_round_rating_prereg.md §E, docs/research/rrb_round_rating_study.md §E",
+    "runner": "scripts/research/rrb_round_rating.py:run_section_e1"
+  },
+  "caveats": [
+    "Esta calibração reescala apenas a ESCALA de `Z` (`actions_states`, terminal=marginal, γ=1) — ela não re-estima `v(code)`. A tabela de valores por código é um SNAPSHOT do bloco `global` de `markov_action_weights.json` sob esse terminal, não um ponteiro vivo: um consumidor que só tiver este arquivo ainda consegue reproduzir Z.",
+    "O clamp de Elo NÃO vem de uma varredura leave-one-out dedicada — é o precedente do `hier4` (±400) citado em docs/research/rrb_round_rating_study.md, aplicado aqui porque a varredura LOO completa (prereg §E2) não foi executada nesta passada. Ver `docs/research/rrb_round_rating_study.md` §E para o que foi de fato medido.",
+    "Esta calibração é fit UMA VEZ no corpus público inteiro (`fitted_on`), nunca por usuário — decisão vinculante do dono, prereg §E: sem camada pessoal, sem re-fit on-device."
+  ]
+}

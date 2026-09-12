@@ -1,0 +1,174 @@
+{
+  "calibration_method": "temperature",
+  "calibration_source": "data/rating/rrb_dominance_calibration.json",
+  "cases": [
+    {
+      "calibrated_p": 0.9739944979,
+      "contributions": [
+        {
+          "c_k": 0.1427843293,
+          "code": "TKD",
+          "own": true
+        },
+        {
+          "c_k": 0.538885867,
+          "code": "BTK",
+          "own": true
+        },
+        {
+          "c_k": 0.3183298036,
+          "code": "SUB",
+          "own": true
+        }
+      ],
+      "elo_offset": -629.396504,
+      "entries": [
+        {
+          "actor": "you",
+          "label": "Queda de Perna Única",
+          "successful": true,
+          "type": "takedown"
+        },
+        {
+          "actor": "you",
+          "label": "Costas",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "actor": "you",
+          "label": "Rear Naked Choke",
+          "successful": true,
+          "type": "submission"
+        }
+      ],
+      "expected_codes": [
+        "TKD",
+        "BTK",
+        "SUB"
+      ],
+      "n_mapped": 3,
+      "name": "own_dominant_takedown_and_control",
+      "raw_p": 0.5595586804,
+      "z": 0.239371179
+    },
+    {
+      "calibrated_p": 0.0524660289,
+      "contributions": [
+        {
+          "c_k": -0.6181070012,
+          "code": "SWP",
+          "own": false
+        },
+        {
+          "c_k": -0.3818929988,
+          "code": "GPS",
+          "own": false
+        }
+      ],
+      "elo_offset": 502.686638,
+      "entries": [
+        {
+          "actor": "partner",
+          "label": "Butterfly Sweep",
+          "successful": true,
+          "type": "sweep"
+        },
+        {
+          "actor": "partner",
+          "label": "Leg Drag",
+          "successful": true,
+          "type": "pass"
+        }
+      ],
+      "expected_codes": [
+        "SWP",
+        "GPS"
+      ],
+      "n_mapped": 2,
+      "name": "partner_dominant_sweep_and_pass",
+      "raw_p": 0.4523497811,
+      "z": -0.1911810637
+    },
+    {
+      "calibrated_p": 0.9717959793,
+      "contributions": [
+        {
+          "c_k": 1.0,
+          "code": "SUBA",
+          "own": true
+        }
+      ],
+      "elo_offset": -614.905629,
+      "entries": [
+        {
+          "actor": "you",
+          "label": "Montada",
+          "successful": true,
+          "type": "control"
+        },
+        {
+          "actor": "partner",
+          "label": "Meia Guarda",
+          "successful": null,
+          "type": "guard"
+        },
+        {
+          "actor": "you",
+          "label": "Armbar",
+          "successful": false,
+          "type": "submission"
+        }
+      ],
+      "expected_codes": [
+        null,
+        null,
+        "SUBA"
+      ],
+      "n_mapped": 1,
+      "name": "mixed_sides_one_mapped_one_not",
+      "raw_p": 0.5582,
+      "z": 0.2338600301
+    },
+    {
+      "calibrated_p": null,
+      "contributions": [],
+      "elo_offset": null,
+      "entries": [
+        {
+          "actor": "you",
+          "label": "Quatro Apoios",
+          "successful": null,
+          "type": "guard"
+        },
+        {
+          "actor": "partner",
+          "label": "Guarda Fechada",
+          "successful": null,
+          "type": "control"
+        }
+      ],
+      "expected_codes": [
+        null,
+        null
+      ],
+      "n_mapped": 0,
+      "name": "no_mapped_entries",
+      "raw_p": null,
+      "z": null
+    },
+    {
+      "calibrated_p": null,
+      "contributions": [],
+      "elo_offset": null,
+      "entries": [],
+      "expected_codes": [],
+      "n_mapped": 0,
+      "name": "empty_round",
+      "raw_p": null,
+      "z": null
+    }
+  ],
+  "contract": "actions_states Z (gamma=1, terminal=marginal) -> raw_p = sigmoid(Z) -> calibrated_p via the artefact's method -> elo_offset = 400*log10(p/(1-p)) with the sign flipped (partner offset); contributions c_k sum |c_k| = 1 over mapped steps.",
+  "generated_from": "GrapplingArcAnalytics/scripts/export_rrb_dominance_fixtures.py"
+}

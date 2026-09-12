@@ -14,14 +14,22 @@ import pytest
 
 from scripts.research.rrb_round_rating import (
     K_SHAPES,
+    Bout,
+    _e3_credit,
+    _isotonic_interp,
     action_values,
     budget_lambda,
+    calibration_apply,
+    calibration_fit,
     competitiveness,
+    contribution_shares,
     elo_offset,
     k_mult,
     log_loss,
     marginal_submission_share,
     p_own,
+    run_owner_dominance_glicko,
+    run_section_e1,
     self_cancellation_residual,
     signed_log_odds,
     spearman_rho,
@@ -435,4 +443,173 @@ def test_last_flag_only_keeps_the_manual_flag_on_the_final_node_alone() -> None:
     assert entry_score(e_false, (1.0, "inferred"), "last_flag_only") == (1.0, "inferred")
     # last node -> the flag, even where the sequence happens to resolve it
     assert entry_score(e_false, (1.0, "inferred"), "last_flag_only", is_last=True) == (0.0, "flag")
+
+
+# ══ §E — global calibration, dominance-driven Glicko-2, technique credit ═══════════
+
+
+def test_calibration_apply_temperature_and_platt_formulas() -> None:
+    z = 0.6
+    temp = calibration_apply([z], {"method": "temperature", "T": 2.0})[0]
+    assert temp == pytest.approx(p_own(z / 2.0))
+    platt = calibration_apply([z], {"method": "platt", "a": 2.0, "b": -0.5})[0]
+    assert platt == pytest.approx(p_own(2.0 * z - 0.5))
+    with pytest.raises(ValueError):
+        calibration_apply([z], {"method": "nope"})
+
+
+def test_isotonic_interp_is_monotone_and_clamps_outside_the_thresholds() -> None:
+    xt, yt = [0.2, 0.5, 0.8], [0.1, 0.5, 0.9]
+    assert _isotonic_interp(0.0, xt, yt) == 0.1     # below range -> clamps to the first
+    assert _isotonic_interp(1.0, xt, yt) == 0.9     # above range -> clamps to the last
+    assert _isotonic_interp(0.35, xt, yt) == pytest.approx(0.3)  # midpoint, linear interpolation
+    assert _isotonic_interp(0.5, xt, yt) == pytest.approx(0.5)   # exactly on a threshold
+    assert _isotonic_interp(0.5, [], []) == 0.5     # no thresholds -> identity, never a crash
+
+
+def test_calibration_fit_temperature_never_scores_worse_than_raw_on_its_own_training_data() -> None:
+    """Temperature scaling minimises log-loss over T by direct search on a bounded interval that
+    CONTAINS T=1 (raw `σ(Z)`) — so by construction it can never score worse than raw on the SAME
+    data it was fit on. Deliberately mixed/overlapping labels, not perfectly separable — a
+    perfectly separable toy set pushes T to a boundary and is not a useful fixture here."""
+    zs = [-2.0, -2.0, -1.0, -0.2, 0.2, 1.0, 2.0, 2.0]
+    ys = [0, 1, 0, 0, 1, 1, 0, 1]
+    params = calibration_fit(zs, ys, "temperature")
+    assert params["method"] == "temperature"
+    assert 0.0 < params["T"] < 20.0
+    calibrated = calibration_apply(zs, params)
+    raw = [p_own(z) for z in zs]
+    assert log_loss(calibrated, ys) <= log_loss(raw, ys) + 1e-9
+
+
+def test_contribution_shares_sum_of_absolute_values_is_one() -> None:
+    # own does a mildly favourable action (TKD, 0.55); the OPPONENT lands a high-value one (SUB,
+    # 0.8) — that should read as bad news for own, i.e. a NEGATIVE share, not a blanket
+    # own/not-own sign rule (a code with value exactly 0.5 has zero signed weight regardless of
+    # side, which is the case this test avoids by picking values away from 0.5).
+    vals = {"SUB": 0.8, "TKD": 0.55}
+    steps = [("TKD", True), ("SUB", False)]
+    shares = contribution_shares(steps, vals)
+    assert len(shares) == 2
+    assert sum(abs(c) for _, _, c in shares) == pytest.approx(1.0)
+    by_code = {code: c for code, _own, c in shares}
+    assert by_code["TKD"] > 0  # own's own favourable action
+    assert by_code["SUB"] < 0  # the opponent's dominant action, read from own's perspective
+
+
+def test_contribution_shares_empty_when_nothing_is_mapped() -> None:
+    assert contribution_shares([(None, True), (None, False)], {"SUB": 0.8}) == []
+
+
+def test_e3_credit_arms_are_mean_one_over_the_round() -> None:
+    """prereg §E3: `equal_split`/`contribution` weight the round's mapped steps so the AVERAGE
+    weight is 1; `last_action_only` puts the round's whole evidence on its single observation."""
+    vals = {"SUB": 0.8, "TKD": 0.55, "GPS": 0.5, "BTK": 0.6}
+    steps = [("TKD", True), ("SUB", True), ("GPS", False), ("BTK", True)]
+    for arm in ("equal_split", "contribution"):
+        credit = _e3_credit(steps, vals, arm)
+        assert len(credit) == 4
+        assert sum(w for _, _, w in credit) / len(credit) == pytest.approx(1.0)
+    last = _e3_credit(steps, vals, "last_action_only")
+    assert last == [("BTK", True, 1.0)]
+    assert _e3_credit([], vals, "equal_split") == []
+    with pytest.raises(ValueError):
+        _e3_credit(steps, vals, "nope")
+
+
+def _owner_doc(round3_entries: list[dict]) -> dict:
+    """Two fixed early rounds + a third round whose ENTRIES vary by caller."""
+    fixed = [
+        {
+            "difficulty": 5,
+            "intensity": 5,
+            "outcome": "succeeded",
+            "entries": [
+                {
+                    "type": "submission",
+                    "label": "Rear Naked Choke",
+                    "actor": "you",
+                    "successful": True,
+                }
+            ],
+        },
+        {
+            "difficulty": 5,
+            "intensity": 5,
+            "outcome": "failed",
+            "entries": [
+                {"type": "pass", "label": "Leg Drag", "actor": "partner", "successful": True}
+            ],
+        },
+    ]
+    return {
+        "sessions": [
+            {"created_at": "2026-01-01", "rounds": fixed},
+            {
+                "created_at": "2026-01-02",
+                "rounds": [
+                    {
+                        "difficulty": 5,
+                        "intensity": 5,
+                        "outcome": "succeeded",
+                        "entries": round3_entries,
+                    }
+                ],
+            },
+        ]
+    }
+
+
+def test_e2_forecast_independent_of_same_round_actions() -> None:
+    """prereg §E2's identity, one level up from §2b: the forecast issued for round *t* reads
+    state that saw only EARLIER rounds, so it cannot depend on round *t*'s own actions — even
+    though those actions DO change what the state becomes AFTER round *t* updates."""
+    vals = {"SUB": 0.8, "GPS": 0.5, "BTK": 0.6, "TKD": 0.55}
+    dominant = [
+        {"type": "submission", "label": "Rear Naked Choke", "actor": "you", "successful": True}
+    ]
+    weak = [{"type": "pass", "label": "Leg Drag", "actor": "partner", "successful": True}]
+
+    result_a = run_owner_dominance_glicko(_owner_doc(dominant), vals, None)
+    result_b = run_owner_dominance_glicko(_owner_doc(weak), vals, None)
+
+    assert len(result_a["_ps"]) == len(result_b["_ps"]) == 3
+    # rounds 1-2's forecasts are identical by construction (unrelated to round 3 at all)...
+    assert result_a["_ps"][:2] == result_b["_ps"][:2]
+    # ...and so is round 3's OWN forecast, despite round 3's entries differing between the runs.
+    assert result_a["_ps"][2] == pytest.approx(result_b["_ps"][2])
+    # but the state AFTER round 3 (which DOES see its entries) diverges.
+    assert result_a["final_rating"] != pytest.approx(result_b["final_rating"])
+
+
+def test_run_section_e1_death_rule_verdict_is_one_of_the_three() -> None:
+    """No DB: synthetic corpus bouts + a tiny owner doc, exercising the whole §E1 pipeline."""
+    vals = {"SUB": 0.8, "GPS": 0.5, "BTK": 0.6, "TKD": 0.55, "SWP": 0.5, "PGD": 0.5}
+    bouts = []
+    win_types = {}
+    for i in range(40):
+        year = 2022 + (i % 4)
+        a_wins = i % 3 != 0  # a skewed but non-degenerate label split
+        steps = (("TKD", a_wins), ("BTK", a_wins), ("SUB", a_wins))
+        bid = f"b{i}"
+        bouts.append(
+            Bout(
+                bout_id=bid,
+                year=year,
+                created_at=f"{year}-01-01",
+                a="athleteA",
+                b="athleteB",
+                winner="athleteA" if a_wins else "athleteB",
+                family="other",
+                steps=steps,
+            )
+        )
+        win_types[bid] = "SUBMISSION"
+
+    owner_doc = _owner_doc(
+        [{"type": "submission", "label": "Rear Naked Choke", "actor": "you", "successful": True}]
+    )
+    res = run_section_e1(bouts, win_types, vals, owner_doc, cutoffs=(2022, 2023, 2024))
+    assert res["death_rule"]["verdict"] in ("PASS", "FAIL", "NULL")
+    assert res["chosen_method"] in ("temperature", "platt", "isotonic")
     assert entry_score({}, (None, "unresolved"), "last_flag_only", is_last=True) == (1.0, "flag")

@@ -634,6 +634,10 @@ def run_owner_prequential(
     ps: dict[str, list[float]] = {a: [] for a in arms}
     ys: list[int] = []
     skipped_no_rrb = 0
+    # |S - E| per own-actor OBSERVATION, today's mechanism (binary flag) — prereg §E2's "shrink"
+    # comparator against a fractional dominance score. Entry-level, not round-level: this IS the
+    # granularity today's engine scores at.
+    shrink_a0: list[float] = []
 
     for _round_i, (_s, _i, rd) in enumerate(raw):
         outcome = str(rd.get("outcome") or "")
@@ -688,6 +692,11 @@ def run_owner_prequential(
                 for (sc, _src), w in zip(scored, ws, strict=True)
                 if sc is not None
             ]
+            if a == "A0_difficulty":
+                shrink_a0.extend(
+                    abs(o.score - expected_score(st.rating, st.deviation, o.opponent_rating, o.opponent_deviation))
+                    for o in obs
+                )
             n_obs_total[a] += len(obs)
             state[a] = update_period(st, obs, tau=0.5, center=GLOBAL_SEED)
 
@@ -714,7 +723,12 @@ def run_owner_prequential(
         "base_rate": base,
         "rounds_without_rrb": skipped_no_rrb,
         "observations_scored": dict(n_obs_total),
+        "shrink_a0_difficulty_mean_abs_s_minus_e": (
+            sum(shrink_a0) / len(shrink_a0) if shrink_a0 else float("nan")
+        ),
+        "shrink_a0_difficulty_n": len(shrink_a0),
         "_ps": ps["A0_difficulty"],
+        "_ps_by_arm": ps,
         "_ys": ys,
         "arms": rows,
         "H2_A4_vs_A0": paired_delta_ci(ps["A4_rrb"], ps["A0_difficulty"], ys, "logloss"),
@@ -1063,11 +1077,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--section-c", action="store_true", help="prereg §C: personal layers + coherence")
     ap.add_argument("--section-c6", action="store_true", help="prereg §C6: agreed four-layer arm")
     ap.add_argument("--section-d", action="store_true", help="prereg §D: inferred per-action success")
+    ap.add_argument("--section-e", action="store_true", help="prereg §E: global calibration + dominance-Glicko + technique credit")
     ap.add_argument("--all", action="store_true")
     args = ap.parse_args(argv)
     if args.all:
-        args.owner_fixture = args.owner = args.corpus = args.sweep = args.addendum = args.section_b = args.section_c = args.section_c6 = args.section_d = True
-    if not any((args.owner_fixture, args.owner, args.corpus, args.sweep, args.addendum, args.section_b, args.section_c, args.section_c6, args.section_d)):
+        args.owner_fixture = args.owner = args.corpus = args.sweep = args.addendum = args.section_b = args.section_c = args.section_c6 = args.section_d = args.section_e = True
+    if not any((args.owner_fixture, args.owner, args.corpus, args.sweep, args.addendum, args.section_b, args.section_c, args.section_c6, args.section_d, args.section_e)):
         ap.print_help()
         return 0
 
@@ -1112,6 +1127,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     if args.section_d:
         doc = json.loads(fixture.read_text(encoding="utf-8"))
         print("section D:", _write("section_d.json", run_section_d(doc, weights_doc)))
+    if args.section_e:
+        doc = json.loads(fixture.read_text(encoding="utf-8"))
+        print("section E:", _write("section_e.json", run_section_e(doc, weights_doc)))
     figs = _figures(owner_res, q1, sweep_rows)
     if figs:
         print("figures:", ", ".join(figs))
@@ -3050,6 +3068,594 @@ def run_section_d(doc: Mapping[str, Any], weights_doc: Mapping[str, Any]) -> dic
         m.pop("_ps", None)
         m.pop("_ys", None)
     return res
+
+
+# ══ ADDENDUM §E — global calibration, dominance-driven Glicko-2, technique credit ══
+# Owner rule 2026-09-12: drop round outcome/difficulty/intensity entirely; representation =
+# `actions_states` (§A) under a GLOBAL calibration fit once on the public corpus, never
+# per-user. See prereg §E for every fixed choice below.
+
+CALIBRATION_METHODS = ("temperature", "platt", "isotonic")
+#: Tie-break tolerance for E1's method selection (prereg §E1), fixed before any number was seen.
+CALIBRATION_TIE_NATS = 0.005
+
+
+def calibration_fit(zs: Sequence[float], ys: Sequence[float], method: str) -> dict[str, Any]:
+    """One calibration candidate, fit on ``(Z, label)`` pairs — prereg §E1."""
+    if method == "temperature":
+        from scipy.optimize import minimize_scalar
+
+        ys_int = [int(y) for y in ys]
+
+        def nll(t: float) -> float:
+            t = max(t, 1e-3)
+            return log_loss([sigmoid(z / t) for z in zs], ys_int)
+
+        r = minimize_scalar(nll, bounds=(0.05, 20.0), method="bounded")
+        return {"method": "temperature", "T": float(r.x)}
+    if method == "platt":
+        from sklearn.linear_model import LogisticRegression
+
+        lr = LogisticRegression(C=1e6, solver="lbfgs")
+        lr.fit([[z] for z in zs], ys)
+        return {"method": "platt", "a": float(lr.coef_[0][0]), "b": float(lr.intercept_[0])}
+    if method == "isotonic":
+        from sklearn.isotonic import IsotonicRegression
+
+        ps = [sigmoid(z) for z in zs]
+        iso = IsotonicRegression(out_of_bounds="clip", y_min=1e-6, y_max=1 - 1e-6)
+        iso.fit(ps, ys)
+        return {
+            "method": "isotonic",
+            "x_thresholds": [round(float(x), 6) for x in iso.X_thresholds_],
+            "y_thresholds": [round(float(y), 6) for y in iso.y_thresholds_],
+        }
+    raise ValueError(f"método de calibração desconhecido: {method!r}")
+
+
+def _isotonic_interp(p: float, xt: Sequence[float], yt: Sequence[float]) -> float:
+    """Piecewise-linear read of a serialised isotonic fit — no sklearn object in the artefact."""
+    if not xt:
+        return p
+    if p <= xt[0]:
+        return yt[0]
+    if p >= xt[-1]:
+        return yt[-1]
+    for i in range(1, len(xt)):
+        if p <= xt[i]:
+            x0, x1, y0, y1 = xt[i - 1], xt[i], yt[i - 1], yt[i]
+            if x1 == x0:
+                return y1
+            return y0 + (p - x0) / (x1 - x0) * (y1 - y0)
+    return yt[-1]
+
+
+def calibration_apply(zs: Sequence[float], params: Mapping[str, Any]) -> list[float]:
+    """Calibrated ``P`` for a list of raw ``Z`` (logit-scale `actions_states`), one method."""
+    method = params["method"]
+    if method == "temperature":
+        t = params["T"]
+        return [sigmoid(z / t) for z in zs]
+    if method == "platt":
+        a, b = params["a"], params["b"]
+        return [sigmoid(a * z + b) for z in zs]
+    if method == "isotonic":
+        xt, yt = params["x_thresholds"], params["y_thresholds"]
+        return [_isotonic_interp(sigmoid(z), xt, yt) for z in zs]
+    raise ValueError(f"método de calibração desconhecido: {method!r}")
+
+
+def _corpus_t2_dominance(
+    bouts: Sequence[Bout], win_types: Mapping[str, str], vals: Mapping[str, float]
+) -> list[tuple[int, float, int]]:
+    """``(year, Z, label)`` for every corpus T2 unit under `actions_states`/marginal/γ=1 — prereg
+    §E0's fixed cell. Mirrors `corpus_units`'s T2 branch; kept separate because `Unit` carries no
+    year and E1's rolling folds need one."""
+    out: list[tuple[int, float, int]] = []
+    for b in bouts:
+        if b.winner not in (b.a, b.b) or win_types.get(b.bout_id) != "SUBMISSION":
+            continue
+        idx = [i for i, (c, _) in enumerate(b.steps) if c == "SUB"]
+        if not idx:
+            continue
+        z, n = granular_score(b.steps[: idx[-1]], vals, granularity="actions_states", gamma=1.0)
+        if n == 0 or math.isnan(z):
+            continue
+        out.append((b.year, z, 1 if b.winner == b.a else 0))
+    return out
+
+
+def run_section_e1(
+    bouts: Sequence[Bout],
+    win_types: Mapping[str, str],
+    vals: Mapping[str, float],
+    owner_doc: Mapping[str, Any],
+    *,
+    cutoffs: Sequence[int] = (2023, 2024, 2025),
+) -> dict[str, Any]:
+    """Prereg §E1 — global calibration of `actions_states`, fit on the corpus, transferred to the
+    owner's rounds with NO refit."""
+    rows = _corpus_t2_dominance(bouts, win_types, vals)
+    folds: list[dict[str, Any]] = []
+    pooled_val_ps: dict[str, list[float]] = {m: [] for m in CALIBRATION_METHODS}
+    pooled_val_ys: list[int] = []
+    pooled_raw_ps: list[float] = []
+
+    for cut in cutoffs:
+        train = [(z, y) for yr, z, y in rows if yr <= cut]
+        test = [(z, y) for yr, z, y in rows if yr == cut + 1]
+        if not train or not test or len({y for _, y in train}) < 2:
+            folds.append({"cutoff": cut, "skipped": "no train/test or single class in train"})
+            continue
+        tz, ty = [z for z, _ in train], [float(y) for _, y in train]
+        vz, vy = [z for z, _ in test], [y for _, y in test]
+        raw_vp = [p_own(z) for z in vz]
+        row: dict[str, Any] = {
+            "cutoff": cut,
+            "test_year": cut + 1,
+            "n_train": len(train),
+            "n_test": len(test),
+            "raw": {"logloss": log_loss(raw_vp, vy), "brier": brier(raw_vp, vy), "ece": ece(raw_vp, vy)[0]},
+        }
+        pooled_val_ys.extend(vy)
+        pooled_raw_ps.extend(raw_vp)
+        for m in CALIBRATION_METHODS:
+            params = calibration_fit(tz, ty, m)
+            vp = calibration_apply(vz, params)
+            row[m] = {"logloss": log_loss(vp, vy), "brier": brier(vp, vy), "ece": ece(vp, vy)[0]}
+            pooled_val_ps[m].extend(vp)
+        folds.append(row)
+
+    pooled_ll = {m: log_loss(pooled_val_ps[m], pooled_val_ys) for m in CALIBRATION_METHODS if pooled_val_ps[m]}
+    raw_pooled_ll = log_loss(pooled_raw_ps, pooled_val_ys) if pooled_raw_ps else float("nan")
+    if pooled_ll:
+        best_ll = min(pooled_ll.values())
+        chosen = next(m for m in CALIBRATION_METHODS if m in pooled_ll and pooled_ll[m] <= best_ll + CALIBRATION_TIE_NATS)
+    else:
+        chosen = CALIBRATION_METHODS[0]
+
+    all_z = [z for _, z, _ in rows]
+    all_y = [float(y) for _, _, y in rows]
+    final_params = calibration_fit(all_z, all_y, chosen) if all_z else {"method": chosen}
+
+    owner_t2 = owner_units(owner_doc, "T2", library=True)
+    oz: list[float] = []
+    oy: list[int] = []
+    for u in owner_t2:
+        z, n = granular_score(u.steps, vals, granularity="actions_states", gamma=1.0)
+        if n and not math.isnan(z):
+            oz.append(z)
+            oy.append(u.label)
+    owner_raw = [p_own(z) for z in oz]
+    owner_cal = calibration_apply(oz, final_params) if oz else []
+    death = paired_delta_ci(owner_cal, owner_raw, oy, "brier") if oz else {"delta": float("nan"), "lo": float("nan"), "hi": float("nan")}
+    verdict = "PASS" if death["hi"] < 0 else ("FAIL" if death["lo"] > 0 else "NULL")
+
+    ece_raw, rel_raw = ece(owner_raw, oy)
+    ece_cal, rel_cal = ece(owner_cal, oy)
+    corpus_ece_raw, corpus_rel_raw = ece(pooled_raw_ps, pooled_val_ys) if pooled_raw_ps else (float("nan"), [])
+    corpus_ece_cal, corpus_rel_cal = (
+        ece(pooled_val_ps[chosen], pooled_val_ys) if pooled_val_ps.get(chosen) else (float("nan"), [])
+    )
+
+    return {
+        "n_corpus_t2": len(rows),
+        "folds": folds,
+        "pooled_validation_logloss": pooled_ll,
+        "pooled_validation_logloss_raw": raw_pooled_ll,
+        "chosen_method": chosen,
+        "final_calibration": final_params,
+        "corpus_validation": {
+            "n": len(pooled_val_ys),
+            "ece_raw": corpus_ece_raw,
+            "ece_calibrated": corpus_ece_cal,
+            "reliability_raw": corpus_rel_raw,
+            "reliability_calibrated": corpus_rel_cal,
+            "brier_raw": brier(pooled_raw_ps, pooled_val_ys) if pooled_raw_ps else float("nan"),
+            "brier_calibrated": (
+                brier(pooled_val_ps[chosen], pooled_val_ys) if pooled_val_ps.get(chosen) else float("nan")
+            ),
+        },
+        "owner_transfer": {
+            "n": len(oy),
+            "ece_raw": ece_raw,
+            "ece_calibrated": ece_cal,
+            "reliability_raw": rel_raw,
+            "reliability_calibrated": rel_cal,
+            "brier_raw": brier(owner_raw, oy),
+            "brier_calibrated": brier(owner_cal, oy),
+            "logloss_raw": log_loss(owner_raw, oy),
+            "logloss_calibrated": log_loss(owner_cal, oy),
+        },
+        "death_rule": {"delta_brier_calibrated_minus_raw": death, "verdict": verdict},
+    }
+
+
+def run_owner_dominance_glicko(
+    doc: Mapping[str, Any], vals: Mapping[str, float], calib_params: Mapping[str, Any] | None
+) -> dict[str, Any]:
+    """Prereg §E2(iii), owner — S = the round's own (calibrated) `actions_states P`; E from the
+    FIXED population seed, never the athlete's own moving rating (§2a/§2b one level up: an
+    opponent equal to one's own current rating makes E ≡ 0.5 regardless of S and forecasts
+    nothing). ``calib_params=None`` runs on raw `σ(Z)` — the §E1 death-rule fallback.
+    """
+    raw = [(s, i, rd) for s in (doc.get("sessions") or []) for i, rd in enumerate(s.get("rounds") or [])]
+    raw.sort(key=lambda t: (str(t[0].get("created_at")), t[1]))
+    st = RatingState(GLOBAL_SEED, GLOBAL_RD_SEED, VOLATILITY_SEED)
+    ps: list[float] = []
+    ys: list[int] = []
+    shrink: list[float] = []
+    n_scored_updates = 0
+    for _s, _i, rd in raw:
+        outcome = str(rd.get("outcome") or "")
+        ents = rd.get("entries") or []
+        steps = tuple((canonical_code(e, library=True), e.get("actor") != "partner") for e in ents)
+        # The forecast for THIS round is read off state that saw only EARLIER rounds — appended
+        # before this round's own Z/S is even computed, which is the identity §E2 fixes.
+        if outcome in ("succeeded", "failed"):
+            ys.append(1 if outcome == "succeeded" else 0)
+            ps.append(expected_score(st.rating, st.deviation, GLOBAL_SEED, GLOBAL_RD_SEED))
+        z, n = granular_score(steps, vals, granularity="actions_states", gamma=1.0)
+        if n == 0 or math.isnan(z):
+            continue
+        p = calibration_apply([z], calib_params)[0] if calib_params else p_own(z)
+        e = expected_score(st.rating, st.deviation, GLOBAL_SEED, GLOBAL_RD_SEED)
+        shrink.append(abs(p - e))
+        st = update_period(st, [Observation(GLOBAL_SEED, GLOBAL_RD_SEED, p, 1.0)], tau=0.5, center=GLOBAL_SEED)
+        n_scored_updates += 1
+    return {
+        "n": len(ys),
+        "n_scored_updates": n_scored_updates,
+        "logloss": log_loss(ps, ys),
+        "brier": brier(ps, ys),
+        "auc": _auc_point(ps, ys),
+        "final_rating": st.rating,
+        "final_rd": st.deviation,
+        "shrink_mean_abs_s_minus_e": sum(shrink) / len(shrink) if shrink else float("nan"),
+        "shrink_n": len(shrink),
+        "_ps": ps,
+        "_ys": ys,
+    }
+
+
+def _e2_corpus_fold(
+    train: Sequence[Bout], test: Sequence[Bout], vals: Mapping[str, float], *, method: str | None
+) -> dict[str, Any]:
+    """One rolling fold of prereg §E2(iii) on the corpus — S = the fold-locally calibrated (train
+    years only) `actions_states P`, E = the real opponent's pre-bout Glicko-2 state (prereg §2a's
+    identified-partner escape). A standalone fold replay, deliberately not touching the
+    already-scored `_replay_fold` (§A-D)."""
+    st: dict[str, RatingState] = {}
+
+    def get(x: str) -> RatingState:
+        return st.setdefault(x, RatingState(GLOBAL_SEED, 350.0, VOLATILITY_SEED))
+
+    params: dict[str, Any] | None = None
+    if method is not None:
+        tz: list[float] = []
+        ty: list[float] = []
+        for b in train:
+            if b.winner not in (b.a, b.b):
+                continue
+            z, n = granular_score(b.steps, vals, granularity="actions_states", gamma=1.0)
+            if n and not math.isnan(z):
+                tz.append(z)
+                ty.append(1.0 if b.winner == b.a else 0.0)
+        if tz and 0 < sum(ty) < len(ty):
+            params = calibration_fit(tz, ty, method)
+
+    def score_of(z: float) -> float:
+        return calibration_apply([z], params)[0] if params else p_own(z)
+
+    def update(b: Bout) -> None:
+        sa, sb = get(b.a), get(b.b)
+        z, n = granular_score(b.steps, vals, granularity="actions_states", gamma=1.0)
+        if n == 0 or math.isnan(z):
+            return
+        p = score_of(z)
+        na = update_period(sa, [Observation(sb.rating, sb.deviation, p, 1.0)], tau=0.5, center=GLOBAL_SEED)
+        nb = update_period(sb, [Observation(sa.rating, sa.deviation, 1.0 - p, 1.0)], tau=0.5, center=GLOBAL_SEED)
+        st[b.a], st[b.b] = na, nb
+
+    for b in train:
+        update(b)
+    ps: list[float] = []
+    ys: list[int] = []
+    for b in test:
+        if b.winner not in (b.a, b.b):
+            continue
+        sa, sb = get(b.a), get(b.b)
+        ps.append(expected_score(sa.rating, sa.deviation, sb.rating, sb.deviation))
+        ys.append(1 if b.winner == b.a else 0)
+        update(b)
+    return {"ps": ps, "ys": ys, "n": len(ys)}
+
+
+def run_section_e2_corpus(
+    bouts: Sequence[Bout], vals: Mapping[str, float], method: str | None, cutoffs: Sequence[int] = (2023, 2024, 2025)
+) -> dict[str, Any]:
+    """Prereg §E2, corpus, arm (iii) only — (i)/(ii) are read from the already-scored
+    `run_corpus_q2` (`A0g_winner`/`A4_blend`, prereg §E2's table)."""
+    decided = [b for b in bouts if b.winner in (b.a, b.b)]
+    folds = []
+    for cut in cutoffs:
+        train = [b for b in decided if b.year <= cut]
+        test = [b for b in decided if b.year == cut + 1]
+        if not train or not test:
+            folds.append({"cutoff": cut, "skipped": "no train or no test bouts"})
+            continue
+        r = _e2_corpus_fold(train, test, vals, method=method)
+        row = {
+            "cutoff": cut,
+            "test_year": cut + 1,
+            "n": r["n"],
+            "logloss": log_loss(r["ps"], r["ys"]),
+            "brier": brier(r["ps"], r["ys"]),
+            "auc": _auc_point(r["ps"], r["ys"]),
+        }
+        folds.append(row)
+    return {"calibration_method": method, "folds": folds}
+
+
+@dataclass(frozen=True)
+class E3Unit:
+    """One round/bout for §E3's technique-credit replay: the WHOLE mapped sequence (for the
+    Glicko-2 update signal) plus an optional T2 prefix + label (for evaluation)."""
+
+    steps: tuple[tuple[str | None, bool], ...]
+    t2_prefix: tuple[tuple[str | None, bool], ...] | None
+    t2_label: int | None
+
+
+def _e3_owner_units(doc: Mapping[str, Any]) -> list[E3Unit]:
+    raw = [(s, i, rd) for s in (doc.get("sessions") or []) for i, rd in enumerate(s.get("rounds") or [])]
+    raw.sort(key=lambda t: (str(t[0].get("created_at")), t[1]))
+    out: list[E3Unit] = []
+    for _s, _i, rd in raw:
+        ents = rd.get("entries") or []
+        steps = tuple((canonical_code(e, library=True), e.get("actor") != "partner") for e in ents)
+        prefix = label = None
+        if ents:
+            last = ents[-1]
+            if str(last.get("type") or "") == "submission" and last.get("successful") is not False:
+                prefix = tuple((canonical_code(e, library=True), e.get("actor") != "partner") for e in ents[:-1])
+                label = 1 if last.get("actor") != "partner" else 0
+        out.append(E3Unit(steps, prefix, label))
+    return out
+
+
+def _e3_corpus_units(bouts: Sequence[Bout], win_types: Mapping[str, str]) -> list[E3Unit]:
+    out: list[E3Unit] = []
+    for b in bouts:
+        if b.winner not in (b.a, b.b):
+            continue
+        prefix = label = None
+        if win_types.get(b.bout_id) == "SUBMISSION":
+            idx = [i for i, (c, _) in enumerate(b.steps) if c == "SUB"]
+            if idx:
+                prefix = b.steps[: idx[-1]]
+                label = 1 if b.winner == b.a else 0
+        out.append(E3Unit(b.steps, prefix, label))
+    return out
+
+
+def _e3_forecast(
+    prefix: Sequence[tuple[str | None, bool]], ratings: Mapping[str, RatingState]
+) -> tuple[float, int]:
+    """``(Z, n)`` for one T2 prefix, reading each step's value off the LIVE per-code rating
+    instead of the static `v(code)` table — the `actions` shape (γ=1), prereg §E3."""
+    zs = []
+    for code, own in prefix:
+        if code is None:
+            continue
+        st = ratings.get(code)
+        if st is None:
+            continue
+        p = expected_score(st.rating, st.deviation, GLOBAL_SEED, GLOBAL_RD_SEED)
+        zs.append(_logit(p) if own else -_logit(p))
+    n = len(zs)
+    return (sum(zs) / n, n) if n else (float("nan"), 0)
+
+
+def contribution_shares(
+    steps: Sequence[tuple[str | None, bool]], vals: Mapping[str, float]
+) -> list[tuple[str, bool, float]]:
+    """``(code, own, c_k)`` — prereg §E3's per-action contribution: the actor-signed SHARE of the
+    round's `actions` log-odds mass, ``c_k = z_k / Σ|z_j|`` so ``Σ|c_k| = 1``. Mapped steps only.
+    """
+    kz = _keyed_zs(steps, vals)
+    total = sum(abs(z) for _, z in kz)
+    if total <= 0:
+        return []
+    return [(code, own, z / total) for (code, own), z in kz]
+
+
+def _e3_credit(
+    steps: Sequence[tuple[str | None, bool]], vals: Mapping[str, float], arm: str
+) -> list[tuple[str, bool, float]]:
+    """``(code, own, weight)`` per mapped step of one WHOLE round/bout, prereg §E3's three arms.
+    Mean-1 over the round: `equal_split`/`contribution` weight every mapped step so the average
+    weight is 1; `last_action_only` puts the round's whole evidence on its one observation."""
+    mapped = [(c, o) for c, o in steps if c is not None]
+    n = len(mapped)
+    if n == 0:
+        return []
+    if arm == "equal_split":
+        return [(c, o, 1.0) for c, o in mapped]
+    if arm == "last_action_only":
+        c, o = mapped[-1]
+        return [(c, o, 1.0)]
+    if arm == "contribution":
+        shares = contribution_shares(steps, vals)
+        if len(shares) != n:
+            return [(c, o, 1.0) for c, o in mapped]
+        return [(c, o, abs(c_k) * n) for c, o, c_k in shares]
+    raise ValueError(f"credit arm desconhecido: {arm!r}")
+
+
+def run_section_e3(units: Sequence[E3Unit], vals: Mapping[str, float], *, verdict: bool) -> dict[str, Any]:
+    """Prereg §E3 — per-technique Glicko-2 credit vs the static `v(code)` prior, chronological.
+
+    ``verdict=True`` (corpus) computes the paired death-rule CI; ``verdict=False`` (owner) reports
+    the same numbers as a coverage-limited DESCRIPTIVE only (prereg §E3's owner scope note).
+    """
+    arms = ("equal_split", "last_action_only", "contribution")
+    ratings: dict[str, dict[str, RatingState]] = {a: {} for a in arms}
+
+    def get(a: str, code: str) -> RatingState:
+        return ratings[a].setdefault(code, RatingState(GLOBAL_SEED, 350.0, VOLATILITY_SEED))
+
+    ps: dict[str, list[float]] = {a: [] for a in arms}
+    ps_null: list[float] = []
+    ys: list[int] = []
+
+    for u in units:
+        if u.t2_prefix is not None and u.t2_label is not None:
+            z_null, n_null = granular_score(u.t2_prefix, vals, granularity="actions", gamma=1.0)
+            rows = {a: _e3_forecast(u.t2_prefix, ratings[a]) for a in arms}
+            if n_null and not math.isnan(z_null) and all(n and not math.isnan(z) for z, n in rows.values()):
+                ys.append(u.t2_label)
+                ps_null.append(p_own(z_null))
+                for a in arms:
+                    ps[a].append(p_own(rows[a][0]))
+
+        z_round, n_round = granular_score(u.steps, vals, granularity="actions", gamma=1.0)
+        if n_round == 0 or math.isnan(z_round):
+            continue
+        s_round = p_own(z_round)
+        for a in arms:
+            credit = _e3_credit(u.steps, vals, a)
+            for code, own, w in credit:
+                st = get(a, code)
+                score = s_round if own else 1.0 - s_round
+                ratings[a][code] = update_period(
+                    st, [Observation(GLOBAL_SEED, GLOBAL_RD_SEED, score, w)], tau=0.5, center=GLOBAL_SEED
+                )
+
+    out: dict[str, Any] = {
+        "n_t2_scored": len(ys),
+        "n_codes_seen": {a: len(ratings[a]) for a in arms},
+    }
+    if not (ys and 0 < sum(ys) < len(ys)):
+        out["estimable"] = False
+        return out
+
+    sep_null = auc_ci(ps_null, [bool(y) for y in ys], n_boot=N_BOOT, seed=SEED)
+    out["arms"] = {
+        "N5_static_prior": {
+            "n": len(ys),
+            "auc": sep_null.auc,
+            "auc_lo": sep_null.lo,
+            "auc_hi": sep_null.hi,
+            "logloss": log_loss(ps_null, ys),
+            "brier": brier(ps_null, ys),
+        }
+    }
+    for a in arms:
+        sep = auc_ci(ps[a], [bool(y) for y in ys], n_boot=N_BOOT, seed=SEED)
+        row: dict[str, Any] = {
+            "n": len(ys),
+            "auc": sep.auc,
+            "auc_lo": sep.lo,
+            "auc_hi": sep.hi,
+            "logloss": log_loss(ps[a], ys),
+            "brier": brier(ps[a], ys),
+        }
+        if verdict:
+            d_auc = paired_delta_ci(ps[a], ps_null, ys, "auc")
+            d_ll = paired_delta_ci(ps[a], ps_null, ys, "logloss")
+            row["delta_auc_vs_null"] = d_auc
+            row["delta_logloss_vs_null"] = d_ll
+            row["beats_null"] = bool(d_auc["lo"] > 0)
+        out["arms"][a] = row
+    return out
+
+
+def run_section_e(doc: Mapping[str, Any], weights_doc: Mapping[str, Any]) -> dict[str, Any]:
+    """Prereg §E, end to end: E1 (calibration) -> E2 (dominance-Glicko) -> E3 (technique credit).
+    Read-only; no prod write; the owner's rounds never enter the corpus fit (root CLAUDE.md)."""
+    from sqlalchemy import text
+
+    from db.base import get_engine
+
+    block = block_for_family("other", weights_doc) or {}
+    marginal = marginal_submission_share(weights_doc)
+    vals = action_values(block, terminal="marginal", marginal=marginal)
+
+    bouts = load_corpus_bouts()
+    with get_engine().connect() as conn:
+        rows = conn.execute(text("SELECT id, win_type FROM matches WHERE status='final'")).mappings().all()
+    win_types = {str(r["id"]): str(r["win_type"] or "") for r in rows}
+
+    e1 = run_section_e1(bouts, win_types, vals, doc)
+    e1_passed = e1["death_rule"]["verdict"] == "PASS"
+    calib = e1["final_calibration"] if e1_passed else None
+    method_for_folds = e1["chosen_method"] if e1_passed else None
+
+    e2_owner = run_owner_dominance_glicko(doc, vals, calib)
+    e2_owner_reference = run_owner_prequential(doc, block, marginal)
+    e2_corpus_iii = run_section_e2_corpus(bouts, vals, method_for_folds)
+    e2_corpus_reference = run_corpus_q2(bouts, weights_doc)
+
+    e3_corpus = run_section_e3(_e3_corpus_units(bouts, win_types), vals, verdict=True)
+    e3_owner = run_section_e3(_e3_owner_units(doc), vals, verdict=False)
+
+    # Paired Δlog-loss, (iii) vs (i)/(ii), on the SAME labelled rounds — both filters are
+    # `outcome in (succeeded, failed)` walked in the same chronological order, so the `ys` align.
+    ys_ref = e2_owner_reference["_ys"]
+    owner_paired = None
+    if e2_owner["_ys"] == ys_ref:
+        owner_paired = {
+            "logloss": {
+                "iii_vs_i": paired_delta_ci(e2_owner["_ps"], e2_owner_reference["_ps_by_arm"]["A0_difficulty"], ys_ref, "logloss"),
+                "iii_vs_ii": paired_delta_ci(e2_owner["_ps"], e2_owner_reference["_ps_by_arm"]["A4_rrb"], ys_ref, "logloss"),
+            },
+            "auc": {
+                "iii_vs_i": paired_delta_ci(e2_owner["_ps"], e2_owner_reference["_ps_by_arm"]["A0_difficulty"], ys_ref, "auc"),
+                "iii_vs_ii": paired_delta_ci(e2_owner["_ps"], e2_owner_reference["_ps_by_arm"]["A4_rrb"], ys_ref, "auc"),
+            },
+        }
+
+    for d in (e2_owner, e2_owner_reference):
+        d.pop("_ps", None)
+        d.pop("_ys", None)
+        d.pop("_ps_by_arm", None)
+
+    return {
+        "e1": e1,
+        "e2": {
+            "owner": {
+                "iii_dominance_glicko": e2_owner,
+                "i_today_v2": e2_owner_reference["arms"]["A0_difficulty"],
+                "ii_rrb_opponent_flag": e2_owner_reference["arms"]["A4_rrb"],
+                "delta_logloss_iii_vs_i_ii": owner_paired,
+                "shrink_a0_difficulty_mean_abs_s_minus_e": e2_owner_reference[
+                    "shrink_a0_difficulty_mean_abs_s_minus_e"
+                ],
+                "shrink_scale_k_star": (
+                    e2_owner_reference["shrink_a0_difficulty_mean_abs_s_minus_e"] / e2_owner["shrink_mean_abs_s_minus_e"]
+                    if e2_owner["shrink_mean_abs_s_minus_e"] not in (0.0, float("nan"))
+                    and not math.isnan(e2_owner["shrink_mean_abs_s_minus_e"])
+                    else float("nan")
+                ),
+            },
+            "corpus": {
+                "iii_dominance_glicko": e2_corpus_iii,
+                "i_today_v2": [
+                    {"cutoff": f["cutoff"], **f["arms"]["A0g_winner"]}
+                    for f in e2_corpus_reference["folds"]
+                    if "arms" in f
+                ],
+                "ii_blend_hybrid": [
+                    {"cutoff": f["cutoff"], **f["arms"]["A4_blend"]}
+                    for f in e2_corpus_reference["folds"]
+                    if "arms" in f
+                ],
+            },
+        },
+        "e3": {"corpus": e3_corpus, "owner_descriptive": e3_owner},
+        "e4_artifact_eligible": e1_passed,
+    }
 
 
 if __name__ == "__main__":  # pragma: no cover

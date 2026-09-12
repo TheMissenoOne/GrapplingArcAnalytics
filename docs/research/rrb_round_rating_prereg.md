@@ -780,3 +780,241 @@ must be visible).
 An inference rule that resolves **< 25 %** of entries is reported as *insufficient to replace the
 flag* regardless of how the arms that use it score — at that coverage, mode (b) is mostly measuring
 which entries happened to be resolvable.
+
+---
+
+# ADDENDUM §E — global calibration, dominance-driven Glicko-2, per-technique credit
+
+Written 2026-09-12, **before any §E arm was scored**. Three owner decisions supersede §C/§C6's
+`hier4` recommendation for this addendum only (§C/§C6 keep their own numbers; §E is a new,
+narrower candidate the owner asked to run instead):
+
+> *"the skill rating drops round outcome, difficulty and intensity completely."*
+> *representation B = `actions_states` with a GLOBAL calibration fitted on the public corpus
+> (no personal layer)."*
+
+So §E's whole candidate space is: **one signal** (§A's `actions_states`, terminal = `marginal`,
+γ = 1 — the cell that scores AUC 0.989 on the owner's T2 and 0.8795 on the corpus's, both already
+measured in `addendum.json`) run through **one calibration fitted once on the public corpus and
+never refit per-user**. No Beta-Binomial count, no per-node state, no walk-forward — the opposite
+end of the complexity axis from `hier4`.
+
+## E0. Why `actions_states`, restated as a constraint on E1-E3
+
+`actions_states` is the mean of two already-published-constant Zs (§A3): the Lamas `actions` Z
+(repetition-weighted) and the `states` Z (last mapped step). Fixing it means **no new value
+table is estimated in §E** — E1 calibrates the SCALE of an existing `Z`, E2 changes what consumes
+`P`, E3 changes how `Z`'s summands are credited to individual techniques. Nothing here re-derives
+`v(code)`; that stays `markov_action_weights.json`'s `global` block under `terminal=marginal`
+(§3a), exactly as scored in §A.
+
+## E1. Global calibration
+
+**Population.** Public corpus, T2 (finish-side from the prefix, submission-decided bouts only —
+prereg §A2), same gate as `load_corpus_bouts` (≥4 events, `perspective_reliable`). Measured
+2026-09-12: **143 units** across years (the `actions_states_marginal_g1.0` row of `addendum.json`'s
+`corpus_T2`).
+
+**Candidates**, in simplest-first order (this order IS the tie-break, fixed now):
+
+1. **`temperature`** — one parameter `T`, `P' = σ(Z/T)` (Guo et al. 2017's temperature scaling).
+2. **`platt`** — two parameters, `P' = σ(aZ + b)` (Platt 1999), fit by `sklearn.linear_model.
+   LogisticRegression(C=1e6)` (near-unregularised, the classic Platt fit).
+3. **`isotonic`** — nonparametric, `sklearn.isotonic.IsotonicRegression` on `σ(Z) → y`, serialised
+   as `(x_thresholds, y_thresholds)` and applied by piecewise-linear interpolation (no sklearn
+   object is written to the artefact — E4 needs a format a future App port can read without a
+   Python ML dependency).
+
+**Protocol — chronological, never pooled for selection.** Rolling origins identical to H4's
+(`cutoffs = (2023, 2024, 2025)`): fit each candidate on `year ≤ cutoff`, apply to `year = cutoff+1`,
+never refit inside a fold. Selection statistic: **pooled log-loss across the three validation
+folds** (the held-out years concatenated, not averaged per-fold — a fold with more units should
+count more). **Tie-break, fixed now:** if a simpler candidate's pooled log-loss is within **0.005
+nats** of the best, the simpler candidate wins. 0.005 is chosen before the numbers are seen because
+it is an order of magnitude below the smallest Δlog-loss this study has treated as decisive
+anywhere (H2's −0.19).
+
+**The artefact's calibration** (E4) is the winning method refit ONCE on the **whole** gated
+corpus (all years) — this is the number that travels to the owner's rounds, never a per-fold one.
+
+**Reporting, regardless of which method wins:**
+
+* ECE (5 equal-count bins, `ece()`) and the reliability rows, **before** (raw `σ(Z)`) and
+  **after** (winning method), on the pooled chronological validation predictions above (genuine
+  held-out, no leakage) — this is the corpus-side number.
+* The SAME before/after, applied to the **owner's 42 T2 rounds**, using the artefact fit (fit on
+  the whole corpus, **zero owner data**, "no refit" is the entire point of a global calibration).
+  Private data is never fed back into the fit (root `CLAUDE.md`, public → private only).
+
+**Death rule (extends §8).** Paired bootstrap (`paired_delta_ci`, round-unit — the same unit H1/H2
+use, not session-clustered: E1 personalises nothing, so there is no within-session correlation to
+protect against) of `Brier(calibrated) − Brier(raw)` on the owner's 42 rounds, **4000 draws, seed
+20260820**. **PASS** iff the interval is strictly **below** 0 (calibration measurably better).
+**NULL** iff it contains 0. **FAIL** iff it is strictly above 0 (calibration measurably worse) —
+in either NULL or FAIL case, E1 has not held, and E2/E4 are reported as run on the RAW `σ(Z)`
+instead, with that substitution stated plainly rather than silently.
+
+## E2. Glicko-2 driven by dominance
+
+**The identity, fixed before any number.** `S` (the observation score fed to `update_period`) and
+`E` (`expected_score`, computed from the pre-bout state) must be built from **disjoint** inputs:
+`S` from the calibrated `actions_states` `P` of THIS round/bout; `E` from a rating that does not
+read this round's `Z` anywhere. Structurally enforced by loop order (the forecast for round *t* is
+appended to `ps` **before** round *t*'s `Z`/`S` is computed) and asserted by a regression test that
+perturbs round *t*'s actions while holding every earlier round fixed and checks `ps[t]` is
+unchanged (`tests/test_rrb_round_rating.py::test_e2_forecast_independent_of_same_round_actions`).
+This is prereg §2b's identity one level up: §2b showed `s − E ≡ 0` when `E` is DERIVED FROM `S` of
+the same round; E2 avoids it by never doing that.
+
+**`E`, per dataset — fixed now, not tuned:**
+
+* **corpus** — the real opponent's pre-bout Glicko-2 state (`A3_rrb_real_opponent`'s existing
+  mechanism, prereg §2a). Identified partner ⇒ a real prior is available.
+* **owner** — the App carries no partner identity (prereg §2a, unchanged). "The user's own rating
+  vs population mean" can only mean the **fixed** population seed
+  (`GLOBAL_SEED`/`GLOBAL_RD_SEED`, 1500/220 — the same constants every arm in this study seeds
+  from), NOT the athlete's own current rating: an opponent equal to one's own current rating makes
+  `E ≡ 0.5` by construction regardless of `S` (the same self-cancellation shape as §2b, one level
+  removed — `A0n_zero`'s existing mechanism), which forecasts nothing. Anchoring `E` on the FIXED
+  seed instead lets the athlete's own rating drift away from it as `S` accumulates, which is a
+  real (if data-poor, n=1 athlete) forecast.
+
+**Three arms compared, same units as everywhere else in this study:**
+
+| | (i) today's V2 | (ii) V2, RRB opponent + flag score | (iii) dominance-Glicko |
+|---|---|---|---|
+| **owner** | `A0_difficulty` (existing) | `A4_rrb` (existing, `run_owner_prequential`) — this IS "the §C/§D arm": flag score, RRB-derived virtual opponent | new: `run_owner_dominance_glicko` — `S` = calibrated `actions_states P` of the round, `E` from the fixed population seed |
+| **corpus** | `A0g_winner` (existing, `run_corpus_q2`) | `A4_blend` (existing) — the closest analogue: a blend of the win flag and dominance against the SAME real opponent (there is no "virtual opponent" concept when the partner is already identified, so (i)/(ii) collapse toward the SAME opponent source and differ only in the score; stated as a scoping decision, not discovered post-hoc) | new fold replay, `_e2_corpus_fold(calibrated=True)`: `S` = the fold-local calibration (fit on TRAIN years only, §E1's winning method) applied to `P`, weight 1.0, opponent = real (§2a) |
+
+**Metrics:** prequential log-loss/Brier of the pre-bout `E` on the NEXT unit (already the
+protocol both `run_owner_prequential` and `run_corpus_q2` use); rating-trajectory stability —
+`sd` of the rating series and its lag-1 autocorrelation (owner: within-session, reusing §C3(a)'s
+definition; corpus: within-fold), plus a **LOO sensitivity with a clamp**: for each round, the
+max |rating(full) − rating(drop this round)| after clamping any single round's Elo contribution
+to ±400 (the `difficulty` slider's own ±280 is the precedent, §2's recommendation already uses
+this number for `hier4`; §E asks whether (iii) needs it at all, since fractional `S` already
+damps the update — see next paragraph).
+
+**The shrink, quantified.** `|S − E| ≤ 0.5` always (fractional score), vs a binary flag's
+`|S − E| ∈ [0, 1]` — so a fractional-score update has **at most half** the magnitude of a binary
+one at the same `E`, and less whenever `E` itself is close to `S`. Reported: `mean(|S−E|)` for
+(iii) vs (i)/(ii) on the same units, and the **scale factor** `k*` such that
+`mean(k* · |S−E|_{(iii)}) = mean(|S−E|_{(i)})` — the multiplier that would need to sit in front of
+(iii)'s update to preserve TODAY's mean update budget, computed from the data actually run, not
+assumed.
+
+## E3. Per-technique rating by contribution to dominance
+
+**Contribution.** For round/bout `i` with mapped steps `(code_1, own_1) … (code_n, own_n)`,
+`z_k = ±logit(v(code_k))` (§3, `own` sign) is already what `actions`' `Z` sums. Define
+`c_k = z_k / Σ_j |z_j|` — the actor-signed SHARE of the round's total `actions` log-odds mass
+(note: this is `actions`' component only, not the `states` half of `actions_states` — a "last
+step" has no natural per-technique split, and crediting the state step to every earlier action
+would double-count). `Σ_k |c_k| = 1` by construction.
+
+**Observation.** One Glicko-2 observation per `(node_key(code_k), own_k)` pair per round:
+`score = S_round` (the round's OWN calibrated `actions_states P`, prereg §D1's `S` — never the
+per-action code's own value, which would be circular), `weight = |c_k| · n` (mean-1 over the
+round's mapped steps, the SAME normalisation `own_entry_weights`/`relative_shares` already use).
+Anchored **node_rating-style** (`analysis/rating_v2/node_rating.py`, ADR-16): seeded at the
+athlete's own current global at first sighting, `E` from that same own-anchor (own bias, not
+opponent — the corr(-0.790) finding that motivated own-anchor there applies here identically:
+crediting a technique against the OPPONENT's rating would make a dominant athlete's every
+technique read as "below their level").
+
+`code_k` here is the Lamas 12-code, not the full node vocabulary (§B's 252-key space) — §E0 fixed
+`actions_states` as the backbone, and the Lamas code is what its `v()` is defined over. A
+node-level (252-key) contribution split is a §B-shaped follow-on, not run here (`ponytail:`
+ceiling — §B's own value table was measured flat, sd(logit v)=0.012, so a node-level credit split
+would be splitting a near-uniform quantity finer, not adding information; stated, not assumed).
+
+**Arms, all scored on FUTURE rounds/bouts where the technique reappears (chronological, the
+technique's rating at time `t` must be built from observations strictly before `t`):**
+
+1. **equal split** — `c_k = 1/n` for every mapped step (drops the sign of contribution, keeps the
+   count).
+2. **last-action-only** — only the round's last mapped step receives an observation (the
+   `states`-shaped ablation).
+3. **contribution-weighted** — the `c_k` defined above.
+4. **today's flag-based node rating** (`node_rating.py`'s own mechanism, read-only reference, NOT
+   re-run against a different corpus split) — the existing baseline.
+5. **null: the technique's GLOBAL `v(code)` prior**, unmoved by any observation — the death-rule
+   comparator.
+
+**Target, pre-registered:** does the technique's OWN rating at time `t` (not the round's `Z`, not
+`S`) predict the finish-side label of a FUTURE round/bout in which that code appears, better than
+the null prior — AUC and log-loss, chronological, paired bootstrap vs arm 5. **Death rule
+(extends §8):** an arm that does not beat arm 5 with a clean interval is dead — "the technique has
+a rating" bought nothing over "the technique has its published constant".
+
+**Scope, fixed now.** Owner-side E3 is reported as a **coverage-limited descriptive** result only
+— 42 T2 rounds is too thin to hold out a "future round" per technique for more than a handful of
+codes (SUB/SUBA alone are 83 of 184 mapped entries, §5) — no PASS/FAIL verdict is issued for the
+owner; the death rule and the verdict apply to the **corpus** run, where 143+ T2 units and a
+70 % Lamas coverage give enough per-code future occurrences to hold one out.
+
+## E4. Artefact — only if E1 holds
+
+If E1's death rule PASSES: `data/rating/rrb_dominance_calibration.json` — `version`, `fitted_on`
+(the corpus year range actually used), `method` + its serialised parameters (§E1's three
+candidate formats), `clamp_elo` (§E2's LOO-derived clamp, or the `hier4`-precedent ±400 if the LOO
+sweep is inconclusive), and the `actions_states` definition needed to reproduce `Z` without this
+repo: `clean_label → node_key`'s pt-BR/English resolver name (`technique_match.clean_label`),
+`node_key → Lamas code` (`lamas_state`), `γ=1`, `terminal=marginal` and its 12-code value table
+(a snapshot of `markov_action_weights.json`'s `global` block under that terminal setting, not a
+live pointer — the artefact must be self-contained). Generator:
+`scripts/build_rrb_dominance_calibration.py --check`, deterministic (no bootstrap touches the
+artefact's own numbers; the fit is the deterministic sklearn/scipy call, not a random search).
+Fixture exporter `scripts/export_rrb_dominance_fixtures.py --check` writes
+`data/fixtures/rrbDominanceGolden.json`: for a small set of hand-picked input round shapes, the
+computed raw `Z`/`P`, the calibrated `P`, the resulting Elo offset, and the per-action
+contributions `c_k` — intended to be byte-identical in an eventual `services/rating/
+rrbDominance.ts` App port (not written in this addendum; App-side work is out of scope for this
+Analytics-only study and is left as the contract-row draft in §E5).
+
+If E1's death rule does **not** pass (NULL or FAIL): **no artefact is generated.** E4 is reported
+as skipped, with the reason, and E2/E3 run on raw `σ(Z)` instead (stated in E1).
+
+## E5. Contract-row draft (for the orchestrator, not applied here)
+
+Analytics never edits `GrapplingArcApp`. This is the row this study's evidence would support
+adding to root `CLAUDE.md`'s cross-module contract table, for the orchestrator to action as its
+own, separate, App-side PR if E1-E2 pass:
+
+| Contract | App side (proposed, NOT written) | Analytics side |
+|---|---|---|
+| RRB dominance calibration | `services/rating/rrbDominance.ts` — pure port of `Z`/`P`/calibration/contribution; consumed by `ratingV2Evidence.ts` as an alternative virtual-opponent source; reads NO `difficulty`/`intensity`/`outcome` field | `data/rating/rrb_dominance_calibration.json` (§E4) + `analysis/rating_v2/…` consumer (not written here) |
+
+## E6. Death rules, added to §8
+
+15. **Calibration death.** E1 NULL or FAIL (§E1) kills E4 (no artefact) and demotes E2/E3 to
+    running on raw `σ(Z)`.
+16. **Identity death.** If `test_e2_forecast_independent_of_same_round_actions` cannot be made to
+    pass without changing E2's construction, E2(iii) is dead by the same reasoning as §2b's A1.
+17. **Credit death (E3).** An arm that does not beat the technique's global prior (arm 5) with a
+    clean interval on the corpus is dead, regardless of its raw AUC.
+
+## E7. Privacy, restated for §E
+
+The corpus fit (E1) reads `matches` only (privacy class A). The owner transfer (E1's "no refit"
+step, E2's owner arm, E3's owner descriptive) reads the one `owner_id` this whole study is scoped
+to and writes nothing back — no calibration, no per-technique rating, no Glicko-2 state computed
+here is persisted to `user_sessions`, `graphs`, or any prod table. `data/rating/
+rrb_dominance_calibration.json` (E4) is fit on the public corpus alone and ships with the corpus's
+own provenance, the same class as `markov_action_weights.json` — no owner-derived number enters
+it.
+
+## E8. Literature this addendum leans on
+
+| Source | What it fixes here |
+|---|---|
+| Platt (1999), *Probabilistic outputs for SVMs* | The `platt` candidate — logistic recalibration of a monotone score. |
+| Zadrozny & Elkan (2002), *Transforming classifier scores into accurate multiclass probability estimates* | The `isotonic` candidate and why ECE, not AUC, is the criterion a calibration claim is judged by. |
+| Guo, Pleiss, Sun & Weinberger (2017), arXiv:1706.04599, *On Calibration of Modern Neural Networks* | The `temperature` candidate — the simplest possible recalibration (one scalar), and the reason it is tried first in the tie-break order. |
+| Chen, Sun, Seif El-Nasr & Nguyen (2017), arXiv:1702.06253 | Already cited in §2b/§11; reused in E2 for the one-level-up version of the same identity (own-rating-as-opponent ⇒ E≡0.5). |
+| Glickman (1999/2012), Glicko-2 | The fractional-score extension E2 uses is exactly what `ATTEMPT_WEIGHT`/`Observation.weight` already generalise to on both sides of this repo. |
+
+> As in §0-§D, the `scientific-papers` MCP was **not available in this run's tool set**. The five
+> references above are standard, load-bearing citations for calibration (Platt/isotonic/
+> temperature) already known to whoever fixed this method; they are not re-derived from a fresh
+> search and no number in this study is taken from a paper.

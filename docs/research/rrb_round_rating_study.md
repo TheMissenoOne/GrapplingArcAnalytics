@@ -3,9 +3,12 @@
 Pre-registration: [`rrb_round_rating_prereg.md`](rrb_round_rating_prereg.md) — §1–§11 written before
 any arm was scored, the **addendum** (§A1–A5: granularity arms, the objective target, the mapper
 defect) written after §1–§11 were scored and before any addendum arm was.
-Runner: `scripts/research/rrb_round_rating.py`. Tests: `tests/test_rrb_round_rating.py` (12 pass).
+Runner: `scripts/research/rrb_round_rating.py`. Tests: `tests/test_rrb_round_rating.py` (40 pass).
 Artefacts: `out/rrb_study/` (gitignored) — `owner_rounds.json` (private fixture),
-`owner_results.json`, `corpus_q1.json`, `corpus_q2.json`, `addendum.json`, `sweep.csv`, 3 PNGs.
+`owner_results.json`, `corpus_q1.json`, `corpus_q2.json`, `addendum.json`, `section_b.json`,
+`section_c.json`, `section_c6.json`, `section_d.json`, `section_e.json`, `sweep.csv`, 3 PNGs.
+§E also ships two COMMITTED artefacts (public-corpus-only, §E7 privacy note):
+`data/rating/rrb_dominance_calibration.json` and `data/fixtures/rrbDominanceGolden.json`.
 
 Run 2026-09-12 against prod **read-only**. No database write, no replay persisted, no artefact
 regenerated. Dataset (a) appears here as aggregates only.
@@ -49,11 +52,18 @@ regenerated. Dataset (a) appears here as aggregates only.
 | **§D2c** | mode (c) `inferred_then_flag` can be adopted without regression | **PASS (by identity)** | Δ log-loss **0.0000** — and it is an *identity*, not a null: the forecast is provably invariant to the scores (§D) |
 | **§D2d** | mode (b) `inferred_only` matches today's accuracy | **NULL**, at a large evidence cost | Δ +0.0021 [−0.0024, +0.0062]; observations **431 → 89 (−79 %)**, RD 78.8 → 127.6 |
 
+| **§E1** | *(corpus→owner transfer)* a GLOBAL calibration of `actions_states` (no personal layer) beats raw `σ(Z)` on the owner's rounds, Brier | **PASS** | ΔBrier **−0.154** [−0.183, −0.106]; owner ECE 0.414 → **0.047**; method = `temperature`, T=0.0661 |
+| **§E2(owner)** | dominance-Glicko (S=calibrated P, E=fixed population seed) beats production V2 on **discrimination** | **FAIL** | ΔAUC vs A0 **−0.149** [−0.292, −0.004]; vs A4 **−0.205** [−0.356, −0.051] — dominance-Glicko discriminates *worse* |
+| **§E2(owner), log-loss** | same comparison, **calibration** | **NULL** | vs A0 +0.0074 [−0.106, +0.124]; vs A4 −0.0163 [−0.103, +0.076] |
+| **§E2(corpus)** | dominance-Glicko forecasts next year's winners | **NULL, same shape as H4** | AUC at/near chance in 2 of 3 folds (0.606/0.548/0.499), no arm beats the fold's base rate |
+| **§E3** | per-technique Glicko-2 credit (equal/last/contribution) beats the technique's static prior | **DEAD — death rule 17 fires** | none of the three arms clears the null with a clean interval; `contribution`/`equal_split`/`last_action_only` all score **worse** log-loss than N5 with CI excluding 0 |
+
 ★ = decision target (§D1)  ·  ◦ = plausibility/sanity only, carries no product decision.
 
 Death rules that fired: **rule 8 (flat value)** on §B's `v`; **rule 14 (resolution floor)** on §D's
 inference under the entry denominator; **rule 3 (leakage)** on the
-*broken-mapper* first pass only (§1). Rules 9 (frequency), 11 (capacity), 10 (α disagreement) did
+*broken-mapper* first pass only (§1); **rule 17 (credit death)** on all three §E3 arms. Rules 9
+(frequency), 11 (capacity), 10 (α disagreement), 15 (calibration death), 16 (identity death) did
 **not** fire. Rule 6 (the lazy death) did **not** fire: substituting nothing is worse than
 everything.
 
@@ -752,6 +762,168 @@ last nodes and this sees one. Upgrade path: keep `sequenceId` in the fixture and
 
 ---
 
+## E. Global calibration, dominance-driven Glicko-2, technique credit (prereg §E)
+
+Written after prereg addendum §E was fixed and after §E1-E3 were scored, in that order. Owner
+decision (binding, supersedes §C/§C6's `hier4` recommendation for THIS candidate): drop round
+outcome/difficulty/intensity entirely; representation = `actions_states` (§A's `terminal=marginal`,
+γ=1 cell — AUC 0.989 T2 owner / 0.8795 T2 corpus) under a calibration fit **once** on the public
+corpus, **no personal layer**. Artefacts: `out/rrb_study/section_e.json`,
+`data/rating/rrb_dominance_calibration.json` (E4), `data/fixtures/rrbDominanceGolden.json` (E4).
+Generators: `scripts/build_rrb_dominance_calibration.py --check`,
+`scripts/export_rrb_dominance_fixtures.py --check`. Tests: `tests/test_rrb_round_rating.py`
+(§E-specific: 9 of the 40).
+
+### E1. The calibration — PASSES, decisively
+
+`actions_states`' raw `σ(Z)` **discriminates** well (AUC 0.989 owner T2, 0.8795 corpus T2, both
+already in `addendum.json`) but is badly **under-confident**: `Z`'s magnitude is small by
+construction (every `v(code)` sits within ~0.10 of 0.5, §B's own flat-value finding one level
+up — the value TABLE is what's flat, not the discrimination it produces once averaged over a
+round), so `σ(Z)` hovers near 0.5 even on units the arm separates almost perfectly.
+
+Pooled chronological validation log-loss (3 rolling folds, `2023→2024, 2024→2025, 2025→2026`,
+143 corpus T2 units):
+
+| candidate | pooled validation log-loss | params (final, whole-corpus fit) |
+|---|---|---|
+| raw `σ(Z)` | 0.646 | — |
+| **`temperature`** (chosen) | **0.455** | `T = 0.0661` |
+| `platt` | 0.903 | worse than raw — 2 params overfit 3 small training folds (27-99 bouts) |
+| `isotonic` | 1.786 | far worse — nonparametric fit on 27-99 points does not generalise |
+
+`temperature` wins outright (best AND simplest — the tie-break never had to fire). A very small
+`T` means the raw `Z` scale needs roughly a 15× sharpening, which is consistent with the flat
+value table, not a symptom of overfitting: it is measured on 3 **held-out** years, not the
+training fold.
+
+**Corpus validation, pooled:** ECE **0.322 → 0.075**, Brier **0.227 → 0.136**.
+**Owner transfer (41 T2 rounds, NO refit — the whole point):** ECE **0.414 → 0.047**, Brier
+**0.195 → 0.041**, log-loss **0.583 → 0.165**. Reliability, before/after (5 equal-count bins,
+confidence/accuracy): raw sits at **0.45-0.59** confidence across every bin including the four
+bins whose true accuracy is **1.0** — badly under-confident everywhere; calibrated moves to
+**0.11 / 0.82 / 0.97 / 0.99 / 0.99**, tracking the true accuracy in every bin but the first
+(accuracy 0.125, calibrated confidence 0.109 — correctly LOW).
+
+**Death rule: PASS.** Paired bootstrap ΔBrier(calibrated − raw) on the owner's 41 T2 rounds:
+**−0.154 [−0.183, −0.106]**, strictly below 0. E1 holds; E2/E3/E4 run on the calibrated signal.
+
+### E2. Dominance-Glicko — mixed, and worse than production on the axis that matters most
+
+**The identity.** `S` (this round's calibrated `P`) and `E` (the pre-bout expectation) are built
+from disjoint state by construction — the forecast for round *t* is read before round *t*'s own
+`Z` is even computed (loop order), asserted by
+`test_e2_forecast_independent_of_same_round_actions`: round 3's forecast is bit-identical whether
+round 3's own entries are a dominant submission or a partner sweep, while the state AFTER round 3
+diverges. Death rule 16 did not fire.
+
+**Owner (n=100 T1-labelled rounds, `E` = fixed population seed 1500/220 — no partner identity,
+prereg §2a):**
+
+| | AUC | log-loss |
+|---|---|---|
+| (i) `A0_difficulty` (today's V2) | 0.739 | 0.6265 |
+| (ii) `A4_rrb` (RRB-opponent + flag, the §C/§D arm) | **0.796** | 0.6502 |
+| (iii) dominance-Glicko (calibrated P, no flags) | **0.590** | 0.6339 |
+
+ΔAUC (iii) vs (i): **−0.149 [−0.292, −0.004]** — excludes 0, dominance-Glicko discriminates
+*measurably worse*. Vs (ii): **−0.205 [−0.356, −0.051]**, same direction, larger. Log-loss is
+NULL both ways (CI straddles 0 for both comparisons) — the fixed-population-mean opponent makes
+(iii) a low-variance predictor that is neither clearly better nor worse calibrated than production
+at this sample size, but it separates T1 outcomes worse. **The `A4_rrb`-style construction (keep
+the `successful` flag as the score, use RRB only for the virtual opponent) is not replaced by
+score-is-dominance on this data** — this is the practical reason A4/`hier4`'s shape (flag score +
+RRB-derived opponent) beats plain dominance-as-score, one level more concrete than prereg §2b's
+identity.
+
+**Corpus (rolling folds, real opponent, calibration fit train-years-only per fold):** the same
+NULL-everywhere pattern as H4 — AUC 0.606/0.548/0.499 across the three folds, at or below the
+`A0g_winner`/`A4_blend` references reported alongside (0.583/0.504/0.495 and 0.607/0.513/0.469
+respectively). No arm, including dominance-Glicko, beats a coin flip on 2 of 3 folds. This is not a
+new finding — it is H4's NULL, reproduced under a different score/opponent construction, which is
+itself informative: the corpus's forward-prediction ceiling is not a property of any one arm's
+construction.
+
+**The shrink, quantified.** Mean `|S−E|` per observation: today's `A0_difficulty` (binary flag,
+per-ENTRY) = **0.476**; dominance-Glicko (fractional, per-ROUND) = **0.293**. The naive ratio
+`k* ≈ 1.63` — reported as a first-order number, not a re-derived K-budget: the two quantities are
+at different granularities (entry vs round), so `k*` is NOT a recommended multiplier, only the
+measured gap prereg §E2 asked to quantify. **LOO clamp sweep: not run in this pass** (stated
+gap, not assumed — `clamp_elo` in the E4 artefact carries the `hier4` ±400 precedent instead, and
+says so in its own `source` field).
+
+### E3. Per-technique credit — dead, cleanly
+
+All three credit arms (`equal_split`, `last_action_only`, `contribution`) on the corpus (142 T2
+units, 12 Lamas codes seen by every arm) score **worse** log-loss than the static `v(code)` prior
+(N5), with the interval **excluding 0 in the wrong direction**:
+
+| arm | AUC | Δlog-loss vs N5 | beats_null |
+|---|---|---|---|
+| N5 (static prior) | 0.842 | — | — |
+| `equal_split` | 0.851 | **+0.0230** [+0.0175, +0.0284] | **no** |
+| `last_action_only` | 0.857 | **+0.0233** [+0.0174, +0.0289] | **no** |
+| `contribution` | 0.849 | **+0.0247** [+0.0191, +0.0302] | **no** |
+
+AUC ties with the null in all three cases (ΔAUC CI includes 0), and log-loss is measurably WORSE
+in all three. **Death rule 17 fires for every arm.** This is exactly what §B's flat-value finding
+predicts one level up: the Lamas-12 code space is close to uniform in value (`sd(logit v) = 0.012`,
+§B2), so letting each code drift via a noisy per-round Glicko-2 observation adds variance without
+adding information the static, already-measured `v(code)` did not already carry. Owner-side (40 T2
+rounds, descriptive only per prereg §E3's scope — no verdict issued): AUC ties within noise (0.961
+vs N5's 0.974, n too small for the death rule), consistent with the corpus verdict.
+
+**Conclusion: no per-technique layer.** The static, already-published `v(code)` table stays the
+whole technique-level signal; nothing in §E3 buys a reason to track a live per-technique rating on
+top of it.
+
+### E4. Artefact — produced (E1 passed)
+
+`data/rating/rrb_dominance_calibration.json` (version 1, `fitted_on.years` 2015-2026, 143 units,
+`method="temperature"`, `T=0.0661`, a self-contained snapshot of the 12-code `terminal=marginal`
+value table, `clamp_elo=400` with its `hier4`-precedent source noted). Generator
+`scripts/build_rrb_dominance_calibration.py --check` is green and deterministic (byte-identical
+re-run verified). Fixture `data/fixtures/rrbDominanceGolden.json`
+(`scripts/export_rrb_dominance_fixtures.py --check`, green) covers 5 hand-picked round shapes
+(own-dominant, partner-dominant, mixed-mapped, all-unmapped, empty) with the raw `Z`/`P`,
+calibrated `P`, Elo offset and per-action `contribution_shares` — no App port is written in this
+pass (out of scope, §E5).
+
+### E5. Verdict table
+
+| id | question | verdict | number |
+|---|---|---|---|
+| E1 | global temperature calibration beats raw on the owner's rounds (Brier) | **PASS** | ΔBrier −0.154 [−0.183, −0.106] |
+| E2(owner, AUC) | dominance-Glicko beats production V2 | **FAIL** | ΔAUC −0.149…−0.205, both CIs strictly negative |
+| E2(owner, log-loss) | same, calibration axis | **NULL** | both CIs straddle 0 |
+| E2(corpus) | dominance-Glicko forecasts next year | **NULL** | same shape as H4 — no arm beats chance in 2/3 folds |
+| E3 | per-technique credit beats the static prior | **DEAD (rule 17)** | all 3 arms score worse log-loss, CI excludes 0 |
+| E4 | artefact produced | **YES** | `data/rating/rrb_dominance_calibration.json` + golden fixture, both `--check` green |
+
+### E6. What this means for the App-side contract
+
+The evidence does **not** support shipping `actions_states`-driven Glicko-2 *as the score* (§E2's
+(iii)) in place of today's engine — it discriminates worse than both production and the
+already-shipped `A4_rrb`/`hier4` shape. What §E1 DOES support, cleanly, is the calibration itself:
+`actions_states`' raw output is a genuinely under-confident probability that a cheap, global,
+one-parameter rescale fixes, transferably, with zero personal data. That calibration is the
+useful, narrow output of this addendum — usable wherever an `actions_states` `P` is already
+consumed (e.g. as `hier4`'s `w_ctx` context term, or standalone where a lighter signal than
+`hier4` is wanted and re-calibrated), not as a wholesale replacement for the flag-scored,
+RRB-opponent construction §C/§C6 already recommended. The draft contract row (App side not
+written, Analytics-only per scope):
+
+| Contract | App side (proposed, NOT written) | Analytics side |
+|---|---|---|
+| RRB dominance calibration | `services/rating/rrbDominance.ts` — pure port of `Z`/calibrated `P`/`contribution_shares`; a CALIBRATION utility `ratingV2Evidence.ts` may call wherever it already reads an `actions_states`-shaped `P`, not a new virtual-opponent source on its own (§E2 does not support that); reads NO `difficulty`/`intensity`/`outcome` field | `data/rating/rrb_dominance_calibration.json` (E4) + `analysis/rating_v2/…` consumer (not written here) |
+
+### E7. Death rules that fired
+
+Rule **17 (credit death)**: all three §E3 arms. No other §E-added rule (15 calibration death, 16
+identity death) fired — E1 passed and the identity test passes cleanly.
+
+---
+
 ## 6. Deviations from the pre-registration
 
 1. **Bootstrap draws 4000, not 2000** — declared in prereg §6 before the run; 4000/seed 20260820 is
@@ -764,6 +936,20 @@ last nodes and this sees one. Upgrade path: keep `sequenceId` in the fixture and
    before the corrected arms were run; both readings are published.
 4. **A3/A4-with-partner-prior not runnable on the owner's data** — the App carries no partner
    identity at all (prereg §2a, confirmed in `GrapplingArcApp/src/types/session.ts`).
+5. **§E2's corpus (i)/(ii) mapping, fixed in the prereg before scoring but worth restating**: the
+   corpus already has an IDENTIFIED real opponent, so "virtual opponent" doesn't apply there the
+   way it does on the owner's data; (i)=`A0g_winner`, (ii)=`A4_blend` (the closest existing analogue
+   — a blend of the win flag and dominance against the SAME real opponent) are a scoping choice,
+   not a discovery.
+6. **§E1's death-rule bootstrap resamples the ROUND, not the SESSION** — unlike §C3's
+   `cluster_bootstrap_delta`, because E1 fits nothing per-user; there is no within-session
+   correlation from a personal layer to protect against, so it uses the same unit as H1/H2.
+7. **§E1/§E3 use the POOLED, whole-corpus `v(code)` table** (not re-estimated per rolling fold) —
+   consistent with every other arm in this study outside the dedicated H4/§E2(corpus) fold tests,
+   where `v(code)` itself has never been rolled, only the RATING state being tested.
+8. **§E2's LOO clamp sweep (prereg's "clamp with a LOO sweep") was not run** — only the shrink's
+   mean `|S−E|` and the naive scale `k*` were measured. The E4 artefact's `clamp_elo` therefore
+   carries the `hier4` ±400 precedent, stated as a precedent, not a re-derivation.
 
 ## 7. What could not be run, and why
 
@@ -794,14 +980,20 @@ last nodes and this sees one. Upgrade path: keep `sequenceId` in the fixture and
 | Hvattum (2019), plus-minus review | The exposure/length artefact class. §5g finding 1 is that artefact; finding 2 is it mis-corrected. |
 | Lamas et al. (2024), *No-gi BJJ: a Markovian analysis* | The 12-state space and the reward-risk quantity the shares derive from (`analysis/lamas_chain.py`), including rule 2 — which is exactly why the remaining 50 % of the owner's entries do not map. |
 | Glickman (1999/2012), Glicko-2 | Weighted observations as the continuous extension of repeat-count — already the basis of `ATTEMPT_WEIGHT` on both sides. |
+| Platt (1999), *Probabilistic outputs for SVMs* | The §E1 `platt` calibration candidate. |
+| Zadrozny & Elkan (2002) | The §E1 `isotonic` candidate and the ECE-first reading rule. |
+| Guo, Pleiss, Sun & Weinberger (2017), arXiv:1706.04599 | The §E1 `temperature` candidate — the one that won, and the reason a one-parameter rescale was tried first. |
 
 ## 9. Reproduce
 
 ```bash
 set -a; source .env; set +a
 uv run python -m scripts.research.rrb_round_rating --all
+uv run python -m scripts.research.rrb_round_rating --section-e
+uv run python -m scripts.build_rrb_dominance_calibration --check
+uv run python -m scripts.export_rrb_dominance_fixtures --check
 uv run pytest tests/test_rrb_round_rating.py -q
-uv run ruff check scripts/research/rrb_round_rating.py tests/test_rrb_round_rating.py
+uv run ruff check scripts/research/rrb_round_rating.py scripts/build_rrb_dominance_calibration.py scripts/export_rrb_dominance_fixtures.py tests/test_rrb_round_rating.py
 ```
 
 Deterministic: sorted iteration, seed 20260820, matplotlib Agg.
