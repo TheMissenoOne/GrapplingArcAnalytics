@@ -40,22 +40,22 @@
 │   └── app_types.py                 # UserBundle parser — mirrors TS types
 ├── analysis/
 │   ├── __init__.py                  # module exports
-│   ├── elo_calibration.py           # [TODO] ADCC ELO + K-factor calibration
-│   ├── technique_freq.py            # [TODO] position heatmaps, transition matrices
-│   ├── belt_analysis.py             # [TODO] belt-level stats
-│   ├── benchmark.py                 # [TODO] user vs pro benchmarking
-│   └── similarity.py                # [TODO] cosine-sim fighter matching
+│   ├── elo_calibration.py           # ✅ ADCC ELO + K-factor calibration (kanban 001, tests/test_elo.py)
+│   ├── technique_freq.py            # ✅ position heatmaps, transition matrices (kanban 004, tests/test_technique_freq.py)
+│   ├── belt_analysis.py             # ✅ belt-level stats (kanban 005, tests/test_belt_analysis.py)
+│   ├── benchmark.py                 # ✅ user vs pro benchmarking (kanban 010, tests/test_benchmark.py)
+│   └── similarity.py                # ✅ cosine-sim fighter matching (kanban 011, tests/test_similarity.py)
 ├── cv/
 │   ├── __init__.py                  # module exports
-│   ├── vicos_download.py            # [TODO] ViCoS downloader
-│   ├── vicos_explore.py             # [TODO] dataset exploration
-│   ├── pose_features.py             # [TODO] keypoint feature engineering
-│   └── baseline_classifier.py       # [TODO] RF/XGBoost on pose features
+│   ├── vicos_download.py            # ⚠️ verify-only — ANNOTATIONS_URL/IMAGES_URL unset, no hosted archive URL found yet (kanban 006 still DOING)
+│   ├── vicos_explore.py             # ✅ dataset exploration (kanban 007, tests/test_vicos_explore.py)
+│   ├── pose_features.py             # ✅ keypoint feature engineering (kanban 008, tests/test_pose_features.py)
+│   └── baseline_classifier.py       # ✅ RF/XGBoost on pose features (kanban 009, tests/test_baseline_classifier.py)
 ├── export/
 │   ├── __init__.py                  # module exports
 │   ├── tech_library.py              # ✅ → app technique library JSON + effectiveness scores
-│   ├── adcc_elo_table.py            # [TODO] → app ELO benchmark
-│   └── benchmark_results.py         # [TODO] → user benchmark JSON
+│   ├── adcc_elo_table.py            # ✅ implemented + tested (tests/test_elo_export.py) but NOT an App export — see "App Integration" below
+│   └── benchmark_results.py         # ✅ export_pro_baseline_db → app ProBaselineV1, the real App-facing export — see "App Integration" below
 ├── harvest/                         # ✅ native YouTube fight-transcript harvester (replaced
 │   │                                #   the bjj-match-analyzer sibling repo — now scrapped)
 │   ├── transcripts.py               # youtube-transcript-api + oEmbed title + feedparser playlist

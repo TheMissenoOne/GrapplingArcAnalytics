@@ -4,7 +4,7 @@ slug: app-directed-edges
 phase: 6
 lane: G
 priority: P1
-status: todo
+status: done
 depends: []
 branch: feature/014-app-directed-edges
 created: 2026-07-07
@@ -49,3 +49,6 @@ single PR, no cross-module contract.
 Manual device/emulator QA on NetworkScreen: arrows follow `source→target`, survive pan/pinch and the
 settle animation, and match a known sequence direction. Existing Jest suites unchanged.
 </content>
+
+---
+closed 2026-09-12: done at App commit 6b4a81b (2026-07-17, "feat(graph): data-directed edges (arrows + low-success dashing)") — EdgeRenderer.tsx draws the accent-colored arrowhead triangle (static Path, mirrors site/graph.js), directedEdges.ts parity documented live in GrapplingArcApp/CLAUDE.md.

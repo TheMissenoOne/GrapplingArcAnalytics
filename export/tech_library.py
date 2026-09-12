@@ -343,7 +343,7 @@ def build_technique_library(
 
         existing = _name_in_nodes(norm, existing_nodes)
 
-        entry = {
+        entry: dict[str, Any] = {
             "_id": _make_oid(index),
             "name": pt_name,
             "type": app_type,

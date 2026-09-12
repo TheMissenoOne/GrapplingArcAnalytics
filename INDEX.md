@@ -72,6 +72,10 @@ Test layout: `tests/` (pytest, mirrors `pipelines/`/`export/`/`analysis/`/`db`/`
 | `docs/publishing.md` | Publish flow for athlete graphs / site |
 | `kanban/README.md` | Task board rules + card template |
 | `.claude/skills/` | Repo-local skills (analysis/cv/pipeline); root skills one level up |
+| `docs/SECURITY_AUDIT.md` | Public × private access audit (App/Web/Supabase), ties to the LGPD contract above |
+| `docs/next_moves.md` | Next-move ranking (`analysis/next_moves*.py`) — method, measurement, verdict |
+| `docs/taxonomy/04_ONTOLOGIA_CANONICA.md` | Canonical state/action/sequence ontology (mirrored by App `docs/ONTOLOGY.md`) |
+| `docs/repairs/` | Point-in-time prod-migration runbooks (one file per applied repair/alembic rev) |
 
 ## 7. Known stale or historical
 

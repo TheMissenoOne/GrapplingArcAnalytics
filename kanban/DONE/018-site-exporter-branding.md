@@ -4,7 +4,7 @@ slug: site-exporter-branding
 phase: 6
 lane: H
 priority: P1
-status: doing
+status: done
 depends: []
 branch: feature/radial-brand-exporter
 created: 2026-07-29
@@ -38,3 +38,6 @@ The local database is incomplete, so a full export would prune hundreds of valid
 
 ## Test Plan
 Pure string assertions against `_nav`, `_FOOTER`, `_head`, and generated dossier output; no database or network.
+
+---
+closed 2026-09-12: done at commit c4f9c9b (2026-07-29, "feat(site): centralize radial brand export") — brand-symbol.svg/brand-og.png/brand-mark.svg wired in export/site_data.py, --branding-only migration present, tests.test_site_branding.py 12/12 green.
