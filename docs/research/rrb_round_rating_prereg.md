@@ -426,3 +426,357 @@ oriented difficulty for T1/T2 on the owner's rounds, `A0g_winner` for T3 on the 
 
 Death rules §8 apply unchanged, including rule 3 (leakage): every arm is reported at
 `terminal = marginal` **and** `terminal = drop`.
+
+---
+
+# ADDENDUM §B — the FULL catalogued-node Markov chain, and high-confidence inference
+
+Written 2026-09-12, **before any §B arm was scored**. Two owner decisions:
+
+> *"vamos tentar usando o markov de todas as ações catalogadas, não das ações Lamas"*
+> *"usando também a inferência de alta confiança já estabelecida"*
+
+§A's finding was that the bottleneck is the **Lamas 12-state vocabulary**: 50 % of the owner's
+entries map, and the 320 that do not are dwell/position states (`Montada`, `Meia Guarda`,
+`Quatro Apoios`) that the Lamas space has no state for. §B removes that ceiling by replacing the
+12-state space with the **whole catalogued node vocabulary**, and by letting the production chain
+compiler **infer** the actions that a state→state pair implies.
+
+## B1. The value function, fixed now
+
+Vocabulary = every canonical `node_key` appearing in the public corpus sequences, derived by the
+repo's own key map: `canonicalize(_normalize_name(clean_label(label, type)))` — the same
+derivation `node_rating.node_key_of` uses, with `clean_label` in front so pt-BR and English land on
+one key. Measured read-only 2026-09-12: **252 distinct keys over 10 121 corpus events** (129 with
+≥5 occurrences, 97 with ≥10).
+
+States are **lifted by side** relative to a reference athlete, exactly as `lamas_chain.rrb` lifts
+its 12: `(node_key, is_own)`. Each gated bout contributes its ordered event stream **twice**, once
+with each athlete as reference, which makes the mirror `v(node, own) = 1 − v(node, opp)` exact by
+construction rather than an assumption (asserted in the runner).
+
+Absorbing states: `FIN_own` / `FIN_opp` when the bout ended in a submission by that side,
+`END_other` for every other ending (decision/points/unknown — never recoded as a draw, ADR-06).
+
+```
+v(node) = B_own(node) / ( B_own(node) + B_opp(node) )        B = (I − Q)⁻¹ R
+```
+
+i.e. **P(the reference side's finish comes before the opponent's, given the chain is at this node
+and does reach a finish)** — the same conditional `lamas_chain.rrb`'s `sub_share` publishes, on a
+21× larger state space. Dirichlet/Laplace smoothing **α ∈ {0.5, 1}** is added uniformly over every
+destination including the absorbing ones, so a rarely-seen node shrinks toward 0.5 rather than
+inheriting a singleton's outcome. **Both α values are reported; neither is chosen after seeing a
+verdict** — if they disagree on a verdict, the verdict is NULL.
+
+## B2. Arms
+
+| arm | score of one round/bout |
+|---|---|
+| `fullchain_nodes` | actor-signed mean log-odds of `v` over mapped entries, `Σ ±logit(v_i) / n^γ`, γ ∈ {0.5, 1} |
+| `fullchain_edges` | actor-signed mean of `v(target) − v(source)` over consecutive mapped pairs (needs ≥2) |
+| `fullchain_last` | `±logit(v)` of the LAST non-terminal mapped node — "where were you when it ended" |
+| `actions_fullchain` | mean of the Lamas `actions` Z and the `fullchain_nodes` Z |
+
+Terminal handling as §3a: `marginal` (the submission family's own corpus marginal replaces the
+terminal node's value), `drop` (submission-family nodes removed), `landed` (values as estimated).
+
+## B3. The `+inferred` variant — every family gets one
+
+Before scoring, each unit's event stream is run through the **production** chain compiler
+(`analysis/chain_compiler.compile_two_sided` → `analysis/taxonomy_kind`, Fase 2: actor + two stance
+axes + redundancy; exit orientation may only SUPPRESS an inference, never create one). The
+compiler splices inferred actions (`ChainAction.inferred=True`, `provenance='inferred'`) into the
+observed buffer without reordering, so `Guarda → Montada` yields an inferred `guard pass` and
+`Meia Guarda` bottom → top yields a `sweep`.
+
+**Strict tier, stated explicitly.** The compiler's confidence gate is `actor_readable`, which it
+documents as `attribution.bout_flags(...)` — and its own default is the *cheap* one-sided test. The
+**strict** reading is taken: `actor_readable = bout_flags(...)['perspective_reliable']`, the same
+flag that already gates every bout into this study (so it is `True` on all 465 gated bouts, and
+one-sided bouts never reach the inference rule at all). On the owner's rounds both corners are
+logged (`you` 475 / `partner` 165), so `actor_readable=True` is honest there and is passed
+explicitly rather than inferred from bucket sizes.
+
+Two contracts inherited from the compiler and **not** re-implemented here:
+
+* **an inferred action never becomes a state** — inferred entries enter the node sequence as
+  actions only;
+* **the redundancy rule prevents double counting** — when an observed action already explains the
+  state delta, the rule suppresses the inference. That is the compiler's Fase 2 behaviour and is
+  used as-is.
+
+**The SAME inference is applied when building the corpus chain**, so `v()` and the scored sequences
+live in one universe. A `+inferred` arm scored against a non-inferred `v()` would be comparing two
+different state spaces and is not run.
+
+## B4. Controls — all three are load-bearing
+
+1. **Frequency null (`fullchain_freq`).** `v` replaced by the node's corpus **frequency percentile**
+   (same vocabulary, same mapping, same coverage, no value). If `fullchain_nodes` cannot beat this,
+   the signal is the vocabulary, not the value, and §B is a coverage story with a rating costume.
+2. **No leakage into T3.** Inside every rolling-origin fold, `v` is re-estimated on the **training
+   years only** (`year ≤ cutoff`). The pooled `v` is never used for a forward number.
+3. **The owner's rounds NEVER enter the corpus chain.** Private → public is forbidden (root
+   `CLAUDE.md`). The chain is estimated on `matches` alone; the owner's rounds are only ever
+   *scored* against it. This is enforced by construction — the chain builder takes corpus bouts and
+   has no path to `user_sessions` — and asserted in the runner.
+
+## B5. What must be reported regardless of verdict
+
+* **coverage before/after**, per arm, on the owner's 640 entries: the §A canonical mapper reached
+  50.0 %; how many of the **320 still-unmapped** entries now carry a value.
+* **number of inferred actions** added, on the owner's rounds and on the corpus.
+* **is `v` informative or flat?** The spread of `v` across the vocabulary, and the specific values
+  of `Montada`, `Meia Guarda`, `Quatro Apoios`, `Costas`. A `v` that is ≈0.5 everywhere is a null
+  result and must be reported as one — §5's own caveat about the Lamas amplitude ("a cadeia mistura
+  mais rápido do que absorve") is the prior here, not a surprise.
+* **length artefact ρ per arm**, same as §A.
+* **ΔAUC with CI against production** for T1/T2, and Δ log-loss vs `A0g` for T3. An arm beats
+  production only when the paired interval excludes 0. **Whether inference helps** is its own paired
+  Δ: `+inferred` arm vs the same arm without it, with CI.
+
+## B6. Death rules, added to §8
+
+8. **Flat-value death.** If `sd(logit(v))` over the vocabulary weighted by the owner's mapped
+   entries is below 0.1, the arm is reported as *not informative* regardless of AUC — an AUC built
+   on a value that does not vary is being carried by something else.
+9. **Frequency death.** An arm that does not beat `fullchain_freq` with a clean interval is a
+   vocabulary result, not a value result, and is reported as such.
+10. **α-disagreement death.** If α=0.5 and α=1 give different verdicts for an arm, that arm's
+    verdict is NULL.
+
+---
+
+# ADDENDUM §C — personalized hierarchical layers, and the coherence of the inferred Elo
+
+Written 2026-09-12, **before any §C arm was scored**. Triggered by a third external artefact: an
+owner-run notebook over the same 140 rounds. **The notebook itself was not available to us** —
+only the numbers below. Everything in §C is therefore a **re-implementation from a described
+model**, and any disagreement is as likely to be a difference in the re-implementation as a defect
+in either side. That is stated up front and repeated in the report.
+
+## C0. The numbers to reproduce or refute
+
+Target: finish-side from the prefix (our T2). Personal layers learned walk-forward from round 10;
+per-session bootstrap.
+
+| model | AUC | Brier | log-loss |
+|---|---|---|---|
+| global Lamas-state | 0.933 | 0.214 | 0.620 |
+| **personalized** Lamas-state | 0.943 | 0.106 | 0.367 |
+| action-label (personal per-label values) | 0.963 | 0.127 | 0.428 |
+| action-label + hierarchical directed-edge residual | **0.963** | **0.095** | **0.303** |
+| walk-forward action-label | 0.962 | 0.142 | 0.464 |
+| walk-forward + edge residual, gate = 3 | 0.962 | 0.111 | 0.346 |
+| gate = 5 / 10 | — | 0.123 / 0.138 | 0.384 / 0.442 |
+
+ΔBrier (gate 3) −0.0318, 95 % CI [−0.0450, −0.0195]; **ΔAUC ≈ 0**.
+
+Their conclusion, which §C tests rather than assumes: *action-label is the dominance backbone, the
+edge residual is a **calibration** layer, and edge-RRB must not be the main score.* Note that this
+agrees with §B independently — §B measured `fullchain_edges` as the weakest owner-side arm on T1
+(0.837–0.856 vs `fullchain_nodes` 0.936) while it was the strongest on T2, which is exactly what
+"good residual, bad backbone" looks like.
+
+## C1. The model, fixed here
+
+Three layers, each shrunk toward the one above it (Beta-Binomial, the standard hierarchical form):
+
+```
+prior       v_prior(k)    = the §B corpus absorption value of node_key k (global, public corpus)
+labels      p_label(k)    = ( s_k + α · v_prior(k) ) / ( n_k + α )
+edges       p_edge(e)     = ( s_e + α_e · p_hat(e) ) / ( n_e + α_e ),  p_hat(e) = σ( (logit p_label(src) + logit p_label(dst)) / 2 )
+residual    R_e           = logit p_edge(e) − logit p_hat(e)              [only when n_e ≥ gate]
+
+Z = Σ_i ±logit(p_label(k_i)) / n   +   λ · mean_e( ±R_e )
+P = σ(Z)
+```
+
+`s_k` accumulates the **actor-oriented outcome**: a round that the reference side finished
+contributes 1 for every own-side entry and 0 for every partner-side entry; a round the partner
+finished contributes the mirror. `n_k` is the count. The sign in `Z` is the entry's own side, as in
+every other arm in this study.
+
+**Strict walk-forward.** Every personal count for round *t* is accumulated over rounds **strictly
+earlier in time** (`(session createdAt, round index)`, the same total order §A uses). A round can
+never see itself, and the layers are re-fitted at every step. The first rounds therefore score on
+the prior alone; the **warm-up is reported at 10 rounds with a finish**, matching the notebook, and
+the pre-warm-up rounds are reported separately rather than dropped silently.
+
+**Grid:** gate ∈ {1, 2, 3, 5, 10}, α = α_e ∈ {0.5, 1, 2}, λ ∈ {1, 1.5, 2}. The notebook's cell is
+gate = 3, α_e = 1, λ = 1.5.
+
+**Bootstrap unit = the SESSION**, not the round (the notebook's choice, and the right one: rounds
+within a session share a partner, a day and a mood). 4000 draws, seed 20260820.
+
+## C2. The null that decides whether the gain is real
+
+**`hier_shuffled`** — the identical hierarchy, identical parameter count, identical walk-forward,
+fitted on **permuted node keys** (a fixed random relabelling of the owner's vocabulary, seed
+20260820). Capacity preserved, information destroyed. If the personal layers' Brier gain survives
+against the real arm but is matched by the shuffled one, the gain is **capacity**, not knowledge —
+the model is memorising round-to-round autocorrelation, not learning what a technique is worth.
+This null is pre-registered because a personalized, walk-forward, hierarchically shrunk model with
+three free parameters fitted on 140 rounds is exactly the shape that gets a Brier gain for free.
+
+**Verdict rule:** the hierarchy PASSES only when `ΔBrier(hier vs labels-only)` excludes 0 **and**
+`ΔBrier(hier vs hier_shuffled)` excludes 0. Either one alone is not enough.
+
+## C3. The coherence experiment (owner's proposal, pre-registered)
+
+Every arm produces one `P` per round. Two transforms:
+
+```
+relative Elo offset    ΔR  = 400 · log10( P / (1 − P) )
+coherent update        ΔR' = K · λ · C · (S − 0.5),   C = 1 − 2|P − 0.5|,  S = the round's outcome
+```
+
+Arms compared: `difficulty` (production), `intensity`, `states_only` (Lamas `states_occ`),
+`labels_only` (§B `fullchain_nodes`), `hier_residual`. Five measurements, all **descriptive** — §C3
+carries **no PASS/FAIL verdict**, because "smoother" is not "more correct" and this study will not
+pretend otherwise:
+
+* **(a) stability within a session** — sd of ΔR across the rounds of one session (averaged over
+  sessions with ≥3 rounds) and lag-1 autocorrelation of ΔR inside a session. Same partner, same
+  day ⇒ a partner-strength estimate ought to be smoother, *if* it is estimating the partner. A
+  perfectly smooth arm that is also uninformative is worse, so (a) is read only alongside (c)/(e).
+* **(b) leave-one-entry-out sensitivity** — mean and max |ΔR(full) − ΔR(drop one entry)| over every
+  entry of every round. How much one logged action moves the inferred partner Elo.
+* **(c) agreement with the recorded assessment** — Kendall τ between ΔR and the outcome ordering
+  (`failed` < `partial` < `succeeded`), all 122 rounds with an outcome.
+* **(d) K budget** — `mean(λ · C)` under the **budget-preserving** λ measured in §A/§B (≈1.04–1.11),
+  not the external 0.548, with the discrepancy restated.
+* **(e) calibration against finish-side** — reliability curve (5 equal-count bins) and **ECE** on
+  T2. This is the one that matters: the notebook's whole claim is a calibration claim, and a
+  calibration claim must be judged by a calibration measure, not by AUC.
+
+## C4. Death rules, extended
+
+11. **Capacity death.** A personalized arm whose ΔBrier against `hier_shuffled` does not exclude 0
+    is reported as capacity, not knowledge, whatever its absolute Brier.
+12. **Warm-up death.** A gain that exists only before the warm-up (i.e. on rounds scored by the
+    prior alone) is an artefact of the prior, not of personalization, and is reported as such.
+13. **Smoothness is not a verdict.** No arm may be recommended on §C3(a) alone.
+
+## C5. Privacy, restated for §C
+
+The personal layers are fitted on the owner's own rounds and serve the owner's own rounds. They
+are **never** written anywhere, never aggregated across users (there is one user), and never touch
+the corpus chain — `v_prior` flows public → private only, which is the permitted direction. No §C
+artefact leaves `out/`.
+
+## §C6 — the agreed four-layer arm, and the question it must answer
+
+Added 2026-09-12, **before the arm was scored**. Owner + external agent converged on one
+construction; §C6 fixes it and, more importantly, fixes the **question**:
+
+> Does the extra complexity buy anything beyond `actions_states` — the §A arm that already scores
+> 0.989 on T2 with no personalization, no shrinkage and no fitted parameter?
+
+**`hier4`, the arm:**
+
+```
+layer 1  prior      v0(k) = the GLOBAL LAMAS value of k's ATTEMPT code
+                    (lamas_state({type, label: k, successful: False}) -> action_values),
+                    falling back to the §B corpus absorption value, then 0.5
+layer 2  labels     p(k)  = ( s_k + α·v0(k) ) / ( n_k + α )        empirical-Bayes, walk-forward
+layer 3  context    Z_ctx = the Lamas `states_occ` Z of the same round
+layer 4  residual   R_e   = logit p_edge(e) − logit p̂(e), EB-shrunk, only when n_e ≥ gate
+
+Z = (1 − w)·Z_labels + w·Z_ctx + λ · mean_e( ±R_e )
+```
+
+The attempt code is used for the prior deliberately: the published Markov weights were derived
+under the attempt reading, and looking a state up under any other reading returns a number that was
+never measured for it (`markovActionWeights.ts`'s own documented divergence).
+
+**Grid:** gate ∈ {2, 3, 5}, α ∈ {0.5, 1, 2}, λ ∈ {1, 1.5}, w ∈ {0, 0.5, 1}. `w = 0` IS the
+"no context layer" ablation and `personal=False` (α → ∞, the value never leaves the prior) IS the
+"personal layer removed" ablation; both are cells of the same grid, not separate code.
+
+**Three head-to-heads, each paired, per-session bootstrap, 4000 draws:**
+
+1. `hier4` vs **`actions_states`** (§A, T1 and T2) — ΔAUC and ΔBrier. *This is the decisive one.*
+   If a four-layer, walk-forward, empirically-shrunk, parameter-fitted model cannot beat a
+   two-term average of published constants, the complexity has no buyer.
+2. `hier4` vs **production V2** in the prequential Glicko-2 log-loss protocol (§5c): `hier4`'s `P`
+   becomes the virtual-opponent offset, everything else identical.
+3. `hier4` vs **`hier_shuffled`** (capacity null, §C2) and vs its own two ablations.
+
+**Pre-registered reading rule:** ΔAUC ≈ 0 with ΔBrier < 0 is a **calibration** result, not a
+discrimination one, and must be reported as such — a better-calibrated probability is worth
+something to a rating engine (it is what Glicko-2 consumes) and nothing to a ranking.
+
+---
+
+# ADDENDUM §D — two binding owner rules
+
+Written 2026-09-12, **before any §D arm was scored**. Two owner decisions that change what the
+study is allowed to treat as evidence.
+
+## D1. The manual round outcome is NOT a rating input
+
+> *"the manual round outcome (succeeded/partial/failed/no_attempt) is NOT a rating input — the
+> sequence is the primary record."*
+
+Consequence for this study, applied retroactively to how results are **read**, not to how they were
+computed:
+
+* **T1** (`succeeded` vs `failed`) is demoted to a **plausibility / sanity target**. It carries no
+  product decision. It was already labelled internal-consistency in §0 of the prereg — this makes
+  the demotion explicit and puts it in the verdict table.
+* **The decision targets are T2** (finish-side from the prefix — objective, derived from the
+  sequence itself) **and the prequential V2 comparison** (does the arm make production's Glicko-2
+  forecast better).
+* No arm may be recommended on T1 alone. H1/H1b keep their numbers and lose their authority.
+
+## D2. Per-action success is INFERRED from the sequence, never assumed
+
+> *"Per-action success/failure is INFERRED from the sequence when the resulting transition makes it
+> observable (Half Guard → Sweep → Top ⇒ sweep succeeded; Back Control → RNC attempt → Back Control
+> ⇒ attempt did not finish); when the sequence cannot resolve it, the action is UNKNOWN (NULL ⇒ no
+> observation) — never auto-success/failure."*
+
+This is ADR-06 one level down, and it is exactly what `analysis/rating_v2/node_rating.py` already
+does with a NULL flag: **a missing outcome is lost coverage, never a manufactured result.**
+
+### The rule, fixed here (reusing production's own tables, inventing nothing)
+
+For each observed action sitting on a compiled `ChainEdge(source_state → target_state)`:
+
+| condition | `success_source` | score |
+|---|---|---|
+| the target state's topological role **matches the action's declared exit orientation** (`data/taxonomy/inference_table.json` → `action_exit_orientation`, read through `attribution.classify`'s curated role for the target state) | `inferred` | **1.0** |
+| the target state **equals the source state** (the chain came back to where it started) | `inferred` | **0.0** |
+| the edge is terminal and the action is a submission that ends the chain | `inferred` | **1.0** |
+| anything else — no target, an action-to-action gap, an orientation the table calls `neutral`, an unresolvable role | **`unresolved`** | **no observation** |
+
+`neutral` exit orientations (`escape`, `submission` mid-chain, `transition`, `control`) resolve
+**only** by the return-to-source rule; they can never be read as a success, because "neutral" means
+the table makes no claim about where the action lands. Exit orientation may **suppress** a reading,
+never manufacture one — the same direction of travel Fase 2's inference rule already obeys.
+
+### What is reported, regardless of verdict
+
+Counts of `flag` / `inferred` / `unresolved` per dataset: how many entries resolve by inference, how
+many would need the manual flag, how many stay NULL.
+
+### The three scoring modes, evaluated in the production V2 slot
+
+| mode | score of one entry |
+|---|---|
+| **(a) `flag`** | today's behaviour: `successful === false → 0`, else 1 |
+| **(b) `inferred_only`** | the inferred score; **`unresolved` produces NO observation**. The manual flag is ignored entirely. |
+| **(c) `inferred_then_flag`** | the inferred score where resolvable, else the manual flag, else NULL |
+
+**The product target is (b)/(c)** — the manual `successful` toggle becomes optional. Reported as
+prequential log-loss / Brier / AUC with paired CIs against (a), plus the observation counts each
+mode produces (a mode that scores fewer observations is not automatically worse, but the difference
+must be visible).
+
+### Death rule 14
+
+An inference rule that resolves **< 25 %** of entries is reported as *insufficient to replace the
+flag* regardless of how the arms that use it score — at that coverage, mode (b) is mostly measuring
+which entries happened to be resolvable.

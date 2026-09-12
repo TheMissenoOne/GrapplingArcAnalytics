@@ -20,24 +20,42 @@ regenerated. Dataset (a) appears here as aggregates only.
 
 | id | hypothesis | verdict | the number |
 |---|---|---|---|
-| **H1** | *(owner, T1)* RRB dominance separates `succeeded`/`failed` better than `difficulty` | **PASS** | ΔAUC **+0.195** [+0.092, +0.306]; RRB 0.923 vs difficulty 0.750 |
-| **H1b** | H1 survives the leakage control (`terminal=drop`) | **PASS** | ΔAUC **+0.193** [+0.089, +0.306]; RRB still 0.915 [0.852, 0.965] |
-| **T2** | *(owner, objective)* finish-side from the prefix, vs `difficulty` | **PASS for the combined arm, NULL for plain actions** | `actions_states` **0.989**, Δ **+0.116** [+0.022, +0.235]; plain `actions` 0.956, Δ +0.082 [−0.019, +0.197] |
-| **H2** | *(owner)* the A4 hybrid beats production on prequential log-loss | **NULL** | Δ **−0.0015** [−0.0639, +0.0560] — a tie, at n = 100 |
-| **H2n** | *(owner)* A4 beats deleting the sliders and substituting nothing | **PASS** | Δ **−0.0682** [−0.0817, −0.0546] |
-| **H2x** | *(added)* production A0 beats A0n | **PASS** | Δ **−0.0667** [−0.1252, −0.0033] |
-| **H3** | *(corpus)* dominance identifies the recorded winner | **PASS** | best `states_occ` **0.849** [0.809, 0.887]; pilot's cell 0.796 |
-| **H3b** | H3 is not a submission tautology | **PASS** | `states_occ_drop` 0.749 [0.699, 0.797]; `actions_drop` 0.727 [0.674, 0.777] |
+| **H1** ◦ | *(owner, T1 — **sanity only**, §D1)* RRB dominance separates `succeeded`/`failed` better than `difficulty` | **PASS** | ΔAUC **+0.195** [+0.092, +0.306]; 0.923 vs 0.750 |
+| **H1b** ◦ | *(sanity only)* H1 survives the leakage control (`terminal=drop`) | **PASS** | ΔAUC **+0.193** [+0.089, +0.306]; arm still 0.915 |
+| **T2** ★ | *(owner, objective — **decision target**)* finish-side from the prefix, vs `difficulty` | **PASS** | best `actions_states` **0.989**, Δ **+0.116** [+0.022, +0.235] |
+| **H2** ★ | *(owner — **decision target**)* an RRB arm beats production V2 on prequential log-loss | **PASS — but only for `hier4`** | plain RRB: Δ −0.0015 [−0.0639, +0.0560] (**tie**). `hier4` (§C6): Δ **−0.1909 [−0.2781, −0.1061]**, log-loss **0.4356 vs 0.6265** |
+| **H2n** | *(owner)* an RRB arm beats deleting the sliders and substituting nothing | **PASS** | plain −0.0682 [−0.0817, −0.0546]; `hier4` −0.2576 [−0.3267, −0.1776] |
+| **H2x** | *(added)* production A0 beats A0n | **PASS** | Δ −0.0667 [−0.1252, −0.0033] |
+| **H3** | *(corpus)* dominance identifies the recorded winner | **PASS** | `states_occ` **0.849** [0.809, 0.887] |
+| **H3b** | H3 is not a submission tautology | **PASS** | `states_occ_drop` 0.749 [0.699, 0.797] |
 | **H4** | *(corpus, T3)* an RRB-updated rating forecasts next year's winners better than production | **NULL** | no arm, no fold, no interval excluding 0 — and no arm beats a coin flip |
-| **H5** | the length artefact is controlled at γ = 1 | **FAIL as specified** | γ=1 **over-corrects** (ρ −0.23 … −0.47). The length-neutral arms are the state/edge ones (ρ −0.04 … −0.16) and γ = 0.5 for actions (ρ −0.04) |
+| **H5** | the length artefact is controlled at γ = 1 | **FAIL as specified** | γ=1 **over-corrects** (ρ −0.23 … −0.47). γ ≈ 0.5 is the neutral point; state arms are neutral by construction |
+| **§B1** | the FULL catalogued-node chain lifts coverage over the Lamas 12 states | **PASS** | entry coverage **50.0 % → 81.8 %** (89.0 % with inference) |
+| **§B2** | the node value `v` is informative (not ≈0.5 everywhere) | **FAIL — death rule 8 fires** | `sd(logit v)` = **0.012**; mount 0.5007, half guard 0.4994, back control 0.5039 |
+| **§B3** | `fullchain_nodes` beats the frequency and actor-balance controls | **PASS** | vs freq **+0.174** [+0.081, +0.280]; vs signed-own-share **+0.211** [+0.116, +0.319] |
+| **§B4** | the production chain-compiler **inference** helps | **FAIL — it costs signal** | T1 AUC 0.936 → 0.860; Δ vs production falls from +0.184 (clean) to +0.107 (straddles 0) |
+| **§C1** | the notebook's edge residual improves **calibration** at gate 2–5, and gate 10 loses it | **PASS** | ΔBrier(gate 3) **−0.0118** [−0.0209, −0.0038]; gate 10 = 0.1164 ≈ labels-only 0.1177 |
+| **§C1b** | …and gate = 1 gives a *smaller* gain | **FAIL** | gate 1 is our **best** cell (Brier 0.0919, AUC 0.984) |
+| **§C2** | the calibration gain is knowledge, not capacity | **PASS** | vs shuffled-label null ΔBrier **−0.0596** [−0.0874, −0.0305] |
+| **§C3** | the same hierarchy works on the public corpus (per-athlete) | **FAIL** | personalization **hurts**: AUC 0.772 (global prior) → **0.708** (personal). Only 51 of 189 units have any prior history |
+| **§C6a** | `hier4` beats `actions_states` on **discrimination** | **NULL** | ΔAUC −0.019 [−0.097, +0.026] |
+| **§C6b** | `hier4` beats `actions_states` on **calibration** | **PASS** | ΔBrier **−0.1104** [−0.1420, −0.0730]; ECE 0.145 vs 0.414 |
+| **§C6c** | the four-layer model's **context** layer earns its place | **FAIL** | the best cell is `w_ctx = 0`; `no_context` is numerically identical (Δ = 0.0000 exactly) |
+| **§C6d** | which layer carries the calibration gain | **the PERSONAL layer** | vs `no_personal` ΔBrier −0.1464 [−0.1832, −0.1069]; vs `no_residual` only −0.0135 [−0.0239, −0.0046] |
 
-Death rules: **none fired on the corrected run.** Rule 3 (leakage) fired on the *broken-mapper*
-run and is what made the first pass reject the idea — see §1. Rule 2 (both-sides floor) no longer
-binds: the canonical mapper lifts owner rounds with both corners mapped well above the 18 measured
-with the broken one. Rule 6 (the lazy death) did **not** fire: substituting nothing is worse than
-either input, decisively.
+| **§D1** | the manual round outcome is a rating input | **binding owner decision, not a hypothesis** | T1 demoted to sanity (◦); the decision targets are T2 and the prequential (★) |
+| **§D2a** | per-action success can be inferred from the sequence often enough to replace the flag | **FAIL — death rule 14 fires** | resolves **18.9 %** of entries (121/640). On the ACTION denominator it is **54.0 %** (121/224) — both reported, see §D |
+| **§D2b** | where it resolves, the inference agrees with the manual flag | **PARTIAL** | concordance **70.2 %** (85/121); 36 disagreements, 26 of them "the sequence says it did not land" |
+| **§D2c** | mode (c) `inferred_then_flag` can be adopted without regression | **PASS (by identity)** | Δ log-loss **0.0000** — and it is an *identity*, not a null: the forecast is provably invariant to the scores (§D) |
+| **§D2d** | mode (b) `inferred_only` matches today's accuracy | **NULL**, at a large evidence cost | Δ +0.0021 [−0.0024, +0.0062]; observations **431 → 89 (−79 %)**, RD 78.8 → 127.6 |
 
----
+★ = decision target (§D1)  ·  ◦ = plausibility/sanity only, carries no product decision.
+
+Death rules that fired: **rule 8 (flat value)** on §B's `v`; **rule 14 (resolution floor)** on §D's
+inference under the entry denominator; **rule 3 (leakage)** on the
+*broken-mapper* first pass only (§1). Rules 9 (frequency), 11 (capacity), 10 (α disagreement) did
+**not** fire. Rule 6 (the lazy death) did **not** fire: substituting nothing is worse than
+everything.
 
 ## 1. The defect, and how much it moved
 
@@ -75,33 +93,93 @@ The 320 entries that *still* do not map — `Montada`, `Meia Guarda`, `Quatro Ap
 
 ## 2. The answer, plainly
 
-**Yes — with the caveat that "better" means "better at describing the round", and "as good as" at
-feeding the rating.**
-
-Three numbers carry it.
+**Yes.** With three qualifications, each of which is a number.
 
 1. **ΔAUC +0.195 [+0.092, +0.306].** RRB dominance separates the owner's `succeeded` from `failed`
-   rounds at AUC 0.923 against the difficulty slider's 0.750, and the paired interval clears 0 with
-   room. It **survives** the leakage control at 0.915 — the signal is not "I got the submission".
-2. **Δ log-loss −0.0015 [−0.0639, +0.0560].** Drop RRB into production's actual Glicko-2 slot
-   (replace `70 × (difficulty − 5)` with `400·log10(P/(1−P))`) and the forecast is a **statistical
-   tie** — with RRB's discrimination far ahead (AUC 0.921 vs 0.739). This is the number the product
-   decision rests on: **removing the step costs the rating nothing measurable.**
-3. **H4 NULL in all three folds, and no arm beats a coin flip.** On the public corpus, *no* update
-   rule — RRB's, production's, or any granularity — predicts next year's winners better than 0.5.
-   RRB describes a bout well and forecasts a rating badly, and so does what runs today (§5c).
+   rounds at 0.923 against the difficulty slider's 0.750, and it **survives** the leakage control
+   at 0.915 — the signal is not "I got the submission".
+2. **Δ log-loss −0.1909 [−0.2781, −0.1061].** The four-layer `hier4` arm (§C6), dropped into
+   production's actual Glicko-2 slot as the virtual-opponent offset, scores **0.4356** against
+   production's **0.6265**. This is the only arm in the study that beats production on the
+   prequential protocol with a clean interval — plain RRB merely ties (−0.0015).
+3. **H4 NULL in all three folds, and no arm beats a coin flip.** On the public corpus *no* update
+   rule — RRB's, `hier4`'s, or production's — predicts next year's winners better than 0.5. The
+   whole family describes a round well and forecasts a rating not at all.
+
+And one result that says *why* it works, which is not what any of the three external reports
+claimed: **the node value is flat.** `sd(logit v)` over the 243-node vocabulary is **0.012** — mount
+0.5007, half guard 0.4994, closed guard 0.4989, back control 0.5039. The chain mixes far faster
+than it absorbs, exactly as `markov_action_weights.json`'s own caveat says
+(*"a cadeia mistura mais rápido do que absorve"*). The arms still win, and win against both the
+frequency control (+0.174) and the actor-balance control (+0.211), so the tiny differences are
+correctly **ordered** — but nobody should describe this as "positions carry value". They carry a
+consistent sign at a hair's amplitude.
+
+### THE RECOMMENDATION — one representation for the Glicko-2 virtual-opponent slot
+
+**Implement `hier4` without its context layer**, i.e.
+**global Lamas-attempt prior → personal canonical-label Beta-Binomial posterior (walk-forward,
+α = 0.5) → gated edge residual (gate = 2, λ = 1.5)**, mapped through `technique_match.clean_label`,
+scored with `last_flag_only`, and fed into production's existing slot as
+`opponentRating = currentGlobal + 400·log10(P/(1−P))` — replacing
+`ELO_PER_DIFFICULTY_POINT × (difficulty − 5)`, never as the observation score.
+
+It is the only arm in this study that beats production on the decision target with a clean interval
+(**prequential log-loss 0.4356 vs 0.6265, Δ −0.1909 [−0.2781, −0.1061]**), and it is the best
+calibrated (**Brier 0.088, ECE 0.145** against `actions_states`' 0.196 / 0.414) — which is the axis
+that matters, because this slot converts `P` into Elo points directly and a Glicko-2 engine consumes
+a probability, not a ranking. Its "personal fit" is a running Beta-Binomial count per `node_key`:
+on-device, no training pipeline, no artefact, one number per technique.
+
+**On the tie-break rule.** `hier4` and `actions_states` genuinely **tie on ordering**
+(ΔAUC −0.019 [−0.097, +0.026], NULL on T2) — so if the slot needed a *ranking*, the owner's rule
+("prefer the simplest with best coverage") would select `actions_states`: no fitting, no personal
+state, published constants only, 98 % coverage. It does not tie on **calibration**
+(ΔBrier −0.1104 [−0.1420, −0.0730]), and calibration is what this slot consumes, so the tie-break
+does not fire. **If the owner wants zero on-device fitting anyway, `actions_states` is the fallback
+— but it must be recalibrated (Platt/isotonic on the owner's own rounds) before its `P` is allowed
+near `400·log10`, because ECE 0.414 fed straight into an Elo offset is a systematic error, not
+noise.**
+
+**Three conditions attached to shipping it, each from a measured number:**
+
+1. **Clamp the offset.** `hier4`'s leave-one-entry-out sensitivity is 52 Elo mean / **758 Elo max**
+   (§C3) — one logged action can move the inferred partner by three quarters of a rating point of
+   standard deviation. Clamp to roughly ±400 (the `difficulty` slider's own ±280 is the precedent).
+2. **Drop the context layer and the chain-compiler inference.** The best grid cell is `w_ctx = 0`
+   and `no_context` is numerically identical (Δ = 0.0000); the inference layer *costs* 0.076 AUC
+   (§B4). Both are complexity with a measured price and no measured buyer.
+3. **Do not generalise it past this user.** The same construction **failed** on the public corpus
+   (AUC 0.772 → 0.708 with per-athlete layers, §C2). It works in the regime it was built for — one
+   person with a long, growing log — and there is no evidence it works anywhere else. A second
+   user's first twenty rounds will score on the prior alone, which is `fullchain_nodes`, which is
+   fine.
 
 ### What to do
 
-| | recommendation | strength of evidence |
+| | recommendation | strength |
 |---|---|---|
-| **`intensity` stepper** | **Delete it.** No rating path reads it — it reaches nothing. | certain (code, not statistics) |
-| **`difficulty` stepper** | **Can be deleted**, with RRB in its place, at measured parity on log-loss and a large gain on discrimination. It must **not** be deleted with *nothing* in its place — that is worse than both, decisively (Δ +0.067 / +0.068). | good, but a **tie is not a win**: n = 100 rounds cannot separate the two. If the owner wants a *win* before shipping, the cheap path is more rounds, not more math. |
-| **Which RRB variant** | `actions` or `states_occ` at **γ = 1, terminal = `marginal`**, through `clean_label`. Both reach AUC ≈ 0.92 on T1 and tie production on log-loss. On the *objective* target the combined `actions_states` arm is the only one that beats difficulty with a clean interval (0.989, Δ +0.116 [+0.022, +0.235]). | moderate |
-| **Which variant NOT to use** | **`edges` (pure progression) is dead.** AUC 0.42–0.69 on the owner's rounds, *worse* than difficulty in every cell, and worst coverage (needs ≥2 mapped steps). Combining it with states rescues it only back to par. | clear |
-| **γ** | **Not γ = 1 for the length artefact.** γ=1 over-corrects (ρ = −0.23 to −0.47). γ = 0.5 is the length-neutral point for `actions`; the **state-based arms are length-neutral by construction** (ρ −0.04 … −0.16) and that is the owner's own hypothesis, confirmed. | clear, measured on both datasets |
-| **RRB as a rating *update* on the corpus** | **No.** H4 NULL everywhere; the self-cancellation identity (§4) kills the self-anchored form outright. | clear |
-| **The real bottleneck** | **Mapping coverage, still.** 50 % is double 28.75 % and it flipped the whole conclusion. The next 20 points are in the dwell/position vocabulary (`Montada`, `Meia Guarda`, `Quatro Apoios` — 157 entries) that the Lamas space has no state for. That is a *taxonomy* decision, not a statistics one, and it would move the result more than every cell of the 324-cell sweep combined. | — |
+| **`intensity` stepper** | **Remove it.** No rating path reads it. | certain (code, not statistics) |
+| **`difficulty` stepper** | **Replace it** with an RRB-derived virtual opponent inside Glicko-2. `hier4` beats it on log-loss by 0.19 nats; plain RRB ties it. Do **not** remove it with nothing in its place — that is worse than both, decisively. | good on the owner's 140 rounds; untested on any other user |
+| **Never as both `s` and `E`** | The same round's dominance may set the virtual **opponent** or supply the **score**, never both: `s − E = 0` identically (max residual 9.2e-09). RRB is the opponent; the `successful` flag stays the score. | proved, not measured |
+| **Do NOT add a custom competitiveness K yet** | There is no forecasting evidence for it. H4 is NULL everywhere and the corpus cannot currently validate any update rule. | clear |
+| **Canonicalisation is part of model validity** | Not a preprocessing detail. 28.75 % → 50 % coverage **flipped four verdicts** (§1). Any arm shipped without `clean_label` is a different model. | measured |
+| **γ ≈ 0.5 for repeated-action arms** | γ=1 over-corrects the length artefact (ρ −0.23 … −0.47); γ=0.5 lands at ρ −0.04. State arms are length-neutral by construction. | measured on both datasets |
+| **λ from the training data (~1.1), never 0.548** | Budget-preserving λ measured at 1.007–1.471 depending on the arm; 0.548 would need mean C ≈ 1.8, impossible for a quantity bounded by 1. It halves the K budget. | arithmetic |
+| **Which arm** | For **ranking**: `actions_states` (AUC 0.989 on T2) — no fitting, no parameters, published constants only. For **a rating input**: `hier4` — same ordering (ΔAUC −0.019, NULL) but far better calibrated (Brier 0.088 vs 0.196, ECE 0.145 vs 0.414), and calibration is what Glicko-2 consumes. | see §C6 |
+| **Drop from `hier4`** | The **context layer** (best cell `w_ctx = 0`, Δ exactly 0.0000) and the **chain-compiler inference** (costs 0.076 AUC). Keep the personal label layer (−0.146 Brier) and the gated edge residual (−0.014). | measured |
+| **Do NOT personalize on the corpus** | Per-athlete layers *hurt* there: AUC 0.772 → 0.708. Only 51 of 189 units have any prior history. The method needs a long personal log, which is exactly what a corpus athlete does not have. | measured |
+
+### Not yet supported by anything in this study
+
+* **Forward prediction of any kind.** H4 is NULL in every fold for every arm; production's own
+  global track scores 0.6892 / 0.7170 / 0.7035 against a coin flip's 0.6931 and is at chance
+  (AUC 0.504 / 0.495) in two folds of three. **No update rule can currently be validated on
+  next-bout prediction in this repo** — not RRB's, not `hier4`'s, not the one that ships.
+* **Generalisation beyond this owner.** Every owner-side number is n = 100 (T1) or n = 42 (T2)
+  rounds from one person over five weeks, with the personal layers fitted on that same person.
+  The corpus test of the same construction **failed**.
+* **Anything competitive.** None of this may touch a centroid, a ranking, the corpus or the site.
 
 ### Adjudicating the two external reports
 
@@ -288,6 +366,391 @@ they are corpus-side and the mapper defect was owner-side only). Three findings 
 2. **T is a pure calibration knob** — zero effect on AUC, up to 0.09 on log-loss.
 3. **λ = 0.548/0.549 does not preserve the K budget** — see §2's adjudication table. Use
    `budget_lambda()`, which computes it from the data.
+
+## G. Glossary — six things called "edges" or "states", and why none of them is another
+
+Three external artefacts and this study all use the words *action*, *state* and *edge*. They do
+**not** mean the same objects, and two of the "edge" results that look contradictory are measuring
+different things. Both stand.
+
+| term | **in this study** | **in the external notebook** |
+|---|---|---|
+| `actions` | the **repeated Lamas codes** of a round, actor-signed mean log-odds of the published `sub_share`. Repetition counts. | — |
+| `states` | the **last mapped Lamas code**. One value per round. | — |
+| `states_occ` | the **distinct `(Lamas code, actor)` occupancy** of a round — each pair counted once. | — |
+| `edges` (§A) | **ΔV of the published Lamas values** — pure progression, `z_{i+1} − z_i`. **Nothing is re-estimated**; it is a telescoping difference of constants. | — |
+| `fullchain_nodes` (§B) | actor-signed log-odds of the **corpus absorption value** over the whole 243-key catalogued vocabulary. | — |
+| **action labels** | — | **canonical technique labels** (`Mata-Leão`, `Smash da Meia Guarda`, …) with **learned personal posteriors**, empirical-Bayes shrunk toward a global prior, walk-forward. |
+| **edge residual** | — | **observed transition value − label-predicted value**, EB-shrunk, with a support gate. A *residual on top of a fitted label layer*, not a difference of constants. |
+
+**The two "edge" results test different objects and both stand.** §A/§B's `edges` is a pure
+progression of published numbers and is the **weakest** owner-side arm on T1 (0.837–0.856 against
+`fullchain_nodes`' 0.936) — a difference of near-constant constants carries little. The notebook's
+`edge residual` is a *learned correction* on a *fitted* backbone and does exactly what a residual
+should: it moves calibration (ΔBrier −0.0118 [−0.0209, −0.0038]) and not ordering (ΔAUC 0.0000).
+Reading either as evidence about the other is a category error.
+
+One more distinction that mattered: `lamas_state` reads a **localized** label and returns `None`
+(§1), while `technique_match.clean_label` resolves pt-BR → canonical English. Everything in §A
+before the addendum used the first; everything after uses the second.
+
+---
+
+## B. The FULL catalogued-node Markov chain (prereg §B)
+
+Owner decision: *"vamos tentar usando o markov de todas as ações catalogadas, não das ações
+Lamas"*, plus *"usando também a inferência de alta confiança já estabelecida"*.
+
+### B1. Coverage — the point of the exercise, and it worked
+
+| mapper / space | owner entries mapped | corpus |
+|---|---|---|
+| Lamas 12 states, raw labels (§A first pass) | 28.75 % | 70.0 % |
+| Lamas 12 states, `clean_label` (§A corrected) | 50.00 % | 70.0 % |
+| **full catalogued vocabulary (243 node keys)** | **81.82 %** | — |
+| full vocabulary **+ chain-compiler inference** | **89.02 %** | — |
+
+Of the 320 entries the Lamas space could not map, the ones that now carry a value include `mount`
+(67), `half guard` (53), `closed guard` (23), `side control` (14). Still unmapped: `quatro apoios`
+(37) — the technique library has no `Quatro Apoios → Turtle` entry, a concrete one-line gap.
+
+Corpus chain: 465 gated bouts, 243 node keys (120 with ≥5 occurrences), mirror identity
+`v(node, own) = 1 − v(node, opp)` exact to **0.0**, α-sensitivity max |v(0.5) − v(1.0)| = **0.030**
+(verdicts identical at both α, so death rule 10 does not fire).
+
+### B2. The value is flat — death rule 8 fires
+
+`sd(logit v)` = **0.0120** (observed) / 0.0244 (with inference), against the pre-registered floor of
+0.1. Every value sits inside [0.489, 0.535]:
+
+| node | n | v | | node | n | v |
+|---|---|---|---|---|---|---|
+| back control | 1508 | 0.5039 | | mount | 333 | 0.5007 |
+| half guard | 396 | 0.4994 | | closed guard | 107 | 0.4989 |
+| triangle choke | 364 | 0.5061 | | guard pass | 131 | 0.4988 |
+| heel hook | 122 | 0.5147 | | armbar | 162 | 0.5072 |
+
+**Positions are not distinguishable.** This is the Lamas amplitude caveat confirmed on a state
+space 20× larger, and it is the honest answer to the owner's question "is `v` informative or ≈0.5
+everywhere": **≈0.5 everywhere, with a consistent sign**.
+
+### B3. …and yet the arm wins, against both controls
+
+Owner T1, n = 100, production reference = oriented `difficulty` (0.750):
+
+| arm | n | AUC | vs production | vs actor-balance | vs frequency |
+|---|---|---|---|---|---|
+| **`fullchain_nodes` γ=0.5 α=0.5** | 97 | **0.936** [0.880, 0.978] | **+0.184** [+0.080, +0.296] | **+0.211** [+0.116, +0.319] | **+0.174** [+0.081, +0.280] |
+| `fullchain_nodes` γ=1 | 97 | 0.923 | +0.171 [+0.060, +0.289] | +0.198 [+0.108, +0.301] | +0.161 [+0.073, +0.258] |
+| `actions_fullchain` (combo) | 92 | 0.929 | +0.204 [+0.105, +0.316] | +0.182 [+0.081, +0.297] | +0.154 [+0.049, +0.273] |
+| `fullchain_last` | 97 | 0.882 | +0.131 [+0.023, +0.240] | +0.158 [+0.047, +0.280] | +0.120 [+0.013, +0.235] |
+| `fullchain_edges` γ=0.5 | 89 | 0.856 | +0.127 [−0.009, +0.268] | +0.068 [−0.049, +0.199] | +0.041 [−0.070, +0.156] |
+| `CONTROL_fullchain_freq` | 97 | 0.762 | +0.010 [−0.150, +0.162] | — | — |
+| `CONTROL_signed_own_share` | 97 | 0.724 | −0.027 [−0.185, +0.127] | — | — |
+
+Both controls sit at production's level and neither beats it; `fullchain_nodes` beats **both** with
+clean intervals. So the flat-but-ordered value is doing real work — it is not the vocabulary
+(frequency control) and it is not "what share of the round did I log as mine" (actor-balance
+control). Death rule 9 does not fire.
+
+On **T2** the ordering flips: `fullchain_edges` is the best full-chain arm (0.978 [0.931, 1.000],
+Δ vs production +0.108 [+0.017, +0.223]) while being the weakest on T1 — the "good residual, bad
+backbone" signature the notebook independently reported.
+
+### B4. Inference adds coverage and subtracts signal
+
+1 986 inferred actions on the corpus, 142 on the owner's rounds (strict tier: `actor_readable =
+bout_flags(...)['perspective_reliable']`, true on all 465 gated bouts and honest on the owner's
+two-corner log).
+
+| | coverage | best T1 AUC | Δ vs production |
+|---|---|---|---|
+| observed only | 81.8 % | **0.936** | **+0.184** [+0.080, +0.296] |
+| + inference | 89.0 % | 0.860 | +0.107 [−0.006, +0.217] — **straddles 0** |
+
+On T2 the damage is larger: inferred `fullchain_edges` collapses to 0.427–0.448 (it *loses* to
+production with a clean interval) where observed scores 0.978. The generic states the compiler
+inserts (`control transition`, `start neutral`, `start top`, `finish`, `reversal`) dilute the
+sequence. **Verdict: do not use the inference layer for scoring.**
+
+> **A production defect found on the way, and not fixed here.** `chain_compiler.compile_chain` keys
+> its states from `_normalize_name(label)` with **no `clean_label`**, so run on a pt-BR user log it
+> emits `costas` / `montada` / `meia guarda` — a node key space **disjoint** from the English one
+> the corpus produces (measured: 108 `costas` for the same entries the direct mapper keys as
+> `back control`). This study works around it by canonicalising labels before compiling. The defect
+> is in `analysis/chain_compiler.py`, it affects the edge-as-path / map layer and not just this
+> study, and it is handed back rather than patched by a research runner.
+
+### B5. T3 — forward prediction, unchanged
+
+| fold | `A0g` (production) | `B_fullchain` | coin flip | Δ |
+|---|---|---|---|---|
+| ≤2023 → 2024 | 0.6892 | 0.6930 | 0.6931 | +0.0037 [−0.0502, +0.0563] |
+| ≤2024 → 2025 | 0.7170 | 0.6930 | 0.6931 | −0.0240 [−0.0821, +0.0319] |
+| ≤2025 → 2026 | 0.7035 | 0.6932 | 0.6931 | −0.0103 [−0.0831, +0.0614] |
+
+`B_fullchain` lands on the coin flip to four decimals, which is what a flat `v` predicts: score
+≈ 0.5 ⇒ the rating barely moves. **H4 NULL.**
+
+---
+
+## C. Personalized hierarchical layers (prereg §C)
+
+> **The external notebook's artefacts were not available to us** — only its reported numbers, and
+> the owner notes it ran on more limited data. Everything in §C is a **re-implementation from a
+> described model**, and every claim is treated as a hypothesis to validate, not a result to
+> reproduce.
+
+### C1. Reconciliation — their number | ours (same construction) | ours on the corpus
+
+Target T2, walk-forward, per-session bootstrap, n = 42 rounds / 39 sessions.
+
+| claim | theirs | **ours, same construction** | **ours, public corpus** |
+|---|---|---|---|
+| action-label backbone, AUC | 0.963 | **0.963** (after the 10-round warm-up) | 0.708 |
+| + edge residual, AUC | 0.963 | **0.947** all / **0.963** after warm-up | 0.708 |
+| **ΔAUC from the residual** | ≈ 0 | **+0.0000 [+0.0000, +0.0000]** — exact | +0.0000 |
+| + edge residual, Brier | 0.095 | **0.1059** all / **0.0761** after warm-up | 0.2426 |
+| walk-forward gate 3, Brier / log-loss | 0.111 / 0.346 | **0.1059 / 0.3413** | 0.2426 / 0.6777 |
+| ΔBrier (gate 3) | −0.0318 [−0.0450, −0.0195] | **−0.0118 [−0.0209, −0.0038]** — same sign, CI excludes 0, **≈3× smaller** | −0.0000 [+0.0000, +0.0000] |
+| gate 5 / gate 10, Brier | 0.123 / 0.138 | **0.1075 / 0.1164** (labels-only = 0.1177) | — |
+| "gate 10 loses it" | claimed | **CONFIRMED** — gate 10 is within 0.001 of labels-only | — |
+| "gate 1 gives a smaller gain" | claimed | **REFUTED** — gate 1 is our **best** cell (Brier 0.0919, AUC 0.984) | — |
+| capacity null | not reported | shuffled labels: Brier 0.1655, **ΔBrier(real − shuffled) = −0.0596 [−0.0874, −0.0305]** | — |
+
+**Verdict on their headline claim** — *"action-label = dominance backbone, edge residual =
+calibration layer, do not use edge-RRB as the main score"*: **PASS on the owner's rounds**, with
+gate ∈ {2, 3, 5} and gate 10 losing it exactly as stated; **FAIL on the sub-claim about gate 1**;
+**FAIL on the public corpus**.
+
+### C2. Where their numbers do NOT hold, plainly
+
+**On the public corpus, per-athlete personalization makes things worse.** 189 submission bouts,
+149 athletes, and only **51 of 189** units have any prior history at all:
+
+| arm | n | AUC | Brier | ECE |
+|---|---|---|---|---|
+| **`global_prior_only`** (no personal layer) | 189 | **0.772** [0.697, 0.840] | 0.2478 | 0.264 |
+| `personal_labels_only` | 189 | 0.708 [0.625, 0.790] | 0.2426 | 0.223 |
+| `hier_gate2..10` | 189 | 0.707–0.709 | 0.2415–0.2436 | 0.214–0.226 |
+
+Personalization costs **0.064 AUC** and the edge residual moves Brier by at most 0.0011
+(interval [−0.0028, +0.0000]). The method needs a **long personal history**; the owner has 140
+rounds in five weeks, a corpus athlete has roughly one prior submission bout. *That is a property
+of the method which 140 rounds of one person cannot reveal, and it is the main thing the larger
+data adds.*
+
+### C6. The agreed four-layer arm — does the complexity buy anything?
+
+`hier4` = global Lamas prior → personal canonical-label value (EB, walk-forward) → state/occupancy
+context → gated EB transition residual. Grid gate ∈ {2,3,5} × α ∈ {0.5,1,2} × λ ∈ {1,1.5} × w_ctx ∈
+{0,0.5,1}. Best cell by Brier: **gate 2, α 0.5, λ 1.5, w_ctx 0**.
+
+| arm (owner T2, n = 42) | AUC | Brier | log-loss | ECE |
+|---|---|---|---|---|
+| **`hier4`** | 0.971 [0.914, 1.000] | **0.0883** | **0.2859** | **0.1446** |
+| `actions_states` (§A, no fitting at all) | **0.989** [0.958, 1.000] | 0.1955 | 0.5833 | 0.4138 |
+| ablation `no_personal` | **0.996** | 0.2347 | 0.6626 | 0.4603 |
+| ablation `no_context` | 0.971 | 0.0883 | 0.2859 | 0.1446 |
+| ablation `no_residual` | 0.971 | 0.1018 | 0.3536 | 0.2039 |
+| `shuffled_null` | 0.890 | 0.1474 | 0.4762 | 0.2409 |
+
+Paired, per-session bootstrap, against `actions_states`:
+**ΔAUC −0.019 [−0.097, +0.026] (NULL)**, **ΔBrier −0.1104 [−0.1420, −0.0730] (PASS)**.
+
+Read under the pre-registered rule: **this is a calibration result, not a discrimination one.**
+Four things follow, and they are the answer to "does the extra complexity buy anything":
+
+1. **For ranking, it buys nothing.** `actions_states` — an average of two published constants, no
+   fitting — is *numerically better* (0.989 vs 0.971) and the difference is NULL. So is
+   `no_personal`, which is `hier4` with the entire fitted layer removed, at 0.996.
+2. **For a probability, it buys a great deal.** Brier 0.088 vs 0.196, ECE 0.145 vs 0.414. A
+   Glicko-2 engine consumes a probability, not a ranking, so this is the axis that matters for the
+   product.
+3. **The gain is the PERSONAL layer, not the edge residual.** ΔBrier vs `no_personal`
+   **−0.1464** [−0.1832, −0.1069]; vs `no_residual` only **−0.0135** [−0.0239, −0.0046]. The
+   residual is real and small; the personal posterior is the engine.
+4. **The context layer is dead weight.** The best cell is `w_ctx = 0` and `no_context` is
+   *numerically identical* (Δ = 0.0000 exactly). Drop layer 3.
+
+And it survives the capacity null: ΔBrier vs `shuffled_null` −0.0591 [−0.0881, −0.0301].
+
+### C6b. The head-to-head that decides the product question
+
+`hier4`'s `P` as the virtual-opponent offset inside production's own prequential Glicko-2 protocol
+(§5c), everything else identical, n = 100:
+
+| arm | log-loss ↓ | Brier ↓ | AUC ↑ |
+|---|---|---|---|
+| **`A4_rrb` = `hier4` offset** | **0.4356** | **0.1406** | **0.913** |
+| `A0_difficulty` (production) | 0.6265 | 0.2171 | 0.739 |
+| `N1_marginal` | 0.6342 | 0.2211 | 0.500 |
+| `A0n_zero` | 0.6931 | 0.2500 | 0.500 |
+
+**Δ vs production −0.1909 [−0.2781, −0.1061]** — the first and only clean win over production in
+this study.
+
+> **Two cautions that travel with that number.** (i) It is **ex-post conditional**: the offset for
+> round *t* is read from round *t*'s own actions, as the pilot's own framing requires. (ii) The
+> personal layers are fitted (walk-forward, never on the round being scored) on **finish-side**
+> outcomes while the prequential is scored on the **`succeeded`/`failed`** label, and those two are
+> strongly correlated. There is no self-leakage, but the two targets are not independent, and the
+> honest reading is "a model of my own rounds predicts my own round labels well", not "RRB
+> forecasts".
+>
+> **And it was very nearly wrong.** The first run of this table reported `hier4` as *significantly
+> worse* than production (Δ +0.0667) because a local per-arm dict shadowed the `offsets` parameter,
+> so every round after the first silently read 0.0 and the arm collapsed onto `A0n_zero`. Caught by
+> checking the arm's numbers against the offsets actually passed in; pinned by
+> `test_prequential_offsets_reach_every_round_not_just_the_first`.
+
+### C3. Coherence of the inferred partner Elo (descriptive — no verdict)
+
+| arm | n | within-session sd (Elo) | lag-1 autocorr | LOO mean / max (Elo) | Kendall τ vs outcome | budget λ | ECE vs finish-side |
+|---|---|---|---|---|---|---|---|
+| `difficulty` (production) | 140 | 71.7 | −0.280 | — | −0.450 | 1.407 | 0.267 |
+| `intensity` | 140 | 73.4 | −0.163 | — | −0.324 | 1.301 | 0.373 |
+| `states_only` | 119 | 25.0 | −0.279 | 4.7 / 43.5 | −0.536 | 1.109 | 0.379 |
+| `labels_only` | 131 | **2.3** | −0.251 | **0.7 / 10.6** | −0.622 | 1.007 | **0.423** |
+| `hier_residual` | 132 | 113.8 | −0.292 | 52.2 / 757.8 | **−0.681** | 1.471 | **0.184** |
+
+(τ is negative for every arm because the Elo *offset* falls as dominance rises; |τ| is the
+agreement.) Read as §C3 pre-registered:
+
+* **Smoothness and usefulness point in opposite directions here.** `labels_only` is twenty times
+  smoother than production (sd 2.3 vs 71.7 Elo) and one logged entry moves its inferred partner Elo
+  by 0.7 points on average — and it has the **worst** calibration of all five (ECE 0.423), because
+  its flat `v` keeps `P` pinned near 0.5. Smoothness alone is not a recommendation, which is exactly
+  why §C3 carries no verdict (death rule 13).
+* **`hier_residual` is the best-ordered (|τ| 0.681) and the best-calibrated (ECE 0.184)** and the
+  least stable (sd 113.8, one entry worth up to 758 Elo). If it ships, the offset should be clamped.
+* **Lag-1 autocorrelation is negative for every arm** (−0.16 to −0.29). Consecutive rounds in one
+  session *alternate* rather than persist. Under a "same partner, same day" model it should be
+  positive; it is not, for any arm including production's `difficulty`. Either rounds within a
+  session are not against one partner, or the athlete alternates hard and easy rounds. **The App
+  cannot tell us which, because it records no partner identity** (§2a) — and that is a cheap
+  product change with a measurable research payoff.
+* **Budget λ is 1.007–1.471 across the five arms**, never near the externally quoted 0.548.
+
+---
+
+## D. Inferred per-action success (prereg §D)
+
+Owner rules: the manual round outcome is **not** a rating input (§D1 — reflected in the verdict
+table's ★/◦ marks), and per-action success is **read off the sequence** where the transition makes
+it observable, **UNKNOWN otherwise**, never auto-success or auto-failure (§D2).
+
+The rule is implemented against production's own tables —
+`data/taxonomy/inference_table.json`'s `action_exit_orientation` and `attribution.classify`'s
+curated role — and both of the owner's worked examples are pinned as tests:
+`Half Guard → Sweep → Mount ⇒ 1.0` and `Back Control → RNC → Back Control ⇒ 0.0`, the second in
+pt-BR as well.
+
+### D1. How often the sequence actually resolves it
+
+| | owner | corpus |
+|---|---|---|
+| entries | 640 | 9 817 |
+| **resolved by inference** | **121 (18.9 %)** | **2 044 (20.8 %)** |
+| unresolved | 519 | 7 773 |
+| entries that carry a manual flag | — | 3 049 (31.1 %) |
+
+By the compiler's own classification the owner's 640 entries are **412 states, 224 actions, 4
+transparent** — and a state is never scored by anything in this study. On the **action**
+denominator the rule resolves **121 / 224 = 54.0 %**.
+
+Per type, it resolves where the taxonomy gives it a direction and nowhere else:
+
+| type | inferred | unresolved | |
+|---|---|---|---|
+| `sweep` | 17 | 7 | 71 % — exit orientation `top` |
+| `pass` | 29 | 13 | 69 % |
+| `takedown` | 17 | 8 | 68 % |
+| `submission` | 56 | 27 | 67 % |
+| `escape` | 2 | 37 | 5 % — exit orientation `neutral` |
+| `transition` | 0 | 22 | `neutral` |
+| `control` / `guard` / `technique` / `concept` | 0 | 425 | states, never scored |
+
+> **The pre-registration's 25 % floor is ambiguous and both readings are given.** It says
+> "< 25 % of entries". On the entry denominator (18.9 %) **death rule 14 fires** — the rule is
+> insufficient to replace the flag. On the action denominator (54.0 %) it clears comfortably. The
+> ambiguity was not resolved before scoring, so the stricter reading is the headline and the looser
+> one is stated beside it rather than substituted for it.
+
+### D2. Where it resolves, it agrees with the athlete 70 % of the time
+
+Concordance between the inferred score and the manual flag, on the 121 resolved entries:
+**85 agree (70.2 %), 36 disagree** — and the disagreements are lopsided: **26** are "the sequence
+says it did not land, the flag says it did" against 10 the other way. That asymmetry is what you
+would expect from a default-to-landed toggle (`successful` undefined = landed, on both sides of the
+contract), and it is the strongest argument in this study for the owner's rule: the sequence is
+catching attempts the form recorded as successes.
+
+### D3. The three modes in the production V2 slot — and why this protocol cannot decide between them
+
+| mode | observations scored | final rating | final RD | A4 log-loss | Δ vs `flag` |
+|---|---|---|---|---|---|
+| **(a) `flag`** (today) | 431 | 2511.6 | 78.8 | 0.6249 | — |
+| **(b) `inferred_only`** | **89** (−79 %) | 1803.4 | **127.6** | 0.6296 | +0.0021 [−0.0024, +0.0062] |
+| **(c) `inferred_then_flag`** | 431 | 2466.2 | 78.8 | 0.6249 | **0.0000 [0.0000, 0.0000]** |
+| **(d) `last_flag_only`** — *the owner's product mode* | **161** | 1887.6 | 104.4 | 0.6272 | **+0.0009 [−0.0014, +0.0030]** |
+
+**Mode (c)'s exact zero is an identity, not a null result, and this must not be misread.** In the
+virtual-opponent design the athlete's own rating **cancels out of the forecast**: `expected_score`
+returns 0.340565187099 for a rating of 1200, 1500 or 2400 against the same +140 offset, because
+only the *difference* enters. So the round forecast depends on the **offset** and the **RD**, and
+not at all on the rating level. Mode (c) scores exactly the same 431 observations as (a) — so the
+RD is identical (78.79 both) and the forecasts are identical by construction, even though **24 of
+the 431 own-entry scores differ** and the final rating moves by 45 points (2511.6 → 2466.2).
+
+The honest consequence: **§D cannot be adjudicated by the prequential protocol.** The only channel
+by which a scoring mode reaches that forecast is the observation *count*, through RD — which is
+exactly why mode (b), at 89 observations and RD 127.6, is the only one that moves at all, and moves
+by +0.0021 (NULL). Deciding between the modes needs a metric that reads the rating **level** — and
+this study has none, because the owner's own rating has no external criterion to be checked against.
+
+### D3b. The owner's product mode: `internal = inferred|NULL, last = manual flag`
+
+The refinement (2026-09-12): the manual flag survives **only on the last node of a sequence**,
+because the final action has no following transition and the sequence therefore cannot resolve it
+(the D7 anchor rule). Every internal action is inferred or NULL.
+
+Measured on the owner's fixture: **128 last-own-nodes**, of which the sequence could have inferred
+only **45** — so the flag on the final node contributes 83 observations nothing else can supply,
+which is precisely the gap the rule exists to cover.
+
+| | observations | RD | Δ log-loss vs today |
+|---|---|---|---|
+| today (`flag` everywhere) | 431 | 78.8 | — |
+| **`last_flag_only`** | **161 (37 %)** | 104.4 | **+0.0009 [−0.0014, +0.0030] — NULL** |
+| `inferred_only` (no flag at all) | 89 (21 %) | 127.6 | +0.0021 [−0.0024, +0.0062] — NULL |
+
+**The owner's mode is statistically indistinguishable from today's behaviour** while removing the
+toggle from every internal step, and it recovers 72 more observations than dropping the flag
+entirely. Given §D3's identity — the forecast only ever sees the observation *count*, through RD —
+the honest statement is: *this metric cannot separate them, and on the one channel it can see
+(evidence volume) `last_flag_only` is the best of the flag-free options by a wide margin.*
+
+`ponytail:` "last node of a sequence" is implemented here as the last **own-actor entry of the
+round**; the owner fixture does not carry `sequenceId`. Ceiling — a round with two chains has two
+last nodes and this sees one. Upgrade path: keep `sequenceId` in the fixture and partition by it
+(`services/sequencePartition` already does this on the App side).
+
+### D4. What this supports
+
+* **Adopt mode (d), `last_flag_only`** — the owner's own rule. NULL against today on the only
+  metric available, and the best evidence volume of any flag-free design (161 vs 89).
+* **Mode (c) `inferred_then_flag` is the zero-risk intermediate** if the toggle is kept: it
+  regresses nothing (identically, provably) and corrects 24 of 431 observation scores toward what
+  the sequence shows.
+* **Do not adopt mode (b), `inferred_only`.** At 18.9 % entry resolution it discards 79 % of the
+  evidence, and the RD cost (78.8 → 127.6) is a real loss of confidence that this study's metrics
+  happen not to penalise.
+* **The cheapest way to unlock mode (b)** is not a better inference rule: it is exit orientations
+  for `escape` and `transition` (61 owner entries, currently `neutral` and therefore unresolvable
+  by construction) and a `Quatro Apoios → Turtle` library row. That is table work, not modelling.
+
+---
 
 ## 6. Deviations from the pre-registration
 
