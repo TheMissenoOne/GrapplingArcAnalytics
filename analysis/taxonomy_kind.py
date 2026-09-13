@@ -206,6 +206,18 @@ def resolve_library_entry(label: str) -> tuple[str, str] | None:
 # Keys are `_normalize_name` output. 19 events in the corpus (`transition/Back Take`).
 _LIBRARY_VARIANTS_THAT_ARE_ACTIONS = frozenset({"back take"})
 
+# Labels whose dual identity is a DOCUMENTED, still-open N1 question — see
+# `docs/repairs/2026-09-13_curated_library_sync.md` "Open finding". A library sync (a curated
+# entry gaining a fixed `type`) must be behaviour-preserving: it is not the ontology programme,
+# and it must not silently decide a case N1 hasn't ruled on yet. `kind_of_entry` skips the
+# library's type override for exactly these keys and classifies on the caller's LOGGED type
+# instead (the pre-library-resolution path), so a label here reads whatever `type` the event was
+# actually recorded with until N1 resolves it for real. `tests/test_audit_ontology.py`'s
+# `find_dual_identity` reads this set indirectly (through `kind_of_entry`) rather than
+# duplicating it — the audit is what proves a label here still LOOKS ambiguous in the corpus.
+# Keys are `_normalize_name` output, same convention as `_LIBRARY_VARIANTS_THAT_ARE_ACTIONS`.
+OPEN_DUAL_IDENTITY = frozenset({"hooks in"})
+
 
 def kind_of_entry(label: str, event_type: str | None) -> Kind:
     """D1's classifier, entry point for real logged data: resolves ``label`` through the App's
@@ -214,11 +226,17 @@ def kind_of_entry(label: str, event_type: str | None) -> Kind:
     doesn't recognise. See the module note above `_build_library_lookup` for why the caller's
     ``event_type`` cannot be trusted on its own.
 
-    One carve-out runs on the RAW label first (`_LIBRARY_VARIANTS_THAT_ARE_ACTIONS`): library
-    resolution is what turns "Back Take" into "Back Control", and no amount of authority
-    ordering downstream can undo a label that has already been replaced by another one."""
-    if _normalize_name(str(label or "")) in _LIBRARY_VARIANTS_THAT_ARE_ACTIONS:
+    Two carve-outs run on the RAW label first, before any library resolution:
+    ``_LIBRARY_VARIANTS_THAT_ARE_ACTIONS`` (library resolution is what turns "Back Take" into
+    "Back Control", and no amount of authority ordering downstream can undo a label that has
+    already been replaced by another one) and ``OPEN_DUAL_IDENTITY`` (a label the ontology
+    programme hasn't closed yet must not be silently closed by a library sync fixing its
+    `type` — see that set's docstring)."""
+    key = _normalize_name(str(label or ""))
+    if key in _LIBRARY_VARIANTS_THAT_ARE_ACTIONS:
         return "action"
+    if key in OPEN_DUAL_IDENTITY:
+        return kind_of(label, event_type or "")
     resolved = resolve_library_entry(label)
     if resolved is not None:
         canon_label, lib_type = resolved

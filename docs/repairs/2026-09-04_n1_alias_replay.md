@@ -71,11 +71,18 @@ a curated orientation). Written by `scripts.audit_ontology --write-baseline`, ne
 
 `scripts/sync_app_artifacts` (docstring-verified, not run to completion here — `load_fresh_
 scores` recomputes node scores over the whole corpus and exceeded a 180s budget, orthogonal to
-this task) only (a) byte-copies markov weights, (b) byte-copies `ontology_seed.json`, (c)
-injects `rrb`/`eloPercentile` onto EXISTING App node entries by normalized name. It never adds/
-removes/restructures node entries — it will **not** carry the Back Take split or the Saddle
-variant removal to the App. That's a separate, App-side edit to `grappling-arch.nodes.json`
-(same three edits as above), out of this Analytics-only task's scope.
+this task) at the time only (a) byte-copied markov weights, (b) byte-copied
+`ontology_seed.json`, (c) injected `rrb`/`eloPercentile` onto EXISTING App node entries by
+normalized name — it never added/removed/restructured node entries, so it did **not** carry
+the Back Take split or the Saddle variant removal to the App; that stayed a separate, App-side
+edit to `grappling-arch.nodes.json`, out of this Analytics-only task's scope.
+
+⚠️ **Superseded 2026-09-13** (tech-library-curated-source): the curated file is now node
+IDENTITY for the App library — `merge_curated_identity` re-derives `name`/`type`/
+`translations`/`variations` from it (curated order, first-writer-wins parity with
+`technique_match._index`), so a curated edit like the Back Take split above WOULD now reach
+`grappling-arch.nodes.json` on the next `uv run python -m scripts.sync_app_artifacts`. App file
+is GENERATED output, `--check`-asserted by `tests/test_sync_app_artifacts.py`.
 
 ## Impact, measured (read-only, prod, 2026-09-04)
 

@@ -69,6 +69,14 @@ APP_INFERENCE_TABLE_OUT = (
 )
 LIBRARY_LOOKUP_OUT = ROOT / "data" / "taxonomy" / "library_lookup.json"
 
+# The ten bare event-type words the App library's own `type`/`tipo` field uses — never a real
+# technique identity, only ever a stale/generic logged label. Mirrors the App test's list
+# (`taxonomyKind.test.ts`, "a bare event-TYPE word is NOT a technique").
+_BARE_EVENT_TYPE_WORDS = frozenset({
+    "guard", "control", "pass", "sweep", "submission", "takedown",
+    "escape", "transition", "defensive", "concept",
+})
+
 
 def build_kinds() -> dict[str, dict[str, str]]:
     """``{normalized_canonical_label: {kind, type, orientation?}}`` for every App library entry.
@@ -107,6 +115,15 @@ def build_library_lookup() -> dict[str, list[str]]:
     own file order (a committed, static file, so file order is a fixed reproducible order —
     same first-wins-by-file-order convention ``export.app_node_scores.build_scores``
     documents for the identical file), never overwritten by a later entry.
+
+    ``_BARE_EVENT_TYPE_WORDS`` are excluded even when a curated entry's own ``variants``
+    literally carries one (2026-09-13: the new "Guard Pass"/"Sweep"/"Takedown" entries each
+    do, self-referentially — real corpus events use those bare labels too, so
+    ``technique_match.clean_label`` still needs the variant for CLEANING, and it stays in
+    ``analysis/data/technique_library.json``). This is the identity lookup, a different
+    consumer with a different invariant (mirrors the App's ``libraryNameVariants`` docstring):
+    an event logged with the literal type name must never resolve to "whichever technique the
+    library happens to list first" for that word.
     """
     nodes = json.loads(APP_NODES_PATH.read_text(encoding="utf-8"))
     lookup: dict[str, list[str]] = {}
@@ -117,7 +134,7 @@ def build_library_lookup() -> dict[str, list[str]]:
         typ = str(node.get("type") or "")
         for text in _name_variants(node):
             key = _normalize_name(text)
-            if key and key not in lookup:
+            if key and key not in _BARE_EVENT_TYPE_WORDS and key not in lookup:
                 lookup[key] = [canon, typ]
     return lookup
 

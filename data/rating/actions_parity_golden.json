@@ -105,6 +105,12 @@
       "inferred": true
     },
     {
+      "action_key": "takedown defense",
+      "actor": "partner",
+      "count": 1,
+      "inferred": false
+    },
+    {
       "action_key": "triangle choke",
       "actor": "you",
       "count": 2,

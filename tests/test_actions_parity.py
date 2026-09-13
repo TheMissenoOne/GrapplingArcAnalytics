@@ -66,10 +66,18 @@ def test_p1_observed_actions_are_the_invariant_the_inference_rule_may_never_move
     Fase 0 and after every phase since. A rule change may add or re-key INFERRED actions (Fase 2
     took the mock bundle's inferred count from 2 to 5 by naming three sweeps that the type-only
     table read as `guard exit`); it may never touch this number, and a regenerated golden that
-    quietly did would fail here."""
+    quietly did would fail here.
+
+    2026-09-13 curated-library sync: 22 -> 23. The mock bundle's "Sprawl" event newly resolves
+    through the added "Takedown Defense" curated entry (a `sprawl` variant) instead of staying
+    unrecognised, so it becomes one more observed action — a genuine new resolution, not a
+    reclassification of an existing one (`docs/repairs/2026-09-13_curated_library_sync.md`
+    "Goldens regenerated" table; already reflected in `data/rating/actions_parity_golden.json`'s
+    `+1 entry (takedown defense/partner/observed)`, this hardcoded count was the one place left
+    unupdated)."""
     bundle = json.loads(MOCK_BUNDLE_PATH.read_text(encoding="utf-8"))
     observed = sum(c for (_k, _a, inferred), c in action_multiset(bundle).items() if not inferred)
-    assert observed == 22
+    assert observed == 23
 
 
 # ── P2 — rating parity (regression guard, must NEVER change across any actions[] phase) ────
@@ -365,9 +373,26 @@ def test_no_empty_endpoint_edges_and_no_generic_out_degrees_the_real_graph() -> 
     # action) before the LATER pending buffer (Takedown/Double Leg Takedown/Guillotine Attempt)
     # got dropped whole by D7. After, all five actions stack into ONE pending buffer whose last
     # action is the same failed Guillotine Attempt, so D7 drops the whole run — including the
-    # `Guard Pass Attempt` that used to bank safely on the now-gone state anchor. Any OTHER
-    # movement is the regression this number exists to catch.
-    assert observed_actions == 1386
+    # `Guard Pass Attempt` that used to bank safely on the now-gone state anchor.
+    # 2026-09-13 curated-library sync (`docs/repairs/2026-09-13_curated_library_sync.md`):
+    # regenerating `data/taxonomy/library_lookup.json` off the expanded 213-entry App library
+    # moved THREE labels' `kind_of_entry` classification, not one — the -1 above only ever
+    # accounted for a pre-existing corpus fix, not this library regen. Per-bout diff against the
+    # OLD (142-entry) lookup, all 281 bouts: 1386 -> 1399, net +13, no D7/pending-buffer
+    # involvement (each delta bout carries exactly one reclassified event, 1:1):
+    #   +14  `transition/Roll` (one event each, 14 different bouts): was unresolved
+    #        ("transparent", the old library had no "Roll-Through" variant for it), now resolves
+    #        to "Roll-Through" and is forced `action` by its `transition` type — 14 events that
+    #        were NOT observed actions before now are.
+    #   -1   `control/Snap Down to Front Headlock` (1 bout): now resolves through the new "Front
+    #        Headlock" curated entry, type `control` -> `kind_of` reads it `state` (was `action`
+    #        via the type-only fallback) — a state lives on `ChainEdge`'s ENDPOINT, not in
+    #        `edge.actions`, so this one event stops counting as observed.
+    # `Hooks In` (16 `transition` events, one bout each) is EXCLUDED from this regen via
+    # `analysis.taxonomy_kind.OPEN_DUAL_IDENTITY` — its still-open N1 dual-identity status
+    # (`tests/test_audit_ontology.py`) means the library sync must not silently close it, so its
+    # 16 events classify exactly as they did on the OLD library (no delta). 1386 + 14 - 1 = 1399.
+    assert observed_actions == 1399
     # INFERRED is the rule's own output and moves with it. 399 before Fase 2; 433 after, and the
     # +34 are all inversions the endpoints prove and no observed action explains (28 appended,
     # 4 at the head, 2 spliced BETWEEN observed actions). N0 takes it to 321: 128 `control/Back
@@ -376,7 +401,17 @@ def test_no_empty_endpoint_edges_and_no_generic_out_degrees_the_real_graph() -> 
     # takes it to 320: one fewer state-pair gap to bridge around those 4 events. Unmoved by the
     # `mount attempt` fix above — that state simply stopped existing, not a gap that needed a
     # bridge. Change the rule and change this number deliberately — never to make a red test green.
-    assert inferred_actions == 320
+    # 2026-09-13 curated-library sync: 320 -> 319. Same regen as the `observed_actions` note
+    # above; only ONE of the 14 newly-resolved `Roll` events touches this number. A `transparent`
+    # event is DROPPED by the compiler (`chain_compiler.compile_chain`, `kind == "transparent"`)
+    # as if it were never logged, so the OLD library's unresolved "Roll" (dropped) left one bout
+    # (actor Dayton Fix, 29:00) needing an inferred bridge across the gap it left; now that
+    # "Roll" resolves to an observed action, it fills that gap itself and no bridge is inferred.
+    # The other 13 `Roll` bouts already had a real action or state adjacent, so dropping vs.
+    # keeping "Roll" made no difference to their inference there. `Front Headlock`'s action->state
+    # flip does not touch this number (a state doesn't need a bridging INFERRED action the way a
+    # dropped/transparent event does — the state itself is still a real anchor either way).
+    assert inferred_actions == 319
     max_real_degree = max(
         (d for key, d in degree.items() if key not in generic_keys and key != ""), default=0
     )

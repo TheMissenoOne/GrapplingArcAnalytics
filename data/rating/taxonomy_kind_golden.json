@@ -198,6 +198,14 @@
       "kind": "action",
       "type": "takedown"
     },
+    "arm drag takedown": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "arm lock": {
+      "kind": "action",
+      "type": "submission"
+    },
     "arm triangle choke": {
       "kind": "action",
       "type": "submission"
@@ -211,9 +219,17 @@
       "orientation": "top",
       "type": "control"
     },
+    "back escape": {
+      "kind": "action",
+      "type": "escape"
+    },
     "back take": {
       "kind": "action",
       "type": "transition"
+    },
+    "back triangle": {
+      "kind": "action",
+      "type": "submission"
     },
     "base": {
       "kind": "transparent",
@@ -244,6 +260,10 @@
     "body lock pass": {
       "kind": "action",
       "type": "pass"
+    },
+    "body lock takedown": {
+      "kind": "action",
+      "type": "takedown"
     },
     "body triangle": {
       "kind": "state",
@@ -283,9 +303,21 @@
       "kind": "action",
       "type": "pass"
     },
+    "choi bar": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "choke": {
+      "kind": "action",
+      "type": "submission"
+    },
     "circle throw": {
       "kind": "action",
       "type": "takedown"
+    },
+    "clinch": {
+      "kind": "action",
+      "type": "transition"
     },
     "clock choke": {
       "kind": "action",
@@ -301,6 +333,11 @@
       "orientation": "bottom",
       "type": "guard"
     },
+    "collar tie": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "control"
+    },
     "connection": {
       "kind": "transparent",
       "type": "concept"
@@ -308,6 +345,19 @@
     "cop lock": {
       "kind": "action",
       "type": "submission"
+    },
+    "counter takedown": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "cradle": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "cross ashi": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "control"
     },
     "cross choke": {
       "kind": "action",
@@ -336,6 +386,10 @@
       "kind": "action",
       "type": "pass"
     },
+    "double guard pull": {
+      "kind": "action",
+      "type": "guard"
+    },
     "double leg takedown": {
       "kind": "action",
       "type": "takedown"
@@ -353,9 +407,21 @@
       "orientation": "neutral",
       "type": "control"
     },
+    "escape to standing": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "escape to turtle": {
+      "kind": "action",
+      "type": "escape"
+    },
     "ezekiel choke": {
       "kind": "action",
       "type": "submission"
+    },
+    "false reap": {
+      "kind": "action",
+      "type": "transition"
     },
     "firemans carry": {
       "kind": "action",
@@ -373,6 +439,10 @@
       "kind": "action",
       "type": "pass"
     },
+    "foot lock": {
+      "kind": "action",
+      "type": "submission"
+    },
     "foot sweep": {
       "kind": "action",
       "type": "takedown"
@@ -380,6 +450,11 @@
     "frame": {
       "kind": "transparent",
       "type": "concept"
+    },
+    "front headlock": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
     },
     "ghost escape": {
       "kind": "action",
@@ -406,18 +481,42 @@
       "kind": "action",
       "type": "submission"
     },
+    "guard break": {
+      "kind": "action",
+      "type": "transition"
+    },
+    "guard pass": {
+      "kind": "action",
+      "type": "pass"
+    },
     "guard pull": {
       "kind": "action",
       "type": "transition"
+    },
+    "guard recovery": {
+      "kind": "action",
+      "type": "guard"
+    },
+    "guard recovery escape": {
+      "kind": "action",
+      "type": "escape"
     },
     "guillotine choke": {
       "kind": "action",
       "type": "submission"
     },
+    "guillotine sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
     "half guard": {
       "kind": "state",
       "orientation": "bottom",
       "type": "guard"
+    },
+    "half guard pass": {
+      "kind": "action",
+      "type": "pass"
     },
     "half guard smash pass": {
       "kind": "action",
@@ -431,6 +530,10 @@
       "kind": "action",
       "type": "submission"
     },
+    "high crotch": {
+      "kind": "action",
+      "type": "takedown"
+    },
     "hip bump sweep": {
       "kind": "action",
       "type": "sweep"
@@ -443,13 +546,37 @@
       "kind": "action",
       "type": "takedown"
     },
+    "hooks in": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
+    "imanari roll": {
+      "kind": "action",
+      "type": "transition"
+    },
     "inside arm stack pass": {
       "kind": "action",
       "type": "pass"
     },
+    "inside ashi": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "control"
+    },
     "inside trip": {
       "kind": "action",
       "type": "takedown"
+    },
+    "inverted de la riva guard": {
+      "kind": "state",
+      "orientation": "bottom",
+      "type": "guard"
+    },
+    "inverted half guard": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "guard"
     },
     "inverted triangle": {
       "kind": "action",
@@ -465,6 +592,15 @@
       "type": "guard"
     },
     "kimura": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "kimura grip": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "control"
+    },
+    "kimura trap": {
       "kind": "action",
       "type": "submission"
     },
@@ -485,6 +621,11 @@
       "kind": "action",
       "type": "pass"
     },
+    "knee shield half guard": {
+      "kind": "state",
+      "orientation": "bottom",
+      "type": "guard"
+    },
     "knee tap": {
       "kind": "action",
       "type": "takedown"
@@ -502,10 +643,32 @@
       "kind": "action",
       "type": "pass"
     },
+    "leg drag to straddle": {
+      "kind": "action",
+      "type": "transition"
+    },
+    "leg entanglement": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "guard"
+    },
     "leg hug": {
       "kind": "state",
       "orientation": "neutral",
       "type": "control"
+    },
+    "leg lace": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
+    "leg lock": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "leg lock escape": {
+      "kind": "action",
+      "type": "escape"
     },
     "leg staple pass": {
       "kind": "action",
@@ -523,23 +686,62 @@
       "kind": "action",
       "type": "submission"
     },
+    "low single leg": {
+      "kind": "action",
+      "type": "takedown"
+    },
     "lumberjack sweep": {
       "kind": "action",
       "type": "sweep"
+    },
+    "lung lock": {
+      "kind": "action",
+      "type": "submission"
     },
     "mount": {
       "kind": "state",
       "orientation": "top",
       "type": "control"
     },
+    "mount escape": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "mounted crucifix": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
+    "neck crank": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "north south choke": {
+      "kind": "action",
+      "type": "submission"
+    },
+    "north south control": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "control"
+    },
     "northsouth choke": {
       "kind": "action",
       "type": "submission"
+    },
+    "northsouth pass": {
+      "kind": "action",
+      "type": "pass"
     },
     "northsouth position": {
       "kind": "state",
       "orientation": "top",
       "type": "control"
+    },
+    "octopus guard": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "guard"
     },
     "old school sweep": {
       "kind": "action",
@@ -562,6 +764,10 @@
       "kind": "state",
       "orientation": "neutral",
       "type": "control"
+    },
+    "outside pass": {
+      "kind": "action",
+      "type": "pass"
     },
     "overhook": {
       "kind": "transparent",
@@ -595,6 +801,11 @@
       "kind": "transparent",
       "type": "concept"
     },
+    "rear body lock": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
     "rear naked choke": {
       "kind": "action",
       "type": "submission"
@@ -608,10 +819,19 @@
       "kind": "transparent",
       "type": "concept"
     },
+    "rollthrough": {
+      "kind": "action",
+      "type": "transition"
+    },
     "rubber guard": {
       "kind": "state",
       "orientation": "bottom",
       "type": "guard"
+    },
+    "russian tie": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "control"
     },
     "saddle inside sankaku": {
       "kind": "state",
@@ -631,15 +851,37 @@
       "kind": "action",
       "type": "sweep"
     },
+    "scramble": {
+      "kind": "action",
+      "type": "transition"
+    },
+    "seatbelt control": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
+    "seated guard": {
+      "kind": "state",
+      "orientation": "bottom",
+      "type": "guard"
+    },
     "shin to shin guard": {
       "kind": "state",
       "orientation": "neutral",
       "type": "guard"
     },
+    "shoot": {
+      "kind": "action",
+      "type": "transition"
+    },
     "shoulder crunch": {
       "kind": "state",
       "orientation": "top",
       "type": "control"
+    },
+    "shoulder lock": {
+      "kind": "action",
+      "type": "submission"
     },
     "shoulder throw": {
       "kind": "action",
@@ -667,11 +909,24 @@
       "kind": "action",
       "type": "pass"
     },
+    "smash half guard": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
     "smash pass": {
       "kind": "action",
       "type": "pass"
     },
     "snapdown": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "snapdown to front headlock": {
+      "kind": "action",
+      "type": "transition"
+    },
+    "snatch single leg": {
       "kind": "action",
       "type": "takedown"
     },
@@ -696,9 +951,25 @@
       "kind": "action",
       "type": "takedown"
     },
+    "sweep": {
+      "kind": "action",
+      "type": "sweep"
+    },
     "sweeping hip throw": {
       "kind": "action",
       "type": "takedown"
+    },
+    "switch escape": {
+      "kind": "action",
+      "type": "escape"
+    },
+    "takedown": {
+      "kind": "action",
+      "type": "takedown"
+    },
+    "takedown defense": {
+      "kind": "action",
+      "type": "transition"
     },
     "tani otoshi": {
       "kind": "action",
@@ -708,9 +979,28 @@
       "kind": "action",
       "type": "escape"
     },
+    "threequarter mount": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
+    "throw": {
+      "kind": "action",
+      "type": "takedown"
+    },
     "toe hold": {
       "kind": "action",
       "type": "submission"
+    },
+    "top control": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
+    "top half guard": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
     },
     "toreando pass": {
       "kind": "action",
@@ -719,6 +1009,10 @@
     "triangle choke": {
       "kind": "action",
       "type": "submission"
+    },
+    "trip": {
+      "kind": "action",
+      "type": "takedown"
     },
     "tripod pass": {
       "kind": "action",
@@ -733,6 +1027,11 @@
       "orientation": "top",
       "type": "control"
     },
+    "turtle control": {
+      "kind": "state",
+      "orientation": "top",
+      "type": "control"
+    },
     "turtle position": {
       "kind": "state",
       "orientation": "bottom",
@@ -741,6 +1040,11 @@
     "twister": {
       "kind": "action",
       "type": "submission"
+    },
+    "twoonone wrist control": {
+      "kind": "state",
+      "orientation": "neutral",
+      "type": "control"
     },
     "uchi mata": {
       "kind": "action",
@@ -762,6 +1066,10 @@
       "kind": "state",
       "orientation": "bottom",
       "type": "guard"
+    },
+    "wrestleup": {
+      "kind": "action",
+      "type": "transition"
     },
     "wrist lock": {
       "kind": "action",
@@ -843,6 +1151,14 @@
       "source": "declared",
       "value": "top"
     },
+    "control|Collar Tie": {
+      "source": "derived",
+      "value": "controlling"
+    },
+    "control|Cross Ashi": {
+      "source": "derived",
+      "value": "controlling"
+    },
     "control|Crucifix": {
       "source": "declared",
       "value": "top"
@@ -851,9 +1167,25 @@
       "source": "derived",
       "value": "controlling"
     },
+    "control|Front Headlock": {
+      "source": "declared",
+      "value": "top"
+    },
     "control|Gift Wrap": {
       "source": "declared",
       "value": "top"
+    },
+    "control|Hooks In": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|Inside Ashi": {
+      "source": "derived",
+      "value": "controlling"
+    },
+    "control|Kimura Grip": {
+      "source": "derived",
+      "value": "controlling"
     },
     "control|Knee on Belly": {
       "source": "declared",
@@ -863,7 +1195,19 @@
       "source": "derived",
       "value": "controlling"
     },
+    "control|Leg Lace": {
+      "source": "declared",
+      "value": "top"
+    },
     "control|Mount": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|Mounted Crucifix": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|North South Control": {
       "source": "declared",
       "value": "top"
     },
@@ -875,11 +1219,23 @@
       "source": "derived",
       "value": "controlling"
     },
+    "control|Rear Body Lock": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|Russian Tie": {
+      "source": "derived",
+      "value": "controlling"
+    },
     "control|Saddle (Inside Sankaku)": {
       "source": "derived",
       "value": "controlling"
     },
     "control|Scarf Hold": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|Seatbelt Control": {
       "source": "declared",
       "value": "top"
     },
@@ -891,13 +1247,37 @@
       "source": "declared",
       "value": "top"
     },
+    "control|Smash Half Guard": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|Three-Quarter Mount": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|Top Control": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|Top Half Guard": {
+      "source": "declared",
+      "value": "top"
+    },
     "control|Truck": {
+      "source": "declared",
+      "value": "top"
+    },
+    "control|Turtle Control": {
       "source": "declared",
       "value": "top"
     },
     "control|Turtle Position": {
       "source": "declared",
       "value": "bottom"
+    },
+    "control|Two-on-One Wrist Control": {
+      "source": "derived",
+      "value": "controlling"
     },
     "control|arm drag": {
       "source": "derived",
@@ -1127,7 +1507,19 @@
       "source": "derived",
       "value": "controlling"
     },
+    "escape|Back Escape": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "escape|Bridge (Upa Escape)": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "escape|Escape to Standing": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "escape|Escape to Turtle": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1139,7 +1531,23 @@
       "source": "derived",
       "value": "neutral"
     },
+    "escape|Guard Recovery Escape": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "escape|Leg Lock Escape": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "escape|Mount Escape": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "escape|Shrimp (Hip Escape)": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "escape|Switch Escape": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1183,16 +1591,44 @@
       "source": "declared",
       "value": "bottom"
     },
+    "guard|Double Guard Pull": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "guard|Guard Recovery": {
+      "source": "declared",
+      "value": "bottom"
+    },
     "guard|Half Guard": {
       "source": "declared",
+      "value": "bottom"
+    },
+    "guard|Inverted De La Riva Guard": {
+      "source": "declared",
+      "value": "bottom"
+    },
+    "guard|Inverted Half Guard": {
+      "source": "derived",
       "value": "bottom"
     },
     "guard|K-Guard": {
       "source": "declared",
       "value": "bottom"
     },
+    "guard|Knee Shield Half Guard": {
+      "source": "declared",
+      "value": "bottom"
+    },
     "guard|Lasso Guard": {
       "source": "declared",
+      "value": "bottom"
+    },
+    "guard|Leg Entanglement": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "guard|Octopus Guard": {
+      "source": "derived",
       "value": "bottom"
     },
     "guard|Open Guard": {
@@ -1204,6 +1640,10 @@
       "value": "bottom"
     },
     "guard|Rubber Guard": {
+      "source": "declared",
+      "value": "bottom"
+    },
+    "guard|Seated Guard": {
       "source": "declared",
       "value": "bottom"
     },
@@ -1451,6 +1891,14 @@
       "source": "derived",
       "value": "top"
     },
+    "pass|Guard Pass": {
+      "source": "derived",
+      "value": "top"
+    },
+    "pass|Half Guard Pass": {
+      "source": "derived",
+      "value": "top"
+    },
     "pass|Half Guard Smash Pass": {
       "source": "derived",
       "value": "top"
@@ -1484,6 +1932,14 @@
       "value": "top"
     },
     "pass|Long Step Pass": {
+      "source": "derived",
+      "value": "top"
+    },
+    "pass|North-South Pass": {
+      "source": "derived",
+      "value": "top"
+    },
+    "pass|Outside Pass": {
       "source": "derived",
       "value": "top"
     },
@@ -1531,11 +1987,19 @@
       "source": "derived",
       "value": "neutral"
     },
+    "submission|Arm Lock": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "submission|Arm Triangle Choke": {
       "source": "derived",
       "value": "neutral"
     },
     "submission|Armbar": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "submission|Back Triangle": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1563,6 +2027,14 @@
       "source": "derived",
       "value": "neutral"
     },
+    "submission|Choi Bar": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "submission|Choke": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "submission|Clock Choke": {
       "source": "derived",
       "value": "neutral"
@@ -1580,6 +2052,10 @@
       "value": "neutral"
     },
     "submission|Ezekiel Choke": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "submission|Foot Lock": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1607,11 +2083,31 @@
       "source": "derived",
       "value": "neutral"
     },
+    "submission|Kimura Trap": {
+      "source": "declared",
+      "value": "top"
+    },
     "submission|Knee Bar": {
       "source": "derived",
       "value": "neutral"
     },
+    "submission|Leg Lock": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "submission|Loop Choke": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "submission|Lung Lock": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "submission|Neck Crank": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "submission|North South Choke": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1632,6 +2128,10 @@
       "value": "neutral"
     },
     "submission|Rear Naked Choke": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "submission|Shoulder Lock": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1683,6 +2183,10 @@
       "source": "derived",
       "value": "neutral"
     },
+    "sweep|Guillotine Sweep": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "sweep|Hip Bump Sweep": {
       "source": "derived",
       "value": "neutral"
@@ -1703,6 +2207,10 @@
       "source": "derived",
       "value": "neutral"
     },
+    "sweep|Sweep": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "sweep|Tripod Sweep": {
       "source": "derived",
       "value": "neutral"
@@ -1719,7 +2227,23 @@
       "source": "derived",
       "value": "neutral"
     },
+    "takedown|Arm Drag Takedown": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "takedown|Body Lock Takedown": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "takedown|Circle Throw": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "takedown|Counter Takedown": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "takedown|Cradle": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1739,6 +2263,10 @@
       "source": "derived",
       "value": "neutral"
     },
+    "takedown|High Crotch": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "takedown|Hip Throw": {
       "source": "derived",
       "value": "neutral"
@@ -1752,6 +2280,10 @@
       "value": "neutral"
     },
     "takedown|Kouchi Gari": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "takedown|Low Single Leg": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1775,6 +2307,10 @@
       "source": "derived",
       "value": "neutral"
     },
+    "takedown|Snatch Single Leg": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "takedown|Sumi Gaeshi": {
       "source": "derived",
       "value": "neutral"
@@ -1787,7 +2323,19 @@
       "source": "derived",
       "value": "neutral"
     },
+    "takedown|Takedown": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "takedown|Tani Otoshi": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "takedown|Throw": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "takedown|Trip": {
       "source": "derived",
       "value": "neutral"
     },
@@ -1807,7 +2355,51 @@
       "source": "derived",
       "value": "neutral"
     },
+    "transition|Clinch": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|False Reap": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Guard Break": {
+      "source": "derived",
+      "value": "neutral"
+    },
     "transition|Guard Pull": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Imanari Roll": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Leg Drag to Straddle": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Roll-Through": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Scramble": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Shoot": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Snapdown to Front Headlock": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Takedown Defense": {
+      "source": "derived",
+      "value": "neutral"
+    },
+    "transition|Wrestle-Up": {
       "source": "derived",
       "value": "neutral"
     },

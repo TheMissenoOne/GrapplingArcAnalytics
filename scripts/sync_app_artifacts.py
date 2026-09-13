@@ -6,30 +6,45 @@ current outputs, so nobody hand-copies them out of sync again.
     uv run python -m scripts.sync_app_artifacts            # sync, write files
     uv run python -m scripts.sync_app_artifacts --check     # regenerate + diff, write nothing, exit nonzero on drift
 
-Three artifacts (root CLAUDE.md cross-module contracts):
+Four artifacts (root CLAUDE.md cross-module contracts):
   a. `data/rating/markov_action_weights.json` -> App `src/data/markov_action_weights.json`
      (byte copy — generator: `scripts/build_markov_action_weights.py --check`).
   b. `data/processed/ontology_seed.json` -> App `src/data/ontology_seed.json` (byte copy,
      sanity-gated first — generator: `export/ontology.py`).
-  c. `data/processed/app_node_scores.json`'s `rrb`/`eloPercentile` INJECTED into the App's
-     bundled technique library (`src/data/grappling-arch.nodes.json`), keyed by normalized
-     name (`analysis.names._normalize_name`, the App's `normalizeLabel` port) — App's
-     `nodeCorpusScores.ts` reads these two fields straight off each `NodeLibraryItem`
-     (`src/utils/storage/libraryStorage.ts`). Fetched fresh every run (see `load_fresh_scores`).
+  c. `analysis/data/technique_library.json` (curated, hand-maintained) is node IDENTITY for
+     the App's bundled technique library (`src/data/grappling-arch.nodes.json`):
+     `merge_curated_identity` re-derives `type`/`translations`/`variations` (+ `name` for a
+     brand-new entry only) from it, in
+     CURATED ORDER (so a label collision resolves the same way on both sides'
+     first-writer-wins lookups — App `techniqueCategory.buildCategoryResolver`, Analytics
+     `technique_match._index`), preserving `_id`/`createdAt` for a curated entry that already
+     has an App row. An App-only entry (never in curated) is kept, appended after the
+     curated block — never silently deleted, only reported.
+  d. `data/processed/app_node_scores.json`'s `rrb`/`eloPercentile` INJECTED into the (now
+     identity-synced) library, keyed by normalized name (`analysis.names._normalize_name`,
+     the App's `normalizeLabel` port) — App's `nodeCorpusScores.ts` reads these two fields
+     straight off each `NodeLibraryItem` (`src/utils/storage/libraryStorage.ts`). Fetched
+     fresh every run (see `load_fresh_scores`).
 
-Run after any change to the markov weights artifact, the ontology exporter, or the App's
-`grappling-arch.nodes.json` — and after a sync, bump `NODE_LIBRARY_VERSION`
+The App file is GENERATED output of this script — never hand-edited; `--check` (this file)
+is asserted in Analytics CI by `tests/test_sync_app_artifacts.py`.
+
+Run after any change to the markov weights artifact, the ontology exporter, or the curated
+technique library — and after a sync, bump `NODE_LIBRARY_VERSION`
 (App `src/utils/defaultDataLoader.ts`) and/or `ONTOLOGY_VERSION`
 (App `src/utils/storage/ontologyStorage.ts`) so cold start re-seeds.
 """
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+
+from analysis.names import _normalize_name
 
 REPO = Path(__file__).resolve().parent.parent
 APP = REPO.parent / "GrapplingArcApp"
@@ -38,9 +53,16 @@ MARKOV_SRC = REPO / "data" / "rating" / "markov_action_weights.json"
 MARKOV_DST = APP / "src" / "data" / "markov_action_weights.json"
 ONTOLOGY_SRC = REPO / "data" / "processed" / "ontology_seed.json"
 ONTOLOGY_DST = APP / "src" / "data" / "ontology_seed.json"
+CURATED_LIB = REPO / "analysis" / "data" / "technique_library.json"
 NODES_LIB = APP / "src" / "data" / "grappling-arch.nodes.json"
 
 SCORE_FIELDS = ("rrb", "eloPercentile")
+
+# A new curated entry's createdAt/updatedAt is a FIXED constant, never
+# datetime.now() — `--check` regenerates in memory on every call, and a
+# wall-clock stamp would make a rerun look drifted from the very file it just
+# wrote. Bump only when hand-running a real sync that adds curated entries.
+NEW_ENTRY_DATE = "2026-09-13T00:00:00.000Z"
 
 
 def verify_ontology_seed(doc: dict[str, Any]) -> tuple[int, int]:
@@ -74,6 +96,119 @@ def sync_text_file(src: Path, dst: Path, *, check: bool, label: str) -> tuple[bo
         return True, f"{label}: DRIFT ({dst})"
     dst.write_text(text, encoding="utf-8")
     return True, f"{label}: updated ({dst})"
+
+
+def load_curated_nodes(path: Path = CURATED_LIB) -> list[dict[str, Any]]:
+    """The curated technique library (`{en, pt, type, variants}` per entry) — node
+    IDENTITY source of truth (root CLAUDE.md tech-library contract), read fresh
+    every run like the scores. Mirrors `export.tech_library.load_curated_library`'s
+    contract but kept local: importing that module drags in the whole Kaggle/ADCC
+    pipeline (pandas, kagglehub) for what is otherwise a plain JSON read."""
+    if not path.is_file():
+        raise SystemExit(f"ABORT: curated technique library missing: {path}")
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return list(data) if isinstance(data, list) else []
+
+
+def _deterministic_oid(en: str) -> dict[str, str]:
+    """Stable `_id.$oid` for a curated entry with no existing App row: first 24 hex
+    chars of sha1(normalized en) — no counter/state to keep in sync, so two syncs
+    (and a `--check` right after a real run) produce the identical id."""
+    digest = hashlib.sha1(_normalize_name(en).encode("utf-8")).hexdigest()
+    return {"$oid": digest[:24]}
+
+
+def _entry_key(node: dict[str, Any]) -> str:
+    en = (node.get("translations") or {}).get("en") or node.get("name") or ""
+    return _normalize_name(str(en))
+
+
+def merge_curated_identity(
+    curated: list[dict[str, Any]], existing_nodes: list[dict[str, Any]]
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Re-derive the App's node list from the curated library — the curated file is
+    node IDENTITY (root CLAUDE.md tech-library contract), emitted in CURATED ORDER
+    so a label collision resolves to the same entry on both sides' first-writer-wins
+    lookups (App `techniqueCategory.buildCategoryResolver`, Analytics
+    `technique_match._index`).
+
+    Matched by normalized `en` against an existing App row: keeps that row's `_id`/
+    `createdAt`/`name`/score fields/anything else it carries — `name` is NOT curated's
+    to overwrite, a real reader keys a hardcoded list against it verbatim
+    (`SessionStartSheet.curatedFallbackTopics`) — only `type`/`translations`/
+    `variations` are replaced with curated's. No match: a fresh node, `name` = curated
+    `pt` (the file's own dominant convention), deterministic `_id`
+    (`_deterministic_oid`), `createdAt`/`updatedAt` pinned to `NEW_ENTRY_DATE`.
+
+    An App row with no curated match (App-only) is APPENDED after the curated
+    block, untouched — never dropped; the owner decides whether it enters the
+    curated file (see `report["app_only_names"]`).
+    """
+    existing_by_key: dict[str, dict[str, Any]] = {}
+    for node in existing_nodes:
+        key = _entry_key(node)
+        if key and key not in existing_by_key:
+            existing_by_key[key] = node
+
+    curated_keys: set[str] = set()
+    merged: list[dict[str, Any]] = []
+    new_count = matched = 0
+
+    for item in curated:
+        en = str(item.get("en", "")).strip()
+        if not en:
+            continue
+        key = _normalize_name(en)
+        if key in curated_keys:
+            continue  # curated file is expected pre-de-duped; defensive only
+        curated_keys.add(key)
+
+        pt = str(item.get("pt") or en).strip()
+        node_type = item.get("type")
+        variations = list(item.get("variants") or [])
+        translations = {"pt": pt, "en": en}
+
+        existing = existing_by_key.get(key)
+        if existing is not None:
+            matched += 1
+            # `name` is untouched — a real production reader (`SessionStartSheet.
+            # curatedFallbackTopics`) keys a hardcoded list against it verbatim
+            # (measured: `getDefaultNodes().map(n => [n.name, n])`), so it is NOT
+            # free-standing identity curated owns; only translations/type/variations are.
+            node = dict(existing)
+            node["type"] = node_type
+            node["translations"] = translations
+            node["variations"] = variations
+        else:
+            new_count += 1
+            node = {
+                "_id": _deterministic_oid(en),
+                # New entry, no existing `name` to preserve: `pt` matches the file's own
+                # dominant convention (127/142 pre-existing entries have name==pt) and
+                # the App's Portuguese-first `getDisplayName` default.
+                "name": pt,
+                "createdAt": {"$date": NEW_ENTRY_DATE},
+                "type": node_type,
+                "translations": translations,
+                "updatedAt": {"$date": NEW_ENTRY_DATE},
+                "variations": variations,
+            }
+        merged.append(node)
+
+    app_only = [n for n in existing_nodes if _entry_key(n) not in curated_keys]
+    merged.extend(app_only)
+
+    report = {
+        "curated_count": len(curated_keys),
+        "matched": matched,
+        "new_count": new_count,
+        "app_only_count": len(app_only),
+        "app_only_names": sorted(
+            str((n.get("translations") or {}).get("en") or n.get("name") or "")
+            for n in app_only
+        ),
+    }
+    return merged, report
 
 
 def load_fresh_scores() -> dict[str, dict[str, float]]:
@@ -125,16 +260,24 @@ def inject_scores(
 
 
 def sync_nodes_library(
-    path: Path, scores: dict[str, dict[str, float]], *, check: bool
+    path: Path,
+    scores: dict[str, dict[str, float]],
+    curated: list[dict[str, Any]],
+    *,
+    check: bool,
 ) -> tuple[bool, str]:
     old_text = path.read_text(encoding="utf-8")
     nodes = json.loads(old_text)
-    new_nodes, counts = inject_scores(nodes, scores)
+    identity_nodes, identity_report = merge_curated_identity(curated, nodes)
+    new_nodes, counts = inject_scores(identity_nodes, scores)
     text = json.dumps(new_nodes, indent=2, ensure_ascii=False) + "\n"
 
     summary = (
-        f"grappling-arch.nodes.json: {counts['with_rrb']} with rrb, "
-        f"{counts['with_elo_percentile']} with eloPercentile"
+        f"grappling-arch.nodes.json: {identity_report['curated_count']} curated "
+        f"({identity_report['new_count']} new, {identity_report['matched']} matched), "
+        f"{identity_report['app_only_count']} app-only kept "
+        f"({', '.join(identity_report['app_only_names']) or 'none'}); "
+        f"{counts['with_rrb']} with rrb, {counts['with_elo_percentile']} with eloPercentile"
     )
     if text == old_text:
         return False, f"{summary} (unchanged)"
@@ -176,7 +319,8 @@ def main() -> int:
     drift = drift or changed
 
     scores = load_fresh_scores()
-    changed, msg = sync_nodes_library(NODES_LIB, scores, check=args.check)
+    curated = load_curated_nodes()
+    changed, msg = sync_nodes_library(NODES_LIB, scores, curated, check=args.check)
     lines.append(msg)
     drift = drift or changed
 

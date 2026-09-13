@@ -69,13 +69,11 @@
   },
   {
     "en": "Arm Lock",
-    "pt": "Chave de Braço",
+    "pt": "Chave de Braço (genérica)",
     "type": "submission",
     "variants": [
-      "armlock",
       "arm lock",
-      "bent armlock",
-      "chave no braco"
+      "bent armlock"
     ]
   },
   {
@@ -596,6 +594,18 @@
     ]
   },
   {
+    "en": "Electric Chair",
+    "pt": "Electric Chair",
+    "type": "control",
+    "variants": [
+      "electric chair",
+      "electricchair",
+      "electric-chair",
+      "cadeira elétrica",
+      "cadeira eletrica"
+    ]
+  },
+  {
     "en": "Escape to Standing",
     "pt": "Levantada",
     "type": "escape",
@@ -996,7 +1006,6 @@
     "type": "control",
     "variants": [
       "hooks in",
-      "ganchos",
       "ganchos encaixados"
     ]
   },
@@ -1053,8 +1062,7 @@
       "inverted de la riva",
       "inverted de la riva guard",
       "reverse de la riva",
-      "de la riva invertida",
-      "rdlr"
+      "de la riva invertida"
     ]
   },
   {
@@ -1189,7 +1197,6 @@
     "variants": [
       "knee shield half guard",
       "knee shield",
-      "escudo de joelho",
       "meia guarda com escudo"
     ]
   },
@@ -1256,6 +1263,18 @@
       "leg lock entanglement",
       "emaranhado de pernas",
       "entrada nas pernas"
+    ]
+  },
+  {
+    "en": "Leg Hug",
+    "pt": "Leg Hug",
+    "type": "control",
+    "variants": [
+      "leg hug",
+      "leghug",
+      "leg-hug",
+      "abraço de perna",
+      "abraco de perna"
     ]
   },
   {
@@ -1804,12 +1823,22 @@
     ]
   },
   {
+    "en": "Shoulder Crunch",
+    "pt": "Shoulder Crunch",
+    "type": "control",
+    "variants": [
+      "shoulder crunch",
+      "shouldercrunch",
+      "shoulder-crunch",
+      "crunch de ombro"
+    ]
+  },
+  {
     "en": "Shoulder Lock",
     "pt": "Chave de Ombro",
     "type": "submission",
     "variants": [
       "shoulder lock",
-      "shoulder crunch",
       "chave de ombro",
       "chave no ombro"
     ]

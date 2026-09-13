@@ -149,7 +149,10 @@ def test_observed_total_matches_the_fase2_invariant_on_the_real_corpus() -> None
     observed action occurrences over the owner's 281-bout dump, 1390 before N0's authority swap
     — docs/taxonomy/04_ONTOLOGIA_CANONICA.md; N2's `guard recovery` fix moves it again, 1548 ->
     1387 after D7, was 1551; `corpus-labels-fora-da-biblioteca`'s `mount attempt` fix moves it
-    to 1386 — `tests/test_actions_parity.py` carries the exact accounting), reproduced through
+    to 1386; the 2026-09-13 curated-library sync moves it again, to 1399 (+14 `Roll` ->
+    `Roll-Through`/action, -1 `Snap Down to Front Headlock`/state, `Hooks In` excluded via
+    `analysis.taxonomy_kind.OPEN_DUAL_IDENTITY` — `tests/test_actions_parity.py` carries the
+    exact per-bout accounting), reproduced through
     ``PathMetrics.observed`` — proves this module doesn't lose or invent an observation while
     reshaping ``ChainEdge`` into path statistics. Skips when the private corpus dump isn't
     present (never committed — LGPD, same convention as ``test_actions_parity.py``)."""
@@ -171,4 +174,4 @@ def test_observed_total_matches_the_fase2_invariant_on_the_real_corpus() -> None
             )
             total_observed += sum(m.observed for _, m in pairs)
 
-    assert total_observed == 1386
+    assert total_observed == 1399

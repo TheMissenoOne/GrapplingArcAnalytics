@@ -244,6 +244,19 @@
         false
       ],
       "actions": [
+        "takedown defense"
+      ],
+      "actor": "partner",
+      "count": 1,
+      "inferred": false,
+      "source": "start neutral",
+      "target": "start neutral"
+    },
+    {
+      "action_inferred": [
+        false
+      ],
+      "actions": [
         "bridge roll"
       ],
       "actor": "partner",
@@ -347,15 +360,6 @@
       "to_key": "start top"
     },
     {
-      "count": 1,
-      "from": "opp:sprawl",
-      "from_actor": "partner",
-      "from_key": "sprawl",
-      "to": "closed guard",
-      "to_actor": "you",
-      "to_key": "closed guard"
-    },
-    {
       "count": 2,
       "from": "opp:whizzer",
       "from_actor": "partner",
@@ -372,6 +376,15 @@
       "to": "back control",
       "to_actor": "you",
       "to_key": "back control"
+    },
+    {
+      "count": 1,
+      "from": "start neutral",
+      "from_actor": "partner",
+      "from_key": "start neutral",
+      "to": "closed guard",
+      "to_actor": "you",
+      "to_key": "closed guard"
     },
     {
       "count": 1,
@@ -396,9 +409,9 @@
       "from": "start neutral",
       "from_actor": "you",
       "from_key": "start neutral",
-      "to": "opp:sprawl",
+      "to": "start neutral",
       "to_actor": "partner",
-      "to_key": "sprawl"
+      "to_key": "start neutral"
     },
     {
       "count": 1,
@@ -504,14 +517,6 @@
       "type": "control"
     },
     {
-      "actor": "partner",
-      "count": 1,
-      "inferred": false,
-      "nascent": true,
-      "node_key": "sprawl",
-      "type": "defensive"
-    },
-    {
       "actor": "you",
       "count": 5,
       "inferred": true,
@@ -521,7 +526,7 @@
     },
     {
       "actor": "you",
-      "count": 6,
+      "count": 8,
       "inferred": true,
       "nascent": false,
       "node_key": "start neutral",
