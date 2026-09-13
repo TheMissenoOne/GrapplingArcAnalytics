@@ -11,7 +11,15 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from scripts.render_atlas_user import render
+import pytest
+
+from scripts.render_atlas_user import _SITE_DIR, render
+
+# The preview copies the real client bundle from the sibling public-site checkout; CI checks
+# out this repo alone, so the test is a no-op there rather than a false red (2026-09-13).
+pytestmark = pytest.mark.skipif(
+    not (_SITE_DIR / "atlas.js").exists(), reason="sibling GrapplingArc/site checkout missing"
+)
 
 _BUNDLE = {
     "user": {"auth": {"fullName": "Test Owner"}},
