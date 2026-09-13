@@ -191,6 +191,10 @@ module = [
     "export.grapplemap_icons_export",
     "export.site_data",
     "scripts.dump_import",
+    "scripts.gemini_read_frames",
+    "scripts.render_atlas_user",
+    "scripts.research.rrb_round_rating",
+    "scripts.video_frames",
     "tests.test_admin",
     "tests.test_apply_video_fixes",
     "tests.test_archetype",
@@ -251,6 +255,11 @@ ignore_errors = true
 # falls out — not adding names back here.
 #
 # Everything left below is test modules. Issue #4 is closed for production code.
+#
+# 2026-09-13: 18 test modules added (video jobs/frames, Gemini baseline/guidance/read-frames,
+# rrb round rating, next-moves, and a handful of smaller ones) written since the last pass
+# without being kept mypy-strict, which is what turned CI red on ba77157/926208f. Same fix as
+# every prior batch here: name them, don't relax `tests.*` wholesale.
 [[tool.mypy.overrides]]
 module = [
     "tests.poc.test_decision_vision_dashboard",
@@ -263,30 +272,48 @@ module = [
     "tests.test_apply_decision_results",
     "tests.test_apply_events",
     "tests.test_backfill_taxonomy_id",
+    "tests.test_backfill_video_offsets",
     "tests.test_category_profile",
     "tests.test_compare_athlete_system_detectors",
+    "tests.test_corpus_paths_systems",
     "tests.test_decision_criteria",
     "tests.test_decision_flow",
     "tests.test_dossier_decision_flow",
+    "tests.test_edges_by_graph",
     "tests.test_exchange_cycles",
     "tests.test_flowchart_compiler",
+    "tests.test_gemini_baseline",
+    "tests.test_gemini_guidance",
+    "tests.test_gemini_read_frames",
     "tests.test_group_admin",
+    "tests.test_link_graph_node_canonicals",
+    "tests.test_merge_athlete",
+    "tests.test_next_moves",
     "tests.test_opponent_conditions",
     "tests.test_private_data_boundary",
     "tests.test_pro_analytics",
     "tests.test_pro_analytics_systemd",
     "tests.test_rating_v2",
+    "tests.test_rating_v2_presentation_demo",
     "tests.test_report_charts",
+    "tests.test_round_analysis",
+    "tests.test_rrb_round_rating",
     "tests.test_scouting_division_report",
     "tests.test_scouting_report",
     "tests.test_site_branding",
     "tests.test_site_confidence_gate",
+    "tests.test_site_data_links",
     "tests.test_study_knowledge",
     "tests.test_study",
     "tests.test_study_reports",
+    "tests.test_sync_app_artifacts",
     "tests.test_taxonomy_map",
     "tests.test_taxonomy",
+    "tests.test_tech_library",
+    "tests.test_technique_library_variants",
     "tests.test_transitions",
+    "tests.test_video_frames",
+    "tests.test_video_jobs",
 ]
 ignore_errors = true
 

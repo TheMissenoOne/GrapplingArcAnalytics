@@ -13,6 +13,7 @@ from uuid import uuid4
 
 import psycopg
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 from psycopg import Cursor
 from psycopg.types.json import Jsonb
 
@@ -141,26 +142,67 @@ def verify_catalog(cursor: Cursor[tuple[Any, ...]]) -> None:
     if "BEFORE UPDATE" not in str(trigger[2]).upper():
         raise AssertionError(f"unexpected LWW trigger definition: {trigger[2]}")
 
+    # group_member_sessions was a VIEW through 0031; 0033 dropped it for good (0032 stood the
+    # SECURITY DEFINER FUNCTION up first, both live at once, then 0033 removed the view once
+    # GrapplingArcWeb moved off `.from()` onto `.rpc()`). Check the function that replaced it.
+    #
+    # No `security_barrier` equivalent: 0032's own docstring says why — the function takes no
+    # caller-supplied predicate for the planner to push a cheap user expression below, which is
+    # what security_barrier on the view existed to prevent. The view's `security_invoker=false`
+    # requirement (run as the definer, so the predicate — not the caller's own RLS — is the
+    # access control) is `prosecdef = true` here; same guarantee, function-shaped.
     cursor.execute(
         """
-        select c.reloptions, pg_get_viewdef(c.oid, true)
-        from pg_class c
-        join pg_namespace n on n.oid = c.relnamespace
+        select p.prosecdef, p.proconfig, pg_get_functiondef(p.oid)
+        from pg_proc p
+        join pg_namespace n on n.oid = p.pronamespace
         where n.nspname = 'public'
-          and c.relname = 'group_member_sessions'
-          and c.relkind = 'v'
+          and p.proname = 'group_member_sessions'
+          and pg_get_function_identity_arguments(p.oid) = ''
         """
     )
-    view = cursor.fetchone()
-    if view is None:
-        raise AssertionError("group_member_sessions view is missing")
-    options = set(view[0] or [])
-    if "security_barrier=true" not in options or "security_invoker=true" in options:
-        raise AssertionError(f"unexpected group_member_sessions options: {sorted(options)}")
-    view_sql = str(view[1]).lower()
-    for token in ("class_session_id", "reflection", "notes", "shares_group_as_professor"):
-        if token not in view_sql:
-            raise AssertionError(f"group_member_sessions lost {token!r}: {view[1]}")
+    fn = cursor.fetchone()
+    if fn is None:
+        raise AssertionError("group_member_sessions function is missing")
+    expect("group_member_sessions is SECURITY DEFINER", fn[0], True)
+    proconfig = set(fn[1] or [])
+    if "search_path=public" not in proconfig:
+        raise AssertionError(f"group_member_sessions did not pin search_path: {sorted(proconfig)}")
+    fn_sql = str(fn[2]).lower()
+    # `shares_group_as_professor` moved one hop down: 0060 routed the predicate through
+    # `can_read_member_row` (member OR class-guest), so the member-path guarantee is checked
+    # on that function's own body below rather than as a literal token here.
+    for token in ("class_session_id", "reflection", "notes", "deleted_at", "can_read_member_row"):
+        if token not in fn_sql:
+            raise AssertionError(f"group_member_sessions lost {token!r}: {fn[2]}")
+
+    cursor.execute(
+        "select has_function_privilege("
+        "'authenticated', 'public.group_member_sessions()', 'execute')"
+    )
+    expect("authenticated may call group_member_sessions", cursor.fetchone(), (True,))
+    cursor.execute(
+        "select has_function_privilege('anon', 'public.group_member_sessions()', 'execute')"
+    )
+    expect("anon may NOT call group_member_sessions", cursor.fetchone(), (False,))
+
+    # The member-path predicate itself: can_read_member_row must still fall back to
+    # shares_group_as_professor (0032's original guarantee, untouched by 0060 per that
+    # revision's own docstring — "first disjunct byte-identical to the predicate it replaces").
+    cursor.execute(
+        """
+        select pg_get_functiondef(p.oid)
+        from pg_proc p
+        join pg_namespace n on n.oid = p.pronamespace
+        where n.nspname = 'public' and p.proname = 'can_read_member_row'
+        """
+    )
+    predicate = cursor.fetchone()
+    if predicate is None:
+        raise AssertionError("can_read_member_row function is missing")
+    predicate_sql = str(predicate[0]).lower()
+    if "shares_group_as_professor" not in predicate_sql:
+        raise AssertionError(f"can_read_member_row lost the member path: {predicate[0]}")
 
 
 def exercise_identity(
@@ -279,6 +321,14 @@ def run_alembic(url: str, operation: Callable[[Config], None]) -> None:
             os.environ["DATABASE_URL"] = previous_url
 
 
+def current_head() -> str:
+    """Head revision per the script directory — never hardcode it, it moves with every migration."""
+    head = ScriptDirectory.from_config(Config("alembic.ini")).get_current_head()
+    if head is None:
+        raise AssertionError("alembic script directory has no head revision")
+    return head
+
+
 def verify_downgrade_fails_closed(url: str) -> None:
     try:
         run_alembic(url, lambda config: command.downgrade(config, "0060"))
@@ -287,7 +337,11 @@ def verify_downgrade_fails_closed(url: str) -> None:
             raise AssertionError(f"downgrade failed for the wrong reason: {exc}") from exc
     else:
         raise AssertionError("revision 0061 downgrade accepted duplicate owner-scoped ids")
-    expect("revision after rejected downgrade", current_revision(url), "0061")
+    # 0061's downgrade guard raises before any DDL commits, and alembic runs a multi-step
+    # `downgrade(..., "0060")` as one transaction on a transactional-DDL dialect, so a
+    # rejected downgrade rolls all the way back to wherever the DB started — head, not
+    # necessarily 0061 (0062+ may already be applied by the time this runs).
+    expect("revision after rejected downgrade", current_revision(url), current_head())
 
 
 def cleanup(url: str, fixture: Fixture) -> None:
@@ -310,7 +364,9 @@ def ensure_head(url: str) -> None:
 
 
 def assert_head(url: str) -> None:
-    expect("final revision", current_revision(url), "0061")
+    # Not hardcoded: this file was written when 0061 was head, and the very next revision
+    # (0062) already made a literal "0061" here stale.
+    expect("final revision", current_revision(url), current_head())
 
 
 def run_verification(url: str, fixture: Fixture) -> None:

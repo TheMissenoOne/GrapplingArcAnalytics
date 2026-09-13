@@ -50,6 +50,7 @@ import logging
 import os
 import statistics
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -190,7 +191,7 @@ def match_bout(human: list[dict[str, Any]], model: list[dict[str, Any]],
     return matches
 
 
-def _mean(xs: list[float]) -> float | None:
+def _mean(xs: Sequence[float]) -> float | None:
     return statistics.mean(xs) if xs else None
 
 

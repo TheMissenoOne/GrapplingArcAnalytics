@@ -60,10 +60,14 @@ CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
 -- on storage.objects. Recreate only the columns/functions those revisions name.
 CREATE SCHEMA IF NOT EXISTS storage;
 
+-- 0056 upserts file_size_limit/allowed_mime_types on conflict; real Supabase's
+-- storage.buckets carries both (bigint / text[]), so the stub must too.
 CREATE TABLE IF NOT EXISTS storage.buckets (
     id text PRIMARY KEY,
     name text NOT NULL,
-    public boolean NOT NULL DEFAULT false
+    public boolean NOT NULL DEFAULT false,
+    file_size_limit bigint,
+    allowed_mime_types text[]
 );
 
 CREATE TABLE IF NOT EXISTS storage.objects (
