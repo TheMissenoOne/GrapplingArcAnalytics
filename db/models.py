@@ -84,6 +84,17 @@ class Profile(Base):
     # policy change needed since `profiles_update_own` (0023) already gates the row.
     face_ref_path: Mapped[str | None] = mapped_column(Text)
     face_consent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # Per-user technique NAMING PREFERENCE (alembic 0064) — PRIVATE, display-only, never
+    # used competitively. Mirrors the App's `LabelPrefsState` (`services/labelPrefs.ts`):
+    # nodeKey -> normalizeLabel(alias) -> {display, count, lastAt}, learned from search
+    # picks. Synced across the owner's own devices via `services/labelPrefsSync.ts` and
+    # merged (never overwritten) by `mergeLabelPrefs`. `authenticated` gets a column grant
+    # (0023's per-column-list convention, same shape as `face_ref_path`/`face_consent_at`
+    # above) so the owner can read/write their own votes; no RLS policy change needed —
+    # `profiles_update_own` (0023) already gates the row to `id = auth.uid()`.
+    label_prefs: Mapped[dict[str, Any]] = mapped_column(
+        JSONB, nullable=False, default=dict, server_default="{}"
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -1008,6 +1019,12 @@ class Match(Base):
     # from the replay until approved). Manually-entered matches default final.
     status: Mapped[str] = mapped_column(String(10), nullable=False, server_default="final")
     created_by: Mapped[str | None] = mapped_column(UUID(as_uuid=False))
+    # Which ingestion run wrote this row — the dump module's human label (e.g. "ADCC2024-ABS",
+    # "Khabib"), same string ``scripts.reprocess_all.DATASETS`` and every
+    # ``run_dump(..., label=)`` caller already carries. NULL = pre-0063 row, not yet backfilled
+    # (``scripts/backfill_source_batch.py``) or written outside
+    # ``scripts.dump_import.run_dump`` (alembic 0063).
+    source_batch: Mapped[str | None] = mapped_column(Text, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 

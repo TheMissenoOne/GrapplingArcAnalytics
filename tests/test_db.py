@@ -354,6 +354,35 @@ def test_run_dump_batched_delete_insert_is_idempotent(session, monkeypatch):
     assert len(matches) == 1
 
 
+def test_run_dump_tags_source_batch_with_label(session, monkeypatch):
+    """Every bout a dump inserts carries the caller's ``label`` as provenance (alembic 0063,
+    closes the E16 within/cross-batch residual — docs/research/e16_technique_jaccard_prereg.md)."""
+    import contextlib
+
+    import db.base as db_base
+    from db.models import Match
+    from scripts import dump_import
+
+    @contextlib.contextmanager
+    def _fake_db_session():
+        yield session
+
+    monkeypatch.setattr(db_base, "db_session", _fake_db_session)
+
+    raw = [{("Craig Jones", 2024): {
+        "winner": "Craig Jones", "method": "Submission (Armbar)", "opponent": "Kyle Boehm",
+        "events": [
+            {"label": "Guard Pull", "type": "guard", "actor": "Craig Jones"},
+            {"label": "Armbar", "type": "submission", "actor": "Craig Jones", "successful": True},
+        ],
+    }}]
+
+    dump_import.run_dump(raw, event=None, label="ADCC2024-ABS", replay=False)
+
+    m = session.execute(select(Match)).scalars().one()
+    assert m.source_batch == "ADCC2024-ABS"
+
+
 def test_run_dump_different_concrete_events_coexist(session, monkeypatch):
     """Same pair, same year, two DIFFERENT concrete events = two physical bouts. Importing
     the second must not delete the first (measured 2026-08-25: World No-Gi 2024 clobbered

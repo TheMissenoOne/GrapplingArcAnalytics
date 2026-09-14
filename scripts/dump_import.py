@@ -281,7 +281,8 @@ def run_dump(
     replay: bool = True,
     out_participants: set[str] | None = None,
 ) -> int:
-    """Build + (unless ``dry_run``) persist a dump, tagging each bout with ``event``.
+    """Build + (unless ``dry_run``) persist a dump, tagging each bout with ``event`` and
+    ``source_batch=label`` (the ingestion-run provenance column, alembic 0063).
 
     ``replay=False`` skips the per-athlete graph rebuild (caller does it later, once per
     unique athlete instead of once per dump — see ``scripts.reprocess_all``).
@@ -374,6 +375,7 @@ def run_dump(
                 submission=cm.submission, event=event, year=cm.year,
                 weight_class=None, stage=None, sequence=seq, created_by=None,
                 video_url=None, timeline=cm.timeline, ts_origin=None, video_start_seconds=None,
+                source_batch=label,
             ))
             row_cms.append(cm)
 
