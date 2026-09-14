@@ -32,7 +32,16 @@ REPORT_PATH = Path(__file__).resolve().parent.parent / "docs" / "taxonomy" / "sh
 
 
 def _side_of(match: dict[str, Any]) -> Callable[[Mapping[str, Any]], str | None]:
-    a_key, b_key = match.get("athlete_a_key"), match.get("athlete_b_key")
+    # Canonicalize the dump's frozen a/b keys through the same athlete_key() the live actor
+    # string goes through below. Those keys are baked into the dump at export time; an
+    # ATHLETE_ALIASES entry added afterward (2026-09-14, "bia mesquita" -> "beatriz mesquita")
+    # otherwise compares a pre-alias frozen key against a post-alias live key and matches
+    # neither side, silently dropping every event in that bout. ponytail: re-running an
+    # already-canonical key through athlete_key() is idempotent (same clean/deaccent/
+    # normalize + alias lookup), so no separate "canonicalize a stored key" helper is needed.
+    raw_a, raw_b = match.get("athlete_a_key"), match.get("athlete_b_key")
+    a_key = athlete_key(raw_a) if raw_a else raw_a
+    b_key = athlete_key(raw_b) if raw_b else raw_b
 
     def side_of(ev: Mapping[str, Any]) -> str | None:
         k = athlete_key(str(ev.get("actor") or ""))

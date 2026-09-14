@@ -152,7 +152,13 @@ def test_observed_total_matches_the_fase2_invariant_on_the_real_corpus() -> None
     to 1386; the 2026-09-13 curated-library sync moves it again, to 1399 (+14 `Roll` ->
     `Roll-Through`/action, -1 `Snap Down to Front Headlock`/state, `Hooks In` excluded via
     `analysis.taxonomy_kind.OPEN_DUAL_IDENTITY` — `tests/test_actions_parity.py` carries the
-    exact per-bout accounting), reproduced through
+    exact per-bout accounting); 2026-09-14 (commit 806e338, N1 alias batch 2) briefly moved it
+    to 1396 by an unrelated mechanism, root-caused and fixed in
+    `scripts.shadow_chain_compiler._side_of` (canonicalizes the frozen `athlete_a_key`/
+    `athlete_b_key` through `athlete_key()` too) rather than re-pinned — the fix also surfaced a
+    pre-existing, broader frozen-key/live-alias skew unrelated to that one commit, landing on
+    1415, not 1399; `tests/test_actions_parity.py`'s pinned assertion carries the full per-bout
+    accounting, reproduced through
     ``PathMetrics.observed`` — proves this module doesn't lose or invent an observation while
     reshaping ``ChainEdge`` into path statistics. Skips when the private corpus dump isn't
     present (never committed — LGPD, same convention as ``test_actions_parity.py``)."""
@@ -174,4 +180,9 @@ def test_observed_total_matches_the_fase2_invariant_on_the_real_corpus() -> None
             )
             total_observed += sum(m.observed for _, m in pairs)
 
-    assert total_observed == 1399
+    dump_stat = DEFAULT_EXPORT.stat()
+    assert total_observed == 1415, (
+        f"total_observed drifted off the pinned value — check {DEFAULT_EXPORT} "
+        f"(size={dump_stat.st_size}, mtime={dump_stat.st_mtime}) against the accounting above "
+        "and tests/test_actions_parity.py's matching comment"
+    )

@@ -392,7 +392,35 @@ def test_no_empty_endpoint_edges_and_no_generic_out_degrees_the_real_graph() -> 
     # `analysis.taxonomy_kind.OPEN_DUAL_IDENTITY` — its still-open N1 dual-identity status
     # (`tests/test_audit_ontology.py`) means the library sync must not silently close it, so its
     # 16 events classify exactly as they did on the OLD library (no delta). 1386 + 14 - 1 = 1399.
-    assert observed_actions == 1399
+    # 2026-09-14, N1 alias replay batch 2 (commit 806e338) briefly moved this to 1396 by an
+    # unrelated mechanism, not a taxonomy/kind reclassification: `analysis.names.ATHLETE_ALIASES`
+    # gained `"bia mesquita": "beatriz mesquita"`, and `scripts.shadow_chain_compiler._side_of`
+    # compared that live-aliased actor key against this dump's `athlete_a_key`/`athlete_b_key`
+    # (frozen at export time, predating the alias), so one bout's `b` side matched neither key
+    # and lost all 3 of its observed actions. Root-caused and fixed at the source: `_side_of`
+    # now canonicalizes the frozen `athlete_a_key`/`athlete_b_key` through `athlete_key()` too,
+    # not just the live actor string. That fix does NOT land back on 1399 — it also surfaces a
+    # PRE-EXISTING skew unrelated to commit 806e338, present even checking out 926208f (the
+    # commit that measured 1399 in the first place) with the fix applied there. This dump was
+    # frozen 2026-06-30 and `athlete_a_key`/`athlete_b_key` were never re-derived since; several
+    # OTHER `ATHLETE_ALIASES` entries (unrelated to this batch, some older than the dump itself)
+    # had the same frozen-vs-live desync, just degrading gracefully (a few events per bout
+    # silently unattributed to either side) instead of zeroing a whole bout the way `bia
+    # mesquita` did, so nobody had noticed. 1396 -> 1415, net +19: +3 restores the reported
+    # bia-mesquita bout (0 -> 3, its `b` side now attributes again), +16 recovers previously
+    # dropped, unattributed events across 7 OTHER bouts whose frozen key also needed today's
+    # alias table to resolve (no `a_key`/`b_key` collisions introduced — verified `a_key !=
+    # b_key` post-canonicalization on all 8 affected bouts). `inferred_actions` (319) is
+    # untouched throughout — every recovered/moved event was OBSERVED, none inferred. Counts
+    # only per the private-corpus convention; see `docs/repairs/
+    # 2026-09-14_n1_alias_replay_batch2.md`'s "Achado" section for the narrative. See the
+    # assertion message below for the dump's mtime/size so a REAL future drift is diagnosable
+    # without a bisect.
+    dump_stat = DEFAULT_EXPORT.stat()
+    assert observed_actions == 1415, (
+        f"observed_actions drifted off the pinned value — check {DEFAULT_EXPORT} "
+        f"(size={dump_stat.st_size}, mtime={dump_stat.st_mtime}) against the accounting above"
+    )
     # INFERRED is the rule's own output and moves with it. 399 before Fase 2; 433 after, and the
     # +34 are all inversions the endpoints prove and no observed action explains (28 appended,
     # 4 at the head, 2 spliced BETWEEN observed actions). N0 takes it to 321: 128 `control/Back

@@ -144,6 +144,37 @@ absent, which is the case in CI (never committed, LGPD) — so this does **not**
 gate, only local runs on this machine. Flagging for the owner as a separate, pre-existing
 finding; the `1399`/`320`/`319` comments in both test files are untouched by this session.
 
+### Achado (2026-09-14, follow-up) — frozen `athlete_a/b_key` vs live `ATHLETE_ALIASES`
+
+Root cause found by bisection: `analysis.names.ATHLETE_ALIASES` gained `"bia mesquita":
+"beatriz mesquita"` in this commit. `scripts.shadow_chain_compiler._side_of` compares
+`athlete_key(actor)` (canonicalized fresh on every event) against a match's
+`athlete_a_key`/`athlete_b_key` — but those two fields are frozen into the dump at export
+time and never re-derived. On this dump (frozen 2026-06-30, months before this alias
+existed) one bout's `athlete_b_key` still read the pre-alias form while its actor now
+canonicalizes to the post-alias form, so `_side_of` matched neither side and its whole `b`
+side lost all 3 observed actions — `1399 -> 1396`.
+
+Fixed at the source: `_side_of` now canonicalizes the frozen `athlete_a_key`/`athlete_b_key`
+through `athlete_key()` too, so a later alias can never desync from an already-exported
+dump (`scripts/shadow_chain_compiler.py`, unit tests in `tests/test_shadow_chain_compiler.py`
+— synthetic bout: frozen key = pre-alias form, actor = alias source, must still resolve).
+
+The fix does **not** land back on 1399 — it lands on **1415**. Applying it against commit
+`926208f`'s own alias table (the commit that measured 1399, with no batch-2 aliases at all)
+gives the same 1415, so this isn't specific to `bia mesquita`: the June-30 dump's frozen
+keys had already drifted from several *other*, older `ATHLETE_ALIASES` entries too — those
+just degraded gracefully (a few events per bout quietly unattributed to either side) instead
+of zeroing a whole bout, so nobody had noticed. Net `1396 -> 1415` (+19): +3 restores the
+`bia mesquita` bout, +16 recovers previously-dropped events across 7 other bouts (no
+`a_key == b_key` collisions on any of the 8 — verified). `inferred_actions` (319) is
+unaffected. Both pins re-measured and re-pinned to 1415 with the accounting above (counts
+only, per the private-corpus convention) in `tests/test_actions_parity.py` /
+`tests/test_path_metrics.py`; the earlier `git stash` claim above (step 1, "reproduces 1396
+at bare 926208f") does not hold under a clean worktree checkout of that commit — it measures
+1399, matching the original pin; the stash likely ran with other uncommitted local files
+still present.
+
 ## Gate results
 
 ```
