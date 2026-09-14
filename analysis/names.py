@@ -104,6 +104,44 @@ SYNONYMS: dict[str, str] = {
     # documented decision) rather than to "leg entry" or "backside 50/50 entry" -- both
     # plausible per the docs/taxonomy plan. Ambiguous at n=1; left as-is rather than
     # re-litigated without new evidence.
+
+    # N1 alias batch 2 (2026-09-14, docs/repairs/2026-09-14_n1_alias_replay_batch2.md) --
+    # the three items deferred in docs/repairs/2026-09-13_curated_library_sync.md, decided
+    # against the ontology (state=position, action=dynamic):
+    #
+    # "roll" IS an action (a logged transition), not its own generic move -- stays
+    # resolvable to Roll-Through, same call the curated library already made (its
+    # "roll" variant was never removed). This was a curated-library-only merge before
+    # today; the athlete GRAPH's node_key (driven by this dict, not the curated file)
+    # had "roll" (12 graphs) and "rollthrough" (1) as two separate fragments --
+    # aligning them here is the actual replay-triggering change.
+    "roll": "rollthrough",
+    # "North South Choke" / "North-South Choke" are one technique under two spellings,
+    # same shape as the north-south position/pass family already merged above --
+    # `en` renamed to the hyphenated form in the curated library alongside this so the
+    # cleaning layer agrees with the graph node_key. 6 graphs, clean rename, no
+    # existing "northsouth choke" node to collide with.
+    "north south choke": "northsouth choke",
+    #
+    # "pass" bare word: reviewed, kept resolving to "guard pass" -- generic guard-pass
+    # action, no change needed. Already merged (this exact entry, `"pass": "guard
+    # pass"`, above) and already the athlete graph's live behaviour (0 graphs carry a
+    # bare "pass" node) -- confirmed, not re-added.
+
+    # library-duplicate-entries (2026-09-14): same technique/guard filed as two
+    # curated entries; curated file merged into one (more common EN name kept), these
+    # entries make the athlete graph agree. "arm lock" -> "armbar" already existed
+    # above (2026-08-24); "bent armlock" was Arm Lock's own variant, not yet
+    # redirected (1 graph, the one real move here). 0 graphs currently hold "reverse
+    # de la riva" / "rdlr" / etc (dead paths today -- these are future-fragmentation
+    # guards, not a rename of existing rows).
+    "bent armlock": "armbar",
+    "reverse de la riva": "inverted de la riva guard",
+    "rdlr": "inverted de la riva guard",
+    "dlr invertida": "inverted de la riva guard",
+    "de la riva reversa": "inverted de la riva guard",
+    "reverse dlr": "inverted de la riva guard",
+    "guarda de la riva invertida": "inverted de la riva guard",
 }
 
 

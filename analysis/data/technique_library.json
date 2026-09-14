@@ -68,15 +68,6 @@
     ]
   },
   {
-    "en": "Arm Lock",
-    "pt": "Chave de Braço (genérica)",
-    "type": "submission",
-    "variants": [
-      "arm lock",
-      "bent armlock"
-    ]
-  },
-  {
     "en": "Arm Triangle Choke",
     "pt": "Triângulo de Braço",
     "type": "submission",
@@ -101,7 +92,9 @@
       "arm bar",
       "armlock",
       "juji-gatame",
-      "armbar attempt"
+      "armbar attempt",
+      "arm lock",
+      "bent armlock"
     ]
   },
   {
@@ -1062,7 +1055,12 @@
       "inverted de la riva",
       "inverted de la riva guard",
       "reverse de la riva",
-      "de la riva invertida"
+      "de la riva invertida",
+      "rdlr",
+      "dlr invertida",
+      "de la riva reversa",
+      "reverse dlr",
+      "guarda de la riva invertida"
     ]
   },
   {
@@ -1431,7 +1429,7 @@
     ]
   },
   {
-    "en": "North South Choke",
+    "en": "North-South Choke",
     "pt": "Estrangulamento Norte-Sul",
     "type": "submission",
     "variants": [
@@ -1660,18 +1658,6 @@
       "mata leao",
       "estrangulamento por trás",
       "rear naked choke attempt"
-    ]
-  },
-  {
-    "en": "Reverse De La Riva",
-    "pt": "Guarda De La Riva Invertida",
-    "type": "guard",
-    "variants": [
-      "reverse de la riva",
-      "rdlr",
-      "dlr invertida",
-      "de la riva reversa",
-      "reverse dlr"
     ]
   },
   {
