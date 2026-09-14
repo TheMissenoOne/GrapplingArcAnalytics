@@ -485,11 +485,15 @@ def _metrics(rows: Sequence[Scored], n_boot: int = 2000) -> dict[str, Any]:
             "brier": mean(briers), "accuracy": mean(accs)}
 
 
-def evaluate(bouts: Sequence[Bout], engines: Sequence[Any],
-             burn_in_years: int = 1, n_boot: int = 2000) -> list[EngineReport]:
-    """Prequential evaluation. The first ``burn_in_years`` distinct years are
-    observed but not scored — every engine starts ignorant, and scoring the cold
-    open would mostly measure the seed constants."""
+def stream_scores(bouts: Sequence[Bout], engines: Sequence[Any],
+                  burn_in_years: int = 1) -> dict[str, list[Scored]]:
+    """One prequential pass; the raw per-bout predictions, keyed by engine name.
+
+    Split out of ``evaluate`` so a caller that needs PAIRED comparisons (the same
+    bout scored by two engines, differenced bout-by-bout) gets the rows instead of
+    an already-aggregated mean. Every engine sees the identical stream in the
+    identical order, which is what makes the pairing legitimate.
+    """
     years = sorted({b.year for b in bouts})
     scored_years = set(years[burn_in_years:])
     prior: dict[str, int] = defaultdict(int)
@@ -513,15 +517,24 @@ def evaluate(bouts: Sequence[Bout], engines: Sequence[Any],
         prior[bout.b] += 1
     for e in engines:
         e.close_year()
+    return per_engine
 
-    reports = []
-    for e in engines:
-        rows = per_engine[e.name]
-        rep = EngineReport(e.name, overall=_metrics(rows, n_boot))
-        rep.slices["experienced"] = _metrics([r for r in rows if r.experienced], n_boot)
-        rep.slices["cold_start"] = _metrics([r for r in rows if not r.experienced], n_boot)
-        reports.append(rep)
-    return reports
+
+def report_from_rows(name: str, rows: Sequence[Scored], n_boot: int = 2000) -> EngineReport:
+    """Aggregate one engine's prequential rows into the overall + sliced metrics."""
+    rep = EngineReport(name, overall=_metrics(rows, n_boot))
+    rep.slices["experienced"] = _metrics([r for r in rows if r.experienced], n_boot)
+    rep.slices["cold_start"] = _metrics([r for r in rows if not r.experienced], n_boot)
+    return rep
+
+
+def evaluate(bouts: Sequence[Bout], engines: Sequence[Any],
+             burn_in_years: int = 1, n_boot: int = 2000) -> list[EngineReport]:
+    """Prequential evaluation. The first ``burn_in_years`` distinct years are
+    observed but not scored — every engine starts ignorant, and scoring the cold
+    open would mostly measure the seed constants."""
+    per_engine = stream_scores(bouts, engines, burn_in_years=burn_in_years)
+    return [report_from_rows(e.name, per_engine[e.name], n_boot) for e in engines]
 
 
 def default_engines(taus: Sequence[float] = TAU_SWEEP) -> list[Any]:

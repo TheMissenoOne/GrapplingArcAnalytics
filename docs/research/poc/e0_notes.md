@@ -125,3 +125,25 @@ the new `glicko2-perbout-tau0.5` row and the K-sweep table — the instrument di
   exactly where an engine optimized for something else should land.
 - K sweep needs a wider grid (>80) before it says anything actionable about production K;
   `calibrate_k_factor`'s target-σ mode is not retired by this run, only put on notice.
+
+## 2026-09-14 — both remaining next actions CLOSED
+
+Wider K grid (to 400) and WHR (PoC-E3) both ran through this harness:
+**`docs/research/2026-09-14_e0_ksweep_whr.md`** (runner `scripts/research/e0_ksweep_whr.py`,
+pre-registered criteria, both corpora).
+
+- **K sweep beyond 80 — the "monotonic to the end" caveat above is RESOLVED.** The curve
+  turns: minimum at **K=100** on BOTH corpora, rising steeply after 200 (K=400 is worse
+  than production K=40 on both). But K=80…125 is a flat bottom within noise, all three
+  pre-registered criteria FAIL, and selecting the best-on-TUNE K makes the held-out years
+  *worse*. No production K change. Post-hoc (not pre-registered): K=100 does beat K=40
+  with a paired CI excluding zero on both corpora — the direction this note flagged holds.
+- **WHR — REJECTED.** Fails all three criteria on both corpora; on the closed `matches`
+  corpus the selection-free reading is significantly *worse* than Elo. 780 bouts over 777
+  athletes leaves no opponent graph for whole-history propagation to travel along.
+- Transferable finding: **update cadence beats rating-model choice again**, now for a
+  second engine family (WHR per-bout 0.4843 vs per-year 0.5418 on scouting).
+
+One harness change landed with it: `evaluate` was split into `stream_scores` (raw
+per-bout rows, so arms can be compared PAIRED on the same bouts) + `report_from_rows`.
+Behaviour unchanged; `tests/test_poc_e0.py` still green.
