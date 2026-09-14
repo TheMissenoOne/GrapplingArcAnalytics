@@ -14,8 +14,10 @@ import pytest
 from scripts.video_frames import (
     MIN_STATIC_WINDOW_SECONDS,
     MotionRecord,
+    adaptive_sample_timestamps,
     compute_motion_series,
     decide_camera_moving,
+    extract_frames,
     fallback_frame_timestamps,
     otsu_threshold,
     select_static_scene_frames,
@@ -164,3 +166,68 @@ def test_select_static_scene_frames_drops_short_static_run() -> None:
     # frame 0 always kept, the action spike at t=0.4 kept, neither short static run gets one
     assert 0.4 in chosen
     assert len(chosen) <= 2
+
+
+# ── adaptive_sample_timestamps ──────────────────────────────────────────────────────────────
+def test_adaptive_sample_denser_inside_burst() -> None:
+    times = [float(i) for i in range(61)]           # 0..60s
+    displacement = [1.0] * 61
+    for i in range(20, 31):                         # burst window 20-30s
+        displacement[i] = 50.0
+    target = 20
+
+    ts = adaptive_sample_timestamps(times, displacement, target)
+
+    assert len(ts) == target
+    assert ts == sorted(ts)
+    for a, b in zip(ts, ts[1:]):
+        assert b - a >= 0.5 - 1e-6
+
+    inside = sum(1 for t in ts if 20.0 <= t <= 30.0)
+    inside_density = inside / 10.0
+    outside_density = (target - inside) / (60.0 - 10.0)
+    assert inside_density > outside_density * 2, (inside, ts)
+
+
+def test_adaptive_sample_flat_series_is_approximately_uniform() -> None:
+    times = [float(i) for i in range(61)]
+    displacement = [3.0] * 61
+    target = 13
+
+    ts = adaptive_sample_timestamps(times, displacement, target)
+
+    assert len(ts) == target
+    expected_gap = (times[-1] - times[0]) / target   # quantum width, flat series has no drift
+    for a, b in zip(ts, ts[1:]):
+        assert abs((b - a) - expected_gap) < 0.6, ts
+
+
+def test_adaptive_sample_respects_target_count_matching_fixed() -> None:
+    # Same total frame count as a fixed-interval pass over the same duration -- the
+    # requirement is "approximately the same N", not a different budget.
+    duration = 120.0
+    fixed_n = len(fallback_frame_timestamps(duration, step=5.0))
+    times = [float(i) for i in range(int(duration) + 1)]
+    displacement = [2.0] * len(times)
+
+    ts = adaptive_sample_timestamps(times, displacement, fixed_n)
+    assert len(ts) == fixed_n
+
+
+def test_adaptive_sample_empty_or_zero_target() -> None:
+    assert adaptive_sample_timestamps([], [], 10) == []
+    assert adaptive_sample_timestamps([0.0, 1.0], [0.0, 1.0], 0) == []
+    assert adaptive_sample_timestamps([5.0], [0.0], 3) == [5.0]
+
+
+# ── extract_frames: sub-second collision ────────────────────────────────────────────────────
+def test_extract_frames_disambiguates_same_second_timestamps(static_video, tmp_path) -> None:
+    # 0.1s and 0.6s both round to t00000 -- routine under adaptive's 0.5s min_gap, impossible
+    # at a >=1s fixed interval. Both files must exist, both distinct, neither silently
+    # overwritten by the other.
+    frames = extract_frames(static_video, [0.1, 0.6], tmp_path)
+    assert len(frames) == 2
+    paths = [p for _, p in frames]
+    assert len(set(paths)) == 2
+    for p in paths:
+        assert p.exists()

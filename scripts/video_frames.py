@@ -47,6 +47,7 @@ it is pure local frame extraction. The sample invocation in this repo's docs use
 from __future__ import annotations
 
 import argparse
+import bisect
 import json
 import logging
 import statistics
@@ -280,13 +281,96 @@ def fallback_frame_timestamps(duration: float, step: float = DEFAULT_STEP_SECOND
     return [round(min(i * step, duration), 3) for i in range(n)]
 
 
+# A floor on epsilon (below) as a FRACTION of the median displacement -- 10-20% is the "dead
+# stretches still get sparse coverage" band per spec; 0.15 sits in the middle. A knob, not a
+# constant, because a noisier or cleaner source (broadcast vs a phone clip) shifts what counts
+# as "dead".
+ADAPTIVE_EPS_FRAC = 0.15
+# Same floor the rest of this module uses for "two samples 0.5s apart are still different
+# moments" (frame_pdf.py's own DEFAULT_STEP_SECONDS=5 is 10x coarser than this).
+ADAPTIVE_MIN_GAP_SECONDS = 0.5
+
+
+def adaptive_sample_timestamps(times: list[float], displacement: list[float],
+                               target_count: int, *, eps_frac: float = ADAPTIVE_EPS_FRAC,
+                               min_gap: float = ADAPTIVE_MIN_GAP_SECONDS) -> list[float]:
+    """``target_count`` timestamps spaced by equal quanta of cumulative "activity arc length"
+    ``A(t) = integral (d(t) + eps) dt`` -- dense where the footage moves, sparse where it
+    doesn't, same total frame budget a fixed interval would spend on the whole video.
+
+    ``eps = eps_frac * median(displacement)`` is a floor so a dead stretch still gets sparse
+    coverage (``eps_frac=0`` would starve any window with a near-zero disp read entirely).
+    ``times``/``displacement`` are paired, ascending, ``times[0]`` is the arc's start and
+    ``times[-1]`` its end (duration); ``displacement[i]`` is read as the activity level of the
+    interval ENDING at ``times[i]`` (piecewise-constant integration -- ``displacement[0]`` is
+    unused, mirroring how ``MotionRecord`` has no diff for its own first frame).
+
+    Walks ``target_count`` equal-width quanta of ``A`` in order and takes each quantum's own
+    CENTRE timestamp; when a burst packs two quanta's centres closer than ``min_gap``, the
+    later one is pushed forward to exactly ``min_gap`` past its predecessor rather than
+    dropped -- always returns exactly ``target_count`` timestamps (clamped to the video's own
+    end), so the total stays ``N`` the way a fixed interval's total is never short either.
+    """
+    if not times or target_count <= 0:
+        return []
+    if len(times) == 1 or times[-1] <= times[0]:
+        return [times[0]]
+
+    med = statistics.median(displacement) if displacement else 0.0
+    eps = eps_frac * med if med > 0 else eps_frac
+
+    n = len(times)
+    cum = [0.0] * n
+    for i in range(1, n):
+        level = displacement[i] if displacement[i] is not None else 0.0
+        cum[i] = cum[i - 1] + (level + eps) * (times[i] - times[i - 1])
+    total = cum[-1]
+
+    if total <= 0:
+        step = (times[-1] - times[0]) / max(1, target_count - 1)
+        return [round(times[0] + i * step, 3) for i in range(target_count)]
+
+    def t_at(q: float) -> float:
+        idx = bisect.bisect_left(cum, q)
+        if idx <= 0:
+            return times[0]
+        if idx >= n:
+            return times[-1]
+        lo_c, hi_c = cum[idx - 1], cum[idx]
+        lo_t, hi_t = times[idx - 1], times[idx]
+        frac = (q - lo_c) / (hi_c - lo_c) if hi_c > lo_c else 0.0
+        return lo_t + frac * (hi_t - lo_t)
+
+    quantum = total / target_count
+    chosen: list[float] = []
+    for i in range(target_count):
+        t = t_at((i + 0.5) * quantum)
+        if chosen and t - chosen[-1] < min_gap:
+            t = chosen[-1] + min_gap
+        chosen.append(min(t, times[-1]))
+    return [round(t, 3) for t in chosen]
+
+
 # ── Extraction + render ──────────────────────────────────────────────────────────────────────
-def extract_frames(video_path: Path, timestamps: list[float], out_dir: Path) -> list[tuple[float, Path]]:
+def extract_frames(video_path: Path, timestamps: list[float], out_dir: Path,
+                   clear: bool = True) -> list[tuple[float, Path]]:
     """Native-resolution JPEGs, one per timestamp, named by video-absolute second (matches
-    frame_pdf.py's ``t%05d.jpg`` convention)."""
+    frame_pdf.py's ``t%05d.jpg`` convention). ``clear=False`` skips wiping the directory first
+    -- for a single-timestamp refill call mid-dedupe pass, where clearing would delete every
+    frame already kept this run.
+
+    Two timestamps under 1s apart -- routine for adaptive sampling's 0.5s ``min_gap``, never
+    possible at a >=1s fixed interval -- round to the SAME ``int(t)`` and would otherwise
+    silently overwrite one JPEG with the other, which then breaks any caller (the dedupe pass
+    below) still holding the now-wrong path for the first one. A ``b1``/``b2``/... suffix
+    disambiguates, checked against both this call's own picks and whatever the directory
+    already holds (a prior ``clear=False`` call).
+    """
     out_dir.mkdir(parents=True, exist_ok=True)
-    for stale in out_dir.glob("t*.jpg"):
-        stale.unlink()
+    if clear:
+        for stale in out_dir.glob("t*.jpg"):
+            stale.unlink()
+    existing = {p.stem for p in out_dir.glob("t*.jpg")}
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise RuntimeError(f"cannot open video: {video_path}")
@@ -298,10 +382,61 @@ def extract_frames(video_path: Path, timestamps: list[float], out_dir: Path) -> 
         if not ok:
             logger.warning("could not read frame at t=%.2fs", t)
             continue
-        path = out_dir / f"t{int(t):05d}.jpg"
+        base = f"t{int(t):05d}"
+        name, i = base, 0
+        while name in existing:
+            i += 1
+            name = f"{base}b{i}"
+        existing.add(name)
+        path = out_dir / f"{name}.jpg"
         cv2.imwrite(str(path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
         frames.append((t, path))
     cap.release()
+    return frames
+
+
+def _frame_mad(path_a: Path, path_b: Path) -> float:
+    """Grayscale mean-abs-diff between two saved JPEGs, downscaled the same way the motion
+    series is -- "near-duplicate" means the same thing here as it does in
+    ``compute_motion_series``. ``inf`` (never a duplicate) on an unreadable file."""
+    a, b = cv2.imread(str(path_a)), cv2.imread(str(path_b))
+    if a is None or b is None:
+        return float("inf")
+    ga, gb = _downscale_gray(a), _downscale_gray(b)
+    return float(np.abs(ga.astype(np.float32) - gb.astype(np.float32)).mean())
+
+
+def extract_frames_adaptive(video_path: Path, timestamps: list[float], pool: list[float],
+                            out_dir: Path, *, dup_mad_threshold: float = 3.0,
+                            max_refills: int = 20) -> list[tuple[float, Path]]:
+    """``extract_frames`` plus a dedupe pass: two adjacent frames whose grayscale MAD falls
+    below ``dup_mad_threshold`` (the displacement signal picked two moments that turned out to
+    look the same -- a held position the arc-length quanta still had to spend a sample on)
+    drop the later one and pull a replacement timestamp from ``pool`` -- the extra candidates
+    the caller's adaptive sampling pass produced beyond its own N, in ascending order -- so the
+    total stays close to ``len(timestamps)`` rather than shrinking every time a duplicate is
+    found. ``max_refills`` bounds the pass against a pathological duplicate streak.
+    """
+    frames = extract_frames(video_path, timestamps, out_dir)
+    kept_ts = {f[0] for f in frames}
+    remaining_pool = [t for t in pool if t not in kept_ts]
+    refills = 0
+    i = 1
+    while i < len(frames) and refills < max_refills:
+        if _frame_mad(frames[i - 1][1], frames[i][1]) >= dup_mad_threshold:
+            i += 1
+            continue
+        frames[i][1].unlink(missing_ok=True)
+        frames.pop(i)
+        if remaining_pool:
+            nt = remaining_pool.pop(0)
+            extra = extract_frames(video_path, [nt], out_dir, clear=False)
+            if extra:
+                frames.append(extra[0])
+                frames.sort(key=lambda f: f[0])
+        refills += 1
+        # do not advance i -- the frame now at i (whatever replaced the dropped one, or the
+        # next original frame) needs its own check against i-1
     return frames
 
 
@@ -360,6 +495,12 @@ def build_sheet(frames: list[tuple[float, Path]], video_path: Path, decision: di
         ("Frames", f"{len(frames)}, {hhmmss(frames[0][0]) if frames else '-'} to "
                    f"{hhmmss(frames[-1][0]) if frames else '-'}"),
         ("Sampling method", decision["method"]),
+    ]
+    if decision["method"] == "adaptive_arc_length":
+        fixed_n = decision.get("fixed_n_equivalent")
+        rows.append(("Sampling", f"adaptive, {len(frames)} frames "
+                                  f"(fixed would be {fixed_n})"))
+    rows += [
         ("Camera moving", str(decision["camera_moving"])),
         ("Median cam motion (px-equiv)", f"{decision['median_cam_motion']:.3f}"),
         ("Fraction high-motion windows", f"{decision['frac_high_cam_motion']:.2f}"),
@@ -416,7 +557,18 @@ def plot_motion(records: list[MotionRecord], chosen: list[float], otsu_t: float 
 # ── CLI ───────────────────────────────────────────────────────────────────────────────────────
 def process(video_path: Path, out_dir: Path, *, analysis_fps: float = ANALYSIS_FPS,
            step: float = DEFAULT_STEP_SECONDS, dry_run: bool = False,
-           no_library: bool = False, context: dict[str, Any] | None = None) -> dict[str, Any]:
+           no_library: bool = False, context: dict[str, Any] | None = None,
+           sampling: str = "fixed", target_count: int | None = None,
+           eps_frac: float = ADAPTIVE_EPS_FRAC, min_gap: float = ADAPTIVE_MIN_GAP_SECONDS,
+           dup_mad_threshold: float = 3.0) -> dict[str, Any]:
+    """``sampling="fixed"`` (default) is the original camera-moving/static-scene decision,
+    unchanged. ``sampling="adaptive"`` skips that decision entirely and spends the SAME frame
+    budget a fixed interval would (``duration / step``, or ``target_count`` when given) by
+    walking equal quanta of the raw displacement series (``diff_raw`` -- always present, unlike
+    ``diff_residual``/``cam_motion`` which can be ``None`` on a failed ORB fit) via
+    ``adaptive_sample_timestamps``, then dedupes visually-identical neighbours via
+    ``extract_frames_adaptive``, refilling from a denser second pass (``target_count*2``) over
+    the same series."""
     cap = cv2.VideoCapture(str(video_path))
     if not cap.isOpened():
         raise RuntimeError(f"cannot open video: {video_path}")
@@ -429,7 +581,23 @@ def process(video_path: Path, out_dir: Path, *, analysis_fps: float = ANALYSIS_F
     decision = decide_camera_moving(records)
 
     otsu_t = None
-    if decision["camera_moving"]:
+    adaptive_pool: list[float] = []
+    if sampling == "adaptive":
+        decision["method"] = "adaptive_arc_length"
+        fixed_n = len(fallback_frame_timestamps(duration, step))
+        n_target = target_count or fixed_n
+        times = [0.0] + [r.t for r in records]
+        disp = [(records[0].diff_raw if records else 0.0)] + [r.diff_raw for r in records]
+        timestamps = adaptive_sample_timestamps(times, disp, n_target,
+                                                eps_frac=eps_frac, min_gap=min_gap)
+        pool_candidates = adaptive_sample_timestamps(times, disp, n_target * 2,
+                                                      eps_frac=eps_frac, min_gap=min_gap / 2)
+        chosen_set = set(timestamps)
+        adaptive_pool = sorted(t for t in pool_candidates if t not in chosen_set)
+        decision["fixed_n_equivalent"] = fixed_n
+        decision["adaptive_eps_frac"] = eps_frac
+        decision["adaptive_min_gap"] = min_gap
+    elif decision["camera_moving"]:
         decision["method"] = "fallback_frame_pdf_step"
         timestamps = fallback_frame_timestamps(duration, step)
     else:
@@ -451,7 +619,12 @@ def process(video_path: Path, out_dir: Path, *, analysis_fps: float = ANALYSIS_F
     plot_motion(records, timestamps, otsu_t, out_dir / "motion.png")
 
     if not dry_run:
-        frames = extract_frames(video_path, timestamps, out_dir / "frames")
+        if sampling == "adaptive":
+            frames = extract_frames_adaptive(video_path, timestamps, adaptive_pool,
+                                             out_dir / "frames",
+                                             dup_mad_threshold=dup_mad_threshold)
+        else:
+            frames = extract_frames(video_path, timestamps, out_dir / "frames")
         if frames:
             library = None if no_library else load_library()
             build_sheet(frames, video_path, decision, out_dir / "sheets" / f"{out_dir.name}.pdf",
@@ -468,7 +641,23 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--analysis-fps", type=float, default=ANALYSIS_FPS)
     ap.add_argument("--step", type=float, default=DEFAULT_STEP_SECONDS,
-                    help="fallback interval (seconds) when the camera is moving")
+                    help="fallback interval (seconds) when the camera is moving, and the "
+                         "budget --sampling adaptive matches by default")
+    ap.add_argument("--sampling", choices=["fixed", "adaptive"], default="fixed",
+                    help="fixed = original camera-moving/static-scene decision (default, "
+                         "unchanged). adaptive = equal quanta of the displacement series, "
+                         "same total frame budget, denser where the footage moves")
+    ap.add_argument("--target-count", type=int, default=None,
+                    help="adaptive only: frame budget (default: what --step would produce)")
+    ap.add_argument("--eps-frac", type=float, default=ADAPTIVE_EPS_FRAC,
+                    help="adaptive only: floor on activity, as a fraction of median "
+                         "displacement, so dead stretches still get sparse coverage")
+    ap.add_argument("--min-gap", type=float, default=ADAPTIVE_MIN_GAP_SECONDS,
+                    help="adaptive only: minimum seconds between chosen timestamps")
+    ap.add_argument("--dup-mad-threshold", type=float, default=3.0,
+                    help="adaptive only: grayscale MAD below which two neighbouring frames "
+                         "count as near-duplicate and the later one is refilled from a "
+                         "denser candidate pool")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-library", action="store_true",
                     help="do not print the label vocabulary into the sheet")
@@ -479,7 +668,9 @@ def main() -> int:
         return 1
 
     decision = process(a.video, a.out, analysis_fps=a.analysis_fps, step=a.step,
-                       dry_run=a.dry_run, no_library=a.no_library)
+                       dry_run=a.dry_run, no_library=a.no_library, sampling=a.sampling,
+                       target_count=a.target_count, eps_frac=a.eps_frac, min_gap=a.min_gap,
+                       dup_mad_threshold=a.dup_mad_threshold)
     logger.info("camera_moving=%s method=%s n_frames=%d (median_cam=%.3f frac_high=%.2f)",
                decision["camera_moving"], decision["method"], decision["n_frames"],
                decision["median_cam_motion"], decision["frac_high_cam_motion"])
