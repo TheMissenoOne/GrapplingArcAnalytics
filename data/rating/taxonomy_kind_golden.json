@@ -202,10 +202,6 @@
       "kind": "action",
       "type": "takedown"
     },
-    "arm lock": {
-      "kind": "action",
-      "type": "submission"
-    },
     "arm triangle choke": {
       "kind": "action",
       "type": "submission"
@@ -716,10 +712,6 @@
       "kind": "action",
       "type": "submission"
     },
-    "north south choke": {
-      "kind": "action",
-      "type": "submission"
-    },
     "north south control": {
       "kind": "state",
       "orientation": "neutral",
@@ -809,11 +801,6 @@
     "rear naked choke": {
       "kind": "action",
       "type": "submission"
-    },
-    "reverse de la riva": {
-      "kind": "state",
-      "orientation": "bottom",
-      "type": "guard"
     },
     "rolling": {
       "kind": "transparent",
@@ -1635,10 +1622,6 @@
       "source": "declared",
       "value": "bottom"
     },
-    "guard|Reverse De La Riva": {
-      "source": "declared",
-      "value": "bottom"
-    },
     "guard|Rubber Guard": {
       "source": "declared",
       "value": "bottom"
@@ -1987,10 +1970,6 @@
       "source": "derived",
       "value": "neutral"
     },
-    "submission|Arm Lock": {
-      "source": "derived",
-      "value": "neutral"
-    },
     "submission|Arm Triangle Choke": {
       "source": "derived",
       "value": "neutral"
@@ -2104,10 +2083,6 @@
       "value": "neutral"
     },
     "submission|Neck Crank": {
-      "source": "derived",
-      "value": "neutral"
-    },
-    "submission|North South Choke": {
       "source": "derived",
       "value": "neutral"
     },

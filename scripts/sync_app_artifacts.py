@@ -44,7 +44,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from analysis.names import _normalize_name
+from analysis.names import _normalize_name, canonicalize
 
 REPO = Path(__file__).resolve().parent.parent
 APP = REPO.parent / "GrapplingArcApp"
@@ -119,8 +119,22 @@ def _deterministic_oid(en: str) -> dict[str, str]:
 
 
 def _entry_key(node: dict[str, Any]) -> str:
+    """Exact identity key — NOT SYNONYMS-folded. Two existing App rows can legitimately
+    share a canonical key on purpose (e.g. "North South Control" / "North-South
+    Position", kept as two curated entries for display/type though their node_key folds
+    together, `analysis.names.SYNONYMS`) — folding here would let one steal the other's
+    `_id`/`name`. See `_fold_key` for the (one-directional, drop-only) synonym check."""
     en = (node.get("translations") or {}).get("en") or node.get("name") or ""
     return _normalize_name(str(en))
+
+
+def _fold_key(node: dict[str, Any]) -> str:
+    """SYNONYMS-folded key, used ONLY to decide whether an unmatched existing row is a
+    redundant duplicate of some curated concept (e.g. "Arm Lock" folds into "Armbar")
+    and should be silently dropped — never to assign its `_id`/`name` onto the curated
+    row it folds into. Analytics-internal derivation only; never reaches the graph
+    `node_key` contract."""
+    return canonicalize(_entry_key(node))
 
 
 def merge_curated_identity(
@@ -158,6 +172,12 @@ def merge_curated_identity(
         en = str(item.get("en", "")).strip()
         if not en:
             continue
+        # NOT canonicalized here: curated's own `en` values are the SYNONYMS-canonical
+        # form already — except when two curated rows share a canonical key on purpose
+        # (e.g. "North South Control" / "North-South Position", kept as two curated
+        # entries for display/type though their node_key folds together — see
+        # `analysis.names.SYNONYMS`). Folding via canonicalize here would silently drop
+        # one of those rows; only `_entry_key` (matching an EXISTING App row) needs it.
         key = _normalize_name(en)
         if key in curated_keys:
             continue  # curated file is expected pre-de-duped; defensive only
@@ -195,7 +215,16 @@ def merge_curated_identity(
             }
         merged.append(node)
 
-    app_only = [n for n in existing_nodes if _entry_key(n) not in curated_keys]
+    # A row with no exact match is only TRULY app-only if it also doesn't fold (via
+    # SYNONYMS) into a curated concept already covered above — those are redundant
+    # duplicates under a deprecated spelling and are dropped, not appended (e.g. "Arm
+    # Lock" once "Armbar" is curated; the already-matched "Armbar" row's own identity
+    # is untouched by this — see `_fold_key`).
+    folded_curated_keys = {canonicalize(k) for k in curated_keys}
+    app_only = [
+        n for n in existing_nodes
+        if _entry_key(n) not in curated_keys and _fold_key(n) not in folded_curated_keys
+    ]
     merged.extend(app_only)
 
     report = {

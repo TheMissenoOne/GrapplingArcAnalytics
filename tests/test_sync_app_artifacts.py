@@ -284,6 +284,64 @@ def test_merge_app_only_entry_appended_after_curated_block_never_dropped() -> No
     assert report["app_only_names"] == ["Electric Chair"]
 
 
+def test_merge_folds_app_only_legacy_name_via_synonym() -> None:
+    """A curated rename/fold (e.g. "Arm Lock" -> "Armbar", `analysis.names.SYNONYMS`)
+    drops the App's pre-existing row under the OLD spelling as a redundant duplicate,
+    rather than stranding it as app-only forever — but never lets it steal the `_id`/
+    `name` of whatever curated entry it folds into (that stays a separate, unrelated
+    match/new-entry decision; a distinct test below covers a real name-collision risk)."""
+    existing = [{
+        "name": "Arm Lock", "type": "submission",
+        "translations": {"pt": "Arm Lock", "en": "Arm Lock"},
+        "variations": [],
+    }]
+    curated = [{
+        "en": "Armbar", "pt": "Chave de Braço", "type": "submission", "variants": ["armbar"],
+    }]
+
+    out, report = merge_curated_identity(curated, existing)
+
+    assert report["app_only_count"] == 0
+    assert report["matched"] == 0  # no existing "Armbar" row — this is a fresh entry
+    assert report["new_count"] == 1
+    assert len(out) == 1
+    assert out[0]["translations"]["en"] == "Armbar"
+    assert out[0]["name"] == "Chave de Braço"  # curated `pt` — nothing to preserve from "Arm Lock"
+
+
+def test_merge_fold_never_lets_orphan_steal_a_distinct_matched_entrys_identity() -> None:
+    """Regression: two existing rows that canonicalize to the SAME synonym-folded key
+    but are matched by two DIFFERENT curated entries (kept separate on purpose, e.g.
+    "North South Control" / "North-South Position") must never cross-contaminate —
+    each keeps its own `_id`/`name`, and neither is dropped as the other's duplicate."""
+    existing = [
+        {
+            "_id": {"$oid": "control1"}, "name": "Controle Norte-Sul", "type": "control",
+            "translations": {"pt": "Controle Norte-Sul", "en": "North South Control"},
+            "variations": [],
+        },
+        {
+            "_id": {"$oid": "position1"}, "name": "Posição Norte-Sul", "type": "control",
+            "translations": {"pt": "Posição Norte-Sul", "en": "North-South Position"},
+            "variations": [],
+        },
+    ]
+    curated = [
+        {"en": "North South Control", "pt": "Controle Norte-Sul", "type": "control",
+         "variants": []},
+        {"en": "North-South Position", "pt": "Posição Norte-Sul", "type": "control",
+         "variants": []},
+    ]
+
+    out, report = merge_curated_identity(curated, existing)
+
+    assert report["matched"] == 2
+    assert report["app_only_count"] == 0
+    by_id = {n["_id"]["$oid"]: n for n in out}
+    assert by_id["control1"]["name"] == "Controle Norte-Sul"
+    assert by_id["position1"]["name"] == "Posição Norte-Sul"
+
+
 def test_merge_preserves_curated_order_for_collision_priority() -> None:
     """First-writer-wins lookups (App `buildCategoryResolver`, Analytics
     `technique_match._index`) both resolve a shared alias to whichever library

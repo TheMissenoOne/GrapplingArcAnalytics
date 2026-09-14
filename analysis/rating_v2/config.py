@@ -99,7 +99,7 @@ class EngineConfig:
 # published Grappling ELO and athletes.elo read the same corpus again.
 # 2026-09-04 — N1 aliases + N2 composite reprocess + Turtle=control + D7 (one replay for all;
 # corpus: 912 matches after the N2 expansion, 248 composite events split).
-SITE_RATING_RUN_ID: str | None = "b679c3f0-60a7-44ac-b993-9a173074ad09"
+SITE_RATING_RUN_ID: str | None = "cef15301-ec99-4189-89b9-50439d233e12"
 
 # Publish-confidence cut. An editorial decision calibrated against measured impact
 # (RD<=150 -> 30 trusted athletes / 544 of 894 bouts hidden; raised to RD<=200 -> 87

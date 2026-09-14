@@ -132,7 +132,7 @@
     "takedown"
   ],
   "arm lock": [
-    "Arm Lock",
+    "Armbar",
     "submission"
   ],
   "arm triangle": [
@@ -284,7 +284,7 @@
     "control"
   ],
   "bent armlock": [
-    "Arm Lock",
+    "Armbar",
     "submission"
   ],
   "berimba": [
@@ -481,10 +481,6 @@
   ],
   "chave de brao": [
     "Armbar",
-    "submission"
-  ],
-  "chave de brao genrica": [
-    "Arm Lock",
     "submission"
   ],
   "chave de calcanhar": [
@@ -828,7 +824,7 @@
     "pass"
   ],
   "de la riva reversa": [
-    "Reverse De La Riva",
+    "Inverted De La Riva Guard",
     "guard"
   ],
   "de quatro": [
@@ -868,7 +864,7 @@
     "guard"
   ],
   "dlr invertida": [
-    "Reverse De La Riva",
+    "Inverted De La Riva Guard",
     "guard"
   ],
   "dlr leg drag": [
@@ -1088,7 +1084,7 @@
     "submission"
   ],
   "estrangulamento nortesul": [
-    "North South Choke",
+    "North-South Choke",
     "submission"
   ],
   "estrangulamento por trs": [
@@ -1412,7 +1408,7 @@
     "guard"
   ],
   "guarda de la riva invertida": [
-    "Reverse De La Riva",
+    "Inverted De La Riva Guard",
     "guard"
   ],
   "guarda de perna": [
@@ -2224,7 +2220,7 @@
     "control"
   ],
   "north south choke": [
-    "North South Choke",
+    "North-South Choke",
     "submission"
   ],
   "north south control": [
@@ -2240,7 +2236,7 @@
     "control"
   ],
   "northsouth choke": [
-    "North South Choke",
+    "North-South Choke",
     "submission"
   ],
   "northsouth pass": [
@@ -2808,7 +2804,7 @@
     "takedown"
   ],
   "rdlr": [
-    "Reverse De La Riva",
+    "Inverted De La Riva Guard",
     "guard"
   ],
   "reap falso": [
@@ -2860,7 +2856,7 @@
     "guard"
   ],
   "reverse dlr": [
-    "Reverse De La Riva",
+    "Inverted De La Riva Guard",
     "guard"
   ],
   "reverse triangle": [
