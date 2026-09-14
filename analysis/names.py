@@ -249,6 +249,7 @@ ATHLETE_ALIASES: dict[str, str] = {
     "raphaela guedes final": "rafaela guedes", # stage tag leaked into the name, same class as
                                                # "felipe pena sf" above
     "mo black": "morgan black",                # nickname; ADCC Trials 2023/2024 then ADCC 2024
+    "bia mesquita": "beatriz mesquita",        # Bia → Beatriz Mesquita (owner, 2026-09-14)
     "gabby garcia": "gabi garcia",             # her single bout is Craig Jones at CJI 2024 —
                                                # the publicised superfight, which is hers
     "gabrielle garcia": "gabi garcia",         # full name, no bouts; aliased so a future
