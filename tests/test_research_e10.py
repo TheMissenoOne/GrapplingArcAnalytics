@@ -106,19 +106,19 @@ def test_joint_permutation_destroys_the_signal_it_is_meant_to_destroy() -> None:
 # ── corpus preparation counts every drop ────────────────────────────────────────
 def test_to_bouts_drops_and_counts_rather_than_defaulting() -> None:
     rows = [
-        _Row("keep", [0.0, 100.0, 300.0], "END/points"),
-        _Row("no-ts", None, "END/submission"),
-        _Row("no-term", [0.0, 50.0], None),
-        _Row("draw", [0.0, 400.0], "END/draw"),
-        _Row("too-long", [0.0, 20000.0], "END/points"),
-        _Row("jumbled", [0.0, 300.0, 100.0], "END/submission"),
+        _Row(("keep",), [0.0, 100.0, 300.0], "END/points"),
+        _Row(("no-ts",), None, "END/submission"),
+        _Row(("no-term",), [0.0, 50.0], None),
+        _Row(("draw",), [0.0, 400.0], "END/draw"),
+        _Row(("too-long",), [0.0, 20000.0], "END/points"),
+        _Row(("jumbled",), [0.0, 300.0, 100.0], "END/submission"),
     ]
     bouts, prep = to_bouts(rows)
     assert prep == Prep(gated=6, no_ts=1, no_terminal=1, draw=1, over_span=1,
                         non_monotonic=1, kept=2)
-    assert {b.key for b in bouts} == {"keep", "jumbled"}
+    assert {b.key for b in bouts} == {("keep",), ("jumbled",)}
     # duration is max(elapsed), so a non-monotonic ts is counted but does not change the clock
-    assert next(b for b in bouts if b.key == "jumbled").duration == 300.0
+    assert next(b for b in bouts if b.key == ("jumbled",)).duration == 300.0
 
 
 def test_merging_draws_into_points_keeps_them_as_points() -> None:
