@@ -41,14 +41,15 @@ DEFAULT_FILE = PROCESSED_DIR / "technique_library.json"
 # Raw SQL kept as a string; sqlalchemy.text() is wrapped lazily in seed() so
 # --dry-run works without the optional `postgres` extra installed.
 _UPSERT_SQL = """
-    insert into public.technique_nodes (node_key, label, type, node_type, source, elo_deviance)
-    values (:node_key, :label, :type, :node_type, 'library', :elo_deviance)
+    insert into public.technique_nodes (node_key, label, type, node_type, source, elo_deviance, origin)
+    values (:node_key, :label, :type, :node_type, 'library', :elo_deviance, :origin)
     on conflict (node_key) do update set
         label         = excluded.label,
         type          = excluded.type,
         node_type     = excluded.node_type,
         source        = 'library',
         elo_deviance  = excluded.elo_deviance,
+        origin        = excluded.origin,
         updated_at    = now()
 """
 
@@ -65,10 +66,27 @@ _TYPE_TO_NODE_TYPE = {
     "concept": "concept",
 }
 
+# export/tech_library.py's per-row `source` tier -> technique_nodes.origin (alembic 0065).
+# Distinct axis from `source` in the upsert (always 'library' here); unmapped/missing tier
+# (e.g. a raw 'user' node this file never touches) -> None, never guessed.
+_SOURCE_TO_ORIGIN = {
+    "library": "curated",
+    "grappling_techniques_dataset": "dataset",
+    "adcc_submission_data": "dataset",
+    "athlete_match": "corpus",
+}
+
+
 def _canonical_label(item: dict[str, Any]) -> str:
     """Prefer the English translation as the canonical, locale-independent label."""
     tr = item.get("translations") or {}
     return str(tr.get("en") or item.get("name") or "").strip()
+
+
+def _origin_histogram(rows: dict[str, dict[str, Any]]) -> dict[str, int]:
+    from collections import Counter
+
+    return dict(Counter(r["origin"] or "unknown" for r in rows.values()))
 
 
 def seed(path: Path, dry_run: bool = False) -> int:
@@ -88,12 +106,15 @@ def seed(path: Path, dry_run: bool = False) -> int:
             "type": "technique",
             "node_type": _TYPE_TO_NODE_TYPE.get(dataset_type, dataset_type),
             "elo_deviance": item.get("eloDeviance", 0),
+            "origin": _SOURCE_TO_ORIGIN.get(str(item.get("source") or "")),
         }
 
     logger.info("Prepared %d distinct library node_keys from %s", len(rows), path.name)
+    histogram = _origin_histogram(rows)
+    logger.info("Origin histogram: %s", histogram)
     if dry_run:
         for r in list(rows.values())[:10]:
-            logger.info("  %s -> %s (%s)", r["node_key"], r["label"], r["node_type"])
+            logger.info("  %s -> %s (%s, origin=%s)", r["node_key"], r["label"], r["node_type"], r["origin"])
         return len(rows)
 
     from sqlalchemy import text  # lazy — only needed for actual DB writes

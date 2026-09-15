@@ -812,6 +812,10 @@ class TechniqueNode(Base):
     type: Mapped[str] = mapped_column(String(20), default="technique")
     node_type: Mapped[str] = mapped_column(String(40), default="")
     source: Mapped[str] = mapped_column(String(10), default="user")  # 'library' | 'user'
+    # Which export tier produced a 'library' row (alembic 0065). NOT the same axis as `source`
+    # above — 'curated' | 'dataset' | 'corpus' | NULL (pre-backfill; picker treats NULL as
+    # curated). See migration docstring for the full mapping to export/tech_library.py sources.
+    origin: Mapped[str | None] = mapped_column(Text, nullable=True)
     embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
     # Decision Space (DS-01/04): {offensive[], defensive[], expected_reactions[],
     # constraints[], attacker_score, defender_score}. ds_mode (DS-16) = 'expert' | 'learned'.

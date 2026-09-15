@@ -238,3 +238,25 @@ def test_render_breakdown_page_has_no_text_glyph_arrows_and_uses_icons() -> None
     train_cta = page[cta_start:page.index("</section>", cta_start)]
     assert "→" not in train_cta
     assert '<svg viewBox="0 0 24 24"' in train_cta
+
+
+def test_render_breakdown_page_maps_go_through_preview_not_a_bare_canvas() -> None:
+    # Owner rule (2026-09-15): a map on a page that scrolls is a preview + modal
+    # (GAGraph.mountPreview), never a live pan/zoom canvas sitting in the scroll flow.
+    seq = [
+        {"label": "Double Leg Takedown", "type": "takedown", "actor_id": "B", "successful": True},
+        {"label": "Mount", "type": "control", "actor_id": "B"},
+        {"label": "Sweep / Reversal", "type": "sweep", "actor_id": "A", "successful": True},
+    ]
+    a = _breakdown_athlete("A", "Dricus du Plessis", elo=794.6, series=[800.0, 794.6])
+    b = _breakdown_athlete("B", "Khamzat Chimaev", elo=811.0, series=[800.0, 811.0, 811.0])
+    bd = build_match_breakdown(_breakdown_match(seq, "B"), a, b)
+    bd["transition_graph_gv"] = _to_graphview(bd["transition_graph"])
+    page = render_breakdown_page("dricus-du-plessis-vs-khamzat-chimaev-2025", bd)
+    assert "GAGraph.mountPreview(document.getElementById('seqGraph')" in page
+    assert '<canvas id="seqGraph"' not in page
+    # the legend can no longer be a CHILD of #seqGraph — mountPreview's full-box trigger
+    # button would sit on top of it and swallow the clicks.
+    card_start = page.index('id="seqGraph"')
+    card_end = page.index("</div>", card_start) + len("</div>")
+    assert "seqLegend" not in page[card_start:card_end]

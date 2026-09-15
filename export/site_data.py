@@ -1336,15 +1336,22 @@ function gaSeek(t){
 // bundle has no pathGraph, so a stale page never renders empty.
 var PG = BD.pathGraph && BD.pathGraph.nodes && BD.pathGraph.nodes.length ? BD.pathGraph : null;
 if (PG) {
-  GAGraph.mountPaths(document.getElementById('seqGraph'), {
+  // Preview + modal (owner rule, 2026-09-15): #seqGraph is a container, not a canvas —
+  // mountPreview builds the static thumbnail's canvas AND the full interactive one (lazy,
+  // inside its own <dialog>) from this same payload.
+  GAGraph.mountPreview(document.getElementById('seqGraph'), {
     nodes: PG.nodes, links: PG.links, paths: PG.paths, unresolved: PG.unresolved,
     // §17 — the concentric-ring frame. Additive: an older bundle has neither field and draws as
     // the flow it was laid out in.
     layout: PG.layout, rings: PG.rings, ringCentre: PG.ringCentre,
     onLinkSelect: l => { if (l && l.ts != null) gaSeek(l.ts); },
-  });
+  }, {labelEn: 'Open sequence map', labelPt: 'Abrir mapa da sequência'});
 } else {
-  GAGraph.mount(document.getElementById('seqGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:BD.graph.nodes,links:BD.graph.links,
+  // legacy fallback (pre-pathGraph bundle) — #seqGraph is a container now, so give it a
+  // canvas of its own before handing it to the old force-sim renderer.
+  var sgCanvas = document.createElement('canvas'); sgCanvas.className = 'graph-canvas';
+  document.getElementById('seqGraph').appendChild(sgCanvas);
+  GAGraph.mount(sgCanvas,{mode:'map',swim:true,pan:true,zoom:true,nodes:BD.graph.nodes,links:BD.graph.links,
     onSelect:n=>{if(n&&n.ts!=null)gaSeek(n.ts);}});
 }
 const lc=[['takedown','Takedown'],['control','Control'],['guard','Guard'],['pass','Passing'],['sweep','Sweep'],['submission','Submission'],['escape','Escape'],['transition','Transition']];
@@ -1542,8 +1549,8 @@ def render_breakdown_page(
   <div class="divider"></div>
   <section class="block"><div class="wrap prose"><h2 class="sec-label">The decisive sequence</h2>
       <p class="editorial">{seq_hint}</p></div>
-    <div class="wrap viz"><div class="graph-card seq-card"><canvas id="seqGraph" class="graph-canvas"></canvas>
-      <div class="graph-legend" id="seqLegend"></div></div></div></section>
+    <div class="wrap viz"><div class="graph-card seq-card" id="seqGraph"></div>
+      <div class="graph-legend" id="seqLegend"></div></div></section>
   <div class="divider"></div>
   <section class="block"><div class="wrap prose">{_prose_html(sections[1:], sections_pt[1:])}</div></section>
   <div class="divider"></div>
@@ -1636,16 +1643,23 @@ function gaWatch(ref){
 // Falls back to the legacy every-event-is-a-node graph when an older bundle has no pathGraph.
 var CPG = P.pathGraph && P.pathGraph.nodes && P.pathGraph.nodes.length ? P.pathGraph : null;
 if (CPG) {
-  GAGraph.mountPaths(document.getElementById('careerGraph'), {
+  // Preview + modal (owner rule, 2026-09-15): #careerGraph is a container, not a canvas —
+  // mountPreview builds the static thumbnail's canvas AND the full interactive one (lazy,
+  // inside its own <dialog>) from this same payload.
+  GAGraph.mountPreview(document.getElementById('careerGraph'), {
     nodes: CPG.nodes, links: CPG.links, paths: CPG.paths, unresolved: CPG.unresolved,
     // §17 — the concentric-ring frame (additive; see the breakdown's own note).
     layout: CPG.layout, rings: CPG.rings, ringCentre: CPG.ringCentre,
     // footage still hangs off the TECHNIQUE, which is now an action on the stroke
     onLinkSelect: l => { if (l && P.videos) { for (const a of (l.actions||[])) { if (P.videos[a.key]) { gaWatch(P.videos[a.key]); return; } } } },
     onSelect: n => { if (n && P.videos && n.stateKey) gaWatch(P.videos[n.stateKey]); },
-  });
+  }, {labelEn: 'Open career map', labelPt: 'Abrir mapa da carreira'});
 } else {
-  GAGraph.mount(document.getElementById('careerGraph'),{mode:'map',swim:true,pan:true,zoom:true,nodes:P.graph.nodes,links:P.graph.links,
+  // legacy fallback (pre-pathGraph bundle) — #careerGraph is a container now, so give it a
+  // canvas of its own before handing it to the old force-sim renderer.
+  var cgCanvas = document.createElement('canvas'); cgCanvas.className = 'graph-canvas';
+  document.getElementById('careerGraph').appendChild(cgCanvas);
+  GAGraph.mount(cgCanvas,{mode:'map',swim:true,pan:true,zoom:true,nodes:P.graph.nodes,links:P.graph.links,
     onSelect:n=>{if(n&&P.videos)gaWatch(P.videos[n.id]);}});
 }
 const lg=[['guard','Guard'],['pass','Passing'],['control','Control'],['submission','Submission'],['takedown','Takedown'],['transition','Transition']];
@@ -1713,9 +1727,12 @@ def render_profile_page(profile: dict[str, Any]) -> str:
     # Decision Flow — second view over the same career, when the athlete has enough
     # observed exchanges to compile one (see analysis/dossier_decision_flow eligibility).
     # Not eligible → the career section stays exactly the single Game Map card it always was.
+    # `.career .graph-card` (site.css) sets the 440px height — mountPreview builds its own
+    # canvas+trigger inside #careerGraph, so the legend moves OUT to a sibling: a child would
+    # sit under the preview's full-box trigger button and never be reachable.
     game_map_card = f'''
-  <div class="graph-card"><canvas id="careerGraph" class="graph-canvas" style="height:440px"></canvas>
-    <div class="graph-legend" id="legend"></div></div>
+  <div class="graph-card" id="careerGraph"></div>
+  <div class="graph-legend" id="legend"></div>
   <p class="graph-hint">{graph_hint}</p>
   <div id="dossierVideo" class="graph-card" style="display:none;margin-top:14px"></div>'''
     df_tabs_html = ""
