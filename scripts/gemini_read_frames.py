@@ -113,16 +113,21 @@ def empty_answer(reason: str) -> dict[str, Any]:
     return {"bout": {}, "events": [], "source": f"gemini_read_frames (dry-run: {reason})"}
 
 
-def build_generate_config(thinking: str | None) -> Any:
+def build_generate_config(thinking: str | None, temperature: float | None = None) -> Any:
     """Shared by both attempts in ``read_frames`` -- with or without ``thinking_config``.
     ``automatic_function_calling`` disabled: we never pass tools, so the AFC branch (and its
-    "Direct use of AFC..." log warning) has nothing to do here."""
+    "Direct use of AFC..." log warning) has nothing to do here. ``temperature`` defaults to
+    ``None`` (field omitted, the SDK/model default applies) so every existing caller here and
+    in ``gemini_finetune.py`` is unaffected; ``scripts/research/vision_read_experiment.py`` is
+    the first caller that passes one explicitly."""
     from google.genai import types
 
     kwargs: dict[str, Any] = {
         "response_mime_type": "application/json",
         "automatic_function_calling": types.AutomaticFunctionCallingConfig(disable=True),
     }
+    if temperature is not None:
+        kwargs["temperature"] = temperature
     if thinking:
         kwargs["thinking_config"] = types.ThinkingConfig(thinking_level=thinking.upper())
     return types.GenerateContentConfig(**kwargs)
