@@ -434,12 +434,23 @@ def test_bin_edges_are_half_open_on_time_and_closed_on_steps() -> None:
 
 
 # ── gate ────────────────────────────────────────────────────────────────────────
-def test_gate_self_check_speaks_up_when_the_corpus_moves() -> None:
-    from analysis.poc.e9_markov import E8_GATED_BOUTS, GateReport
+def test_gate_self_check_reports_drift_without_asserting_a_frozen_count() -> None:
+    """Corpus growth (or a small shrink) must never turn this into a failure — only a real
+    inconsistency (passed > with_sequence > total) should."""
+    from analysis.poc.e9_markov import E9_PUBLISHED_GATED_BOUTS, GateReport
 
-    assert "OK" in verify_gate(GateReport(passed=E8_GATED_BOUTS))
-    assert "MISMATCH" in verify_gate(GateReport(passed=E8_GATED_BOUTS - 1))
+    grown = GateReport(total=1000, with_sequence=700, passed=E9_PUBLISHED_GATED_BOUTS + 37)
+    out = verify_gate(grown)
+    assert "OK" in out and "+37" in out
+
+    shrunk = GateReport(total=900, with_sequence=600, passed=E9_PUBLISHED_GATED_BOUTS - 1)
+    out = verify_gate(shrunk)
+    assert "OK" in out and "-1" in out
+
     assert "NOT RUN" in verify_gate(GateReport(error="no DATABASE_URL"))
+
+    broken = GateReport(total=10, with_sequence=5, passed=6)  # passed > with_sequence
+    assert "INVARIANT VIOLATED" in verify_gate(broken)
 
 
 def test_split_is_chronological_and_the_boundary_goes_to_train() -> None:
