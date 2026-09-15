@@ -1,0 +1,420 @@
+{
+  "_comment": "Proposta (NAO a tabela viva) do audit 2026-09-15 pedido pelo dono depois de achar 'Crucifix / Omoplata', 'Omoplata / Triangle', 'Omoplata (Shoulder Lock)' fora da tabela curada. Varre matches.sequence (911 lutas, 741 com sequence), technique_nodes(source='library') e analysis/data/technique_library.json por 9 padroes de separador/sufixo/prefixo. Relatorio completo: docs/repairs/2026-09-15_composite_labels_audit.md. So os rotulos AINDA presentes como eventos crus em matches.sequence (37) tem linha aqui -- rotulos que so aparecem em technique_nodes (orfaos do reprocess N2 de 2026-09-04) estao listados no relatorio, nao aqui. Chaves = analysis.names._normalize_name do rotulo bruto, igual composite_labels.json. Verdict='decompose' -> candidato a entrar na tabela viva (nao entrou sozinho: precisa revisao humana, principalmente os n=1). Verdict='keep'/'reject' -> nao decompor, motivo em 'why'.",
+  "Escape": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "reject",
+    "why": "Palavra de resultado generica ('Escape'), nao um rotulo composto de dois nos -- nao ha 'B' para separar de 'A'. E um rotulo vago (tecnica nao especificada), problema de precisao de dado, nao de composicao N2. Fora de escopo desta decomposicao (184 eventos, 111 lutas).",
+    "events": 184,
+    "bouts": 111
+  },
+  "Finish": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "reject",
+    "why": "Palavra de resultado generica ('Finish'), nao um rotulo composto de dois nos -- nao ha 'B' para separar de 'A'. E um rotulo vago (tecnica nao especificada), problema de precisao de dado, nao de composicao N2. Fora de escopo desta decomposicao (112 eventos, 66 lutas).",
+    "events": 112,
+    "bouts": 66
+  },
+  "Tap": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "reject",
+    "why": "Palavra de resultado generica ('Tap'), nao um rotulo composto de dois nos -- nao ha 'B' para separar de 'A'. E um rotulo vago (tecnica nao especificada), problema de precisao de dado, nao de composicao N2. Fora de escopo desta decomposicao (87 eventos, 72 lutas).",
+    "events": 87,
+    "bouts": 72
+  },
+  "Submission": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "reject",
+    "why": "Palavra de resultado generica ('Submission'), nao um rotulo composto de dois nos -- nao ha 'B' para separar de 'A'. E um rotulo vago (tecnica nao especificada), problema de precisao de dado, nao de composicao N2. Fora de escopo desta decomposicao (68 eventos, 59 lutas).",
+    "events": 68,
+    "bouts": 59
+  },
+  "Bridge (Upa Escape)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Nome canonico da biblioteca (`en` em technique_library.json) cujo parentetico/prefixo E o proprio nome alternativo curado (ex.: Omoplata = 'Shoulder Lock', Upa = 'Bridge') -- decompor criaria um no falso para o sinonimo. Composto legitimo.",
+    "events": 49,
+    "bouts": 37
+  },
+  "Saddle (Inside Sankaku)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Nome canonico da biblioteca (`en` em technique_library.json) cujo parentetico/prefixo E o proprio nome alternativo curado (ex.: Omoplata = 'Shoulder Lock', Upa = 'Bridge') -- decompor criaria um no falso para o sinonimo. Composto legitimo.",
+    "events": 35,
+    "bouts": 25
+  },
+  "Takedown Defense": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Nome canonico da biblioteca (`en` em technique_library.json) cujo parentetico/prefixo E o proprio nome alternativo curado (ex.: Omoplata = 'Shoulder Lock', Upa = 'Bridge') -- decompor criaria um no falso para o sinonimo. Composto legitimo.",
+    "events": 29,
+    "bouts": 24
+  },
+  "Top Control": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Nome canonico da biblioteca (`en` em technique_library.json) cujo parentetico/prefixo E o proprio nome alternativo curado (ex.: Omoplata = 'Shoulder Lock', Upa = 'Bridge') -- decompor criaria um no falso para o sinonimo. Composto legitimo.",
+    "events": 18,
+    "bouts": 17
+  },
+  "Americana (Keylock)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Nome canonico da biblioteca (`en` em technique_library.json) cujo parentetico/prefixo E o proprio nome alternativo curado (ex.: Omoplata = 'Shoulder Lock', Upa = 'Bridge') -- decompor criaria um no falso para o sinonimo. Composto legitimo.",
+    "events": 16,
+    "bouts": 16
+  },
+  "Omoplata (Shoulder Lock)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Nome canonico da biblioteca (`en` em technique_library.json) cujo parentetico/prefixo E o proprio nome alternativo curado (ex.: Omoplata = 'Shoulder Lock', Upa = 'Bridge') -- decompor criaria um no falso para o sinonimo. Composto legitimo.",
+    "events": 11,
+    "bouts": 9
+  },
+  "Top Control (Half Guard)": {
+    "state": "Half Guard",
+    "action": null,
+    "to": null,
+    "perspective": {
+      "actor": "top"
+    },
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja curado em data/taxonomy/composite_labels.json (forma {state,perspective} -- rotulo permanece inalterado por desenho, so ganha metadado). Nenhuma acao necessaria.",
+    "events": 8,
+    "bouts": 7
+  },
+  "Top Half Guard": {
+    "state": "Half Guard",
+    "action": null,
+    "to": null,
+    "perspective": {
+      "actor": "top"
+    },
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja curado em data/taxonomy/composite_labels.json (forma {state,perspective} -- rotulo permanece inalterado por desenho, so ganha metadado). Nenhuma acao necessaria.",
+    "events": 7,
+    "bouts": 7
+  },
+  "Body Triangle (Bottom)": {
+    "state": "Body Triangle",
+    "action": null,
+    "to": null,
+    "perspective": {
+      "actor": "bottom"
+    },
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja curado em data/taxonomy/composite_labels.json (forma {state,perspective} -- rotulo permanece inalterado por desenho, so ganha metadado). Nenhuma acao necessaria.",
+    "events": 2,
+    "bouts": 2
+  },
+  "Head‑Arm Control (Top)": {
+    "state": "Head-Arm Control",
+    "action": null,
+    "to": null,
+    "perspective": {
+      "actor": "top"
+    },
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja curado em data/taxonomy/composite_labels.json (forma {state,perspective} -- rotulo permanece inalterado por desenho, so ganha metadado). Nenhuma acao necessaria.",
+    "events": 2,
+    "bouts": 2
+  },
+  "Knockdown (right hand)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Parentetico e qualificador/contexto (variante de estilo, tag de periodo de wrestling SV=Sudden Victory/TB=Tie Breaker, ou golpe de striking em luta MMA), nao um segundo no de grappling -- mesmo padrao de '50/50 Guard'/'X-Guard'. Rotulo nao esta na biblioteca curada hoje (gap de dicionario para trabalho futuro de N1, nao de decomposicao N2).",
+    "events": 2,
+    "bouts": 2
+  },
+  "Leg Entanglement / 50/50": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 2,
+    "bouts": 1
+  },
+  "Reset / Stalemate": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 2,
+    "bouts": 1
+  },
+  "Shrimp (Hip Escape)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Nome canonico da biblioteca (`en` em technique_library.json) cujo parentetico/prefixo E o proprio nome alternativo curado (ex.: Omoplata = 'Shoulder Lock', Upa = 'Bridge') -- decompor criaria um no falso para o sinonimo. Composto legitimo.",
+    "events": 2,
+    "bouts": 1
+  },
+  "Takedown (Back Exposure)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "reject",
+    "why": "'Back Exposure' nao existe na biblioteca curada (gap de dicionario) -- nao ha chave curada para popular 'to'. Nao decompor sem antes dar entrada propria a 'Back Exposure' (ou resolver que e sinonimo de 'Back Take'/'Back Control'); ate la o parentetico fica como descricao presa ao rotulo. 2 eventos, 2 lutas.",
+    "events": 2,
+    "bouts": 2
+  },
+  "Ankle Pick Takedown (SV)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Parentetico e qualificador/contexto (variante de estilo, tag de periodo de wrestling SV=Sudden Victory/TB=Tie Breaker, ou golpe de striking em luta MMA), nao um segundo no de grappling -- mesmo padrao de '50/50 Guard'/'X-Guard'. Rotulo nao esta na biblioteca curada hoje (gap de dicionario para trabalho futuro de N1, nao de decomposicao N2).",
+    "events": 1,
+    "bouts": 1
+  },
+  "Armbar / Choi Bar": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Armbar / Triangle": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Arm‑Triangle / Head‑Arm Strangle": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Guard Pass (Tripod)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Parentetico e qualificador/contexto (variante de estilo, tag de periodo de wrestling SV=Sudden Victory/TB=Tie Breaker, ou golpe de striking em luta MMA), nao um segundo no de grappling -- mesmo padrao de '50/50 Guard'/'X-Guard'. Rotulo nao esta na biblioteca curada hoje (gap de dicionario para trabalho futuro de N1, nao de decomposicao N2).",
+    "events": 1,
+    "bouts": 1
+  },
+  "Half Guard (flat)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Parentetico e qualificador/contexto (variante de estilo, tag de periodo de wrestling SV=Sudden Victory/TB=Tie Breaker, ou golpe de striking em luta MMA), nao um segundo no de grappling -- mesmo padrao de '50/50 Guard'/'X-Guard'. Rotulo nao esta na biblioteca curada hoje (gap de dicionario para trabalho futuro de N1, nao de decomposicao N2).",
+    "events": 1,
+    "bouts": 1
+  },
+  "Katagatame / Darce": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Katagatame / Gift Wrap": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Knee Crush / Calf Slicer": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Knockdown (head kick)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Parentetico e qualificador/contexto (variante de estilo, tag de periodo de wrestling SV=Sudden Victory/TB=Tie Breaker, ou golpe de striking em luta MMA), nao um segundo no de grappling -- mesmo padrao de '50/50 Guard'/'X-Guard'. Rotulo nao esta na biblioteca curada hoje (gap de dicionario para trabalho futuro de N1, nao de decomposicao N2).",
+    "events": 1,
+    "bouts": 1
+  },
+  "Knockdown (punches)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Parentetico e qualificador/contexto (variante de estilo, tag de periodo de wrestling SV=Sudden Victory/TB=Tie Breaker, ou golpe de striking em luta MMA), nao um segundo no de grappling -- mesmo padrao de '50/50 Guard'/'X-Guard'. Rotulo nao esta na biblioteca curada hoje (gap de dicionario para trabalho futuro de N1, nao de decomposicao N2).",
+    "events": 1,
+    "bouts": 1
+  },
+  "Leg Entry (50/50)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "'Leg Entry' resolve para 'Leg Entanglement' (guard) e '50/50' resolve para '50/50 Guard' (guard) -- os dois lados sao ESTADOS da mesma familia, nao cabem no formato {action,to} nem {state,action}. Quase-duplicata do par ja revisado 'leg entanglement 5050' (_skipped: 'ambos os lados sao ESTADOS'). n=1 (CJI).",
+    "events": 1,
+    "bouts": 1
+  },
+  "Neck Crank / Rear Naked Choke": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Omoplata / Triangle": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Ja revisado em composite_labels.json._skipped (par ambiguo ou nomenclatura alternativa da MESMA tecnica) -- decompor duplicaria a ocorrencia em vez de descreve-la melhor. Nenhuma acao nova.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Pull Guard / Sit Guard": {
+    "state": null,
+    "action": "Guard Pull",
+    "to": "Seated Guard",
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "decompose",
+    "why": "O bloqueio original (_skipped) era 'sit guard pode ser alias de seated guard, decisao N1 pendente' -- ja resolvido: technique_library.json ja tem 'sit guard' como variant de 'Seated Guard' hoje. 'Pull Guard' resolve para 'Guard Pull' (transition). Ambos lados existem na biblioteca -> cabe no formato {action,to}. n=1 (WNO31) -- confirmar contra a transcricao antes de promover para a tabela viva.",
+    "events": 1,
+    "bouts": 1
+  },
+  "Quick Stand‑up Escape (TB)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Parentetico e qualificador/contexto (variante de estilo, tag de periodo de wrestling SV=Sudden Victory/TB=Tie Breaker, ou golpe de striking em luta MMA), nao um segundo no de grappling -- mesmo padrao de '50/50 Guard'/'X-Guard'. Rotulo nao esta na biblioteca curada hoje (gap de dicionario para trabalho futuro de N1, nao de decomposicao N2).",
+    "events": 1,
+    "bouts": 1
+  },
+  "Rear Naked Choke (One-Arm)": {
+    "state": null,
+    "action": null,
+    "to": null,
+    "perspective": null,
+    "alias_of": null,
+    "verdict": "keep",
+    "why": "Parentetico e qualificador/contexto (variante de estilo, tag de periodo de wrestling SV=Sudden Victory/TB=Tie Breaker, ou golpe de striking em luta MMA), nao um segundo no de grappling -- mesmo padrao de '50/50 Guard'/'X-Guard'. Rotulo nao esta na biblioteca curada hoje (gap de dicionario para trabalho futuro de N1, nao de decomposicao N2).",
+    "events": 1,
+    "bouts": 1
+  },
+  "Top Control (Body Lock)": {
+    "state": "Body Lock",
+    "action": null,
+    "to": null,
+    "perspective": {
+      "actor": "top"
+    },
+    "alias_of": null,
+    "verdict": "decompose",
+    "why": "Mesmo padrao das 4 perspectivas ja curadas (top half guard / top control half guard / body triangle bottom / headarm control top). 'Body Lock' e state curado (N0 moveu control/Body Lock -> state, 68 eventos no corpus principal). So 1 evento no corpus mas o padrao e identico -- gap de cobertura, nao caso novo. Rotulo NAO muda (perspectiva e metadado, 04 S1).",
+    "events": 1,
+    "bouts": 1
+  }
+}
