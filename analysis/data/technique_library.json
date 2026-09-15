@@ -921,6 +921,19 @@
     ]
   },
   {
+    "en": "Headlock",
+    "pt": "Gravata",
+    "type": "control",
+    "variants": [
+      "headlock",
+      "gravata",
+      "side headlock",
+      "gravata lateral",
+      "standing headlock",
+      "headlock control"
+    ]
+  },
+  {
     "en": "Headquarters Pass",
     "pt": "Passagem Headquarters",
     "type": "pass",
