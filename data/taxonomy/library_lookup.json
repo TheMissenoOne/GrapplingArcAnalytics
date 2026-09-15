@@ -1323,12 +1323,20 @@
     "Granby Roll",
     "escape"
   ],
+  "gravata": [
+    "Headlock",
+    "control"
+  ],
   "gravata cruzada": [
     "Cross Choke",
     "submission"
   ],
   "gravata frontal": [
     "Front Headlock",
+    "control"
+  ],
+  "gravata lateral": [
+    "Headlock",
     "control"
   ],
   "gravata peruana": [
@@ -1569,6 +1577,14 @@
   ],
   "head and arm control": [
     "Scarf Hold",
+    "control"
+  ],
+  "headlock": [
+    "Headlock",
+    "control"
+  ],
+  "headlock control": [
+    "Headlock",
     "control"
   ],
   "headquarters": [
@@ -3043,6 +3059,10 @@
     "Side Control",
     "control"
   ],
+  "side headlock": [
+    "Headlock",
+    "control"
+  ],
   "side mount": [
     "Mount",
     "control"
@@ -3250,6 +3270,10 @@
   "stand up escape": [
     "Escape to Standing",
     "escape"
+  ],
+  "standing headlock": [
+    "Headlock",
+    "control"
   ],
   "standup escape": [
     "Escape to Standing",
