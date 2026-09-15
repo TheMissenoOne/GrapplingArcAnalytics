@@ -407,12 +407,20 @@ class AthleteEloEngine:
     Known simplification: ``Match`` rows carry no per-bout date (only ``year`` and
     ``created_at``), so every replayed match gets ``date=None`` -- ``athlete_elo``'s
     temporal K-decay is inert here rather than biased by wall-clock run time.
+
+    ``competitive_mult`` is passed straight through to ``replay_matches``. It is the only
+    handle on that engine's K LEVEL that already exists, and it is an exact one: K =
+    base(n) x gap x competitive_mult x decay, so scaling it is arithmetically identical to
+    scaling the whole ``_base_k`` ladder. ``scripts/research/athlete_elo_base_k.py`` sweeps
+    it for that reason; the default reproduces the shipped competitor path.
     """
 
-    name = "athlete-elo"
-
-    def __init__(self, rank_targets: Mapping[str, float]) -> None:
+    def __init__(self, rank_targets: Mapping[str, float],
+                 competitive_mult: float = athlete_elo.COMPETITIVE_K_MULT,
+                 name: str = "athlete-elo") -> None:
         self.rank_targets = rank_targets
+        self.competitive_mult = competitive_mult
+        self.name = name
         self.history: dict[str, list[Any]] = defaultdict(list)
         self.opp_elos: dict[str, list[float]] = defaultdict(list)
         self.mean: dict[str, float] = {}
@@ -443,6 +451,7 @@ class AthleteEloEngine:
             self.opp_elos[me].append(self._target(opp))
             _, snapshots = athlete_elo.replay_matches(
                 me, self.history[me], self._target(me), self.opp_elos[me], belt="black",
+                competitive_mult=self.competitive_mult,
             )
             if snapshots:
                 self.mean[me] = snapshots[-1]

@@ -545,14 +545,16 @@ def run_corpus(source: str, bouts: Sequence[Bout], dropped: Mapping[str, int],
     return "\n".join(out)
 
 
-def write_block(body: str, doc: Path = DOC) -> None:
+def write_block(body: str, doc: Path = DOC, marker: str = MARKER) -> None:
     """Replace the text between the two RESULTS markers; the pre-registration above
-    the first marker is never touched by a run."""
+    the first marker is never touched by a run. ``marker`` is a parameter so a sibling
+    study (``athlete_elo_base_k.py``) writes its own doc through this same rule instead
+    of copying it."""
     text = doc.read_text(encoding="utf-8")
-    pattern = re.compile(re.escape(MARKER) + r".*?" + re.escape(MARKER), re.DOTALL)
+    pattern = re.compile(re.escape(marker) + r".*?" + re.escape(marker), re.DOTALL)
     if not pattern.search(text):
-        raise SystemExit(f"{doc} has no {MARKER} pair — pre-registration must exist first")
-    doc.write_text(pattern.sub(f"{MARKER}\n\n{body}\n{MARKER}", text), encoding="utf-8")
+        raise SystemExit(f"{doc} has no {marker} pair — pre-registration must exist first")
+    doc.write_text(pattern.sub(f"{marker}\n\n{body}\n{marker}", text), encoding="utf-8")
 
 
 def self_check() -> int:
