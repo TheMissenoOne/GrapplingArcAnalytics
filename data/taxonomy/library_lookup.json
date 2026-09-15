@@ -39,6 +39,10 @@
     "Guard Break",
     "transition"
   ],
+  "abraar as pernas": [
+    "Leg Hug",
+    "control"
+  ],
   "abraco de perna": [
     "Leg Hug",
     "control"
@@ -2105,6 +2109,10 @@
   ],
   "meia guarda invertida": [
     "Inverted Half Guard",
+    "guard"
+  ],
+  "meia guarda peito com peito": [
+    "Half Guard",
     "guard"
   ],
   "meia guarda por cima": [
