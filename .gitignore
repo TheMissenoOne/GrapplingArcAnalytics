@@ -30,6 +30,13 @@ data/finetune/*
 !data/finetune/manifests/
 !data/finetune/splits/
 !data/finetune/DATASET_CARD.md
+# The human verdict store (scripts/dataset_review.py, scripts/dictionary_audit.py) is the one
+# thing under data/finetune/ that is NOT regenerable: it is hand-made judgement on individual
+# frames. Small, text, and committed for the same reason the manifest is. Everything else the
+# audit produces (contact sheets, coverage.json, queue) is output and stays ignored.
+!data/finetune/audit/
+data/finetune/audit/*
+!data/finetune/audit/verdicts.jsonl
 
 # Jupyter
 .ipynb_checkpoints/

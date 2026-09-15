@@ -1,6 +1,6 @@
 # Dataset card — GrapplingArc vision dataset (v1)
 
-Generated 2026-09-03T01:20:56+00:00 by `scripts/vision_dataset.py`. **Generated file — do not hand-edit**;
+Generated 2026-09-15T15:23:38+00:00 by `scripts/vision_dataset.py`. **Generated file — do not hand-edit**;
 change the builder or the source answers and rebuild.
 
 ## What it is
@@ -41,7 +41,7 @@ Label origin, per line, never rewritten:
 | frames | 7117 (481 carry ≥1 label, 6636 unlabelled) |
 | labels | 933 |
 | frame bytes | 460 MB |
-| taxonomy | `node_library@8b2dcd1cfa75` (376-node technique library) |
+| taxonomy | `node_library@6bbeca545d80` (376-node technique library) |
 
 Labels by origin: `gemini` 475, `human` 458
 

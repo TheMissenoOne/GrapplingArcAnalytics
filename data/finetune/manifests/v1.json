@@ -1,4 +1,5 @@
 {
+ "applied_verdicts": {},
  "bouts": [
   {
    "athletes": [
@@ -1110,7 +1111,7 @@
    "low single leg": 2,
    "match": 2,
    "mount": 8,
-   "north south choke": 2,
+   "northsouth choke": 2,
    "northsouth position": 4,
    "open guard": 16,
    "rear naked choke": 10,
@@ -1122,7 +1123,7 @@
    "single leg takedown": 20,
    "single leg x": 2,
    "smother": 2,
-   "snap down": 8,
+   "snapdown": 8,
    "stand up": 2,
    "straight ankle lock": 4,
    "straight armbar": 2,
@@ -1177,7 +1178,7 @@
    "knee on belly": 2,
    "leg entanglement": 7,
    "mount": 2,
-   "north south choke": 2,
+   "northsouth choke": 2,
    "northsouth position": 2,
    "open guard": 2,
    "outside ashi garami": 2,
@@ -1188,7 +1189,7 @@
    "side control": 6,
    "single leg takedown": 16,
    "single leg x": 2,
-   "snap down": 8,
+   "snapdown": 8,
    "standing guillotine": 2,
    "straight ankle lock": 2,
    "takedown": 8,
@@ -1217,7 +1218,7 @@
  "dropped_events": {
   "off_library_label": 1
  },
- "generated": "2026-09-03T01:20:56+00:00",
+ "generated": "2026-09-15T15:23:38+00:00",
  "labels_by_origin": {
   "gemini": 475,
   "human": 458
@@ -1244,7 +1245,7 @@
   }
  },
  "split_file": "splits/v1.json",
- "taxonomy_version": "node_library@8b2dcd1cfa75",
+ "taxonomy_version": "node_library@6bbeca545d80",
  "train_labels_by_type_and_class": {
   "control": {
    "back control": 10,
@@ -1307,7 +1308,7 @@
    "guillotine choke": 7,
    "heel hook": 4,
    "kimura": 1,
-   "north south choke": 1,
+   "northsouth choke": 1,
    "rear naked choke": 4,
    "smother": 1,
    "straight ankle lock": 2,
@@ -1328,7 +1329,7 @@
    "knee tap": 1,
    "low single leg": 1,
    "single leg takedown": 10,
-   "snap down": 4,
+   "snapdown": 4,
    "suplex": 2,
    "takedown": 9,
    "takedown back exposure": 1,
@@ -1542,7 +1543,7 @@
   "submission/dogbar",
   "submission/foot lock",
   "submission/kimura",
-  "submission/north south choke",
+  "submission/northsouth choke",
   "submission/smother",
   "submission/straight ankle lock",
   "submission/straight armbar",

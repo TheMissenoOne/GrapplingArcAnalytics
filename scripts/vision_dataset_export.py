@@ -112,6 +112,12 @@ def _answer_from_labels(slug: str, lines: list[dict[str, Any]],
             if header.get(k) not in (None, "", {}, [])}
     events = []
     for ln in sorted(lines, key=lambda r: (r["event_ts"], r["node_key"], r["actor_key"])):
+        # A dictionary-audit line asserts "this technique is visible in this frame" and may
+        # carry no actor (scripts/dictionary_audit.py). Admissible for frame classification,
+        # never for a tuning TARGET: a null actor there teaches the model to emit one, which
+        # is the thing frame_answer.py refuses on the way in.
+        if not ln.get("actor"):
+            continue
         ev = {"ts": ln["event_ts"], "label": ln["label"], "actor": ln["actor"],
               "successful": ln["successful"], "type": ln["type"]}
         if "points" in ln:

@@ -68,6 +68,8 @@ data/finetune/
   splits/<version>.json            frozen once cut
   manifests/<version>.json         counts, class distribution, hashes, taxonomy  ← committed
   DATASET_CARD.md                  origin, privacy, measured limits              ← committed
+  audit/verdicts.jsonl             every human verdict, DURABLE — see below
+  audit/{coverage.json,queue.md,sheets/}   dictionary audit (docs/dictionary_audit.md)
   exports/<consumer>/              regenerable; never an input to anything
 ```
 
@@ -117,8 +119,17 @@ learn the sampling policy, not the sport. The manifest counts unlabelled frames 
 Promoting a model reading to `source: "human"` on review is exactly the laundering
 `frame_registrar.py` was fixed for on 2026-08-24. So review records `review` +
 `reviewer` + `reviewed_at` **alongside** the untouched `source`, and
-`vision_dataset_export.admissible` is the disjunction. `scripts/dataset_review.py` is the only
-writer of `review` and refuses a `source == "human"` line — there is nothing to review there.
+`vision_dataset_export.admissible` is the disjunction. `scripts/dataset_review.py` and
+`scripts/dictionary_audit.py apply` are the only writers of `review`, and neither touches a
+`source == "human"` line — there is nothing to review there.
+
+**A verdict lives in `audit/verdicts.jsonl`, not only in a label file.** A build REWRITES
+every `labels/<bout>.jsonl` from the answer files, so a `review` written straight into one is
+erased by the next build — which is why both writers append to that store and `build()`
+replays it at the end of every run (`vision_dataset.apply_verdicts`, counted in the manifest
+as `applied_verdicts`). It also lets a verdict on a frame no answer file mentions (a
+dictionary-audit accept) be minted back on each build. Deleting that file loses human work
+nothing can reconstruct.
 
 ---
 
@@ -209,6 +220,13 @@ content word, with their counts. Today's worst:
 | guard | `butterfly` | `butterfly guard` ×1, `butterfly half guard` ×1 |
 | submission | `lock` | `straight ankle lock` ×2, `aoki lock` ×1, `foot lock` ×1 |
 | takedown | `single` | `single leg takedown` ×10, `low single leg` ×1 |
+
+Per-technique coverage of the CURATED dictionary is measured by
+`scripts/dictionary_audit.py` — `docs/research/2026-09-15_dictionary_audit.md`, procedure
+`docs/dictionary_audit.md`. First run, 2026-09-15: of 209 curated entries **18 well-covered
+(≥8 verified frames), 56 thin, 95 zero, 29 unreachable** (no node in the reader's own
+vocabulary, so the label can never be written), **0 with a written visual definition**, and 98
+candidate labels in the corpus/reads with no curated entry at all.
 
 Two labels at ×2 each cannot be separated by any amount of tuning. **Vertex SFT has no
 per-example weight**, so the only lever is coverage: the next labelling batch should be chosen
@@ -318,6 +336,11 @@ uv run python -m scripts.gemini_finetune --eval --model projects/…/models/… 
 # 8. feed the tuned model's readings back as labels for review (active learning)
 uv run python -m scripts.dataset_review list --disputed-only
 uv run python -m scripts.dataset_review accept <label_id> --note "confirmed off frame 04490"
+
+# 9. close the COVERAGE gap §5 diagnoses — the dictionary audit (docs/dictionary_audit.md)
+uv run python -m scripts.dictionary_audit measure
+uv run python -m scripts.dictionary_audit queue
+uv run python -m scripts.dictionary_audit apply verdicts.jsonl --write
 ```
 
 ### Owner checklist — what has to exist before step 4

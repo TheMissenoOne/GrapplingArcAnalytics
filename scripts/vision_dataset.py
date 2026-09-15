@@ -352,6 +352,75 @@ def build_labels(slug: str, answer: dict[str, Any], frames: list[dict[str, Any]]
     return lines, drops
 
 
+# -------------------------------------------------------------------- verdict store
+
+VERDICTS = DATASET / "audit" / "verdicts.jsonl"
+
+
+def _verdict_key(rec: dict[str, Any]) -> tuple[str, int, str]:
+    return str(rec["bout"]), int(rec["ts_ms"]), str(rec["node_key"])
+
+
+def load_verdicts(path: Path = VERDICTS) -> list[dict[str, Any]]:
+    """Every human verdict ever recorded, newest-wins already collapsed by the writer."""
+    if not path.exists():
+        return []
+    return [json.loads(ln) for ln in path.read_text(encoding="utf-8").splitlines() if ln.strip()]
+
+
+def record_verdicts(rows: list[dict[str, Any]], path: Path = VERDICTS) -> int:
+    """Append human verdicts to the durable store. Returns how many keys are new.
+
+    One record per (bout, ts_ms, node_key): ``verdict`` (accepted|rejected), who and when,
+    and — for a claim no label line carries yet — the whole label ``line`` to mint. Keeping
+    the mint payload IN the record is what lets ``apply_verdicts`` stay dumb and lets a
+    rebuild reproduce a hand-audited frame without re-reading a sheet.
+    """
+    merged = {_verdict_key(r): r for r in load_verdicts(path)}
+    before = len(merged)
+    for r in rows:
+        merged[_verdict_key(r)] = r
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("".join(json.dumps(r, ensure_ascii=False, sort_keys=True) + "\n"
+                            for _k, r in sorted(merged.items())), encoding="utf-8")
+    return len(merged) - before
+
+
+def apply_verdicts(labels: dict[str, list[dict[str, Any]]],
+                   path: Path = VERDICTS) -> Counter[str]:
+    """Re-apply the durable store onto freshly built labels. Mutates ``labels`` in place.
+
+    ``source`` is never rewritten here either: a verdict on a model line sets ``review``
+    beside it, and a line is MINTED only when no existing line carries that claim — which is
+    the relabel case, where the claim's origin genuinely is the human who typed it.
+    """
+    stats: Counter[str] = Counter()
+    for rec in load_verdicts(path):
+        slug, ts_ms, node_key = _verdict_key(rec)
+        verdict = str(rec.get("verdict") or "")
+        rows = labels.setdefault(slug, [])
+        hit = [ln for ln in rows if ln["ts_ms"] == ts_ms and ln["node_key"] == node_key]
+        for ln in hit:
+            if ln.get("source") == "human":
+                stats["human_line_untouched"] += 1
+                continue
+            ln["review"] = verdict
+            ln["reviewer"] = rec.get("reviewer") or ln.get("reviewer")
+            ln["reviewed_at"] = rec.get("reviewed_at") or ln.get("reviewed_at")
+            if rec.get("note"):
+                ln["review_note"] = rec["note"]
+            stats[f"review_{verdict}"] += 1
+        if hit or verdict != "accepted":
+            continue
+        line = rec.get("line")
+        if not isinstance(line, dict):
+            stats["accepted_without_line"] += 1
+            continue
+        rows.append(dict(line))
+        stats["minted"] += 1
+    return stats
+
+
 # ----------------------------------------------------------------------------- split
 
 @dataclass
@@ -515,15 +584,24 @@ def build(version: str = "v1", seed: int = DEFAULT_SEED,
             seen = {ln["label_id"] for ln in labels[slug]}
             labels[slug].extend(ln for ln in lines if ln["label_id"] not in seen)
 
+    # ---- human verdicts, re-applied from the durable store
+    # A build REWRITES every labels/*.jsonl from the answer files, so a `review` written
+    # straight into one is erased by the next build. The store is the durable copy and this
+    # is where it comes back; nothing else may be the only home of a human verdict.
+    applied = apply_verdicts(labels, dataset / "audit" / "verdicts.jsonl")
+
     # ---- write labels + sheet symlinks
     (dataset / "labels").mkdir(parents=True, exist_ok=True)
     (dataset / "sheets").mkdir(parents=True, exist_ok=True)
     for slug, lines in labels.items():
         lines.sort(key=lambda r: (r["ts_ms"], r["node_key"], r["actor_key"], r["source"]))
-        bouts[slug].n_labels = len(lines)
+        if slug in bouts:
+            bouts[slug].n_labels = len(lines)
         (dataset / "labels" / f"{slug}.jsonl").write_text(
             "".join(json.dumps(ln, ensure_ascii=False, sort_keys=True) + "\n" for ln in lines),
             encoding="utf-8")
+        if slug not in bouts:
+            continue      # a verdict-only bout: no sheet, so no symlink and no split entry
         link = dataset / "sheets" / f"{slug}.pdf"
         if not link.exists():
             # A derived view, not a copy: 326 MB of sheets already exist one directory over.
@@ -542,7 +620,8 @@ def build(version: str = "v1", seed: int = DEFAULT_SEED,
     split["excluded"] = {**skipped, **(split.get("excluded") or {})}
     split_path.write_text(json.dumps(split, indent=1, sort_keys=True) + "\n", encoding="utf-8")
 
-    manifest = write_manifest(dataset, version, split, ordered, labels, taxonomy, drops)
+    manifest = write_manifest(dataset, version, split, ordered, labels, taxonomy, drops,
+                              applied)
     write_card(dataset, manifest)
     return manifest
 
@@ -577,7 +656,8 @@ def near_miss_clusters(counts: dict[str, dict[str, int]]) -> dict[str, list[dict
 
 def write_manifest(dataset: Path, version: str, split: dict[str, Any], bouts: list[Bout],
                    labels: dict[str, list[dict[str, Any]]], taxonomy: str,
-                   drops: Counter[str]) -> dict[str, Any]:
+                   drops: Counter[str],
+                   applied: Counter[str] | None = None) -> dict[str, Any]:
     side = {s: "train" for s in split["train"]}
     side.update({s: "val" for s in split["val"]})
     per_split: dict[str, Counter[str]] = defaultdict(Counter)
@@ -619,6 +699,7 @@ def write_manifest(dataset: Path, version: str, split: dict[str, Any], bouts: li
         "classes_by_split": {k: dict(sorted(v.items(), key=lambda kv: (-kv[1], kv[0])))
                              for k, v in sorted(per_split.items())},
         "dropped_events": dict(sorted(drops.items())),
+        "applied_verdicts": dict(sorted((applied or Counter()).items())),
         # Train-split, admissible labels only: what a tuning run would actually learn from.
         "train_labels_by_type_and_class": {
             t: dict(sorted(c.items(), key=lambda kv: (-kv[1], kv[0])))

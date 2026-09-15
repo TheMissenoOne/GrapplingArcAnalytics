@@ -34,7 +34,7 @@ from typing import Any
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
-from scripts.vision_dataset import DATASET  # noqa: E402
+from scripts.vision_dataset import DATASET, record_verdicts  # noqa: E402
 
 logger = logging.getLogger("dataset_review")
 
@@ -105,10 +105,12 @@ def cmd_list(dataset: Path, bout: str | None, limit: int, disputed_only: bool,
 
 
 def cmd_rule(dataset: Path, verdict: str, ids: list[str], note: str, reviewer: str) -> int:
+    """Record a verdict on model-origin labels, in the labels file AND the durable store."""
     wanted = set(ids)
     stamped = datetime.now(UTC).date().isoformat()
     hit = 0
     refused: list[str] = []
+    store: list[dict[str, Any]] = []
     for path, rows in iter_labels(dataset):
         touched = False
         for r in rows:
@@ -122,9 +124,17 @@ def cmd_rule(dataset: Path, verdict: str, ids: list[str], note: str, reviewer: s
             r["reviewed_at"] = stamped
             if note:
                 r["review_note"] = note
+            # The durable copy. A `vision_dataset --build` rewrites every labels/*.jsonl from
+            # the answer files, so a verdict that lives ONLY in this file is erased by the
+            # next build; `vision_dataset.apply_verdicts` replays the store afterwards.
+            store.append({"bout": r["bout"], "ts_ms": r["ts_ms"], "node_key": r["node_key"],
+                          "verdict": verdict, "reviewer": reviewer, "reviewed_at": stamped,
+                          "note": note or None, "line": None})
             touched, hit = True, hit + 1
         if touched:
             write_labels(path, rows)
+    if store:
+        record_verdicts(store, dataset / "audit" / "verdicts.jsonl")
     missing = wanted - {i for i in wanted if hit}
     print(f"{verdict}: {hit} label(s) by {reviewer} on {stamped}")
     if refused:
