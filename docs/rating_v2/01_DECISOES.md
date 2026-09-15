@@ -695,3 +695,25 @@ AUC 0,772 → 0,708) — este ADR não introduz nenhuma camada pessoal on-device
 ajustada UMA VEZ no corpus inteiro (`fitted_on`), nunca por usuário. E H4 (previsão do vencedor
 do próximo ano) é NULL em todas as dobras para todo braço, inclusive este — a dominância RRB
 descreve um round bem; não valida uma regra de atualização de rating no corpus público.
+
+## ADR-18 — Diminishing returns por sessão, App-only (2026-09-15)
+
+**Contexto.** Decisão do dono: "Tive um ganho de ELO de 20% em 8 rounds; acredito que é muito.
+Quanto mais rounds melhor, mas deve ser logarítmico, não linear." Até aqui toda tentativa de
+todo round de uma sessão era uma observação Glicko-2 ponderada pelo bloco Markov `global`
+(`ratingV2Evidence.ts`, mean-1 por round); nada temperava a SESSÃO como um todo — 8 rounds
+logados carregavam ~8× a evidência de 1 round.
+
+**Escolha.** Toda observação de uma sessão é multiplicada por `w(n) = ln(1+n) / (n·ln2)`, n =
+rounds logados (≥1 entrada). A evidência TOTAL da sessão cresce como `log2(1+n)`: n=1 → 1,00,
+n=2 → 0,79, n=4 → 0,58, n=8 → 0,40 (8 rounds ≈ 3,2 rounds-equivalentes). Compõe
+multiplicativamente com o peso Markov e com o meio-peso da inferência (`INFERRED_OBSERVATION_WEIGHT`).
+A dominância RRB (oponente virtual, ADR-17) não muda: é por round.
+
+**Por quê base-2.** A normalização em log2 mantém a sessão de 1 round exatamente em 1,0 — o botão
+que impede a mudança de mover contas de 1 round por sessão.
+
+**Escopo: App-only.** A trilha de atleta faz replay de LUTAS, sem agrupamento de sessão; não há
+espelho nem golden cross-repo. `RATING_V2_ENGINE_VERSION` → `glicko2-user-v4-session-log`
+(ADR-12: replay por conta). Medido no corpus de referência do App: ganho de um nó numa sessão
+sintética de 8 rounds landed 4,06% → 1,83%.
