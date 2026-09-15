@@ -972,6 +972,10 @@ class GraphEdge(Base):
     # spaces split by partial index on owner_kind. Backfilled by
     # ``analysis.embeddings.backfill_graph_edge_embeddings``; NULL until then.
     embedding: Mapped[Any | None] = mapped_column(Vector(768), nullable=True)
+    # Whose game this transition belongs to, on a `owner_kind='user'` graph only (alembic 0066).
+    # 'you' | 'partner' | 'both'; NULL = pre-0066 edge, or an athlete-corpus row (different actor
+    # axis entirely, untouched here). Never backfilled — a normal App re-sync fills it in.
+    actor: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     graph: Mapped[Graph] = relationship("Graph", back_populates="edges")
 
