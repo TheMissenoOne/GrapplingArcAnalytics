@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 from scripts.seed_technique_nodes import _SOURCE_TO_ORIGIN, _origin_histogram, seed
 
@@ -21,7 +22,7 @@ def test_source_to_origin_covers_every_export_tier() -> None:
 
 
 def test_origin_histogram_buckets_missing_as_unknown() -> None:
-    rows = {
+    rows: dict[str, dict[str, Any]] = {
         "a": {"origin": "curated"},
         "b": {"origin": "curated"},
         "c": {"origin": "dataset"},
