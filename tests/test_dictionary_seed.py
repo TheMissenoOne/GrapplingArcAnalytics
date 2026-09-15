@@ -1,6 +1,6 @@
 """Pure logic only -- no network, no DB, no ffmpeg/yt-dlp. plan sampling (spread across
-bouts), ts arithmetic with ts_origin, the agreement rule, coverage-driven priority, and
-report shape."""
+bouts), ts arithmetic + evidence-based reclassification, the alignment stage, the agreement
+rule, coverage-driven priority, and report shape."""
 from __future__ import annotations
 
 import json
@@ -13,16 +13,22 @@ import pytest
 pytest.importorskip("google.genai")
 
 from scripts.dictionary_seed import (
+    WINDOW_OFFSETS,
     absolute_ts,
     ask_gemini,
     build_plan,
     build_report,
     cap_plan,
-    frame_paths,
+    chosen_frame_paths,
+    classify_ts_origin,
     load_coverage,
     prioritize_curated,
+    resolve_offset,
+    run_ask,
     score_agreement,
     select_candidates,
+    strip_frame_path,
+    ts_class_matches_flag,
     vocabulary_text,
 )
 
@@ -37,6 +43,10 @@ def test_absolute_ts_video_absolute_ignores_start() -> None:
     assert absolute_ts(120, "video_absolute", 340) == 340.0
 
 
+def test_absolute_ts_absolute_from_zero_same_as_video_absolute() -> None:
+    assert absolute_ts(None, "absolute_from_zero", 90) == 90.0
+
+
 def test_absolute_ts_bout_relative_adds_start() -> None:
     assert absolute_ts(120, "bout_relative", 30) == 150.0
 
@@ -47,11 +57,65 @@ def test_absolute_ts_bout_relative_missing_start_defaults_zero() -> None:
 
 def test_absolute_ts_unknown_origin_is_unlocatable() -> None:
     assert absolute_ts(120, None, 30) is None
-    assert absolute_ts(120, "something_else", 30) is None
+    assert absolute_ts(120, "unknown", 30) is None
 
 
 def test_absolute_ts_missing_ts_is_unlocatable() -> None:
     assert absolute_ts(120, "video_absolute", None) is None
+
+
+# ── evidence-based ts reclassification ────────────────────────────────────────────
+def test_classify_ts_origin_bout_relative_when_all_events_below_start() -> None:
+    # the WNO 30 case: video_start=6746, event ts run 5..397 -- all below start.
+    assert classify_ts_origin(6746, [5, 120, 397], None) == "bout_relative"
+
+
+def test_classify_ts_origin_video_absolute_when_all_events_at_or_after_start() -> None:
+    assert classify_ts_origin(100, [110, 250, 900], None) == "video_absolute"
+
+
+def test_classify_ts_origin_mixed_is_unknown() -> None:
+    # some events below start, some at/after -- neither convention explains it.
+    assert classify_ts_origin(100, [50, 150], None) == "unknown"
+
+
+def test_classify_ts_origin_small_start_is_not_evidence() -> None:
+    # start <= 60s is noise, not proof of bout-relative -- falls through to "no duration ->
+    # unknown" rather than misreading a near-zero start as bout-relative.
+    assert classify_ts_origin(45, [10, 20], None) == "unknown"
+
+
+def test_classify_ts_origin_absolute_from_zero_when_start_missing_but_fits_duration() -> None:
+    assert classify_ts_origin(None, [10, 300], 600.0) == "absolute_from_zero"
+    assert classify_ts_origin(0, [10, 300], 600.0) == "absolute_from_zero"
+
+
+def test_classify_ts_origin_zero_start_exceeding_duration_is_unknown() -> None:
+    assert classify_ts_origin(None, [10, 700], 600.0) == "unknown"
+
+
+def test_classify_ts_origin_zero_start_no_duration_is_unknown() -> None:
+    assert classify_ts_origin(None, [10, 300], None) == "unknown"
+
+
+def test_classify_ts_origin_no_events_is_unknown() -> None:
+    assert classify_ts_origin(100, [], None) == "unknown"
+
+
+def test_ts_class_matches_flag_video_absolute_agrees_with_both_absolute_classes() -> None:
+    assert ts_class_matches_flag("video_absolute", "video_absolute")
+    assert ts_class_matches_flag("video_absolute", "absolute_from_zero")
+    assert not ts_class_matches_flag("video_absolute", "bout_relative")
+
+
+def test_ts_class_matches_flag_bout_relative_agrees_only_with_bout_relative() -> None:
+    assert ts_class_matches_flag("bout_relative", "bout_relative")
+    assert not ts_class_matches_flag("bout_relative", "video_absolute")
+
+
+def test_ts_class_matches_flag_null_flag_never_agreed() -> None:
+    assert not ts_class_matches_flag(None, "video_absolute")
+    assert not ts_class_matches_flag(None, "bout_relative")
 
 
 # ── candidate sampling ───────────────────────────────────────────────────────────
@@ -105,21 +169,55 @@ def test_build_plan_matches_only_curated_labels_and_resolves_ts() -> None:
     assert row.ts_ms == 340000
     assert row.match_id == "m1"
     assert row.bout
+    assert row.ts_class == "video_absolute"
+
+
+def test_build_plan_reclassifies_against_db_flag_bout_relative_evidence() -> None:
+    # DB flag says video_absolute (as WNO 30's really did), but every event ts is well below
+    # video_start -- the evidence-based classifier overrides the flag.
+    matches = [_match("m1", "Alice", "Bob", 2025, [
+        {"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 5},
+    ])]
+    plan, _counts = build_plan(matches, CURATED, per_technique=6)
+    assert len(plan) == 1
+    assert plan[0].ts_class == "bout_relative"
+    assert plan[0].ts == 105.0  # video_start(100) + ts(5), NOT the raw ts=5
 
 
 def test_build_plan_drops_events_with_no_locatable_ts() -> None:
     matches = [_match("m1", "Alice", "Bob", 2025, [
         {"label": "Armbar", "type": "submission", "actor": "Alice"},   # no ts
     ])]
-    matches[0]["ts_origin"] = None
     plan, counts = build_plan(matches, CURATED, per_technique=6)
     assert counts["Armbar"] == 0
     assert plan == []
 
 
+def test_build_plan_zero_start_uses_probe_duration_fn() -> None:
+    matches = [_match("m1", "Alice", "Bob", 2025, [
+        {"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 300},
+    ])]
+    matches[0]["video_start_seconds"] = None
+    plan, _counts = build_plan(matches, CURATED, per_technique=6,
+                               probe_duration_fn=lambda _url: 600.0)
+    assert len(plan) == 1
+    assert plan[0].ts_class == "absolute_from_zero"
+    assert plan[0].ts == 300.0
+
+
+def test_build_plan_zero_start_without_probe_is_unknown() -> None:
+    matches = [_match("m1", "Alice", "Bob", 2025, [
+        {"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 300},
+    ])]
+    matches[0]["video_start_seconds"] = None
+    plan, counts = build_plan(matches, CURATED, per_technique=6)   # no probe_duration_fn
+    assert plan == []
+    assert counts["Armbar"] == 0
+
+
 def test_build_plan_min_events_filters_out_thin_techniques() -> None:
     matches = [_match("m1", "Alice", "Bob", 2025, [
-        {"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 10},
+        {"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 340},
     ])]
     plan, _counts = build_plan(matches, CURATED, per_technique=6, min_events=2)
     assert plan == []
@@ -128,9 +226,9 @@ def test_build_plan_min_events_filters_out_thin_techniques() -> None:
 def test_cap_plan_drops_whole_techniques_not_partial() -> None:
     plan, _ = build_plan(
         [_match("m1", "Alice", "Bob", 2025, [
-            {"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 10},
-            {"label": "Armbar", "type": "submission", "actor": "Bob", "ts": 20},
-            {"label": "Closed Guard", "type": "guard", "actor": "Alice", "ts": 30},
+            {"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 340},
+            {"label": "Armbar", "type": "submission", "actor": "Bob", "ts": 350},
+            {"label": "Closed Guard", "type": "guard", "actor": "Alice", "ts": 360},
         ])],
         CURATED, per_technique=6)
     capped = cap_plan(plan, 2)
@@ -141,7 +239,7 @@ def test_cap_plan_drops_whole_techniques_not_partial() -> None:
 def test_cap_plan_none_is_noop() -> None:
     plan, _ = build_plan(
         [_match("m1", "Alice", "Bob", 2025,
-               [{"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 10}])],
+               [{"label": "Armbar", "type": "submission", "actor": "Alice", "ts": 340}])],
         CURATED, per_technique=6)
     assert cap_plan(plan, None) == plan
 
@@ -198,6 +296,40 @@ def test_load_coverage_indexes_entries_by_en(tmp_path: Path) -> None:
     assert len(coverage) == 1
 
 
+# ── stage-A offset resolution ──────────────────────────────────────────────────────
+def test_resolve_offset_exact_match() -> None:
+    assert resolve_offset({"offset": 10}) == 10
+    assert resolve_offset({"offset": -30}) == -30
+
+
+def test_resolve_offset_snaps_to_nearest() -> None:
+    assert resolve_offset({"offset": 12}) == 10
+    assert resolve_offset({"offset": 7}) == 5
+
+
+def test_resolve_offset_missing_or_unparsable_defaults_zero() -> None:
+    assert resolve_offset({}) == 0
+    assert resolve_offset({"offset": "not a number"}) == 0
+    assert resolve_offset({"offset": None}) == 0
+
+
+def test_strip_and_chosen_frame_paths_encode_offset_sign() -> None:
+    p = strip_frame_path("armbar", "a-vs-b-2025", 1000, -10)
+    assert "strip_m10" in p.name
+    p2 = strip_frame_path("armbar", "a-vs-b-2025", 1000, 10)
+    assert "strip_p10" in p2.name
+    chosen = chosen_frame_paths("armbar", "a-vs-b-2025", 1000, 0)
+    assert "chosen_p0" in chosen["center"].name
+    assert chosen["m2"].name.endswith("_m2.jpg")
+    assert chosen["p2"].name.endswith("_p2.jpg")
+
+
+def test_window_offsets_are_symmetric_and_include_zero() -> None:
+    assert 0 in WINDOW_OFFSETS
+    assert sorted(WINDOW_OFFSETS) == list(WINDOW_OFFSETS)
+    assert sorted(-o for o in WINDOW_OFFSETS) == list(WINDOW_OFFSETS)
+
+
 # ── agreement rule ───────────────────────────────────────────────────────────────
 def test_score_agreement_full() -> None:
     agree, conf = score_agreement("armbar", {"label": "Armbar"})
@@ -234,14 +366,20 @@ def test_vocabulary_text_lists_every_curated_label() -> None:
 
 
 # ── report shape ──────────────────────────────────────────────────────────────────
+def _seed_row(**over: Any) -> dict[str, Any]:
+    base = {
+        "node_key": "armbar", "corpus_label": "Armbar", "model_label": "Armbar",
+        "agree": "full", "review_confidence": "high", "chosen_offset": 0, "visible": True,
+        "usage": {"prompt": 100, "candidates": 20, "thoughts": 5, "total": 125},
+    }
+    base.update(over)
+    return base
+
+
 def test_build_report_never_drops_disagreements() -> None:
-    seed: list[dict[str, Any]] = [
-        {"node_key": "armbar", "corpus_label": "Armbar", "model_label": "Armbar",
-         "agree": "full", "review_confidence": "high",
-         "usage": {"prompt": 100, "candidates": 20, "thoughts": 5, "total": 125}},
-        {"node_key": "armbar", "corpus_label": "Armbar", "model_label": "Kimura",
-         "agree": "no", "review_confidence": "low",
-         "usage": {"prompt": 100, "candidates": 20, "thoughts": 5, "total": 125}},
+    seed = [
+        _seed_row(),
+        _seed_row(model_label="Kimura", agree="no", review_confidence="low"),
     ]
     counts = {"Armbar": 5, "Closed Guard": 0}
     report = build_report(seed, counts, CURATED)
@@ -258,14 +396,36 @@ def test_build_report_empty_seed_does_not_crash() -> None:
     assert "Total candidates asked: 0" in report
 
 
-# ── ask_gemini: a JSON array response must not crash the batch ───────────────────
+def test_build_report_offset_histogram_and_not_visible() -> None:
+    seed = [
+        _seed_row(chosen_offset=10),
+        _seed_row(chosen_offset=10),
+        _seed_row(visible=False, agree="no", review_confidence="low",
+                  model_label=None, align_reason="not in frame"),
+    ]
+    report = build_report(seed, {"Armbar": 3}, CURATED)
+    assert "+10" in report
+    assert "Not visible in any window frame: 1 of 3" in report
+
+
+def test_build_report_alignment_and_before_after() -> None:
+    seed = [_seed_row()]
+    before = [_seed_row(agree="no", review_confidence="low", model_label="Side Control")]
+    report = build_report(seed, {"Armbar": 1}, CURATED,
+                          alignment={"misaligned": 40, "of_total": 96},
+                          before_seed=before)
+    assert "40" in report and "96" in report
+    assert "Before vs after realignment" in report
+
+
+# ── ask_gemini / ask_alignment: a JSON array response must not crash the batch ────
 def test_ask_gemini_unwraps_a_one_element_array_response(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
     row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000,
-          "a_name": "A", "b_name": "B"}
-    center = frame_paths("armbar", "a-vs-b-2025", 1000)["center"]
+          "a_name": "A", "b_name": "B", "chosen_offset": 0}
+    center = chosen_frame_paths("armbar", "a-vs-b-2025", 1000, 0)["center"]
     center.parent.mkdir(parents=True, exist_ok=True)
     center.write_bytes(b"fake")
 
@@ -284,8 +444,8 @@ def test_ask_gemini_non_dict_non_list_response_is_empty(
 ) -> None:
     monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
     row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000,
-          "a_name": "A", "b_name": "B"}
-    center = frame_paths("armbar", "a-vs-b-2025", 1000)["center"]
+          "a_name": "A", "b_name": "B", "chosen_offset": 0}
+    center = chosen_frame_paths("armbar", "a-vs-b-2025", 1000, 0)["center"]
     center.parent.mkdir(parents=True, exist_ok=True)
     center.write_bytes(b"fake")
 
@@ -297,3 +457,109 @@ def test_ask_gemini_non_dict_non_list_response_is_empty(
 
     result = ask_gemini(row, "vocab", fake_client)
     assert result["parsed"] == {}
+
+
+def test_ask_gemini_reads_the_chosen_offset_frame_not_the_default(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000,
+          "a_name": "A", "b_name": "B", "chosen_offset": 20}
+    chosen_frame_paths("armbar", "a-vs-b-2025", 1000, 0)["center"].parent.mkdir(
+        parents=True, exist_ok=True)
+    # only the offset=0 default exists -- reading offset=20 (never extracted) must not crash,
+    # it just sends zero image parts.
+    resp = MagicMock()
+    resp.text = json.dumps({"label": "Armbar"})
+    resp.usage_metadata = None
+    fake_client = MagicMock()
+    fake_client.models.generate_content.return_value = resp
+
+    result = ask_gemini(row, "vocab", fake_client)
+    assert result["parsed"]["label"] == "Armbar"
+    _, kwargs = fake_client.models.generate_content.call_args
+    # contents = [] image parts + 1 text part, since the offset-20 frame doesn't exist
+    assert len(kwargs["contents"]) == 1
+
+
+# ── run_ask: extraction failure must not spend a call on an empty prompt ─────────
+def test_run_ask_skips_gemini_when_no_strip_frames_extracted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    row = {"node_key": "armbar", "label": "Armbar", "bout": "a-vs-b-2025", "ts_ms": 1000,
+          "a_name": "A", "b_name": "B", "match_id": "m1", "ts_class": "video_absolute"}
+    # no frames written on disk at all -- extraction "failed" for this candidate's match
+
+    calls = {"n": 0}
+
+    def _boom(*a: Any, **k: Any) -> Any:
+        calls["n"] += 1
+        raise AssertionError("must not call Gemini with no extracted frames")
+
+    fake_client = MagicMock()
+    fake_client.models.generate_content.side_effect = _boom
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr("google.genai.Client", lambda **_kw: fake_client)
+        mp.setenv("GEMINI_API_KEY", "test-key")
+        seed = run_ask([row], dry_run=False)
+
+    assert calls["n"] == 0
+    assert len(seed) == 1
+    assert seed[0]["visible"] is False
+    assert seed[0]["align_reason"] == "extraction_failed"
+    assert seed[0]["agree"] == "no"
+    assert seed[0]["review_confidence"] == "low"
+
+
+# ── run_ask: an API error on one candidate must not lose the whole batch ─────────
+def test_run_ask_survives_a_quota_error_and_keeps_grading_the_rest(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from google.genai import errors
+
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    rows: list[dict[str, Any]] = [
+        {"node_key": "armbar", "label": "Armbar", "bout": "a-vs-b-2025", "ts_ms": 1000,
+         "a_name": "A", "b_name": "B", "match_id": "m1", "ts_class": "video_absolute"},
+        {"node_key": "closed guard", "label": "Closed Guard", "bout": "a-vs-b-2025",
+         "ts_ms": 2000, "a_name": "A", "b_name": "B", "match_id": "m1",
+         "ts_class": "video_absolute"},
+    ]
+    for row in rows:
+        for o in WINDOW_OFFSETS:
+            p = strip_frame_path(row["node_key"], row["bout"], row["ts_ms"], o)
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_bytes(b"fake")
+        center = chosen_frame_paths(row["node_key"], row["bout"], row["ts_ms"], 0)["center"]
+        center.write_bytes(b"fake")
+
+    quota_error = errors.ClientError(429, {"error": {"message": "quota exceeded"}})
+    good_align = MagicMock()
+    good_align.text = json.dumps({"offset": 0, "visible": "yes", "reason": "ok"})
+    good_align.usage_metadata = None
+    good_blind = MagicMock()
+    good_blind.text = json.dumps({"label": "Closed Guard"})
+    good_blind.usage_metadata = None
+
+    fake_client = MagicMock()
+    # candidate 1's stage A AND retry both quota-error; candidate 2's stage A + stage B
+    # both succeed -- the batch must still return BOTH graded candidates.
+    fake_client.models.generate_content.side_effect = [
+        quota_error, quota_error,      # row 1 stage A (initial + thinking-retry)
+        good_align,                     # row 2 stage A
+        good_blind,                     # row 2 stage B
+    ]
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr("google.genai.Client", lambda **_kw: fake_client)
+        mp.setenv("GEMINI_API_KEY", "test-key")
+        seed = run_ask(rows, dry_run=False)
+
+    assert len(seed) == 2   # neither candidate lost, despite the 429
+    assert seed[0]["agree"] == "no"
+    assert seed[0]["visible"] is False
+    assert "ClientError" in (seed[0]["align_reason"] or "")
+    assert seed[1]["model_label"] == "Closed Guard"
+    assert seed[1]["agree"] == "full"

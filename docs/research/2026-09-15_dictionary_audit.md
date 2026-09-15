@@ -42,20 +42,20 @@ not missing techniques. They want a "reject, this is not a technique" verdict re
 not 500 frames.
 
 <!-- BEGIN GENERATED: dictionary_audit measure -->
-_Generated 2026-09-15T15:21:01+00:00 by `scripts/dictionary_audit.py measure`; corpus read 2026-09-15; taxonomy `node_library@8b2dcd1cfa75`. Do not hand-edit this block._
+_Generated 2026-09-15T16:01:30+00:00 by `scripts/dictionary_audit.py measure`; corpus read 2026-09-15; taxonomy `node_library@6bbeca545d80`. Do not hand-edit this block._
 
 ### Coverage of the curated dictionary
 
 | bucket | entries | meaning |
 |---|---|---|
 | `well-covered` | 18 | ≥ 8 human-verified frames |
-| `thin` | 56 | 1–7 verified frames |
-| `zero` | 95 | no verified frame at all |
-| `unreachable` | 29 | no node in `data/frame_pdf/node_library.json` — the reader is never offered this label, so `vision_dataset.build_labels` would drop it as `off_library_label` |
+| `thin` | 57 | 1–7 verified frames |
+| `zero` | 123 | no verified frame at all |
+| `unreachable` | 0 | no node in `data/frame_pdf/node_library.json` — the reader is never offered this label, so `vision_dataset.build_labels` would drop it as `off_library_label` |
 | `out-of-scope` | 11 | `concept` type — a quality of a position, not a discrete occurrence a reader logs |
 | **total** | 209 | **0 carry a written visual definition** |
 
-Candidates (a label in the corpus or a read with no curated entry): **98** distinct, 897 mentions, 89 of them already a node in `node_library.json`.
+Candidates (a label in the corpus or a read with no curated entry): **98** distinct, 897 mentions, 97 of them already a node in `node_library.json`.
 
 ### Top zero-coverage techniques by corpus frequency
 
@@ -63,14 +63,14 @@ Candidates (a label in the corpus or a read with no curated entry): **98** disti
 |---|---|---|---|---|---|
 | 1 | `Leg Drag Pass` | pass | 58 | 0 | 0/0 |
 | 2 | `Bridge (Upa Escape)` | escape | 49 | 0 | 0/0 |
-| 3 | `Smash Pass` | pass | 43 | 0 | 0/0 |
-| 4 | `Stack Pass` | pass | 37 | 0 | 2/0 |
-| 5 | `Saddle (Inside Sankaku)` | control | 35 | 0 | 0/0 |
-| 6 | `Crucifix` | control | 33 | 0 | 0/0 |
-| 7 | `Long Step Pass` | pass | 33 | 0 | 0/0 |
-| 8 | `Old School Sweep` | sweep | 33 | 0 | 0/0 |
-| 9 | `Takedown Defense` | transition | 30 | 0 | 0/3 |
-| 10 | `Rubber Guard` | guard | 28 | 0 | 0/0 |
+| 3 | `Snatch Single Leg` | takedown | 48 | 0 | 0/0 |
+| 4 | `Smash Pass` | pass | 43 | 0 | 0/0 |
+| 5 | `Stack Pass` | pass | 37 | 0 | 2/0 |
+| 6 | `Saddle (Inside Sankaku)` | control | 35 | 0 | 0/0 |
+| 7 | `Crucifix` | control | 33 | 0 | 0/0 |
+| 8 | `Long Step Pass` | pass | 33 | 0 | 0/0 |
+| 9 | `Old School Sweep` | sweep | 33 | 0 | 0/0 |
+| 10 | `Takedown Defense` | transition | 30 | 0 | 0/3 |
 
 ### Thinnest covered techniques
 
@@ -114,7 +114,7 @@ Candidates (a label in the corpus or a read with no curated entry): **98** disti
 
 ### Unreachable curated entries (no node in the reader's vocabulary)
 
-`Body Lock from Back`, `Circle Throw`, `Clock Choke`, `Collar Sleeve Guard`, `Cop Lock`, `DLR Leg Drag Pass`, `Electric Chair`, `Gogoplata`, `Guard Recovery Escape`, `Half Guard Smash Pass`, `High Crotch`, `Hip Pin Pass`, `Inside Arm Stack Pass`, `Knee Shield Collapse Pass`, `Kouchi Gari`, `Leg Hug`, `Lung Lock`, `Neck Crank`, `North-South Choke`, `Paper Cutter Choke`, `Sassae Tsurikomi Ashi`, `Shoulder Crunch`, `Shoulder Lock`, `Shoulder Throw`, `Snapdown to Front Headlock`, `Snatch Single Leg`, `Sweeping Hip Throw`, `Tani Otoshi`, `Toreando Pass`
+(none)
 
 ### Curated entries that collide on one `node_key`
 
