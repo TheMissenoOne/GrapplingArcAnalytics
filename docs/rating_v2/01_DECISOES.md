@@ -717,3 +717,25 @@ que impede a mudança de mover contas de 1 round por sessão.
 espelho nem golden cross-repo. `RATING_V2_ENGINE_VERSION` → `glicko2-user-v4-session-log`
 (ADR-12: replay por conta). Medido no corpus de referência do App: ganho de um nó numa sessão
 sintética de 8 rounds landed 4,06% → 1,83%.
+
+## ADR-18b — Diminishing returns por janela de tempo, App-only (2026-09-15)
+
+**Contexto.** Follow-up do dono: "A proporcionalidade não deve ser apenas no nível da sessão,
+mas também no nível do tempo. Duas sessões é melhor que uma mas não é o dobro de ganho. Não
+agressivo a ponto de tornar irrisório o treino após certa margem, mas também não fora de controle."
+
+**Escolha.** Mesma forma do ADR-18, um nível acima: `windowEvidenceScale(m) = ln(1+m)/(m·ln2)`,
+m = sessões logadas (esta incluída) na janela trailing de `WINDOW_DAYS` = 7 dias terminando na
+data da sessão. O engine já percorre as sessões em ordem cronológica, conta m e passa a
+`extractSessionEvidence`. Composição multiplicativa com o fator por rounds (ADR-18), o peso
+Markov e o meio-peso de inferência.
+
+| m | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| w(m) | 1,00 | 0,79 | 0,67 | 0,58 | 0,52 | 0,47 | 0,43 | 0,40 |
+
+**Medido.** Totais semanais (sessões de 2 rounds): 3/semana ≈ 1,95 rounds-equivalentes,
+5 ≈ 2,82, 7 ≈ 3,53 — sempre crescente, incrementos decrescentes. Sessão isolada = 1,0.
+
+**Escopo: App-only** (a trilha de atleta não tem "semana" de treino). `RATING_V2_ENGINE_VERSION`
+→ `glicko2-user-v5-window-log`. Corpus de referência do App: média 1243,15 → 1237,49.
