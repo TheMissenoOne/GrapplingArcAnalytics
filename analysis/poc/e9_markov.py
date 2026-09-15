@@ -1151,6 +1151,19 @@ def verify_gate(gate: GateReport) -> str:
             f"{E9_PUBLISHED_GATED_BOUTS}; corpus size is not frozen, this is informational).")
 
 
+def gate_drift_note(gate: GateReport) -> str:
+    """The same real-invariant / informational-drift check as ``verify_gate``, factored out
+    for the sibling PoCs (e5/x3/e14) that share this module's ``GateReport``/``load_corpus``
+    and used to each carry their own frozen ``gate.passed == 429`` equality check. Returns
+    only the invariant/drift clause — callers still own their own gate-count prose."""
+    if not (0 <= gate.passed <= gate.with_sequence <= gate.total):
+        return (f"INVARIANT VIOLATED — passed={gate.passed}, with_sequence={gate.with_sequence}, "
+                f"total={gate.total}; expected 0 <= passed <= with_sequence <= total")
+    delta = gate.passed - E9_PUBLISHED_GATED_BOUTS
+    return (f"{delta:+d} vs PoC-E9's published {E9_PUBLISHED_GATED_BOUTS} "
+            f"(corpus size is not frozen, this is informational)")
+
+
 # ── verdicts ────────────────────────────────────────────────────────────────────
 Cross = Sequence[tuple[str, str, tuple[float, float, float]]]
 

@@ -43,7 +43,7 @@ from analysis.poc.e8_interaction_graph import (
     rank_auc,
     temporal_split,
 )
-from analysis.poc.e9_markov import BoutRow, GateReport, load_corpus
+from analysis.poc.e9_markov import BoutRow, GateReport, gate_drift_note, load_corpus
 from analysis.poc.signatures import TEdge, counter_vector, index_motif_counts, motif_counts
 from analysis.poc.x3_sequence_mining import _own_labels
 from analysis.technique_match import clean_label
@@ -337,19 +337,13 @@ class Run:
         return next((p for p in self.passes if p.delta == DELTA_PRIMARY), None)
 
 
-E8_GATED_BOUTS = 429
-
-
 def gate_note(gate: GateReport) -> str:
     if gate.error:
         return f"NOT RUN — {gate.error}"
     base = (f"{gate.passed} gated bouts of {gate.total} final+sequence "
             f"({gate.total - gate.with_sequence} under 4 events, "
             f"{gate.one_sided} dropped as one-sided)")
-    if gate.passed == E8_GATED_BOUTS:
-        return f"{base} — matching PoC-E8's published {E8_GATED_BOUTS}"
-    return (f"{base} — **DRIFT** against PoC-E8/E9's published {E8_GATED_BOUTS}; the corpus "
-            f"grew since those cells ran")
+    return f"{base} — {gate_drift_note(gate)}"
 
 
 def ts_slice(rows: Sequence[BoutRow]) -> tuple[list[tuple[Bout, list[float]]], str]:

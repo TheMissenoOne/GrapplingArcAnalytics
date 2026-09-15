@@ -40,7 +40,7 @@ import numpy as np
 from analysis.athlete_graph import AthleteEdge, AthleteGraph, AthleteNode
 from analysis.athlete_systems import build_system_profile, match_systems
 from analysis.names import _normalize_name
-from analysis.poc.e9_markov import BoutRow, GateReport, load_corpus
+from analysis.poc.e9_markov import BoutRow, GateReport, gate_drift_note, load_corpus
 from analysis.poc.signatures import (
     Retrieval,
     cosine_distance,
@@ -624,19 +624,13 @@ class Run:
     chrono: Pass | None = None
 
 
-E8_GATED_BOUTS = 429   # PoC-E8's published gate, for the drift check
-
-
 def gate_note(gate: GateReport) -> str:
     if gate.error:
         return f"NOT RUN — {gate.error}"
     base = (f"{gate.passed} gated bouts of {gate.total} final+sequence "
             f"({gate.total - gate.with_sequence} under 4 events, "
             f"{gate.one_sided} dropped as one-sided)")
-    if gate.passed == E8_GATED_BOUTS:
-        return f"{base} — matching PoC-E8's published {E8_GATED_BOUTS}"
-    return (f"{base} — **DRIFT** against PoC-E8/E9's published {E8_GATED_BOUTS}. The corpus "
-            f"grew since those cells ran; their numbers are not directly comparable to these.")
+    return f"{base} — {gate_drift_note(gate)}"
 
 
 def run_all(gate: GateReport, n_boot: int = N_BOOT) -> Run:
