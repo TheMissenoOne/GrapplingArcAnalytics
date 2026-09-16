@@ -114,6 +114,7 @@ learn the sampling policy, not the sport. The manifest counts unlabelled frames 
 |---|---|---|
 | `human` | concordance audit — an auditor formed an **independent** read of every event off the frames before seeing the model's line | yes |
 | `gemini` | a raw model reading | only after `review: "accepted"` |
+| `gemini_seed` | a raw model reading proposed through `scripts/dictionary_seed.py` (a blind read the corpus itself pointed the frame at) — same admissibility as `gemini`, kept as its own value only so its provenance is traceable back to that pipeline (decision 2026-09-16, `docs/dictionary_audit.md`) | only after `review: "accepted"` |
 | `gemini_ft:<job>` | a tuned model's reading | only after `review: "accepted"` |
 
 Promoting a model reading to `source: "human"` on review is exactly the laundering
@@ -122,6 +123,15 @@ Promoting a model reading to `source: "human"` on review is exactly the launderi
 `vision_dataset_export.admissible` is the disjunction. `scripts/dataset_review.py` and
 `scripts/dictionary_audit.py apply` are the only writers of `review`, and neither touches a
 `source == "human"` line — there is nothing to review there.
+
+**Decisão 2026-09-16** (`docs/dictionary_audit.md`): a seed row's blind Gemini read
+(`candidate_label`) is the CANDIDATE a human reviews; the corpus label `dictionary_seed.plan`
+searched for is only a second opinion beside it. This changed `dictionary_seed.py` and the
+`dictionary_audit.py` queue that feeds `verdicts.jsonl`, but the verdict SHAPE this file's
+`build()`/`apply_verdicts` consume is unchanged — `record` still carries `bout`/`ts_ms`/
+`node_key`/`verdict`/`reviewer`/`reviewed_at`/`note`/`line`, and `line.source` still just
+flows through untouched (a new value, `gemini_seed`, not a new field — see the provenance
+table above). `vision_dataset --build` needs no change to keep reading it.
 
 **A verdict lives in `audit/verdicts.jsonl`, not only in a label file.** A build REWRITES
 every `labels/<bout>.jsonl` from the answer files, so a `review` written straight into one is

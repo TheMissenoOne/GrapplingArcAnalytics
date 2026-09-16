@@ -577,11 +577,15 @@ def near_frames(ts: int, frames: list[dict[str, Any]], radius: int = 1
 def load_seed(path: Path | None = None) -> list[dict[str, Any]]:
     """``scripts/dictionary_seed.py``'s corpus-event seed, when it exists.
 
-    One JSON object per line, written by ``dictionary_seed.run_ask``: ``node_key``,
-    ``bout``, ``ts_ms``, ``frame`` (repo-relative), ``corpus_label``, the blind model's
-    ``model_label``/``model_type``, ``agree`` and ``review_confidence`` — ``high`` when the
-    blind read agreed with the corpus label, ``low`` when it did not. Nothing is dropped
-    there, so the disagreements arrive here as the frames most worth a human's eyes.
+    One JSON object per line, written by ``dictionary_seed.run_ask``: ``node_key``, ``bout``,
+    ``ts_ms``, ``frame`` (repo-relative), the blind model's own ``candidate_label``/
+    ``candidate_type`` (null when the row was never actually read — a preverify skip,
+    `visible: no`, or a Gemini error), ``second_opinion`` (``{corpus_label, agree,
+    agree_near}`` — the corpus label `plan` searched for, kept only as a second opinion since
+    the 2026-09-16 decision, `docs/dictionary_audit.md`) and ``review_confidence``
+    (``dictionary_seed.compute_review_confidence`` — ``high`` only when the second opinion
+    backs the candidate up). Nothing is dropped there, so a disagreement with the corpus still
+    arrives here as a frame worth a human's eyes.
 
     It carries NO actor name (``actor_role`` is top/bottom, not an identity), which is why
     an accepted seed frame mints a label line with a null actor — see ``mint_line``.
@@ -625,22 +629,36 @@ def gather_proposals(dataset: Path, wanted: set[str]) -> dict[str, list[Proposal
     """
     out: dict[str, list[Proposal]] = defaultdict(list)
 
+    # 2026-09-16 decision (docs/dictionary_audit.md): the blind Gemini read is the CANDIDATE
+    # for review, the corpus label (what this bucket's `wanted` key is) is only a second
+    # opinion -- a row never actually read (preverify skip / not visible / error) has no
+    # `candidate_label` and is not a review item at all, it never reaches Gemini.
+    _RANK_BY_CONF = {"high": 0, "medium": 1, "low": 2}
     for row in load_seed():
         key = node_key_of(str(row.get("node_key") or ""))
         if key not in wanted:
             continue
-        high = str(row.get("review_confidence") or "").lower() == "high"
+        candidate = str(row.get("candidate_label") or "").strip()
+        if not candidate:
+            continue
+        second = row.get("second_opinion") or {}
+        corpus_label = str(second.get("corpus_label") or row.get("corpus_label") or "")
+        agree_near = str(second.get("agree_near") or second.get("agree")
+                         or row.get("agree_near") or row.get("agree") or "no")
+        confidence = str(row.get("review_confidence") or "low").lower()
         ts_ms = int(row.get("ts_ms") or 0)
         bout = str(row.get("bout") or "")
-        model = str(row.get("model_label") or "?")
+        caption = f"gemini: {candidate} ({confidence})"
+        if corpus_label:
+            caption += f" · corpus: {corpus_label} [{agree_near}]"
         out[key].append(Proposal(
             node_key=key, bout=bout, ts_ms=ts_ms,
-            ts=int(row.get("ts") or ts_ms // 1000), rank=0 if high else 1, offset=0,
-            caption="corpus+gemini ✓" if high else f"corpus ✗ gemini: {model}",
-            frame=seed_frame_rel(row, key, dataset), origin="gemini",
-            label=str(row.get("corpus_label") or row.get("label") or ""),
-            type=str(row.get("type") or ""), actor=row.get("actor"),
-            successful=row.get("successful")))
+            ts=int(row.get("ts") or ts_ms // 1000),
+            rank=_RANK_BY_CONF.get(confidence, 2), offset=0,
+            caption=caption,
+            frame=seed_frame_rel(row, key, dataset), origin="gemini_seed",
+            label=candidate, type=str(row.get("candidate_type") or row.get("type") or ""),
+            actor=row.get("actor"), successful=row.get("successful")))
 
     for path in sorted((dataset / "labels").glob("*.jsonl")):
         slug = path.stem
@@ -744,9 +762,12 @@ def queue(dataset: Path = DATASET, cap: int = DEFAULT_CAP, limit: int | None = N
                      "sheet": str(sheet.relative_to(dataset)) if render else None,
                      "proposals": [p.__dict__ for p in picked]})
 
+    seed_items_queued = sum(1 for t in rows for p in t.get("proposals") or []
+                            if p.get("origin") == "gemini_seed")
     out = {"generated": datetime.now(UTC).isoformat(timespec="seconds"),
            "cap": cap, "min_human": min_human,
            "seed_rows": len(load_seed()),
+           "seed_items_queued": seed_items_queued,
            "targets": rows}
     QUEUE_JSON.parent.mkdir(parents=True, exist_ok=True)
     QUEUE_JSON.write_text(json.dumps(out, ensure_ascii=False, indent=1) + "\n",
@@ -783,7 +804,9 @@ def write_queue_md(queue_out: dict[str, Any]) -> Path:
         "",
         f"Generated {queue_out['generated']} by `scripts/dictionary_audit.py queue` "
         f"(cap {queue_out['cap']} frames/technique, "
-        f"{queue_out['seed_rows']} seed rows). **Generated file — do not hand-edit.**",
+        f"{queue_out['seed_rows']} seed rows, "
+        f"{queue_out.get('seed_items_queued', 0)} of them queued as review items). "
+        "**Generated file — do not hand-edit.**",
         "",
         "Order: zero-coverage techniques by corpus frequency first (those are the classes a "
         "tuning run cannot learn today), then thin ones, then candidate labels with no "
@@ -914,8 +937,9 @@ def _proposal_index(queue_out: dict[str, Any],
         ts_ms = int(row.get("ts_ms") or 0)
         idx[(key, str(row.get("bout") or ""), ts_ms)] = {
             "node_key": key, "bout": row.get("bout"), "ts_ms": ts_ms, "ts": ts_ms // 1000,
-            "frame": seed_frame_rel(row, key, dataset), "origin": "gemini",
-            "label": row.get("corpus_label") or "", "type": "", "actor": None,
+            "frame": seed_frame_rel(row, key, dataset), "origin": "gemini_seed",
+            "label": row.get("candidate_label") or row.get("corpus_label") or "",
+            "type": row.get("candidate_type") or "", "actor": None,
             "successful": None}
     for t in queue_out.get("targets", []):
         for p in t.get("proposals") or []:
@@ -1100,6 +1124,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{len(rendered)} sheet(s) under {SHEETS}, "
               f"{sum(t['frames'] for t in rendered)} frames queued; "
               f"{len(out['targets']) - len(rendered)} technique(s) had no candidate frame")
+        print(f"seed: {out.get('seed_items_queued', 0)} of {out['seed_rows']} seed.jsonl rows "
+              "queued as review items (the rest were never actually read: preverify skip / "
+              "not visible / error)")
         print(f"index: {QUEUE_MD}")
         return 0
     out = apply(args.verdicts, args.dataset, write=args.write and not args.dry_run,

@@ -175,28 +175,48 @@ def test_queue_ingests_the_gemini_seed_high_confidence_first(isolated: Path) -> 
     seed_dir.mkdir(parents=True)
     for name in ("bout-x__11000.jpg", "bout-x__22000.jpg"):
         (seed_dir / name).write_bytes(b"\xff\xd8\xff")      # presence is what queue checks
-    # The shape scripts/dictionary_seed.py:run_ask writes, verbatim: repo-relative frame,
-    # corpus_label, the blind model's guess, agreement + review_confidence, no actor name.
+    # The shape scripts/dictionary_seed.py:run_ask writes, verbatim (2026-09-16 decision): the
+    # blind model's own read is `candidate_label`/`candidate_type` (the review target), the
+    # corpus label `plan` searched for is only a `second_opinion`, and `review_confidence` is
+    # `dictionary_seed.compute_review_confidence`'s output.
     da.SEED.write_text("".join(json.dumps(r) + "\n" for r in [
         {"node_key": "kimura", "bout": "bout-x", "ts_ms": 22000,
          "frame": "data/finetune/audit/gemini_seed/kimura/bout-x__22000.jpg",
-         "corpus_label": "Kimura", "model_label": "Americana (Keylock)",
-         "model_type": "submission", "actor_role": "top", "model_confidence": "high",
-         "agree": "no", "review_confidence": "low"},
+         "candidate_label": "Americana (Keylock)", "candidate_type": "submission",
+         "second_opinion": {"corpus_label": "Kimura", "agree": "no", "agree_near": "near"},
+         "actor_role": "top", "model_confidence": "high", "review_confidence": "low"},
         {"node_key": "kimura", "bout": "bout-x", "ts_ms": 11000,
          "frame": "data/finetune/audit/gemini_seed/kimura/bout-x__11000.jpg",
-         "corpus_label": "Kimura", "model_label": "Kimura", "model_type": "submission",
-         "actor_role": "top", "model_confidence": "high",
-         "agree": "full", "review_confidence": "high"},
+         "candidate_label": "Kimura", "candidate_type": "submission",
+         "second_opinion": {"corpus_label": "Kimura", "agree": "full", "agree_near": "full"},
+         "actor_role": "top", "model_confidence": "high", "review_confidence": "high"},
     ]), encoding="utf-8")
 
     got = da.gather_proposals(dataset, {"kimura"})
     picked = da.dedupe(got["kimura"], cap=12, seen=set())
     assert [p.ts_ms for p in picked] == [11000, 22000], "high confidence sorts first"
-    assert picked[0].caption == "corpus+gemini ✓"
-    assert picked[1].caption == "corpus ✗ gemini: Americana (Keylock)"
+    assert picked[0].caption == "gemini: Kimura (high) · corpus: Kimura [full]"
+    assert picked[1].caption == "gemini: Americana (Keylock) (low) · corpus: Kimura [near]"
     assert picked[0].frame == "audit/gemini_seed/kimura/bout-x__11000.jpg"
     assert picked[0].label == "Kimura" and picked[0].actor is None
+    assert picked[0].origin == "gemini_seed"
+
+
+def test_queue_ignores_seed_rows_never_actually_read(isolated: Path) -> None:
+    # A preverify skip / not-visible / error row has no `candidate_label` -- nothing was ever
+    # shown to a human to review, so it must not become a queue item at all.
+    dataset = _tiny_dataset(isolated, [])
+    seed_dir = dataset / "audit" / "gemini_seed" / "kimura"
+    seed_dir.mkdir(parents=True)
+    da.SEED.write_text(json.dumps(
+        {"node_key": "kimura", "bout": "bout-x", "ts_ms": 5000,
+         "frame": "data/finetune/audit/gemini_seed/kimura/bout-x__5000.jpg",
+         "candidate_label": None, "candidate_type": None,
+         "second_opinion": {"corpus_label": "Kimura", "agree": "no", "agree_near": "no"},
+         "review_confidence": "low"}) + "\n", encoding="utf-8")
+
+    got = da.gather_proposals(dataset, {"kimura"})
+    assert got.get("kimura", []) == []
 
 
 def test_queue_skips_frames_already_ruled_on(isolated: Path) -> None:
@@ -366,7 +386,8 @@ def test_accepting_a_seed_frame_without_a_queue_file_still_credits_the_model(
     da.SEED.write_text(json.dumps(
         {"node_key": "kimura", "bout": "b1", "ts_ms": 10000,
          "frame": "data/finetune/audit/gemini_seed/kimura/b1__10000.jpg",
-         "corpus_label": "Kimura", "model_label": "Kimura", "agree": "full",
+         "candidate_label": "Kimura",
+         "second_opinion": {"corpus_label": "Kimura", "agree": "full", "agree_near": "full"},
          "review_confidence": "high"}) + "\n", encoding="utf-8")
     verdicts = isolated / "verdicts.jsonl"
     verdicts.write_text(json.dumps({"node_key": "kimura", "bout": "b1", "ts_ms": 10000,
@@ -374,6 +395,6 @@ def test_accepting_a_seed_frame_without_a_queue_file_still_credits_the_model(
     assert not da.QUEUE_JSON.exists()
     da.apply(verdicts, dataset, write=True, reviewer="tester", rebuild=False)
     line = vd.load_verdicts(da.AUDIT / "verdicts.jsonl")[0]["line"]
-    assert line["source"] == "gemini"
+    assert line["source"] == "gemini_seed", "accepting must not launder the origin"
     assert line["frame"] == "audit/gemini_seed/kimura/b1__10000.jpg"
     assert line["actor"] is None, "the seed carries a role, never an identity"

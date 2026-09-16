@@ -35,18 +35,38 @@ stopped:
    AND per warning) and `preverify_sheet_<n>.png` contact sheets (≤24 candidates/page,
    captioned `skip: <reasons>` / `warn: <warnings>`) for a human to spot-check before any
    Gemini call happens.
-4. **ask** — TWO Gemini (`gemini-pro-latest`, temperature 0) calls per candidate. A candidate
+4. **ask** — ONE Gemini (`gemini-pro-latest`, temperature 0) call per candidate by default: the
+   already-preverified centre frame (offset 0) is read BLIND (two athletes' names, closed
+   curated vocabulary, three frames, no hint of the corpus label) and that read becomes
+   `candidate_label` — the label a human reviews. `--align` opts back into a second, first
+   call: a NOT-blind stage A that shows the 9-frame window and asks which offset actually
+   shows the corpus label (a non-default choice gets its full-res frame re-extracted on
+   demand) before the same blind read runs on whichever frame it picked. A candidate
    `preverify` marked `skip` is written straight to `seed.jsonl` with `visible: false`,
    `review_confidence: low`, reason `preverify:<reasons>` and zero usage — never sent to
-   Gemini. For the rest: stage A (NOT blind) shows the 9-frame window and asks which offset
-   actually shows the corpus label; a non-default choice gets its full-res frame re-extracted
-   on demand. Stage B is the original blind read (two athletes' names, closed curated
-   vocabulary, three frames, no hint of the corpus label) on whichever frame stage A picked.
-   `visible: no` at stage A skips stage B (`review_confidence: low`, reason
-   `not_visible_in_window`). Resume-safe: a candidate already in `seed.jsonl`
-   (node_key+bout+ts_ms) is skipped and the new answers are appended, not overwritten.
-5. **report** — `REPORT.md`: per-technique agreement, zero-video-backed techniques, cost, top
+   Gemini, no stage A or B either way. `visible: no` at stage A (`--align` only) skips the
+   blind read too (`review_confidence: low`, reason `not_visible_in_window`). Resume-safe: a
+   candidate already in `seed.jsonl` (node_key+bout+ts_ms) is skipped and the new answers are
+   appended, not overwritten.
+5. **report** — re-grades an existing `seed.jsonl` IN PLACE, no Gemini calls: adds/refreshes
+   `agree_near`, `candidate_label`/`candidate_type`, `second_opinion` and `review_confidence`
+   on every row (so a seed written before these fields existed is upgraded, not stuck). Writes
+   `REPORT.md`: per-technique agreement (by corpus label, what was searched for, AND by
+   candidate label, what the model actually saw), zero-video-backed techniques, cost, top
    confusions (the dictionary's ambiguous pairs).
+
+**Decisão 2026-09-16** (owner): the Gemini blind read is the CANDIDATE label for human
+review; the corpus label the plan searched for is only a SECOND OPINION shown alongside it.
+Measured why: batch 2 (91 rows) — 6 disagreements eyeballed by hand, 5 of 6 showed the model
+naming the position actually VISIBLE in the frame while the corpus label simply was not in it
+(corpus-timestamp misalignment, not a wrong model read). Trusting the corpus label as ground
+truth was therefore the wrong prior even after the stage-A alignment window. Consequences:
+stage A is now OPTIONAL, off by default (`ask --align` turns it back on) — with the model's
+own read as the label, the frame no longer has to show the corpus label at all, so the centre
+frame at offset 0 (already screened by `preverify`) is read blind directly; `review_confidence`
+is redefined around the candidate (see `compute_review_confidence`) instead of "did the model
+match the corpus"; and the human review queue (`scripts/dictionary_audit.py queue`) now shows
+the candidate first, the corpus label as a second opinion beside it.
 
 Privacy: public corpus only (`matches`/`athletes`), same class as `scripts/frame_pdf.py`.
 Prod is read-only; this script writes nothing back to the DB.
@@ -884,7 +904,9 @@ def write_sheets(results: list[dict[str, Any]], out_dir: Path,
 def build_preverify_skip_seed_row(row: dict[str, Any], reasons: list[str]) -> dict[str, Any]:
     """A preverify ``skip`` verdict -> the exact shape ``run_ask`` writes to ``seed.jsonl``, at
     zero Gemini cost -- so `report` never has to special-case where a row came from, and the
-    candidate is never silently dropped."""
+    candidate is never silently dropped. Never "read" (no Gemini call happened), so
+    ``candidate_label`` is null and ``review_confidence`` is ``low`` -- see
+    :func:`compute_review_confidence`."""
     tag = f"preverify:{'+'.join(reasons)}"
     frame = chosen_frame_paths(str(row["node_key"]), str(row["bout"]), int(row["ts_ms"]), 0)["center"]
     return {
@@ -893,6 +915,8 @@ def build_preverify_skip_seed_row(row: dict[str, Any], reasons: list[str]) -> di
         "chosen_offset": 0, "visible": False, "align_reason": tag,
         "frame": str(frame.relative_to(REPO)) if str(frame).startswith(str(REPO)) else str(frame),
         "corpus_label": row.get("label"), "model_label": None, "model_type": None,
+        "candidate_label": None, "candidate_type": None,
+        "second_opinion": {"corpus_label": row.get("label"), "agree": "no", "agree_near": "no"},
         "actor_role": None, "model_confidence": None, "reason": tag,
         "agree": "no", "review_confidence": "low", "usage": dict(_EMPTY_USAGE),
     }
@@ -1064,9 +1088,12 @@ def _arrived_at_state(node_key: str, model_answer: Mapping[str, Any]) -> bool:
 
 
 def score_agreement(node_key: str, model_answer: dict[str, Any]) -> tuple[str, str]:
-    """``(agree, review_confidence)``. ``agree`` in ``full|partial|near|no``; ``review_confidence``
-    is ``high`` only on full agreement, ``medium`` on ``near`` -- disagreement is exactly what
-    the human review queue exists to see, so it is never dropped, only marked ``low``/``medium``.
+    """``(agree, _legacy_conf)``. ``agree`` in ``full|partial|near|no`` is the second opinion's
+    own tier and is still used everywhere. The second element is the PRE-2026-09-16 confidence
+    rule (corpus-centric: high only on full agreement) -- kept for callers/tests that still
+    read it, but a seed row's own ``review_confidence`` now comes from
+    :func:`compute_review_confidence` instead (candidate-centric, see its docstring).
+    Disagreement is exactly what the human review queue exists to see, so it is never dropped.
 
     ``near`` (added 2026-09-16, `docs/dictionary_audit.md`) sits between ``partial`` and ``no``:
     the model's label is not the corpus label and not its declared ``alternative``, but is
@@ -1084,6 +1111,28 @@ def score_agreement(node_key: str, model_answer: dict[str, Any]) -> tuple[str, s
         if _same_family(node_key, model_key) or _arrived_at_state(node_key, model_answer):
             return "near", "medium"
     return "no", "low"
+
+
+def compute_review_confidence(agree: str, model_confidence: str | None, read: bool) -> str:
+    """Human review confidence (decision 2026-09-16, `docs/dictionary_audit.md`): the
+    CANDIDATE (blind Gemini read) is what a human reviews now, the corpus label is only a
+    second opinion beside it -- so this is no longer "did the model match the corpus", it is
+    "how much can the human trust this candidate without looking hard".
+
+    ``high`` only when the second opinion backs it up (``agree`` full or partial -- both
+    directions of agreement, not just an exact match). ``medium`` on the ``near`` tier (same
+    curated family / declared landing state) OR when the model itself reported high
+    confidence, even with no corpus support -- either is a reason to look, neither is a reason
+    to trust blindly. ``low`` otherwise, including a row that was never actually read (a
+    preverify skip, `visible: no` at stage A, or a Gemini error/empty answer) -- those get
+    ``read=False`` and short-circuit here regardless of ``agree``."""
+    if not read:
+        return "low"
+    if agree in ("full", "partial"):
+        return "high"
+    if agree == "near" or str(model_confidence or "").strip().lower() == "high":
+        return "medium"
+    return "low"
 
 
 def regrade_seed_near(seed: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -1113,6 +1162,31 @@ def regrade_seed_near(seed: list[dict[str, Any]]) -> list[dict[str, Any]]:
                     row["agree_near"] = "no"
             else:
                 row["agree_near"] = "no"
+        out.append(row)
+    return out
+
+
+def regrade_seed_review(seed: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Backfill/refresh ``candidate_label``/``candidate_type``/``second_opinion``/
+    ``review_confidence`` on every row, derived from what's already stored
+    (``model_label``/``model_type``/``agree``/``agree_near``/``model_confidence``) -- no
+    Gemini call, idempotent, and it upgrades a `seed.jsonl` written before these fields
+    existed (decision 2026-09-16, `docs/dictionary_audit.md`). Call AFTER
+    :func:`regrade_seed_near` so ``agree_near`` is already the best tier available."""
+    out = []
+    for row in seed:
+        row = dict(row)
+        read = bool(row.get("model_label"))
+        row["candidate_label"] = row.get("model_label") if read else None
+        row["candidate_type"] = row.get("model_type") if read else None
+        agree = str(row.get("agree", "no"))
+        agree_near = str(row.get("agree_near") or agree)
+        row["second_opinion"] = {"corpus_label": row.get("corpus_label"),
+                                 "agree": agree, "agree_near": agree_near}
+        # the near-aware tier decides confidence (a strict `no` regraded to `near` still
+        # earns `medium`) -- see compute_review_confidence's docstring.
+        row["review_confidence"] = compute_review_confidence(
+            agree_near, row.get("model_confidence"), read)
         out.append(row)
     return out
 
@@ -1200,12 +1274,19 @@ def ask_gemini(row: dict[str, Any], vocab_text: str, client: Any,
     return {"parsed": _parse_json_answer(resp.text), "usage": usage_totals(resp.usage_metadata)}
 
 
-def run_ask(plan: list[dict[str, Any]], *, dry_run: bool = False) -> list[dict[str, Any]]:
-    """Two stages, both ``gemini-pro-latest`` at ``temperature=0``: stage A (not blind) picks
-    which frame in the +/-30s window actually shows the corpus label; stage B (blind, no
-    corpus label given) reads that chosen frame the same way the single-frame pipeline
-    always did. ``visible: no`` at stage A skips stage B entirely -- ``review_confidence:
-    low``, reason ``not_visible_in_window``, never dropped."""
+def run_ask(plan: list[dict[str, Any]], *, dry_run: bool = False,
+           align: bool = False) -> list[dict[str, Any]]:
+    """``gemini-pro-latest`` at ``temperature=0``. Default (``align=False``, decision
+    2026-09-16): ONE call per candidate -- the blind read (no corpus label given) straight on
+    the already-preverified centre frame (offset 0); its answer becomes ``candidate_label``,
+    the label a human reviews, with the corpus label kept only as a second opinion. A
+    candidate whose centre frame never got extracted is marked ``visible: false``
+    (``align_reason: extraction_failed``) and never spends a call.
+
+    ``align=True`` opts back into the OLD two-call shape: stage A (not blind) picks which
+    frame in the +/-30s window actually shows the CORPUS label first; the same blind read
+    then runs on whichever frame it picked. ``visible: no`` at stage A skips the blind read
+    entirely (``review_confidence: low``, reason ``not_visible_in_window``, never dropped)."""
     curated = load_curated()
     vocab = vocabulary_text(curated)
     client = None
@@ -1213,50 +1294,63 @@ def run_ask(plan: list[dict[str, Any]], *, dry_run: bool = False) -> list[dict[s
         from google import genai
         client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 
-    # stage A -- alignment
-    stage_a: list[dict[str, Any]] = []
-    for i, row in enumerate(plan, 1):
-        logger.info("[stage A %d/%d] %s (%s)", i, len(plan), row["node_key"], row["bout"])
-        node_key, bout, ts_ms = str(row["node_key"]), str(row["bout"]), int(row["ts_ms"])
-        has_frames = any(strip_frame_path(node_key, bout, ts_ms, o).exists()
-                         for o in WINDOW_OFFSETS)
-        if not has_frames:
-            # extraction failed for this candidate's match (yt-dlp/ffmpeg) -- nothing to
-            # show the model, so don't spend a call on an empty prompt.
-            stage_a.append({**row, "chosen_offset": 0, "visible": False,
-                            "align_reason": "extraction_failed", "align_usage": dict(_EMPTY_USAGE)})
-            continue
-        if client is None:
-            align, err = {"parsed": {}, "usage": dict(_EMPTY_USAGE)}, None
-        else:
-            align, err = _safe_call(ask_alignment, row, client)
-        parsed = align["parsed"]
-        offset = resolve_offset(parsed)
-        visible = str(parsed.get("visible", "")).strip().lower() == "yes"
-        stage_a.append({**row, "chosen_offset": offset, "visible": visible,
-                        "align_reason": err or parsed.get("reason"),
-                        "align_usage": align["usage"]})
+    stage_a: list[dict[str, Any]]
+    if align:
+        # stage A -- alignment (opt-in, --align)
+        stage_a = []
+        for i, row in enumerate(plan, 1):
+            logger.info("[stage A %d/%d] %s (%s)", i, len(plan), row["node_key"], row["bout"])
+            node_key, bout, ts_ms = str(row["node_key"]), str(row["bout"]), int(row["ts_ms"])
+            has_frames = any(strip_frame_path(node_key, bout, ts_ms, o).exists()
+                             for o in WINDOW_OFFSETS)
+            if not has_frames:
+                # extraction failed for this candidate's match (yt-dlp/ffmpeg) -- nothing to
+                # show the model, so don't spend a call on an empty prompt.
+                stage_a.append({**row, "chosen_offset": 0, "visible": False,
+                                "align_reason": "extraction_failed",
+                                "align_usage": dict(_EMPTY_USAGE)})
+                continue
+            if client is None:
+                align_resp, err = {"parsed": {}, "usage": dict(_EMPTY_USAGE)}, None
+            else:
+                align_resp, err = _safe_call(ask_alignment, row, client)
+            parsed = align_resp["parsed"]
+            offset = resolve_offset(parsed)
+            visible = str(parsed.get("visible", "")).strip().lower() == "yes"
+            stage_a.append({**row, "chosen_offset": offset, "visible": visible,
+                            "align_reason": err or parsed.get("reason"),
+                            "align_usage": align_resp["usage"]})
 
-    # any non-default choice needs its own full-res extraction (only offset 0 exists yet)
-    needing = [r for r in stage_a if r["chosen_offset"] != 0 and r["visible"]
-              and not chosen_frame_paths(str(r["node_key"]), str(r["bout"]), int(r["ts_ms"]),
-                                         int(r["chosen_offset"]))["center"].exists()]
-    if needing and client is not None:
-        ensure_chosen_frames(needing)
+        # any non-default choice needs its own full-res extraction (only offset 0 exists yet)
+        needing = [r for r in stage_a if r["chosen_offset"] != 0 and r["visible"]
+                  and not chosen_frame_paths(str(r["node_key"]), str(r["bout"]), int(r["ts_ms"]),
+                                             int(r["chosen_offset"]))["center"].exists()]
+        if needing and client is not None:
+            ensure_chosen_frames(needing)
+    else:
+        # 2026-09-16: off by default -- the model's own read is the candidate, so the frame no
+        # longer has to show the corpus label. Read the centre frame (offset 0, already
+        # screened by `preverify`) blind directly -- zero stage-A calls, one call total below.
+        stage_a = [
+            {**row, "chosen_offset": 0,
+             "visible": (visible := chosen_frame_paths(
+                 str(row["node_key"]), str(row["bout"]), int(row["ts_ms"]), 0)["center"].exists()),
+             "align_reason": None if visible else "extraction_failed",
+             "align_usage": dict(_EMPTY_USAGE)}
+            for row in plan
+        ]
 
-    # stage B -- the blind read
+    # the blind read (stage B when --align, the only call otherwise)
     seed: list[dict[str, Any]] = []
     for i, row in enumerate(stage_a, 1):
-        logger.info("[stage B %d/%d] %s (%s) offset=%+d visible=%s", i, len(stage_a),
+        logger.info("[ask %d/%d] %s (%s) offset=%+d visible=%s", i, len(stage_a),
                    row["node_key"], row["bout"], row["chosen_offset"], row["visible"])
         reason: str | None
         agree: str
-        conf: str
         usage: dict[str, int]
         if not row["visible"]:
             model_parsed: dict[str, Any] = {}
             agree = "no"
-            conf = "low"
             reason = "not_visible_in_window"
             usage = dict(_EMPTY_USAGE)
         else:
@@ -1267,9 +1361,11 @@ def run_ask(plan: list[dict[str, Any]], *, dry_run: bool = False) -> list[dict[s
             else:
                 answer, b_err = _safe_call(ask_gemini, row, vocab, client)
             model_parsed = answer["parsed"]
-            agree, conf = score_agreement(str(row["node_key"]), model_parsed)
+            agree, _old_conf = score_agreement(str(row["node_key"]), model_parsed)
             reason = b_err or model_parsed.get("reason")
             usage = answer["usage"]
+        read = bool(model_parsed.get("label"))
+        conf = compute_review_confidence(agree, model_parsed.get("confidence"), read)
         frame = chosen_frame_paths(str(row["node_key"]), str(row["bout"]), int(row["ts_ms"]),
                                    int(row["chosen_offset"]))["center"]
         seed.append({
@@ -1281,6 +1377,10 @@ def run_ask(plan: list[dict[str, Any]], *, dry_run: bool = False) -> list[dict[s
                     else str(frame),
             "corpus_label": row["label"], "model_label": model_parsed.get("label"),
             "model_type": model_parsed.get("type"),
+            "candidate_label": model_parsed.get("label") if read else None,
+            "candidate_type": model_parsed.get("type") if read else None,
+            "second_opinion": {"corpus_label": row["label"], "agree": agree,
+                               "agree_near": agree},
             "actor_role": model_parsed.get("actor_role"),
             "model_confidence": model_parsed.get("confidence"), "reason": reason,
             "agree": agree, "review_confidence": conf,
@@ -1436,6 +1536,31 @@ def build_report(seed: list[dict[str, Any]], counts: dict[str, int],
         lines.append(f"| {en} | {counts.get(en, 0)} | {len(rows)} | {f_} | {p_} | {n_} | {hi}/{lo} |")
     lines.append("")
 
+    per_candidate: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for s in seed:
+        label = s.get("candidate_label")
+        if label:
+            per_candidate[str(label)].append(s)
+    lines += ["## Per technique (by candidate — what the model saw)", "",
+             "The table above groups rows by the CORPUS label (what `plan` searched for). "
+             "This one groups the same rows by `candidate_label` (the model's own blind read) "
+             "-- decision 2026-09-16 makes that the review target, so this is what a human "
+             "actually sees on the sheet.", "",
+             "| candidate label | rows | corpus agree full | partial | near | no | "
+             "review high/medium/low |",
+             "|---|---|---|---|---|---|---|"]
+    for label in sorted(per_candidate):
+        c_rows = per_candidate[label]
+        f_ = sum(1 for r in c_rows if _near_tier(r) == "full")
+        p_ = sum(1 for r in c_rows if _near_tier(r) == "partial")
+        ne_ = sum(1 for r in c_rows if _near_tier(r) == "near")
+        n_ = sum(1 for r in c_rows if _near_tier(r) == "no")
+        hi = sum(1 for r in c_rows if r.get("review_confidence") == "high")
+        me = sum(1 for r in c_rows if r.get("review_confidence") == "medium")
+        lo = sum(1 for r in c_rows if r.get("review_confidence") == "low")
+        lines.append(f"| {label} | {len(c_rows)} | {f_} | {p_} | {ne_} | {n_} | {hi}/{me}/{lo} |")
+    lines.append("")
+
     zero = sorted(t["en"] for t in curated if t.get("en") and counts.get(t["en"], 0) == 0)
     lines += [f"## Techniques with zero video-backed events ({len(zero)})", ""]
     lines += [f"- {n}" for n in zero] + [""]
@@ -1501,6 +1626,10 @@ def main() -> int:
 
     p_ask = sub.add_parser("ask")
     p_ask.add_argument("--dry-run", action="store_true")
+    p_ask.add_argument("--align", action="store_true",
+                       help="opt-in second call per candidate: pick the frame that shows the "
+                            "corpus label before the blind read (off by default since "
+                            "2026-09-16 -- the blind read's own answer is the candidate now)")
 
     sub.add_parser("report")
 
@@ -1590,16 +1719,17 @@ def main() -> int:
         preverify_rows = read_jsonl(PREVERIFY_PATH)
         to_ask, skip_seed = partition_for_ask(plan_rows, existing_seed, preverify_rows)
         dry = a.dry_run or not os.environ.get("GEMINI_API_KEY")
-        asked = run_ask(to_ask, dry_run=dry) if to_ask else []
+        asked = run_ask(to_ask, dry_run=dry, align=a.align) if to_ask else []
         seed = existing_seed + skip_seed + asked
         write_jsonl(seed, SEED_PATH)
-        logger.info("ask: %d asked, %d preverify-skipped, %d already done (dry_run=%s)",
-                   len(asked), len(skip_seed), len(existing_seed), dry)
+        logger.info("ask: %d asked, %d preverify-skipped, %d already done (dry_run=%s align=%s)",
+                   len(asked), len(skip_seed), len(existing_seed), dry, a.align)
         return 0
 
     if a.cmd == "report":
         seed = regrade_seed_near(read_jsonl(SEED_PATH))
-        write_jsonl(seed, SEED_PATH)   # persist agree_near -- report is re-run often, ask is not
+        seed = regrade_seed_review(seed)
+        write_jsonl(seed, SEED_PATH)   # persist agree_near/candidate fields -- report re-runs often, ask does not
         counts = (json.loads(PLAN_COUNTS_PATH.read_text(encoding="utf-8"))
                  if PLAN_COUNTS_PATH.exists() else {})
         curated = load_curated()

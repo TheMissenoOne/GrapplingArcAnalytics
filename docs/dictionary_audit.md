@@ -87,10 +87,13 @@ Priority order on every sheet, which is also the order of how much a human's min
 
 | rank | source | caption |
 |---|---|---|
-| 0 | `scripts/dictionary_seed.py` — a corpus event with video, frame extracted, a BLIND Gemini read agreeing with the corpus label | `corpus+gemini ✓` |
-| 1 | the same, where the blind read DISAGREED | `corpus ✗ gemini: <its guess>` |
+| 0–2 | `scripts/dictionary_seed.py` — a corpus event with video, frame extracted, a BLIND Gemini read (`review_confidence` high/medium/low decides the rank; see "Decisão 2026-09-16" below) | `gemini: <candidate> (<confidence>) · corpus: <corpus label> [<agree_near>]` |
 | 2 | an unreviewed model label already in the dataset, plus its ±1 neighbouring frames | `gemini read (+1 frame)` |
 | 3 | the 4 Fable reference reads and the 64 Gemini reads under `data/frame_pdf/out/experiments/`, frames recovered from the Bernardi sheets with `pdfimages -j` | `<reader>` |
+
+A seed row that was never actually read (a preverify skip, `visible: no`, or a Gemini error —
+no `candidate_label`) is not a review item at all: `dictionary_audit.gather_proposals` drops
+it before it can reach a sheet, since there is nothing to show a human.
 
 ### Preverify — screen before spending a Gemini call
 
@@ -126,6 +129,33 @@ never silently dropped. `ask` is also resume-safe on its own: a candidate alread
 A frame already carrying a verdict is never queued again. A technique with no proposal at all
 gets a row in `queue.md` saying so rather than an empty sheet — that is the honest signal that
 its frames have to be MADE (step 2), not found.
+
+### Decisão 2026-09-16 — o candidato é o alvo, o corpus é a segunda opinião
+
+**A leitura cega do Gemini (`candidate_label`) é o alvo de revisão; o corpus label que
+`plan` procurou é só a segunda opinião ao lado.** Medido: no batch de 91 candidatos, 6
+discordâncias foram checadas a olho — em 5 de 6 o modelo nomeou a posição realmente VISÍVEL
+no frame, e o corpus label simplesmente não estava naquele frame (desalinhamento de
+timestamp, mesmo depois da janela de alinhamento de ±30s). Confiar no corpus label como
+verdade era o prior errado.
+
+Consequências, todas em `scripts/dictionary_seed.py`:
+
+- **Stage A (alinhamento) virou OPCIONAL, desligado por padrão.** `ask` sem flag faz UMA
+  chamada por candidato: lê o frame central (offset 0, já filtrado pelo `preverify`) às
+  cegas — não precisa mais mostrar o corpus label, porque a resposta do modelo já É o
+  candidato. `ask --align` liga de volta o stage A de duas chamadas (o comportamento antigo).
+- **`review_confidence` foi redefinido** em torno do candidato, não da concordância com o
+  corpus (`compute_review_confidence`): `high` só quando a segunda opinião confirma (`agree`
+  full/partial); `medium` no tier `near` OU quando o próprio modelo relatou confiança alta;
+  `low` no resto, incluindo uma linha nunca lida de fato (preverify skip / `visible: no` /
+  erro).
+- **`seed.jsonl` ganhou `candidate_label`/`candidate_type`** (a leitura do modelo, null
+  quando a linha nunca foi lida) e **`second_opinion`** (`{corpus_label, agree, agree_near}`).
+  `report` re-grada um `seed.jsonl` existente com esses campos, sem nenhuma chamada nova.
+- **A fila de revisão (`dictionary_audit.py queue`)** agora mostra o candidato primeiro, com
+  a segunda opinião ao lado — uma linha sem `candidate_label` (nunca lida) não vira item de
+  fila.
 
 ### Results — 2026-09-16 run
 

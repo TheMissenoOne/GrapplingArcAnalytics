@@ -25,6 +25,7 @@ from scripts.dictionary_seed import (
     cap_plan,
     chosen_frame_paths,
     classify_ts_origin,
+    compute_review_confidence,
     count_persons,
     is_blank,
     is_no_people,
@@ -34,6 +35,7 @@ from scripts.dictionary_seed import (
     preverify_candidate,
     prioritize_curated,
     regrade_seed_near,
+    regrade_seed_review,
     resolve_offset,
     run_ask,
     run_preverify,
@@ -666,7 +668,7 @@ def test_run_ask_survives_a_quota_error_and_keeps_grading_the_rest(
     with pytest.MonkeyPatch.context() as mp:
         mp.setattr("google.genai.Client", lambda **_kw: fake_client)
         mp.setenv("GEMINI_API_KEY", "test-key")
-        seed = run_ask(rows, dry_run=False)
+        seed = run_ask(rows, dry_run=False, align=True)
 
     assert len(seed) == 2   # neither candidate lost, despite the 429
     assert seed[0]["agree"] == "no"
@@ -995,3 +997,102 @@ def test_partition_for_ask_no_preverify_file_asks_everything() -> None:
     to_ask, skip_seed = partition_for_ask(plan_rows, [], [])
     assert len(to_ask) == 1
     assert skip_seed == []
+
+
+# ── review_confidence: candidate-first rule (2026-09-16) ─────────────────────────
+def test_compute_review_confidence_not_read_is_always_low() -> None:
+    # preverify skip / not visible / error -- never actually read, regardless of agree.
+    assert compute_review_confidence("full", "high", read=False) == "low"
+
+
+def test_compute_review_confidence_high_on_full_or_partial_agreement() -> None:
+    assert compute_review_confidence("full", None, read=True) == "high"
+    assert compute_review_confidence("partial", None, read=True) == "high"
+
+
+def test_compute_review_confidence_medium_on_near_tier() -> None:
+    assert compute_review_confidence("near", None, read=True) == "medium"
+
+
+def test_compute_review_confidence_medium_on_model_high_confidence_even_with_no_agreement() -> None:
+    assert compute_review_confidence("no", "high", read=True) == "medium"
+
+
+def test_compute_review_confidence_low_otherwise() -> None:
+    assert compute_review_confidence("no", "low", read=True) == "low"
+    assert compute_review_confidence("no", "medium", read=True) == "low"
+    assert compute_review_confidence("no", None, read=True) == "low"
+
+
+# ── regrade_seed_review: backfill candidate fields, no Gemini call ───────────────
+def test_regrade_seed_review_backfills_candidate_label_when_read() -> None:
+    seed = [{"node_key": "armbar", "corpus_label": "Armbar", "model_label": "Armbar",
+            "model_type": "submission", "agree": "full", "model_confidence": "high"}]
+    out = regrade_seed_review(seed)
+    assert out[0]["candidate_label"] == "Armbar"
+    assert out[0]["candidate_type"] == "submission"
+    assert out[0]["second_opinion"] == {"corpus_label": "Armbar", "agree": "full",
+                                        "agree_near": "full"}
+    assert out[0]["review_confidence"] == "high"
+
+
+def test_regrade_seed_review_null_candidate_when_never_read() -> None:
+    seed = [{"node_key": "armbar", "corpus_label": "Armbar", "model_label": None,
+            "agree": "no"}]
+    out = regrade_seed_review(seed)
+    assert out[0]["candidate_label"] is None
+    assert out[0]["candidate_type"] is None
+    assert out[0]["review_confidence"] == "low"
+
+
+def test_regrade_seed_review_uses_agree_near_when_present() -> None:
+    seed = [{"node_key": "lasso guard", "corpus_label": "Lasso Guard",
+            "model_label": "Closed Guard", "model_type": "guard", "agree": "no",
+            "agree_near": "near"}]
+    out = regrade_seed_review(seed)
+    assert out[0]["second_opinion"]["agree_near"] == "near"
+    assert out[0]["review_confidence"] == "medium"
+
+
+def test_regrade_seed_review_is_idempotent() -> None:
+    seed = [{"node_key": "armbar", "corpus_label": "Armbar", "model_label": "Armbar",
+            "model_type": "submission", "agree": "full"}]
+    once = regrade_seed_review(seed)
+    twice = regrade_seed_review(once)
+    assert once == twice
+
+
+# ── run_ask default (no --align): exactly one Gemini call per candidate ──────────
+def test_run_ask_default_makes_one_call_per_candidate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    rows: list[dict[str, Any]] = [
+        {"node_key": "armbar", "label": "Armbar", "bout": "a-vs-b-2025", "ts_ms": 1000,
+         "a_name": "A", "b_name": "B", "match_id": "m1", "ts_class": "video_absolute"},
+        {"node_key": "closed guard", "label": "Closed Guard", "bout": "a-vs-b-2025",
+         "ts_ms": 2000, "a_name": "A", "b_name": "B", "match_id": "m1",
+         "ts_class": "video_absolute"},
+    ]
+    for row in rows:
+        center = chosen_frame_paths(row["node_key"], row["bout"], row["ts_ms"], 0)["center"]
+        center.parent.mkdir(parents=True, exist_ok=True)
+        center.write_bytes(b"fake")
+
+    resp = MagicMock()
+    resp.text = json.dumps({"label": "Armbar", "type": "submission", "confidence": "high"})
+    resp.usage_metadata = None
+    fake_client = MagicMock()
+    fake_client.models.generate_content.return_value = resp
+
+    with pytest.MonkeyPatch.context() as mp:
+        mp.setattr("google.genai.Client", lambda **_kw: fake_client)
+        mp.setenv("GEMINI_API_KEY", "test-key")
+        seed = run_ask(rows, dry_run=False)   # align defaults False
+
+    assert fake_client.models.generate_content.call_count == len(rows)
+    assert len(seed) == 2
+    for row in seed:
+        assert row["candidate_label"] == "Armbar"
+        assert row["chosen_offset"] == 0
+        assert row["align_reason"] is None
