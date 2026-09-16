@@ -5,10 +5,11 @@ sees, and keep the disagreements front and centre for a human.
 
     uv run python -m scripts.dictionary_seed plan --per-technique 3 --min-events 3 --max-calls 150
     uv run python -m scripts.dictionary_seed extract
+    uv run python -m scripts.dictionary_seed preverify
     uv run python -m scripts.dictionary_seed ask
     uv run python -m scripts.dictionary_seed report
 
-Four steps, each reading the previous step's file so a batch can be re-run from wherever it
+Five steps, each reading the previous step's file so a batch can be re-run from wherever it
 stopped:
 
 1. **plan** — read-only prod (`matches.status='final'`, `video_url is not null`). For every
@@ -23,14 +24,28 @@ stopped:
    Resume-safe (skips a candidate whose frames already exist). Corpus `ts` is measured
    unreliable even after `plan`'s own reclassification (2026-09-15) — the window exists so
    stage A below can correct a still-wrong second instead of reading the wrong frame blind.
-3. **ask** — TWO Gemini (`gemini-pro-latest`, temperature 0) calls per candidate. Stage A
-   (NOT blind) shows the 9-frame window and asks which offset actually shows the corpus
-   label; a non-default choice gets its full-res frame re-extracted on demand. Stage B is the
-   original blind read (two athletes' names, closed curated vocabulary, three frames, no hint
-   of the corpus label) on whichever frame stage A picked. `visible: no` at stage A skips
-   stage B (`review_confidence: low`, reason `not_visible_in_window`). Writes `seed.jsonl` —
-   every candidate, agreement graded, never dropped.
-4. **report** — `REPORT.md`: per-technique agreement, zero-video-backed techniques, cost, top
+3. **preverify** — local, free, no Gemini. Five cheap screens gate `verdict: skip` (centre
+   frame missing/undecodable or fewer than 5/9 strip frames present, a near-blank centre
+   frame, a static ±30s window, an out-of-range or intro-card timestamp, a duplicate centre
+   frame already used by another candidate); a sixth (no/one person detected on the centre
+   frame via an optional YOLOv8n person detector) is ADVISORY ONLY — measured 2026-09-16 that
+   a general-purpose detector isn't reliable enough on entangled grappling to gate anything,
+   so it lands in `warnings`, never `reasons`. Writes `preverify.jsonl` (verdict `ok`/`skip` +
+   reasons + warnings + metrics per candidate), `preverify_summary.json` (counts per reason
+   AND per warning) and `preverify_sheet_<n>.png` contact sheets (≤24 candidates/page,
+   captioned `skip: <reasons>` / `warn: <warnings>`) for a human to spot-check before any
+   Gemini call happens.
+4. **ask** — TWO Gemini (`gemini-pro-latest`, temperature 0) calls per candidate. A candidate
+   `preverify` marked `skip` is written straight to `seed.jsonl` with `visible: false`,
+   `review_confidence: low`, reason `preverify:<reasons>` and zero usage — never sent to
+   Gemini. For the rest: stage A (NOT blind) shows the 9-frame window and asks which offset
+   actually shows the corpus label; a non-default choice gets its full-res frame re-extracted
+   on demand. Stage B is the original blind read (two athletes' names, closed curated
+   vocabulary, three frames, no hint of the corpus label) on whichever frame stage A picked.
+   `visible: no` at stage A skips stage B (`review_confidence: low`, reason
+   `not_visible_in_window`). Resume-safe: a candidate already in `seed.jsonl`
+   (node_key+bout+ts_ms) is skipped and the new answers are appended, not overwritten.
+5. **report** — `REPORT.md`: per-technique agreement, zero-video-backed techniques, cost, top
    confusions (the dictionary's ambiguous pairs).
 
 Privacy: public corpus only (`matches`/`athletes`), same class as `scripts/frame_pdf.py`.
@@ -39,6 +54,7 @@ Prod is read-only; this script writes nothing back to the DB.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import logging
 import os
@@ -50,6 +66,9 @@ from collections import Counter, defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
+
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont
 
 REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
@@ -65,6 +84,8 @@ OUT_DIR = REPO / "data" / "finetune" / "audit" / "gemini_seed"
 PLAN_PATH = OUT_DIR / "plan.jsonl"
 PLAN_COUNTS_PATH = OUT_DIR / "plan_counts.json"
 SEED_PATH = OUT_DIR / "seed.jsonl"
+PREVERIFY_PATH = OUT_DIR / "preverify.jsonl"
+PREVERIFY_SUMMARY_PATH = OUT_DIR / "preverify_summary.json"
 REPORT_PATH = OUT_DIR / "REPORT.md"
 # One-time archive of the pre-realignment batch's own graded answers (single frame, corpus
 # ts trusted as-is) + the misalignment diagnostic `plan` computes against it, both written
@@ -556,6 +577,345 @@ def run_extract(plan: list[dict[str, Any]]) -> dict[str, int]:
     return stats
 
 
+# ── preverify ────────────────────────────────────────────────────────────────────
+# Local, free, no Gemini -- screens every planned candidate's already-extracted frames so an
+# obvious mistake (blank feed, paused/static window, too few frames on disk, corpus ts
+# landing in an intro card or past the video's own end, the same frame reused for two
+# candidates) never spends a Gemini call. `no_people` is advisory-only, see PERSON_MIN_COUNT
+# below -- it never gates. Runs on `plan.jsonl` + whatever `extract` already put on disk;
+# never downloads or deletes anything itself.
+BLANK_STD_MAX = 8.0     # centre frame near-uniform (paused feed, solid graphic)
+BLANK_MEAN_MAX = 12.0   # centre frame near-black (dropped feed, black card)
+STATIC_DOWNSAMPLE = (64, 36)   # cheap enough to diff 9 frames without reading them for real
+STATIC_DIFF_MAX = 2.0   # mean abs pixel diff between consecutive strip frames, 0-255 scale
+INTRO_TS_S = 20.0       # below this, ts is almost certainly a tale-of-the-tape/intro card
+# Stage A (`ask_alignment`) only sends whichever strip frames exist -- a full 9/9 window is
+# nice, not required. Below this many present there isn't enough of the window left to trust
+# an alignment choice, so `missing_frames` fires; at/above it a gap is tolerated.
+STRIPS_MIN_PRESENT = 5
+PERSON_MIN_AREA_FRAC = 0.01   # a detected box smaller than 1% of the frame is noise, not a person
+# ponytail: MIN_COUNT=1 (zero persons is still a real miss; one is not) is now moot for the
+# verdict -- measured on sheets 1-2 (2026-09-16) that this general-purpose YOLO detector isn't
+# reliable enough on entangled grappling to GATE anything (it merges two grapplers into one
+# box, or misses a dark-arena frame that's perfectly usable) -- kept only to decide the
+# `no_people` WARNING (never `reasons`, see `preverify_candidate`). Upgrade path: a
+# grappling-tuned detector, if one is ever trained, could move this back to gating.
+PERSON_MIN_COUNT = 1
+SHEET_PAGE_SIZE = 24
+_SHEET_CENTER = (160, 90)
+_SHEET_STRIP = (64, 36)
+_SHEET_CAPTION_H = 34
+_SHEET_PAD = 6
+
+
+def _load_gray_array(path: Path) -> np.ndarray | None:
+    """Decode one frame to a grayscale float array, or ``None`` when the file is missing or
+    fails to decode -- the ``missing_frames`` check's own definition of "bad"."""
+    if not path.exists():
+        return None
+    try:
+        with Image.open(path) as img:
+            img.load()
+            return np.asarray(img.convert("L"), dtype=np.float64)
+    except Exception:
+        return None
+
+
+def is_blank(gray: np.ndarray) -> bool:
+    """Near-uniform (paused feed / solid graphic) or near-black (dropped feed) centre frame."""
+    return float(gray.std()) < BLANK_STD_MAX or float(gray.mean()) < BLANK_MEAN_MAX
+
+
+def _downsample(gray: np.ndarray, size: tuple[int, int] = STATIC_DOWNSAMPLE) -> np.ndarray:
+    img = Image.fromarray(np.clip(gray, 0, 255).astype("uint8")).resize(size)
+    return np.asarray(img, dtype=np.float64)
+
+
+def is_static_window(grays: list[np.ndarray]) -> bool:
+    """True when every consecutive pair of the 9 strip frames (downsampled 64x36) is
+    near-identical -- a paused feed, a graphic held on screen, or a replay card sitting still
+    across the whole +/-30s alignment window. Fewer than 2 frames has nothing to compare, so
+    it reads as NOT static -- ``missing_frames`` is the check that flags that case."""
+    if len(grays) < 2:
+        return False
+    small = [_downsample(g) for g in grays]
+    return all(float(np.abs(small[i] - small[i - 1]).mean()) < STATIC_DIFF_MAX
+              for i in range(1, len(small)))
+
+
+def ts_in_intro(ts_ms: int) -> bool:
+    return (ts_ms / 1000.0) < INTRO_TS_S
+
+
+def ts_out_of_range(ts_ms: int, duration: float | None) -> bool:
+    if duration is None:
+        return False
+    return (ts_ms / 1000.0) > duration
+
+
+def count_persons(boxes: list[tuple[float, float, float, float]],
+                  frame_w: int, frame_h: int) -> tuple[int, list[float]]:
+    """``boxes`` (pixel xyxy person boxes) -> (# boxes covering >= 1% of the frame, every
+    box's area fraction, largest first). The count is what ``is_no_people`` gates on; the full
+    list is kept in ``metrics`` for a human skimming the sheet."""
+    frame_area = float(frame_w * frame_h) or 1.0
+    areas = sorted(((x2 - x1) * (y2 - y1)) / frame_area for x1, y1, x2, y2 in boxes)[::-1]
+    persons = sum(1 for a in areas if a >= PERSON_MIN_AREA_FRAC)
+    return persons, areas
+
+
+def is_no_people(persons: int) -> bool:
+    return persons < PERSON_MIN_COUNT
+
+
+_PERSON_MODEL: Any = None
+_PERSON_MODEL_TRIED = False
+
+
+def person_detector() -> Any | None:
+    """Lazily load an Ultralytics YOLOv8n general detector (class 0 = person) -- installed via
+    the ``cv`` extra, not a hard dependency (same guarded-import shape as
+    ``cv.pose_estimate.PoseEstimator._ultralytics_runtime``). Missing package or a failed
+    weight download both cache to ``None`` once rather than retrying per candidate; callers
+    record ``detector: unavailable`` in ``metrics`` and skip the ``no_people`` check rather
+    than fail it -- an owner without the extra installed still gets the other five checks."""
+    global _PERSON_MODEL, _PERSON_MODEL_TRIED
+    if _PERSON_MODEL_TRIED:
+        return _PERSON_MODEL
+    _PERSON_MODEL_TRIED = True
+    try:
+        from ultralytics import YOLO  # type: ignore[attr-defined, unused-ignore]
+
+        _PERSON_MODEL = YOLO("yolov8n.pt")
+    except Exception as exc:
+        logger.warning("person detector unavailable: %s", exc)
+        _PERSON_MODEL = None
+    return _PERSON_MODEL
+
+
+def detect_person_boxes(path: Path, model: Any) -> list[tuple[float, float, float, float]]:
+    """One frame -> its person-class boxes (pixel xyxy), via an already-loaded model."""
+    results = model.predict(str(path), verbose=False, classes=[0])
+    if not results or results[0].boxes is None:
+        return []
+    xyxy = results[0].boxes.xyxy.cpu().numpy()
+    return [(float(b[0]), float(b[1]), float(b[2]), float(b[3])) for b in xyxy]
+
+
+def preverify_candidate(row: dict[str, Any], *, duration: float | None,
+                        detector: Any | None) -> dict[str, Any]:
+    """One plan row -> ``{node_key, bout, ts_ms, verdict, reasons, warnings, metrics,
+    center_path, strip_paths}``. ``verdict`` is ``ok`` iff ``reasons`` is empty --
+    ``warnings`` are informational only and NEVER gate the verdict (``no_people``: the
+    general-purpose YOLO detector merges entangled grapplers into one box or misses a dark
+    arena often enough on this domain, measured on sheets 1-2 2026-09-16, that it can only be
+    advisory). Never touches the network or deletes anything -- reads whatever ``extract``
+    already put on disk. The ``duplicate_frame`` check is NOT here (it needs every OTHER
+    candidate's centre frame too) -- :func:`run_preverify` adds it in a second pass."""
+    node_key, bout, ts_ms = str(row["node_key"]), str(row["bout"]), int(row["ts_ms"])
+    center_path = chosen_frame_paths(node_key, bout, ts_ms, 0)["center"]
+    strip_paths = [strip_frame_path(node_key, bout, ts_ms, o) for o in WINDOW_OFFSETS]
+
+    reasons: list[str] = []
+    warnings: list[str] = []
+    metrics: dict[str, Any] = {}
+
+    center_gray = _load_gray_array(center_path)
+    strip_grays = [_load_gray_array(p) for p in strip_paths]
+    strips_missing = sum(1 for g in strip_grays if g is None)
+    strips_present = len(WINDOW_OFFSETS) - strips_missing
+    if center_gray is None or strips_present < STRIPS_MIN_PRESENT:
+        reasons.append("missing_frames")
+        metrics["missing_frames"] = {"center": center_gray is None, "strips_missing": strips_missing}
+
+    if center_gray is not None:
+        metrics["blank"] = {"std": round(float(center_gray.std()), 2),
+                            "mean": round(float(center_gray.mean()), 2)}
+        if is_blank(center_gray):
+            reasons.append("blank_frame")
+
+    present_strips = [g for g in strip_grays if g is not None]
+    if len(present_strips) == len(WINDOW_OFFSETS) and is_static_window(present_strips):
+        reasons.append("static_window")
+
+    metrics["duration"] = duration
+    if ts_out_of_range(ts_ms, duration):
+        reasons.append("ts_out_of_range")
+    if ts_in_intro(ts_ms):
+        reasons.append("ts_in_intro")
+
+    if center_gray is not None:
+        if detector is None:
+            metrics["detector"] = "unavailable"
+        else:
+            boxes = detect_person_boxes(center_path, detector)
+            h, w = center_gray.shape
+            persons, areas = count_persons(boxes, w, h)
+            metrics["persons"] = persons
+            metrics["person_areas"] = [round(a, 4) for a in areas[:3]]
+            if is_no_people(persons):
+                warnings.append("no_people")
+
+    return {
+        "node_key": node_key, "bout": bout, "ts_ms": ts_ms,
+        "verdict": "skip" if reasons else "ok", "reasons": reasons, "warnings": warnings,
+        "metrics": metrics,
+        "center_path": str(center_path), "strip_paths": [str(p) for p in strip_paths],
+    }
+
+
+def _add_duplicate_frame_reason(results: list[dict[str, Any]]) -> None:
+    """Second pass over an already-scored batch: an identical centre frame (md5 of the file's
+    own bytes) already used by an EARLIER candidate marks every later one ``duplicate_frame``
+    -- the first occurrence stays whatever it already was. Mutates ``results`` in place."""
+    seen: dict[str, int] = {}
+    for i, r in enumerate(results):
+        p = Path(r["center_path"])
+        if not p.exists():
+            continue   # missing_frames already covers this candidate
+        digest = hashlib.md5(p.read_bytes()).hexdigest()
+        if digest in seen:
+            other = results[seen[digest]]
+            r["reasons"].append("duplicate_frame")
+            r["metrics"]["duplicate_of"] = f"{other['node_key']}/{other['bout']}/{other['ts_ms']}"
+            r["verdict"] = "skip"
+        else:
+            seen[digest] = i
+
+
+def run_preverify(plan_rows: list[dict[str, Any]], *,
+                  probe_duration_fn: Any = probe_duration,
+                  detector: Any | None = "auto") -> list[dict[str, Any]]:
+    """``plan.jsonl`` rows -> graded preverify rows. ``duration`` per candidate is probed once
+    per distinct ``video_url`` (memoised) and only for a row that carries one; a row with no
+    url just records ``duration: null`` and skips the range check rather than guessing.
+    ``detector="auto"`` loads (and caches) the real YOLO person detector; pass ``None`` or an
+    injected callable-model to skip/replace it in tests."""
+    if detector == "auto":
+        detector = person_detector()
+    duration_cache: dict[str, float | None] = {}
+
+    def _duration(row: dict[str, Any]) -> float | None:
+        url = row.get("video_url")
+        if not url:
+            return None
+        if url not in duration_cache:
+            duration_cache[url] = probe_duration_fn(url) if probe_duration_fn else None
+        return duration_cache[url]
+
+    results = [preverify_candidate(row, duration=_duration(row), detector=detector)
+              for row in plan_rows]
+    _add_duplicate_frame_reason(results)
+    return results
+
+
+def build_preverify_summary(results: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        "total": len(results),
+        "verdicts": dict(Counter(r["verdict"] for r in results)),
+        "reasons": dict(Counter(reason for r in results for reason in r["reasons"])),
+        "warnings": dict(Counter(w for r in results for w in r.get("warnings", []))),
+    }
+
+
+def _sheet_thumb(path: Path, size: tuple[int, int]) -> Image.Image:
+    """A frame -> a fixed-size RGB thumbnail, letterboxed on a dark background -- a broken or
+    missing frame becomes a flat red-ish tile instead of crashing the sheet build."""
+    try:
+        with Image.open(path) as src:
+            img = src.convert("RGB")
+            img.thumbnail(size)
+            canvas = Image.new("RGB", size, (40, 40, 40))
+            canvas.paste(img, ((size[0] - img.width) // 2, (size[1] - img.height) // 2))
+            return canvas
+    except Exception:
+        return Image.new("RGB", size, (90, 30, 30))
+
+
+def _sheet_caption(result: dict[str, Any]) -> str:
+    ts_s = result["ts_ms"] / 1000.0
+    tag = result["verdict"] if result["verdict"] == "ok" else f"skip: {'+'.join(result['reasons'])}"
+    if result.get("warnings"):
+        tag += f" · warn: {'+'.join(result['warnings'])}"
+    return f"{result['node_key']} · {result['bout']} · {ts_s:.1f}s · {tag}"
+
+
+def build_sheet_page(results: list[dict[str, Any]]) -> Image.Image:
+    """One contact-sheet page (<= ``SHEET_PAGE_SIZE`` rows): centre-frame thumb + the 9 strip
+    thumbs in a row, captioned with node_key/bout/ts/verdict -- what a human skims before
+    trusting `ask` to spend Gemini calls."""
+    row_w = _SHEET_CENTER[0] + _SHEET_PAD + len(WINDOW_OFFSETS) * (_SHEET_STRIP[0] + 2)
+    row_h = max(_SHEET_CENTER[1], _SHEET_STRIP[1]) + _SHEET_CAPTION_H
+    page = Image.new("RGB", (row_w + 2 * _SHEET_PAD, row_h * max(len(results), 1) + _SHEET_PAD),
+                     (20, 20, 20))
+    draw = ImageDraw.Draw(page)
+    font = ImageFont.load_default()
+    for i, r in enumerate(results):
+        y = i * row_h + _SHEET_PAD
+        x = _SHEET_PAD
+        page.paste(_sheet_thumb(Path(r["center_path"]), _SHEET_CENTER), (x, y))
+        x += _SHEET_CENTER[0] + _SHEET_PAD
+        for sp in r["strip_paths"]:
+            page.paste(_sheet_thumb(Path(sp), _SHEET_STRIP), (x, y))
+            x += _SHEET_STRIP[0] + 2
+        draw.text((_SHEET_PAD, y + max(_SHEET_CENTER[1], _SHEET_STRIP[1]) + 2),
+                  _sheet_caption(r), fill=(230, 230, 230), font=font)
+    return page
+
+
+def write_sheets(results: list[dict[str, Any]], out_dir: Path,
+                 page_size: int = SHEET_PAGE_SIZE) -> list[Path]:
+    paths = []
+    for n, i in enumerate(range(0, max(len(results), 1), page_size), 1):
+        page = build_sheet_page(results[i:i + page_size])
+        p = out_dir / f"preverify_sheet_{n}.png"
+        page.save(p)
+        paths.append(p)
+    return paths
+
+
+def build_preverify_skip_seed_row(row: dict[str, Any], reasons: list[str]) -> dict[str, Any]:
+    """A preverify ``skip`` verdict -> the exact shape ``run_ask`` writes to ``seed.jsonl``, at
+    zero Gemini cost -- so `report` never has to special-case where a row came from, and the
+    candidate is never silently dropped."""
+    tag = f"preverify:{'+'.join(reasons)}"
+    frame = chosen_frame_paths(str(row["node_key"]), str(row["bout"]), int(row["ts_ms"]), 0)["center"]
+    return {
+        "node_key": row["node_key"], "bout": row["bout"], "ts_ms": row["ts_ms"],
+        "ts_class": row.get("ts_class"),
+        "chosen_offset": 0, "visible": False, "align_reason": tag,
+        "frame": str(frame.relative_to(REPO)) if str(frame).startswith(str(REPO)) else str(frame),
+        "corpus_label": row.get("label"), "model_label": None, "model_type": None,
+        "actor_role": None, "model_confidence": None, "reason": tag,
+        "agree": "no", "review_confidence": "low", "usage": dict(_EMPTY_USAGE),
+    }
+
+
+def partition_for_ask(plan_rows: list[dict[str, Any]], existing_seed: list[dict[str, Any]],
+                      preverify_rows: list[dict[str, Any]],
+                      ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Plan rows -> ``(rows still needing a Gemini ask, seed rows for preverify-skipped
+    candidates)``. A row already present in ``existing_seed`` (matched on
+    node_key+bout+ts_ms) is dropped from both -- what makes `ask` resume-safe. A row
+    ``preverify`` marked ``skip`` never reaches the Gemini list at all."""
+    done = {(s["node_key"], s["bout"], s["ts_ms"]) for s in existing_seed}
+    preverify_by_key = {(p["node_key"], p["bout"], p["ts_ms"]): p for p in preverify_rows}
+    to_ask: list[dict[str, Any]] = []
+    skip_seed: list[dict[str, Any]] = []
+    seen: set[tuple[str, str, int]] = set()
+    for row in plan_rows:
+        key = (row["node_key"], row["bout"], row["ts_ms"])
+        if key in done or key in seen:
+            continue
+        seen.add(key)
+        pv = preverify_by_key.get(key)
+        if pv and pv.get("verdict") == "skip":
+            skip_seed.append(build_preverify_skip_seed_row(row, list(pv.get("reasons") or [])))
+        else:
+            to_ask.append(row)
+    return to_ask, skip_seed
+
+
 # ── ask ──────────────────────────────────────────────────────────────────────────
 def vocabulary_text(curated: list[dict[str, Any]]) -> str:
     """Closed vocabulary block for the Gemini prompt -- same "Allowed labels" framing
@@ -946,6 +1306,8 @@ def main() -> int:
 
     sub.add_parser("extract")
 
+    sub.add_parser("preverify")
+
     p_ask = sub.add_parser("ask")
     p_ask.add_argument("--dry-run", action="store_true")
 
@@ -1012,15 +1374,36 @@ def main() -> int:
                    stats["matches"], stats["matches_failed"], stats["frames"])
         return 0
 
+    if a.cmd == "preverify":
+        plan_rows = read_jsonl(PLAN_PATH)
+        if not plan_rows:
+            logger.error("no %s -- run `plan` first", PLAN_PATH)
+            return 1
+        results = run_preverify(plan_rows)
+        write_jsonl(results, PREVERIFY_PATH)
+        summary = build_preverify_summary(results)
+        PREVERIFY_SUMMARY_PATH.write_text(json.dumps(summary, indent=2, sort_keys=True),
+                                          encoding="utf-8")
+        sheets = write_sheets(results, OUT_DIR)
+        logger.info("preverify: %d ok, %d skip %s (warnings %s) -- sheets: %s",
+                   summary["verdicts"].get("ok", 0), summary["verdicts"].get("skip", 0),
+                   summary["reasons"], summary["warnings"], [str(p) for p in sheets])
+        return 0
+
     if a.cmd == "ask":
         plan_rows = read_jsonl(PLAN_PATH)
         if not plan_rows:
             logger.error("no %s -- run `plan` first", PLAN_PATH)
             return 1
+        existing_seed = read_jsonl(SEED_PATH)
+        preverify_rows = read_jsonl(PREVERIFY_PATH)
+        to_ask, skip_seed = partition_for_ask(plan_rows, existing_seed, preverify_rows)
         dry = a.dry_run or not os.environ.get("GEMINI_API_KEY")
-        seed = run_ask(plan_rows, dry_run=dry)
+        asked = run_ask(to_ask, dry_run=dry) if to_ask else []
+        seed = existing_seed + skip_seed + asked
         write_jsonl(seed, SEED_PATH)
-        logger.info("ask: %d answered (dry_run=%s)", len(seed), dry)
+        logger.info("ask: %d asked, %d preverify-skipped, %d already done (dry_run=%s)",
+                   len(asked), len(skip_seed), len(existing_seed), dry)
         return 0
 
     if a.cmd == "report":

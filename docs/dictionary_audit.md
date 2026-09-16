@@ -55,8 +55,12 @@ uv run python -m scripts.dictionary_audit measure --min-human 8
 #    --no-db skips the prod read (every other number still moves)
 
 # 2. optional: seed candidate frames from corpus events that have video
-#    (scripts/dictionary_seed.py — costs Gemini calls, owner's call)
-uv run python -m scripts.dictionary_seed ...
+#    (scripts/dictionary_seed.py plan/extract, then preverify BEFORE ask spends any
+#    Gemini call — see "Preverify" below)
+uv run python -m scripts.dictionary_seed plan --per-technique 3 --min-events 3
+uv run python -m scripts.dictionary_seed extract
+uv run python -m scripts.dictionary_seed preverify
+uv run python -m scripts.dictionary_seed ask
 
 # 3. queue — build one contact sheet per technique that needs frames
 uv run python -m scripts.dictionary_audit queue --cap 12 [--limit 40]
@@ -87,6 +91,37 @@ Priority order on every sheet, which is also the order of how much a human's min
 | 1 | the same, where the blind read DISAGREED | `corpus ✗ gemini: <its guess>` |
 | 2 | an unreviewed model label already in the dataset, plus its ±1 neighbouring frames | `gemini read (+1 frame)` |
 | 3 | the 4 Fable reference reads and the 64 Gemini reads under `data/frame_pdf/out/experiments/`, frames recovered from the Bernardi sheets with `pdfimages -j` | `<reader>` |
+
+### Preverify — screen before spending a Gemini call
+
+`scripts/dictionary_seed.py preverify` runs after `extract`, before `ask`: five cheap, local,
+no-network* checks over each planned candidate's already-extracted frames GATE `verdict:
+skip` — `missing_frames` (centre frame absent/undecodable, OR fewer than 5 of the 9 strip
+frames present — stage A/`ask_alignment` only sends whichever strips exist, so a handful
+missing is fine, e.g. the heel hook `helena-crevar-vs-aurelie-le-vern-2024`@182s with 8/9
+strips is usable), `blank_frame` (near-uniform or near-black centre), `static_window` (all 9
+present strip frames near-identical — a paused feed or replay card sitting still across the
+whole ±30s window), `ts_out_of_range` / `ts_in_intro` (corpus timestamp past the video's own
+duration, or inside the first 20s tale-of-the-tape window), and `duplicate_frame` (an
+identical centre frame already used by an earlier candidate). (*`ts_out_of_range` probes each
+distinct `video_url` once via `yt-dlp --dump-json` when the plan row carries one.)
+
+A sixth check, `no_people` (fewer than 1 person detected on the centre frame via an optional
+YOLOv8n detector — installed with the `cv` extra; missing extra/weights just records
+`detector: unavailable` and is skipped, never fails the batch), is **advisory only** — it
+lands in a `warnings` list, never `reasons`, and never gates the verdict. Measured against two
+real sheets (2026-09-16): a general-purpose detector merges two entangled grapplers into one
+box, or misses a dark-arena frame, often enough on this domain that gating on it would have
+thrown away real, usable frames (`ponytail:` note on `PERSON_MIN_COUNT` in the module).
+
+Writes `preverify.jsonl` (verdict `ok`/`skip` + reasons + warnings + metrics per candidate),
+`preverify_summary.json` (counts per reason AND per warning) and `preverify_sheet_<n>.png`
+contact sheets (≤24 candidates/page — centre thumb + the 9 strip thumbs, captioned `skip:
+<reasons>` / `warn: <warnings>`) for a human to spot-check. `ask` then reads
+`preverify.jsonl` if present: a `skip` verdict is written straight to `seed.jsonl` with
+`visible: false`, reason `preverify:<reasons>`, zero Gemini usage — never sent to the model,
+never silently dropped. `ask` is also resume-safe on its own: a candidate already in
+`seed.jsonl` (matched on node_key+bout+ts_ms) is skipped and new answers are appended.
 
 A frame already carrying a verdict is never queued again. A technique with no proposal at all
 gets a row in `queue.md` saying so rather than an empty sheet — that is the honest signal that

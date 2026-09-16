@@ -1,6 +1,6 @@
 """Pure logic only -- no network, no DB, no ffmpeg/yt-dlp. plan sampling (spread across
 bouts), ts arithmetic + evidence-based reclassification, the alignment stage, the agreement
-rule, coverage-driven priority, and report shape."""
+rule, coverage-driven priority, preverify's six local screens, and report shape."""
 from __future__ import annotations
 
 import json
@@ -8,7 +8,9 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
+import numpy as np
 import pytest
+from PIL import Image
 
 pytest.importorskip("google.genai")
 
@@ -17,18 +19,29 @@ from scripts.dictionary_seed import (
     absolute_ts,
     ask_gemini,
     build_plan,
+    build_preverify_skip_seed_row,
+    build_preverify_summary,
     build_report,
     cap_plan,
     chosen_frame_paths,
     classify_ts_origin,
+    count_persons,
+    is_blank,
+    is_no_people,
+    is_static_window,
     load_coverage,
+    partition_for_ask,
+    preverify_candidate,
     prioritize_curated,
     resolve_offset,
     run_ask,
+    run_preverify,
     score_agreement,
     select_candidates,
     strip_frame_path,
     ts_class_matches_flag,
+    ts_in_intro,
+    ts_out_of_range,
     vocabulary_text,
 )
 
@@ -563,3 +576,324 @@ def test_run_ask_survives_a_quota_error_and_keeps_grading_the_rest(
     assert "ClientError" in (seed[0]["align_reason"] or "")
     assert seed[1]["model_label"] == "Closed Guard"
     assert seed[1]["agree"] == "full"
+
+
+# ── preverify: local, cheap screens ───────────────────────────────────────────────
+def _gray(std: float, mean: float, shape: tuple[int, int] = (36, 64), seed: int = 0) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    arr = rng.normal(loc=mean, scale=std, size=shape)
+    return np.clip(arr, 0, 255)
+
+
+def test_is_blank_low_std_is_blank() -> None:
+    assert is_blank(_gray(std=1.0, mean=120.0))
+
+
+def test_is_blank_low_mean_is_blank() -> None:
+    assert is_blank(_gray(std=1.0, mean=2.0))
+
+
+def test_is_blank_normal_frame_is_not_blank() -> None:
+    assert not is_blank(_gray(std=40.0, mean=120.0))
+
+
+def test_is_static_window_identical_frames_is_static() -> None:
+    frame = _gray(std=40.0, mean=120.0)
+    assert is_static_window([frame.copy() for _ in range(9)])
+
+
+def test_is_static_window_changing_frames_is_not_static() -> None:
+    frames = [np.full((36, 64), float(i) * 40, dtype=np.float64) for i in range(9)]
+    assert not is_static_window(frames)
+
+
+def test_is_static_window_fewer_than_two_frames_is_not_static() -> None:
+    assert not is_static_window([_gray(std=1.0, mean=120.0)])
+
+
+def test_ts_in_intro() -> None:
+    assert ts_in_intro(5000)
+    assert not ts_in_intro(30000)
+
+
+def test_ts_out_of_range() -> None:
+    assert ts_out_of_range(700_000, 600.0)
+    assert not ts_out_of_range(500_000, 600.0)
+
+
+def test_ts_out_of_range_no_duration_never_flags() -> None:
+    assert not ts_out_of_range(999_999_000, None)
+
+
+def test_count_persons_filters_small_boxes() -> None:
+    # frame 100x100 -- a 5x5 box is 0.25% of area (noise), a 50x50 box is 25% (a real person)
+    persons, areas = count_persons([(0, 0, 5, 5), (0, 0, 50, 50)], frame_w=100, frame_h=100)
+    assert persons == 1
+    assert areas[0] == pytest.approx(0.25)
+
+
+def test_is_no_people_thresholds() -> None:
+    # MIN_COUNT=1 -- zero detected persons is still a miss (empty mat), but ONE is enough
+    # (an entangled ground position often merges two grapplers into a single YOLO box).
+    assert is_no_people(0)
+    assert not is_no_people(1)
+    assert not is_no_people(2)
+
+
+class _FakeDetector:
+    """Injected in place of the real YOLO model -- returns fixed pixel boxes."""
+
+    def __init__(self, boxes: list[tuple[float, float, float, float]]) -> None:
+        self.boxes = boxes
+
+    def predict(self, *_a: Any, **_k: Any) -> list[Any]:
+        result = MagicMock()
+        result.boxes.xyxy.cpu.return_value.numpy.return_value = np.array(self.boxes)
+        return [result]
+
+
+def _write_candidate_frames(node_key: str, bout: str, ts_ms: int, *,
+                            std: float = 40.0, mean: float = 120.0,
+                            static: bool = False) -> None:
+    center = chosen_frame_paths(node_key, bout, ts_ms, 0)["center"]
+    center.parent.mkdir(parents=True, exist_ok=True)
+    frame = Image.fromarray(_gray(std, mean, shape=(360, 640), seed=1).astype("uint8"))
+    frame.save(center)
+    for i, o in enumerate(WINDOW_OFFSETS):
+        strip_arr = (np.full((360, 640), mean, dtype=np.float64) if static
+                    else _gray(std, mean, shape=(360, 640), seed=100 + i))
+        Image.fromarray(strip_arr.astype("uint8")).save(strip_frame_path(node_key, bout, ts_ms, o))
+
+
+def test_preverify_candidate_missing_frames_is_skip(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000}
+    result = preverify_candidate(row, duration=None, detector=None)
+    assert result["verdict"] == "skip"
+    assert "missing_frames" in result["reasons"]
+
+
+def test_preverify_candidate_tolerates_a_few_missing_strips(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # 8/9 strips + a good centre (the heel hook helena-crevar-vs-aurelie-le-vern-2024 @182s
+    # case) -- stage A (ask_alignment) only sends whichever strips exist, so this is usable.
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 30_000)
+    strip_frame_path("armbar", "a-vs-b-2025", 30_000, WINDOW_OFFSETS[0]).unlink()
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 30_000}
+    result = preverify_candidate(row, duration=None, detector=None)
+    assert "missing_frames" not in result["reasons"]
+    assert result["verdict"] == "ok"
+
+
+def test_preverify_candidate_too_few_strips_is_missing_frames(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # only 4/9 strips present -- below STRIPS_MIN_PRESENT=5, not enough window left to trust
+    # an alignment choice.
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 1000)
+    for o in WINDOW_OFFSETS[:5]:
+        strip_frame_path("armbar", "a-vs-b-2025", 1000, o).unlink()
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000}
+    result = preverify_candidate(row, duration=None, detector=None)
+    assert "missing_frames" in result["reasons"]
+    assert result["verdict"] == "skip"
+
+
+def test_preverify_candidate_blank_center_is_skip(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 1000, std=1.0, mean=120.0)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000}
+    result = preverify_candidate(row, duration=None, detector=None)
+    assert "blank_frame" in result["reasons"]
+
+
+def test_preverify_candidate_static_window_is_skip(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 1000, static=True)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000}
+    result = preverify_candidate(row, duration=None, detector=None)
+    assert "static_window" in result["reasons"]
+
+
+def test_preverify_candidate_ts_in_intro_is_skip(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 5000)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 5000}
+    result = preverify_candidate(row, duration=None, detector=None)
+    assert "ts_in_intro" in result["reasons"]
+
+
+def test_preverify_candidate_ts_out_of_range_is_skip(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 700_000)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 700_000}
+    result = preverify_candidate(row, duration=600.0, detector=None)
+    assert "ts_out_of_range" in result["reasons"]
+
+
+def test_preverify_candidate_no_detector_records_unavailable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 30_000)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 30_000}
+    result = preverify_candidate(row, duration=None, detector=None)
+    assert result["metrics"]["detector"] == "unavailable"
+    assert "no_people" not in result["reasons"]
+    assert result["warnings"] == []
+
+
+def test_preverify_candidate_no_people_is_warning_not_skip(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # a general-purpose detector finding zero people is advisory only (measured 2026-09-16:
+    # not reliable enough on this domain to gate) -- it must never reach `reasons`/`skip`.
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 30_000)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 30_000}
+    detector = _FakeDetector([(0, 0, 5, 5)])   # one tiny box -- 0 people >= 1% area
+    result = preverify_candidate(row, duration=None, detector=detector)
+    assert "no_people" not in result["reasons"]
+    assert result["reasons"] == []
+    assert result["warnings"] == ["no_people"]
+    assert result["verdict"] == "ok"
+    assert result["metrics"]["persons"] == 0
+
+
+def test_preverify_candidate_two_people_is_ok(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 30_000)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 30_000}
+    detector = _FakeDetector([(0, 0, 200, 200), (300, 0, 500, 200)])   # both >= 1% of 640x360
+    result = preverify_candidate(row, duration=None, detector=detector)
+    assert result["verdict"] == "ok"
+    assert result["metrics"]["persons"] == 2
+
+
+def test_preverify_candidate_one_merged_box_is_ok(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # an entangled ground position often reads as ONE box (YOLO merges the two grapplers) --
+    # that's still a real position, not a no_people miss.
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 30_000)
+    row = {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 30_000}
+    detector = _FakeDetector([(0, 0, 300, 300)])   # one large merged box, >= 1% of 640x360
+    result = preverify_candidate(row, duration=None, detector=detector)
+    assert result["verdict"] == "ok"
+    assert result["metrics"]["persons"] == 1
+
+
+def test_run_preverify_flags_duplicate_centre_frame(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 30_000)
+    # second candidate points at the SAME frame files (duplicate ts resolution) -- copy the
+    # first candidate's exact bytes under a different ts_ms.
+    src_center = chosen_frame_paths("armbar", "a-vs-b-2025", 30_000, 0)["center"]
+    dst_center = chosen_frame_paths("armbar", "a-vs-b-2025", 31_000, 0)["center"]
+    dst_center.write_bytes(src_center.read_bytes())
+    for o in WINDOW_OFFSETS:
+        strip_frame_path("armbar", "a-vs-b-2025", 31_000, o).write_bytes(
+            strip_frame_path("armbar", "a-vs-b-2025", 30_000, o).read_bytes())
+
+    plan_rows = [
+        {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 30_000},
+        {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 31_000},
+    ]
+    results = run_preverify(plan_rows, probe_duration_fn=None, detector=None)
+    assert results[0]["verdict"] == "ok"
+    assert results[1]["verdict"] == "skip"
+    assert "duplicate_frame" in results[1]["reasons"]
+
+
+def test_run_preverify_only_probes_duration_when_row_has_url(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.OUT_DIR", tmp_path)
+    _write_candidate_frames("armbar", "a-vs-b-2025", 30_000)
+    calls: list[str] = []
+
+    def _probe(url: str) -> float:
+        calls.append(url)
+        return 600.0
+
+    plan_rows = [{"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 30_000}]  # no video_url
+    run_preverify(plan_rows, probe_duration_fn=_probe, detector=None)
+    assert calls == []
+
+
+def test_build_preverify_summary_counts_verdicts_reasons_and_warnings() -> None:
+    results = [
+        {"verdict": "ok", "reasons": [], "warnings": ["no_people"]},
+        {"verdict": "skip", "reasons": ["blank_frame"], "warnings": []},
+        {"verdict": "skip", "reasons": ["blank_frame", "ts_in_intro"], "warnings": ["no_people"]},
+    ]
+    summary = build_preverify_summary(results)
+    assert summary["total"] == 3
+    assert summary["verdicts"] == {"ok": 1, "skip": 2}
+    assert summary["reasons"] == {"blank_frame": 2, "ts_in_intro": 1}
+    assert summary["warnings"] == {"no_people": 2}
+
+
+# ── ask wiring: preverify skip -> seed row, resume-safe ───────────────────────────
+def test_build_preverify_skip_seed_row_shape() -> None:
+    row = {"node_key": "armbar", "label": "Armbar", "bout": "a-vs-b-2025", "ts_ms": 1000,
+          "ts_class": "video_absolute"}
+    seed_row = build_preverify_skip_seed_row(row, ["blank_frame", "no_people"])
+    assert seed_row["visible"] is False
+    assert seed_row["agree"] == "no"
+    assert seed_row["review_confidence"] == "low"
+    assert seed_row["reason"] == "preverify:blank_frame+no_people"
+    assert seed_row["usage"] == {"prompt": 0, "candidates": 0, "thoughts": 0, "total": 0}
+    assert seed_row["node_key"] == "armbar"
+    assert seed_row["ts_ms"] == 1000
+
+
+def test_partition_for_ask_routes_preverify_skips_away_from_gemini() -> None:
+    plan_rows = [
+        {"node_key": "armbar", "label": "Armbar", "bout": "a-vs-b-2025", "ts_ms": 1000},
+        {"node_key": "kimura", "label": "Kimura", "bout": "a-vs-b-2025", "ts_ms": 2000},
+    ]
+    preverify_rows = [
+        {"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000,
+         "verdict": "skip", "reasons": ["blank_frame"]},
+        {"node_key": "kimura", "bout": "a-vs-b-2025", "ts_ms": 2000,
+         "verdict": "ok", "reasons": []},
+    ]
+    to_ask, skip_seed = partition_for_ask(plan_rows, [], preverify_rows)
+    assert [r["node_key"] for r in to_ask] == ["kimura"]
+    assert len(skip_seed) == 1
+    assert skip_seed[0]["node_key"] == "armbar"
+    assert skip_seed[0]["reason"] == "preverify:blank_frame"
+
+
+def test_partition_for_ask_skips_candidates_already_in_seed() -> None:
+    plan_rows = [{"node_key": "armbar", "label": "Armbar", "bout": "a-vs-b-2025", "ts_ms": 1000}]
+    existing_seed = [{"node_key": "armbar", "bout": "a-vs-b-2025", "ts_ms": 1000, "agree": "full"}]
+    to_ask, skip_seed = partition_for_ask(plan_rows, existing_seed, [])
+    assert to_ask == []
+    assert skip_seed == []
+
+
+def test_partition_for_ask_no_preverify_file_asks_everything() -> None:
+    plan_rows = [{"node_key": "armbar", "label": "Armbar", "bout": "a-vs-b-2025", "ts_ms": 1000}]
+    to_ask, skip_seed = partition_for_ask(plan_rows, [], [])
+    assert len(to_ask) == 1
+    assert skip_seed == []
