@@ -49,6 +49,7 @@ from scripts.dictionary_seed import (
     ts_in_intro,
     ts_out_of_range,
     vocabulary_text,
+    write_pair_support,
 )
 
 CURATED: list[dict[str, Any]] = [
@@ -309,6 +310,20 @@ def test_build_pair_support_ignores_unresolvable_labels() -> None:
 
 def test_load_pair_support_missing_file_returns_empty(tmp_path: Path) -> None:
     assert load_pair_support(tmp_path / "no-such-pair-support.json") == {}
+
+
+def test_write_pair_support_writes_and_returns_the_same_dict(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_seed.PAIR_SUPPORT_PATH", tmp_path / "pair_support.json")
+    matches = [_match("m1", "Alice", "Bob", 2025, [
+        {"label": "Guard Pass", "type": "pass", "actor": "Alice", "ts": 10},
+        {"label": "Side Control", "type": "control", "actor": "Alice", "ts": 15},
+    ])]
+    out = write_pair_support(matches)
+    assert out["guard pass|side control"] == 1
+    on_disk = json.loads((tmp_path / "pair_support.json").read_text(encoding="utf-8"))
+    assert on_disk == out
 
 
 # ── coverage-driven priority ──────────────────────────────────────────────────────

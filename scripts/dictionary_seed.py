@@ -8,6 +8,7 @@ sees, and keep the disagreements front and centre for a human.
     uv run python -m scripts.dictionary_seed preverify
     uv run python -m scripts.dictionary_seed ask
     uv run python -m scripts.dictionary_seed report
+    uv run python -m scripts.dictionary_seed pair-support   # standalone refresh, see below
 
 Five steps, each reading the previous step's file so a batch can be re-run from wherever it
 stopped:
@@ -75,9 +76,11 @@ disagreement — it is a double label with HIGH confidence, and the frame keeps 
 `score_agreement` gains a `pair` tier, checked BEFORE `near`: one side resolves to an action,
 the other to a state (`analysis.taxonomy_kind.kind_of_entry`), and the pair is backed by
 evidence already in the repo — real corpus adjacency (`build_pair_support`, cached to
-`data/finetune/audit/gemini_seed/pair_support.json` by `plan`, ≥ 2 distinct bouts), the
-existing exit-orientation rule (`_arrived_at_state`), or a shared curated sub-family
-(`_pair_family`, reusing `style_profile_core._sub_family`) — never a hand list of pairs.
+`data/finetune/audit/gemini_seed/pair_support.json` by `plan`, or standalone via the
+`pair-support` command -- read-only prod, no `plan.jsonl` write, no video probing -- ≥ 2
+distinct bouts), the existing exit-orientation rule (`_arrived_at_state`), or a shared
+curated sub-family (`_pair_family`, reusing `style_profile_core._sub_family`) — never a hand
+list of pairs.
 `pair_rule` on the seed row says which one fired. A `pair` row's `labels` field carries BOTH
 technique claims (`{node_key, kind, source}`, corpus + candidate); every other tier keeps only
 the candidate (decision 2026-09-16, item 31, above).
@@ -489,6 +492,16 @@ def load_pair_support(path: Path = PAIR_SUPPORT_PATH) -> dict[str, int]:
         return {}
     data: dict[str, int] = json.loads(path.read_text(encoding="utf-8"))
     return data
+
+
+def write_pair_support(matches: list[dict[str, Any]]) -> dict[str, int]:
+    """:func:`build_pair_support` -> :data:`PAIR_SUPPORT_PATH`, returning what it wrote.
+    Shared by `plan` (which already has `matches` in hand) and the standalone `pair-support`
+    command (a re-run that only needs this cache refreshed, no new batch)."""
+    pair_support = build_pair_support(matches)
+    PAIR_SUPPORT_PATH.write_text(json.dumps(pair_support, indent=2, sort_keys=True),
+                                 encoding="utf-8")
+    return pair_support
 
 
 def _load_matches() -> list[dict[str, Any]]:
@@ -1824,6 +1837,11 @@ def main() -> int:
 
     sub.add_parser("preverify")
 
+    sub.add_parser("pair-support", help="rebuild data/finetune/audit/gemini_seed/"
+                   "pair_support.json from prod ONLY (read-only, no plan.jsonl write, no "
+                   "video probing) -- what `plan` also calls, standalone for a re-run that "
+                   "doesn't need a whole new batch")
+
     p_ask = sub.add_parser("ask")
     p_ask.add_argument("--dry-run", action="store_true")
     p_ask.add_argument("--align", action="store_true",
@@ -1874,14 +1892,21 @@ def main() -> int:
         write_jsonl([asdict(r) for r in plan], PLAN_PATH)
         PLAN_COUNTS_PATH.parent.mkdir(parents=True, exist_ok=True)
         PLAN_COUNTS_PATH.write_text(json.dumps(counts, indent=2, sort_keys=True), encoding="utf-8")
-        pair_support = build_pair_support(matches)
-        PAIR_SUPPORT_PATH.write_text(json.dumps(pair_support, indent=2, sort_keys=True),
-                                     encoding="utf-8")
+        pair_support = write_pair_support(matches)
         n_techs = len({r.node_key for r in plan})
         n_zero = sum(1 for t in curated if t.get("en") and counts.get(t["en"], 0) == 0)
         logger.info("plan: %d candidates across %d techniques (of %d curated; %d with zero "
                    "video-backed events); %d action/state adjacency pairs cached",
                    len(plan), n_techs, len(curated), n_zero, len(pair_support))
+        return 0
+
+    if a.cmd == "pair-support":
+        # Read-only prod, no plan.jsonl write, no video probing -- `build_pair_support` only
+        # reads `matches.sequence`, the same field `_load_matches` already selects.
+        matches = _load_matches()
+        pair_support = write_pair_support(matches)
+        logger.info("pair-support: %d action/state adjacency pairs cached to %s",
+                   len(pair_support), PAIR_SUPPORT_PATH)
         return 0
 
     if a.cmd == "extract":
