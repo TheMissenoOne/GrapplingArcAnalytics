@@ -9,14 +9,36 @@ data/video/owner/rounds/IMG_7501.MOV, not simulated).
 from __future__ import annotations
 
 import json
+import shutil
+import subprocess
 from pathlib import Path
 
 import cv2
 import numpy as np
+import pytest
 
 import scripts.round_audit as round_audit
 
 FPS = 10.0
+
+
+def _ffmpeg_has_h264_encoder() -> bool:
+    """True only if a real ffmpeg binary AND its libopenh264 encoder are both present --
+    CI runners with no ffmpeg on PATH, or a system ffmpeg build missing the encoder, must
+    skip rather than fail. Cached once at import (probing is a subprocess call)."""
+    if shutil.which("ffmpeg") is None:
+        return False
+    try:
+        r = subprocess.run(
+            ["ffmpeg", "-hide_banner", "-encoders"],
+            capture_output=True, text=True, timeout=10,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        return False
+    return "libopenh264" in r.stdout
+
+
+_HAS_FFMPEG_H264 = _ffmpeg_has_h264_encoder()
 
 
 def _write_synthetic_video(path: Path, n_frames: int, w: int, h: int) -> None:
@@ -446,6 +468,7 @@ def test_cut_clip_cv2_raises_when_window_has_no_frames(tmp_path):
 
 
 # ── transcode: real cv2 decode -> real ffmpeg libopenh264 encode, tiny synthetic source ────
+@pytest.mark.skipif(not _HAS_FFMPEG_H264, reason="ffmpeg with libopenh264 encoder not on PATH")
 def test_transcode_h264_writes_a_playable_720p_mp4(tmp_path):
     src = tmp_path / "src.mp4"
     _write_synthetic_video(src, n_frames=6, w=64, h=32)  # landscape, well under 720p
