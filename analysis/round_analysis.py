@@ -51,6 +51,13 @@ HIGHLIGHT_WINDOW_AFTER_S = 4.0
 MOTION_WINDOW_BEFORE_S = 2.0
 MOTION_WINDOW_AFTER_S = 3.0
 
+#: A candidate highlight window is dropped (not a distinct clip) once it overlaps an
+#: already-kept window by this fraction of the (fixed, ``HIGHLIGHT_WINDOW_BEFORE_S +
+#: HIGHLIGHT_WINDOW_AFTER_S``) window length -- two events 4s apart or two events sharing a
+#: ``ts`` both produced near-identical/duplicate clips before this existed (measured on
+#: img-7501). The dropped candidate's label is folded into the kept highlight's ``also``.
+HIGHLIGHT_MAX_OVERLAP = 0.5
+
 
 def _ordered(events: Sequence[Event]) -> list[Event]:
     return sorted(events, key=lambda e: float(e.get("ts", 0.0)))
@@ -174,10 +181,28 @@ def _peak_in_window(records: list[Mapping[str, Any]], lo: float, hi: float) -> f
     return max(values) if values else 0.0
 
 
+def _window_overlap_seconds(a: Mapping[str, Any], b: Mapping[str, Any]) -> float:
+    lo = max(float(a["start"]), float(b["start"]))
+    hi = min(float(a["end"]), float(b["end"]))
+    return max(0.0, hi - lo)
+
+
 def build_highlights(events: Sequence[Event], motion: Any, k: int = 5) -> list[dict[str, Any]]:
-    """Top ``k`` events by ``score = successful + confidence + motion peak + Markov weight``
-    (each term the plan's own additive rule, roughly O(1) so no single term dominates), each
-    returned as a clip window ``{start, end, label, score}`` ready to hand to ffmpeg."""
+    """Top ``k`` DISTINCT-window events by ``score = successful + confidence + motion peak +
+    Markov weight`` (each term the plan's own additive rule, roughly O(1) so no single term
+    dominates), each returned as a clip window ``{start, end, label, score, components, also}``
+    ready to hand to ffmpeg. ``components`` (added for ``scripts/round_audit.py``'s highlight
+    demo — additive, the App's own ``toRoundHighlights`` reads named fields only and ignores
+    unknown keys, see root CLAUDE.md's Round Video Worker contract) is the four raw terms the
+    score sums, so a reviewer can see WHY an event ranked where it did without re-deriving the
+    formula.
+
+    Candidates are scored and sorted highest-first, then kept greedily: a candidate whose
+    window overlaps ANY already-kept window by >= :data:`HIGHLIGHT_MAX_OVERLAP` of the window
+    length is dropped and its label appended to that kept highlight's ``also`` (e.g. two events
+    sharing a ``ts`` become one highlight with ``also: ["Closed Guard"]``) instead of producing
+    a duplicate/near-duplicate clip. Keeps scanning past the first ``k`` candidates until ``k``
+    distinct windows are found or candidates run out."""
     records = _motion_records(motion)
     peak_scale = max((_motion_value(r) for r in records), default=0.0)
 
@@ -202,7 +227,31 @@ def build_highlights(events: Sequence[Event], motion: Any, k: int = 5) -> list[d
                 "end": round(ts + HIGHLIGHT_WINDOW_AFTER_S, 2),
                 "label": str(e.get("label", "")),
                 "score": round(score, 3),
+                "components": {
+                    "success": round(success_term, 3),
+                    "confidence": round(confidence_term, 3),
+                    "motion_peak": round(peak_term, 3),
+                    "markov": round(markov_term, 3),
+                },
             },
         ))
     scored.sort(key=lambda pair: pair[0], reverse=True)
-    return [item for _, item in scored[:k]]
+
+    window_length = HIGHLIGHT_WINDOW_BEFORE_S + HIGHLIGHT_WINDOW_AFTER_S
+    kept: list[dict[str, Any]] = []
+    for _, item in scored:
+        target = next(
+            (
+                k_item for k_item in kept
+                if _window_overlap_seconds(k_item, item) / window_length >= HIGHLIGHT_MAX_OVERLAP
+            ),
+            None,
+        )
+        if target is not None:
+            target["also"].append(item["label"])
+            continue
+        item["also"] = []
+        kept.append(item)
+        if len(kept) >= k:
+            break
+    return kept

@@ -297,6 +297,7 @@ module = [
     "tests.test_rating_v2_presentation_demo",
     "tests.test_report_charts",
     "tests.test_round_analysis",
+    "tests.test_round_audit",
     "tests.test_rrb_round_rating",
     "tests.test_scouting_division_report",
     "tests.test_scouting_report",

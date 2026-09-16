@@ -103,3 +103,46 @@ def test_highlights_handle_missing_motion_without_crashing():
     events = [_ev(5, "sweep", "Scissor Sweep", "you", successful=True)]
     highlights = build_highlights(events, motion={}, k=5)
     assert highlights[0]["label"] == "Scissor Sweep"
+
+
+def test_highlights_same_ts_dedupes_into_also():
+    events = [
+        _ev(292, "escape", "Mount Escape", "you", successful=True, confidence="high"),
+        _ev(292, "guard", "Closed Guard", "you", successful=False, confidence="low"),
+    ]
+    highlights = build_highlights(events, motion=None, k=5)
+    assert len(highlights) == 1
+    assert highlights[0]["label"] == "Mount Escape"
+    assert highlights[0]["also"] == ["Closed Guard"]
+
+
+def test_highlights_overlapping_windows_keep_only_higher_scored():
+    # windows [97,104] and [99,106] -- overlap 5s of a 7s window (71% >= 50% threshold)
+    events = [
+        _ev(100, "submission", "Guard Pass", "you", successful=True, confidence="high"),
+        _ev(102, "control", "Side Control", "you", successful=False, confidence="low"),
+    ]
+    highlights = build_highlights(events, motion=None, k=5)
+    assert len(highlights) == 1
+    assert highlights[0]["label"] == "Guard Pass"
+    assert highlights[0]["also"] == ["Side Control"]
+
+
+def test_highlights_nonoverlapping_events_all_kept():
+    events = [
+        _ev(t, "takedown", f"Takedown {t}", "you", successful=True, confidence="high")
+        for t in (0, 30, 60)
+    ]
+    highlights = build_highlights(events, motion=None, k=5)
+    assert len(highlights) == 3
+    assert {h["label"] for h in highlights} == {"Takedown 0", "Takedown 30", "Takedown 60"}
+    assert all(h["also"] == [] for h in highlights)
+
+
+def test_highlights_result_count_never_exceeds_k():
+    events = [
+        _ev(t, "takedown", f"Takedown {t}", "you", successful=True, confidence="high")
+        for t in range(0, 700, 50)
+    ]
+    highlights = build_highlights(events, motion=None, k=5)
+    assert len(highlights) == 5
