@@ -953,8 +953,10 @@ def create_admin_app() -> FastAPI:
             return JSONResponse(
                 {"error": "node_key, bout and verdict are required"}, status_code=400
             )
+        pair_node_key = (body or {}).get("pair_node_key")
         result = audit_mod.apply_dictionary_verdict(
-            node_key, bout, ts_ms, verdict, note=str((body or {}).get("note") or "")
+            node_key, bout, ts_ms, verdict, note=str((body or {}).get("note") or ""),
+            pair_node_key=str(pair_node_key) if pair_node_key else None,
         )
         if result.get("problems"):
             return JSONResponse(result, status_code=400)

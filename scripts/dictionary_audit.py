@@ -628,16 +628,21 @@ def gather_proposals(dataset: Path, wanted: set[str]) -> dict[str, list[Proposal
     "look closely", and a read-only proposal is the long tail.
     """
     out: dict[str, list[Proposal]] = defaultdict(list)
+    dictionary = load_dictionary()
 
     # 2026-09-16 decision (docs/dictionary_audit.md): the blind Gemini read is the CANDIDATE
     # for review, the corpus label (what this bucket's `wanted` key is) is only a second
     # opinion -- a row never actually read (preverify skip / not visible / error) has no
     # `candidate_label` and is not a review item at all, it never reaches Gemini.
+    #
+    # Item 32 (2026-09-16): a `pair` row is a genuine DOUBLE label (one action, one state --
+    # `scripts.dictionary_seed._pair_rule`), so it is a proposal for BOTH techniques, not just
+    # the one `plan` originally searched for -- it is filed under the candidate's own bucket
+    # too, whenever that bucket also needs frames (`key in wanted`).
     _RANK_BY_CONF = {"high": 0, "medium": 1, "low": 2}
+    _KIND_PT = {"action": "ação", "state": "estado"}
     for row in load_seed():
-        key = node_key_of(str(row.get("node_key") or ""))
-        if key not in wanted:
-            continue
+        corpus_key = node_key_of(str(row.get("node_key") or ""))
         candidate = str(row.get("candidate_label") or "").strip()
         if not candidate:
             continue
@@ -648,17 +653,39 @@ def gather_proposals(dataset: Path, wanted: set[str]) -> dict[str, list[Proposal
         confidence = str(row.get("review_confidence") or "low").lower()
         ts_ms = int(row.get("ts_ms") or 0)
         bout = str(row.get("bout") or "")
-        caption = f"gemini: {candidate} ({confidence})"
-        if corpus_label:
-            caption += f" · corpus: {corpus_label} [{agree_near}]"
-        out[key].append(Proposal(
-            node_key=key, bout=bout, ts_ms=ts_ms,
-            ts=int(row.get("ts") or ts_ms // 1000),
-            rank=_RANK_BY_CONF.get(confidence, 2), offset=0,
-            caption=caption,
-            frame=seed_frame_rel(row, key, dataset), origin="gemini_seed",
-            label=candidate, type=str(row.get("candidate_type") or row.get("type") or ""),
-            actor=row.get("actor"), successful=row.get("successful")))
+        rank = _RANK_BY_CONF.get(confidence, 2)
+        candidate_type = str(row.get("candidate_type") or row.get("type") or "")
+        labels = row.get("labels") or []
+        is_pair = agree_near == "pair" and len(labels) == 2
+
+        if is_pair:
+            corpus_kind, candidate_kind = labels[0].get("kind"), labels[1].get("kind")
+            caption = (f"pair: {candidate} ({_KIND_PT.get(candidate_kind, '?')}) + "
+                      f"{corpus_label} ({_KIND_PT.get(corpus_kind, '?')}) [{confidence}]")
+        else:
+            caption = f"gemini: {candidate} ({confidence})"
+            if corpus_label:
+                caption += f" · corpus: {corpus_label} [{agree_near}]"
+
+        targets: list[tuple[str, str, str]] = [(corpus_key, candidate, candidate_type)]
+        if is_pair:
+            candidate_key = node_key_of(candidate)
+            if candidate_key != corpus_key:
+                corpus_entry = dictionary.get(corpus_key)
+                corpus_type = corpus_entry.type if corpus_entry else ""
+                targets = [(candidate_key, candidate, candidate_type),
+                           (corpus_key, corpus_label, corpus_type)]
+        for key, label, typ in targets:
+            if key not in wanted:
+                continue
+            out[key].append(Proposal(
+                node_key=key, bout=bout, ts_ms=ts_ms,
+                ts=int(row.get("ts") or ts_ms // 1000),
+                rank=rank, offset=0,
+                caption=caption,
+                frame=seed_frame_rel(row, key, dataset), origin="gemini_seed",
+                label=label, type=typ,
+                actor=row.get("actor"), successful=row.get("successful")))
 
     for path in sorted((dataset / "labels").glob("*.jsonl")):
         slug = path.stem
@@ -930,17 +957,38 @@ def _proposal_index(queue_out: dict[str, Any],
     frame that a later ``queue`` run did not re-emit must still resolve to "a model proposed
     this", otherwise accepting it would mint ``source: "human"`` — the laundering this file
     exists not to do.
+
+    A ``pair`` row (item 32, 2026-09-16) indexes under BOTH node_keys — the corpus's own
+    label under its node_key, the candidate's under its own — so an ``accept`` verdict on
+    EITHER half mints the right label, not the other half's.
     """
     idx: dict[tuple[str, str, int], dict[str, Any]] = {}
+    dictionary = load_dictionary()
     for row in load_seed():
         key = node_key_of(str(row.get("node_key") or ""))
         ts_ms = int(row.get("ts_ms") or 0)
-        idx[(key, str(row.get("bout") or ""), ts_ms)] = {
-            "node_key": key, "bout": row.get("bout"), "ts_ms": ts_ms, "ts": ts_ms // 1000,
-            "frame": seed_frame_rel(row, key, dataset), "origin": "gemini_seed",
-            "label": row.get("candidate_label") or row.get("corpus_label") or "",
-            "type": row.get("candidate_type") or "", "actor": None,
-            "successful": None}
+        bout = str(row.get("bout") or "")
+        candidate_label = str(row.get("candidate_label") or row.get("corpus_label") or "")
+        candidate_type = str(row.get("candidate_type") or "")
+        agree_near = str(row.get("agree_near") or row.get("agree") or "")
+        base = {"bout": row.get("bout"), "ts_ms": ts_ms, "ts": ts_ms // 1000,
+               "origin": "gemini_seed", "actor": None, "successful": None}
+
+        label, typ = candidate_label, candidate_type
+        if agree_near == "pair":
+            corpus_entry = dictionary.get(key)
+            label = corpus_entry.en if corpus_entry else str(row.get("corpus_label") or "")
+            typ = corpus_entry.type if corpus_entry else ""
+        idx[(key, bout, ts_ms)] = {**base, "node_key": key,
+                                   "frame": seed_frame_rel(row, key, dataset),
+                                   "label": label, "type": typ}
+        if agree_near == "pair":
+            cand_key = node_key_of(candidate_label)
+            if cand_key and cand_key != key:
+                idx[(cand_key, bout, ts_ms)] = {
+                    **base, "node_key": cand_key,
+                    "frame": seed_frame_rel(row, cand_key, dataset),
+                    "label": candidate_label, "type": candidate_type}
     for t in queue_out.get("targets", []):
         for p in t.get("proposals") or []:
             idx[(str(p["node_key"]), str(p["bout"]), int(p["ts_ms"]))] = p

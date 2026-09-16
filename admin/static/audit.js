@@ -370,6 +370,24 @@
     var focusIdx = 0;
     var total = items.length;
 
+    function kindLabel(k) {
+      return k === "action" ? "ação" : k === "state" ? "estado" : (k || "?");
+    }
+
+    function secondLineHtml(item) {
+      if (!item.pair_node_key) {
+        return '<div class="second">corpus: ' + (item.corpus_label || "—") + ' [' +
+          item.agree_near + ']</div>';
+      }
+      // item 32 (2026-09-16): a `pair` row is a genuine double label -- show both chips with
+      // their own kind badge instead of "corpus is only a second opinion".
+      return '<div class="pair-chips">' +
+        '<span class="chip">' + item.candidate_label + ' (' + kindLabel(item.kind) + ')</span>' +
+        '<span class="chip chip-pair">' + (item.pair_label || item.pair_node_key) + ' (' +
+          kindLabel(item.pair_kind) + ')</span>' +
+        '</div>';
+    }
+
     function cardEl(item, i) {
       var card = document.createElement("div");
       card.className = "dict-card";
@@ -380,7 +398,7 @@
         '<div class="body">' +
           '<div><span class="candidate">' + item.candidate_label + '</span>' +
           '<span class="conf conf-' + item.confidence + '">' + item.confidence + '</span></div>' +
-          '<div class="second">corpus: ' + (item.corpus_label || "—") + ' [' + item.agree_near + ']</div>' +
+          secondLineHtml(item) +
           '<div class="meta">' + item.bout + ' · ' + fmtTs(item.ts) + '</div>' +
           '<div class="actions">' +
             '<button class="btn-accept" data-act="accept">Accept</button>' +
@@ -429,12 +447,15 @@
       var verdictStr = kind === "relabel" ? "relabel:" + target : kind;
       var card = grid.querySelector('[data-idx="' + i + '"]');
       if (card) card.classList.add("is-done");
+      var body = {
+        node_key: kind === "relabel" ? target : item.node_key,
+        bout: item.bout, ts_ms: item.ts_ms, verdict: verdictStr,
+      };
+      // Relabel only ever replaces the candidate's own claim, never the pair's other half.
+      if (kind !== "relabel" && item.pair_node_key) body.pair_node_key = item.pair_node_key;
       fetch("/admin/audit/dictionary/verdict", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          node_key: kind === "relabel" ? target : item.node_key,
-          bout: item.bout, ts_ms: item.ts_ms, verdict: verdictStr,
-        }),
+        body: JSON.stringify(body),
       }).then(function (r) {
         if (r.ok) { item._done = true; render(); }
         else if (card) card.classList.remove("is-done");

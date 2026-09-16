@@ -18,10 +18,12 @@ from scripts.dictionary_seed import (
     WINDOW_OFFSETS,
     absolute_ts,
     ask_gemini,
+    build_pair_support,
     build_plan,
     build_preverify_skip_seed_row,
     build_preverify_summary,
     build_report,
+    build_row_labels,
     cap_plan,
     chosen_frame_paths,
     classify_ts_origin,
@@ -31,6 +33,7 @@ from scripts.dictionary_seed import (
     is_no_people,
     is_static_window,
     load_coverage,
+    load_pair_support,
     partition_for_ask,
     preverify_candidate,
     prioritize_curated,
@@ -260,6 +263,54 @@ def test_cap_plan_none_is_noop() -> None:
     assert cap_plan(plan, None) == plan
 
 
+# ── build_pair_support: real corpus adjacency for the "pair" tier's rule (a) ──────
+def test_build_pair_support_counts_distinct_bouts_for_adjacent_action_state() -> None:
+    matches = [
+        _match("m1", "Alice", "Bob", 2025, [
+            {"label": "Guard Pass", "type": "pass", "actor": "Alice", "ts": 10},
+            {"label": "Side Control", "type": "control", "actor": "Alice", "ts": 15},
+        ]),
+        _match("m2", "Carol", "Dan", 2025, [
+            {"label": "Side Control", "type": "control", "actor": "Carol", "ts": 5},
+            {"label": "Guard Pass", "type": "pass", "actor": "Carol", "ts": 2},
+        ]),
+    ]
+    support = build_pair_support(matches)
+    assert support["guard pass|side control"] == 2
+
+
+def test_build_pair_support_ignores_same_kind_adjacency() -> None:
+    # both actions (type "pass") -- never a plausible action+state double label.
+    matches = [_match("m1", "Alice", "Bob", 2025, [
+        {"label": "Guard Pass", "type": "pass", "actor": "Alice", "ts": 10},
+        {"label": "Knee Cut Pass", "type": "pass", "actor": "Alice", "ts": 12},
+    ])]
+    assert build_pair_support(matches) == {}
+
+
+def test_build_pair_support_counts_each_bout_once_even_with_repeats() -> None:
+    matches = [_match("m1", "Alice", "Bob", 2025, [
+        {"label": "Guard Pass", "type": "pass", "actor": "Alice", "ts": 10},
+        {"label": "Side Control", "type": "control", "actor": "Alice", "ts": 15},
+        {"label": "Side Control", "type": "control", "actor": "Alice", "ts": 20},
+        {"label": "Guard Pass", "type": "pass", "actor": "Alice", "ts": 25},
+    ])]
+    support = build_pair_support(matches)
+    assert support["guard pass|side control"] == 1
+
+
+def test_build_pair_support_ignores_unresolvable_labels() -> None:
+    matches = [_match("m1", "Alice", "Bob", 2025, [
+        {"label": "Not A Curated Label", "type": "pass", "actor": "Alice", "ts": 10},
+        {"label": "Side Control", "type": "control", "actor": "Alice", "ts": 15},
+    ])]
+    assert build_pair_support(matches) == {}
+
+
+def test_load_pair_support_missing_file_returns_empty(tmp_path: Path) -> None:
+    assert load_pair_support(tmp_path / "no-such-pair-support.json") == {}
+
+
 # ── coverage-driven priority ──────────────────────────────────────────────────────
 def test_prioritize_curated_puts_zero_bucket_first_by_corpus_events() -> None:
     curated = [
@@ -348,70 +399,126 @@ def test_window_offsets_are_symmetric_and_include_zero() -> None:
 
 # ── agreement rule ───────────────────────────────────────────────────────────────
 def test_score_agreement_full() -> None:
-    agree, conf = score_agreement("armbar", {"label": "Armbar"})
-    assert (agree, conf) == ("full", "high")
+    agree, conf, rule = score_agreement("armbar", {"label": "Armbar"})
+    assert (agree, conf, rule) == ("full", "high", None)
 
 
 def test_score_agreement_full_via_variant_spelling() -> None:
     # "arm bar" is a curated variant of "Armbar" -- clean_label canonicalises it first.
-    agree, conf = score_agreement("armbar", {"label": "arm bar"})
-    assert (agree, conf) == ("full", "high")
+    agree, conf, rule = score_agreement("armbar", {"label": "arm bar"})
+    assert (agree, conf, rule) == ("full", "high", None)
 
 
 def test_score_agreement_partial_via_alternative() -> None:
-    agree, conf = score_agreement("armbar", {"label": "Kimura", "alternative": "Armbar"})
-    assert (agree, conf) == ("partial", "low")
+    agree, conf, rule = score_agreement("armbar", {"label": "Kimura", "alternative": "Armbar"})
+    assert (agree, conf, rule) == ("partial", "low", None)
 
 
 def test_score_agreement_no_match() -> None:
     # Closed Guard/Mount are a different curated `type` (guard/control) and a different
     # submission family than Armbar (`_sub_family`), so they stay `no` even with the near
     # tier -- unlike "Kimura", which is now legitimately `near` (see
-    # test_score_agreement_near_same_submission_family below).
-    agree, conf = score_agreement(
+    # test_score_agreement_near_same_submission_family below). Armbar's own exit orientation
+    # is `neutral` (submissions don't project a landing position), so the `pair` tier never
+    # fires here either.
+    agree, conf, rule = score_agreement(
         "armbar", {"label": "Closed Guard", "type": "guard", "alternative": "Mount"})
-    assert (agree, conf) == ("no", "low")
+    assert (agree, conf, rule) == ("no", "low", None)
 
 
 def test_score_agreement_empty_answer_is_no() -> None:
-    agree, conf = score_agreement("armbar", {})
-    assert (agree, conf) == ("no", "low")
+    agree, conf, rule = score_agreement("armbar", {})
+    assert (agree, conf, rule) == ("no", "low", None)
 
 
 # ── agreement rule: near tier (2026-09-16) ─────────────────────────────────────────
 def test_score_agreement_near_same_curated_type() -> None:
-    # Lasso Guard vs Closed Guard: two different curated entries, both `type: guard` --
-    # a generic-vs-specific pair within one family (technique_library.json `type`).
-    agree, conf = score_agreement("lasso guard", {"label": "Closed Guard", "type": "guard"})
-    assert (agree, conf) == ("near", "medium")
+    # Lasso Guard vs Closed Guard: two different curated entries, both `type: guard` -- both
+    # resolve to `state` (`kind_of_entry`), so the `pair` tier's action+state precondition
+    # never applies here (state+state falls straight to near/no) -- a generic-vs-specific
+    # pair within one family (technique_library.json `type`).
+    agree, conf, rule = score_agreement("lasso guard", {"label": "Closed Guard", "type": "guard"})
+    assert (agree, conf, rule) == ("near", "medium", None)
 
 
 def test_score_agreement_near_same_submission_family() -> None:
-    # Both `type: submission` AND both `style_profile_core._sub_family` == "armlock".
-    agree, conf = score_agreement("armbar", {"label": "Kimura", "type": "submission"})
-    assert (agree, conf) == ("near", "medium")
+    # Both `type: submission` (both `action`, kind_of_entry) AND both
+    # `style_profile_core._sub_family` == "armlock" -- action+action, so `pair` never applies.
+    agree, conf, rule = score_agreement("armbar", {"label": "Kimura", "type": "submission"})
+    assert (agree, conf, rule) == ("near", "medium", None)
 
 
 def test_score_agreement_no_when_submission_type_but_different_family() -> None:
     # Both `type: submission`, but Heel Hook is a leglock and Kimura is an armlock -- a bare
     # `type` match would wrongly call these near; `_sub_family` is what keeps them apart.
-    agree, conf = score_agreement("heel hook", {"label": "Kimura", "type": "submission"})
-    assert (agree, conf) == ("no", "low")
+    agree, conf, rule = score_agreement("heel hook", {"label": "Kimura", "type": "submission"})
+    assert (agree, conf, rule) == ("no", "low", None)
 
 
-def test_score_agreement_near_arrived_at_state() -> None:
+# ── agreement rule: pair tier (2026-09-16, item 32) ────────────────────────────────
+def test_score_agreement_pair_via_exit_orientation() -> None:
     # Guard Pass is an ACTION (`kind_of_entry`) whose curated `type` ("pass") declares a
     # `top` landing orientation (`data/taxonomy/inference_table.json`
-    # `action_exit_orientation`); Side Control reads `top` too (`orientation_for_inference`).
-    agree, conf = score_agreement("guard pass", {"label": "Side Control", "type": "control"})
-    assert (agree, conf) == ("near", "medium")
+    # `action_exit_orientation`); Side Control is a STATE reading `top` too
+    # (`orientation_for_inference`) -- one action + one state, backed by rule (b), so this is
+    # now a `pair` (item 32), not a `near` disagreement.
+    agree, conf, rule = score_agreement("guard pass", {"label": "Side Control", "type": "control"})
+    assert (agree, conf, rule) == ("pair", "high", "exit_orientation")
+
+
+def test_score_agreement_pair_via_family() -> None:
+    # Heel Hook (submission, leglock family) + Leg Entanglement (guard/state): action+state,
+    # and "Leg Entanglement"'s own curated variant "leg lock entanglement" carries the same
+    # "leg lock" keyword `_sub_family` uses -- rule (c).
+    agree, conf, rule = score_agreement(
+        "heel hook", {"label": "Leg Entanglement", "type": "guard"})
+    assert (agree, conf, rule) == ("pair", "high", "family")
+
+
+def test_score_agreement_pair_via_adjacency() -> None:
+    # Injected `pair_support`: real corpus evidence (>= 2 distinct bouts) that this exact
+    # action/state pair sits adjacent in `matches.sequence` -- rule (a), the one that needs no
+    # curated-table backing at all.
+    support = {"straight ankle lock|single leg x": 3}
+    agree, conf, rule = score_agreement(
+        "straight ankle lock", {"label": "Single Leg X", "type": "guard"},
+        pair_support=support)
+    assert (agree, conf, rule) == ("pair", "high", "adjacency")
+
+
+def test_score_agreement_no_pair_when_adjacency_support_below_threshold() -> None:
+    support = {"straight ankle lock|single leg x": 1}   # only 1 distinct bout -- not enough
+    agree, conf, rule = score_agreement(
+        "straight ankle lock", {"label": "Single Leg X", "type": "guard"},
+        pair_support=support)
+    assert rule is None
+    assert agree != "pair"
+
+
+def test_score_agreement_no_pair_when_action_and_unrelated_state() -> None:
+    # Armbar (action, armlock family) + Closed Guard (state) -- no adjacency, no declared
+    # exit-orientation match (submission's own exit orientation is neutral), no shared family
+    # (Closed Guard carries no armlock keyword) -- action+state but implausible, stays no.
+    agree, conf, rule = score_agreement("armbar", {"label": "Closed Guard", "type": "guard"})
+    assert (agree, conf, rule) == ("no", "low", None)
+
+
+def test_score_agreement_no_pair_when_state_and_state() -> None:
+    # Cross Ashi + Leg Entanglement are both STATES (control/guard, kind_of_entry) -- the
+    # `pair` tier's precondition is exactly one action + one state, so this falls through to
+    # near/no like any other state+state comparison (different curated `type`, so `no`).
+    agree, conf, rule = score_agreement(
+        "cross ashi", {"label": "Leg Entanglement", "type": "guard"})
+    assert rule is None
+    assert agree != "pair"
 
 
 def test_score_agreement_no_when_action_exit_orientation_disagrees() -> None:
     # A pass's declared landing is `top`; Closed Guard reads `bottom` -- not the state the
-    # action's own exit-orientation row declares.
-    agree, conf = score_agreement("guard pass", {"label": "Closed Guard", "type": "guard"})
-    assert (agree, conf) == ("no", "low")
+    # action's own exit-orientation row declares, and "pass" isn't a submission so rule (c)
+    # (family) never applies either.
+    agree, conf, rule = score_agreement("guard pass", {"label": "Closed Guard", "type": "guard"})
+    assert (agree, conf, rule) == ("no", "low", None)
 
 
 # ── regrade_seed_near: re-grade an already-scored batch, no Gemini call ───────────
@@ -422,6 +529,7 @@ def test_regrade_seed_near_keeps_full_and_partial_untouched() -> None:
     assert [r["agree_near"] for r in out] == ["full", "partial"]
     # strict `agree` is never dropped
     assert [r["agree"] for r in out] == ["full", "partial"]
+    assert [r["pair_rule"] for r in out] == [None, None]
 
 
 def test_regrade_seed_near_promotes_a_no_row_that_is_near() -> None:
@@ -429,6 +537,7 @@ def test_regrade_seed_near_promotes_a_no_row_that_is_near() -> None:
             "model_label": "Closed Guard", "model_type": "guard"}]
     out = regrade_seed_near(seed)
     assert out[0]["agree_near"] == "near"
+    assert out[0]["pair_rule"] is None
 
 
 def test_regrade_seed_near_keeps_a_genuinely_wrong_no() -> None:
@@ -444,6 +553,52 @@ def test_regrade_seed_near_no_row_with_no_model_label() -> None:
     assert out[0]["agree_near"] == "no"
 
 
+# ── regrade_seed_near: pair tier (2026-09-16, item 32) ─────────────────────────────
+def test_regrade_seed_near_promotes_a_no_row_that_is_pair() -> None:
+    seed = [{"node_key": "guard pass", "agree": "no",
+            "model_label": "Side Control", "model_type": "control"}]
+    out = regrade_seed_near(seed)
+    assert out[0]["agree_near"] == "pair"
+    assert out[0]["pair_rule"] == "exit_orientation"
+
+
+def test_regrade_seed_near_pair_uses_injected_pair_support() -> None:
+    support = {"straight ankle lock|single leg x": 5}
+    seed = [{"node_key": "straight ankle lock", "agree": "no",
+            "model_label": "Single Leg X", "model_type": "guard"}]
+    out = regrade_seed_near(seed, pair_support=support)
+    assert out[0]["agree_near"] == "pair"
+    assert out[0]["pair_rule"] == "adjacency"
+
+
+# ── build_row_labels (2026-09-16, item 32) ─────────────────────────────────────────
+def test_build_row_labels_empty_when_never_read() -> None:
+    assert build_row_labels("armbar", None, None, "no") == []
+
+
+def test_build_row_labels_one_entry_for_full_partial_near_no() -> None:
+    for tier in ("full", "partial", "near", "no"):
+        labels = build_row_labels("armbar", "Armbar", "submission", tier)
+        assert len(labels) == 1
+        assert labels[0] == {"node_key": "armbar", "kind": "action", "source": "gemini"}
+
+
+def test_build_row_labels_two_entries_for_pair() -> None:
+    labels = build_row_labels("guard pass", "Side Control", "control", "pair")
+    assert labels == [
+        {"node_key": "guard pass", "kind": "action", "source": "corpus"},
+        {"node_key": "side control", "kind": "state", "source": "gemini"},
+    ]
+
+
+def test_build_row_labels_pair_but_same_key_is_still_one_entry() -> None:
+    # defensive: a `pair` tier can never really carry the same node_key on both sides
+    # (`_pair_rule` requires two different keys), but the builder must not duplicate a claim
+    # if it ever does.
+    labels = build_row_labels("armbar", "Armbar", "submission", "pair")
+    assert len(labels) == 1
+
+
 # ── build_report: near summary + preverify block ──────────────────────────────────
 def test_build_report_strict_vs_near_table() -> None:
     seed = [_seed_row(), _seed_row(model_label="Closed Guard", agree="no",
@@ -451,7 +606,14 @@ def test_build_report_strict_vs_near_table() -> None:
     report = build_report(seed, {"Armbar": 2}, CURATED)
     assert "Strict vs near agreement" in report
     assert "full 1, partial 0, no 1" in report   # strict row unaffected by near
-    assert "| with near (`agree_near`) | 1 | 0 | 1 | 0 |" in report
+    assert "| with near (`agree_near`) | 1 | 0 | 0 | 1 | 0 |" in report
+
+
+def test_build_report_strict_vs_near_table_includes_pair_column() -> None:
+    seed = [_seed_row(), _seed_row(model_label="Side Control", agree="pair",
+                      review_confidence="high", agree_near="pair")]
+    report = build_report(seed, {"Armbar": 2}, CURATED)
+    assert "| with near (`agree_near`) | 1 | 0 | 1 | 0 | 0 |" in report
 
 
 def test_build_report_preverify_block() -> None:

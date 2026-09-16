@@ -177,6 +177,13 @@ details.advanced summary { cursor: pointer; color: #888; margin: 12px 0; }
 .conf-medium { background: #4a3a10; color: #ffcc80; }
 .conf-low { background: #2a2a2a; color: #999; }
 .dict-card .second { color: #888; margin-top: 4px; }
+/* item 32 (2026-09-16): a `pair` card's two chips -- candidate + the other half of the
+   double label, each with its own action/state badge. */
+.dict-card .pair-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.dict-card .chip {
+  background: #24243e; color: #ccc; border-radius: 999px; padding: 2px 8px; font-size: 0.72rem;
+}
+.dict-card .chip-pair { background: #2a1e3e; color: #c9a6ff; }
 .dict-card .meta { color: #666; font-size: 0.75rem; margin-top: 4px; }
 .dict-card .actions { display: flex; gap: 6px; margin-top: 10px; }
 .dict-card .actions button {

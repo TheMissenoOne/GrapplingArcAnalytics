@@ -398,3 +398,84 @@ def test_accepting_a_seed_frame_without_a_queue_file_still_credits_the_model(
     assert line["source"] == "gemini_seed", "accepting must not launder the origin"
     assert line["frame"] == "audit/gemini_seed/kimura/b1__10000.jpg"
     assert line["actor"] is None, "the seed carries a role, never an identity"
+
+
+# --------------------------------------------------------- pair tier (item 32, 2026-09-16)
+
+def _pair_seed_row(**over: Any) -> dict[str, Any]:
+    base: dict[str, Any] = {
+        "node_key": "guard pass", "bout": "b1", "ts_ms": 5000,
+        "frame": "data/finetune/audit/gemini_seed/guard pass/b1__5000.jpg",
+        "candidate_label": "Side Control", "candidate_type": "control",
+        "second_opinion": {"corpus_label": "Guard Pass", "agree": "no", "agree_near": "pair"},
+        "agree_near": "pair", "review_confidence": "high",
+        "labels": [
+            {"node_key": "guard pass", "kind": "action", "source": "corpus"},
+            {"node_key": "side control", "kind": "state", "source": "gemini"},
+        ],
+    }
+    base.update(over)
+    return base
+
+
+def test_gather_proposals_pair_row_files_under_both_wanted_buckets(isolated: Path) -> None:
+    dataset = _tiny_dataset(isolated, [])
+    da.SEED.write_text(json.dumps(_pair_seed_row()) + "\n", encoding="utf-8")
+
+    got = da.gather_proposals(dataset, {"guard pass", "side control"})
+
+    assert set(got.keys()) == {"guard pass", "side control"}
+    expected_caption = "pair: Side Control (estado) + Guard Pass (ação) [high]"
+    for key in ("guard pass", "side control"):
+        assert len(got[key]) == 1
+        assert got[key][0].caption == expected_caption
+
+
+def test_gather_proposals_pair_row_only_files_the_wanted_half(isolated: Path) -> None:
+    # a coverage target asking for only ONE half of the pair never gets a proposal it didn't
+    # need for the other half.
+    dataset = _tiny_dataset(isolated, [])
+    da.SEED.write_text(json.dumps(_pair_seed_row()) + "\n", encoding="utf-8")
+
+    got = da.gather_proposals(dataset, {"side control"})
+    assert set(got.keys()) == {"side control"}
+
+
+def test_gather_proposals_non_pair_row_only_files_the_corpus_bucket(isolated: Path) -> None:
+    # unchanged shape for every other tier -- one bucket, the plain caption.
+    dataset = _tiny_dataset(isolated, [])
+    row = _pair_seed_row(agree_near="full", review_confidence="high",
+                        candidate_label="Guard Pass", candidate_type="pass",
+                        second_opinion={"corpus_label": "Guard Pass", "agree": "full",
+                                       "agree_near": "full"},
+                        labels=[{"node_key": "guard pass", "kind": "action", "source": "gemini"}])
+    da.SEED.write_text(json.dumps(row) + "\n", encoding="utf-8")
+
+    got = da.gather_proposals(dataset, {"guard pass", "side control"})
+    assert set(got.keys()) == {"guard pass"}
+    assert got["guard pass"][0].caption == "gemini: Guard Pass (high) · corpus: Guard Pass [full]"
+
+
+def test_apply_pair_accept_mints_both_labels_with_their_own_type(isolated: Path) -> None:
+    """Accepting BOTH halves of a pair (one verdict line per node_key, same bout/ts_ms) mints
+    two label lines -- the candidate's own type, and the corpus's own curated type, never one
+    borrowed from the other."""
+    dataset = isolated / "finetune"
+    (dataset / "labels").mkdir(parents=True, exist_ok=True)
+    da.SEED.write_text(json.dumps(_pair_seed_row()) + "\n", encoding="utf-8")
+    verdicts = isolated / "verdicts.jsonl"
+    verdicts.write_text("".join(json.dumps(r) + "\n" for r in [
+        {"node_key": "side control", "bout": "b1", "ts_ms": 5000, "verdict": "accept"},
+        {"node_key": "guard pass", "bout": "b1", "ts_ms": 5000, "verdict": "accept"},
+    ]), encoding="utf-8")
+
+    out = da.apply(verdicts, dataset, write=True, reviewer="tester", rebuild=False)
+    assert out["stats"] == {"accepted": 2}
+
+    store = {v["node_key"]: v for v in vd.load_verdicts(da.AUDIT / "verdicts.jsonl")}
+    assert store["side control"]["line"]["source"] == "gemini_seed"
+    assert store["side control"]["line"]["label"] == "Side Control"
+    assert store["side control"]["line"]["type"] == "control"
+    assert store["guard pass"]["line"]["source"] == "gemini_seed"
+    assert store["guard pass"]["line"]["label"] == "Guard Pass"
+    assert store["guard pass"]["line"]["type"] == "pass"

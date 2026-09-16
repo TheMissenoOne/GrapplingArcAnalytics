@@ -157,6 +157,53 @@ Consequências, todas em `scripts/dictionary_seed.py`:
   a segunda opinião ao lado — uma linha sem `candidate_label` (nunca lida) não vira item de
   fila.
 
+### Decisão 2026-09-16 (item 32) — dupla marcação de ação+estado
+
+**Um frame pode mostrar uma AÇÃO e um ESTADO ao mesmo tempo. Quando o candidato (leitura
+cega) e o corpus label formam um par ação/estado plausível, isso NÃO é uma discordância — é
+uma dupla marcação de ALTA confiança, e o frame guarda os DOIS labels.** Exemplos do batch 2
+(`data/finetune/audit/gemini_seed/seed.jsonl`): corpus Guard Pass + candidato Side Control;
+corpus Heel Hook + candidato Leg Entanglement; corpus Straight Ankle Lock + candidato Single
+Leg X; corpus Sweep + candidato Open Guard; corpus Triangle Choke + candidato Closed Guard.
+
+`score_agreement` (`scripts/dictionary_seed.py`) ganha um tier `pair`, checado ANTES do
+`near`: um lado resolve para ação, o outro para estado
+(`analysis.taxonomy_kind.kind_of_entry`), e o par tem que estar amparado por evidência que já
+existe no repositório — nunca uma lista escrita à mão. Três regras, checadas nessa ordem, a
+primeira que casar vence (`pair_rule` no seed row diz qual foi):
+
+1. **`adjacency`** — o estado aparece imediatamente antes ou depois dessa ação em
+   `matches.sequence`, em pelo menos 2 lutas distintas. `plan` calcula essa tabela uma vez
+   (`build_pair_support`) e grava em `data/finetune/audit/gemini_seed/pair_support.json`;
+   `report`/`score_agreement` só leem.
+2. **`exit_orientation`** — a mesma regra do tier `near` (`_arrived_at_state`): a ação declara
+   uma orientação de saída (`data/taxonomy/inference_table.json`
+   `action_exit_orientation`) e o estado lê essa mesma orientação.
+3. **`family`** — a sub-família curada da submissão (`style_profile_core._sub_family` —
+   armlock/leglock/strangle) também aparece no label ou nas variantes curadas do estado (ex.:
+   Heel Hook + Leg Entanglement, cuja variante "leg lock entanglement" carrega a mesma palavra-
+   chave "leg lock").
+
+`compute_review_confidence`: `pair` → `high` (uma dupla marcação plausível é motivo de
+confiança, não de dúvida). O seed row ganha `labels: [{node_key, kind, source}]`
+(`build_row_labels`) — os DOIS labels para `pair` (corpus + candidato), só o candidato para
+`full`/`partial`/`near`/`no` (decisão 2026-09-16, item 31, acima). Um par ação+ação ou
+estado+estado NUNCA vira `pair` — cai para `near`/`no` como antes (ex.: Cross Ashi + Leg
+Entanglement, dois estados, continua sendo avaliado pela regra de família curada existente).
+
+**A fila de revisão mostra os dois labels.** `dictionary_audit.gather_proposals` arquiva uma
+linha `pair` sob os DOIS node_keys (o da técnica que `plan` procurou e o do candidato), cada
+um com a legenda `pair: <candidato> (<ação|estado>) + <corpus> (<ação|estado>) [<confiança>]`.
+No admin (`/admin/audit/dictionary`), o card mostra dois chips com o selo ação/estado no lugar
+da linha "corpus: ... [tier]"; **Accept** grava um veredito PARA CADA label (dois registros em
+`verdicts.jsonl`, mesma `(bout, ts_ms)`, um `node_key` cada); **Reject** rejeita os dois;
+**Relabel** troca só o label do candidato, nunca o outro lado do par.
+
+`vision_dataset` já chaveia cada linha de label por `(bout, ts_ms, node_key)`
+(`label_id`/`_verdict_key`/`apply_verdicts`) — dois `node_key` diferentes no mesmo frame já
+eram duas linhas distintas antes desta decisão; nada mudou nesse arquivo, só passou a ser
+usado com dois vereditos por frame em vez de um.
+
 ### Results — 2026-09-16 run
 
 First full `plan`→`ask` pass over the realigned batch: 91 candidates, 27 skipped by preverify

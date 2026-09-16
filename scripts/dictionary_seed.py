@@ -68,6 +68,20 @@ is redefined around the candidate (see `compute_review_confidence`) instead of "
 match the corpus"; and the human review queue (`scripts/dictionary_audit.py queue`) now shows
 the candidate first, the corpus label as a second opinion beside it.
 
+**Decisão 2026-09-16, item 32** (owner): a frame can show an ACTION and a STATE at once. When
+the candidate and the corpus label form a plausible action/state pair (Guard Pass + Side
+Control, Triangle Choke + Closed Guard, Heel Hook + Leg Entanglement, ...), that is NOT a
+disagreement — it is a double label with HIGH confidence, and the frame keeps BOTH labels.
+`score_agreement` gains a `pair` tier, checked BEFORE `near`: one side resolves to an action,
+the other to a state (`analysis.taxonomy_kind.kind_of_entry`), and the pair is backed by
+evidence already in the repo — real corpus adjacency (`build_pair_support`, cached to
+`data/finetune/audit/gemini_seed/pair_support.json` by `plan`, ≥ 2 distinct bouts), the
+existing exit-orientation rule (`_arrived_at_state`), or a shared curated sub-family
+(`_pair_family`, reusing `style_profile_core._sub_family`) — never a hand list of pairs.
+`pair_rule` on the seed row says which one fired. A `pair` row's `labels` field carries BOTH
+technique claims (`{node_key, kind, source}`, corpus + candidate); every other tier keeps only
+the candidate (decision 2026-09-16, item 31, above).
+
 Privacy: public corpus only (`matches`/`athletes`), same class as `scripts/frame_pdf.py`.
 Prod is read-only; this script writes nothing back to the DB.
 """
@@ -111,6 +125,10 @@ OUT_DIR = REPO / "data" / "finetune" / "audit" / "gemini_seed"
 PLAN_PATH = OUT_DIR / "plan.jsonl"
 PLAN_COUNTS_PATH = OUT_DIR / "plan_counts.json"
 SEED_PATH = OUT_DIR / "seed.jsonl"
+# `build_pair_support`'s own cache, written once by `plan` (needs `matches.sequence`, which
+# only `plan` reads) and consumed read-only by `report`/`score_agreement` -- see the "pair"
+# tier docstring on `score_agreement` below (owner decision 2026-09-16, item 32).
+PAIR_SUPPORT_PATH = OUT_DIR / "pair_support.json"
 PREVERIFY_PATH = OUT_DIR / "preverify.jsonl"
 PREVERIFY_SUMMARY_PATH = OUT_DIR / "preverify_summary.json"
 REPORT_PATH = OUT_DIR / "REPORT.md"
@@ -407,6 +425,70 @@ def cap_plan(plan: list[PlanRow], max_calls: int | None) -> list[PlanRow]:
         out.extend(group)
         budget -= len(group)
     return out
+
+
+# Owner decision 2026-09-16 (item 32): a frame can show an ACTION and a STATE at once --
+# corpus adjacency ("does this action/state pair actually sit next to each other in a real
+# sequence?") is rule (a) of the "pair" tier below. `MIN_PAIR_SUPPORT_BOUTS` mirrors the
+# `select_candidates`/`min_events` convention of counting DISTINCT bouts, not raw mentions --
+# two logged occurrences inside the same one-off bout is one data point, not two.
+MIN_PAIR_SUPPORT_BOUTS = 2
+
+
+def build_pair_support(matches: list[dict[str, Any]]) -> dict[str, int]:
+    """``matches`` (as ``_load_matches`` shapes them) -> ``{"<action_key>|<state_key>":
+    distinct_bout_count}`` over every adjacent (action, state) pair in a match's own
+    ``sequence`` order, where both sides resolve to a CURATED entry
+    (``analysis.taxonomy_kind.kind_of_entry``) and the two kinds differ. Written once by
+    `plan` (the only step that reads ``matches.sequence``) to :data:`PAIR_SUPPORT_PATH`;
+    read by `report`/:func:`score_agreement` as evidence for the "pair" tier's rule (a) --
+    never a hand list of plausible pairs, the corpus IS the list.
+
+    Key order is always ``action|state`` regardless of which one came first in the sequence
+    (a submission attempted FROM a state and a state reached BY an action are the same
+    adjacency evidence either way) -- so a caller checking one specific (action, state)
+    candidate builds the exact same key it looks up.
+    """
+    curated = _curated_by_node_key()
+    counts: Counter[str] = Counter()
+    seen_bouts: dict[str, set[str]] = defaultdict(set)
+    for m in matches:
+        raw_events = [ev for ev in (m.get("sequence") or []) if isinstance(ev, dict)]
+        if len(raw_events) < 2:
+            continue
+        match_id = str(m.get("match_id") or "")
+        resolved: list[tuple[str, str] | None] = []
+        for ev in raw_events:
+            label = str(ev.get("label") or "")
+            if not label:
+                resolved.append(None)
+                continue
+            key = node_key_of(clean_label(label, str(ev.get("type") or "")))
+            entry = curated.get(key)
+            if entry is None:
+                resolved.append(None)
+                continue
+            kind = kind_of_entry(str(entry["en"]), str(entry.get("type") or ""))
+            resolved.append((key, kind) if kind in ("action", "state") else None)
+        for a, b in zip(resolved, resolved[1:], strict=False):
+            if a is None or b is None or a[1] == b[1]:
+                continue
+            action_key, state_key = (a[0], b[0]) if a[1] == "action" else (b[0], a[0])
+            pair_key = f"{action_key}|{state_key}"
+            if match_id not in seen_bouts[pair_key]:
+                seen_bouts[pair_key].add(match_id)
+                counts[pair_key] += 1
+    return dict(counts)
+
+
+def load_pair_support(path: Path = PAIR_SUPPORT_PATH) -> dict[str, int]:
+    """:data:`PAIR_SUPPORT_PATH`, or ``{}`` when `plan` hasn't written one yet -- same
+    "sibling artefact may not exist" tolerance as :func:`load_coverage`. No caching, same
+    convention as that function -- a few KB, read once per `report`/scoring call."""
+    if not path.exists():
+        return {}
+    data: dict[str, int] = json.loads(path.read_text(encoding="utf-8"))
+    return data
 
 
 def _load_matches() -> list[dict[str, Any]]:
@@ -1087,13 +1169,75 @@ def _arrived_at_state(node_key: str, model_answer: Mapping[str, Any]) -> bool:
     return _STANCE_TO_ORIENTATION.get(stance) == orient
 
 
-def score_agreement(node_key: str, model_answer: dict[str, Any]) -> tuple[str, str]:
-    """``(agree, _legacy_conf)``. ``agree`` in ``full|partial|near|no`` is the second opinion's
-    own tier and is still used everywhere. The second element is the PRE-2026-09-16 confidence
-    rule (corpus-centric: high only on full agreement) -- kept for callers/tests that still
-    read it, but a seed row's own ``review_confidence`` now comes from
-    :func:`compute_review_confidence` instead (candidate-centric, see its docstring).
-    Disagreement is exactly what the human review queue exists to see, so it is never dropped.
+def _pair_family(action_key: str, state_key: str) -> bool:
+    """Pair rule (c): the ACTION's curated sub-family (``style_profile_core._sub_family`` --
+    armlock/leglock/strangle, submissions only) also shows up in the STATE's own label or any
+    of its curated variants -- e.g. Heel Hook (leglock) with Leg Entanglement, whose variant
+    "leg lock entanglement" carries the same "leg lock" keyword. Reuses the curated keyword
+    table already in the repo; no hand list of technique pairs. Only submissions carry a
+    curated sub-family today, so a non-submission action never matches here."""
+    action = _curated_by_node_key().get(action_key)
+    state = _curated_by_node_key().get(state_key)
+    if not action or not state or str(action.get("type") or "") != "submission":
+        return False
+    fam = _sub_family(str(action["en"]))
+    if fam is None:
+        return False
+    texts = [state.get("en"), *(state.get("variants") or [])]
+    return any(_sub_family(str(t)) == fam for t in texts if t)
+
+
+def _pair_rule(node_key: str, model_key: str, pair_support: Mapping[str, int] | None,
+               ) -> str | None:
+    """Owner decision 2026-09-16 (item 32): is ``node_key`` (the corpus label) and
+    ``model_key`` (the candidate) a genuine double label on one frame -- one side an ACTION,
+    the other a STATE (``kind_of_entry``), backed by evidence already in the repo? Returns
+    which rule fired (``adjacency``/``exit_orientation``/``family``), or ``None`` when the two
+    aren't one action + one state, or no rule backs the pair -- the caller falls through to
+    the existing ``near``/``no`` tiers in either case.
+
+    Checked in the same priority order a human would trust: real corpus adjacency first (a),
+    then the declared exit-orientation table (b, :func:`_arrived_at_state`), then a shared
+    curated family (c, :func:`_pair_family`) -- the first one that fires wins, `pair_rule`
+    only ever names one."""
+    corpus = _curated_by_node_key().get(node_key)
+    model = _curated_by_node_key().get(model_key)
+    if not corpus or not model or node_key == model_key:
+        return None
+    corpus_kind = kind_of_entry(str(corpus["en"]), str(corpus.get("type") or ""))
+    model_kind = kind_of_entry(str(model["en"]), str(model.get("type") or ""))
+    if {corpus_kind, model_kind} != {"action", "state"}:
+        return None
+    action_key, state_key = (node_key, model_key) if corpus_kind == "action" \
+        else (model_key, node_key)
+
+    support = pair_support if pair_support is not None else load_pair_support()
+    if int(support.get(f"{action_key}|{state_key}", 0)) >= MIN_PAIR_SUPPORT_BOUTS:
+        return "adjacency"
+    state_entry = _curated_by_node_key()[state_key]
+    if _arrived_at_state(action_key, {"label": state_entry["en"], "type": state_entry["type"]}):
+        return "exit_orientation"
+    if _pair_family(action_key, state_key):
+        return "family"
+    return None
+
+
+def score_agreement(node_key: str, model_answer: dict[str, Any],
+                    pair_support: Mapping[str, int] | None = None,
+                    ) -> tuple[str, str, str | None]:
+    """``(agree, _legacy_conf, pair_rule)``. ``agree`` in ``full|partial|pair|near|no`` is the
+    second opinion's own tier and is still used everywhere. The second element is the
+    PRE-2026-09-16 confidence rule (corpus-centric: high only on full agreement) -- kept for
+    callers/tests that still read it, but a seed row's own ``review_confidence`` now comes
+    from :func:`compute_review_confidence` instead (candidate-centric, see its docstring).
+    ``pair_rule`` names which pair rule fired (``adjacency``/``exit_orientation``/``family``,
+    see :func:`_pair_rule`) and is ``None`` for every other tier. Disagreement is exactly what
+    the human review queue exists to see, so it is never dropped.
+
+    ``pair`` (added 2026-09-16, item 32) is checked BEFORE ``near``: the corpus label and the
+    candidate are a genuine double label on one frame (one action, one state,
+    :func:`_pair_rule`) rather than a disagreement -- see the module docstring's "Decisão
+    2026-09-16 (item 32)".
 
     ``near`` (added 2026-09-16, `docs/dictionary_audit.md`) sits between ``partial`` and ``no``:
     the model's label is not the corpus label and not its declared ``alternative``, but is
@@ -1102,15 +1246,18 @@ def score_agreement(node_key: str, model_answer: dict[str, Any]) -> tuple[str, s
     a hand list of pairs."""
     model_label = str(model_answer.get("label") or "")
     if model_label and node_key_of(clean_label(model_label)) == node_key:
-        return "full", "high"
+        return "full", "high", None
     alt = str(model_answer.get("alternative") or "")
     if alt and node_key_of(clean_label(alt)) == node_key:
-        return "partial", "low"
+        return "partial", "low", None
     if model_label:
         model_key = node_key_of(clean_label(model_label, str(model_answer.get("type") or "")))
+        rule = _pair_rule(node_key, model_key, pair_support)
+        if rule:
+            return "pair", "high", rule
         if _same_family(node_key, model_key) or _arrived_at_state(node_key, model_answer):
-            return "near", "medium"
-    return "no", "low"
+            return "near", "medium", None
+    return "no", "low", None
 
 
 def compute_review_confidence(agree: str, model_confidence: str | None, read: bool) -> str:
@@ -1119,27 +1266,55 @@ def compute_review_confidence(agree: str, model_confidence: str | None, read: bo
     second opinion beside it -- so this is no longer "did the model match the corpus", it is
     "how much can the human trust this candidate without looking hard".
 
-    ``high`` only when the second opinion backs it up (``agree`` full or partial -- both
-    directions of agreement, not just an exact match). ``medium`` on the ``near`` tier (same
-    curated family / declared landing state) OR when the model itself reported high
-    confidence, even with no corpus support -- either is a reason to look, neither is a reason
-    to trust blindly. ``low`` otherwise, including a row that was never actually read (a
-    preverify skip, `visible: no` at stage A, or a Gemini error/empty answer) -- those get
-    ``read=False`` and short-circuit here regardless of ``agree``."""
+    ``high`` when the second opinion backs it up (``agree`` full or partial -- both directions
+    of agreement, not just an exact match) OR the row is a ``pair`` (item 32: a plausible
+    double label is not a disagreement, it's two trustworthy claims). ``medium`` on the
+    ``near`` tier (same curated family / declared landing state) OR when the model itself
+    reported high confidence, even with no corpus support -- either is a reason to look,
+    neither is a reason to trust blindly. ``low`` otherwise, including a row that was never
+    actually read (a preverify skip, `visible: no` at stage A, or a Gemini error/empty answer)
+    -- those get ``read=False`` and short-circuit here regardless of ``agree``."""
     if not read:
         return "low"
-    if agree in ("full", "partial"):
+    if agree in ("full", "partial", "pair"):
         return "high"
     if agree == "near" or str(model_confidence or "").strip().lower() == "high":
         return "medium"
     return "low"
 
 
-def regrade_seed_near(seed: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Re-grade an already-asked batch with the near tier, WITHOUT another Gemini call and
-    WITHOUT touching the strict ``agree`` a row already carries -- adds ``agree_near``.
-    ``full``/``partial`` stay themselves (near only ever sits between partial and no); a
-    ``no`` row is re-checked against ``_same_family``/``_arrived_at_state`` on its own stored
+def build_row_labels(node_key: str, candidate_label: str | None, candidate_type: str | None,
+                     tier: str) -> list[dict[str, Any]]:
+    """A seed row's own ``labels`` field (item 32): every technique this frame actually
+    claims. ``[]`` when the row was never read (no candidate). One entry -- the candidate --
+    for ``full``/``partial``/``near``/``no`` (decision 2026-09-16, item 31: the candidate is
+    the review target, the corpus label elsewhere is only a second opinion, not a second
+    claim). TWO entries for ``pair``: the candidate (``source: gemini``) AND the corpus label
+    (``source: corpus``) -- a genuine double label, both trustworthy. Corpus first, to match
+    ``second_opinion``'s convention of leading with the corpus half."""
+    if not candidate_label:
+        return []
+    candidate_key = node_key_of(clean_label(str(candidate_label), str(candidate_type or "")))
+    candidate_entry = _curated_by_node_key().get(candidate_key)
+    candidate_kind = (kind_of_entry(str(candidate_entry["en"]), str(candidate_entry.get("type") or ""))
+                      if candidate_entry else None)
+    candidate_line = {"node_key": candidate_key, "kind": candidate_kind, "source": "gemini"}
+    if tier != "pair" or candidate_key == node_key:
+        return [candidate_line]
+    corpus_entry = _curated_by_node_key().get(node_key)
+    corpus_kind = (kind_of_entry(str(corpus_entry["en"]), str(corpus_entry.get("type") or ""))
+                  if corpus_entry else None)
+    corpus_line = {"node_key": node_key, "kind": corpus_kind, "source": "corpus"}
+    return [corpus_line, candidate_line]
+
+
+def regrade_seed_near(seed: list[dict[str, Any]], *,
+                      pair_support: Mapping[str, int] | None = None) -> list[dict[str, Any]]:
+    """Re-grade an already-asked batch with the pair/near tiers, WITHOUT another Gemini call
+    and WITHOUT touching the strict ``agree`` a row already carries -- adds ``agree_near`` and
+    ``pair_rule``. ``full``/``partial`` stay themselves (pair/near only ever sit between
+    partial and no, ``pair`` checked first -- item 32); a ``no`` row is re-checked against
+    :func:`_pair_rule`, then ``_same_family``/``_arrived_at_state``, on its own stored
     ``model_label``/``model_type``. ``alternative`` was never persisted to `seed.jsonl`
     (partial's own basis), so a `no` row's `alternative` is unrecoverable here -- fine, since
     a row already scored `partial` is left alone and never needs it."""
@@ -1149,30 +1324,39 @@ def regrade_seed_near(seed: list[dict[str, Any]]) -> list[dict[str, Any]]:
         agree = str(row.get("agree", "no"))
         if agree != "no":
             row["agree_near"] = agree
+            row.setdefault("pair_rule", None)
         else:
             model_label = row.get("model_label")
             if model_label:
                 model_key = node_key_of(
                     clean_label(str(model_label), str(row.get("model_type") or "")))
                 answer = {"label": model_label, "type": row.get("model_type")}
-                if (_same_family(str(row["node_key"]), model_key)
+                rule = _pair_rule(str(row["node_key"]), model_key, pair_support)
+                if rule:
+                    row["agree_near"] = "pair"
+                    row["pair_rule"] = rule
+                elif (_same_family(str(row["node_key"]), model_key)
                         or _arrived_at_state(str(row["node_key"]), answer)):
                     row["agree_near"] = "near"
+                    row["pair_rule"] = None
                 else:
                     row["agree_near"] = "no"
+                    row["pair_rule"] = None
             else:
                 row["agree_near"] = "no"
+                row["pair_rule"] = None
         out.append(row)
     return out
 
 
 def regrade_seed_review(seed: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Backfill/refresh ``candidate_label``/``candidate_type``/``second_opinion``/
-    ``review_confidence`` on every row, derived from what's already stored
+    ``review_confidence``/``labels`` on every row, derived from what's already stored
     (``model_label``/``model_type``/``agree``/``agree_near``/``model_confidence``) -- no
     Gemini call, idempotent, and it upgrades a `seed.jsonl` written before these fields
-    existed (decision 2026-09-16, `docs/dictionary_audit.md`). Call AFTER
-    :func:`regrade_seed_near` so ``agree_near`` is already the best tier available."""
+    existed (decision 2026-09-16, `docs/dictionary_audit.md`; ``labels`` added item 32). Call
+    AFTER :func:`regrade_seed_near` so ``agree_near``/``pair_rule`` are already the best tier
+    available."""
     out = []
     for row in seed:
         row = dict(row)
@@ -1183,10 +1367,12 @@ def regrade_seed_review(seed: list[dict[str, Any]]) -> list[dict[str, Any]]:
         agree_near = str(row.get("agree_near") or agree)
         row["second_opinion"] = {"corpus_label": row.get("corpus_label"),
                                  "agree": agree, "agree_near": agree_near}
-        # the near-aware tier decides confidence (a strict `no` regraded to `near` still
-        # earns `medium`) -- see compute_review_confidence's docstring.
+        # the near-aware tier decides confidence (a strict `no` regraded to `near`/`pair`
+        # still earns medium/high) -- see compute_review_confidence's docstring.
         row["review_confidence"] = compute_review_confidence(
             agree_near, row.get("model_confidence"), read)
+        row["labels"] = build_row_labels(str(row["node_key"]), row["candidate_label"],
+                                         row["candidate_type"], agree_near)
         out.append(row)
     return out
 
@@ -1347,10 +1533,12 @@ def run_ask(plan: list[dict[str, Any]], *, dry_run: bool = False,
                    row["node_key"], row["bout"], row["chosen_offset"], row["visible"])
         reason: str | None
         agree: str
+        pair_rule_hit: str | None
         usage: dict[str, int]
         if not row["visible"]:
             model_parsed: dict[str, Any] = {}
             agree = "no"
+            pair_rule_hit = None
             reason = "not_visible_in_window"
             usage = dict(_EMPTY_USAGE)
         else:
@@ -1361,13 +1549,15 @@ def run_ask(plan: list[dict[str, Any]], *, dry_run: bool = False,
             else:
                 answer, b_err = _safe_call(ask_gemini, row, vocab, client)
             model_parsed = answer["parsed"]
-            agree, _old_conf = score_agreement(str(row["node_key"]), model_parsed)
+            agree, _old_conf, pair_rule_hit = score_agreement(str(row["node_key"]), model_parsed)
             reason = b_err or model_parsed.get("reason")
             usage = answer["usage"]
         read = bool(model_parsed.get("label"))
         conf = compute_review_confidence(agree, model_parsed.get("confidence"), read)
         frame = chosen_frame_paths(str(row["node_key"]), str(row["bout"]), int(row["ts_ms"]),
                                    int(row["chosen_offset"]))["center"]
+        candidate_label = model_parsed.get("label") if read else None
+        candidate_type = model_parsed.get("type") if read else None
         seed.append({
             "node_key": row["node_key"], "bout": row["bout"], "ts_ms": row["ts_ms"],
             "ts_class": row.get("ts_class"),
@@ -1377,13 +1567,15 @@ def run_ask(plan: list[dict[str, Any]], *, dry_run: bool = False,
                     else str(frame),
             "corpus_label": row["label"], "model_label": model_parsed.get("label"),
             "model_type": model_parsed.get("type"),
-            "candidate_label": model_parsed.get("label") if read else None,
-            "candidate_type": model_parsed.get("type") if read else None,
+            "candidate_label": candidate_label,
+            "candidate_type": candidate_type,
             "second_opinion": {"corpus_label": row["label"], "agree": agree,
                                "agree_near": agree},
             "actor_role": model_parsed.get("actor_role"),
             "model_confidence": model_parsed.get("confidence"), "reason": reason,
-            "agree": agree, "review_confidence": conf,
+            "agree": agree, "review_confidence": conf, "pair_rule": pair_rule_hit,
+            "labels": build_row_labels(str(row["node_key"]), candidate_label, candidate_type,
+                                       agree),
             "usage": _sum_usage(row["align_usage"], usage),
         })
     return seed
@@ -1405,13 +1597,14 @@ def _near_tier(s: dict[str, Any]) -> str:
     return str(s.get("agree_near") or s.get("agree") or "no")
 
 
-def _near_counts(seed: list[dict[str, Any]]) -> tuple[int, int, int, int, int]:
+def _near_counts(seed: list[dict[str, Any]]) -> tuple[int, int, int, int, int, int]:
     total = len(seed)
     full = sum(1 for s in seed if _near_tier(s) == "full")
     partial = sum(1 for s in seed if _near_tier(s) == "partial")
+    pair = sum(1 for s in seed if _near_tier(s) == "pair")
     near = sum(1 for s in seed if _near_tier(s) == "near")
     no = sum(1 for s in seed if _near_tier(s) == "no")
-    return total, full, partial, near, no
+    return total, full, partial, pair, near, no
 
 
 _FRAME_CHECK_NOTE = """## Frame check (orchestrator, 2026-09-16)
@@ -1448,18 +1641,23 @@ def build_report(seed: list[dict[str, Any]], counts: dict[str, int],
              f"Agreement: full {full}, partial {partial}, no {no}"
              + (f" ({full / total:.0%} full)" if total else ""), ""]
 
-    n_total, n_full, n_partial, n_near, n_no = _near_counts(seed)
+    n_total, n_full, n_partial, n_pair, n_near, n_no = _near_counts(seed)
     lines += ["## Strict vs near agreement", "",
              "`agree` is the original strict rule (full/partial/no). `agree_near` "
-             "(`score_agreement`, added 2026-09-16) inserts a `near` tier between partial and "
-             "no: same curated family (`technique_library.json` `type`) or the state a corpus "
-             "ACTION declares it lands in (`data/taxonomy/inference_table.json` "
-             "`action_exit_orientation`) -- both tables already in the repo, no hand list of "
-             "pairs.", "",
-             "| | full | partial | near | no | full % |", "|---|---|---|---|---|---|",
-             f"| strict (`agree`) | {full} | {partial} | – | {no} | "
+             "(`score_agreement`, added 2026-09-16) inserts two tiers between partial and no: "
+             "`pair` (item 32, 2026-09-16 — the candidate and the corpus label are a genuine "
+             "double label on one frame, one action + one state, backed by real corpus "
+             "adjacency / the declared exit-orientation table / a shared curated family — "
+             "`_pair_rule`) checked first, then `near` (same curated family "
+             "(`technique_library.json` `type`) or the state a corpus ACTION declares it "
+             "lands in (`data/taxonomy/inference_table.json` `action_exit_orientation`)) -- "
+             "every rule reuses a table already in the repo, no hand list of pairs.", "",
+             "| | full | partial | pair | near | no | full % |",
+             "|---|---|---|---|---|---|---|",
+             f"| strict (`agree`) | {full} | {partial} | – | – | {no} | "
              + (f"{full / total:.0%} |" if total else "n/a |"),
-             f"| with near (`agree_near`) | {n_full} | {n_partial} | {n_near} | {n_no} | "
+             f"| with near (`agree_near`) | {n_full} | {n_partial} | {n_pair} | {n_near} | "
+             f"{n_no} | "
              + (f"{n_full / n_total:.0%} |" if n_total else "n/a |"), ""]
 
     if preverify_summary:
@@ -1546,19 +1744,21 @@ def build_report(seed: list[dict[str, Any]], counts: dict[str, int],
              "This one groups the same rows by `candidate_label` (the model's own blind read) "
              "-- decision 2026-09-16 makes that the review target, so this is what a human "
              "actually sees on the sheet.", "",
-             "| candidate label | rows | corpus agree full | partial | near | no | "
+             "| candidate label | rows | corpus agree full | partial | pair | near | no | "
              "review high/medium/low |",
-             "|---|---|---|---|---|---|---|"]
+             "|---|---|---|---|---|---|---|---|"]
     for label in sorted(per_candidate):
         c_rows = per_candidate[label]
         f_ = sum(1 for r in c_rows if _near_tier(r) == "full")
         p_ = sum(1 for r in c_rows if _near_tier(r) == "partial")
+        pa_ = sum(1 for r in c_rows if _near_tier(r) == "pair")
         ne_ = sum(1 for r in c_rows if _near_tier(r) == "near")
         n_ = sum(1 for r in c_rows if _near_tier(r) == "no")
         hi = sum(1 for r in c_rows if r.get("review_confidence") == "high")
         me = sum(1 for r in c_rows if r.get("review_confidence") == "medium")
         lo = sum(1 for r in c_rows if r.get("review_confidence") == "low")
-        lines.append(f"| {label} | {len(c_rows)} | {f_} | {p_} | {ne_} | {n_} | {hi}/{me}/{lo} |")
+        lines.append(f"| {label} | {len(c_rows)} | {f_} | {p_} | {pa_} | {ne_} | {n_} | "
+                     f"{hi}/{me}/{lo} |")
     lines.append("")
 
     zero = sorted(t["en"] for t in curated if t.get("en") and counts.get(t["en"], 0) == 0)
@@ -1674,10 +1874,14 @@ def main() -> int:
         write_jsonl([asdict(r) for r in plan], PLAN_PATH)
         PLAN_COUNTS_PATH.parent.mkdir(parents=True, exist_ok=True)
         PLAN_COUNTS_PATH.write_text(json.dumps(counts, indent=2, sort_keys=True), encoding="utf-8")
+        pair_support = build_pair_support(matches)
+        PAIR_SUPPORT_PATH.write_text(json.dumps(pair_support, indent=2, sort_keys=True),
+                                     encoding="utf-8")
         n_techs = len({r.node_key for r in plan})
         n_zero = sum(1 for t in curated if t.get("en") and counts.get(t["en"], 0) == 0)
         logger.info("plan: %d candidates across %d techniques (of %d curated; %d with zero "
-                   "video-backed events)", len(plan), n_techs, len(curated), n_zero)
+                   "video-backed events); %d action/state adjacency pairs cached",
+                   len(plan), n_techs, len(curated), n_zero, len(pair_support))
         return 0
 
     if a.cmd == "extract":

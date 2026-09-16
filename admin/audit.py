@@ -341,6 +341,12 @@ def dictionary_queue(min_confidence: str | None = None) -> list[dict[str, Any]]:
     minus any ``(bout, ts_ms)`` already ruled on (same set ``dictionary_audit.queue`` builds
     from ``load_verdicts``).
 
+    A ``pair`` row (item 32, 2026-09-16 — a genuine action+state double label, never a
+    disagreement) additionally carries ``pair_node_key``/``pair_label``/``pair_kind``/
+    ``kind`` — the OTHER half of the double label, read off the row's own ``labels`` field
+    (``dictionary_seed.build_row_labels``: ``[corpus_line, candidate_line]`` for ``pair``).
+    ``None`` for every other tier.
+
     ponytail: reads ``load_seed``/``load_verdicts`` directly rather than the full
     ``gather_proposals``/``queue`` pipeline — that pipeline also renders PDF contact sheets
     and pulls in ``labels/*.jsonl`` + experiment reads, none of which a per-frame card grid
@@ -361,17 +367,28 @@ def dictionary_queue(min_confidence: str | None = None) -> list[dict[str, Any]]:
             continue
         second = row.get("second_opinion") or {}
         confidence = str(row.get("review_confidence") or "low")
-        out.append({
+        agree_near = str(second.get("agree_near") or row.get("agree_near")
+                         or row.get("agree") or "no")
+        item: dict[str, Any] = {
             "node_key": node_key_of(candidate),
             "candidate_label": candidate,
             "candidate_type": str(row.get("candidate_type") or ""),
             "confidence": confidence,
             "corpus_label": str(second.get("corpus_label") or row.get("corpus_label") or ""),
             "agree": str(second.get("agree") or row.get("agree") or "no"),
-            "agree_near": str(second.get("agree_near") or row.get("agree_near") or "no"),
+            "agree_near": agree_near,
             "bout": bout, "ts": int(row.get("ts") or ts_ms // 1000), "ts_ms": ts_ms,
             "frame": str(row.get("frame") or ""),
-        })
+            "kind": None, "pair_node_key": None, "pair_label": None, "pair_kind": None,
+        }
+        labels = row.get("labels") or []
+        if agree_near == "pair" and len(labels) == 2:
+            corpus_line, candidate_line = labels[0], labels[1]
+            item["kind"] = candidate_line.get("kind")
+            item["pair_node_key"] = corpus_line.get("node_key")
+            item["pair_label"] = item["corpus_label"] or corpus_line.get("node_key")
+            item["pair_kind"] = corpus_line.get("kind")
+        out.append(item)
     out.sort(key=lambda r: _CONF_ORDER.get(r["confidence"], 0))
     if min_confidence:
         floor = _CONF_ORDER.get(min_confidence, 0)
@@ -388,21 +405,33 @@ def dictionary_frame_path(rel: str) -> Path | None:
 
 
 def apply_dictionary_verdict(
-    node_key: str, bout: str, ts_ms: int, verdict: str, note: str = ""
+    node_key: str, bout: str, ts_ms: int, verdict: str, note: str = "",
+    pair_node_key: str | None = None,
 ) -> dict[str, Any]:
-    """One card action -> one line through ``scripts.dictionary_audit.apply``, the sole
-    writer of ``data/finetune/audit/verdicts.jsonl``. ``rebuild=False`` (the CLI's own
+    """One card action -> one (or two) lines through ``scripts.dictionary_audit.apply``, the
+    sole writer of ``data/finetune/audit/verdicts.jsonl``. ``rebuild=False`` (the CLI's own
     ``--no-rebuild``) — a full ``vision_dataset.build()`` per click would make every card
-    slow; the owner reruns the CLI's rebuild separately when ready to fine-tune."""
+    slow; the owner reruns the CLI's rebuild separately when ready to fine-tune.
+
+    ``pair_node_key`` (item 32, 2026-09-16): a ``pair`` card's OTHER half. Accept/Reject apply
+    to BOTH node_keys (one ``verdicts.jsonl`` record each, same bout/ts_ms — two trustworthy
+    claims on the same frame); Relabel only ever replaces the candidate's own claim
+    (``node_key``), never the pair's other half.
+    """
     from scripts.dictionary_audit import apply as apply_verdict_file
 
-    row: dict[str, Any] = {"node_key": node_key, "bout": bout, "ts_ms": ts_ms, "verdict": verdict}
+    rows: list[dict[str, Any]] = [
+        {"node_key": node_key, "bout": bout, "ts_ms": ts_ms, "verdict": verdict}]
+    if pair_node_key and verdict in ("accept", "reject"):
+        rows.append({"node_key": pair_node_key, "bout": bout, "ts_ms": ts_ms, "verdict": verdict})
     if note:
-        row["note"] = note
+        for row in rows:
+            row["note"] = note
     with tempfile.NamedTemporaryFile(
         "w", suffix=".jsonl", delete=False, encoding="utf-8"
     ) as fh:
-        fh.write(json.dumps(row) + "\n")
+        for row in rows:
+            fh.write(json.dumps(row) + "\n")
         tmp_path = Path(fh.name)
     try:
         return apply_verdict_file(tmp_path, write=True, rebuild=False)

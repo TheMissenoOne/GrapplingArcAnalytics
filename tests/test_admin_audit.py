@@ -276,3 +276,97 @@ def test_dictionary_verdict_writes_via_the_owned_writer(
 def test_dictionary_verdict_route_rejects_missing_fields(client: TestClient) -> None:
     resp = client.post("/admin/audit/dictionary/verdict", json={"bout": "b1"})
     assert resp.status_code == 400
+
+
+# ── Mode B: pair tier (item 32, 2026-09-16) ─────────────────────────────────────────────────
+def test_dictionary_queue_surfaces_pair_fields(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    rows = [{
+        "node_key": "guard pass", "bout": "b1", "ts_ms": 5000, "ts": 5,
+        "candidate_label": "Side Control", "candidate_type": "control",
+        "review_confidence": "high", "frame": "data/finetune/audit/gemini_seed/b1.jpg",
+        "agree_near": "pair",
+        "second_opinion": {"corpus_label": "Guard Pass", "agree": "no", "agree_near": "pair"},
+        "labels": [
+            {"node_key": "guard pass", "kind": "action", "source": "corpus"},
+            {"node_key": "side control", "kind": "state", "source": "gemini"},
+        ],
+    }]
+    monkeypatch.setattr("scripts.dictionary_audit.load_seed", lambda *a, **k: rows)
+    monkeypatch.setattr("scripts.vision_dataset.load_verdicts", lambda *a, **k: [])
+
+    items = audit_mod.dictionary_queue()
+
+    assert len(items) == 1
+    item = items[0]
+    assert item["node_key"] == "side control"   # candidate is still the primary identity
+    assert item["kind"] == "state"
+    assert item["pair_node_key"] == "guard pass"
+    assert item["pair_label"] == "Guard Pass"
+    assert item["pair_kind"] == "action"
+
+
+def test_dictionary_queue_non_pair_rows_carry_no_pair_fields(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("scripts.dictionary_audit.load_seed", lambda *a, **k: [_seed_row()])
+    monkeypatch.setattr("scripts.vision_dataset.load_verdicts", lambda *a, **k: [])
+
+    item = audit_mod.dictionary_queue()[0]
+    assert item["pair_node_key"] is None
+    assert item["kind"] is None
+
+
+def test_apply_dictionary_verdict_accept_writes_two_records_for_a_pair(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import scripts.dictionary_audit as da_mod
+
+    monkeypatch.setattr(da_mod, "AUDIT", tmp_path / "audit")
+    monkeypatch.setattr(da_mod, "QUEUE_JSON", tmp_path / "audit" / "queue.json")
+    monkeypatch.setattr(da_mod, "PROPOSALS", tmp_path / "proposals.json")
+    monkeypatch.setattr(
+        da_mod, "load_seed",
+        lambda *a, **k: [{
+            "node_key": "guard pass", "bout": "b1", "ts_ms": 5000,
+            "candidate_label": "Side Control", "candidate_type": "control",
+            "agree_near": "pair",
+            "second_opinion": {"corpus_label": "Guard Pass", "agree": "no", "agree_near": "pair"},
+        }],
+    )
+
+    result = audit_mod.apply_dictionary_verdict(
+        "side control", "b1", 5000, "accept", pair_node_key="guard pass"
+    )
+
+    assert result["written"] is True
+    assert result["stats"] == {"accepted": 2}
+    recs = [json.loads(ln) for ln in
+            (tmp_path / "audit" / "verdicts.jsonl").read_text(encoding="utf-8").splitlines()]
+    node_keys = {r["node_key"] for r in recs}
+    assert node_keys == {"side control", "guard pass"}
+    assert all(r["bout"] == "b1" and r["ts_ms"] == 5000 for r in recs)
+
+
+def test_apply_dictionary_verdict_relabel_never_touches_the_pair_half(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A card's route layer only ever forwards `pair_node_key` for accept/reject -- relabel
+    stays a single line, replacing only the candidate's own claim."""
+    import scripts.dictionary_audit as da_mod
+
+    monkeypatch.setattr(da_mod, "AUDIT", tmp_path / "audit")
+    monkeypatch.setattr(da_mod, "QUEUE_JSON", tmp_path / "audit" / "queue.json")
+    monkeypatch.setattr(da_mod, "PROPOSALS", tmp_path / "proposals.json")
+    monkeypatch.setattr(da_mod, "load_seed", lambda *a, **k: [])
+
+    result = audit_mod.apply_dictionary_verdict(
+        "armbar", "b1", 5000, "relabel:kimura", pair_node_key="guard pass"
+    )
+
+    assert result["stats"]["relabelled"] == 1
+    recs = [json.loads(ln) for ln in
+            (tmp_path / "audit" / "verdicts.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert {r["node_key"] for r in recs} == {"kimura", "armbar"}, \
+        "relabel only ever touches its own candidate claim, never `pair_node_key`"
