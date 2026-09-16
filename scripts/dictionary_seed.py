@@ -63,6 +63,7 @@ import subprocess
 import sys
 import tempfile
 from collections import Counter, defaultdict
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -74,7 +75,13 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 from analysis.names import _normalize_name, canonicalize  # noqa: E402
-from analysis.style_profile_core import _bout_slug  # noqa: E402
+from analysis.style_profile_core import _bout_slug, _sub_family  # noqa: E402
+from analysis.taxonomy_kind import (  # noqa: E402
+    exit_orientation,
+    kind_of_entry,
+    load_inference_table,
+    orientation_for_inference,
+)
 from analysis.technique_match import clean_label  # noqa: E402
 
 logger = logging.getLogger("dictionary_seed")
@@ -984,17 +991,130 @@ def resolve_offset(parsed: dict[str, Any]) -> int:
     return min(WINDOW_OFFSETS, key=lambda o: abs(o - raw))
 
 
+_CURATED_BY_NODE_KEY: dict[str, dict[str, Any]] | None = None
+
+
+def _curated_by_node_key() -> dict[str, dict[str, Any]]:
+    """``node_key -> curated entry``, built once from the same 210-entry
+    ``technique_library.json`` everything else in this module reads -- no second table."""
+    global _CURATED_BY_NODE_KEY
+    if _CURATED_BY_NODE_KEY is None:
+        _CURATED_BY_NODE_KEY = {node_key_of(t["en"]): t for t in load_curated() if t.get("en")}
+    return _CURATED_BY_NODE_KEY
+
+
+def _same_family(node_key: str, model_key: str) -> bool:
+    """Near rule (1): corpus and model resolve to two DIFFERENT curated entries that share the
+    same curated ``type`` -- a parent/child or generic-vs-specific pair within one family
+    (Lasso Guard/De la Riva -> Open Guard, Turtle Control -> Turtle Position). Reuses the
+    library's own ``type`` field -- no hand list of pairs, no new table.
+
+    ``type == "submission"`` on both sides narrows further, through
+    ``style_profile_core._sub_family`` (the curated strangle/leglock/armlock keyword table
+    the style profile already uses) -- ``type`` alone is too coarse there: Heel Hook and
+    Kimura are BOTH ``submission`` but a leg lock is not a shoulder lock. Every other type
+    (guard/control/...) has no such curated sub-split in the repo today, so it stays a plain
+    type match."""
+    corpus = _curated_by_node_key().get(node_key)
+    model = _curated_by_node_key().get(model_key)
+    if not corpus or not model or node_key == model_key:
+        return False
+    if not corpus["type"] or corpus["type"] != model["type"]:
+        return False
+    if corpus["type"] == "submission":
+        cf, mf = _sub_family(corpus["en"]), _sub_family(model["en"])
+        return cf is not None and cf == mf
+    return True
+
+
+# Stance (5-way, `orientation_for_inference`) -> Orientation (3-way, `action_exit_orientation`)
+# -- `controlling`/`controlled` are the SAME physical dominance as `top`/`bottom` (D1's own
+# 5-vs-3 split, see `taxonomy_kind._POSITIONAL_ROLES`), collapsed here only for this one
+# comparison; nothing upstream is touched.
+_STANCE_TO_ORIENTATION = {"top": "top", "controlling": "top",
+                          "bottom": "bottom", "controlled": "bottom"}
+
+
+def _arrived_at_state(node_key: str, model_answer: Mapping[str, Any]) -> bool:
+    """Near rule (2): the corpus label is an ACTION (``kind_of_entry``) whose curated ``type``
+    carries a non-neutral declared landing orientation (``action_exit_orientation`` in
+    ``data/taxonomy/inference_table.json`` -- the same R0 exit table
+    ``analysis.outcome_inference`` uses), and the model's state reads that SAME orientation
+    (``orientation_for_inference``, declared table first, curated actor role second). Catches
+    e.g. Guard Pass -> Side Control (pass:top, Side Control:top). Deliberately narrower than
+    every "arrived-at position" example an eyeballed disagreement might suggest -- a frame
+    showing the OTHER fighter's residual state (Sweep -> Open Guard, a failed/mid attempt) is
+    not expressible from this table without inventing a second, opponent-relative one, so it
+    stays ``no`` rather than guessing."""
+    corpus = _curated_by_node_key().get(node_key)
+    if not corpus:
+        return False
+    corpus_type = str(corpus.get("type") or "")
+    if kind_of_entry(str(corpus["en"]), corpus_type) != "action":
+        return False
+    table = load_inference_table()
+    orient = exit_orientation(table, corpus_type)
+    if orient == "neutral":
+        return False
+    model_label = str(model_answer.get("label") or "")
+    if not model_label:
+        return False
+    stance = orientation_for_inference(str(model_answer.get("type") or ""), model_label).value
+    return _STANCE_TO_ORIENTATION.get(stance) == orient
+
+
 def score_agreement(node_key: str, model_answer: dict[str, Any]) -> tuple[str, str]:
-    """``(agree, review_confidence)``. ``agree`` in ``full|partial|no``; ``review_confidence``
-    is ``high`` only on full agreement -- disagreement is exactly what the human review
-    queue exists to see, so it is never dropped, only marked ``low``."""
+    """``(agree, review_confidence)``. ``agree`` in ``full|partial|near|no``; ``review_confidence``
+    is ``high`` only on full agreement, ``medium`` on ``near`` -- disagreement is exactly what
+    the human review queue exists to see, so it is never dropped, only marked ``low``/``medium``.
+
+    ``near`` (added 2026-09-16, `docs/dictionary_audit.md`) sits between ``partial`` and ``no``:
+    the model's label is not the corpus label and not its declared ``alternative``, but is
+    either the same curated family (``_same_family``) or the state that corpus ACTION declares
+    it lands in (``_arrived_at_state``) -- both computed from tables already in the repo, never
+    a hand list of pairs."""
     model_label = str(model_answer.get("label") or "")
     if model_label and node_key_of(clean_label(model_label)) == node_key:
         return "full", "high"
     alt = str(model_answer.get("alternative") or "")
     if alt and node_key_of(clean_label(alt)) == node_key:
         return "partial", "low"
+    if model_label:
+        model_key = node_key_of(clean_label(model_label, str(model_answer.get("type") or "")))
+        if _same_family(node_key, model_key) or _arrived_at_state(node_key, model_answer):
+            return "near", "medium"
     return "no", "low"
+
+
+def regrade_seed_near(seed: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Re-grade an already-asked batch with the near tier, WITHOUT another Gemini call and
+    WITHOUT touching the strict ``agree`` a row already carries -- adds ``agree_near``.
+    ``full``/``partial`` stay themselves (near only ever sits between partial and no); a
+    ``no`` row is re-checked against ``_same_family``/``_arrived_at_state`` on its own stored
+    ``model_label``/``model_type``. ``alternative`` was never persisted to `seed.jsonl`
+    (partial's own basis), so a `no` row's `alternative` is unrecoverable here -- fine, since
+    a row already scored `partial` is left alone and never needs it."""
+    out = []
+    for row in seed:
+        row = dict(row)
+        agree = str(row.get("agree", "no"))
+        if agree != "no":
+            row["agree_near"] = agree
+        else:
+            model_label = row.get("model_label")
+            if model_label:
+                model_key = node_key_of(
+                    clean_label(str(model_label), str(row.get("model_type") or "")))
+                answer = {"label": model_label, "type": row.get("model_type")}
+                if (_same_family(str(row["node_key"]), model_key)
+                        or _arrived_at_state(str(row["node_key"]), answer)):
+                    row["agree_near"] = "near"
+                else:
+                    row["agree_near"] = "no"
+            else:
+                row["agree_near"] = "no"
+        out.append(row)
+    return out
 
 
 _EMPTY_USAGE = {"prompt": 0, "candidates": 0, "thoughts": 0, "total": 0}
@@ -1177,16 +1297,46 @@ def _agreement_counts(seed: list[dict[str, Any]]) -> tuple[int, int, int, int]:
     return total, full, partial, no
 
 
+def _near_tier(s: dict[str, Any]) -> str:
+    """This row's grade under the near-aware rule -- ``agree_near`` when a re-grade wrote one
+    (a previously-scored batch, graded in place with the strict ``agree`` kept untouched), else
+    the row's own ``agree`` (already 4-tier for anything scored by the current
+    ``score_agreement``)."""
+    return str(s.get("agree_near") or s.get("agree") or "no")
+
+
+def _near_counts(seed: list[dict[str, Any]]) -> tuple[int, int, int, int, int]:
+    total = len(seed)
+    full = sum(1 for s in seed if _near_tier(s) == "full")
+    partial = sum(1 for s in seed if _near_tier(s) == "partial")
+    near = sum(1 for s in seed if _near_tier(s) == "near")
+    no = sum(1 for s in seed if _near_tier(s) == "no")
+    return total, full, partial, near, no
+
+
+_FRAME_CHECK_NOTE = """## Frame check (orchestrator, 2026-09-16)
+
+6 disagreements were eyeballed by hand. In 5 the model named the position actually VISIBLE in \
+the frame and the corpus label simply is not in it (Mount → Side Control ×2, RNC → front \
+headlock/side, IDLR → top scramble, Wrist Lock → closed guard) -- corpus timestamp \
+misalignment still dominates even after the ±30s stage-A window. Stage A itself said \
+`visible: yes` on 52/64 candidates, yet the label is often not there once checked: stage A is \
+lenient, not a reliable gate on its own."""
+
+
 # ── report ───────────────────────────────────────────────────────────────────────
 def build_report(seed: list[dict[str, Any]], counts: dict[str, int],
                  curated: list[dict[str, Any]], *,
                  alignment: dict[str, Any] | None = None,
-                 before_seed: list[dict[str, Any]] | None = None) -> str:
+                 before_seed: list[dict[str, Any]] | None = None,
+                 preverify_summary: dict[str, Any] | None = None) -> str:
     """``alignment`` (optional): ``{"misaligned": int, "of_total": int}`` -- how many of a
     PREVIOUS batch's candidates sat on a match whose DB ``ts_origin`` flag disagreed with the
     evidence-based reclassification (see ``ts_class_matches_flag``), written once by `plan`
     right before it overwrites that previous batch. ``before_seed`` (optional): that previous
-    batch's own graded answers, for an agreement before/after comparison."""
+    batch's own graded answers, for an agreement before/after comparison. ``preverify_summary``
+    (optional): ``build_preverify_summary``'s own output (verdicts/reasons/warnings), so the
+    report can show how many candidates never reached Gemini at all."""
     per_tech: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for s in seed:
         per_tech[str(s["corpus_label"])].append(s)
@@ -1197,6 +1347,47 @@ def build_report(seed: list[dict[str, Any]], counts: dict[str, int],
              f"Total candidates asked: {total}",
              f"Agreement: full {full}, partial {partial}, no {no}"
              + (f" ({full / total:.0%} full)" if total else ""), ""]
+
+    n_total, n_full, n_partial, n_near, n_no = _near_counts(seed)
+    lines += ["## Strict vs near agreement", "",
+             "`agree` is the original strict rule (full/partial/no). `agree_near` "
+             "(`score_agreement`, added 2026-09-16) inserts a `near` tier between partial and "
+             "no: same curated family (`technique_library.json` `type`) or the state a corpus "
+             "ACTION declares it lands in (`data/taxonomy/inference_table.json` "
+             "`action_exit_orientation`) -- both tables already in the repo, no hand list of "
+             "pairs.", "",
+             "| | full | partial | near | no | full % |", "|---|---|---|---|---|---|",
+             f"| strict (`agree`) | {full} | {partial} | – | {no} | "
+             + (f"{full / total:.0%} |" if total else "n/a |"),
+             f"| with near (`agree_near`) | {n_full} | {n_partial} | {n_near} | {n_no} | "
+             + (f"{n_full / n_total:.0%} |" if n_total else "n/a |"), ""]
+
+    if preverify_summary:
+        v = preverify_summary.get("verdicts", {})
+        r = preverify_summary.get("reasons", {})
+        w = preverify_summary.get("warnings", {})
+        lines += ["## Preverify", "",
+                 "Local, no-Gemini screen run before `ask` spends any call "
+                 "(`scripts/dictionary_seed.py preverify`) -- a `skip` candidate is written "
+                 "straight to `seed.jsonl` at zero cost, never sent to the model.", "",
+                 f"ok: {v.get('ok', 0)} · skip: {v.get('skip', 0)} "
+                 f"(of {preverify_summary.get('total', 0)} planned)", "",
+                 "skip reasons: " + ", ".join(f"{k} {n}" for k, n in sorted(r.items())), ""]
+        if r.get("missing_frames"):
+            lines.append("- `missing_frames`: two ~2h event VODs whose frame extraction never "
+                         "landed enough of the 9-frame strip")
+        if r.get("ts_out_of_range"):
+            lines.append("- `ts_out_of_range`: corpus timestamp past the video's own duration")
+        if r.get("duplicate_frame"):
+            lines.append("- `duplicate_frame`: same centre frame already used by an earlier "
+                         "candidate")
+        if w:
+            lines += ["", "warnings (advisory only, never gate a verdict): "
+                     + ", ".join(f"{k} {n}" for k, n in sorted(w.items()))]
+        lines.append("")
+
+    lines.append(_FRAME_CHECK_NOTE)
+    lines.append("")
 
     lines += ["## Timestamp alignment", ""]
     if alignment:
@@ -1407,16 +1598,20 @@ def main() -> int:
         return 0
 
     if a.cmd == "report":
-        seed = read_jsonl(SEED_PATH)
+        seed = regrade_seed_near(read_jsonl(SEED_PATH))
+        write_jsonl(seed, SEED_PATH)   # persist agree_near -- report is re-run often, ask is not
         counts = (json.loads(PLAN_COUNTS_PATH.read_text(encoding="utf-8"))
                  if PLAN_COUNTS_PATH.exists() else {})
         curated = load_curated()
         alignment = (json.loads(ALIGNMENT_PATH.read_text(encoding="utf-8"))
                     if ALIGNMENT_PATH.exists() else None)
         before_seed = read_jsonl(BEFORE_SEED_PATH) if BEFORE_SEED_PATH.exists() else None
+        preverify_summary = (json.loads(PREVERIFY_SUMMARY_PATH.read_text(encoding="utf-8"))
+                             if PREVERIFY_SUMMARY_PATH.exists() else None)
         REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
         REPORT_PATH.write_text(
-            build_report(seed, counts, curated, alignment=alignment, before_seed=before_seed),
+            build_report(seed, counts, curated, alignment=alignment, before_seed=before_seed,
+                        preverify_summary=preverify_summary),
             encoding="utf-8")
         logger.info("wrote %s", REPORT_PATH)
         return 0
