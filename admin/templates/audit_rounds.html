@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Auditoria — Rounds{% endblock %}
+{% block content %}
+<h1>Auditoria</h1>
+<div class="audit-tabs">
+  <a href="/admin/audit/rounds" class="on">Rounds</a>
+  <a href="/admin/audit/dictionary">Dictionary</a>
+</div>
+
+<p style="color:#888;font-size:0.85rem;margin-bottom:16px">
+  Owner's own training footage — <code>data/video/owner/out/&lt;slug&gt;/</code>, PRIVATE, never leaves this machine.
+</p>
+
+<table>
+  <thead>
+    <tr><th>Round</th><th>Events</th><th>Reviewed</th><th>Difficulty</th><th>Video</th><th></th></tr>
+  </thead>
+  <tbody>
+    {% for r in rounds %}
+    <tr>
+      <td>{{ r.slug }}</td>
+      <td>{{ r.n_events }}</td>
+      <td>{{ r.n_reviewed }} / {{ r.n_events }}{% if r.n_events and r.n_reviewed == r.n_events %} <span class="badge badge-green">done</span>{% endif %}</td>
+      <td>{{ r.difficulty if r.difficulty is not none else "—" }}</td>
+      <td>{% if r.has_video %}<span class="badge badge-green">mp4</span>{% else %}<span class="badge badge-gray">frames only</span>{% endif %}</td>
+      <td><a class="btn btn-primary" href="/admin/audit/rounds/{{ r.slug }}">Review</a></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" style="color:#666">No rounds under data/video/owner/out/ yet — run `round_audit read` first.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -443,3 +443,40 @@ def test_cut_clip_cv2_raises_when_window_has_no_frames(tmp_path):
     except RuntimeError:
         raised = True
     assert raised
+
+
+# ── transcode: real cv2 decode -> real ffmpeg libopenh264 encode, tiny synthetic source ────
+def test_transcode_h264_writes_a_playable_720p_mp4(tmp_path):
+    src = tmp_path / "src.mp4"
+    _write_synthetic_video(src, n_frames=6, w=64, h=32)  # landscape, well under 720p
+    out_path = tmp_path / "video.mp4"
+
+    round_audit._transcode_h264(src, out_path)
+
+    assert out_path.exists() and out_path.stat().st_size > 0
+    cap = cv2.VideoCapture(str(out_path))
+    ok, frame = cap.read()
+    cap.release()
+    assert ok  # ffmpeg's own encode decodes back fine
+    h, w = frame.shape[:2]
+    assert (w, h) == (720, 360)  # longest side always scaled to 720, aspect kept
+
+
+def test_cmd_transcode_resume_skips_existing_video(tmp_path, monkeypatch):
+    fake_out_root = tmp_path / "out"
+    monkeypatch.setattr(round_audit, "OUT_ROOT", fake_out_root)
+    in_dir = tmp_path / "rounds"
+    _write_video_stub(in_dir / "r1.mov")
+    out_dir = fake_out_root / "r1"
+    out_dir.mkdir(parents=True)
+    (out_dir / "video.mp4").write_bytes(b"already-transcoded")
+
+    calls = []
+    monkeypatch.setattr(round_audit, "_transcode_h264",
+                        lambda source, out_path: calls.append(out_path))
+    monkeypatch.setattr(round_audit, "prepare_source", lambda video_path, out_dir: video_path)
+
+    round_audit.cmd_transcode(in_dir, force=False)
+
+    assert calls == []  # resume-safe: never re-transcoded
+    assert (out_dir / "video.mp4").read_bytes() == b"already-transcoded"

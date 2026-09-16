@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import logging
 import os
 import re
@@ -16,6 +17,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import func, select
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from admin import audit as audit_mod
 from admin.auth import (
     _COOKIE_NAME,
     SESSION_TTL_SECONDS,
@@ -110,6 +112,9 @@ _CSRF_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 # JSON API from the Study page (JS posts JSON — no form to carry the hidden token).
 # Auth still enforced above; only the CSRF check is skipped for these paths.
 _CSRF_EXEMPT_PATHS = {"/admin/study/analyze", "/admin/study/reports"}
+# Same reason, for every JSON POST under the Audit pages (autosave, dictionary verdicts) —
+# a prefix because these paths carry a {slug}.
+_CSRF_EXEMPT_PREFIXES = ("/admin/audit/",)
 
 
 def _auth_exempt(path: str) -> bool:
@@ -142,7 +147,8 @@ class AdminAuthCSRFMiddleware(BaseHTTPMiddleware):
             # auth failure (GET or POST) — none return JSON, so no 401 branch is
             # exercised yet. ponytail: add one if/when a JSON route shows up.
             return RedirectResponse("/admin/login", status_code=status.HTTP_303_SEE_OTHER)
-        if request.method in _CSRF_METHODS and path not in _CSRF_EXEMPT_PATHS:
+        csrf_exempt = path in _CSRF_EXEMPT_PATHS or path.startswith(_CSRF_EXEMPT_PREFIXES)
+        if request.method in _CSRF_METHODS and not csrf_exempt:
             # Reading the form here drains the request stream, and the route downstream
             # would then see an empty body — every Form(...) parameter fails validation
             # with a 422. Buffer the body and hand call_next a receive channel that
@@ -867,6 +873,92 @@ def create_admin_app() -> FastAPI:
         return FileResponse(
             path, media_type=media_type, filename=path.name if extension == "json" else None
         )
+
+    # ── Audit — Mode A: rounds (private owner footage) ─────────────────────
+    @app.get("/admin/audit/rounds", response_class=HTMLResponse)
+    def audit_rounds_list(request: Request) -> Any:
+        return templates.TemplateResponse(
+            request, "audit_rounds.html", context={"rounds": audit_mod.list_round_slugs()}
+        )
+
+    @app.get("/admin/audit/rounds/{slug}", response_class=HTMLResponse)
+    def audit_round_detail(request: Request, slug: str) -> Any:
+        round_data = audit_mod.load_round(slug)
+        if round_data is None:
+            raise HTTPException(status_code=404, detail="Round not found")
+        return templates.TemplateResponse(
+            request, "audit_round.html",
+            context={"round": round_data, "vocab": audit_mod.audit_label_vocab()},
+        )
+
+    @app.get("/admin/audit/rounds/{slug}/video")
+    def audit_round_video(slug: str) -> Any:
+        path = audit_mod.round_video_path(slug)
+        if path is None:
+            raise HTTPException(status_code=404, detail="video.mp4 not built yet")
+        return FileResponse(path, media_type="video/mp4")
+
+    @app.get("/admin/audit/rounds/{slug}/frame/{filename}")
+    def audit_round_frame(slug: str, filename: str) -> Any:
+        path = audit_mod.round_frame_path(slug, filename)
+        if path is None:
+            raise HTTPException(status_code=404, detail="Frame not found")
+        return FileResponse(path, media_type="image/jpeg")
+
+    @app.post("/admin/audit/rounds/{slug}/verdicts")
+    async def audit_round_save(slug: str, request: Request) -> Any:
+        try:
+            payload = await request.json()
+            doc = audit_mod.save_round_verdicts(slug, payload)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="Round not found") from None
+        except (ValueError, TypeError, json.JSONDecodeError) as exc:
+            return JSONResponse({"error": str(exc)}, status_code=400)
+        return JSONResponse({"ok": True, "reviewed_at": doc["reviewed_at"]})
+
+    @app.post("/admin/audit/rounds/{slug}/export")
+    def audit_round_export(slug: str) -> Any:
+        try:
+            events = audit_mod.build_corrected_timeline(slug)
+        except FileNotFoundError:
+            raise HTTPException(status_code=404, detail="Round not found") from None
+        return JSONResponse({"slug": slug, "events": events})
+
+    # ── Audit — Mode B: dictionary queue (public corpus) ────────────────────
+    @app.get("/admin/audit/dictionary", response_class=HTMLResponse)
+    def audit_dictionary_page(request: Request) -> Any:
+        return templates.TemplateResponse(
+            request, "audit_dictionary.html",
+            context={"items": audit_mod.dictionary_queue(), "vocab": audit_mod.audit_label_vocab()},
+        )
+
+    @app.get("/admin/audit/dictionary/frame/{rel:path}")
+    def audit_dictionary_frame(rel: str) -> Any:
+        path = audit_mod.dictionary_frame_path(rel)
+        if path is None:
+            raise HTTPException(status_code=404, detail="Frame not found")
+        return FileResponse(path, media_type="image/jpeg")
+
+    @app.post("/admin/audit/dictionary/verdict")
+    async def audit_dictionary_verdict(request: Request) -> Any:
+        body = await request.json()
+        node_key = str((body or {}).get("node_key") or "")
+        bout = str((body or {}).get("bout") or "")
+        verdict = str((body or {}).get("verdict") or "")
+        try:
+            ts_ms = int((body or {}).get("ts_ms") or 0)
+        except (TypeError, ValueError):
+            return JSONResponse({"error": "ts_ms must be an int"}, status_code=400)
+        if not (node_key and bout and verdict):
+            return JSONResponse(
+                {"error": "node_key, bout and verdict are required"}, status_code=400
+            )
+        result = audit_mod.apply_dictionary_verdict(
+            node_key, bout, ts_ms, verdict, note=str((body or {}).get("note") or "")
+        )
+        if result.get("problems"):
+            return JSONResponse(result, status_code=400)
+        return JSONResponse(result)
 
     # ── Ontology authoring (RF04-06, RF20, DS-01/04) ────────────────────────
     @app.get("/admin/ontology", response_class=HTMLResponse)

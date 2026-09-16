@@ -59,3 +59,129 @@
 .pill .x:hover { color: #fff; }
 
 details.advanced summary { cursor: pointer; color: #888; margin: 12px 0; }
+
+/* ── Audit (rounds + dictionary) ───────────────────────────────────── */
+.audit-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+.audit-tabs a {
+  padding: 6px 14px; border-radius: 999px; border: 1px solid #333; color: #aaa;
+  font-size: 0.85rem; text-decoration: none;
+}
+.audit-tabs a.on { background: #24243e; border-color: #4c72d5; color: #fff; }
+
+/* `minmax(0,1fr)` (not bare `1fr`) is load-bearing: a grid track's automatic minimum is its
+   content's min-content width, so a bare `1fr` next to a 73-thumbnail flex strip grows the
+   whole column to fit every thumbnail in a row instead of scrolling inside it -- measured
+   overflowing to docW=3670px at 1440px viewport. `min-width: 0` on both children closes the
+   same hole for anything nested (flex/grid children inherit the same min-content floor). */
+.audit-round-layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) 440px; gap: 16px; align-items: start;
+}
+.audit-round-layout > * { min-width: 0; }
+@media (max-width: 1000px) { .audit-round-layout { grid-template-columns: 1fr; } }
+
+.audit-video {
+  width: 100%; background: #000; border-radius: 8px; max-height: 62vh; object-fit: contain;
+}
+.audit-video-missing {
+  display: flex; align-items: center; justify-content: center; height: 240px;
+  background: #141414; border: 1px dashed #333; border-radius: 8px; color: #777; font-size: 0.85rem;
+}
+.frame-strip {
+  display: flex; gap: 4px; overflow-x: auto; white-space: nowrap; margin-top: 10px; padding-bottom: 6px;
+}
+.frame-strip img {
+  height: 64px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; flex: 0 0 auto;
+}
+.frame-strip img:hover { border-color: #4c72d5; }
+.frame-strip img.current { border-color: #7c9ef5; }
+
+.audit-highlights { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.audit-highlights button {
+  background: #1a1a1a; border: 1px solid #333; border-radius: 999px; color: #cdd;
+  padding: 5px 12px; font-size: 0.78rem; cursor: pointer;
+}
+.audit-highlights button:hover { border-color: #4c72d5; color: #fff; }
+
+/* The sticky/scroll behaviour lives on the COLUMN (events list + the AUDIT_VISUAL panel
+   under it), not on #audit-events alone -- so the panel scrolls into view under the list
+   instead of being clipped by a scroll box that only covers the list. */
+.audit-col { position: sticky; top: 12px; max-height: calc(100vh - 100px); overflow: auto; }
+@media (max-width: 1000px) { .audit-col { position: static; max-height: none; } }
+.audit-events { border: 1px solid #222; border-radius: 8px; }
+.audit-event {
+  display: grid; grid-template-columns: 52px 60px 1fr auto; gap: 8px; align-items: center;
+  padding: 8px 10px; border-bottom: 1px solid #1e1e1e; font-size: 0.85rem; cursor: pointer;
+}
+.audit-event:last-child { border-bottom: none; }
+.audit-event:hover { background: #161616; }
+.audit-event.selected { background: #1d1d30; outline: 1px solid #4c72d5; }
+.audit-event .ts { color: #888; font-variant-numeric: tabular-nums; }
+.audit-event .actor { font-size: 0.75rem; padding: 2px 6px; border-radius: 4px; text-align: center; }
+.audit-event .actor.you { background: #1b3a1e; color: #81c784; }
+.audit-event .actor.partner { background: #3a1e1e; color: #ef9a9a; }
+.audit-event .label { color: #e0e0e0; }
+.audit-event .label .type { color: #777; font-size: 0.75rem; margin-left: 6px; }
+.audit-event .label .note { display: block; color: #666; font-size: 0.75rem; }
+.audit-event .verdict-badge {
+  font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+}
+.vb-confirmed { background: #1b5e20; color: #81c784; }
+.vb-wrong_actor, .vb-wrong_label, .vb-wrong_time { background: #4a3a10; color: #ffcc80; }
+.vb-not_visible { background: #3a1e1e; color: #ef9a9a; text-decoration: line-through; }
+.vb-added { background: #1a2a4a; color: #90caf9; }
+.audit-event.is-reset { opacity: 0.6; cursor: default; font-style: italic; }
+
+.audit-toolbar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+.audit-toolbar .save-state { font-size: 0.78rem; color: #777; margin-left: auto; }
+.audit-keys { color: #666; font-size: 0.76rem; margin-top: 8px; }
+.audit-keys kbd {
+  background: #1a1a1a; border: 1px solid #333; border-radius: 4px; padding: 1px 6px; font-size: 0.75rem;
+}
+
+.audit-visual { margin-top: 18px; }
+.audit-visual summary { cursor: pointer; color: #888; }
+.audit-visual .body { margin-top: 10px; font-size: 0.85rem; color: #ccc; }
+.audit-visual .body table { margin: 10px 0; font-size: 0.8rem; }
+.audit-visual .body th, .audit-visual .body td { padding: 5px 8px; }
+.audit-visual .body h1, .audit-visual .body h2, .audit-visual .body h3 { color: #fff; margin: 14px 0 6px; }
+
+/* Shared label-picker popover (Mode A + Mode B) */
+.label-picker {
+  position: fixed; z-index: 50; width: 320px; background: #141420; border: 1px solid #333;
+  border-radius: 8px; box-shadow: 0 8px 28px rgba(0,0,0,0.5); padding: 8px; display: none;
+}
+.label-picker.open { display: block; }
+.label-picker input { margin-bottom: 8px; }
+.label-picker .lp-results { max-height: 240px; overflow-y: auto; }
+.label-picker .lp-row {
+  padding: 6px 8px; border-radius: 5px; cursor: pointer; font-size: 0.85rem; color: #cdd;
+  display: flex; justify-content: space-between; gap: 8px;
+}
+.label-picker .lp-row:hover, .label-picker .lp-row.is-active { background: #24243e; }
+.label-picker .lp-row .lp-type { color: #777; font-size: 0.75rem; }
+
+/* Dictionary card grid */
+.dict-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap; }
+.dict-progress { color: #888; font-size: 0.85rem; margin-left: auto; }
+.dict-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+.dict-card {
+  background: #141414; border: 1px solid #222; border-radius: 8px; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.dict-card.is-done { opacity: 0.35; pointer-events: none; }
+.dict-card img { width: 100%; height: 160px; object-fit: cover; background: #000; }
+.dict-card .body { padding: 10px 12px; font-size: 0.82rem; }
+.dict-card .candidate { color: #fff; font-weight: 600; }
+.dict-card .conf { font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; margin-left: 6px; }
+.conf-high { background: #1b5e20; color: #81c784; }
+.conf-medium { background: #4a3a10; color: #ffcc80; }
+.conf-low { background: #2a2a2a; color: #999; }
+.dict-card .second { color: #888; margin-top: 4px; }
+.dict-card .meta { color: #666; font-size: 0.75rem; margin-top: 4px; }
+.dict-card .actions { display: flex; gap: 6px; margin-top: 10px; }
+.dict-card .actions button {
+  flex: 1; padding: 6px 0; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem;
+}
+.dict-card .btn-accept { background: #2e7d32; color: #fff; }
+.dict-card .btn-relabel { background: #4c72d5; color: #fff; }
+.dict-card .btn-reject { background: #c62828; color: #fff; }

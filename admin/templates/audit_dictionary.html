@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Auditoria — Dictionary{% endblock %}
+{% block content %}
+<h1>Auditoria</h1>
+<div class="audit-tabs">
+  <a href="/admin/audit/rounds">Rounds</a>
+  <a href="/admin/audit/dictionary" class="on">Dictionary</a>
+</div>
+
+<p style="color:#888;font-size:0.85rem;margin-bottom:16px">
+  Public corpus frames — <code>data/finetune/audit/gemini_seed/seed.jsonl</code>. Candidate is a
+  blind Gemini read; corpus is only a second opinion (2026-09-16 decision, <code>docs/dictionary_audit.md</code>).
+</p>
+
+<div id="audit-dictionary">
+  <div class="dict-toolbar">
+    <label style="margin:0">Min confidence
+      <select id="dict-conf-filter" style="width:auto;display:inline-block;margin:0 0 0 6px">
+        <option value="">any</option>
+        <option value="low">low+</option>
+        <option value="medium">medium+</option>
+        <option value="high">high only</option>
+      </select>
+    </label>
+    <span class="dict-progress" id="dict-progress"></span>
+  </div>
+  <div class="audit-keys" style="margin-bottom:12px">
+    <kbd>j</kbd>/<kbd>k</kbd> focus · <kbd>1</kbd> accept · <kbd>2</kbd> relabel · <kbd>3</kbd> reject
+  </div>
+  <div class="dict-grid" id="dict-grid"></div>
+</div>
+
+<script id="dict-items" type="application/json">{{ items | tojson }}</script>
+<script id="audit-vocab" type="application/json">{{ vocab | tojson }}</script>
+<script src="/admin/static/audit.js?v=1"></script>
+{% endblock %}

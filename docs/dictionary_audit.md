@@ -216,6 +216,25 @@ verdict is also appended to `data/finetune/audit/verdicts.jsonl`, and why
 (`vision_dataset.apply_verdicts`). `scripts/dataset_review.py` writes to the same store.
 Deleting that file loses human work that no re-run can reconstruct.
 
+### Revisão interativa
+
+Escrever `verdicts.jsonl` à mão não é o único jeito. `uv run --extra web python -m admin` →
+`/admin/audit/dictionary` mostra um card por frame (`candidate_label`/confiança da leitura
+cega, `corpus_label`/`agree_near` como segunda opinião, bout + ts) com botões **Accept** /
+**Relabel** (busca sobre a mesma biblioteca curada) / **Reject** e atalhos `1`/`2`/`3` +
+`j`/`k`. Lê `load_seed`/`load_verdicts` direto (mesmos filtros de `gather_proposals`/`queue`:
+só linha com `candidate_label` não nulo, nunca uma já julgada); cada ação vira UMA linha
+através de `scripts.dictionary_audit.apply` (`admin/audit.py:apply_dictionary_verdict`,
+`rebuild=False` — o rebuild completo do `vision_dataset` continua manual, via CLI, quando
+o dono estiver pronto para re-treinar) — o mesmo dono de `verdicts.jsonl` de sempre, nunca
+um segundo escritor. Card revisado some da fila ao recarregar a página.
+
+A mesma página do admin também audita **rounds privados** do dono
+(`/admin/audit/rounds`, sobre `data/video/owner/out/`) — vídeo + tira de frames + lista de
+eventos do `read.json` com veredito por evento, gravando em `verdicts.json` ao lado do round
+(nunca em `data/finetune/`, nunca no corpus público — ver "Public vs Private Data" no
+`CLAUDE.md` raiz). Duas filas, dois donos de dado, uma única página de navegação.
+
 ## 4. What this feeds
 
 The pre-registered criterion is unchanged and lives in `docs/vision_dataset.md` §8:

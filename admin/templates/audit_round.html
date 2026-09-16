@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Auditoria — {{ round.slug }}{% endblock %}
+{% block content %}
+<h1>{{ round.slug }}</h1>
+<div class="audit-tabs">
+  <a href="/admin/audit/rounds" class="on">Rounds</a>
+  <a href="/admin/audit/dictionary">Dictionary</a>
+</div>
+
+<div id="audit-round">
+  <div class="audit-toolbar">
+    <button class="btn btn-primary" id="export-corrected" type="button">Export corrected timeline</button>
+    <span class="save-state" id="save-state"></span>
+  </div>
+
+  <div class="audit-round-layout">
+    <div>
+      {% if round.has_video %}
+      <video id="audit-video" class="audit-video" controls preload="metadata"
+             src="/admin/audit/rounds/{{ round.slug }}/video"></video>
+      {% else %}
+      <div class="audit-video-missing">no video.mp4 yet — frames only (run `round_audit transcode`)</div>
+      {% endif %}
+      <div class="frame-strip" id="frame-strip"></div>
+      <div class="audit-highlights" id="audit-highlights"></div>
+      <div class="audit-keys">
+        <kbd>j</kbd>/<kbd>k</kbd> move · <kbd>c</kbd> confirm · <kbd>a</kbd> swap actor ·
+        <kbd>l</kbd> label · <kbd>t</kbd> set time · <kbd>x</kbd> not visible · <kbd>n</kbd> new event
+      </div>
+    </div>
+
+    <div class="audit-col">
+      <div class="audit-events" id="audit-events"></div>
+
+      {% if round.visual_html %}
+      <details class="audit-visual">
+        <summary>Reviewer hints (AUDIT_VISUAL.md)</summary>
+        <div class="body">{{ round.visual_html | safe }}</div>
+      </details>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script id="audit-data" type="application/json">{{ round | tojson }}</script>
+<script id="audit-vocab" type="application/json">{{ vocab | tojson }}</script>
+<script src="/admin/static/audit.js?v=1"></script>
+{% endblock %}

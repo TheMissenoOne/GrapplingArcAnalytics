@@ -7,6 +7,14 @@ worker's queue.
     uv run python -m scripts.round_audit read    --in data/video/owner/rounds --you "<kit description>" [--only <slug>]... [--model gemini-pro-latest] [--thinking high]
     uv run python -m scripts.round_audit highlights --in data/video/owner/rounds
     uv run python -m scripts.round_audit report  --in data/video/owner/rounds
+    uv run python -m scripts.round_audit transcode --in data/video/owner/rounds [--only <slug>]...
+
+``transcode`` builds ``out/<slug>/video.mp4`` — a 720p H.264 copy the admin dashboard's
+``<video>`` tag (and any browser) can actually play. Needed because this machine's system
+ffmpeg has no HEVC/H.264 *decoder* (see ``normalize_video``'s docstring) but DOES carry the
+``libopenh264`` *encoder*: cv2 decodes the source (reusing ``prepare_source`` for the same
+rotation handling ``frames`` uses), each frame is piped to ffmpeg over stdin, ffmpeg only
+ever encodes. Resume-safe like every other subcommand here.
 
 Per input file (slug = the filename, safe-cased): ``frames`` segments + builds a sheet PDF,
 ``read`` sends it to Gemini and derives sequences/difficulty/highlights, ``highlights`` cuts
@@ -276,6 +284,72 @@ def cmd_frames(in_dir: Path, target_count: int | None, force: bool,
         )
         logger.info("%s: %d frames (%s) -> %s", slug, decision.get("n_frames", 0),
                     decision.get("method"), sheet_path)
+    return 0
+
+
+# ── transcode ────────────────────────────────────────────────────────────────────────────────
+def _transcode_h264(source: Path, out_path: Path) -> None:
+    """cv2-decode ``source`` -> pipe raw frames into ffmpeg's ``libopenh264`` encoder, 720p
+    max side, browser-playable ``.mp4``. Writes to a ``.tmp`` sibling first and renames on
+    success, same resume-safety shape as ``normalize_video``."""
+    cap = cv2.VideoCapture(str(source))
+    if not cap.isOpened():
+        raise RuntimeError(f"transcode: cannot open {source}")
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    ok, frame = cap.read()
+    if not ok:
+        cap.release()
+        raise RuntimeError(f"transcode: cannot read first frame of {source}")
+    h, w = frame.shape[:2]
+    scale = 720 / max(h, w)
+    out_w, out_h = max(2, int(w * scale) // 2 * 2), max(2, int(h * scale) // 2 * 2)
+
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = out_path.with_suffix(".mp4.tmp")
+    cmd = [
+        "ffmpeg", "-nostdin", "-loglevel", "error", "-y",
+        "-f", "rawvideo", "-pix_fmt", "bgr24", "-s", f"{out_w}x{out_h}", "-r", f"{fps:.3f}",
+        "-i", "-",
+        "-c:v", "libopenh264", "-b:v", "2500k", "-pix_fmt", "yuv420p",
+        "-movflags", "+faststart", "-f", "mp4", str(tmp_path),
+    ]
+    proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
+    n_written = 0
+    try:
+        while ok:
+            assert proc.stdin is not None
+            proc.stdin.write(cv2.resize(frame, (out_w, out_h)).tobytes())
+            n_written += 1
+            ok, frame = cap.read()
+    finally:
+        cap.release()
+        if proc.stdin is not None:
+            proc.stdin.close()
+        proc.wait()
+    if proc.returncode != 0 or n_written == 0 or not tmp_path.exists():
+        tmp_path.unlink(missing_ok=True)
+        raise RuntimeError(
+            f"transcode: ffmpeg failed (exit {proc.returncode}, {n_written} frame(s)) for {source}"
+        )
+    tmp_path.replace(out_path)
+
+
+def cmd_transcode(in_dir: Path, force: bool, only: list[str] | None = None) -> int:
+    videos = _filter_videos(_find_videos(in_dir), only)
+    if not videos:
+        logger.warning("no .mov/.mp4 under %s (after --only filter)", in_dir)
+        return 0
+    for video_path in videos:
+        slug = _slug(video_path)
+        out_dir = OUT_ROOT / slug
+        out_path = out_dir / "video.mp4"
+        if out_path.exists() and not force:
+            logger.info("%s: video.mp4 exists, skip (--force to redo)", slug)
+            continue
+        out_dir.mkdir(parents=True, exist_ok=True)
+        source = prepare_source(video_path, out_dir)
+        _transcode_h264(source, out_path)
+        logger.info("%s: transcoded -> %s (%d bytes)", slug, out_path, out_path.stat().st_size)
     return 0
 
 
@@ -744,6 +818,14 @@ def main() -> int:
     p_report.add_argument("--in", dest="in_dir", type=Path, default=DEFAULT_IN_DIR)
     _add_only(p_report)
 
+    p_transcode = sub.add_parser(
+        "transcode", help="build a browser-playable out/<slug>/video.mp4"
+    )
+    p_transcode.add_argument("--in", dest="in_dir", type=Path, default=DEFAULT_IN_DIR)
+    p_transcode.add_argument("--force", action="store_true",
+                             help="rebuild even if video.mp4 exists")
+    _add_only(p_transcode)
+
     a = ap.parse_args()
     if a.cmd == "frames":
         return cmd_frames(a.in_dir, a.target_count, a.force, only=a.only)
@@ -753,6 +835,8 @@ def main() -> int:
         return cmd_highlights(a.in_dir, a.force, only=a.only)
     if a.cmd == "report":
         return cmd_report(a.in_dir, only=a.only)
+    if a.cmd == "transcode":
+        return cmd_transcode(a.in_dir, a.force, only=a.only)
     return 1
 
 
