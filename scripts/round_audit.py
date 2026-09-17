@@ -8,6 +8,11 @@ worker's queue.
     uv run python -m scripts.round_audit highlights --in data/video/owner/rounds
     uv run python -m scripts.round_audit report  --in data/video/owner/rounds
     uv run python -m scripts.round_audit transcode --in data/video/owner/rounds [--only <slug>]...
+    uv run python -m scripts.round_audit benchmark --in data/video/owner/rounds --only <slug> [--truth <path>] [--from-sessions] [--window 5.0]
+
+``benchmark`` scores a slug's ``read.json`` against a human truth timeline via
+``analysis.round_benchmark.score_read`` -- see its own docstring below for the truth source
+priority and the privacy rule (same class as every other command here).
 
 ``transcode`` builds ``out/<slug>/video.mp4`` — a 720p H.264 copy the admin dashboard's
 ``<video>`` tag (and any browser) can actually play. Needed because this machine's system
@@ -768,6 +773,173 @@ def cmd_report(in_dir: Path, only: list[str] | None = None) -> int:
     return 0
 
 
+# ── benchmark ────────────────────────────────────────────────────────────────────────────────
+def _load_truth_events(path: Path) -> list[dict[str, Any]]:
+    """Accepts either shape a truth file can carry: a flat list (``events_corrected.json``,
+    ``admin/audit.py:build_corrected_timeline`` -- each item may also carry a ``verdict`` field,
+    ignored here) or ``{"events": [...], "resets": [...]}`` (``owner_truth_pull.py``'s own
+    output, same shape as ``read.json``)."""
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    events = doc if isinstance(doc, list) else (doc.get("events") or [])
+    return list(events)
+
+
+def _resolve_truth(
+    slug: str, out_dir: Path, truth_path: Path | None, from_sessions: bool,
+    reference_owner_ids: list[str] | None,
+) -> tuple[list[dict[str, Any]], str] | None:
+    """Truth source priority: (a) ``out_dir/events_corrected.json`` (written by the admin audit
+    tool once the owner has reviewed the round) if present -- the highest-trust source, a human
+    already corrected THIS read; (b) ``--truth <path>``, any file in
+    :func:`_load_truth_events`'s shape; (c) ``--from-sessions``, pulled live from the
+    consented reference owner(s)' own ``user_sessions`` rows via ``scripts.owner_truth_pull``.
+    Returns ``None`` when nothing resolves."""
+    corrected_path = out_dir / "events_corrected.json"
+    if corrected_path.exists():
+        return _load_truth_events(corrected_path), "events_corrected.json"
+    if truth_path is not None:
+        if not truth_path.exists():
+            logger.warning("%s: --truth %s not found", slug, truth_path)
+            return None
+        return _load_truth_events(truth_path), str(truth_path)
+    if from_sessions:
+        from scripts.owner_truth_pull import find_truth_for_slug, pull_owner_sessions
+
+        for owner_id in reference_owner_ids or []:
+            sessions_data = pull_owner_sessions(owner_id)
+            truth = find_truth_for_slug(sessions_data, slug)
+            if truth is not None:
+                return truth["events"], f"user_sessions ({owner_id[:8]}…)"
+    return None
+
+
+def render_benchmark_md(slug: str, doc: dict[str, Any]) -> str:
+    """Pure -- ``doc`` is ``BenchmarkResult.to_dict()`` plus ``slug``/``truth_source``/``window_s``."""
+    lines = [
+        f"# Benchmark — {slug}", "",
+        f"- truth source: `{doc.get('truth_source', '?')}`",
+        f"- window: ±{doc.get('window_s', '?')}s",
+        f"- truth events: {doc['n_truth']}  ·  read events: {doc['n_read']}  ·  "
+        f"matched: {doc['n_matched']}",
+        "",
+        "| metric | value |", "|---|---|",
+        f"| precision | {doc['precision']:.2f} |",
+        f"| recall | {doc['recall']:.2f} |",
+        f"| f1 | {doc['f1']:.2f} |",
+        f"| actor accuracy | {_fmt_pct(doc['actor_accuracy'])} |",
+        f"| success accuracy | {_fmt_pct(doc['success_accuracy'])} |",
+        f"| offset median (s) | {_fmt_s(doc['offset_median_s'])} |",
+        f"| offset p90 (s) | {_fmt_s(doc['offset_p90_s'])} |",
+        "",
+    ]
+    if doc.get("offset_histogram"):
+        lines += ["## Offset histogram (read_ts − truth_ts)", "", "| bucket (s) | count |", "|---|---|"]
+        lines += [f"| {bucket} | {count} |" for bucket, count in doc["offset_histogram"].items()]
+        lines.append("")
+    if doc.get("unmatched_truth"):
+        lines += ["## Missed (in truth, not in read)", ""]
+        lines += [f"- {hhmmss(float(e.get('ts', 0.0)))} {e.get('actor', '-')} — {e.get('label', '-')}"
+                  for e in doc["unmatched_truth"]]
+        lines.append("")
+    if doc.get("unmatched_read"):
+        lines += ["## Extra (in read, not in truth)", ""]
+        lines += [f"- {hhmmss(float(e.get('ts', 0.0)))} {e.get('actor', '-')} — {e.get('label', '-')}"
+                  for e in doc["unmatched_read"]]
+        lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def _fmt_pct(v: float | None) -> str:
+    return f"{v:.0%}" if v is not None else "—"
+
+
+def _fmt_s(v: float | None) -> str:
+    return f"{v:.2f}" if v is not None else "—"
+
+
+def write_benchmark_index() -> None:
+    """``out/BENCHMARK.md`` -- one row per slug that has a ``benchmark.json``, same
+    scan-everything-under-OUT_ROOT convention as :func:`write_index_readme` (a ``--only`` run
+    never truncates the index)."""
+    rows = []
+    for p in sorted(OUT_ROOT.glob("*/benchmark.json")):
+        slug = p.parent.name
+        doc = json.loads(p.read_text(encoding="utf-8"))
+        rows.append((slug, doc))
+    lines = [
+        "# Round-reader benchmark", "",
+        "PRIVATE — see this repo's CLAUDE.md \"Public vs Private Data\". Evaluation set only, "
+        "never training data. Lives under `data/video/owner/out/` (gitignored).", "",
+        "| slug | precision | recall | f1 | actor acc | success acc | offset median (s) | truth source |",
+        "|---|---|---|---|---|---|---|---|",
+    ]
+    for slug, doc in rows:
+        lines.append(
+            f"| [{slug}]({slug}/BENCHMARK.md) | {doc['precision']:.2f} | {doc['recall']:.2f} | "
+            f"{doc['f1']:.2f} | {_fmt_pct(doc['actor_accuracy'])} | "
+            f"{_fmt_pct(doc['success_accuracy'])} | {_fmt_s(doc['offset_median_s'])} | "
+            f"{doc.get('truth_source', '?')} |"
+        )
+    OUT_ROOT.mkdir(parents=True, exist_ok=True)
+    (OUT_ROOT / "BENCHMARK.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def cmd_benchmark(
+    in_dir: Path, truth_path: Path | None, window_s: float, from_sessions: bool, force: bool,
+    only: list[str] | None = None,
+) -> int:
+    from analysis.round_benchmark import score_read
+
+    videos = _filter_videos(_find_videos(in_dir), only)
+    if not videos:
+        logger.warning("no .mov/.mp4 under %s (after --only filter)", in_dir)
+        return 0
+
+    owner_ids: list[str] | None = None
+    if from_sessions:
+        from analysis.reference_owner import reference_owner_ids as resolve_reference_owner_ids
+        from db.base import db_session
+
+        with db_session() as session:
+            owner_ids = resolve_reference_owner_ids(session)
+
+    any_written = False
+    for video_path in videos:
+        slug = _slug(video_path)
+        out_dir = OUT_ROOT / slug
+        read_path = out_dir / "read.json"
+        bench_path = out_dir / "benchmark.json"
+        if not read_path.exists():
+            logger.warning("%s: no read.json, run `read` first, skip", slug)
+            continue
+        if bench_path.exists() and not force:
+            logger.info("%s: benchmark exists, skip (--force to redo)", slug)
+            continue
+
+        resolved = _resolve_truth(slug, out_dir, truth_path, from_sessions, owner_ids)
+        if resolved is None:
+            logger.warning(
+                "%s: no truth source (no events_corrected.json, no --truth, %s), skip", slug,
+                "--from-sessions found nothing" if from_sessions else "no --from-sessions",
+            )
+            continue
+        truth_events, truth_source = resolved
+
+        read_events = json.loads(read_path.read_text(encoding="utf-8")).get("events") or []
+        result = score_read(truth_events, read_events, window_s=window_s)
+
+        doc = result.to_dict()
+        doc.update(slug=slug, truth_source=truth_source, window_s=window_s)
+        bench_path.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+        (out_dir / "BENCHMARK.md").write_text(render_benchmark_md(slug, doc), encoding="utf-8")
+        any_written = True
+        logger.info("%s: P=%.2f R=%.2f F1=%.2f (truth: %s)", slug, result.precision,
+                    result.recall, result.f1, truth_source)
+    if any_written:
+        write_benchmark_index()
+    return 0
+
+
 # ── CLI ───────────────────────────────────────────────────────────────────────────────────────
 def main() -> int:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
@@ -826,6 +998,22 @@ def main() -> int:
                              help="rebuild even if video.mp4 exists")
     _add_only(p_transcode)
 
+    p_bench = sub.add_parser("benchmark", help="score read.json against a human truth "
+                                                "timeline (event P/R/F1, actor/success acc)")
+    p_bench.add_argument("--in", dest="in_dir", type=Path, default=DEFAULT_IN_DIR)
+    p_bench.add_argument("--truth", type=Path, default=None,
+                         help="truth file (flat list or {events,resets}) -- used only when "
+                              "out/<slug>/events_corrected.json does not already exist")
+    p_bench.add_argument("--from-sessions", action="store_true",
+                         help="fall back to pulling truth live from the consented "
+                              "reference-owner(s)' user_sessions rows (REFERENCE_OWNER_EMAILS, "
+                              "DATABASE_URL)")
+    p_bench.add_argument("--window", type=float, default=5.0,
+                         help="match window in seconds (default 5.0)")
+    p_bench.add_argument("--force", action="store_true",
+                         help="rebuild even if benchmark.json exists")
+    _add_only(p_bench)
+
     a = ap.parse_args()
     if a.cmd == "frames":
         return cmd_frames(a.in_dir, a.target_count, a.force, only=a.only)
@@ -837,6 +1025,8 @@ def main() -> int:
         return cmd_report(a.in_dir, only=a.only)
     if a.cmd == "transcode":
         return cmd_transcode(a.in_dir, a.force, only=a.only)
+    if a.cmd == "benchmark":
+        return cmd_benchmark(a.in_dir, a.truth, a.window, a.from_sessions, a.force, only=a.only)
     return 1
 
 
