@@ -12,6 +12,8 @@ import pytest
 from scripts.sync_app_artifacts import (
     inject_scores,
     merge_curated_identity,
+    node_keys_from_library,
+    sync_definitions,
     sync_nodes_library,
     sync_text_file,
     verify_ontology_seed,
@@ -384,5 +386,92 @@ def test_app_nodes_library_identity_matches_curated_source() -> None:
     assert [_without_scores(n) for n in expected] == [_without_scores(n) for n in on_disk], (
         "grappling-arch.nodes.json identity has drifted from the curated library — "
         "run `uv run python -m scripts.sync_app_artifacts` (App side is GENERATED, "
+        "never hand-edited)"
+    )
+
+
+# ── sync_definitions / node_keys_from_library ────────────────────────────────────
+def test_node_keys_from_library_covers_curated_and_existing_app_only() -> None:
+    curated = [
+        {"en": "Armbar", "pt": "Chave de Braço", "type": "submission", "variants": []},
+    ]
+    nodes_path_content = json.dumps([{"name": "Old School Move", "type": "guard"}])
+
+    tmp = Path("/tmp") / "node_keys_from_library_test.json"
+    tmp.write_text(nodes_path_content, encoding="utf-8")
+    try:
+        keys = node_keys_from_library(curated, tmp)
+    finally:
+        tmp.unlink()
+
+    assert "armbar" in keys
+    assert "old school move" in keys  # app-only row, appended by merge_curated_identity
+
+
+def test_sync_definitions_filters_to_given_node_keys(tmp_path: Path) -> None:
+    src = tmp_path / "src.json"
+    dst = tmp_path / "dst.json"
+    src.write_text(json.dumps({
+        "armbar": {"en": "e", "pt": "p", "source": "draft", "reviewed": False},
+        "unrelated key": {"en": "e2", "pt": "p2", "source": "draft", "reviewed": False},
+    }), encoding="utf-8")
+
+    changed, msg = sync_definitions(src, dst, {"armbar"}, check=False)
+
+    assert changed is True
+    written = json.loads(dst.read_text(encoding="utf-8"))
+    assert set(written) == {"armbar"}
+    assert "1 entries" in msg
+
+
+def test_sync_definitions_check_mode_reports_drift_without_writing(tmp_path: Path) -> None:
+    src = tmp_path / "src.json"
+    dst = tmp_path / "dst.json"
+    src.write_text(json.dumps({"armbar": {"en": "e", "pt": "p"}}), encoding="utf-8")
+
+    changed, msg = sync_definitions(src, dst, {"armbar"}, check=True)
+
+    assert changed is True
+    assert "DRIFT" in msg
+    assert not dst.is_file()
+
+
+def test_sync_definitions_second_run_is_a_noop(tmp_path: Path) -> None:
+    src = tmp_path / "src.json"
+    dst = tmp_path / "dst.json"
+    src.write_text(json.dumps({"armbar": {"en": "e", "pt": "p"}}), encoding="utf-8")
+
+    changed1, _ = sync_definitions(src, dst, {"armbar"}, check=False)
+    changed2, msg2 = sync_definitions(src, dst, {"armbar"}, check=False)
+
+    assert changed1 is True
+    assert changed2 is False
+    assert "unchanged" in msg2
+
+
+def test_app_technique_definitions_matches_curated_source_filtered() -> None:
+    """DB-free CI parity for artifact (e): the App file must equal the curated
+    definitions filtered to node_keys the (checked-in) App nodes library carries —
+    same DB-free-check pattern as `test_app_nodes_library_identity_matches_curated_source`."""
+    from scripts.sync_app_artifacts import (
+        APP,
+        CURATED_LIB,
+        DEFINITIONS_DST,
+        DEFINITIONS_SRC,
+        NODES_LIB,
+    )
+
+    if not APP.is_dir():
+        pytest.skip("GrapplingArcApp não está ao lado deste repo")
+    curated = json.loads(CURATED_LIB.read_text(encoding="utf-8"))
+    node_keys = node_keys_from_library(curated, NODES_LIB)
+    definitions = json.loads(DEFINITIONS_SRC.read_text(encoding="utf-8"))
+    expected = {k: v for k, v in definitions.items() if k in node_keys}
+
+    on_disk = json.loads(DEFINITIONS_DST.read_text(encoding="utf-8"))
+
+    assert on_disk == expected, (
+        "App technique_definitions.json has drifted from the curated source — run "
+        "`uv run python -m scripts.sync_app_artifacts` (App side is GENERATED, "
         "never hand-edited)"
     )

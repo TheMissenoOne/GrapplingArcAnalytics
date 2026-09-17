@@ -1,0 +1,1268 @@
+{
+  "5050 guard": {
+    "en": "Both athletes sit hip-to-hip with a single outside leg entangled through the other's, each controlling one of the other's legs symmetrically — neither is clearly on top or bottom.",
+    "pt": "Os dois atletas ficam quadril a quadril com uma perna externa entrelaçada na do outro, cada um controlando uma perna do adversário de forma simétrica — nenhum está claramente em cima ou embaixo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "americana keylock": {
+    "en": "From a top pin, the attacker traps the opponent's bent arm in a figure-four grip (own wrist to own bicep) and cranks it toward the hips, rotating the shoulder externally.",
+    "pt": "De uma imobilização por cima, o atacante prende o braço dobrado do adversário numa pegada em quatro (próprio pulso na própria bicep) e gira o braço em direção ao quadril, rotacionando o ombro para fora.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "anaconda choke": {
+    "en": "Attacker wraps an arm around the opponent's head and near arm from the front headlock position, laces the hands, then rolls to the side so the forearm compresses the neck.",
+    "pt": "O atacante envolve com um braço a cabeça e o braço próximo do adversário a partir da gravata frontal, trava as mãos, e rola para o lado para que o antebraço comprima o pescoço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "ankle pick": {
+    "en": "Attacker drops levels, reaches down to grab the opponent's ankle with one hand while pressuring the shoulder or hip with the other, pulling the foot out from under them.",
+    "pt": "O atacante abaixa o nível, alcança e segura o tornozelo do adversário com uma mão enquanto pressiona o ombro ou quadril com a outra, puxando o pé para tirar o apoio.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "arm drag": {
+    "en": "Attacker pulls the opponent's extended arm across their own body, stepping to the opponent's back or side to break their frame and gain a dominant angle.",
+    "pt": "O atacante puxa o braço estendido do adversário através do próprio corpo, dando um passo para as costas ou lado do adversário para quebrar sua estrutura e ganhar um ângulo dominante.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "arm drag takedown": {
+    "en": "An arm drag used from standing that pulls the opponent off balance and past the attacker, ending with the attacker behind or beside them for a takedown.",
+    "pt": "Um arm drag usado em pé que desequilibra o adversário e o puxa para além do atacante, terminando com o atacante atrás ou ao lado dele para uma queda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "arm triangle choke": {
+    "en": "Attacker traps the opponent's head and one arm between their own arm and chest/shoulder, squeezing so the trapped shoulder presses one carotid and the attacker's arm the other.",
+    "pt": "O atacante prende a cabeça e um braço do adversário entre o próprio braço e o peito/ombro, apertando para que o ombro preso pressione uma carótida e o braço do atacante a outra.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "armbar": {
+    "en": "Attacker isolates a straight arm across their own hips (elbow at the hip, thumb pointing up), controlling the wrist with both hands and extending the hips to hyperextend the elbow.",
+    "pt": "O atacante isola um braço esticado sobre o próprio quadril (cotovelo na altura do quadril, polegar para cima), controla o pulso com as duas mãos e estende o quadril para hiperestender o cotovelo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "back control": {
+    "en": "Attacker is behind the opponent, chest to back, both hooks (feet) inside the opponent's thighs or legs wrapped around the torso, one arm usually under an armpit toward the neck.",
+    "pt": "O atacante fica atrás do adversário, peito nas costas, com os dois ganchos (pés) por dentro das coxas ou pernas envolvendo o tronco, um braço geralmente por baixo da axila em direção ao pescoço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "back escape": {
+    "en": "Defender peels the attacker's hooks off with their hands or heels, turns into the attacker (chest to chest) to remove the back exposure, and re-establishes guard or a neutral position.",
+    "pt": "O defensor retira os ganchos do atacante com as mãos ou calcanhares, gira de frente para o atacante (peito com peito) para eliminar a exposição das costas, e reestabelece a guarda ou posição neutra.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "back take": {
+    "en": "Attacker moves from any position around or through the opponent to end up behind their back, seating hooks or wrapping a body triangle before the opponent can turn to face them.",
+    "pt": "O atacante se move de qualquer posição ao redor ou através do adversário para terminar atrás de suas costas, encaixando ganchos ou o triângulo de corpo antes que o adversário consiga virar de frente.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "back triangle": {
+    "en": "From back control, attacker traps one of the opponent's arms and the neck between their own legs in a triangle shape, choking with leg pressure instead of an arm.",
+    "pt": "Do controle das costas, o atacante prende um dos braços do adversário e o pescoço entre as próprias pernas em formato de triângulo, estrangulando com pressão das pernas em vez do braço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "base": {
+    "en": "A stable, wide-footed posture with weight centered low over the hips, used to resist being pushed, pulled, or swept — not a single move but the structural foundation underneath others.",
+    "pt": "Uma postura estável, com os pés afastados e o peso centrado e baixo sobre o quadril, usada para resistir a empurrões, puxões ou raspagens — não é um movimento único, mas a base estrutural sob os outros.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "baseball bat choke": {
+    "en": "From behind or the side with the opponent's collar crossed, attacker grips the collar like a bat with both hands stacked and pulls/twists to close the collar around the neck.",
+    "pt": "De trás ou do lado com a gola do adversário cruzada, o atacante segura a gola como um taco com as duas mãos empilhadas e puxa/gira para fechar a gola ao redor do pescoço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "berimbolo": {
+    "en": "From a De La Riva hook, attacker inverts (rolls backward under the opponent) while controlling a leg, spinning underneath and around to emerge on the opponent's back.",
+    "pt": "A partir de um gancho de De La Riva, o atacante inverte (rola para trás por baixo do adversário) controlando uma perna, girando por baixo e ao redor até emergir nas costas do adversário.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "bicep slicer": {
+    "en": "Attacker bends the opponent's arm sharply across a hard surface — usually their own shin or forearm — pressing into the bicep/elbow crease to cause pain via compression, not hyperextension.",
+    "pt": "O atacante dobra o braço do adversário fortemente contra uma superfície dura — geralmente a própria canela ou antebraço — pressionando a dobra do bíceps/cotovelo para causar dor por compressão, não hiperextensão.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "body lock": {
+    "en": "Attacker wraps both arms fully around the opponent's torso, hands clasped, chest pressed tight to remove space and control their hips — a clinch/control grip, not a submission.",
+    "pt": "O atacante envolve totalmente o tronco do adversário com os dois braços, mãos entrelaçadas, peito colado para eliminar espaço e controlar o quadril — é uma pegada de clinch/controle, não uma finalização.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "body lock from back": {
+    "en": "The same full torso clasp applied from directly behind the opponent, binding their arms to their sides and preventing them from turning in or posting to stand.",
+    "pt": "O mesmo abraço total no tronco aplicado diretamente por trás do adversário, prendendo os braços dele ao corpo e impedindo que se vire ou apoie as mãos para levantar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "body lock pass": {
+    "en": "Passer clasps both arms around the opponent's waist or hips from inside the guard, chest pressed down, and walks/drives around the legs while the lock prevents re-guarding.",
+    "pt": "O passador abraça o quadril do adversário com os dois braços por dentro da guarda, peito pressionando para baixo, e caminha/empurra ao redor das pernas enquanto o abraço impede recompor a guarda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "body lock takedown": {
+    "en": "From a standing body lock, attacker lifts or off-balances the opponent by driving hips forward and through, running or tripping them to the mat while keeping the torso clasped.",
+    "pt": "De um body lock em pé, o atacante desequilibra ou levanta o adversário empurrando o quadril para frente, correndo ou derrubando-o no chão enquanto mantém o tronco abraçado.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "body triangle": {
+    "en": "From back control, attacker locks one leg's foot behind the opposite knee around the opponent's torso — a leg triangle that clamps the hips instead of using two hooks.",
+    "pt": "Do controle das costas, o atacante trava o pé de uma perna atrás do joelho oposto ao redor do tronco do adversário — um triângulo de perna que prende o quadril em vez de usar dois ganchos.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "bow and arrow choke": {
+    "en": "From back control, attacker grips deep on one collar and the opposite pant leg or leg, straightening their own body like a drawn bow to pull the collar tight across the neck.",
+    "pt": "Do controle das costas, o atacante segura fundo em uma gola e na perna ou calça oposta, esticando o próprio corpo como um arco puxado para fechar a gola no pescoço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "bridge upa escape": {
+    "en": "Defender pinned under mount plants feet, arches the hips explosively upward and to one side, rolling the top opponent over the shoulder to reverse the position.",
+    "pt": "O defensor preso sob a montada apoia os pés, arqueia o quadril explosivamente para cima e para um lado, rolando o oponente de cima por sobre o ombro para reverter a posição.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "buggy choke": {
+    "en": "From back mount, attacker uses a shin or leg (instead of an arm) across the front of the opponent's neck, pinning it with the leg to cut blood flow.",
+    "pt": "Do mount das costas, o atacante usa a canela ou perna (em vez do braço) na frente do pescoço do adversário, prendendo-o com a perna para cortar o fluxo de sangue.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "butterfly guard": {
+    "en": "Guard player sits upright facing the opponent with both feet hooked inside the opponent's thighs (butterfly hooks), using them to lift and off-balance for sweeps.",
+    "pt": "O jogador de guarda senta ereto de frente para o adversário com os dois pés enganchados por dentro das coxas dele (ganchos de borboleta), usando-os para levantar e desequilibrar para raspagens.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "butterfly sweep": {
+    "en": "From butterfly guard, defender lifts one hook while pulling the same-side arm/shoulder, elevating and rotating the opponent over that hook to land on top.",
+    "pt": "Da guarda de ganchos, o defensor eleva um gancho enquanto puxa o braço/ombro do mesmo lado, levantando e girando o adversário por cima desse gancho para terminar em cima.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "calf lock": {
+    "en": "Attacker traps the opponent's lower leg between their own shin/calf and thigh (or figure-four's the calf), squeezing to compress the muscle against bone.",
+    "pt": "O atacante prende a perna inferior do adversário entre a própria canela/panturrilha e coxa (ou uma pegada em quatro), apertando para comprimir o músculo contra o osso.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "calf slicer": {
+    "en": "Attacker folds the opponent's leg so the shin presses hard into the back of their own thigh/calf, using a figure-four or shin pressure to bend the knee sharply.",
+    "pt": "O atacante dobra a perna do adversário para que a canela pressione forte a parte de trás da própria coxa/panturrilha, usando uma pegada em quatro ou pressão de canela para dobrar o joelho.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "cartwheel pass": {
+    "en": "Passer cartwheels — kicking the legs up and over sideways, hand-planting briefly — to spin around the opponent's legs and land in side control on the far side.",
+    "pt": "O passador faz uma estrela — chutando as pernas para cima e para o lado, apoiando a mão brevemente — para girar ao redor das pernas do adversário e cair no controle lateral do outro lado.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "choi bar": {
+    "en": "From an omoplata-like leg-over-the-arm entanglement, attacker rolls forward through to convert directly into a straight armbar rather than the shoulder lock.",
+    "pt": "De um emaranhado tipo omoplata com a perna sobre o braço, o atacante rola para frente para converter diretamente numa chave de braço reta em vez da chave de ombro.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "choke": {
+    "en": "Any technique that compresses the neck — blood chokes squeeze the carotid arteries at the sides, air chokes compress the windpipe at the front — cutting circulation or breath.",
+    "pt": "Qualquer técnica que comprime o pescoço — estrangulamentos sanguíneos apertam as carótidas nas laterais, os de ar comprimem a traqueia na frente — cortando a circulação ou a respiração.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "circle throw": {
+    "en": "A sacrifice throw where the attacker drops onto their back while gripping the opponent, planting a foot in their hip/stomach and using the leg to launch them overhead in an arc.",
+    "pt": "Uma projeção de sacrifício em que o atacante cai de costas segurando o adversário, apoiando um pé no quadril/barriga dele e usando a perna para lançá-lo por cima em arco.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "clinch": {
+    "en": "Two athletes standing, chest-to-chest or head-to-head, gripping each other's upper body (collar, arms, neck, waist) to control posture before a takedown attempt.",
+    "pt": "Dois atletas em pé, peito a peito ou cabeça a cabeça, segurando a parte superior do corpo um do outro (gola, braços, pescoço, cintura) para controlar a postura antes de uma queda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "clock choke": {
+    "en": "Attacker, usually behind a turtled opponent, grips deep across the far collar with one hand and walks/circles around the body like the hands of a clock to tighten it.",
+    "pt": "O atacante, geralmente atrás de um adversário na tartaruga, segura fundo na gola oposta com uma mão e caminha/circula ao redor do corpo como os ponteiros de um relógio para apertar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "closed guard": {
+    "en": "Guard player lies on their back with both ankles locked crossed behind the opponent's lower back, holding them close between their legs so they cannot stand or create space.",
+    "pt": "O jogador de guarda deita de costas com os tornozelos travados cruzados atrás das costas do adversário, mantendo-o preso entre as pernas para que não consiga levantar ou criar espaço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "collar sleeve guard": {
+    "en": "Guard player grips one hand on the opponent's same-side collar and the other on the opposite sleeve/wrist, using the diagonal grip pair to control posture and angles from open guard.",
+    "pt": "O jogador de guarda segura uma mão na gola do mesmo lado do adversário e a outra na manga/pulso oposto, usando o par de pegadas diagonais para controlar postura e ângulos na guarda aberta.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "collar tie": {
+    "en": "Attacker grips one or both hands behind the opponent's neck/head from a clinch, pulling the head down and forward to break posture and set up takedowns or strikes control.",
+    "pt": "O atacante segura com uma ou ambas as mãos atrás do pescoço/cabeça do adversário a partir do clinch, puxando a cabeça para baixo e para frente para quebrar a postura e preparar quedas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "connection": {
+    "en": "The principle of keeping the hips, chest, or limbs physically touching the opponent's body at all times, so their movement can be felt and matched instead of reacted to late.",
+    "pt": "O princípio de manter o quadril, o peito ou os membros fisicamente em contato com o corpo do adversário o tempo todo, para sentir e acompanhar o movimento dele em vez de reagir tarde.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "cop lock": {
+    "en": "A wristlock variant where the attacker bends the opponent's wrist and rotates the arm behind their back — the restraint hold police use — twisting the shoulder and wrist together.",
+    "pt": "Uma variação de chave de pulso em que o atacante dobra o pulso do adversário e gira o braço atrás das costas dele — a pegada de contenção usada pela polícia — torcendo ombro e pulso juntos.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "counter takedown": {
+    "en": "Defender, while sprawling or reacting to an opponent's shot, converts their own defensive movement directly into a takedown of the shooter, using the shooter's own momentum.",
+    "pt": "O defensor, ao fazer sprawl ou reagir à entrada de queda do adversário, converte o próprio movimento defensivo diretamente numa queda sobre quem atacou, usando o próprio impulso dele.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "cradle": {
+    "en": "Attacker wraps one arm around the opponent's head/neck and the other behind a bent knee, clasping the hands together to fold the opponent into a tight, pinned ball on their side.",
+    "pt": "O atacante envolve um braço ao redor da cabeça/pescoço do adversário e o outro atrás de um joelho dobrado, entrelaçando as mãos para dobrar o adversário numa bola apertada de lado.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "cross ashi": {
+    "en": "A leg entanglement where the attacker's legs cross over the opponent's trapped leg in an X, controlling the hip and knee line from a crossed rather than straight angle.",
+    "pt": "Um emaranhado de pernas em que as pernas do atacante cruzam sobre a perna presa do adversário em X, controlando a linha do quadril e joelho por um ângulo cruzado em vez de reto.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "cross choke": {
+    "en": "Attacker, usually from mount or guard, crosses both hands to grip the opposite sides of the opponent's collar (each hand's thumb or fingers inside), then pulls the elbows down and out.",
+    "pt": "O atacante, geralmente da montada ou guarda, cruza as duas mãos para segurar os lados opostos da gola do adversário, e então puxa os cotovelos para baixo e para fora.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "crucifix": {
+    "en": "Attacker traps both of the opponent's arms — one between their legs, one pinned under their own arm — from behind or the side, leaving the opponent unable to defend the neck.",
+    "pt": "O atacante prende os dois braços do adversário — um entre as próprias pernas, outro preso sob o próprio braço — por trás ou de lado, deixando o adversário incapaz de defender o pescoço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "darce choke": {
+    "en": "From a front headlock or top position, attacker threads an arm under the opponent's near arm and across the throat, locking the hands on the far side and squeezing the shoulders together.",
+    "pt": "De uma gravata frontal ou posição por cima, o atacante passa um braço por baixo do braço próximo do adversário e sobre a garganta, travando as mãos do outro lado e apertando os ombros.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "de la riva guard": {
+    "en": "Guard player hooks one leg from outside around the opponent's same-side leg, foot tucked behind their thigh or hip, while gripping a sleeve or collar to control distance and angle.",
+    "pt": "O jogador de guarda enrosca uma perna por fora ao redor da perna correspondente do adversário, pé encaixado atrás da coxa ou quadril dele, segurando manga ou gola para controlar distância e ângulo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "deep half guard": {
+    "en": "Guard player is underneath the opponent's hip on their side, one arm wrapped around the far leg, driving their own head/shoulder under the opponent's center of mass.",
+    "pt": "O jogador de guarda fica por baixo do quadril do adversário, de lado, com um braço envolvendo a perna distante, enfiando a cabeça/ombro por baixo do centro de massa dele.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "dlr leg drag pass": {
+    "en": "Passer strips the De La Riva hook, then drags the freed leg across their own body to the far side, stacking the opponent's legs together before sliding through to side control.",
+    "pt": "O passador retira o gancho de De La Riva, arrasta a perna liberada pelo próprio corpo até o outro lado, empilhando as pernas do adversário antes de deslizar até o controle lateral.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "double guard pull": {
+    "en": "Attacker grips the opponent's sleeves or collar from standing and sits straight down to guard, both feet leaving the floor at once, skipping any single-leg entry.",
+    "pt": "O atacante segura as mangas ou a gola do adversário em pé e senta direto na guarda, os dois pés saindo do chão ao mesmo tempo, sem passar por uma entrada de uma perna só.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "double leg takedown": {
+    "en": "Attacker drops level, drives forward to wrap both arms around the opponent's legs at or below the knees, and drives through with the shoulder to put them on their back.",
+    "pt": "O atacante abaixa o nível, avança para envolver as duas pernas do adversário com os braços na altura ou abaixo dos joelhos, e empurra com o ombro para derrubá-lo de costas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "double under pass": {
+    "en": "Passer hooks both arms under the opponent's thighs/knees from inside the guard, lifting and stacking the legs up and over while driving forward to clear them to one side.",
+    "pt": "O passador enfia os dois braços por baixo das coxas/joelhos do adversário por dentro da guarda, levantando e empilhando as pernas para cima e para o lado enquanto avança.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "duck under": {
+    "en": "From a clinch or tie-up, attacker ducks their head under the opponent's arm to circle to their back or side, escaping a bind rather than shooting on the legs.",
+    "pt": "Do clinch ou pegada, o atacante abaixa a cabeça por baixo do braço do adversário para circular até as costas ou lado dele, escapando de uma pegada sem entrar nas pernas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "electric chair": {
+    "en": "Attacker sits up from between the opponent's legs, trapping one of their legs high on the shoulder while the free arm posts, setting up an estrella sweep or leg lock.",
+    "pt": "O atacante senta entre as pernas do adversário, prendendo uma das pernas dele alto no ombro enquanto o braço livre apoia no chão, preparando uma raspagem ou chave de perna.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "escape to standing": {
+    "en": "From bottom (guard, half guard, or turtle), defender posts a hand or frame, brings a knee up under the hips, and stands up in a base while keeping distance from the opponent.",
+    "pt": "De baixo (guarda, meia-guarda ou tartaruga), o defensor apoia uma mão ou estrutura, traz um joelho para baixo do quadril, e levanta em base mantendo distância do adversário.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "escape to turtle": {
+    "en": "Defender caught in a bad bottom position (mount, side control) rolls to their knees and elbows, covering the neck and hiding limbs to survive rather than fully standing or re-guarding.",
+    "pt": "O defensor preso numa posição ruim por baixo (montada, controle lateral) rola para joelhos e cotovelos, protegendo o pescoço e escondendo os membros para sobreviver, sem levantar ou recompor a guarda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "ezekiel choke": {
+    "en": "Attacker reaches one arm across the opponent's neck, gripping their own opposite sleeve/forearm with the other hand, and drives the wrapped forearm's bony edge into the throat.",
+    "pt": "O atacante passa um braço através do pescoço do adversário, segurando a própria manga/antebraço oposto com a outra mão, e pressiona o antebraço enrolado contra a garganta.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "false reap": {
+    "en": "Attacker's leg crosses over and pins the opponent's straightened leg at an angle that looks like an illegal knee reap but keeps the knee line safe under ADCC-style rules.",
+    "pt": "A perna do atacante cruza e prende a perna esticada do adversário num ângulo que parece uma reaping ilegal, mas mantém a linha do joelho segura sob regras estilo ADCC.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "firemans carry": {
+    "en": "Attacker drops under the opponent's arm, hoists them across the shoulders/back (like carrying a person out of a fire), then drops to one knee to dump them over to the mat.",
+    "pt": "O atacante se abaixa sob o braço do adversário, o levanta sobre os ombros/costas (como carregar alguém para fora de um incêndio), e desce num joelho para derrubá-lo no tatame.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "float pass": {
+    "en": "Passer stays light on the balls of the feet, hips high, circling and hopping around the opponent's guard without committing weight, looking for an opening to settle into a pass.",
+    "pt": "O passador fica leve na ponta dos pés, quadril alto, circulando e saltitando ao redor da guarda do adversário sem comprometer o peso, procurando uma abertura para se firmar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "flower sweep": {
+    "en": "From closed guard, attacker off-balances the opponent forward, hooks one of their legs from the outside with an arm, and rolls/kicks them over that trapped leg to land on top.",
+    "pt": "Da guarda fechada, o atacante desequilibra o adversário para frente, prende uma das pernas dele por fora com um braço, e rola/chuta por cima dessa perna presa para terminar em cima.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "folding pass": {
+    "en": "Passer folds the opponent's own knee up toward their chest/face, using the leg like a hinge to pin and fold them in half before sliding the hips around into side control.",
+    "pt": "O passador dobra o próprio joelho do adversário em direção ao peito/rosto, usando a perna como uma dobradiça para prendê-lo dobrado ao meio antes de deslizar o quadril para o controle lateral.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "foot lock": {
+    "en": "Attacker controls the opponent's foot/ankle, typically with the sole facing them, and applies pressure (bending, twisting, or extending) at the ankle joint to force a tap.",
+    "pt": "O atacante controla o pé/tornozelo do adversário, geralmente com a sola voltada para ele, e aplica pressão (dobrando, torcendo ou estendendo) na articulação do tornozelo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "foot sweep": {
+    "en": "Attacker uses their own foot to sweep the opponent's planted foot out from under them at ankle height, timing it with a push or pull to send them off balance and down.",
+    "pt": "O atacante usa o próprio pé para varrer o pé apoiado do adversário na altura do tornozelo, cronometrando com um empurrão ou puxão para desequilibrá-lo e derrubá-lo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "frame": {
+    "en": "A rigid line created with the forearm, shin, or straight arm braced between the attacker's body and the opponent's, used to create and hold space rather than to strike or grip.",
+    "pt": "Uma linha rígida criada com o antebraço, canela ou braço reto apoiado entre o corpo do atleta e o do adversário, usada para criar e manter espaço, não para golpear ou agarrar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "front headlock": {
+    "en": "Attacker faces a bent-over or sprawled opponent, wrapping an arm around their head/neck from the front while the opponent's head is pinned against the attacker's stomach or hip.",
+    "pt": "O atacante fica de frente para um adversário curvado ou em sprawl, envolvendo a cabeça/pescoço dele com um braço pela frente, com a cabeça presa contra a barriga ou quadril do atacante.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "ghost escape": {
+    "en": "From bottom side control or knee-on-belly, defender turns away and slides their hips/legs out underneath the pinning opponent, reappearing on the far side without them noticing the exit.",
+    "pt": "Do controle lateral ou joelho na barriga por baixo, o defensor vira e desliza o quadril/pernas por baixo do adversário que prende, reaparecendo do outro lado sem que ele perceba a saída.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "gift wrap": {
+    "en": "Attacker pins one of the opponent's arms across their own back or chest, wrapping the attacker's own arm over it and gripping the far side — like wrapping a gift — to remove that arm from defense.",
+    "pt": "O atacante prende um dos braços do adversário atrás das costas ou peito dele, envolvendo o próprio braço por cima e segurando do outro lado — como embrulhar um presente — tirando esse braço da defesa.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "gogoplata": {
+    "en": "Attacker, usually from a rubber-guard-style position, hooks a shin across the opponent's throat and locks the foot behind their own head or the opponent's head, choking with the shin.",
+    "pt": "O atacante, geralmente de uma posição tipo guarda de borracha, coloca a canela sobre a garganta do adversário e trava o pé atrás da própria cabeça ou da cabeça dele, estrangulando com a canela.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "granby roll": {
+    "en": "Defender rolls forward over one shoulder, tucking and spinning the hips through, to escape a pin or bad angle and reset facing the opponent — a scramble/escape roll, not a submission.",
+    "pt": "O defensor rola para frente sobre um ombro, recolhendo e girando o quadril, para escapar de uma imobilização ou ângulo ruim e reposicionar de frente para o adversário.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "grip fighting": {
+    "en": "The ongoing hand fight over the gi (or wrists/collar/head in no-gi) — breaking the opponent's grips and securing your own — that happens before and during every exchange.",
+    "pt": "A disputa contínua de mãos pelo kimono (ou pulsos/gola/cabeça no no-gi) — quebrando as pegadas do adversário e garantindo as próprias — que acontece antes e durante cada troca.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "groin lock": {
+    "en": "Attacker isolates a bent leg and applies pressure that forces it across the opponent's own groin/midline, straining the hip and groin muscles rather than the knee joint.",
+    "pt": "O atacante isola uma perna dobrada e aplica pressão que a força através da própria virilha/linha média do adversário, forçando os músculos do quadril e virilha em vez da articulação do joelho.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "guard break": {
+    "en": "Passer, trapped inside a closed or hooked guard, forces the opponent's legs open or unhooked — standing to pry the ankles apart or driving weight down to break the lock.",
+    "pt": "O passador, preso dentro de uma guarda fechada ou enganchada, força as pernas do adversário a abrir ou desenganchar — levantando para separar os tornozelos ou pressionando o peso para baixo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "guard pass": {
+    "en": "Attacker moves their hips/body past the opponent's legs to reach a controlling top position (side control, mount, knee-on-belly), the legs no longer between them and the opponent's torso.",
+    "pt": "O atacante move o quadril/corpo além das pernas do adversário para alcançar uma posição de controle por cima (controle lateral, montada, joelho na barriga), sem mais as pernas dele no meio.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "guard pull": {
+    "en": "From standing, attacker sits or drops directly to guard (usually gripping the opponent's sleeve or collar first) instead of attempting a standing takedown.",
+    "pt": "Em pé, o atacante senta ou cai direto para a guarda (geralmente segurando primeiro a manga ou gola do adversário) em vez de tentar uma queda em pé.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "guard recovery": {
+    "en": "From a partially passed or side-control position, bottom player reinserts a knee, shin, or foot between themselves and the opponent to rebuild a guard (open or closed).",
+    "pt": "De uma posição parcialmente passada ou controle lateral, quem está embaixo reinsere um joelho, canela ou pé entre si e o adversário para reconstruir uma guarda (aberta ou fechada).",
+    "source": "draft",
+    "reviewed": false
+  },
+  "guard recovery escape": {
+    "en": "Bottom player under side control or mount fights specifically to slide a leg back in and rebuild guard, treating that recovery itself as the escape rather than standing up.",
+    "pt": "Quem está embaixo no controle lateral ou montada luta especificamente para deslizar uma perna de volta e reconstruir a guarda, tratando essa recomposição como a fuga, sem levantar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "guillotine choke": {
+    "en": "Attacker traps the opponent's head under one arm from the front (head tucked at the armpit), locks the hands under the chin, and squeezes the forearm into the throat.",
+    "pt": "O atacante prende a cabeça do adversário sob um braço pela frente (cabeça encaixada na axila), trava as mãos sob o queixo, e aperta o antebraço contra a garganta.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "guillotine sweep": {
+    "en": "While holding a guillotine choke from guard, attacker uses the grip and their legs to off-balance and roll the opponent over, landing on top while keeping the choke locked.",
+    "pt": "Enquanto segura uma guilhotina da guarda, o atacante usa a pegada e as pernas para desequilibrar e rolar o adversário, terminando em cima sem soltar o estrangulamento.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "half guard": {
+    "en": "Guard player traps one of the opponent's legs between both of their own legs (knee shield or classic), the opponent's other leg free outside — a half-open guard.",
+    "pt": "O jogador de guarda prende uma das pernas do adversário entre as próprias duas pernas (joelho de escudo ou clássica), com a outra perna dele livre por fora — uma guarda meio aberta.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "half guard pass": {
+    "en": "Passer, with one leg trapped in the opponent's half guard, frees the trapped leg or flattens the opponent's hips to slide through to full side control.",
+    "pt": "O passador, com uma perna presa na meia-guarda do adversário, libera a perna presa ou achata o quadril dele para deslizar até o controle lateral completo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "half guard smash pass": {
+    "en": "Passer drives their weight and chest down flat onto the opponent's chest/face from half guard, flattening their hips and shoulders to the mat before sliding the trapped leg free.",
+    "pt": "O passador empurra o peso e o peito achatado sobre o peito/rosto do adversário na meia-guarda, achatando o quadril e ombros no chão antes de liberar a perna presa.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "headlock": {
+    "en": "Attacker wraps one arm tightly around the opponent's head from the side, controlling it against their own torso without necessarily choking — a control hold, often gi-less scramble grip.",
+    "pt": "O atacante envolve um braço firmemente ao redor da cabeça do adversário pelo lado, controlando-a contra o próprio tronco sem necessariamente estrangular — uma pegada de controle.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "headquarters pass": {
+    "en": "Passer stands, controls one of the opponent's legs pinned between their own legs (like sitting on it), and circles/steps around the other leg to clear it and reach side control.",
+    "pt": "O passador fica em pé, controla uma perna do adversário presa entre as próprias pernas, e circula/passa a outra perna para alcançar o controle lateral.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "heel hook": {
+    "en": "Attacker controls the opponent's foot/lower leg (often figure-foured or with the leg trapped between their own legs) and rotates the heel, twisting the ankle and knee ligaments together.",
+    "pt": "O atacante controla o pé/perna inferior do adversário (geralmente com pegada em quatro ou perna presa entre as próprias pernas) e gira o calcanhar, torcendo tornozelo e joelho juntos.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "high crotch": {
+    "en": "Attacker drops level and wraps one arm high between the opponent's legs at the groin/hip while the other controls their upper body or far leg, lifting to finish a takedown.",
+    "pt": "O atacante abaixa o nível e envolve um braço alto entre as pernas do adversário na virilha/quadril enquanto o outro controla a parte de cima do corpo ou a perna distante, levantando para finalizar a queda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "hip bump sweep": {
+    "en": "From closed guard, attacker sits up and posts a hand behind them, bumping their hip up and into the opponent's midsection to knock them backward while spinning to mount.",
+    "pt": "Da guarda fechada, o atacante senta e apoia uma mão atrás, batendo o quadril contra o meio do corpo do adversário para derrubá-lo para trás enquanto gira para a montada.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "hip pin pass": {
+    "en": "Passer pins one of the opponent's legs flat by driving a knee or hip weight directly on top of it, isolating that side while working the other leg free to pass.",
+    "pt": "O passador prende uma das pernas do adversário no chão empurrando um joelho ou o peso do quadril diretamente por cima dela, isolando esse lado enquanto libera a outra perna.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "hip throw": {
+    "en": "Attacker turns their back into the opponent, hooks their hip under the opponent's hips while gripping the upper body, then bends forward to launch them over the hip to the mat.",
+    "pt": "O atacante vira as costas para o adversário, encaixa o quadril embaixo do quadril dele segurando a parte de cima do corpo, e se curva para lançá-lo por cima do quadril.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "hooks in": {
+    "en": "Attacker's feet are curled inside the opponent's thighs from a back-control position, anchoring the attacker to the opponent's body and preventing them from turning to face or standing.",
+    "pt": "Os pés do atacante ficam curvados por dentro das coxas do adversário a partir do controle das costas, ancorando o atacante no corpo dele e impedindo que se vire ou levante.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "imanari roll": {
+    "en": "Attacker, usually from open guard, rolls forward/sideways over one shoulder while keeping a grip on the opponent's leg, using the roll's momentum to spin into a leg lock entry.",
+    "pt": "O atacante, geralmente da guarda aberta, rola para frente/de lado sobre um ombro mantendo a pegada na perna do adversário, usando o impulso do rolamento para girar até uma entrada de chave de perna.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "inside arm stack pass": {
+    "en": "Passer traps one of the opponent's own arms against their body between the legs, then stacks their hips and weight forward over the opponent, folding them so the trapped arm blocks any recovery.",
+    "pt": "O passador prende um dos braços do adversário contra o próprio corpo entre as pernas, e então empilha o quadril e o peso para frente sobre ele, dobrando-o para que o braço preso bloqueie a recomposição.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "inside ashi": {
+    "en": "A leg entanglement where the attacker's controlling leg comes from the inside of the opponent's trapped leg, hooking and pinning it against the attacker's own hip/thigh.",
+    "pt": "Um emaranhado de pernas em que a perna de controle do atacante vem por dentro da perna presa do adversário, prendendo-a contra o próprio quadril/coxa do atacante.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "inside trip": {
+    "en": "Attacker steps a leg between/inside the opponent's legs and hooks or blocks their nearest ankle from the inside while pulling/pushing the upper body, tripping them straight down.",
+    "pt": "O atacante coloca uma perna entre/por dentro das pernas do adversário e prende ou bloqueia o tornozelo mais próximo por dentro enquanto puxa/empurra a parte de cima do corpo, derrubando-o.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "inverted de la riva guard": {
+    "en": "Guard player hooks the De La Riva leg but rotates their own hips/back to the mat, upside-down relative to the opponent, using the inverted angle to attack the back or legs.",
+    "pt": "O jogador de guarda encaixa o gancho de De La Riva mas gira o próprio quadril/costas para o chão, de cabeça para baixo em relação ao adversário, usando o ângulo invertido para atacar as costas ou pernas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "inverted half guard": {
+    "en": "Guard player in half guard rotates onto their shoulders/upper back, hips inverted upward, using the reversed orientation to attack the trapped leg or underhook the far side.",
+    "pt": "O jogador de meia-guarda gira sobre os ombros/parte superior das costas, quadril invertido para cima, usando a orientação invertida para atacar a perna presa ou pegar o underhook do lado distante.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "inverted triangle": {
+    "en": "Attacker locks a triangle around the opponent's head and arm as in a normal triangle, but rotates the whole configuration upside down relative to the standard finishing angle.",
+    "pt": "O atacante trava um triângulo ao redor da cabeça e braço do adversário como no triângulo normal, mas gira toda a configuração de cabeça para baixo em relação ao ângulo padrão de finalização.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "john wayne sweep": {
+    "en": "From a leg-entanglement/ashi position, attacker uses the controlled leg and a grip on the opponent's collar or arm to roll/pull them over sideways, landing in a dominant leg-lock position.",
+    "pt": "De uma posição de emaranhado de pernas, o atacante usa a perna controlada e uma pegada na gola ou braço do adversário para rolá-lo/puxá-lo de lado, terminando numa posição dominante de chave de perna.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "kguard": {
+    "en": "Guard player sits with one shin shielding across the front and the other foot posted/hooked near the opponent's hip, the legs forming a K-shape used to enter leg entanglements.",
+    "pt": "O jogador de guarda senta com uma canela protegendo a frente e o outro pé apoiado/enganchado perto do quadril do adversário, as pernas formando um K usado para entrar em emaranhados de pernas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "kimura": {
+    "en": "Attacker traps the opponent's bent arm behind their back in a figure-four grip (own wrist to own forearm), rotating the shoulder internally to hyperextend/hyper-rotate it.",
+    "pt": "O atacante prende o braço dobrado do adversário atrás das costas numa pegada em quatro (próprio pulso no próprio antebraço), rotacionando o ombro para dentro.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "kimura grip": {
+    "en": "The figure-four hand grip itself — one hand on the opponent's wrist, the other hand grabbing your own wrist around their arm — used to control the arm before finishing or sweeping.",
+    "pt": "A pegada em quatro em si — uma mão no pulso do adversário, a outra mão segurando o próprio pulso ao redor do braço dele — usada para controlar o braço antes de finalizar ou raspar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "kimura trap": {
+    "en": "Attacker holds a kimura grip but, instead of finishing, uses it to control and pin the opponent's shoulder/arm to the mat as a positional control rather than submission attempt.",
+    "pt": "O atacante segura a pegada de kimura mas, em vez de finalizar, usa-a para controlar e prender o ombro/braço do adversário no chão como controle posicional em vez de tentativa de finalização.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "knee bar": {
+    "en": "Attacker controls the opponent's leg across their own hips (like an armbar but on the leg), pinning the thigh and extending the hips to hyperextend the knee joint.",
+    "pt": "O atacante controla a perna do adversário sobre o próprio quadril (como uma chave de braço, mas na perna), prendendo a coxa e estendendo o quadril para hiperestender o joelho.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "knee cut pass": {
+    "en": "Passer drives a knee down and across the opponent's near thigh, cutting it flat to the mat while pommeling the far-side underhook free to slide through to side control.",
+    "pt": "O passador empurra um joelho para baixo e através da coxa próxima do adversário, achatando-a no chão enquanto libera o underhook do lado distante para deslizar ao controle lateral.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "knee on belly": {
+    "en": "Attacker plants one knee directly on the opponent's stomach/ribs, the other leg posted out wide for base, applying focused weight through the knee — a mobile pin, not full side control.",
+    "pt": "O atacante apoia um joelho diretamente na barriga/costelas do adversário, a outra perna aberta para base, aplicando peso concentrado pelo joelho — uma imobilização móvel, não controle lateral completo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "knee shield collapse pass": {
+    "en": "Passer, facing a knee shield half guard, collapses/flattens the shielding knee down toward the mat by driving their own weight and hip pressure through it, opening the pass.",
+    "pt": "O passador, diante de uma meia-guarda com joelho de escudo, achata o joelho protetor para baixo empurrando o próprio peso e pressão do quadril através dele, abrindo a passagem.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "knee shield half guard": {
+    "en": "Guard player in half guard keeps a shin/knee braced across the opponent's hip and torso as a frame, using it to prevent them from flattening out or passing.",
+    "pt": "O jogador de meia-guarda mantém uma canela/joelho apoiado através do quadril e tronco do adversário como uma estrutura, evitando que ele o achate ou passe.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "knee tap": {
+    "en": "Attacker off-balances the opponent forward/diagonally with an upper-body grip while their free hand taps/pulls the opponent's near knee out, sending them down without a full shot.",
+    "pt": "O atacante desequilibra o adversário para frente/diagonal com uma pegada na parte de cima do corpo enquanto a mão livre puxa o joelho próximo dele, derrubando-o sem uma entrada completa.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "kouchi gari": {
+    "en": "Attacker hooks their foot inside the opponent's near ankle/calf and reaps it forward and up while pulling the upper body backward, off-balancing them to the mat.",
+    "pt": "O atacante prende o próprio pé por dentro do tornozelo/panturrilha próximos do adversário e o puxa para frente e para cima enquanto empurra a parte de cima do corpo para trás.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "lasso guard": {
+    "en": "Guard player wraps one leg over and around the opponent's same-side arm (trapping it against the body) while gripping the same sleeve, controlling that arm entirely with the leg.",
+    "pt": "O jogador de guarda envolve uma perna por cima e ao redor do braço correspondente do adversário (prendendo-o contra o corpo) enquanto segura a mesma manga, controlando esse braço inteiramente com a perna.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "leg drag pass": {
+    "en": "Passer pulls the opponent's near leg across their own body toward the far side (dragging it past the hip), removing it as an obstacle before sliding around to the back or side.",
+    "pt": "O passador puxa a perna próxima do adversário através do próprio corpo em direção ao lado distante, removendo-a como obstáculo antes de deslizar até as costas ou o lado.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "leg drag to straddle": {
+    "en": "After dragging the opponent's leg across, attacker continues over the top to straddle the opponent's torso directly, one knee on each side, rather than settling into side control.",
+    "pt": "Depois de arrastar a perna do adversário, o atacante continua por cima para sentar diretamente sobre o tronco dele, um joelho de cada lado, em vez de se firmar no controle lateral.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "leg entanglement": {
+    "en": "Any position where the legs of both athletes are intertwined/hooked around each other (ashi garami, 50/50, saddle) — a family of positions built around controlling a trapped leg.",
+    "pt": "Qualquer posição em que as pernas dos dois atletas estão entrelaçadas/enganchadas uma na outra — uma família de posições construídas em torno de controlar uma perna presa.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "leg hug": {
+    "en": "Attacker, usually inside a leg entanglement, wraps both arms tightly around the opponent's trapped leg and pulls it into their own chest to prevent it being freed or repositioned.",
+    "pt": "O atacante, geralmente dentro de um emaranhado de pernas, envolve os dois braços firmemente ao redor da perna presa do adversário e a puxa contra o próprio peito para impedir que seja liberada.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "leg lace": {
+    "en": "Attacker weaves an arm or leg through and around the opponent's bent leg/foot, lacing the limbs together to control and off-balance from a turtle or leg-entanglement position.",
+    "pt": "O atacante entrelaça um braço ou perna através e ao redor da perna/pé dobrado do adversário, unindo os membros para controlar e desequilibrar a partir da tartaruga ou emaranhado de pernas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "leg lock": {
+    "en": "Any submission that attacks the leg — knee, ankle, or calf — by extending, rotating, or compressing the joint or muscle rather than the arm, neck, or spine.",
+    "pt": "Qualquer finalização que ataca a perna — joelho, tornozelo ou panturrilha — estendendo, rotacionando ou comprimindo a articulação ou músculo, em vez do braço, pescoço ou coluna.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "leg lock escape": {
+    "en": "Defender caught in a leg entanglement rotates the trapped knee to point away from danger, pommels the foot free, or spins to face the attacker to neutralize the submission threat.",
+    "pt": "O defensor preso num emaranhado de pernas gira o joelho preso para longe do perigo, libera o pé, ou gira de frente para o atacante para neutralizar a ameaça de finalização.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "leg staple pass": {
+    "en": "Passer pins the opponent's foot/ankle to the mat with a hand or knee while advancing past the leg, using the pin (like a staple) so the leg cannot recover or reframe.",
+    "pt": "O passador prende o pé/tornozelo do adversário no chão com a mão ou joelho enquanto avança além da perna, usando essa fixação para que ela não consiga se recompor.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "level change": {
+    "en": "Attacker drops their hips and bends the knees to lower their center of gravity below the opponent's before shooting for a takedown, rather than reaching down from a standing height.",
+    "pt": "O atacante abaixa o quadril e dobra os joelhos para baixar o próprio centro de gravidade abaixo do adversário antes de entrar numa queda, em vez de se abaixar apenas com o tronco.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "long step pass": {
+    "en": "Passer takes one long stepping motion over/around the opponent's legs — planting the far foot past their hips in a single stride — to land directly in side control.",
+    "pt": "O passador dá um passo longo por cima/ao redor das pernas do adversário — apoiando o pé distante além do quadril dele numa única passada — para cair diretamente no controle lateral.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "loop choke": {
+    "en": "Attacker loops one arm under the opponent's chin/neck from the front while the opponent's head is driven down, then locks the grip on the far shoulder to close the choke like a noose.",
+    "pt": "O atacante passa um braço por baixo do queixo/pescoço do adversário pela frente enquanto a cabeça dele é empurrada para baixo, travando a pegada no ombro distante como um laço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "low single leg": {
+    "en": "Attacker drops very low, gripping the opponent's ankle/lower shin with both hands rather than the knee/thigh, staying below their hips to avoid a sprawl counter.",
+    "pt": "O atacante abaixa muito, segurando o tornozelo/canela inferior do adversário com as duas mãos em vez do joelho/coxa, ficando abaixo do quadril dele para evitar um contra-golpe de sprawl.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "lumberjack sweep": {
+    "en": "From closed guard while the opponent stands, attacker off-balances them and, with the help of a training partner or a grip trick, tips them straight backward like felling a tree.",
+    "pt": "Da guarda fechada enquanto o adversário está em pé, o atacante o desequilibra e o derruba diretamente para trás, como derrubando uma árvore.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "lung lock": {
+    "en": "Attacker applies compressive or twisting pressure to the opponent's torso/ribcage area from a control position, targeting the trunk rather than a limb joint.",
+    "pt": "O atacante aplica pressão de compressão ou torção na área do tronco/costelas do adversário a partir de uma posição de controle, visando o tronco em vez de uma articulação de membro.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "mount": {
+    "en": "Attacker sits directly on top of the opponent's torso, one knee on each side of their hips, facing their head — full weight and both hands free to attack.",
+    "pt": "O atacante senta diretamente sobre o tronco do adversário, um joelho de cada lado do quadril, de frente para a cabeça dele — peso total e as duas mãos livres para atacar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "mount escape": {
+    "en": "Defender pinned under mount bridges, shrimps, or traps an arm/leg to off-balance and dislodge the top opponent, working to either reverse them or re-establish guard.",
+    "pt": "O defensor preso sob a montada faz ponte, se movimenta em fuga de quadril, ou prende um braço/perna para desequilibrar e derrubar o oponente de cima, buscando reverter ou recompor a guarda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "mounted crucifix": {
+    "en": "Attacker, from mount, traps one of the opponent's arms between their own legs and pins the other under an armpit, isolating both arms while remaining seated on top.",
+    "pt": "O atacante, da montada, prende um dos braços do adversário entre as próprias pernas e o outro sob uma axila, isolando os dois braços enquanto permanece sentado em cima.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "neck crank": {
+    "en": "Attacker applies bending or twisting force directly to the opponent's neck/spine (not a choke — no circulation/air cut) to strain the cervical joints and muscles.",
+    "pt": "O atacante aplica força de dobra ou torção diretamente no pescoço/coluna do adversário (não é um estrangulamento — sem corte de circulação/ar), forçando as articulações e músculos cervicais.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "northsouth choke": {
+    "en": "Attacker, positioned facing the opponent's legs with chest on their chest (north-south), threads an arm under their neck and squeezes the opponent's own shoulder/head to close it.",
+    "pt": "O atacante, posicionado de frente para as pernas do adversário com o peito no peito dele (norte-sul), passa um braço sob o pescoço e aperta o próprio ombro/cabeça dele para fechar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "north south control": {
+    "en": "Attacker lies chest-to-chest on top of the opponent but facing the opposite direction — attacker's head over the opponent's legs/hips — pinning with chest weight from that reversed angle.",
+    "pt": "O atacante deita peito com peito em cima do adversário mas de frente para a direção oposta — a cabeça do atacante sobre as pernas/quadril dele — prendendo com o peso do peito nesse ângulo invertido.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "northsouth pass": {
+    "en": "Passer, already chest-to-chest facing the opponent's hips (north-south), rotates their hips around the opponent's head/shoulders to swing into regular side control or mount.",
+    "pt": "O passador, já peito com peito de frente para o quadril do adversário, gira o próprio quadril ao redor da cabeça/ombros dele para virar até o controle lateral regular ou a montada.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "northsouth position": {
+    "en": "Two athletes lie head-to-foot, chests aligned but facing opposite directions — a control position with the top athlete's head over the bottom athlete's hips.",
+    "pt": "Dois atletas deitam cabeça-para-pé, peitos alinhados mas de frente para direções opostas — uma posição de controle com a cabeça de quem está em cima sobre o quadril de quem está embaixo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "octopus guard": {
+    "en": "Guard player uses arms and legs together to wrap and entangle several of the opponent's limbs at once, gripping deep on a leg and an arm simultaneously like tentacles.",
+    "pt": "O jogador de guarda usa braços e pernas juntos para envolver e emaranhar vários membros do adversário ao mesmo tempo, segurando fundo numa perna e num braço simultaneamente.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "old school sweep": {
+    "en": "From guard while the opponent is standing/kneeling and gripping a leg, attacker traps that leg between their own, controls the far arm, and rolls/kicks through to land on top.",
+    "pt": "Da guarda enquanto o adversário está em pé/ajoelhado e segurando uma perna, o atacante a prende entre as próprias, controla o braço distante, e rola/chuta para terminar em cima.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "omoplata shoulder lock": {
+    "en": "Attacker traps the opponent's arm between their legs with the shoulder as the pivot, using the legs to rotate the trapped shoulder past its normal range while lying alongside them.",
+    "pt": "O atacante prende o braço do adversário entre as próprias pernas com o ombro como pivô, usando as pernas para rotacionar o ombro preso além do seu alcance normal.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "open guard": {
+    "en": "Guard player faces the opponent with legs unlocked (not closed around the waist), using feet, shins, or hands to frame, hook, or push against them from a distance.",
+    "pt": "O jogador de guarda fica de frente para o adversário com as pernas destravadas (sem fechar ao redor da cintura), usando pés, canelas ou mãos para estruturar, enganchar ou empurrar à distância.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "osoto gari": {
+    "en": "Attacker steps outside the opponent's leg, sweeping their own leg back into the opponent's same leg at the back of the knee/thigh while pulling the upper body forward and down.",
+    "pt": "O atacante dá um passo por fora da perna do adversário, varrendo a própria perna para trás contra a mesma perna dele na parte de trás do joelho/coxa, puxando a parte de cima do corpo para frente e para baixo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "outside ashi garami": {
+    "en": "A leg entanglement where the attacker's controlling leg comes from outside the opponent's trapped leg, hooking it from the far side rather than between the legs.",
+    "pt": "Um emaranhado de pernas em que a perna de controle do atacante vem de fora da perna presa do adversário, enganchando-a do lado distante em vez de por entre as pernas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "outside pass": {
+    "en": "Passer works entirely around the outside of the opponent's legs (never stepping between them), circling the hips wide to reach side control from the far side.",
+    "pt": "O passador trabalha inteiramente por fora das pernas do adversário (nunca passando entre elas), circulando o quadril amplamente para alcançar o controle lateral do lado distante.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "overunder pass": {
+    "en": "Passer, from inside the guard, hooks one arm over the opponent's near leg and the other arm under the far leg, using the split grip to control and drive both legs to one side.",
+    "pt": "O passador, por dentro da guarda, prende um braço por cima da perna próxima do adversário e o outro braço por baixo da perna distante, usando essa pegada dividida para controlar ambas as pernas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "overhook": {
+    "en": "Attacker's arm wraps over the top of the opponent's arm from the outside (their arm on top, ours underneath is the underhook's mirror), controlling and pinning that arm from above.",
+    "pt": "O braço do atacante envolve por cima do braço do adversário por fora, controlando e prendendo esse braço a partir de cima — o espelho do underhook.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "paper cutter choke": {
+    "en": "Attacker, from side control or knee-on-belly, threads the near collar across the opponent's throat and drives the forearm down and across like a paper cutter blade, using shoulder pressure.",
+    "pt": "O atacante, do controle lateral ou joelho na barriga, passa a gola próxima através da garganta do adversário e empurra o antebraço para baixo e através como uma lâmina de guilhotina de papel.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "peruvian necktie": {
+    "en": "Attacker, usually facing a turtled opponent, drops to one side and wraps an arm around the neck while trapping their head between their own legs, off-balancing them to finish the choke on the ground.",
+    "pt": "O atacante, geralmente de frente para um adversário na tartaruga, cai para um lado e envolve um braço ao redor do pescoço enquanto prende a cabeça dele entre as próprias pernas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "posture": {
+    "en": "The overall alignment of the spine, head, and hips relative to the opponent — an upright, structurally sound posture resists submissions and sweeps; a broken, folded posture invites them.",
+    "pt": "O alinhamento geral da coluna, cabeça e quadril em relação ao adversário — uma postura ereta e estruturalmente sólida resiste a finalizações e raspagens; uma postura quebrada e dobrada as convida.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "pressure": {
+    "en": "The sustained, heavy application of body weight through the chest, hips, or shoulder onto the opponent, making it physically harder for them to breathe, move, or create space.",
+    "pt": "A aplicação sustentada e pesada do peso do corpo através do peito, quadril ou ombro sobre o adversário, tornando fisicamente mais difícil para ele respirar, se mover ou criar espaço.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "pressure pass": {
+    "en": "Passer keeps their chest/hips heavy and flush against the opponent throughout the pass, advancing slowly by collapsing their space rather than moving quickly around them.",
+    "pt": "O passador mantém o peito/quadril pesado e colado no adversário durante toda a passagem, avançando devagar ao colapsar o espaço dele em vez de se mover rápido ao redor.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "pummeling": {
+    "en": "The back-and-forth hand-fighting for underhooks in a clinch — each athlete alternately threading an arm under the other's to win inside position on the torso.",
+    "pt": "A disputa de mãos indo e voltando por underhooks no clinch — cada atleta alternadamente passa um braço por baixo do outro para ganhar a posição interna no tronco.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "rear body lock": {
+    "en": "Attacker clasps both arms around the opponent's waist/torso from directly behind, standing or kneeling, controlling their base before a takedown or drag to the mat.",
+    "pt": "O atacante abraça o quadril/tronco do adversário com os dois braços diretamente por trás, em pé ou ajoelhado, controlando a base dele antes de uma queda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "rear naked choke": {
+    "en": "Attacker, from behind the opponent, wraps one arm fully around their neck (bicep and forearm framing both sides), laces the other hand behind their head, and squeezes both carotids.",
+    "pt": "O atacante, por trás do adversário, envolve um braço totalmente ao redor do pescoço dele (bíceps e antebraço emoldurando os dois lados), trava a outra mão atrás da cabeça, e aperta as duas carótidas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "rollthrough": {
+    "en": "Either athlete uses a full forward or backward roll — tucking the head/shoulder and rotating the whole body — to transition through a scramble into a new position.",
+    "pt": "Qualquer atleta usa um rolamento completo para frente ou para trás — recolhendo cabeça/ombro e girando o corpo inteiro — para transicionar através de uma disputa até uma nova posição.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "rolling": {
+    "en": "General forward or backward rotation of the body over the shoulders as a way of moving through a scramble or transition, distinct from a granby (sideways) or a deliberate throw.",
+    "pt": "Rotação geral do corpo para frente ou para trás sobre os ombros como forma de se mover através de uma disputa ou transição.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "rubber guard": {
+    "en": "Guard player pulls one of their own legs up high behind the opponent's head/shoulder using an arm (a configuration called mission control), gripping their own shin to trap the upper body.",
+    "pt": "O jogador de guarda puxa uma das próprias pernas alto atrás da cabeça/ombro do adversário com um braço, segurando a própria canela para prender a parte de cima do corpo dele.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "russian tie": {
+    "en": "From a clinch/collar tie, attacker wraps an arm around and under the opponent's same-side arm from behind their tricep, controlling it while staying to their outside.",
+    "pt": "De um clinch/pegada de pescoço, o atacante envolve um braço ao redor e por baixo do braço correspondente do adversário por trás do tríceps, controlando-o enquanto fica pelo lado de fora.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "saddle inside sankaku": {
+    "en": "Attacker sits alongside a trapped bent leg with their own legs wrapped triangle-style around the opponent's thigh, hips turned in — the classic modern heel-hook control position.",
+    "pt": "O atacante senta ao lado de uma perna presa dobrada com as próprias pernas envolvidas em triângulo ao redor da coxa do adversário, quadril virado para dentro — a posição clássica de controle para chave de calcanhar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "sassae tsurikomi ashi": {
+    "en": "Attacker blocks the opponent's advancing foot/ankle with the sole of their own foot while pulling the upper body sharply down and around, tripping them over the blocked foot.",
+    "pt": "O atacante bloqueia o pé/tornozelo avançando do adversário com a sola do próprio pé enquanto puxa a parte de cima do corpo bruscamente para baixo e ao redor, derrubando-o sobre o pé bloqueado.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "scarf hold": {
+    "en": "Attacker pins the opponent's head and near arm under their own armpit/side while lying perpendicular across their chest, one leg often extended back for base — kesa-gatame.",
+    "pt": "O atacante prende a cabeça e o braço próximo do adversário sob a própria axila/lado enquanto deita perpendicular sobre o peito dele, uma perna geralmente estendida para trás como base.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "scissor sweep": {
+    "en": "From closed guard, attacker frames one shin across the opponent's stomach and scissors the other leg low across their legs, cutting the two legs in opposite directions to topple them.",
+    "pt": "Da guarda fechada, o atacante apoia uma canela através da barriga do adversário e faz uma tesoura com a outra perna baixa através das pernas dele, cortando em direções opostas para derrubá-lo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "scramble": {
+    "en": "A fast, chaotic exchange where neither athlete has a stable position — both scrambling for grips, base, or an opening — that resolves into whoever secures the next position first.",
+    "pt": "Uma troca rápida e caótica em que nenhum atleta tem uma posição estável — ambos disputando pegadas, base ou uma abertura — que se resolve com quem garantir a próxima posição primeiro.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "seatbelt control": {
+    "en": "Attacker, on the way to or from back control, wraps one arm over the opponent's shoulder and one arm under their armpit from behind, hands gripping like a diagonal seatbelt strap.",
+    "pt": "O atacante, a caminho ou saindo do controle das costas, envolve um braço por cima do ombro do adversário e um braço por baixo da axila por trás, mãos segurando como um cinto de segurança diagonal.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "seated guard": {
+    "en": "Guard player sits upright on the mat facing the opponent (rather than lying flat on their back), using the seated posture to frame, grip, and threaten sweeps or entries.",
+    "pt": "O jogador de guarda senta ereto no tatame de frente para o adversário (em vez de deitar de costas), usando a postura sentada para estruturar, segurar e ameaçar raspagens.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "shin to shin guard": {
+    "en": "Guard player and opponent each have a shin crossed against the other's shin, both athletes seated and facing each other, using the shin contact as the primary frame/hook.",
+    "pt": "O jogador de guarda e o adversário têm cada um uma canela cruzada contra a canela do outro, ambos sentados de frente um para o outro, usando o contato das canelas como estrutura/gancho principal.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "shoot": {
+    "en": "Attacker lowers their level and drives forward explosively at the opponent's legs/hips to close distance and initiate a takedown attempt.",
+    "pt": "O atacante abaixa o nível e avança explosivamente em direção às pernas/quadril do adversário para fechar a distância e iniciar uma tentativa de queda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "shoulder crunch": {
+    "en": "Attacker isolates and folds the opponent's shoulder/arm inward across their own chest under pressure, crunching the shoulder joint's range of motion from a pinning position.",
+    "pt": "O atacante isola e dobra o ombro/braço do adversário para dentro através do próprio peito sob pressão, forçando o limite de movimento da articulação do ombro a partir de uma posição de imobilização.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "shoulder lock": {
+    "en": "Any submission that isolates and rotates or extends the shoulder joint beyond its range — kimura, omoplata, americana, and similar attacks all belong to this family.",
+    "pt": "Qualquer finalização que isola e rotaciona ou estende a articulação do ombro além do seu alcance — kimura, omoplata, americana e ataques similares pertencem a essa família.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "shoulder throw": {
+    "en": "Attacker turns their back into the opponent, pulls one of their arms over the attacker's own shoulder, and bends forward sharply to launch them over the shoulder onto their back.",
+    "pt": "O atacante vira as costas para o adversário, puxa um dos braços dele por cima do próprio ombro, e se curva bruscamente para lançá-lo por cima do ombro.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "shrimp hip escape": {
+    "en": "Defender on their back or side pushes off with the feet to slide the hips away and create a frame/angle from an opponent trying to pin or pass, moving in a shrimp-like curl.",
+    "pt": "O defensor de costas ou de lado empurra com os pés para deslizar o quadril para longe e criar uma estrutura/ângulo contra um adversário tentando prender ou passar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "side control": {
+    "en": "Attacker lies perpendicular across the opponent's chest, chest-to-chest but at a 90-degree angle, pinning their upper body while the opponent's hips face the other direction.",
+    "pt": "O atacante deita perpendicular sobre o peito do adversário, peito com peito mas a 90 graus, prendendo a parte de cima do corpo dele enquanto o quadril fica virado na outra direção.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "single leg takedown": {
+    "en": "Attacker drops level and wraps both arms around one of the opponent's legs, driving them backward or lifting to off-balance and finish the takedown to that single leg.",
+    "pt": "O atacante abaixa o nível e envolve os dois braços ao redor de uma das pernas do adversário, empurrando para trás ou levantando para desequilibrá-lo e finalizar a queda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "single leg x": {
+    "en": "Guard player traps one of the opponent's legs between their own shin and thigh, the other leg hooked under their hip, controlling the leg from underneath rather than beside it.",
+    "pt": "O jogador de guarda prende uma das pernas do adversário entre a própria canela e coxa, a outra perna enganchada sob o quadril dele, controlando a perna por baixo em vez de ao lado.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "single under pass": {
+    "en": "Passer hooks only one arm under a single leg of the opponent (the other stays over), using the split grip to lift and clear one side while keeping weight on the other.",
+    "pt": "O passador enfia apenas um braço por baixo de uma única perna do adversário (a outra fica por cima), usando essa pegada dividida para levantar e limpar um lado mantendo peso no outro.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "smash half guard": {
+    "en": "Attacker, passing a half guard, flattens their full chest weight onto the opponent's upper body/head, pinning them flat to the mat before extracting the trapped leg.",
+    "pt": "O atacante, passando uma meia-guarda, achata todo o peso do peito sobre a parte de cima do corpo/cabeça do adversário, prendendo-o achatado no chão antes de extrair a perna presa.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "smash pass": {
+    "en": "Passer drives their chest/shoulder weight down heavily onto the opponent, flattening their hips and shoulders to the mat, prioritizing crushing pressure over speed or angles.",
+    "pt": "O passador empurra o peso do peito/ombro pesadamente sobre o adversário, achatando o quadril e ombros dele no chão, priorizando pressão esmagadora em vez de velocidade.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "snapdown": {
+    "en": "From a collar tie or head control, attacker sharply pulls/snaps the opponent's head and upper body down and forward, off-balancing them into a front headlock or turtle.",
+    "pt": "De uma pegada de pescoço ou controle de cabeça, o atacante puxa bruscamente a cabeça e a parte de cima do corpo do adversário para baixo e para frente, desequilibrando-o.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "snapdown to front headlock": {
+    "en": "Immediately after snapping the opponent's head/torso down, attacker wraps an arm around their now-lowered head/neck to secure a front headlock before they recover posture.",
+    "pt": "Imediatamente depois de puxar a cabeça/tronco do adversário para baixo, o atacante envolve um braço ao redor da cabeça/pescoço agora abaixado para prender uma gravata frontal.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "snatch single leg": {
+    "en": "Attacker grabs a single leg with a fast, high-pace pull/lift (rather than a driving shot) to snatch the opponent off balance immediately, often finishing standing rather than on a shot.",
+    "pt": "O atacante agarra uma única perna com um puxão/levantada rápido e de alto ritmo (em vez de uma entrada com impulso), arrancando o adversário do equilíbrio imediatamente.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "spider guard": {
+    "en": "Guard player grips both of the opponent's sleeves while placing one or both feet on their biceps/hips, pushing them away at a distance to control posture and distance.",
+    "pt": "O jogador de guarda segura as duas mangas do adversário enquanto coloca um ou os dois pés nos bíceps/quadril dele, empurrando-o para longe para controlar postura e distância.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "stack pass": {
+    "en": "Passer stacks the opponent's legs and hips up and over their own head/shoulders, folding them into a compressed pile so the legs cannot swing or reframe while advancing.",
+    "pt": "O passador empilha as pernas e o quadril do adversário para cima e por cima da própria cabeça/ombros, dobrando-o numa pilha compacta para que as pernas não consigam se mover.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "straight ankle lock": {
+    "en": "Attacker traps the opponent's foot under an armpit or against the hip, gripping the top of the foot and extending the hips to hyperextend the ankle straight backward.",
+    "pt": "O atacante prende o pé do adversário sob uma axila ou contra o quadril, segurando a parte de cima do pé e estendendo o quadril para hiperestender o tornozelo diretamente para trás.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "sumi gaeshi": {
+    "en": "A sacrifice throw where attacker drops onto their back while pulling the opponent's upper body down and driving a foot into their stomach/hip, launching them over in a backward arc.",
+    "pt": "Uma projeção de sacrifício em que o atacante cai de costas puxando a parte de cima do corpo do adversário para baixo e empurrando um pé na barriga/quadril dele, lançando-o para trás em arco.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "suplex": {
+    "en": "Attacker, usually from a rear or waist-lock grip, lifts the opponent off the ground and arches backward, throwing them overhead to land on their back/shoulders behind the attacker.",
+    "pt": "O atacante, geralmente de uma pegada de trás ou na cintura, levanta o adversário do chão e arqueia para trás, lançando-o por cima da cabeça para cair de costas/ombros atrás do atacante.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "sweep": {
+    "en": "Any technique from a bottom guard position that reverses the athletes' positions — the bottom player ends up on top — without passing through a submission.",
+    "pt": "Qualquer técnica a partir de uma posição de guarda por baixo que reverte a posição dos atletas — quem estava embaixo termina em cima — sem passar por uma finalização.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "sweeping hip throw": {
+    "en": "Attacker hooks an arm around the opponent's waist, sweeps a leg across their standing leg from the outside while pulling the upper body, throwing them in a wide arc to the mat.",
+    "pt": "O atacante encaixa um braço ao redor da cintura do adversário, varre uma perna através da perna de apoio dele por fora enquanto puxa a parte de cima do corpo, projetando-o num arco largo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "switch escape": {
+    "en": "Defender under a top position posts a hand behind them and rotates the hips 180 degrees, switching their base from one side to the other to slip out from under the pin.",
+    "pt": "O defensor sob uma posição por cima apoia uma mão atrás e gira o quadril 180 graus, trocando a base de um lado para o outro para escapar de baixo da imobilização.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "takedown": {
+    "en": "Any technique performed from a standing position that brings the opponent from standing down to the mat, with the attacker typically ending in a top or advantageous position.",
+    "pt": "Qualquer técnica feita em pé que leva o adversário do pé ao chão, com o atacante geralmente terminando numa posição por cima ou vantajosa.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "takedown defense": {
+    "en": "Standing defender sprawls the hips back and down, flattens the chest onto the attacker's back/shoulders, and frames to prevent a shot from being completed into a takedown.",
+    "pt": "O defensor em pé faz sprawl com o quadril para trás e para baixo, achata o peito sobre as costas/ombros do atacante, e estrutura para evitar que a entrada se complete numa queda.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "tani otoshi": {
+    "en": "A sacrifice-style throw where attacker steps deeply to one side of the opponent, blocks their near leg, and drops sideways to the mat, taking the opponent down with them.",
+    "pt": "Uma projeção estilo sacrifício em que o atacante dá um passo profundo para um lado do adversário, bloqueia a perna próxima dele, e cai de lado no tatame, levando o adversário junto.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "technical standup": {
+    "en": "Defender on the ground posts one hand and the opposite foot on the mat, sweeping the free leg back underneath to rise to a standing base while always facing the opponent.",
+    "pt": "O defensor no chão apoia uma mão e o pé oposto no tatame, varrendo a perna livre para trás por baixo para levantar numa base em pé sempre de frente para o adversário.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "threequarter mount": {
+    "en": "Attacker is mounted but with one leg extended flat/hooked outside the opponent's leg rather than both knees pinned at the hips — a transitional mount variant, high-mount adjacent.",
+    "pt": "O atacante está montado mas com uma perna estendida/enganchada por fora da perna do adversário em vez dos dois joelhos presos no quadril — uma variante transicional de montada.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "throw": {
+    "en": "Any standing technique that launches or trips the opponent off their feet using leverage through the hip, leg, or shoulder, typically ending with the attacker still standing or landing on top.",
+    "pt": "Qualquer técnica em pé que lança ou derruba o adversário usando alavanca pelo quadril, perna ou ombro, geralmente terminando com o atacante ainda em pé ou caindo em cima.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "toe hold": {
+    "en": "Attacker grips the opponent's foot (toes/forefoot) and rotates it while the leg is trapped, twisting the ankle joint via the foot rather than the heel.",
+    "pt": "O atacante segura o pé do adversário (dedos/parte da frente do pé) e o gira enquanto a perna está presa, torcendo a articulação do tornozelo através do pé em vez do calcanhar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "top control": {
+    "en": "Attacker maintains a heavy, pinning position on top of the opponent (any of mount, side control, knee-on-belly) with the priority of preventing any reversal or escape.",
+    "pt": "O atacante mantém uma posição pesada e de imobilização em cima do adversário, com a prioridade de evitar qualquer reversão ou fuga.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "top half guard": {
+    "en": "Attacker is on top of an opponent's half guard, chest pressure down on their torso, working to flatten the hips and free the trapped leg to complete the pass.",
+    "pt": "O atacante está em cima da meia-guarda do adversário, pressão do peito sobre o tronco dele, trabalhando para achatar o quadril e liberar a perna presa para completar a passagem.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "toreando pass": {
+    "en": "Passer grips both of the opponent's pant legs/ankles from a standing or kneeling base and swings the legs side to side like a bullfighter's cape, stepping around them to pass.",
+    "pt": "O passador segura as duas calças/tornozelos do adversário de uma base em pé ou ajoelhada e balança as pernas de um lado para o outro como a capa de um toureiro, passando ao redor.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "triangle choke": {
+    "en": "Attacker locks their legs in a figure-four around the opponent's neck and one arm, one knee behind their own opposite knee, squeezing the thighs together to compress the neck and trapped shoulder.",
+    "pt": "O atacante trava as pernas numa pegada em quatro ao redor do pescoço do adversário e um braço, apertando as coxas juntas para comprimir o pescoço e o ombro preso.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "trip": {
+    "en": "Attacker uses a leg to block or hook one of the opponent's legs while pushing/pulling their upper body, causing them to fall over the blocked leg.",
+    "pt": "O atacante usa uma perna para bloquear ou enganchar uma das pernas do adversário enquanto empurra/puxa a parte de cima do corpo dele, fazendo-o cair sobre a perna bloqueada.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "tripod pass": {
+    "en": "Passer stands on both feet plus one posted hand (a tripod base), using that wide stable stance to circle and step around the opponent's legs while staying upright.",
+    "pt": "O passador fica de pé nos dois pés mais uma mão apoiada (uma base de tripé), usando essa postura ampla e estável para circular ao redor das pernas do adversário.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "tripod sweep": {
+    "en": "From open guard, attacker posts one foot on the opponent's hip and hooks the other behind their ankle, then pulls/pushes to topple them over that blocked ankle backward.",
+    "pt": "Da guarda aberta, o atacante apoia um pé no quadril do adversário e prende o outro atrás do tornozelo dele, puxando/empurrando para derrubá-lo para trás sobre esse tornozelo bloqueado.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "truck": {
+    "en": "Attacker controls the opponent from a turtled or twisted position by trapping one of their legs high across the attacker's own body, hips turned in, threatening a twister-family attack.",
+    "pt": "O atacante controla o adversário a partir de uma posição de tartaruga ou torcida prendendo uma das pernas dele alta através do próprio corpo, quadril virado para dentro.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "turtle control": {
+    "en": "Attacker positions on top of or alongside a turtled opponent, hooks or hands controlling their hips/far side, preventing them from standing or rolling to escape.",
+    "pt": "O atacante se posiciona em cima ou ao lado de um adversário na tartaruga, ganchos ou mãos controlando o quadril/lado distante dele, impedindo que levante ou role para escapar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "turtle position": {
+    "en": "Defender curls onto their hands and knees (or elbows and knees), head tucked and back rounded, protecting the neck and limbs while presenting the smallest possible target.",
+    "pt": "O defensor se enrola sobre as mãos e joelhos (ou cotovelos e joelhos), cabeça recolhida e costas arredondadas, protegendo o pescoço e os membros enquanto apresenta o menor alvo possível.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "twister": {
+    "en": "From the truck position, attacker turns the opponent's head/shoulders in the opposite direction of their pinned, twisted hips and legs, straining the spine along its rotational axis.",
+    "pt": "Da posição de truck, o atacante gira a cabeça/ombros do adversário na direção oposta ao quadril e pernas presos e torcidos dele, forçando a coluna ao longo do seu eixo rotacional.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "twoonone wrist control": {
+    "en": "Attacker uses both of their own hands to grip and control a single one of the opponent's wrists/arms, doubling up the control to prevent that limb from framing or gripping.",
+    "pt": "O atacante usa as duas próprias mãos para segurar e controlar apenas um pulso/braço do adversário, dobrando o controle para impedir que esse membro estruture ou segure.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "uchi mata": {
+    "en": "Attacker turns their back into the opponent and swings one leg up high and inside between the opponent's legs, lifting them off the mat and rotating them over the swept thigh.",
+    "pt": "O atacante vira as costas para o adversário e balança uma perna alto e por dentro entre as pernas dele, levantando-o do chão e rotacionando-o por cima da coxa.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "underhook": {
+    "en": "Attacker's arm wraps under and around the opponent's arm from below (their arm on the bottom, controlling the opponent's arm from underneath), used to control the torso and lift.",
+    "pt": "O braço do atacante envolve por baixo e ao redor do braço do adversário (o braço do atacante embaixo, controlando o braço dele por baixo), usado para controlar o tronco e levantar.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "von flue choke": {
+    "en": "Attacker, defending a guillotine attempt from on top, drives their shoulder/head down into the opponent's trapped arm and neck, using their own body weight to close the choke instead of the arms.",
+    "pt": "O atacante, defendendo uma tentativa de guilhotina por cima, empurra o próprio ombro/cabeça para baixo contra o braço e pescoço presos do adversário, usando o peso do próprio corpo para fechar o estrangulamento.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "weave pass": {
+    "en": "Passer threads/weaves an arm or leg through the gaps of the opponent's frames or legs, working the limb in and out to clear each obstacle in sequence rather than a single big movement.",
+    "pt": "O passador entrelaça um braço ou perna através dos espaços das estruturas ou pernas do adversário, trabalhando o membro para dentro e para fora para limpar cada obstáculo em sequência.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "worm guard": {
+    "en": "Guard player wraps the opponent's own belt/lapel around one of their legs from underneath, using that lapel-leg lasso to control the leg and off-balance them from open guard.",
+    "pt": "O jogador de guarda envolve o próprio cinto/lapela do adversário ao redor de uma das pernas dele por baixo, usando esse laço de lapela-perna para controlar a perna e desequilibrá-lo.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "wrestleup": {
+    "en": "Attacker, from back control while the opponent tries to stand, drives up and off the ground with them, ending the exchange standing while remaining attached to their back.",
+    "pt": "O atacante, do controle das costas enquanto o adversário tenta levantar, sobe do chão junto com ele, terminando a troca em pé enquanto permanece grudado nas costas dele.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "wrist lock": {
+    "en": "Attacker isolates and bends the opponent's wrist beyond its normal range (flexion, extension, or rotation) using both hands or a body-weight lever against the small joint.",
+    "pt": "O atacante isola e dobra o pulso do adversário além do seu alcance normal (flexão, extensão ou rotação) usando as duas mãos ou uma alavanca de peso corporal contra a pequena articulação.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "xguard": {
+    "en": "Guard player is underneath the opponent between their legs, one leg hooked high behind their thigh and the other blocking their far leg in an X shape, lifting their base off the mat.",
+    "pt": "O jogador de guarda fica por baixo do adversário entre as pernas dele, uma perna enganchada alta atrás da coxa e a outra bloqueando a perna distante em formato de X, levantando a base dele do chão.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "xpass": {
+    "en": "Passer crosses their own legs/hips in an X-shaped stepping pattern around the opponent's guard, using the crossing footwork to circle past the legs quickly.",
+    "pt": "O passador cruza as próprias pernas/quadril num padrão de passos em X ao redor da guarda do adversário, usando esse trabalho de pés cruzado para circular rapidamente além das pernas.",
+    "source": "draft",
+    "reviewed": false
+  },
+  "zguard": {
+    "en": "Guard player traps one of the opponent's legs with a shin bent flat across their hip/thigh (forming a Z-shape with the leg) while the other leg stays free to frame or kick.",
+    "pt": "O jogador de guarda prende uma das pernas do adversário com uma canela dobrada e achatada através do quadril/coxa dele (formando um Z com a perna), enquanto a outra fica livre para estruturar.",
+    "source": "draft",
+    "reviewed": false
+  }
+}

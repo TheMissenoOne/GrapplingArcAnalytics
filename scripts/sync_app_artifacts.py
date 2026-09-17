@@ -25,6 +25,12 @@ Four artifacts (root CLAUDE.md cross-module contracts):
      the App's `normalizeLabel` port) — App's `nodeCorpusScores.ts` reads these two fields
      straight off each `NodeLibraryItem` (`src/utils/storage/libraryStorage.ts`). Fetched
      fresh every run (see `load_fresh_scores`).
+  e. `analysis/data/technique_definitions.json` (curated, hand-maintained descriptions,
+     `analysis/technique_definitions.py:load_definitions`) -> App
+     `src/data/technique_definitions.json`, filtered to only the node_keys present in the
+     (now identity-synced) `grappling-arch.nodes.json` — same `{en, pt, source, reviewed}`
+     shape on both sides, keyed by node_key (`analysis.names._normalize_name(en)`, same key
+     `merge_curated_identity` uses for curated identity).
 
 The App file is GENERATED output of this script — never hand-edited; `--check` (this file)
 is asserted in Analytics CI by `tests/test_sync_app_artifacts.py`.
@@ -55,6 +61,8 @@ ONTOLOGY_SRC = REPO / "data" / "processed" / "ontology_seed.json"
 ONTOLOGY_DST = APP / "src" / "data" / "ontology_seed.json"
 CURATED_LIB = REPO / "analysis" / "data" / "technique_library.json"
 NODES_LIB = APP / "src" / "data" / "grappling-arch.nodes.json"
+DEFINITIONS_SRC = REPO / "analysis" / "data" / "technique_definitions.json"
+DEFINITIONS_DST = APP / "src" / "data" / "technique_definitions.json"
 
 SCORE_FIELDS = ("rrb", "eloPercentile")
 
@@ -316,6 +324,41 @@ def sync_nodes_library(
     return True, f"{summary} — updated ({counts['changed']} node(s))"
 
 
+def node_keys_from_library(curated: list[dict[str, Any]], nodes_path: Path) -> set[str]:
+    """node_key set the App's (identity-synced) nodes library WILL contain — recomputed
+    via `merge_curated_identity` rather than trusting a possibly-stale `nodes_path` on
+    disk (relevant in `--check` mode, where `sync_nodes_library` hasn't written yet)."""
+    existing = json.loads(nodes_path.read_text(encoding="utf-8")) if nodes_path.is_file() else []
+    merged, _ = merge_curated_identity(curated, existing)
+    keys: set[str] = set()
+    for node in merged:
+        en = (node.get("translations") or {}).get("en") or node.get("name") or ""
+        if en:
+            keys.add(_normalize_name(str(en)))
+    return keys
+
+
+def sync_definitions(
+    src: Path, dst: Path, node_keys: set[str], *, check: bool
+) -> tuple[bool, str]:
+    """Filter the curated definitions file down to node_keys the App's library actually
+    carries, then sync like `sync_text_file` (diff -> write, or report DRIFT in --check)."""
+    if not src.is_file():
+        raise SystemExit(f"ABORT: technique_definitions.json source missing: {src}")
+    definitions = json.loads(src.read_text(encoding="utf-8"))
+    filtered = {k: v for k, v in definitions.items() if k in node_keys}
+    text = json.dumps(filtered, indent=2, ensure_ascii=False) + "\n"
+    old_text = dst.read_text(encoding="utf-8") if dst.is_file() else None
+    label = f"technique_definitions.json ({len(filtered)} entries)"
+    if text == old_text:
+        return False, f"{label}: unchanged"
+    if check:
+        return True, f"{label}: DRIFT"
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    dst.write_text(text, encoding="utf-8")
+    return True, f"{label}: updated"
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -350,6 +393,13 @@ def main() -> int:
     scores = load_fresh_scores()
     curated = load_curated_nodes()
     changed, msg = sync_nodes_library(NODES_LIB, scores, curated, check=args.check)
+    lines.append(msg)
+    drift = drift or changed
+
+    node_keys = node_keys_from_library(curated, NODES_LIB)
+    changed, msg = sync_definitions(
+        DEFINITIONS_SRC, DEFINITIONS_DST, node_keys, check=args.check
+    )
     lines.append(msg)
     drift = drift or changed
 
