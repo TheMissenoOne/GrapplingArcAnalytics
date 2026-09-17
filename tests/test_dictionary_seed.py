@@ -58,6 +58,17 @@ CURATED: list[dict[str, Any]] = [
 ]
 
 
+@pytest.fixture(autouse=True)
+def _isolate_pair_support(monkeypatch: pytest.MonkeyPatch) -> None:
+    """`score_agreement`/`regrade_seed_near` fall back to `load_pair_support()` (reads the
+    real, gitignored `data/finetune/audit/gemini_seed/pair_support.json`) whenever a test
+    doesn't pass its own `pair_support` dict. Whether that file exists locally is an accident
+    of what's been run on this machine, not something a test should depend on -- so every
+    test here gets an empty corpus by default; a test that wants adjacency to fire passes its
+    own dict explicitly (see `pair_support=support` below)."""
+    monkeypatch.setattr("scripts.dictionary_seed.load_pair_support", lambda *a, **k: {})
+
+
 # ── ts arithmetic ────────────────────────────────────────────────────────────────
 def test_absolute_ts_video_absolute_ignores_start() -> None:
     assert absolute_ts(120, "video_absolute", 340) == 340.0
