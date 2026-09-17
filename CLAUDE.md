@@ -131,6 +131,13 @@ same user — their own dossier, their grapple-like / archetype match. The line 
 not technique: the same user embedding is legitimate for the owner's dossier and forbidden
 inside an archetype centroid or anything the public site renders.
 
+**Reference-owner accounts** (`analysis/reference_owner.py`, `REFERENCE_OWNER_EMAILS` env,
+never in code/git) are still PRIVATE — the same rule applies. A listed account's own
+sessions/round videos/annotations may be used as reader BENCHMARK / reference extraction
+ONLY when the account is in that list (explicit consent) and only to evaluate/improve the
+automatic round reader for that SAME owner. Outputs stay under `data/video/owner/`
+(gitignored) — never the corpus, a dataset, `site/`, a centroid, or ELO.
+
 ### Removing an athlete — two paths, never one
 
 `db.repository.remove_athlete(athlete, session, reason=...)` is the ONLY way an athlete row

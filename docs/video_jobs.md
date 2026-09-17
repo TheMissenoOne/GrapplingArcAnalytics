@@ -21,6 +21,11 @@ selfie live only inside a `TemporaryDirectory` for the run's own duration; by th
 `process_job` returns, the only durable artefacts are the `session_video_analysis` row and the
 objects the run itself uploaded to `user-media/{owner_id}/analysis/{job_id}/...`.
 
+**Reference-owner accounts** — `analysis/reference_owner.py` resolves `REFERENCE_OWNER_EMAILS`
+(env only, never code/git) to profile ids. Consented owners' own rounds may be used as reader
+BENCHMARK/reference extraction, still PRIVATE, outputs under `data/video/owner/` (gitignored),
+never the corpus/dataset/site/centroid/ELO — see this repo's `CLAUDE.md` "Public vs Private Data".
+
 ## Flow, per job
 
 1. **Claim.** `select ... where status = 'queued' ... for update skip locked` (Postgres only —
