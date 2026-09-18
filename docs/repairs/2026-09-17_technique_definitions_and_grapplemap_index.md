@@ -84,3 +84,77 @@ Tests: `tests/test_grapplemap.py` (`test_export_icons_writes_subset`,
 `test_export_icons_check_mode_writes_nothing_and_detects_drift`) exercise matching,
 the index shape, and that every referenced PNG exists — no DB, sibling-repo-gated
 (`_DEFAULT_NODES_PATH.exists()`, same guard as the rest of the file).
+
+## 2026-09-18 — curated position map (rule 0)
+
+Owner: "siga com as figuras, adicione as já existentes" — raise coverage using
+positions GrappleMap already has, without inventing anything or touching
+`technique_library.json` node identity.
+
+Added `analysis/data/grapplemap_position_map.json` — a hand-curated
+`node_key -> {position, note}` override, loaded by `load_position_map()` and
+consulted as **rule 0 (`curated`)**, before `tag`/`canonical_en`/`variant`/`synonym`/
+`token_set`. Built by loading every GrappleMap position's name+tags through the
+parser and manually searching each of the 115 then-unmatched curated techniques for
+a genuinely matching pose (BJJ synonyms: kneebar=knee bar — already auto-matched,
+americana=keylock/ude garami, anaconda, calf slicer/crush, berimbolo, wrist lock,
+etc.) — most of those specific submissions turned out to have **no** distinct
+GrappleMap position (see rejected list below); 10 genuine matches were found.
+
+**Coverage: 106/211** (up from 96/211). Rule breakdown: `curated` 10, `tag` 62,
+`canonical_en` 6, `variant` 6, `synonym` 0, `token_set` 22.
+
+### The 10 curated matches
+
+| curated technique | GrappleMap position | why |
+|---|---|---|
+| Abraço por Trás (Rear Body Lock) | `standing behind w/ body lock` | owner's own example — exact pairing |
+| Kesa-Gatame | `kuzure kesa gatame` | only kesa-gatame-family position (modified variant, no plain one exists) |
+| Kimura Trap | `single leg vs kimura` | kimura grip as a counter/trap vs a single-leg — matches the curated "kimura counter" variant |
+| Controle de Punho Dois-contra-Um (Two-on-One Wrist Control) | `2-on-1 to chest` | plainest `two_on_one`-tagged position, no arm-drag/pass in progress |
+| Ganchos Encaixados (Hooks In) | `leg ride` | tags `back`+`leg_ride` — same concept as "hooks in", just not the same tokens (doc's earlier "genuine absence" call revisited: same idea, different name) |
+| Meia-Guarda Esmagada (Smash Half Guard) | `smashed traditional half` | plainest `smash`+`half_guard` position |
+| Meia-Guarda com Escudo (Knee Shield Half Guard) | `half guard shell w/ leg grabbed` | half guard with the knee-shield/shell frame up; distinct target from Guarda Z's own match (`quarter z`) |
+| Guarda De La Riva | `standing vs de la riva` | plainest of the three `de la riva`-tagged positions (bottom player playing DLR vs a standing passer) |
+| De La Riva Invertida | `standing vs reverse dlr` | GrappleMap's own name for the reverse/inverted DLR variant, distinct target from the base DLR mapping above |
+| Emaranhado de Pernas (Leg Entanglement) | `ashi` | GrappleMap's generic leg-entanglement position — already reused by 4 other Ashi Garami-family curated nodes, `Emaranhado de Pernas` genuinely is the same broad concept |
+
+Rejected during curation (checked, deliberately NOT mapped — precision over
+coverage, per the module's own stated matching philosophy):
+
+- **Americana, Chave de Ombro (generic Shoulder Lock)** — the only `shoulder_lock`-tagged
+  position is `perfect kimura`, already claimed by the `Kimura` node (tag rule). Reusing
+  it here would show the Kimura icon for a different, visually distinguishable technique
+  — worse than no icon.
+- **Anaconda** — exists only as a GrappleMap *transition* (`anaconda`, endpoints both
+  `parallel jiu-claw`), not a position; that position is already `Omoplata`'s icon.
+  Mapping-file entries must be positions only (rule spec), and reusing Omoplata's icon
+  would misrepresent a completely different submission.
+- **Body Lock das Costas** — near-duplicate concept of `Abraço por Trás` (already
+  mapped) and the pre-existing `Body Lock` node (already `turtle body lock`); no third
+  distinct body-lock position exists.
+- **Leg Lace, Leg Hug, Gift Wrap, Chave de Pulso (Wrist Lock), Chave de Virilha,
+  Chave de Panturrilha, Chave de Bíceps, Chave de Polícia, Chave de Pulmão, Chave de
+  Pé (generic Foot Lock), Chave de Tornozelo, Shoulder Crunch, Triângulo de Corpo,
+  Triângulo pelas Costas, Choi Bar, Buggy Choke, Calf Slicer, Gravata Peruana,
+  Gogoplata, Ezequiel** and the choke family (Cruzado/Rodado/Taco de Beisebol/Von
+  Flue/Relógio/Guilhotina Lateral) — checked by name, tag, and `SYNONYMS` against the
+  full 588-position + 145-tag vocabulary; genuinely absent, not a matcher gap.
+- **Puxada Dupla (Double Guard Pull)** — `guard_pull` tag exists but both positions
+  carrying it are single-limb variants (`jumping guard w/ overhook`,
+  `pulling guard from single-leg`), neither depicts a *double* (two-handed) pull.
+- All **pass** (18), **takedown** (17), **sweep** (6), **escape** (10), **transition**
+  (9) and **concept** (4) type nodes were left alone as a category: GrappleMap
+  positions are static end-poses; these curated types name a *movement*
+  (Toreando, Berimbolo, Snapdown, Scramble, Mudança de Nível, …), and GrappleMap
+  models movement as multi-frame transitions, not positions — there is no
+  single-frame pose that depicts a pass or a takedown without borrowing the
+  resulting control position from a different, already-matched curated node.
+
+Still unmatched: 105/211 (was 115). By curated type: submission 25, pass 18,
+takedown 17, escape 10, transition 9, control 9, guard 7, sweep 6, concept 4.
+
+Regen command unchanged (see above). `--check` clean at 106 entries after this
+change. Validated by two new tests: `test_position_map_entries_are_valid`
+(every key a real curated node_key, every target position exists, no duplicate
+targets within the curated file) and `test_curated_rule_wins_before_automatic_rules`.

@@ -66,6 +66,7 @@ _REPO_ROOT = _ANALYTICS_ROOT.parent
 
 DEFAULT_DB_PATH = _ANALYTICS_ROOT / "data" / "GrappleMap.txt"
 DEFAULT_FULL_ICONS_DIR = _ANALYTICS_ROOT / "data" / "grapplemap_icons"
+DEFAULT_POSITION_MAP_PATH = _ANALYTICS_ROOT / "analysis" / "data" / "grapplemap_position_map.json"
 
 DEFAULT_APP_ASSETS_DIR = (
     _REPO_ROOT / "GrapplingArcApp" / "src" / "assets" / "grapplemap_icons"
@@ -73,6 +74,20 @@ DEFAULT_APP_ASSETS_DIR = (
 DEFAULT_APP_INDEX_TS = (
     _REPO_ROOT / "GrapplingArcApp" / "src" / "data" / "grapplemapIconIndex.ts"
 )
+
+
+def load_position_map(path: Path | str = DEFAULT_POSITION_MAP_PATH) -> dict[str, dict[str, str]]:
+    """Curated node_key -> {position, note} overrides — a hand-verified pairing for
+    a curated technique GrappleMap depicts under a name/tag combo the automatic
+    rules (tag/canonical/variant/token_set) can't safely reach on their own.
+    Consulted as rule 0, before every automatic rule (see `_resolve_node_positions`).
+    Missing file -> {} (no overrides), same degrade-gracefully posture as the rest
+    of this module's sibling-repo-optional inputs."""
+    path = Path(path)
+    if not path.is_file():
+        return {}
+    data = json.loads(path.read_text(encoding="utf-8"))
+    return {str(k): dict(v) for k, v in data.items()}
 
 
 def _node_aliases(node: dict) -> list[str]:
@@ -173,22 +188,27 @@ def _resolve_node_positions(
     gmap: GMapGraph,
     nodes: list[dict],
     node_types: tuple[str, ...] | None = None,
+    position_map: dict[str, dict[str, str]] | None = None,
 ) -> dict[str, tuple[str, NodeRef, str]]:
     """Map app node name -> (representative GrappleMap dict-key, NodeRef, matched-by
     rule). Rules, in order, first hit wins per node — deterministic, auditable:
 
-      0. ``tag``           — GrappleMap tag (e.g. ``closed_guard``) matches an app
-                              alias exactly (unchanged, highest precision).
-      1. ``canonical_en``  — curated `en` name's canonical key matches a GrappleMap
+      0. ``curated``        — hand-authored override in `position_map`
+                              (node_key -> GrappleMap position), highest precision:
+                              a human already verified the pose. See
+                              `load_position_map`.
+      1. ``tag``            — GrappleMap tag (e.g. ``closed_guard``) matches an app
+                              alias exactly.
+      2. ``canonical_en``  — curated `en` name's canonical key matches a GrappleMap
                               position's canonical key.
-      2. ``variant``        — same, tried against each curated `variations[]` entry.
-      3. ``synonym``        — a GrappleMap position's PLAIN (unfolded) name is a
+      3. ``variant``        — same, tried against each curated `variations[]` entry.
+      4. ``synonym``        — a GrappleMap position's PLAIN (unfolded) name is a
                               known ``analysis.names.SYNONYMS`` alias that folds
                               into this node's canonical identity (catches a
                               GrappleMap position literally named the pre-merge
                               spelling, e.g. a synonym source `canonicalize` would
                               otherwise fold before comparison).
-      4. ``token_set``      — conservative fallback: every token of the curated key
+      5. ``token_set``      — conservative fallback: every token of the curated key
                               appears in the GrappleMap key, or vice-versa (e.g.
                               "ashi" <= "inside ashi"; "wide open guard" >= "open
                               guard"). No fuzzy edit-distance guessing.
@@ -200,6 +220,7 @@ def _resolve_node_positions(
     ``cv.vocab_map.POSITION_TYPES`` (which stays guard/control-only, a CV-classifier
     vocabulary constraint unrelated to this icon export).
     """
+    position_map = position_map or {}
     index = build_vocab_index(nodes, position_types=node_types)
 
     pos_nodes = [
@@ -224,7 +245,22 @@ def _resolve_node_positions(
 
     resolved: dict[str, tuple[str, NodeRef, str]] = {}
 
-    # 0. Tag pass — larger tags first so the dominant sense wins a node.
+    # 0. Curated overrides — a human already picked the pose, highest precision.
+    for n in pos_nodes:
+        name = str(n.get("name", ""))
+        if not name or name in resolved:
+            continue
+        tr = n.get("translations", {}) or {}
+        en = str(tr.get("en") or name)
+        entry = position_map.get(_normalize_name(en))
+        if entry is None:
+            continue
+        pos_key = str(entry["position"]).strip().lower()
+        if pos_key not in gmap.positions:
+            continue
+        resolved[name] = (pos_key, node_ref[name], "curated")
+
+    # 1. Tag pass — larger tags first so the dominant sense wins a node.
     for tnorm, members in sorted(by_tag.items(), key=lambda kv: -len(kv[1])):
         ref = index.get(tnorm)
         if ref is None or ref.name in resolved:
@@ -233,7 +269,7 @@ def _resolve_node_positions(
         if rep is not None:
             resolved[ref.name] = (rep, ref, "tag")
 
-    # 1-4. Name-based rules, in curated (nodes) order for determinism.
+    # 2-5. Name-based rules, in curated (nodes) order for determinism.
     for n in pos_nodes:
         name = str(n.get("name", ""))
         if not name or name in resolved:
@@ -246,20 +282,20 @@ def _resolve_node_positions(
         en_key = _canon_key(en)
         variant_keys = [_canon_key(v) for v in variants]
 
-        # 1. canonical_en
+        # 2. canonical_en
         if en_key in gm_canon_index:
             pos_key, _pos = _pick_plainest(gm_canon_index[en_key])
             resolved[name] = (pos_key, ref, "canonical_en")
             continue
 
-        # 2. variant
+        # 3. variant
         hit = next((k for k in variant_keys if k in gm_canon_index), None)
         if hit is not None:
             pos_key, _pos = _pick_plainest(gm_canon_index[hit])
             resolved[name] = (pos_key, ref, "variant")
             continue
 
-        # 3. synonym — a GrappleMap position literally named a raw SYNONYMS alias
+        # 4. synonym — a GrappleMap position literally named a raw SYNONYMS alias
         # that folds into this node's identity.
         target_keys = {en_key, *variant_keys}
         syn_source = next(
@@ -271,7 +307,7 @@ def _resolve_node_positions(
             resolved[name] = (pos_key, ref, "synonym")
             continue
 
-        # 4. token_set
+        # 5. token_set
         found = _token_set_match(en_key, gm_canon_index)
         if found is not None:
             pos_key, _pos = found
@@ -304,12 +340,16 @@ def _render_index_ts(node_key_to_file: dict[str, str]) -> str:
 def resolve_matched_nodes(
     db_path: Path | str = DEFAULT_DB_PATH,
     node_types: tuple[str, ...] | None = None,
+    position_map_path: Path | str = DEFAULT_POSITION_MAP_PATH,
 ) -> tuple[GMapGraph, list[dict], dict[str, tuple[str, NodeRef, str]]]:
     """Parse GrappleMap + resolve node matches — no rendering/file I/O. Cheap enough
     to run twice (render path + `--check` path) without duplicating the match logic."""
     gmap = parse_grapplemap(Path(db_path))
     nodes = load_app_nodes()
-    resolved = _resolve_node_positions(gmap, nodes, node_types=node_types)
+    position_map = load_position_map(position_map_path)
+    resolved = _resolve_node_positions(
+        gmap, nodes, node_types=node_types, position_map=position_map
+    )
     return gmap, nodes, resolved
 
 
@@ -426,7 +466,7 @@ def export_icons(
 def match_rule_counts(resolved: dict[str, tuple[str, NodeRef, str]]) -> dict[str, int]:
     """Ordered tally of which rule matched each resolved node — the audit trail
     the coverage report reads. Fixed rule order regardless of hit counts."""
-    order = ["tag", "canonical_en", "variant", "synonym", "token_set"]
+    order = ["curated", "tag", "canonical_en", "variant", "synonym", "token_set"]
     counts = dict.fromkeys(order, 0)
     for _pos_key, _ref, rule in resolved.values():
         counts[rule] = counts.get(rule, 0) + 1

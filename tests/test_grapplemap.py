@@ -236,6 +236,64 @@ def test_export_icons_writes_subset(gmap, tmp_path):
     assert (app_assets / "guarda_fechada.png").exists()
 
 
+def test_position_map_entries_are_valid(gmap):
+    """Every curated grapplemap_position_map.json entry: key is a real curated
+    node_key, target position exists in GrappleMap, no accidental duplicate targets."""
+    from collections import Counter
+
+    from cv.vocab_map import _DEFAULT_NODES_PATH
+
+    if not _DEFAULT_NODES_PATH.exists():
+        pytest.skip("grappling-arch.nodes.json not found (sibling app repo absent)")
+
+    from analysis.names import _normalize_name
+    from cv.vocab_map import load_app_nodes
+    from export.grapplemap_icons_export import DEFAULT_POSITION_MAP_PATH, load_position_map
+
+    position_map = load_position_map()
+    assert position_map, "expected at least one curated override"
+
+    nodes = load_app_nodes()
+    node_keys = set()
+    for n in nodes:
+        tr = n.get("translations", {}) or {}
+        en = str(tr.get("en") or n.get("name", ""))
+        if en:
+            node_keys.add(_normalize_name(en))
+
+    for node_key, entry in position_map.items():
+        assert node_key in node_keys, (
+            f"{node_key!r} in {DEFAULT_POSITION_MAP_PATH.name} is not a curated technique node_key"
+        )
+        pos_key = str(entry["position"]).strip().lower()
+        assert pos_key in gmap.positions, (
+            f"{node_key!r} maps to {pos_key!r}, which is not a GrappleMap position"
+        )
+        assert "note" in entry and entry["note"], f"{node_key!r} entry missing a note"
+
+    targets = Counter(str(e["position"]).strip().lower() for e in position_map.values())
+    dupes = {k: v for k, v in targets.items() if v > 1}
+    assert not dupes, f"curated map reuses a position for multiple node_keys: {dupes}"
+
+
+def test_curated_rule_wins_before_automatic_rules(gmap):
+    """A curated override resolves via rule 0 ('curated'), even though it wasn't
+    reachable by the automatic tag/name rules — that's the whole point of the file."""
+    from cv.vocab_map import _DEFAULT_NODES_PATH
+
+    if not _DEFAULT_NODES_PATH.exists():
+        pytest.skip("grappling-arch.nodes.json not found (sibling app repo absent)")
+
+    from export.grapplemap_icons_export import resolve_matched_nodes
+
+    _gmap, _nodes, resolved = resolve_matched_nodes()
+    curated_names = {
+        name for name, (_pos, _ref, rule) in resolved.items() if rule == "curated"
+    }
+    assert "Abraço por Trás" in curated_names
+    assert resolved["Abraço por Trás"][0] == "standing behind w/ body lock"
+
+
 def test_export_icons_check_mode_writes_nothing_and_detects_drift(gmap, tmp_path):
     from cv.vocab_map import _DEFAULT_NODES_PATH
 

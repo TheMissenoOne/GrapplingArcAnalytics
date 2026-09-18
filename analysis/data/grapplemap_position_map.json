@@ -1,0 +1,42 @@
+{
+  "rear body lock": {
+    "position": "standing behind w/ body lock",
+    "note": "Owner-identified pairing: standing rear body lock, same bodies/limbs config."
+  },
+  "scarf hold": {
+    "position": "kuzure kesa gatame",
+    "note": "Only kesa-gatame-family position in GrappleMap (modified/kuzure variant)."
+  },
+  "kimura trap": {
+    "position": "single leg vs kimura",
+    "note": "Kimura grip as a counter/trap vs a single-leg (curated variant: 'kimura counter')."
+  },
+  "twoonone wrist control": {
+    "position": "2-on-1 to chest",
+    "note": "Plainest two_on_one-tagged position — standing grip, no drag/pass in progress."
+  },
+  "hooks in": {
+    "position": "leg ride",
+    "note": "No position combines 'hooks'+'in'; leg_ride (tags: back, leg_ride) is the same idea."
+  },
+  "smash half guard": {
+    "position": "smashed traditional half",
+    "note": "Plainest smash+half_guard position — bottom player crushed flat in half guard."
+  },
+  "knee shield half guard": {
+    "position": "half guard shell w/ leg grabbed",
+    "note": "Half guard w/ knee-shield/shell frame; distinct from Guarda Z's own match (quarter z)."
+  },
+  "de la riva guard": {
+    "position": "standing vs de la riva",
+    "note": "Plainest of the three de-la-riva-tagged positions."
+  },
+  "inverted de la riva guard": {
+    "position": "standing vs reverse dlr",
+    "note": "GrappleMap's own name for the inverted/reverse DLR variant."
+  },
+  "leg entanglement": {
+    "position": "ashi",
+    "note": "'ashi' (ashi garami) is GrappleMap's generic leg-entanglement position."
+  }
+}
