@@ -5,6 +5,7 @@
 <div class="audit-tabs">
   <a href="/admin/audit/rounds" class="on">Rounds</a>
   <a href="/admin/audit/dictionary">Dictionary</a>
+  <a href="/admin/audit/definitions">Definições</a>
 </div>
 
 <div id="audit-round">
@@ -44,5 +45,5 @@
 
 <script id="audit-data" type="application/json">{{ round | tojson }}</script>
 <script id="audit-vocab" type="application/json">{{ vocab | tojson }}</script>
-<script src="/admin/static/audit.js?v=1"></script>
+<script src="/admin/static/audit.js?v=2"></script>
 {% endblock %}

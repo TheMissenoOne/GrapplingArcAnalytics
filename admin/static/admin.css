@@ -192,3 +192,31 @@ details.advanced summary { cursor: pointer; color: #888; margin: 12px 0; }
 .dict-card .btn-accept { background: #2e7d32; color: #fff; }
 .dict-card .btn-relabel { background: #4c72d5; color: #fff; }
 .dict-card .btn-reject { background: #c62828; color: #fff; }
+
+/* Definitions list (Mode C) */
+.def-list { display: flex; flex-direction: column; gap: 10px; }
+.def-row {
+  display: flex; gap: 12px; background: #141414; border: 1px solid #222; border-radius: 8px;
+  padding: 12px;
+}
+.def-row.selected { outline: 1px solid #4c72d5; background: #1d1d30; }
+.def-thumb { width: 72px; height: 72px; object-fit: contain; background: #000; border-radius: 6px; flex-shrink: 0; }
+.def-thumb-empty { background: #1a1a1a; border: 1px dashed #333; }
+.def-body { flex: 1; min-width: 0; }
+.def-title { margin-bottom: 6px; }
+.def-title strong { color: #fff; }
+.def-title .def-en { color: #999; font-size: 0.85rem; margin-left: 6px; }
+.def-title .chip {
+  background: #24243e; color: #ccc; border-radius: 999px; padding: 2px 8px; font-size: 0.7rem;
+  margin-left: 6px;
+}
+.def-title .def-source-human { background: #1b5e20; color: #81c784; }
+.def-title .def-source-draft { background: #2a2a2a; color: #888; }
+.def-field { display: block; font-size: 0.72rem; color: #777; margin-bottom: 6px; }
+.def-ta {
+  width: 100%; margin: 4px 0 0; resize: vertical; font-size: 0.85rem; padding: 8px 10px;
+  border: 1px solid #333; border-radius: 5px; background: #1a1a1a; color: #e0e0e0;
+  font-family: inherit;
+}
+.def-reviewed { display: flex; align-items: center; gap: 6px; font-size: 0.8rem; color: #aaa; width: auto; }
+.def-reviewed input { width: auto; margin: 0; }

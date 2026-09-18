@@ -280,7 +280,13 @@ A mesma página do admin também audita **rounds privados** do dono
 (`/admin/audit/rounds`, sobre `data/video/owner/out/`) — vídeo + tira de frames + lista de
 eventos do `read.json` com veredito por evento, gravando em `verdicts.json` ao lado do round
 (nunca em `data/finetune/`, nunca no corpus público — ver "Public vs Private Data" no
-`CLAUDE.md` raiz). Duas filas, dois donos de dado, uma única página de navegação.
+`CLAUDE.md` raiz). E uma terceira aba, **`/admin/audit/definitions`**, revisa as 211
+descrições do critério 2 acima (`technique_definitions.json`) — uma linha por técnica curada,
+nome pt/en, tipo, a figura GrappleMap (via `src/data/grapplemapIconIndex.ts` do App, quando
+existir) e dois textareas (pt/en) com autosave no blur/toggle (`admin/audit.py:save_definition`),
+que sobe `source: "draft"` -> `"human"` ao primeiro edit ou marcação de revisado e regenera a
+cópia do App (`scripts.sync_app_artifacts.sync_definitions`) a cada save — nenhum passo manual
+fica pendente. Três filas, três donos de dado, uma única página de navegação.
 
 ## 4. What this feeds
 

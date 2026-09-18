@@ -488,4 +488,156 @@
 
     render();
   }
+
+  // ── Mode C: technique definitions review ──────────────────────────────────
+  var defRoot = document.getElementById("audit-definitions");
+  if (defRoot) {
+    var defItemsEl = document.getElementById("def-items");
+    var items = JSON.parse(defItemsEl.textContent);
+    var list = document.getElementById("def-list");
+    var progress = document.getElementById("def-progress");
+    var typeFilter = document.getElementById("def-type-filter");
+    var reviewedFilter = document.getElementById("def-reviewed-filter");
+    var searchBox = document.getElementById("def-search");
+    var total = items.length;
+    var selectedIdx = 0;
+    var saveTimers = {};
+
+    function visibleItems() {
+      var t = typeFilter ? typeFilter.value : "";
+      var rv = reviewedFilter ? reviewedFilter.value : "";
+      var q = searchBox ? normSearch(searchBox.value) : "";
+      return items.filter(function (item) {
+        if (t && item.type !== t) return false;
+        if (rv === "reviewed" && !item.reviewed) return false;
+        if (rv === "unreviewed" && item.reviewed) return false;
+        if (q && normSearch(item.en).indexOf(q) === -1 && normSearch(item.pt_name).indexOf(q) === -1) return false;
+        return true;
+      });
+    }
+
+    function updateProgress() {
+      var n = items.filter(function (i) { return i.reviewed; }).length;
+      if (progress) progress.textContent = n + " / " + total + " revisadas";
+    }
+
+    function rowEl(item, i) {
+      var row = document.createElement("div");
+      row.className = "def-row" + (i === selectedIdx ? " selected" : "");
+      row.dataset.idx = i;
+      var thumb = item.icon
+        ? '<img class="def-thumb" loading="lazy" src="/admin/audit/definitions/icon/' +
+          encodeURIComponent(item.node_key) + '">'
+        : '<div class="def-thumb def-thumb-empty"></div>';
+      row.innerHTML =
+        thumb +
+        '<div class="def-body">' +
+          '<div class="def-title"><strong>' + item.pt_name + '</strong> ' +
+            '<span class="def-en">' + item.en + '</span>' +
+            '<span class="chip">' + item.type_pt + '</span>' +
+            '<span class="chip def-source-' + item.source + '">' + item.source + '</span>' +
+          '</div>' +
+          '<label class="def-field">PT<textarea class="def-ta" data-field="def_pt" rows="2">' +
+            item.def_pt + '</textarea></label>' +
+          '<label class="def-field">EN<textarea class="def-ta" data-field="def_en" rows="2">' +
+            item.def_en + '</textarea></label>' +
+          '<label class="def-reviewed"><input type="checkbox" class="def-reviewed-cb"' +
+            (item.reviewed ? ' checked' : '') + '> revisado' +
+            '<span class="save-state"></span></label>' +
+        '</div>';
+      row.addEventListener("click", function () { select(i); });
+      var pt = row.querySelector('[data-field="def_pt"]');
+      var en = row.querySelector('[data-field="def_en"]');
+      var cb = row.querySelector(".def-reviewed-cb");
+      var state = row.querySelector(".save-state");
+      function scheduleSave(delay) {
+        item.def_pt = pt.value; item.def_en = en.value; item.reviewed = cb.checked;
+        if (state) state.textContent = "saving…";
+        clearTimeout(saveTimers[item.node_key]);
+        saveTimers[item.node_key] = setTimeout(function () { saveRow(item, state, row); }, delay);
+      }
+      pt.addEventListener("blur", function () { scheduleSave(400); });
+      en.addEventListener("blur", function () { scheduleSave(400); });
+      cb.addEventListener("change", function () { scheduleSave(150); });
+      return row;
+    }
+
+    function saveRow(item, state, row) {
+      fetch("/admin/audit/definitions/save", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          node_key: item.node_key, def_en: item.def_en, def_pt: item.def_pt,
+          reviewed: item.reviewed,
+        }),
+      }).then(function (r) { return r.ok ? r.json() : Promise.reject(r); })
+        .then(function (saved) {
+          item.source = saved.source;
+          if (state) state.textContent = "saved";
+          var chip = row.querySelector(".def-title .chip:last-child");
+          if (chip) { chip.textContent = item.source; chip.className = "chip def-source-" + item.source; }
+          updateProgress();
+        })
+        .catch(function () { if (state) state.textContent = "save failed"; });
+    }
+
+    function render() {
+      list.innerHTML = "";
+      var visible = visibleItems();
+      selectedIdx = Math.max(0, Math.min(selectedIdx, items.length - 1));
+      visible.forEach(function (item) { list.appendChild(rowEl(item, items.indexOf(item))); });
+      updateProgress();
+    }
+
+    function select(i) {
+      selectedIdx = Math.max(0, Math.min(i, items.length - 1));
+      Array.prototype.forEach.call(list.children, function (r) {
+        r.classList.toggle("selected", Number(r.dataset.idx) === selectedIdx);
+      });
+      var row = list.querySelector('[data-idx="' + selectedIdx + '"]');
+      if (row) row.scrollIntoView({ block: "nearest" });
+    }
+
+    function selectAmongVisible(dir) {
+      var visible = Array.prototype.slice.call(list.children);
+      if (!visible.length) return;
+      var pos = visible.findIndex(function (r) { return Number(r.dataset.idx) === selectedIdx; });
+      pos = Math.max(0, Math.min(pos + dir, visible.length - 1));
+      select(Number(visible[pos].dataset.idx));
+    }
+
+    function focusPt(i) {
+      var row = list.querySelector('[data-idx="' + i + '"]');
+      var ta = row && row.querySelector('[data-field="def_pt"]');
+      if (ta) ta.focus();
+    }
+
+    function toggleReviewed(i) {
+      var row = list.querySelector('[data-idx="' + i + '"]');
+      var cb = row && row.querySelector(".def-reviewed-cb");
+      if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); }
+    }
+
+    if (typeFilter) typeFilter.addEventListener("change", render);
+    if (reviewedFilter) reviewedFilter.addEventListener("change", render);
+    if (searchBox) searchBox.addEventListener("input", render);
+
+    document.addEventListener("keydown", function (e) {
+      var tag = (e.target && e.target.tagName) || "";
+      if (e.key === "Escape" && (tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT")) {
+        e.target.blur();
+        return;
+      }
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+      switch (e.key) {
+        case "j": selectAmongVisible(1); break;
+        case "k": selectAmongVisible(-1); break;
+        case "e": focusPt(selectedIdx); break;
+        case "r": toggleReviewed(selectedIdx); break;
+        default: return;
+      }
+      e.preventDefault();
+    });
+
+    render();
+  }
 })();

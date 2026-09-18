@@ -962,6 +962,45 @@ def create_admin_app() -> FastAPI:
             return JSONResponse(result, status_code=400)
         return JSONResponse(result)
 
+    # ── Audit — Mode C: technique definitions (public curated content) ──────
+    @app.get("/admin/audit/definitions", response_class=HTMLResponse)
+    def audit_definitions_page(request: Request) -> Any:
+        items = audit_mod.definitions_queue()
+        types = sorted({i["type"] for i in items if i["type"]})
+        return templates.TemplateResponse(
+            request, "audit_definitions.html",
+            context={
+                "items": items, "types": types,
+                "reviewed_n": sum(1 for i in items if i["reviewed"]), "total": len(items),
+            },
+        )
+
+    @app.get("/admin/audit/definitions/icon/{node_key}")
+    def audit_definitions_icon(node_key: str) -> Any:
+        path = audit_mod.definition_icon_path(node_key)
+        if path is None:
+            raise HTTPException(status_code=404, detail="Icon not found")
+        return FileResponse(path, media_type="image/png")
+
+    @app.post("/admin/audit/definitions/save")
+    async def audit_definitions_save(request: Request) -> Any:
+        body = await request.json()
+        node_key = str((body or {}).get("node_key") or "")
+        try:
+            entry = audit_mod.save_definition(
+                node_key,
+                str((body or {}).get("def_en") or ""),
+                str((body or {}).get("def_pt") or ""),
+                bool((body or {}).get("reviewed")),
+            )
+        except KeyError:
+            raise HTTPException(status_code=404, detail="Unknown node_key") from None
+        except FileNotFoundError:
+            raise HTTPException(
+                status_code=404, detail="technique_definitions.json missing"
+            ) from None
+        return JSONResponse(entry)
+
     # ── Ontology authoring (RF04-06, RF20, DS-01/04) ────────────────────────
     @app.get("/admin/ontology", response_class=HTMLResponse)
     def ontology_home(request: Request) -> Any:

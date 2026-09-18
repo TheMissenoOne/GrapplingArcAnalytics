@@ -6,8 +6,12 @@ entry per curated technique (`analysis/data/technique_library.json`), keyed by n
 current node set) into `GrapplingArcApp/src/data/technique_definitions.json` by
 `scripts/sync_app_artifacts.py`; see that module's docstring for the regen command.
 
-Every entry today has `source: "draft"` / `reviewed: false` — model-authored, awaiting the
-owner's review; nothing here asserts editorial accuracy.
+`source` is `"draft"` (model-authored, awaiting review), `"external-review"` (2026-09-18,
+GPT-reviewed against public sources — still `reviewed: false`, the owner confirms in the
+admin page), or `"human"` (owner-edited via `admin/audit.py:save_definition`). Optional
+`review_note` — a one-line flag for the owner (ambiguous term needing corpus context, or a
+factual correction applied) — see
+`docs/repairs/2026-09-18_technique_definitions_external_review.md`.
 """
 
 from __future__ import annotations
@@ -15,7 +19,7 @@ from __future__ import annotations
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 
 class TechniqueDefinition(TypedDict):
@@ -23,6 +27,7 @@ class TechniqueDefinition(TypedDict):
     pt: str
     source: str
     reviewed: bool
+    review_note: NotRequired[str]
 
 
 DEFINITIONS_PATH = Path(__file__).resolve().parent / "data" / "technique_definitions.json"

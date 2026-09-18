@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Auditoria — Definições{% endblock %}
+{% block content %}
+<h1>Auditoria</h1>
+<div class="audit-tabs">
+  <a href="/admin/audit/rounds">Rounds</a>
+  <a href="/admin/audit/dictionary">Dictionary</a>
+  <a href="/admin/audit/definitions" class="on">Definições</a>
+</div>
+
+<p style="color:#888;font-size:0.85rem;margin-bottom:16px">
+  {{ total }} técnicas curadas — descrições geradas por modelo (<code>source: "draft"</code>),
+  aguardando revisão. <code>analysis/data/technique_definitions.json</code>.
+</p>
+
+<div id="audit-definitions">
+  <div class="dict-toolbar">
+    <label style="margin:0">Tipo
+      <select id="def-type-filter" style="width:auto;display:inline-block;margin:0 0 0 6px">
+        <option value="">todos</option>
+        {% for t in types %}<option value="{{ t }}">{{ t }}</option>{% endfor %}
+      </select>
+    </label>
+    <label style="margin:0 0 0 12px">Estado
+      <select id="def-reviewed-filter" style="width:auto;display:inline-block;margin:0 0 0 6px">
+        <option value="">todos</option>
+        <option value="unreviewed">não revisadas</option>
+        <option value="reviewed">revisadas</option>
+      </select>
+    </label>
+    <input type="search" id="def-search" placeholder="buscar…"
+           style="width:160px;display:inline-block;margin:0 0 0 12px">
+    <span class="dict-progress" id="def-progress">{{ reviewed_n }} / {{ total }} revisadas</span>
+  </div>
+  <div class="audit-keys" style="margin-bottom:12px">
+    <kbd>j</kbd>/<kbd>k</kbd> mover · <kbd>e</kbd> editar pt · <kbd>r</kbd> revisado ·
+    <kbd>Esc</kbd> voltar à lista
+  </div>
+  <div class="def-list" id="def-list"></div>
+</div>
+
+<script id="def-items" type="application/json">{{ items | tojson }}</script>
+<script src="/admin/static/audit.js?v=2"></script>
+{% endblock %}

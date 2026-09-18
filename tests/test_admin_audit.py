@@ -17,6 +17,7 @@ from fastapi.testclient import TestClient
 os.environ.setdefault("ADMIN_PASSWORD_HASH", "test-placeholder-not-a-real-hash")
 
 from admin import audit as audit_mod  # noqa: E402
+from analysis.names import _normalize_name  # noqa: E402
 
 
 @pytest.fixture()
@@ -370,3 +371,177 @@ def test_apply_dictionary_verdict_relabel_never_touches_the_pair_half(
             (tmp_path / "audit" / "verdicts.jsonl").read_text(encoding="utf-8").splitlines()]
     assert {r["node_key"] for r in recs} == {"kimura", "armbar"}, \
         "relabel only ever touches its own candidate claim, never `pair_node_key`"
+
+
+# ── Mode C: technique definitions review ────────────────────────────────────────────────────
+
+_DEF_CURATED = [
+    {"en": "Armbar", "pt": "Chave de Braço", "type": "submission", "variants": []},
+    {"en": "Closed Guard", "pt": "Guarda Fechada", "type": "guard", "variants": []},
+    {"en": "Rear Naked Choke", "pt": "Mata Leão", "type": "submission", "variants": []},
+]
+_DEF_DEFINITIONS = {
+    "armbar": {"en": "Straightens the elbow.", "pt": "Estica o cotovelo.",
+               "source": "draft", "reviewed": False},
+    "closed guard": {"en": "Legs locked around the torso.",
+                      "pt": "Pernas travadas no tronco.", "source": "draft", "reviewed": True},
+    "rear naked choke": {"en": "Choke from the back.", "pt": "Estrangulamento pelas costas.",
+                          "source": "draft", "reviewed": False},
+}
+
+
+def _write_definitions_fixture(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, n: int = 3,
+) -> tuple[Path, Path]:
+    """Small curated library + matching definitions file, same node_key convention
+    (`analysis.names._normalize_name(en)`) as the real 211-entry pair. Every filesystem
+    seam Mode C touches is monkeypatched to tmp_path -- nothing here writes into the
+    repo's real analysis/data/ or the App checkout."""
+    curated = _DEF_CURATED[:n]
+    keys = {_normalize_name(str(c["en"])) for c in curated}
+    lib_path = tmp_path / "technique_library.json"
+    lib_path.write_text(json.dumps(curated), encoding="utf-8")
+    def_path = tmp_path / "technique_definitions.json"
+    def_path.write_text(
+        json.dumps({k: v for k, v in _DEF_DEFINITIONS.items() if k in keys}), encoding="utf-8"
+    )
+    monkeypatch.setattr(audit_mod, "DICTIONARY_LIBRARY", lib_path)
+    monkeypatch.setattr(audit_mod, "DEFINITIONS_PATH", def_path)
+    monkeypatch.setattr(audit_mod, "APP_NODES_LIB", tmp_path / "nonexistent_nodes.json")
+    monkeypatch.setattr(audit_mod, "APP_DEFINITIONS_DST", tmp_path / "app_definitions.json")
+    monkeypatch.setattr(audit_mod, "GRAPPLEMAP_ICON_INDEX_TS", tmp_path / "no_icons.ts")
+    return lib_path, def_path
+
+
+def test_definitions_page_lists_all_curated_rows(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_definitions_fixture(tmp_path, monkeypatch)
+
+    resp = client.get("/admin/audit/definitions")
+
+    assert resp.status_code == 200
+    assert '"en": "Armbar"' in resp.text
+    assert '"en": "Closed Guard"' in resp.text
+    assert '"en": "Rear Naked Choke"' in resp.text
+    assert "1 / 3 revisadas" in resp.text  # only closed guard is reviewed: true
+
+
+def test_definitions_queue_filters_by_type_reviewed_and_search(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_definitions_fixture(tmp_path, monkeypatch)
+
+    assert len(audit_mod.definitions_queue()) == 3
+    assert len(audit_mod.definitions_queue(type_filter="submission")) == 2
+    assert len(audit_mod.definitions_queue(type_filter="guard")) == 1
+    assert len(audit_mod.definitions_queue(reviewed="reviewed")) == 1
+    assert len(audit_mod.definitions_queue(reviewed="unreviewed")) == 2
+    hits = audit_mod.definitions_queue(search="mata")
+    assert len(hits) == 1 and hits[0]["node_key"] == "rear naked choke"
+
+
+def test_save_definition_roundtrips_flips_source_to_human_and_regenerates_app_copy(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _, def_path = _write_definitions_fixture(tmp_path, monkeypatch, n=1)
+
+    entry = audit_mod.save_definition("armbar", "New EN text.", "Novo texto PT.", True)
+
+    assert entry["source"] == "human"
+    assert entry["reviewed"] is True
+    assert "reviewed_at" in entry
+
+    on_disk = json.loads(def_path.read_text(encoding="utf-8"))
+    assert list(on_disk.keys()) == ["armbar"]  # key order preserved
+    assert on_disk["armbar"]["en"] == "New EN text."
+    assert on_disk["armbar"]["source"] == "human"
+
+    app_dst = audit_mod.APP_DEFINITIONS_DST
+    assert app_dst.is_file(), "App copy must be regenerated on every save"
+    app_doc = json.loads(app_dst.read_text(encoding="utf-8"))
+    assert app_doc["armbar"]["en"] == "New EN text."
+
+
+def test_save_definition_unmarked_reviewed_stays_draft_unless_text_changed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_definitions_fixture(tmp_path, monkeypatch, n=1)
+
+    entry = audit_mod.save_definition(
+        "armbar", "Straightens the elbow.", "Estica o cotovelo.", False,
+    )
+
+    assert entry["source"] == "draft"  # unchanged text, not reviewed -> still a draft
+    assert entry["reviewed"] is False
+    assert "reviewed_at" not in entry
+
+
+def test_save_definition_unknown_node_key_raises_keyerror(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_definitions_fixture(tmp_path, monkeypatch, n=1)
+    with pytest.raises(KeyError):
+        audit_mod.save_definition("kimura", "x", "y", False)
+
+
+def test_definitions_save_route_roundtrips(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_definitions_fixture(tmp_path, monkeypatch, n=1)
+
+    resp = client.post("/admin/audit/definitions/save", json={
+        "node_key": "armbar", "def_en": "E", "def_pt": "P", "reviewed": True,
+    })
+
+    assert resp.status_code == 200
+    assert resp.json()["source"] == "human"
+
+
+def test_definitions_save_route_404_for_unknown_node_key(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _write_definitions_fixture(tmp_path, monkeypatch, n=1)
+
+    resp = client.post("/admin/audit/definitions/save", json={
+        "node_key": "nope", "def_en": "E", "def_pt": "P", "reviewed": False,
+    })
+
+    assert resp.status_code == 404
+
+
+def test_definition_icon_path_resolves_through_generated_index(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    icons_dir = tmp_path / "grapplemap_icons"
+    icons_dir.mkdir()
+    (icons_dir / "chave.png").write_bytes(b"\x89PNGfake")
+    index_ts = tmp_path / "grapplemapIconIndex.ts"
+    index_ts.write_text(
+        'export const GRAPPLEMAP_ICONS: Record<string, number> = {\n'
+        '  "armbar": require("../assets/grapplemap_icons/chave.png"),\n'
+        '};\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(audit_mod, "GRAPPLEMAP_ICONS_DIR", icons_dir)
+    monkeypatch.setattr(audit_mod, "GRAPPLEMAP_ICON_INDEX_TS", index_ts)
+
+    assert audit_mod.definition_icon_path("armbar") == icons_dir / "chave.png"
+    assert audit_mod.definition_icon_path("missing key") is None
+
+
+def test_definitions_icon_route(
+    client: TestClient, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    icons_dir = tmp_path / "grapplemap_icons"
+    icons_dir.mkdir()
+    (icons_dir / "chave.png").write_bytes(b"\x89PNGfake")
+    index_ts = tmp_path / "grapplemapIconIndex.ts"
+    index_ts.write_text(
+        '"armbar": require("../assets/grapplemap_icons/chave.png"),\n', encoding="utf-8",
+    )
+    monkeypatch.setattr(audit_mod, "GRAPPLEMAP_ICONS_DIR", icons_dir)
+    monkeypatch.setattr(audit_mod, "GRAPPLEMAP_ICON_INDEX_TS", index_ts)
+
+    assert client.get("/admin/audit/definitions/icon/armbar").status_code == 200
+    assert client.get("/admin/audit/definitions/icon/missing").status_code == 404

@@ -1,4 +1,4 @@
-"""Admin audit tools — the whole data path for both audit modes, same shape as
+"""Admin audit tools — the whole data path for three audit modes, same shape as
 ``admin/study.py`` owning the Study page.
 
 Mode A (rounds) — ``data/video/owner/out/<slug>/{read.json,analysis.json,frames/,video.mp4?,
@@ -11,6 +11,13 @@ Mode B (dictionary) — ``data/finetune/audit/gemini_seed/seed.jsonl``. **PUBLIC
 frames. Verdicts flow through ``scripts.dictionary_audit.apply``, the sole writer of
 ``data/finetune/audit/verdicts.jsonl`` (owned by ``scripts.vision_dataset``); this module
 never writes that file directly.
+
+Mode C (definitions) — ``analysis/data/technique_definitions.json``. **PUBLIC** curated
+content (the 211 curated techniques, node identity), draft en/pt descriptions awaiting
+review. Saves write straight back into that source file (the only writer,
+``analysis/technique_definitions.py`` only reads it), then re-run
+``scripts/sync_app_artifacts.py``'s own ``sync_definitions`` so the App's bundled copy
+never drifts (root CLAUDE.md tech-library contract).
 """
 
 from __future__ import annotations
@@ -26,11 +33,29 @@ from typing import Any
 from analysis.names import _normalize_name, canonicalize
 
 REPO = Path(__file__).resolve().parent.parent
+APP = REPO.parent / "GrapplingArcApp"
 ROUND_ROOT = REPO / "data" / "video" / "owner" / "out"
 DICTIONARY_LIBRARY = REPO / "analysis" / "data" / "technique_library.json"
 NODE_LIBRARY = REPO / "data" / "frame_pdf" / "node_library.json"
 DICT_AUDIT_ROOT = REPO / "data" / "finetune" / "audit"
 DICT_SEED_ROOT = DICT_AUDIT_ROOT / "gemini_seed"
+
+# Mode C (definitions)
+DEFINITIONS_PATH = REPO / "analysis" / "data" / "technique_definitions.json"
+APP_NODES_LIB = APP / "src" / "data" / "grappling-arch.nodes.json"
+APP_DEFINITIONS_DST = APP / "src" / "data" / "technique_definitions.json"
+GRAPPLEMAP_ICONS_DIR = APP / "src" / "assets" / "grapplemap_icons"
+GRAPPLEMAP_ICON_INDEX_TS = APP / "src" / "data" / "grapplemapIconIndex.ts"
+
+# Display-only pt labels for the 9 curated types (technique_library.json's `type`) — the
+# App's own `techniqueTypes` i18n (pt-BR.ts) only covers 7 of these (no concept/transition);
+# ponytail: a small local dict here rather than reaching into the App's i18n for a filter
+# chip that carries no contract weight.
+TYPE_PT = {
+    "guard": "Guarda", "pass": "Passagem", "submission": "Finalização", "sweep": "Raspagem",
+    "control": "Controle", "escape": "Escape", "takedown": "Queda", "transition": "Transição",
+    "concept": "Conceito",
+}
 
 _FRAME_RE = re.compile(r"^t(\d{5})(?:b(\d+))?$")
 
@@ -437,3 +462,126 @@ def apply_dictionary_verdict(
         return apply_verdict_file(tmp_path, write=True, rebuild=False)
     finally:
         tmp_path.unlink(missing_ok=True)
+
+
+# ── Mode C: technique definitions review ────────────────────────────────────────────────────
+
+
+def _icon_file_map() -> dict[str, str]:
+    """node_key -> GrappleMap PNG filename, parsed from the App's GENERATED require()
+    index (``export/grapplemap_icons_export.py`` owns the real naming: a pt-language
+    slug, not ``<node_key>.png``). ponytail: regex over the generated TS rather than
+    importing/duplicating that script's filename derivation — this file IS the already
+    resolved node_key -> filename table."""
+    if not GRAPPLEMAP_ICON_INDEX_TS.is_file():
+        return {}
+    text = GRAPPLEMAP_ICON_INDEX_TS.read_text(encoding="utf-8")
+    pattern = r'"([^"]+)":\s*require\("\.\./assets/grapplemap_icons/([^"]+\.png)"\)'
+    return dict(re.findall(pattern, text))
+
+
+def definitions_queue(
+    type_filter: str | None = None, reviewed: str | None = None, search: str | None = None,
+) -> list[dict[str, Any]]:
+    """One row per curated technique (``technique_library.json``, 211 entries) with its
+    draft/curated definition (``technique_definitions.json``, same node_key —
+    ``analysis.names._normalize_name(en)``) and a GrappleMap thumbnail if one resolves.
+    Filters are optional — the page itself renders the full list and filters client-side
+    (same convention as Mode B's confidence dropdown); kept here too so the data layer is
+    testable without a browser."""
+    curated = _read_json(DICTIONARY_LIBRARY) or []
+    definitions = _read_json(DEFINITIONS_PATH) or {}
+    icons = _icon_file_map()
+    out: list[dict[str, Any]] = []
+    for row in curated:
+        en = str(row.get("en") or "").strip()
+        if not en:
+            continue
+        node_key = _normalize_name(en)
+        d = definitions.get(node_key) or {}
+        row_type = str(row.get("type") or "")
+        out.append({
+            "node_key": node_key,
+            "en": en,
+            "pt_name": str(row.get("pt") or ""),
+            "type": row_type,
+            "type_pt": TYPE_PT.get(row_type, row_type),
+            "def_en": str(d.get("en") or ""),
+            "def_pt": str(d.get("pt") or ""),
+            "source": str(d.get("source") or "draft"),
+            "reviewed": bool(d.get("reviewed") or False),
+            "icon": icons.get(node_key),
+        })
+    if type_filter:
+        out = [r for r in out if r["type"] == type_filter]
+    if reviewed == "reviewed":
+        out = [r for r in out if r["reviewed"]]
+    elif reviewed == "unreviewed":
+        out = [r for r in out if not r["reviewed"]]
+    if search:
+        q = search.strip().lower()
+        out = [r for r in out if q in r["en"].lower() or q in r["pt_name"].lower()]
+    return out
+
+
+def definition_icon_path(node_key: str) -> Path | None:
+    """GrappleMap thumbnail for one curated node_key, resolved through the App's
+    generated require() index. Same traversal-guard shape as ``round_frame_path``."""
+    filename = _icon_file_map().get(node_key)
+    if not filename:
+        return None
+    base = GRAPPLEMAP_ICONS_DIR.resolve()
+    p = (base / filename).resolve()
+    if base not in p.parents:
+        return None
+    return p if p.is_file() else None
+
+
+def _regen_app_definitions() -> None:
+    """Mirror ``technique_definitions.json`` -> the App's bundled copy the same way
+    ``scripts/sync_app_artifacts.py``'s own ``sync_definitions`` does (root CLAUDE.md
+    tech-library contract) — called after every save so `--check` stays clean without the
+    owner having to remember to re-run the sync script by hand."""
+    from scripts.sync_app_artifacts import (
+        load_curated_nodes,
+        node_keys_from_library,
+        sync_definitions,
+    )
+
+    curated = load_curated_nodes(DICTIONARY_LIBRARY)
+    node_keys = node_keys_from_library(curated, APP_NODES_LIB)
+    sync_definitions(DEFINITIONS_PATH, APP_DEFINITIONS_DST, node_keys, check=False)
+
+
+def save_definition(node_key: str, def_en: str, def_pt: str, reviewed: bool) -> dict[str, Any]:
+    """Autosave target for one definition row — overwrites that node_key's entry in
+    ``technique_definitions.json`` in place (key order preserved — an existing dict key is
+    updated, never deleted + re-inserted), then regenerates the App's copy. ``source``
+    flips ``draft`` -> ``human`` the moment the text is edited or the row is marked
+    reviewed; nothing here ever writes ``source`` back to ``draft``."""
+    if not DEFINITIONS_PATH.is_file():
+        raise FileNotFoundError(DEFINITIONS_PATH)
+    definitions = json.loads(DEFINITIONS_PATH.read_text(encoding="utf-8"))
+    if not isinstance(definitions, dict) or node_key not in definitions:
+        raise KeyError(node_key)
+    entry = dict(definitions[node_key])
+    def_en, def_pt = def_en.strip(), def_pt.strip()
+    edited = def_en != entry.get("en") or def_pt != entry.get("pt")
+    entry["en"], entry["pt"] = def_en, def_pt
+    entry["reviewed"] = bool(reviewed)
+    if edited or reviewed:
+        entry["source"] = "human"
+    if reviewed:
+        entry["reviewed_at"] = datetime.now(UTC).isoformat(timespec="seconds")
+    else:
+        entry.pop("reviewed_at", None)
+    definitions[node_key] = entry
+
+    tmp = DEFINITIONS_PATH.parent / f".{DEFINITIONS_PATH.name}.tmp"
+    tmp.write_text(
+        json.dumps(definitions, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    tmp.replace(DEFINITIONS_PATH)
+
+    _regen_app_definitions()
+    return entry
