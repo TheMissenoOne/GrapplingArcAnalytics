@@ -56,6 +56,9 @@
 │   ├── tech_library.py              # ✅ → app technique library JSON + effectiveness scores
 │   ├── adcc_elo_table.py            # ✅ implemented + tested (tests/test_elo_export.py) but NOT an App export — see "App Integration" below
 │   └── benchmark_results.py         # ✅ export_pro_baseline_db → app ProBaselineV1, the real App-facing export — see "App Integration" below
+├── jobs/                             # periodic batch publishers (service-role, run by hand/timer)
+│   ├── publish_pro_analytics.py     # ✅ athlete dossiers + performance snapshots (Pro, per-user)
+│   └── publish_technique_studies.py # ✅ technique_studies digest (Pro, public corpus) — docs/technique_studies.md
 ├── harvest/                         # ✅ native YouTube fight-transcript harvester (replaced
 │   │                                #   the bjj-match-analyzer sibling repo — now scrapped)
 │   ├── transcripts.py               # youtube-transcript-api + oEmbed title + feedparser playlist
@@ -318,6 +321,13 @@ Export layer produces JSON the App consumes:
 - `export/benchmark_results.py:export_pro_baseline_db` → `src/data/pro_baseline.json`
   (`ProBaselineV1`, bundled with the App) — style-mix + submission-family p25/median/p75.
   This is the real App-facing data export.
+- `jobs/publish_technique_studies.py` → `technique_studies` table (alembic `0067`, RLS
+  `is_pro`) → App `services/techniqueStudies.ts`, read live (not a bundled export) — the "Como
+  a elite resolve" per-technique digest for the Pro issue-study flow. Full contract:
+  `docs/technique_studies.md`; cross-repo row in root `CLAUDE.md`. The same 0067 migration
+  closes a dead grant leak: `matches`/`athlete_matches` had RLS enabled with zero policies but
+  `anon`/`authenticated` still held table-level CRUD grants (nothing App/Web-side ever used
+  them — verified before revoking).
 
 ⚠️ `export/adcc_elo_table.py` is **not** an App export, despite what this file used to claim.
 It computes ELO from the Kaggle ADCC historical corpus (not the `matches` table) and writes
