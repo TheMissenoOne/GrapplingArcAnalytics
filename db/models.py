@@ -797,6 +797,25 @@ class AthleteDossier(Base):
     )
 
 
+class TechniqueStudy(Base):
+    """Public-corpus technique digest, batch-published weekly (alembic 0067).
+
+    Keyed by ``node_key`` (``analysis.names._normalize_name`` + ``canonicalize``), not FK'd
+    to ``technique_nodes`` — the corpus label space and the shared node-identity table are
+    separate axes (see 0067's docstring). One-way Analytics -> App, entitled readers only
+    (RLS ``technique_studies_pro_select``, mirrors ``athlete_dossiers_pro_select``). No user
+    data of any kind — see root CLAUDE.md "Public vs Private Data"."""
+
+    __tablename__ = "technique_studies"
+
+    node_key: Mapped[str] = mapped_column(Text, primary_key=True)
+    schema_version: Mapped[int] = mapped_column(Integer, nullable=False, server_default="1")
+    payload: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False, server_default="{}")
+    generated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
 class TechniqueNode(Base):
     """Shared canonical technique library — one row per distinct node_key, reused
     across all user/athlete graphs. Replaces the per-user node identity rows.
