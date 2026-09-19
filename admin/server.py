@@ -106,7 +106,14 @@ _COOKIE_SECURE = os.environ.get("ADMIN_COOKIE_SECURE", "true").strip().lower() n
     "0",
     "",
 )
-_AUTH_EXEMPT_PATHS = {"/admin/login"}
+_AUTH_EXEMPT_PATHS = {
+    "/admin/login",
+    # PWA plumbing: a browser fetches these before/without a session (install prompt,
+    # SW registration, offline fallback render) — none carry any authenticated data.
+    "/admin/manifest.webmanifest",
+    "/admin/sw.js",
+    "/admin/offline",
+}
 _AUTH_EXEMPT_PREFIXES = ("/admin/static/",)
 _CSRF_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 # JSON API from the Study page (JS posts JSON — no form to carry the hidden token).
@@ -314,6 +321,30 @@ def create_admin_app() -> FastAPI:
 
     # Load node vocab once at startup for the match-entry picker
     app.state.node_options = _build_node_options()
+
+    # ── PWA ───────────────────────────────────────────────────────────────
+    # Manifest + service worker are served from routes (not the /admin/static mount)
+    # so (a) the content-type is exact regardless of the OS mimetypes DB and (b) sw.js
+    # sits at the admin root — its default scope is everything under /admin/, which a
+    # script served from /admin/static/sw.js would not get. Service-Worker-Allowed is
+    # sent anyway as a defensive no-op; the natural scope already covers /admin/.
+    @app.get("/admin/manifest.webmanifest")
+    def pwa_manifest() -> FileResponse:
+        return FileResponse(
+            STATIC_DIR / "manifest.webmanifest", media_type="application/manifest+json"
+        )
+
+    @app.get("/admin/sw.js")
+    def pwa_service_worker() -> FileResponse:
+        return FileResponse(
+            STATIC_DIR / "sw.js",
+            media_type="application/javascript",
+            headers={"Service-Worker-Allowed": "/admin/"},
+        )
+
+    @app.get("/admin/offline", response_class=HTMLResponse)
+    def pwa_offline(request: Request) -> HTMLResponse:
+        return templates.TemplateResponse(request, "offline.html")
 
     # ── Auth ──────────────────────────────────────────────────────────────
     @app.get("/admin/login", response_class=HTMLResponse)

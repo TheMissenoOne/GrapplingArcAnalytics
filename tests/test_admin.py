@@ -361,3 +361,65 @@ def test_expired_rate_limit_entries_are_pruned(real_password):
     auth_mod.check_rate_limit("10.0.1.1")  # any read should trigger the prune
 
     assert "10.0.0.9" not in auth_mod._LOGIN_ATTEMPTS
+
+
+# ── PWA ───────────────────────────────────────────────────────────────────
+
+
+def test_manifest_served_with_correct_content_type_and_fields():
+    from fastapi.testclient import TestClient
+
+    with patch("admin.server._build_node_options", return_value=[]):
+        from admin.server import create_admin_app
+        app = create_admin_app()
+        with TestClient(app) as c:
+            resp = c.get("/admin/manifest.webmanifest", follow_redirects=False)
+    assert resp.status_code == 200
+    assert resp.headers["content-type"].startswith("application/manifest+json")
+    body = resp.json()
+    assert body["name"] == "GrapplingArc Admin"
+    assert body["display"] == "standalone"
+    assert body["start_url"].startswith("/admin/")
+    sizes = {icon["sizes"] for icon in body["icons"]}
+    assert "192x192" in sizes
+    assert "512x512" in sizes
+    assert any(icon.get("purpose") == "maskable" for icon in body["icons"])
+
+
+def test_service_worker_served_with_scope_header():
+    from fastapi.testclient import TestClient
+
+    with patch("admin.server._build_node_options", return_value=[]):
+        from admin.server import create_admin_app
+        app = create_admin_app()
+        with TestClient(app) as c:
+            resp = c.get("/admin/sw.js", follow_redirects=False)
+    assert resp.status_code == 200
+    assert resp.headers["service-worker-allowed"] == "/admin/"
+    assert "application/javascript" in resp.headers["content-type"]
+
+
+def test_offline_page_returns_200_without_auth():
+    from fastapi.testclient import TestClient
+
+    with patch("admin.server._build_node_options", return_value=[]):
+        from admin.server import create_admin_app
+        app = create_admin_app()
+        with TestClient(app) as c:
+            resp = c.get("/admin/offline", follow_redirects=False)
+    assert resp.status_code == 200
+    assert b"No connection" in resp.content
+
+
+def test_base_template_registers_manifest_and_service_worker(client):
+    with patch("admin.server.db_session") as mock_ctx:
+        mock_session = MagicMock()
+        mock_session.execute.return_value.scalars.return_value.all.return_value = []
+        mock_session.execute.return_value.all.return_value = []
+        mock_ctx.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_ctx.return_value.__exit__ = MagicMock(return_value=False)
+        resp = client.get("/admin/analytics")
+    assert resp.status_code == 200
+    assert b'<link rel="manifest" href="/admin/manifest.webmanifest">' in resp.content
+    assert b'navigator.serviceWorker.register("/admin/sw.js"' in resp.content
+    assert b'<meta name="theme-color" content="#1a1a2e">' in resp.content

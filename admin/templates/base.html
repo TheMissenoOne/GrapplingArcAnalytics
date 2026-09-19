@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}GrapplingArc Admin{% endblock %}</title>
+  <link rel="manifest" href="/admin/manifest.webmanifest">
+  <meta name="theme-color" content="#1a1a2e">
+  <link rel="apple-touch-icon" href="/admin/static/icons/icon-192.png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e0e0e0; }
@@ -58,5 +61,12 @@
   <main>
     {% block content %}{% endblock %}
   </main>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("/admin/sw.js", { scope: "/admin/" });
+      });
+    }
+  </script>
 </body>
 </html>

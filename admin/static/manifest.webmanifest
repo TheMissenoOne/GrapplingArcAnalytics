@@ -1,0 +1,15 @@
+{
+  "name": "GrapplingArc Admin",
+  "short_name": "GA Admin",
+  "description": "Local admin dashboard — athlete entry, ontology authoring, harvest, analytics, audit.",
+  "start_url": "/admin/athletes",
+  "scope": "/admin/",
+  "display": "standalone",
+  "background_color": "#0f0f0f",
+  "theme_color": "#1a1a2e",
+  "icons": [
+    { "src": "/admin/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/admin/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/admin/static/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
